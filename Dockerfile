@@ -63,15 +63,19 @@ WORKDIR /my/qt/qt-everywhere-src-6.4.1
 # run qt configuration
 #RUN /my/qt/qt-everywhere-src-6.4.1/configure -prefix /my/qt/qt-everywhere-src-6.4.1/qtbase -no-opengl
 #RUN ./configure -prefix ./qtbase -no-opengl
-RUN ./configure -prefix ./qtbase -no-opengl -- -DCMAKE_INSTALL_PREFIX=/usr/lib64
+#RUN ./configure -prefix ./qtbase -libdir /usr/lib64 -debug -no-opengl -- -DCMAKE_INSTALL_PREFIX=/usr/lib64  # TODO reconfigure for release
+RUN ./configure -prefix /usr/lib64 -libdir /usr/lib64 -debug -no-opengl  # TODO reconfigure for release
 
 # run qt build
 #RUN cmake --build /my/qt/qt-everywhere-src-6.4.1
 #RUN cmake --build .
-RUN cmake --build . --target Widgets
+#RUN cmake --build . --parallel --target Widgets  # TODO rebuild in release  # parallel crashes on 25%
+RUN cmake --build . --target Widgets  # TODO rebuild in release
 
 #install qt::widgets
 RUN cmake --install .
+
+# TODO add clear sources
 
 
 #build and install boost
