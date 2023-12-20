@@ -1,10 +1,37 @@
 #ifndef TUTORIAL_BOOST_ASIO_H
 #define TUTORIAL_BOOST_ASIO_H
 
+#include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/thread/thread.hpp>
+#include <functional>
+#include <string>
+#include <thread>
 
+#include "mainwindow.hpp"
+
+
+class AsioTest : public QObject {
+
+    Q_OBJECT
+
+public:
+    AsioTest() = default;
+    ~AsioTest() = default;
+
+    static AsioTest* instance();
+
+private:
+    static AsioTest* _instance;
+
+public slots:
+    void runTest();
+};
+
+template<typename T> QString getQString(T&& parameter){
+    return QString::fromStdString(std::to_string(parameter));
+};
 
 void timer1();
 void func1(const boost::system::error_code&);
@@ -41,6 +68,10 @@ class printer5 {
 };
 
 void timer5();
+
+void ping();
+
+void daytime1();
 
 void run_asio_tutorials();
 

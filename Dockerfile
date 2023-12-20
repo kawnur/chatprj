@@ -3,23 +3,12 @@
 FROM fedora
 RUN mkdir -p /my/app /my/qt /my/boost /my/cmake
 
-#WORKDIR /my/app
-
-ADD /home/user/sources/qt/qt-everywhere-src-6.4.1.tar.xz /my/qt/
-#RUN --mount=type=bind,target=/my/qt,source=/home/user/sources/qt/qt-everywhere-src-6.4.1
-
 ADD /home/user/sources/boost/boost_1_76_0/boost_1_76_0.tar.gz /my/boost/
 
 ADD /home/user/sources/cmake/cmake-3.24.0-linux-x86_64 /my/cmake
-#RUN --mount=type=bind,target=/my/cmake,source=/home/user/sources/cmake/cmake-3.24.0-linux-x86_64
 
-
-
+#install C Development Tools and Libraries
 RUN sudo dnf groupinstall -y "C Development Tools and Libraries"
-#RUN sudo yum install mesa-libGL-devel
-
-#install opengl
-#sudo dnf install glew-devel SDL2-devel SDL2_image-devel glm-devel freetype-devel
 
 #install compilers
 RUN dnf install -y gcc
@@ -27,6 +16,18 @@ RUN dnf install -y g++
 
 #install gpgme
 RUN dnf install -y gpgme
+
+#install GLX support for libglvnd
+RUN dnf install -y libglvnd-glx
+
+#install OpenGL support for libglvnd
+RUN dnf install -y libglvnd-opengl
+
+#install X.Org X11 XKB parsing library
+RUN dnf install -y libxkbcommon
+
+#install libs for X11
+RUN dnf install -y qt-x11
 
 #install perl
 RUN dnf install -y perl
@@ -40,43 +41,20 @@ RUN dnf install -y vim
 #install tree
 RUN dnf install -y tree
 
+#install less
+RUN dnf install -y less
+
 #install cmake
 RUN ln -s /my/cmake/bin/cmake /usr/bin/cmake
 
-
-#./configure -prefix $PWD/qtbase -- \
-#-DOPENGL_opengl_LIBRARY=/usr/lib64/libOpenGL.so \
-#-DOPENGL_glx_LIBRARY=/usr/lib64/libGLX.so \
-#-DOPENGL_INCLUDE_DIR=/usr/include/GL/gl.h \
-#-DOPENGL_GLX_INCLUDE_DIR=/usr/include/GL/glx.h \
-#-DOPENGL_EGL_INCLUDE_DIR=/usr/include/EGL/egl.h \
-#-DOPENGL_xmesa_INCLUDE_DIR= \
-#-DOPENGL_glx_LIBRARY=/usr/lib64/libGLX.so \
-#-DOPENGL_egl_LIBRARY=/usr/lib64/libEGL.so \
-#-DOPENGL_glu_LIBRARY=/usr/lib64/libGLU.so \
-#-DOPENGL_gl_LIBRARY=/usr/lib64/libGL.so
-
-
-
-WORKDIR /my/qt/qt-everywhere-src-6.4.1
-
-# run qt configuration
-#RUN /my/qt/qt-everywhere-src-6.4.1/configure -prefix /my/qt/qt-everywhere-src-6.4.1/qtbase -no-opengl
-#RUN ./configure -prefix ./qtbase -no-opengl
-#RUN ./configure -prefix ./qtbase -libdir /usr/lib64 -debug -no-opengl -- -DCMAKE_INSTALL_PREFIX=/usr/lib64  # TODO reconfigure for release
-RUN ./configure -prefix /usr/lib64 -libdir /usr/lib64 -debug -no-opengl  # TODO reconfigure for release
-
-# run qt build
-#RUN cmake --build /my/qt/qt-everywhere-src-6.4.1
-#RUN cmake --build .
-#RUN cmake --build . --parallel --target Widgets  # TODO rebuild in release  # parallel crashes on 25%
-RUN cmake --build . --target Widgets  # TODO rebuild in release
-
-#install qt::widgets
-RUN cmake --install .
-
-# TODO add clear sources
-
+#install qt6
+RUN dnf install -y qt6-qt3d qt6-qt5compat qt6-qtbase qt6-qtbase-gui \
+qt6-qtbase-mysql qt6-qtbase-postgresql qt6-qtcharts qt6-qtconnectivity \
+qt6-qtdatavis3d qt6-qtdeclarative qt6-qtimageformats qt6-qtlocation \
+qt6-qtlottie qt6-qtmultimedia qt6-qtnetworkauth qt6-qtquick3d \
+qt6-qtquicktimeline qt6-qtremoteobjects qt6-qtscxml qt6-qtsensors \
+qt6-qtserialbus qt6-qtserialport qt6-qtshadertools qt6-qtsvg qt6-qttools \
+qt6-qtvirtualkeyboard qt6-qtwayland qt6-qtwebchannel qt6-qtwebsockets
 
 #build and install boost
 WORKDIR /my/boost/boost_1_76_0
@@ -86,14 +64,4 @@ RUN ./bootstrap.sh --with-libraries=system,thread,date_time,regex,serialization,
 RUN ./b2 --with-system --with-thread --with-date_time --with-regex --with-serialization --with-chrono --with-atomic \
 --libdir=/usr/lib64 --includedir=/usr/include install
 
-
-
-
-
-
-
-
-
-
-
-
+WORKDIR /my/app
