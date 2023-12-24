@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include <QApplication>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 #include <QGraphicsView>
@@ -8,6 +9,8 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QRectF>
+#include <QScrollBar>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <thread>
 
@@ -24,15 +27,17 @@ private:
 
     QWidget* centralWidget_;
     QVBoxLayout* centralWidgetLayout_;
-//    QPlainTextEdit* text_;
     QGraphicsScene* graphicsScene_;
-    QGraphicsView* graphicsSceneView_;
+    QGraphicsView* graphicsView_;
     QRectF* rect_;
-    QGraphicsTextItem* textItem_;
+    QGraphicsSimpleTextItem* textItem_;
+    int linesCount_;
+    QFont* font_;
     QPushButton* button_;
 
     MainWindow(QWidget* parent = nullptr);
     void set();
+    void closeEvent(QCloseEvent*);
     virtual ~MainWindow() = default;
 
 public:

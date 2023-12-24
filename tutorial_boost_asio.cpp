@@ -241,7 +241,7 @@ private:
               + ", time=" + getQString((now - time_sent_).total_milliseconds())
               + " ms";
 
-      coutArgsWithSpaceSeparator("text: ", text.toStdString());
+//      coutArgsWithSpaceSeparator("text:", text.toStdString());
 
       MainWindow* mainWindow = MainWindow::instance();
       mainWindow->addText(text);

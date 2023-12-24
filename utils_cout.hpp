@@ -85,9 +85,11 @@ template<typename T> void coutStringWithEndl(T&& t) {
 template<typename T> void coutWithTab(T&& t) {
 	std::cout << t << '\t';
 }
+
 template<typename T> void coutWithoutInterval(T&& t) {
 	std::cout << t;
 }
+
 template<typename... Ts> void coutArgsWithSeparator(char separator, Ts&&... args) {
 //	(std::cout << ... << args) << std::endl;
 //	auto l = [](auto& i){ std::cout << i << separator; }
@@ -99,9 +101,11 @@ template<typename... Ts> void coutArgsWithSeparator(char separator, Ts&&... args
 //	(std::cout (<< '\t' <<) ... (<< '\t' <<) args) << std::endl;
 	endline(1);
 }
+
 template<typename... Ts> void coutArgsWithSpaceSeparator(Ts&&... args) {
 	coutArgsWithSeparator(' ', args...);
 }
+
 template<typename... Ts> void coutArgsWithTabSeparator(Ts&&... args) {
 	coutArgsWithSeparator('\t', args...);
 }
@@ -113,6 +117,7 @@ template<typename T> void coutVectorInLine(const std::vector<T>& v) {
 		std::cout << i << ' ';
 	}
 };
+
 template<typename T> void printVector(T& v, bool showSize = false, bool showCapacity = false) {
 	std::cout << std::endl << "printVector" << std::endl;
 
@@ -129,6 +134,7 @@ template<typename T> void printVector(T& v, bool showSize = false, bool showCapa
 	}
 	endline(1);
 }
+
 template<typename T> void coutVectorState(T& v) {
 	endline(1);
 	coutWithEndl("coutVectorState");
@@ -146,6 +152,7 @@ template<typename T> void coutVectorState(T& v) {
 	coutArgsWithManipulators(width1, "CAPACITY:", v.capacity());
 	endline(1);
 }
+
 template<typename T> void coutVectorOfVectorsState(T& v) {
 	endline(1);
 	coutWithEndl("coutVectorState");
@@ -164,6 +171,7 @@ template<typename T> void coutVectorOfVectorsState(T& v) {
 	coutArgsWithSeparator(' ', "v.capacity():", v.capacity());
 	endline(2);
 }
+
 void coutVector1(const std::vector<int>&);
 void coutVectorAndSum(const std::vector<int>&);
 void coutVectorWithIndexesHorizontally(const std::vector<int>&);
