@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QRectF>
 #include <QScrollBar>
+#include <QTextEdit>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <thread>
@@ -17,13 +18,30 @@
 #include "tutorial_boost_asio.hpp"
 #include "utils_cout.hpp"
 
+class MainWindow;
 
-class MainWindow : public QMainWindow
-{
+class TextEdit : public QTextEdit {
+
+    Q_OBJECT
+
+public:
+    TextEdit(MainWindow*);
+    ~TextEdit() = default;
+
+private:
+    void keyPressEvent(QKeyEvent*);
+};
+
+class MainWindow : public QMainWindow {
+
     Q_OBJECT
 
 private:
     static MainWindow* _instance;
+
+    QString role_;
+
+    EchoClient* client_;
 
     QWidget* centralWidget_;
     QVBoxLayout* centralWidgetLayout_;
@@ -33,16 +51,19 @@ private:
     QGraphicsSimpleTextItem* textItem_;
     int linesCount_;
     QFont* font_;
+    TextEdit* textEdit_;
     QPushButton* button_;
 
     MainWindow(QWidget* parent = nullptr);
-    void set();
     void closeEvent(QCloseEvent*);
     virtual ~MainWindow() = default;
 
 public:
     static MainWindow* instance();
 
+    void set(QString);
+    int setClient(EchoClient*);
+    EchoClient* getClient();
     void addText(const QString&);
 };
 

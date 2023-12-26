@@ -1,5 +1,44 @@
 #include "mainwindow.hpp"
 
+TextEdit::TextEdit(MainWindow* parent) {
+   setParent(parent);
+}
+
+void TextEdit::keyPressEvent(QKeyEvent* event) {
+//    coutWithEndl("keyPressEvent");
+//    coutArgsWithSpaceSeparator("event->type():", std::hex, event->type());
+//    coutArgsWithSpaceSeparator("event->key():", std::hex, event->key());
+//    coutArgsWithSpaceSeparator("event->modifiers():", std::hex, event->modifiers());
+//    endline(1);
+
+    if(event->type() == QEvent::KeyPress
+            && event->key() == Qt::Key_Return) {
+        if(event->modifiers() == Qt::NoModifier) {
+//            coutWithEndl("enter event");
+            MainWindow* mainWindow = MainWindow::instance();
+
+            auto text = this->toPlainText();
+
+            mainWindow->addText(text);
+            this->setText("");
+
+            auto client = mainWindow->getClient();
+            client->send(text);
+        }
+        else if(event->modifiers() == Qt::ControlModifier) {
+            QKeyEvent eventEmulated = QKeyEvent(
+                        QEvent::KeyPress,
+                        Qt::Key_Return,
+                        Qt::NoModifier);
+
+            QTextEdit::keyPressEvent(&eventEmulated);
+        }
+    }
+    else {
+        QTextEdit::keyPressEvent(event);
+    }
+}
+
 MainWindow* MainWindow::_instance = nullptr;
 
 MainWindow* MainWindow::instance() {
@@ -10,11 +49,14 @@ MainWindow* MainWindow::instance() {
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-    this->setWindowTitle(QString("MainWindow"));
-    set();
+    setWindowTitle(QString("MainWindow"));
+//    set();
 }
 
-void MainWindow::set() {
+void MainWindow::set(QString role) {
+    this->setWindowTitle(role);
+    role_ = role;
+
     centralWidget_ = new QWidget(this);
     setCentralWidget(centralWidget_);
 
@@ -26,7 +68,6 @@ void MainWindow::set() {
     graphicsScene_ = new QGraphicsScene(this);
     textItem_ = graphicsScene_->addSimpleText("");
     font_ = new QFont;
-//    font_->setPointSize(10);
     font_->setPixelSize(15);
     textItem_->setFont(*font_);
 
@@ -41,19 +82,35 @@ void MainWindow::set() {
     graphicsView_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     rect_ = new QRectF();
-    rect_->setWidth(300);
-    rect_->setHeight(300);
+    rect_->setWidth(500);
+    rect_->setHeight(10000);
     graphicsScene_->setSceneRect(*rect_);
 //    graphicsView_->setSceneRect(*rect_);
     centralWidgetLayout_->addWidget(graphicsView_);
 
-    graphicsView_->viewport()->resize(400, 400);
+    graphicsView_->viewport()->resize(100, 100);
+
+    textEdit_ = new TextEdit(this);
+    centralWidgetLayout_->addWidget(textEdit_);
 
     AsioTest* test = AsioTest::instance();
+    test->setRole(role_);
+//    test->runTestFunc(role_);
+
     button_ = new QPushButton("Run ASIO tests");
     connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
     centralWidgetLayout_->addWidget(button_);
 }
+
+int MainWindow::setClient(EchoClient* client) {
+    this->client_ = client;
+    return 0;
+}
+
+EchoClient*  MainWindow::getClient() {
+    return this->client_;
+}
+
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
@@ -88,40 +145,63 @@ void MainWindow::addText(const QString& text) {
 //    coutArgsWithSpaceSeparator("font pixelSize:", this->textItem_->font().pixelSize());
 //    coutArgsWithSpaceSeparator("font pointSize:", this->textItem_->font().pointSize());
 
-    coutArgsWithSpaceSeparator("textHeight:", textHeight);
+//    coutArgsWithSpaceSeparator("rect topLeft x:", this->rect_->topLeft().x());
+//    coutArgsWithSpaceSeparator("rect topLeft y:", this->rect_->topLeft().y());
+//    coutArgsWithSpaceSeparator("rect bottomRight x:", this->rect_->bottomRight().x());
+//    coutArgsWithSpaceSeparator("rect bottomRight y:", this->rect_->bottomRight().y());
+//    coutArgsWithSpaceSeparator("rect width:", this->rect_->width());
+//    coutArgsWithSpaceSeparator("rect height:", this->rect_->height());
 
-    auto viewportWidth = this->graphicsView_->viewport()->size().width();
-    auto viewportHeight = this->graphicsView_->viewport()->size().height();
+//    coutArgsWithSpaceSeparator("textHeight:", textHeight);
 
-    coutArgsWithSpaceSeparator("viewportWidth:", viewportWidth);
-    coutArgsWithSpaceSeparator("viewportHeight:", viewportHeight);
+    auto viewportWidth = this->graphicsView_->viewport()->width();
+    auto viewportHeight = this->graphicsView_->viewport()->height();
 
-    if(textHeight > viewportHeight) {
-        this->graphicsView_->viewport()->resize(viewportWidth, textHeight);
+//    coutArgsWithSpaceSeparator("viewportWidth:", viewportWidth);
+//    coutArgsWithSpaceSeparator("viewportHeight:", viewportHeight);
 
-        this->graphicsView_->verticalScrollBar()->setPageStep(textHeight);
-        this->graphicsView_->horizontalScrollBar()->setPageStep(viewportWidth);
+    auto verticalScrollBarWidth = this->graphicsView_->verticalScrollBar()->width();
+    auto verticalScrollBarHeight = this->graphicsView_->verticalScrollBar()->height();
+    auto horizontalScrollBarWidth = this->graphicsView_->horizontalScrollBar()->width();
+    auto horizontalScrollBarHeight = this->graphicsView_->horizontalScrollBar()->height();
 
-        this->graphicsView_->verticalScrollBar()->setRange(0, textHeight - viewportHeight);
-        this->graphicsView_->horizontalScrollBar()->setRange(0, viewportWidth);
+//    coutArgsWithSpaceSeparator("verticalScrollBarWidth:", verticalScrollBarWidth);
+//    coutArgsWithSpaceSeparator("verticalScrollBarHeight:", verticalScrollBarHeight);
+//    coutArgsWithSpaceSeparator("horizontalScrollBarWidth:", horizontalScrollBarWidth);
+//    coutArgsWithSpaceSeparator("horizontalScrollBarHeight:", horizontalScrollBarHeight);
 
-        int hvalue = this->graphicsView_->horizontalScrollBar()->value();
-        int vvalue = this->graphicsView_->verticalScrollBar()->value();
-        QPoint topLeft = this->graphicsView_->viewport()->rect().topLeft();
+//    if(textHeight > viewportHeight) {
+    if(textHeight > this->rect_->height()) {
+        this->rect_->setHeight(textHeight);
 
-        this->graphicsView_->viewport()->move(topLeft.x() - hvalue, topLeft.y() - vvalue);
+//        this->graphicsView_->viewport()->resize(viewportWidth, textHeight);
 
+//        this->graphicsView_->verticalScrollBar()->setPageStep(textHeight);
+//        this->graphicsView_->horizontalScrollBar()->setPageStep(viewportWidth);
 
+//        this->graphicsView_->verticalScrollBar()->setRange(0, textHeight - viewportHeight);
+//        this->graphicsView_->horizontalScrollBar()->setRange(0, viewportWidth);
+
+//        int hvalue = this->graphicsView_->horizontalScrollBar()->value();
+//        int vvalue = this->graphicsView_->verticalScrollBar()->value();
+//        QPoint topLeft = this->graphicsView_->viewport()->rect().topLeft();
+
+//        this->graphicsView_->viewport()->move(topLeft.x() - hvalue, topLeft.y() - vvalue);
+//        this->graphicsView_->viewport()->move(0, (-1) * boundingRectHeight);
     }
 
-//    this->graphicsView_->ensureVisible(
-//                0,
-//                textSize - fontSize,
-////                this->rect_->width(),
-//                10,
-//                fontSize,
-//                0,
-//                0);
+//    QApplication::processEvents();
+
+    this->graphicsView_->ensureVisible(
+                0,
+//                textHeight - boundingRectHeight + horizontalScrollBarHeight,
+                textHeight + linesCount_,
+//                this->rect_->height() + linesCount_,
+//                this->rect_->width(),
+                10,
+                boundingRectHeight,
+                0,
+                0);
 
 //    this->graphicsView_->setSceneRect(
 //                0,
@@ -131,14 +211,6 @@ void MainWindow::addText(const QString& text) {
 
 //    coutArgsWithSpaceSeparator("horizontalScrollBarPolicy:", this->graphicsView_->horizontalScrollBarPolicy());
 //    coutArgsWithSpaceSeparator("verticalScrollBarPolicy:", this->graphicsView_->verticalScrollBarPolicy());
-
-//    coutArgsWithSpaceSeparator("rect topLeft x:", this->rect_->topLeft().x());
-//    coutArgsWithSpaceSeparator("rect topLeft y:", this->rect_->topLeft().y());
-//    coutArgsWithSpaceSeparator("rect bottomRight x:", this->rect_->bottomRight().x());
-//    coutArgsWithSpaceSeparator("rect bottomRight y:", this->rect_->bottomRight().y());
-//    coutArgsWithSpaceSeparator("rect width:", this->rect_->width());
-//    coutArgsWithSpaceSeparator("rect height:", this->rect_->height());
-
 
     QApplication::processEvents();
 }

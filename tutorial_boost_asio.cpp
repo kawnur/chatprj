@@ -292,6 +292,9 @@ void daytime1() {
     // A synchronous TCP daytime client
     using tcp = boost::asio::ip::tcp;
 
+    MainWindow* mainWindow = MainWindow::instance();
+//    mainWindow->addText(text);
+
     try {
 //        if(argc != 2) {
 //            std::cerr << "Usage: client <host>" << std::endl;
@@ -299,8 +302,10 @@ void daytime1() {
 //        }
 
 //        coutWithEndl("1");
-        std::string_view host { "time.google.com" };
-//        std::string_view host { "localhost" };
+//        std::string_view host { "time.google.com" };
+        std::string_view host { "localhost" };
+        QString hostRepr = QString("hostname: ") + host.data();
+        mainWindow->addText(hostRepr);
 
 //        coutWithEndl("2");
         boost::asio::io_context io_context;
@@ -311,6 +316,16 @@ void daytime1() {
         tcp::resolver::results_type endpoints =
 //                resolver.resolve(argv[1], "daytime");
                 resolver.resolve(host, "daytime");
+
+        for(auto it = endpoints.begin(); it != endpoints.end(); it++) {
+            mainWindow->addText("Resolved endpoints:");
+            mainWindow->addText(
+                        QString("host_name:")
+                        + QString::fromStdString(it->host_name()));
+            mainWindow->addText(
+                        QString("service_name:")
+                        + QString::fromStdString(it->service_name()));
+        }
 
 //        for(auto& endpoint : endpoints) {
 //            coutArgsWithSpaceSeparator("endpoint.host_name(): ", endpoint.host_name());
@@ -339,12 +354,23 @@ void daytime1() {
             }
 
             std::cout.write(buf.data(), len);
+
+            QString reply;
+
+            for(int i = 0; i < len; i++) {
+                reply.push_back(buf.data()[i]);
+            }
+
+            mainWindow->addText(QString("Reply:\n" + reply));
         }
     }
 
     catch (std::exception& e) {
         coutWithEndl("exception");
         std::cerr << e.what() << std::endl;
+
+        mainWindow->addText("exception");
+        mainWindow->addText(e.what());
     }
 }
 
@@ -352,18 +378,28 @@ std::string make_daytime_string()
 {
   using namespace std; // For time_t, time and ctime;
   time_t now = time(0);
-  return ctime(&now);
+
+  auto result = ctime(&now);
+
+  MainWindow* mainWindow = MainWindow::instance();
+  mainWindow->addText(QString("daytime: ") + QString(result));
+
+//  return ctime(&now);
+  return result;
 }
 
 void daytime2() {
     // A synchronous TCP daytime server
     using boost::asio::ip::tcp;
 
+    MainWindow* mainWindow = MainWindow::instance();
+    mainWindow->addText("Server started");
+
     try
       {
         boost::asio::io_context io_context;
 
-        tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 13));
+        tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 5000));
 
         for (;;)
         {
@@ -379,25 +415,35 @@ void daytime2() {
       catch (std::exception& e)
       {
         std::cerr << e.what() << std::endl;
+
+        mainWindow->addText("exception");
+        mainWindow->addText(e.what());
       }
 
 //      return 0;
 }
 
-void run_asio_tutorials() {
+
+
+//void run_asio_tutorials() {
 //    timer1();
 //    timer2();
 //    timer3();
 //    timer4();
 //    timer5();
-
-    ping();
-
+//    ping();
 //    daytime1();
-
-}
+//}
 
 AsioTest* AsioTest::_instance = nullptr;
+
+AsioTest::AsioTest() {
+    role_ = new QString;
+}
+
+void AsioTest::setRole(QString role) {
+    *(this->role_) = role;
+}
 
 AsioTest* AsioTest::instance() {
     if(_instance == nullptr) {
@@ -407,6 +453,20 @@ AsioTest* AsioTest::instance() {
 }
 
 void AsioTest::runTest() {
-    coutWithEndl("AsioTest::runTest");
-    run_asio_tutorials();
+//    coutWithEndl("AsioTest::runTest");
+//    run_asio_tutorials();
+
+    if(*(this->role_) == "Client") {
+//        daytime1();
+//        ping();
+
+        MainWindow* mainWindow = MainWindow::instance();
+        EchoClient* client = new EchoClient;
+        mainWindow->setClient(client);
+    }
+    else if(*(this->role_) == "Server") {
+//        daytime2();
+//        ping();
+        blocking_tcp_echo_server();
+    }
 }

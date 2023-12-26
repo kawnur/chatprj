@@ -9,6 +9,8 @@
 #include <string>
 #include <thread>
 
+#include "blocking_tcp_echo_client.hpp"
+#include "blocking_tcp_echo_server.hpp"
 #include "mainwindow.hpp"
 
 
@@ -17,12 +19,17 @@ class AsioTest : public QObject {
     Q_OBJECT
 
 public:
-    AsioTest() = default;
-    ~AsioTest() = default;
-
     static AsioTest* instance();
 
+    void setRole(QString);
+//    void runTestFunc(QString);
+
 private:
+    QString* role_;
+
+    AsioTest();
+    ~AsioTest() = default;
+
     static AsioTest* _instance;
 
 public slots:

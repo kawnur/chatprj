@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
+    blocking_tcp_echo_client.hpp  # tutorial boost asio
+    blocking_tcp_echo_client.cpp  # tutorial boost asio
+    blocking_tcp_echo_server.hpp  # tutorial boost asio
+    blocking_tcp_echo_server.cpp  # tutorial boost asio
     build.py
     compose.yaml
     Dockerfile

@@ -1,17 +1,17 @@
 services:
-    user1:
+    client:
 #    command: "sleep infinity"
-        command: "/my/app/chatapp"
+        command: ["/my/app/chatapp", "--client"]
         environment:
             XDG_SESSION_TYPE: wayland
             XDG_RUNTIME_DIR: /tmp
             WAYLAND_DISPLAY: $WAYLAND_DISPLAY
             QT_QPA_PLATFORM: wayland
-#        command: "chatapp"
-#        depends_on:
         image: chatprj
-#        networks:
-#        ports:
+        networks:
+            - network1
+        ports:
+            - "127.0.0.1:5001:5000"
         volumes:
             - type: bind
               source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
@@ -22,5 +22,33 @@ services:
             - type: bind
               source: $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
               target: /tmp/$WAYLAND_DISPLAY
+    server:
+    #    command: "sleep infinity"
+        command: ["/my/app/chatapp", "--server"]
+        environment:
+            XDG_SESSION_TYPE: wayland
+            XDG_RUNTIME_DIR: /tmp
+            WAYLAND_DISPLAY: $WAYLAND_DISPLAY
+            QT_QPA_PLATFORM: wayland
+        image: chatprj
+        networks:
+            - network1
+        ports:
+            - "127.0.0.1:5002:5000"
+        volumes:
+            - type: bind
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              target: /my/app
+            - type: bind
+              source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
+              target: /my/cmake
+            - type: bind
+              source: $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+              target: /tmp/$WAYLAND_DISPLAY
+
+networks:
+    network1:
+#        driver: bridge
+
 
 #volumes:
