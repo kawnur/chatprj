@@ -38,6 +38,9 @@ RUN dnf install -y make
 #install vim
 RUN dnf install -y vim
 
+#install iputils
+RUN dnf install -y iputils
+
 #install tree
 RUN dnf install -y tree
 

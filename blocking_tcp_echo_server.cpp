@@ -12,20 +12,26 @@ void session(tcp::socket sock)
 
   MainWindow* mainWindow = MainWindow::instance();
   mainWindow->addText("session");
+  coutArgsWithSpaceSeparator("session");
 
   try
   {
     for (;;)
     {
       mainWindow->addText("loop step");
+      coutArgsWithSpaceSeparator("loop step");
+
       char data[max_length];
 
       boost::system::error_code error;
       size_t length = sock.read_some(boost::asio::buffer(data), error);
 
       mainWindow->addText("Got: ");
+//      coutArgsWithSpaceSeparator("Got: ");
+
       std::string str(data, length);
       mainWindow->addText(QString::fromStdString(str));
+      coutArgsWithSpaceSeparator("Got:", str);
 
       if (error == boost::asio::error::eof)
         break; // Connection closed cleanly by peer.
@@ -39,17 +45,23 @@ void session(tcp::socket sock)
   {
 //    std::cerr << "Exception in thread: " << e.what() << "\n";
     mainWindow->addText("Exception: " + QString(e.what()));
+    coutArgsWithSpaceSeparator("Exception:", e.what());
   }
 }
 
 void server(boost::asio::io_context& io_context, unsigned short port)
 {
   MainWindow* mainWindow = MainWindow::instance();
+
   mainWindow->addText("server");
+  coutArgsWithSpaceSeparator("server");
+
   tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
   for (;;)
   {
     mainWindow->addText("server thread");
+    coutArgsWithSpaceSeparator("server thread");
+
     std::thread(session, a.accept()).detach();
   }
 }
@@ -62,6 +74,7 @@ int blocking_tcp_echo_server()
   try
   {
     mainWindow->addText("Echo server started");
+    coutWithEndl("Echo server started");
 //    if (argc != 2)
 //    {
 //      std::cerr << "Usage: blocking_tcp_echo_server <port>\n";
@@ -70,12 +83,13 @@ int blocking_tcp_echo_server()
 
     boost::asio::io_context io_context;
 
-    server(io_context, std::atoi("5000"));
+    server(io_context, std::atoi("5002"));
   }
   catch (std::exception& e)
   {
 //    std::cerr << "Exception: " << e.what() << "\n";
     mainWindow->addText("Exception: " + QString(e.what()));
+    coutArgsWithSpaceSeparator("Exception:", e.what());
   }
 
   return 0;

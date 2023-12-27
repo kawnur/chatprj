@@ -21,7 +21,11 @@ int EchoClient::send(QString text) {
         boost::asio::io_context io_context;
         tcp::socket s { io_context };
         tcp::resolver resolver(io_context);
-        boost::asio::connect(s, resolver.resolve("localhost", "5002"));
+//        boost::asio::connect(s, resolver.resolve("localhost", "5002"));
+//        boost::asio::connect(s, resolver.resolve("0.0.0.0", "5002"));
+//        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
+        boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
+//        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
         mainWindow->addText("s.is_open(): "
                             + QString::fromStdString(std::to_string(s.is_open())));
 

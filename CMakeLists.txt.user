@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.2, 2023-12-26T20:51:07. -->
+<!-- Written by QtCreator 7.0.2, 2023-12-27T12:16:13. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -292,14 +292,14 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
+      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose down</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
+      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose up -d</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
