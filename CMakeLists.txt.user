@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.2, 2023-12-27T12:16:13. -->
+<!-- Written by QtCreator 7.0.2, 2023-12-28T11:39:19. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -343,8 +343,6 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.chatapp</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-    <value type="QString" key="RunConfiguration.Arguments">--client</value>
-    <value type="bool" key="RunConfiguration.RunAsRoot">true</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

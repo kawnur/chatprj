@@ -97,6 +97,8 @@ void MainWindow::set(QString role) {
     test->setRole(role_);
 //    test->runTestFunc(role_);
 
+//    this->messages_ = std::queue<QString>();
+
     button_ = new QPushButton("Run ASIO tests");
     connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
     centralWidgetLayout_->addWidget(button_);
@@ -111,13 +113,19 @@ EchoClient*  MainWindow::getClient() {
     return this->client_;
 }
 
-
 void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
 }
 
 void MainWindow::addText(const QString& text) {
     auto currentText = this->textItem_->text();
+
+    coutArgsWithSpaceSeparator(
+                "currentText:",
+                currentText.replace("\n", "NL").toStdString(),
+                ", text:",
+                text.toStdString());
+
     QString newText;
 
     if(currentText == "") {
@@ -213,4 +221,27 @@ void MainWindow::addText(const QString& text) {
 //    coutArgsWithSpaceSeparator("verticalScrollBarPolicy:", this->graphicsView_->verticalScrollBarPolicy());
 
     QApplication::processEvents();
+}
+
+void MainWindow::addMessagesToView() {
+    while(this->messages_.size() > 0) {
+        this->addText(this->messages_.front());
+        this->messages_.pop();
+    }
+}
+
+void addTextFunction(const QString& text) {
+    MainWindow* mainWindow = MainWindow::instance();
+    mainWindow->addText(text);
+}
+
+void MainWindow::pushMessage(const QString& text) {
+    this->messages_.push(text);
+}
+
+void MainWindow::pushMessageAndAddText(const QString& text) {
+//    this->messages_.push(text);
+
+//    std::thread(addTextFunction, text).detach();
+    this->addText(text);
 }

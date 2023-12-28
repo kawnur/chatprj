@@ -4,21 +4,19 @@
 
 using boost::asio::ip::tcp;
 
-//const int max_length = 1024;
-
 void session(tcp::socket sock)
 {
   const int max_length = 1024;
 
   MainWindow* mainWindow = MainWindow::instance();
-  mainWindow->addText("session");
+  mainWindow->pushMessage("session");
   coutArgsWithSpaceSeparator("session");
 
   try
   {
     for (;;)
     {
-      mainWindow->addText("loop step");
+      mainWindow->pushMessage("loop step");
       coutArgsWithSpaceSeparator("loop step");
 
       char data[max_length];
@@ -26,11 +24,11 @@ void session(tcp::socket sock)
       boost::system::error_code error;
       size_t length = sock.read_some(boost::asio::buffer(data), error);
 
-      mainWindow->addText("Got: ");
-//      coutArgsWithSpaceSeparator("Got: ");
-
       std::string str(data, length);
-      mainWindow->addText(QString::fromStdString(str));
+
+      if(length > 0) {
+          mainWindow->pushMessage("Got: " + QString::fromStdString(str));
+      }
       coutArgsWithSpaceSeparator("Got:", str);
 
       if (error == boost::asio::error::eof)
@@ -43,8 +41,7 @@ void session(tcp::socket sock)
   }
   catch (std::exception& e)
   {
-//    std::cerr << "Exception in thread: " << e.what() << "\n";
-    mainWindow->addText("Exception: " + QString(e.what()));
+    mainWindow->pushMessage("Exception: " + QString(e.what()));
     coutArgsWithSpaceSeparator("Exception:", e.what());
   }
 }
@@ -62,11 +59,11 @@ void server(boost::asio::io_context& io_context, unsigned short port)
     mainWindow->addText("server thread");
     coutArgsWithSpaceSeparator("server thread");
 
+    mainWindow->addMessagesToView();
     std::thread(session, a.accept()).detach();
   }
 }
 
-//int main(int argc, char* argv[])
 int blocking_tcp_echo_server()
 {
   MainWindow* mainWindow = MainWindow::instance();
@@ -75,11 +72,6 @@ int blocking_tcp_echo_server()
   {
     mainWindow->addText("Echo server started");
     coutWithEndl("Echo server started");
-//    if (argc != 2)
-//    {
-//      std::cerr << "Usage: blocking_tcp_echo_server <port>\n";
-//      return 1;
-//    }
 
     boost::asio::io_context io_context;
 
@@ -87,7 +79,6 @@ int blocking_tcp_echo_server()
   }
   catch (std::exception& e)
   {
-//    std::cerr << "Exception: " << e.what() << "\n";
     mainWindow->addText("Exception: " + QString(e.what()));
     coutArgsWithSpaceSeparator("Exception:", e.what());
   }

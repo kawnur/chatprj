@@ -12,6 +12,7 @@
 #include <QScrollBar>
 #include <QTextEdit>
 #include <QTimer>
+#include <queue>
 #include <QVBoxLayout>
 #include <thread>
 
@@ -41,6 +42,8 @@ private:
 
     QString role_;
 
+    std::queue<QString> messages_;
+
     EchoClient* client_;
 
     QWidget* centralWidget_;
@@ -65,6 +68,11 @@ public:
     int setClient(EchoClient*);
     EchoClient* getClient();
     void addText(const QString&);
+    void addMessagesToView();
+    void pushMessage(const QString&);
+    void pushMessageAndAddText(const QString&);
 };
+
+void addTextFunction(const QString&);
 
 #endif // MAINWINDOW_HPP
