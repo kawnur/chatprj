@@ -7,11 +7,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
-    blocking_tcp_echo_client.hpp  # tutorial boost asio
+    application.cpp
+    application.hpp
+    async_tcp_echo_server.cpp  # tutorial boost asio
+    async_tcp_echo_server.hpp  # tutorial boost asio
     blocking_tcp_echo_client.cpp  # tutorial boost asio
-    blocking_tcp_echo_server.hpp  # tutorial boost asio
+    blocking_tcp_echo_client.hpp  # tutorial boost asio
     blocking_tcp_echo_server.cpp  # tutorial boost asio
+    blocking_tcp_echo_server.hpp  # tutorial boost asio
     build.py
+    chat_client.cpp
+    chat_client.hpp
+    chat_server.cpp
+    chat_server.hpp
     compose.yaml
     Dockerfile
     icmp_header.hpp  # tutorial boost asio
@@ -19,8 +27,8 @@ set(PROJECT_SOURCES
     main.cpp
     mainwindow.cpp
     mainwindow.hpp
-    tutorial_boost_asio.cpp
-    tutorial_boost_asio.hpp
+    tutorial_boost_asio.cpp  # tutorial boost asio
+    tutorial_boost_asio.hpp  # tutorial boost asio
     utils_cout.cpp
     utils_cout.hpp
     utils_gpgme.cpp

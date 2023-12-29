@@ -16,6 +16,7 @@
 #include <QVBoxLayout>
 #include <thread>
 
+#include "blocking_tcp_echo_client.hpp"
 #include "tutorial_boost_asio.hpp"
 #include "utils_cout.hpp"
 
@@ -38,13 +39,13 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 private:
-    static MainWindow* _instance;
+//    static MainWindow* _instance;
 
-    QString role_;
+//    QString role_;
 
-    std::queue<QString> messages_;
+//    std::queue<QString> messages_;
 
-    EchoClient* client_;
+//    EchoClient* client_;
 
     QWidget* centralWidget_;
     QVBoxLayout* centralWidgetLayout_;
@@ -57,22 +58,25 @@ private:
     TextEdit* textEdit_;
     QPushButton* button_;
 
-    MainWindow(QWidget* parent = nullptr);
+//    MainWindow(QWidget* parent = nullptr);
+//    MainWindow();
     void closeEvent(QCloseEvent*);
     virtual ~MainWindow() = default;
 
 public:
-    static MainWindow* instance();
+    MainWindow();
+//    static MainWindow* instance();
 
-    void set(QString);
-    int setClient(EchoClient*);
-    EchoClient* getClient();
+//    void set(QString);
+    void set();
+//    int setClient(EchoClient*);
+//    EchoClient* getClient();
     void addText(const QString&);
-    void addMessagesToView();
-    void pushMessage(const QString&);
-    void pushMessageAndAddText(const QString&);
+//    void addMessagesToView();
+//    void pushMessage(const QString&);
+//    void pushMessageAndAddText(const QString&);
 };
 
-void addTextFunction(const QString&);
+//void addTextFunction(const QString&);
 
 #endif // MAINWINDOW_HPP

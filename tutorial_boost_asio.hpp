@@ -9,6 +9,7 @@
 #include <string>
 #include <thread>
 
+#include "async_tcp_echo_server.hpp"
 #include "blocking_tcp_echo_client.hpp"
 #include "blocking_tcp_echo_server.hpp"
 #include "mainwindow.hpp"

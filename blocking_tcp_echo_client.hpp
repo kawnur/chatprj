@@ -5,7 +5,6 @@
 
 #include <cstdlib>
 #include <cstring>
-//#include <deque>
 #include <iostream>
 #include <boost/asio.hpp>
 #include <QObject>

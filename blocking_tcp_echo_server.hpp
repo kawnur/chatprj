@@ -9,6 +9,9 @@
 #include <utility>
 #include <boost/asio.hpp>
 
+#include "mainwindow.hpp"
+
+
 using boost::asio::ip::tcp;
 
 //const int max_length = 1024;

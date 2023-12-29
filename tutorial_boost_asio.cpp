@@ -467,6 +467,7 @@ void AsioTest::runTest() {
     else if(*(this->role_) == "Server") {
 //        daytime2();
 //        ping();
-        blocking_tcp_echo_server();
+//        blocking_tcp_echo_server();
+        async_tcp_echo_server();
     }
 }

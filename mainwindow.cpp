@@ -39,23 +39,25 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     }
 }
 
-MainWindow* MainWindow::_instance = nullptr;
+//MainWindow* MainWindow::_instance = nullptr;
 
-MainWindow* MainWindow::instance() {
-    if(_instance == nullptr) {
-        _instance = new MainWindow();
-    }
-    return _instance;
-}
+//MainWindow* MainWindow::instance() {
+//    if(_instance == nullptr) {
+//        _instance = new MainWindow();
+//    }
+//    return _instance;
+//}
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+//MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+MainWindow::MainWindow() {
     setWindowTitle(QString("MainWindow"));
-//    set();
+    set();
 }
 
-void MainWindow::set(QString role) {
-    this->setWindowTitle(role);
-    role_ = role;
+//void MainWindow::set(QString role) {
+void MainWindow::set() {
+//    this->setWindowTitle(role);
+//    role_ = role;
 
     centralWidget_ = new QWidget(this);
     setCentralWidget(centralWidget_);
@@ -93,25 +95,25 @@ void MainWindow::set(QString role) {
     textEdit_ = new TextEdit(this);
     centralWidgetLayout_->addWidget(textEdit_);
 
-    AsioTest* test = AsioTest::instance();
-    test->setRole(role_);
+//    AsioTest* test = AsioTest::instance();
+//    test->setRole(role_);
 //    test->runTestFunc(role_);
 
 //    this->messages_ = std::queue<QString>();
 
     button_ = new QPushButton("Run ASIO tests");
-    connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
+//    connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
     centralWidgetLayout_->addWidget(button_);
 }
 
-int MainWindow::setClient(EchoClient* client) {
-    this->client_ = client;
-    return 0;
-}
+//int MainWindow::setClient(EchoClient* client) {
+//    this->client_ = client;
+//    return 0;
+//}
 
-EchoClient*  MainWindow::getClient() {
-    return this->client_;
-}
+//EchoClient*  MainWindow::getClient() {
+//    return this->client_;
+//}
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
@@ -223,25 +225,26 @@ void MainWindow::addText(const QString& text) {
     QApplication::processEvents();
 }
 
-void MainWindow::addMessagesToView() {
-    while(this->messages_.size() > 0) {
-        this->addText(this->messages_.front());
-        this->messages_.pop();
-    }
-}
+//void MainWindow::addMessagesToView() {
+//    while(this->messages_.size() > 0) {
+//    while(this->messages_.size() > 0) {
+//        this->addText(this->messages_.front());
+//        this->messages_.pop();
+//    }
+//}
 
-void addTextFunction(const QString& text) {
-    MainWindow* mainWindow = MainWindow::instance();
-    mainWindow->addText(text);
-}
+//void addTextFunction(const QString& text) {
+//    MainWindow* mainWindow = MainWindow::instance();
+//    mainWindow->addText(text);
+//}
 
-void MainWindow::pushMessage(const QString& text) {
-    this->messages_.push(text);
-}
-
-void MainWindow::pushMessageAndAddText(const QString& text) {
+//void MainWindow::pushMessage(const QString& text) {
 //    this->messages_.push(text);
+//}
 
-//    std::thread(addTextFunction, text).detach();
-    this->addText(text);
-}
+//void MainWindow::pushMessageAndAddText(const QString& text) {
+////    this->messages_.push(text);
+
+////    std::thread(addTextFunction, text).detach();
+//    this->addText(text);
+//}
