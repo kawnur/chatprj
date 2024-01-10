@@ -1,5 +1,11 @@
 #include "mainwindow.hpp"
 
+MainWindow* getMainWindowPtr() {
+    QCoreApplication* coreApp = QCoreApplication::instance();
+    ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
+    return app->mainWindow_;
+}
+
 TextEdit::TextEdit(MainWindow* parent) {
    setParent(parent);
 }
@@ -15,14 +21,17 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
             && event->key() == Qt::Key_Return) {
         if(event->modifiers() == Qt::NoModifier) {
 //            coutWithEndl("enter event");
-            MainWindow* mainWindow = MainWindow::instance();
+//            MainWindow* mainWindow = MainWindow::instance();
+
+            MainWindow* mainWindow = getMainWindowPtr();
 
             auto text = this->toPlainText();
 
             mainWindow->addText(text);
             this->setText("");
 
-            auto client = mainWindow->getClient();
+//            auto client = mainWindow->getClient();
+            ChatClient* client = getChatClientPtr();
             client->send(text);
         }
         else if(event->modifiers() == Qt::ControlModifier) {
@@ -101,9 +110,9 @@ void MainWindow::set() {
 
 //    this->messages_ = std::queue<QString>();
 
-    button_ = new QPushButton("Run ASIO tests");
+//    button_ = new QPushButton("Run ASIO tests");
 //    connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
-    centralWidgetLayout_->addWidget(button_);
+//    centralWidgetLayout_->addWidget(button_);
 }
 
 //int MainWindow::setClient(EchoClient* client) {

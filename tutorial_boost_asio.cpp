@@ -243,8 +243,8 @@ private:
 
 //      coutArgsWithSpaceSeparator("text:", text.toStdString());
 
-      MainWindow* mainWindow = MainWindow::instance();
-      mainWindow->addText(text);
+//      MainWindow* mainWindow = MainWindow::instance();
+//      mainWindow->addText(text);
 
 //      std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
@@ -292,7 +292,7 @@ void daytime1() {
     // A synchronous TCP daytime client
     using tcp = boost::asio::ip::tcp;
 
-    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = MainWindow::instance();
 //    mainWindow->addText(text);
 
     try {
@@ -305,7 +305,7 @@ void daytime1() {
 //        std::string_view host { "time.google.com" };
         std::string_view host { "localhost" };
         QString hostRepr = QString("hostname: ") + host.data();
-        mainWindow->addText(hostRepr);
+//        mainWindow->addText(hostRepr);
 
 //        coutWithEndl("2");
         boost::asio::io_context io_context;
@@ -318,13 +318,13 @@ void daytime1() {
                 resolver.resolve(host, "daytime");
 
         for(auto it = endpoints.begin(); it != endpoints.end(); it++) {
-            mainWindow->addText("Resolved endpoints:");
-            mainWindow->addText(
-                        QString("host_name:")
-                        + QString::fromStdString(it->host_name()));
-            mainWindow->addText(
-                        QString("service_name:")
-                        + QString::fromStdString(it->service_name()));
+//            mainWindow->addText("Resolved endpoints:");
+//            mainWindow->addText(
+//                        QString("host_name:")
+//                        + QString::fromStdString(it->host_name()));
+//            mainWindow->addText(
+//                        QString("service_name:")
+//                        + QString::fromStdString(it->service_name()));
         }
 
 //        for(auto& endpoint : endpoints) {
@@ -361,7 +361,7 @@ void daytime1() {
                 reply.push_back(buf.data()[i]);
             }
 
-            mainWindow->addText(QString("Reply:\n" + reply));
+//            mainWindow->addText(QString("Reply:\n" + reply));
         }
     }
 
@@ -369,8 +369,8 @@ void daytime1() {
         coutWithEndl("exception");
         std::cerr << e.what() << std::endl;
 
-        mainWindow->addText("exception");
-        mainWindow->addText(e.what());
+//        mainWindow->addText("exception");
+//        mainWindow->addText(e.what());
     }
 }
 
@@ -381,8 +381,8 @@ std::string make_daytime_string()
 
   auto result = ctime(&now);
 
-  MainWindow* mainWindow = MainWindow::instance();
-  mainWindow->addText(QString("daytime: ") + QString(result));
+//  MainWindow* mainWindow = MainWindow::instance();
+//  mainWindow->addText(QString("daytime: ") + QString(result));
 
 //  return ctime(&now);
   return result;
@@ -392,8 +392,8 @@ void daytime2() {
     // A synchronous TCP daytime server
     using boost::asio::ip::tcp;
 
-    MainWindow* mainWindow = MainWindow::instance();
-    mainWindow->addText("Server started");
+//    MainWindow* mainWindow = MainWindow::instance();
+//    mainWindow->addText("Server started");
 
     try
       {
@@ -416,8 +416,8 @@ void daytime2() {
       {
         std::cerr << e.what() << std::endl;
 
-        mainWindow->addText("exception");
-        mainWindow->addText(e.what());
+//        mainWindow->addText("exception");
+//        mainWindow->addText(e.what());
       }
 
 //      return 0;
@@ -460,9 +460,9 @@ void AsioTest::runTest() {
 //        daytime1();
 //        ping();
 
-        MainWindow* mainWindow = MainWindow::instance();
+//        MainWindow* mainWindow = MainWindow::instance();
         EchoClient* client = new EchoClient;
-        mainWindow->setClient(client);
+//        mainWindow->setClient(client);
     }
     else if(*(this->role_) == "Server") {
 //        daytime2();

@@ -7,8 +7,10 @@ void ServerSession::start() {
 }
 
 void ServerSession::do_read() {
-    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = MainWindow::instance();
+    MainWindow* mainWindow = getMainWindowPtr();
 
+//    mainWindow->addText("do_read");
     mainWindow->addText("do_read");
     coutArgsWithSpaceSeparator("do_read");
 
@@ -16,7 +18,9 @@ void ServerSession::do_read() {
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
         [this, self](boost::system::error_code ec, std::size_t length) {
             if (!ec) {
-                MainWindow* mainWindow = MainWindow::instance();
+//                MainWindow* mainWindow = MainWindow::instance();
+                MainWindow* mainWindow = getMainWindowPtr();
+
                 std::string str(data_, length);
 
                 if(length > 0) {
@@ -27,11 +31,13 @@ void ServerSession::do_read() {
 
                 do_write(length);
             }
-        });
+        }
+    );
 }
 
 void ServerSession::do_write(std::size_t length) {
-    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = MainWindow::instance();
+    MainWindow* mainWindow = getMainWindowPtr();
 
     mainWindow->addText("do_write");
     coutArgsWithSpaceSeparator("do_write");
@@ -42,41 +48,51 @@ void ServerSession::do_write(std::size_t length) {
             if (!ec) {
                 do_read();
             }
-        });
+        }
+    );
 }
+
+//ChatServer::ChatServer(short port) {
+//    boost::asio::io_context io_context_;
+//    tcp::acceptor acceptor_(io_context_, tcp::endpoint(tcp::v4(), port));
+
+//    do_accept();
+//}
 
 void ChatServer::do_accept() {
     acceptor_.async_accept(
         [this](boost::system::error_code ec, tcp::socket socket) {
-            if (!ec) {
-                std::make_shared<class session>(std::move(socket))->start();
+            if(!ec) {
+//                std::make_shared<class session>(std::move(socket))->start();
+                std::make_shared<ServerSession>(std::move(socket))->start();
             }
 
             do_accept();
-        });
+        }
+    );
 }
 
-int async_tcp_echo_server()
-{
-  MainWindow* mainWindow = MainWindow::instance();
+//int async_tcp_echo_server()
+//{
+//  MainWindow* mainWindow = MainWindow::instance();
 
-  try
-  {
+//  try
+//  {
 
-    mainWindow->addText("Echo server started");
-    coutWithEndl("Echo server started");
+//    mainWindow->addText("Echo server started");
+//    coutWithEndl("Echo server started");
 
-    boost::asio::io_context io_context;
+//    boost::asio::io_context io_context;
 
-    class server s(io_context, std::atoi("5002"));
+//    class server s(io_context, std::atoi("5002"));
 
-    io_context.run();
-  }
-  catch (std::exception& e)
-  {
-    mainWindow->addText("Exception: " + QString(e.what()));
-    coutArgsWithSpaceSeparator("Exception:", e.what());
-  }
+//    io_context.run();
+//  }
+//  catch (std::exception& e)
+//  {
+//    mainWindow->addText("Exception: " + QString(e.what()));
+//    coutArgsWithSpaceSeparator("Exception:", e.what());
+//  }
 
-  return 0;
-}
+//  return 0;
+//}

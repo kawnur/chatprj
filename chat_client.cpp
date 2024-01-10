@@ -3,14 +3,16 @@
 using boost::asio::ip::tcp;
 
 ChatClient::ChatClient() {
-    MainWindow* mainWindow = MainWindow::instance();
-    setParent(mainWindow);
-    mainWindow->addText("Echo client started");
-    mainWindow->addText("Enter message: ");
+//    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = getMainWindowPtr();
+//    setParent(mainWindow);
+//    mainWindow->addText("Echo client started");
+//    mainWindow->addText("Enter message: ");
 }
 
 int ChatClient::send(QString text) {
-    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = MainWindow::instance();
+    MainWindow* mainWindow = getMainWindowPtr();
 
     try{
         boost::asio::io_context io_context;

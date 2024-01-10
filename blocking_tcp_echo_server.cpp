@@ -8,15 +8,15 @@ void session(tcp::socket sock)
 {
   const int max_length = 1024;
 
-  MainWindow* mainWindow = MainWindow::instance();
-  mainWindow->pushMessage("session");
+//  MainWindow* mainWindow = MainWindow::instance();
+//  mainWindow->pushMessage("session");
   coutArgsWithSpaceSeparator("session");
 
   try
   {
     for (;;)
     {
-      mainWindow->pushMessage("loop step");
+//      mainWindow->pushMessage("loop step");
       coutArgsWithSpaceSeparator("loop step");
 
       char data[max_length];
@@ -27,7 +27,7 @@ void session(tcp::socket sock)
       std::string str(data, length);
 
       if(length > 0) {
-          mainWindow->pushMessage("Got: " + QString::fromStdString(str));
+//          mainWindow->pushMessage("Got: " + QString::fromStdString(str));
       }
       coutArgsWithSpaceSeparator("Got:", str);
 
@@ -41,36 +41,36 @@ void session(tcp::socket sock)
   }
   catch (std::exception& e)
   {
-    mainWindow->pushMessage("Exception: " + QString(e.what()));
+//    mainWindow->pushMessage("Exception: " + QString(e.what()));
     coutArgsWithSpaceSeparator("Exception:", e.what());
   }
 }
 
 void server(boost::asio::io_context& io_context, unsigned short port)
 {
-  MainWindow* mainWindow = MainWindow::instance();
+//  MainWindow* mainWindow = MainWindow::instance();
 
-  mainWindow->addText("server");
+//  mainWindow->addText("server");
   coutArgsWithSpaceSeparator("server");
 
   tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
   for (;;)
   {
-    mainWindow->addText("server thread");
+//    mainWindow->addText("server thread");
     coutArgsWithSpaceSeparator("server thread");
 
-    mainWindow->addMessagesToView();
+//    mainWindow->addMessagesToView();
     std::thread(session, a.accept()).detach();
   }
 }
 
 int blocking_tcp_echo_server()
 {
-  MainWindow* mainWindow = MainWindow::instance();
+//  MainWindow* mainWindow = MainWindow::instance();
 
   try
   {
-    mainWindow->addText("Echo server started");
+//    mainWindow->addText("Echo server started");
     coutWithEndl("Echo server started");
 
     boost::asio::io_context io_context;
@@ -79,7 +79,7 @@ int blocking_tcp_echo_server()
   }
   catch (std::exception& e)
   {
-    mainWindow->addText("Exception: " + QString(e.what()));
+//    mainWindow->addText("Exception: " + QString(e.what()));
     coutArgsWithSpaceSeparator("Exception:", e.what());
   }
 

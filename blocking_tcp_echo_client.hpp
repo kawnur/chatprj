@@ -10,9 +10,12 @@
 #include <QObject>
 #include <QString>
 
+#include "utils_cout.hpp"
+
+
 using boost::asio::ip::tcp;
 
-enum { max_length = 1024 };
+//enum { max_length = 1024 };
 
 class EchoClient : public QObject {
 

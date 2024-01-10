@@ -1,6 +1,8 @@
+# Client container image
 # To build run 'docker build -t chatprj --file <this_file_path> /'
 # Build context / used to copy lib by host abspath
-FROM fedora
+FROM fedora AS chatprj
+
 RUN mkdir -p /my/app /my/qt /my/boost /my/cmake
 
 ADD /home/user/sources/boost/boost_1_76_0/boost_1_76_0.tar.gz /my/boost/
@@ -35,6 +37,9 @@ RUN dnf install -y perl
 #install make
 RUN dnf install -y make
 
+#install ping
+RUN dnf install -y ping
+
 #install vim
 RUN dnf install -y vim
 
@@ -66,5 +71,13 @@ RUN ./bootstrap.sh --with-libraries=system,thread,date_time,regex,serialization,
 
 RUN ./b2 --with-system --with-thread --with-date_time --with-regex --with-serialization --with-chrono --with-atomic \
 --libdir=/usr/lib64 --includedir=/usr/include install
+
+WORKDIR /my/app
+
+
+# DB container image
+FROM postgres:12 as chatprj_db
+
+RUN mkdir -p /my/app
 
 WORKDIR /my/app

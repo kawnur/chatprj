@@ -7,10 +7,13 @@
 #include <utility>
 #include <boost/asio.hpp>
 
+//#include "application.hpp"
 #include "mainwindow.hpp"
 
 
 using boost::asio::ip::tcp;
+
+//class ChatApp;
 
 class ServerSession
         : public std::enable_shared_from_this<class ServerSession> {
@@ -36,13 +39,16 @@ public:
     : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)) {
         do_accept();
     }
+//    ChatServer(short);
 
 private:
     void do_accept();
 
+//    boost::asio::io_context io_context_;
     tcp::acceptor acceptor_;
+
 };
 
 int async_tcp_echo_server();
 
-#endif // ASYNC_TCP_ECHO_SERVER_HPP
+#endif // CHAT_SERVER_HPP

@@ -21,6 +21,9 @@ set(PROJECT_SOURCES
     chat_server.cpp
     chat_server.hpp
     compose.yaml
+    sql_scripts/sql_script_1_configure_db.sql
+    sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
+    sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
     Dockerfile
     icmp_header.hpp  # tutorial boost asio
     ipv4_header.hpp  # tutorial boost asio
@@ -52,3 +55,27 @@ target_link_libraries(chatapp PRIVATE gpgme Boost::thread)
 #target_link_libraries(chatapp PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
 #target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql)
+
+
+# copy sql scripts
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db)
+
+file(COPY_FILE
+    ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
+    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_1_configure_db.sql)
+
+file(COPY_FILE
+    ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
+    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_1_configure_db.sql)
+
+file(COPY_FILE
+    ${PROJECT_SOURCE_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
+    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql)
+
+file(COPY_FILE
+    ${PROJECT_SOURCE_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
+    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql)
+

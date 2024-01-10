@@ -16,11 +16,15 @@
 #include <QVBoxLayout>
 #include <thread>
 
-#include "blocking_tcp_echo_client.hpp"
-#include "tutorial_boost_asio.hpp"
+#include "application.hpp"
+//#include "blocking_tcp_echo_client.hpp"
+//#include "tutorial_boost_asio.hpp"
 #include "utils_cout.hpp"
 
+
 class MainWindow;
+
+MainWindow* getMainWindowPtr();
 
 class TextEdit : public QTextEdit {
 
@@ -56,7 +60,7 @@ private:
     int linesCount_;
     QFont* font_;
     TextEdit* textEdit_;
-    QPushButton* button_;
+//    QPushButton* button_;
 
 //    MainWindow(QWidget* parent = nullptr);
 //    MainWindow();

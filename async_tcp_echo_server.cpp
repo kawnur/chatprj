@@ -8,9 +8,9 @@ void session::start() {
 }
 
 void session::do_read() {
-    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = MainWindow::instance();
 
-    mainWindow->addText("do_read");
+//    mainWindow->addText("do_read");
     coutArgsWithSpaceSeparator("do_read");
 
     auto self(shared_from_this());
@@ -19,11 +19,11 @@ void session::do_read() {
         {
           if (!ec)
           {
-            MainWindow* mainWindow = MainWindow::instance();
+//            MainWindow* mainWindow = MainWindow::instance();
             std::string str(data_, length);
 
             if(length > 0) {
-              mainWindow->addText("Got: " + QString::fromStdString(str));
+//              mainWindow->addText("Got: " + QString::fromStdString(str));
             }
             coutArgsWithSpaceSeparator("Got:", str);
 
@@ -33,9 +33,9 @@ void session::do_read() {
 }
 
 void session::do_write(std::size_t length) {
-    MainWindow* mainWindow = MainWindow::instance();
+//    MainWindow* mainWindow = MainWindow::instance();
 
-    mainWindow->addText("do_write");
+//    mainWindow->addText("do_write");
     coutArgsWithSpaceSeparator("do_write");
 
     auto self(shared_from_this());
@@ -64,12 +64,12 @@ void server::do_accept() {
 
 int async_tcp_echo_server()
 {
-  MainWindow* mainWindow = MainWindow::instance();
+//  MainWindow* mainWindow = MainWindow::instance();
 
   try
   {
 
-    mainWindow->addText("Echo server started");
+//    mainWindow->addText("Echo server started");
     coutWithEndl("Echo server started");
 
     boost::asio::io_context io_context;
@@ -80,7 +80,7 @@ int async_tcp_echo_server()
   }
   catch (std::exception& e)
   {
-    mainWindow->addText("Exception: " + QString(e.what()));
+//    mainWindow->addText("Exception: " + QString(e.what()));
     coutArgsWithSpaceSeparator("Exception:", e.what());
   }
 

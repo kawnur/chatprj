@@ -9,7 +9,8 @@
 #include <utility>
 #include <boost/asio.hpp>
 
-#include "mainwindow.hpp"
+//#include "mainwindow.hpp"
+#include "utils_cout.hpp"
 
 
 using boost::asio::ip::tcp;

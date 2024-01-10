@@ -8,9 +8,14 @@
 #include <QObject>
 #include <QString>
 
+//#include "application.hpp"
+#include "mainwindow.hpp"
+
+
 using boost::asio::ip::tcp;
 
 enum { max_length = 1024 };
+//short max_length = 1024;
 
 class ChatClient : public QObject {
 
@@ -25,4 +30,4 @@ public:
     int send(QString);
 };
 
-#endif
+#endif // CHAT_CLIENT

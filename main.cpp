@@ -8,40 +8,42 @@
 #include <QMainWindow>
 #include <thread>
 
-#include "application.hpp"
+#include "chat_client.hpp"
+#include "chat_server.hpp"
 #include "mainwindow.hpp"
-#include "tutorial_boost_asio.hpp"
+#include "application.hpp"
+//#include "tutorial_boost_asio.hpp"
 #include "utils_cout.hpp"
 #include "utils_gpgme.hpp"
 
 
-//int runApp(int argc, char *argv[], QString role) {
-int runApp(int argc, char *argv[]) {
-//    QApplication a(argc, argv);
-//    QMainWindow mainWindow;
-//    MainWindow* mainWindow = MainWindow::instance();
-    ChatApp app(argc, argv);
+////int runApp(int argc, char *argv[], QString role) {
+//int runApp(int argc, char *argv[]) {
+////    QApplication a(argc, argv);
+////    QMainWindow mainWindow;
+////    MainWindow* mainWindow = MainWindow::instance();
+//    ChatApp app(argc, argv);
 
-//    coutWithEndl("Test1");
+////    coutWithEndl("Test1");
 
-//    coutWithEndl("library paths:");
-//    for(QString& path : QCoreApplication::libraryPaths()) {
-//        coutWithEndl(path.toStdString());
-//    }
+////    coutWithEndl("library paths:");
+////    for(QString& path : QCoreApplication::libraryPaths()) {
+////        coutWithEndl(path.toStdString());
+////    }
 
-//    coutWithEndl("plugin paths:");
-//    coutWithEndl(QLibraryInfo::path(QLibraryInfo::PluginsPath).toStdString());
+////    coutWithEndl("plugin paths:");
+////    coutWithEndl(QLibraryInfo::path(QLibraryInfo::PluginsPath).toStdString());
 
-//    mainWindow.show();
+////    mainWindow.show();
 
-//    mainWindow->setWindowTitle(role);
-//    mainWindow->set(role);
-//    mainWindow->show();
+////    mainWindow->setWindowTitle(role);
+////    mainWindow->set(role);
+////    mainWindow->show();
 
-    //    run_asio_tutorials();
+//    //    run_asio_tutorials();
 
-    return app.exec();
-}
+//    return app.exec();
+//}
 
 
 int main(int argc, char *argv[]) {    
@@ -60,6 +62,8 @@ int main(int argc, char *argv[]) {
 
 //        runApp(argc, argv, role);
         ChatApp app(argc, argv);
+        app.set();
+
         return app.exec();
     }
 }
