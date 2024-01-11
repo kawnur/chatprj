@@ -48,6 +48,77 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     }
 }
 
+SocketInfo::SocketInfo(QString& name, QString& ipaddress, QString& port) :
+    name_(name), ipaddress_(ipaddress), port_(port) {
+
+    set();
+}
+
+SocketInfo::SocketInfo(QString&& name, QString&& ipaddress, QString&& port) :
+    name_(std::move(name)),
+    ipaddress_(std::move(ipaddress)),
+    port_(std::move(port)) {
+
+    set();
+}
+
+SocketInfo::SocketInfo(const SocketInfo& si) {
+    name_ = si.name_;
+    ipaddress_ = si.ipaddress_;
+    port_ = si.port_;
+
+    set();
+}
+
+SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& port) :
+    name_(QString::fromStdString(name)),
+    ipaddress_(QString::fromStdString(ipaddress)),
+    port_(QString::fromStdString(port)) {
+
+    set();
+}
+
+void SocketInfo::print() {
+    coutArgsWithSpaceSeparator("name: ", this->name_.toStdString());
+    coutArgsWithSpaceSeparator("ipaddress: ", this->ipaddress_.toStdString());
+    coutArgsWithSpaceSeparator("port: ", this->port_.toStdString());
+}
+
+void SocketInfo::set() {
+    layout_ = new QHBoxLayout(this);
+    nameLabel_ = new QLabel(name_, this);
+    ipaddressLabel_ = new QLabel(ipaddress_, this);
+    portLabel_ = new QLabel(port_, this);
+    editButton_ = new QPushButton("Edit", this);
+
+    layout_->addWidget(nameLabel_);
+    layout_->addWidget(ipaddressLabel_);
+    layout_->addWidget(portLabel_);
+    layout_->addWidget(editButton_);
+
+    // connect
+}
+
+void MainWindow::buildSockets() {
+    std::vector<std::vector<QString>> data = {
+        {"name1", "192.168.1.1", "7777"},
+        {"name2", "192.168.1.2", "7778"},
+        {"name3", "192.168.1.3", "7779"}
+    };
+
+    for(auto& i : data) {
+        this->sockets_.emplace_back(i.at(0), i.at(1), i.at(2));
+    }
+}
+
+void MainWindow::setLeftPanel() {
+    this->buildSockets();
+
+    for(auto& i : this->sockets_) {
+        this->leftPanelLayout_->addWidget(&i);
+    }
+}
+
 //MainWindow* MainWindow::_instance = nullptr;
 
 //MainWindow* MainWindow::instance() {
@@ -68,13 +139,40 @@ void MainWindow::set() {
 //    this->setWindowTitle(role);
 //    role_ = role;
 
-    centralWidget_ = new QWidget(this);
-    setCentralWidget(centralWidget_);
+    this->centralWidget_ = new QWidget(this);
+    this->setCentralWidget(centralWidget_);
 
-    centralWidgetLayout_ = new QVBoxLayout(this);
-    centralWidgetLayout_->setSpacing(0);
-    centralWidgetLayout_->setContentsMargins(0, 0, 0, 0);
-    centralWidget_->setLayout(centralWidgetLayout_);
+    this->centralWidgetLayout_ = new QHBoxLayout(this);
+    this->centralWidgetLayout_->setSpacing(0);
+    this->centralWidgetLayout_->setContentsMargins(0, 0, 0, 0);
+    this->centralWidget_->setLayout(centralWidgetLayout_);
+
+    // left panel
+
+    this->leftPanel_ = new QWidget(this);
+    this->leftPanel_->resize(2000, 1000);
+    this->leftPanelLayout_ = new QVBoxLayout(this);
+    this->leftPanelLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    this->leftPanelLayout_->setSpacing(0);
+    this->leftPanelLayout_->setContentsMargins(0, 0, 0, 0);
+    this->leftPanel_->setLayout(leftPanelLayout_);
+
+//    this->test_ = new QLineEdit;
+//    this->leftPanelLayout_->addWidget(this->test_);
+
+    this->sockets_ = std::vector<SocketInfo>();
+
+    this->setLeftPanel();
+
+    this->centralWidgetLayout_->addWidget(leftPanel_);
+
+    // central panel
+
+    centralPanel_ = new QWidget(this);    
+    centralPanelLayout_ = new QVBoxLayout(this);
+    centralPanelLayout_->setSpacing(0);
+    centralPanelLayout_->setContentsMargins(0, 0, 0, 0);
+    centralPanel_->setLayout(centralPanelLayout_);
 
     graphicsScene_ = new QGraphicsScene(this);
     textItem_ = graphicsScene_->addSimpleText("");
@@ -97,12 +195,12 @@ void MainWindow::set() {
     rect_->setHeight(10000);
     graphicsScene_->setSceneRect(*rect_);
 //    graphicsView_->setSceneRect(*rect_);
-    centralWidgetLayout_->addWidget(graphicsView_);
+    centralPanelLayout_->addWidget(graphicsView_);
 
     graphicsView_->viewport()->resize(100, 100);
 
     textEdit_ = new TextEdit(this);
-    centralWidgetLayout_->addWidget(textEdit_);
+    centralPanelLayout_->addWidget(textEdit_);
 
 //    AsioTest* test = AsioTest::instance();
 //    test->setRole(role_);
@@ -112,7 +210,9 @@ void MainWindow::set() {
 
 //    button_ = new QPushButton("Run ASIO tests");
 //    connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
-//    centralWidgetLayout_->addWidget(button_);
+//    centralPanelLayout_->addWidget(button_);
+
+    centralWidgetLayout_->addWidget(centralPanel_);
 }
 
 //int MainWindow::setClient(EchoClient* client) {
@@ -126,6 +226,10 @@ void MainWindow::set() {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
+}
+
+MainWindow::~MainWindow() {
+//    delete[] sockets_;
 }
 
 void MainWindow::addText(const QString& text) {
