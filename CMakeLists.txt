@@ -36,6 +36,8 @@ set(PROJECT_SOURCES
     utils_cout.hpp
     utils_gpgme.cpp
     utils_gpgme.hpp
+    widgets.cpp
+    widgets.hpp
 )
 
 find_package(Boost REQUIRED COMPONENTS thread)
