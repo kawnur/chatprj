@@ -11,6 +11,7 @@
 
 #include "application.hpp"
 //#include "blocking_tcp_echo_client.hpp"
+#include "db_interaction.hpp"
 //#include "tutorial_boost_asio.hpp"
 #include "utils_cout.hpp"
 #include "widgets.hpp"
@@ -56,7 +57,7 @@ private:
     QVBoxLayout* rightPanelLayout_;
 
     void buildSockets();
-    void setLeftPanel();
+    void setLeftPanel();    
 
 //    MainWindow(QWidget* parent = nullptr);
 //    MainWindow();
@@ -69,6 +70,7 @@ public:
 
 //    void set(QString);
     void set();
+    void connectToDb();
 //    int setClient(EchoClient*);
 //    EchoClient* getClient();
     void addText(const QString&);

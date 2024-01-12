@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.2, 2024-01-10T17:03:47. -->
+<!-- Written by QtCreator 7.0.2, 2024-01-12T21:00:31. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -292,15 +292,15 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
+      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose down</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose up -d</value>
+      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --env-file ./.env up -d</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
@@ -338,12 +338,15 @@
     <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
     <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
-    <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-    <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
+    <value type="int" key="PE.EnvironmentAspect.Base">1</value>
+    <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes">
+     <value type="QString">CHATAPP_DB_ADDRESS=test_address</value>
+     <value type="QString">CHATAPP_DB_PORT=test_port</value>
+    </valuelist>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.chatapp</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-    <value type="QString" key="RunConfiguration.Arguments">1</value>
+    <value type="QString" key="RunConfiguration.Arguments">--no-exec</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

@@ -6,7 +6,18 @@ MainWindow* getMainWindowPtr() {
     return app->mainWindow_;
 }
 
-void MainWindow::buildSockets() {
+void MainWindow::buildSockets() {  // TODO move to manager
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    PGconn* dbConnection = getDBConnection();
+
+    ConnStatusType status = PQstatus(dbConnection);
+    coutArgsWithSpaceSeparator("status:", status);
+    QString statusQString = QString::fromStdString(std::to_string((int)status));
+    mainWindow->addText(QString("status: ") + statusQString);
+
+    PGresult* result = getsSocketsInfo(dbConnection);
+
     std::vector<std::vector<QString>> data = {
         {"name1", "192.168.1.1", "7777"},
         {"name2", "192.168.1.2", "7778"},
@@ -18,13 +29,16 @@ void MainWindow::buildSockets() {
     }
 }
 
-void MainWindow::setLeftPanel() {
+void MainWindow::setLeftPanel() {}
+
+void MainWindow::connectToDb() {
     this->buildSockets();
 
     for(auto& i : this->sockets_) {
         this->leftPanelLayout_->addWidget(&i);
     }
 }
+
 
 //MainWindow* MainWindow::_instance = nullptr;
 
@@ -38,7 +52,6 @@ void MainWindow::setLeftPanel() {
 //MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 MainWindow::MainWindow() {
     setWindowTitle(QString("MainWindow"));
-    set();
 }
 
 //void MainWindow::set(QString role) {

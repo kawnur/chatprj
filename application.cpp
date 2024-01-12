@@ -8,6 +8,8 @@ void ChatApp::set() {
     server_ = new ChatServer(*io_context_, 5002);
 
     mainWindow_ = new MainWindow;
+    mainWindow_->set();
+    mainWindow_->connectToDb();
     mainWindow_->show();
 }
 
