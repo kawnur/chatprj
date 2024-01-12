@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 #include <QGraphicsView>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -31,47 +32,71 @@ class MainWindow;
 
 MainWindow* getMainWindowPtr();
 
-class TextEdit : public QTextEdit {
+class TextEditWidget : public QTextEdit {
 
     Q_OBJECT
 
 public:
-    TextEdit(MainWindow*);
-    ~TextEdit() = default;
+    TextEditWidget(MainWindow*);
+    ~TextEditWidget() = default;
 
 private:
     void keyPressEvent(QKeyEvent*);
 };
 
-class SocketInfo : public QWidget {
+class IndicatorWidget : public QWidget {
 
     Q_OBJECT
-//class SocketInfo {
+
+public:
+    IndicatorWidget(QWidget*);
+    IndicatorWidget(const IndicatorWidget*);
+    ~IndicatorWidget() = default;
+
+    void setOn();
+    void setOff();
+
+public slots:
+    void toggle();
+
+private:
+    bool isOn_;
+    QColor onColor_;
+    QColor offColor_;
+    QPalette* palette_;
+};
+
+class SocketInfoWidget : public QWidget {
+
+    Q_OBJECT
 
 public:
 //    SocketInfo() = default;
-    SocketInfo() {};
-    SocketInfo(QString&, QString&, QString&);
-    SocketInfo(QString&&, QString&&, QString&&);
+    SocketInfoWidget() {};
+    SocketInfoWidget(QString&, QString&, QString&);
+    SocketInfoWidget(QString&&, QString&&, QString&&);
 //    SocketInfo(const SocketInfo&) {};
-    SocketInfo(const SocketInfo&);
-    SocketInfo(SocketInfo&&) {};
-    SocketInfo(std::string&, std::string&, std::string&);
-    ~SocketInfo() = default;
+    SocketInfoWidget(const SocketInfoWidget&);
+    SocketInfoWidget(SocketInfoWidget&&) {};
+    SocketInfoWidget(std::string&, std::string&, std::string&);
+    ~SocketInfoWidget() = default;
 
     void print();
 
+private:
     QString name_;
     QString ipaddress_;
     QString port_;
 
-private:
     QHBoxLayout* layout_;
+
+    IndicatorWidget* indicator_;
     QLabel* nameLabel_;
     QLabel* ipaddressLabel_;
     QLabel* portLabel_;
 
     QPushButton* editButton_;
+    QPushButton* toggleIndicatorButton_;
 
     void set();
 
@@ -96,7 +121,7 @@ private:
     QWidget* leftPanel_;
     QVBoxLayout* leftPanelLayout_;
 //    QLineEdit* test_;
-    std::vector<SocketInfo> sockets_;
+    std::vector<SocketInfoWidget> sockets_;
 
     QWidget* centralPanel_;
     QVBoxLayout* centralPanelLayout_;
@@ -106,7 +131,7 @@ private:
     QGraphicsSimpleTextItem* textItem_;
     int linesCount_;
     QFont* font_;
-    TextEdit* textEdit_;
+    TextEditWidget* textEdit_;
 //    QPushButton* button_;
 
     QVBoxLayout* rightPanelLayout_;

@@ -6,11 +6,11 @@ MainWindow* getMainWindowPtr() {
     return app->mainWindow_;
 }
 
-TextEdit::TextEdit(MainWindow* parent) {
+TextEditWidget::TextEditWidget(MainWindow* parent) {
    setParent(parent);
 }
 
-void TextEdit::keyPressEvent(QKeyEvent* event) {
+void TextEditWidget::keyPressEvent(QKeyEvent* event) {
 //    coutWithEndl("keyPressEvent");
 //    coutArgsWithSpaceSeparator("event->type():", std::hex, event->type());
 //    coutArgsWithSpaceSeparator("event->key():", std::hex, event->key());
@@ -48,13 +48,53 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     }
 }
 
-SocketInfo::SocketInfo(QString& name, QString& ipaddress, QString& port) :
+IndicatorWidget::IndicatorWidget(QWidget* parent) {
+    setParent(parent);
+
+    setFixedWidth(15);
+    setFixedHeight(15);
+
+    isOn_ = false;
+    onColor_ = QColor(QColorConstants::DarkGreen);
+    offColor_ = QColor(QColorConstants::DarkRed);
+
+    palette_ = new QPalette();
+    palette_->setColor(QPalette::Window, offColor_);
+
+    setAutoFillBackground(true);
+    setPalette(*palette_);
+}
+
+IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator) {
+    isOn_ = indicator->isOn_;
+    onColor_ = indicator->onColor_;
+    offColor_ = indicator->offColor_;
+    palette_ = indicator->palette_;
+}
+
+void IndicatorWidget::setOn() {
+    this->isOn_ = true;
+    this->palette_->setColor(QPalette::Window, onColor_);
+    this->setPalette(*this->palette_);
+}
+
+void IndicatorWidget::setOff() {
+    this->isOn_ = false;
+    this->palette_->setColor(QPalette::Window, offColor_);
+    this->setPalette(*this->palette_);
+}
+
+void IndicatorWidget::toggle() {
+    (this->isOn_ == true) ? this->setOff() : this->setOn();
+}
+
+SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipaddress, QString& port) :
     name_(name), ipaddress_(ipaddress), port_(port) {
 
     set();
 }
 
-SocketInfo::SocketInfo(QString&& name, QString&& ipaddress, QString&& port) :
+SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipaddress, QString&& port) :
     name_(std::move(name)),
     ipaddress_(std::move(ipaddress)),
     port_(std::move(port)) {
@@ -62,7 +102,7 @@ SocketInfo::SocketInfo(QString&& name, QString&& ipaddress, QString&& port) :
     set();
 }
 
-SocketInfo::SocketInfo(const SocketInfo& si) {
+SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si) {
     name_ = si.name_;
     ipaddress_ = si.ipaddress_;
     port_ = si.port_;
@@ -70,7 +110,7 @@ SocketInfo::SocketInfo(const SocketInfo& si) {
     set();
 }
 
-SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& port) :
+SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, std::string& port) :
     name_(QString::fromStdString(name)),
     ipaddress_(QString::fromStdString(ipaddress)),
     port_(QString::fromStdString(port)) {
@@ -78,23 +118,31 @@ SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& p
     set();
 }
 
-void SocketInfo::print() {
+void SocketInfoWidget::print() {
     coutArgsWithSpaceSeparator("name: ", this->name_.toStdString());
     coutArgsWithSpaceSeparator("ipaddress: ", this->ipaddress_.toStdString());
     coutArgsWithSpaceSeparator("port: ", this->port_.toStdString());
 }
 
-void SocketInfo::set() {
+void SocketInfoWidget::set() {
     layout_ = new QHBoxLayout(this);
+    indicator_ = new IndicatorWidget(this);
     nameLabel_ = new QLabel(name_, this);
     ipaddressLabel_ = new QLabel(ipaddress_, this);
     portLabel_ = new QLabel(port_, this);
     editButton_ = new QPushButton("Edit", this);
 
+    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
+    connect(
+                toggleIndicatorButton_, &QPushButton::pressed,
+                indicator_, &IndicatorWidget::toggle);
+
+    layout_->addWidget(indicator_);
     layout_->addWidget(nameLabel_);
     layout_->addWidget(ipaddressLabel_);
     layout_->addWidget(portLabel_);
     layout_->addWidget(editButton_);
+    layout_->addWidget(toggleIndicatorButton_);
 
     // connect
 }
@@ -160,7 +208,7 @@ void MainWindow::set() {
 //    this->test_ = new QLineEdit;
 //    this->leftPanelLayout_->addWidget(this->test_);
 
-    this->sockets_ = std::vector<SocketInfo>();
+    this->sockets_ = std::vector<SocketInfoWidget>();
 
     this->setLeftPanel();
 
@@ -199,7 +247,7 @@ void MainWindow::set() {
 
     graphicsView_->viewport()->resize(100, 100);
 
-    textEdit_ = new TextEdit(this);
+    textEdit_ = new TextEditWidget(this);
     centralPanelLayout_->addWidget(textEdit_);
 
 //    AsioTest* test = AsioTest::instance();
