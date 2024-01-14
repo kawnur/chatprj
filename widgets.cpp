@@ -21,7 +21,7 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event) {
 
             auto text = this->toPlainText();
 
-            mainWindow->addText(text);
+            mainWindow->addTextToCentralPanel(text);
             this->setText("");
 
 //            auto client = mainWindow->getClient();
@@ -113,9 +113,9 @@ SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, st
 }
 
 void SocketInfoWidget::print() {
-    coutArgsWithSpaceSeparator("name: ", this->name_.toStdString());
-    coutArgsWithSpaceSeparator("ipaddress: ", this->ipaddress_.toStdString());
-    coutArgsWithSpaceSeparator("port: ", this->port_.toStdString());
+    logArgs("name: ", this->name_);
+    logArgs("ipaddress: ", this->ipaddress_);
+    logArgs("port: ", this->port_);
 }
 
 void SocketInfoWidget::set() {

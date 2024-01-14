@@ -1,5 +1,9 @@
 #include "application.hpp"
 
+ChatApp::~ChatApp() {
+    delete manager_;
+}
+
 void ChatApp::set() {
     client_ = new ChatClient;
 
@@ -9,7 +13,11 @@ void ChatApp::set() {
 
     mainWindow_ = new MainWindow;
     mainWindow_->set();
-    mainWindow_->connectToDb();
+//    mainWindow_->connectToDb();
+
+    manager_ = new Manager;
+    manager_->set();
+
     mainWindow_->show();
 }
 

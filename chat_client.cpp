@@ -23,12 +23,12 @@ int ChatClient::send(QString text) {
 //        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
         boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
 //        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
-        mainWindow->addText("s.is_open(): "
+        mainWindow->addTextToCentralPanel("s.is_open(): "
                             + QString::fromStdString(std::to_string(s.is_open())));
 
         char request[max_length];
 
-        mainWindow->addText(QString("request: ") + QString(text));
+        mainWindow->addTextToCentralPanel(QString("request: ") + QString(text));
 
         auto textStdString = text.toStdString();
         size_t request_length = textStdString.size();
@@ -41,12 +41,12 @@ int ChatClient::send(QString text) {
             boost::asio::buffer(reply, request_length));
 
         std::string str(reply, reply_length);
-        mainWindow->addText("Reply is: " + QString::fromStdString(str));
-        mainWindow->addText("Enter message: ");
+        mainWindow->addTextToCentralPanel("Reply is: " + QString::fromStdString(str));
+        mainWindow->addTextToCentralPanel("Enter message: ");
     }
 
     catch(std::exception& e) {
-        mainWindow->addText("Exception: " + QString(e.what()));
+        mainWindow->addTextToCentralPanel("Exception: " + QString(e.what()));
     }
 
     return 0;

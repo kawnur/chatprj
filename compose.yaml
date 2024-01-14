@@ -10,9 +10,10 @@ services:
             WAYLAND_DISPLAY: $WAYLAND_DISPLAY
             QT_QPA_PLATFORM: wayland
             CHATAPP_DB_ADDRESS: $CHATAPP_CLIENT1_DB_IPV4_ADDRESS
-            CHATAPP_DB_PORT: $CHATAPP_CLIENT1_DB_PORT_OUTER
+            CHATAPP_DB_PORT: $CHATAPP_CLIENT1_DB_PORT_INNER
             CHATAPP_DB_USER: $CHATAPP_DB_POSTGRES_USER
             CHATAPP_DB_PASSWORD: $CHATAPP_DB_POSTGRES_PASSWORD
+            CLIENT_NAME: client1
         image: chatprj
         networks:
             my-bridge-network:
@@ -42,9 +43,10 @@ services:
             WAYLAND_DISPLAY: $WAYLAND_DISPLAY
             QT_QPA_PLATFORM: wayland
             CHATAPP_DB_ADDRESS: $CHATAPP_CLIENT2_DB_IPV4_ADDRESS
-            CHATAPP_DB_PORT: $CHATAPP_CLIENT2_DB_PORT_OUTER
+            CHATAPP_DB_PORT: $CHATAPP_CLIENT2_DB_PORT_INNER
             CHATAPP_DB_USER: $CHATAPP_DB_POSTGRES_USER
             CHATAPP_DB_PASSWORD: $CHATAPP_DB_POSTGRES_PASSWORD
+            CLIENT_NAME: client2
         image: chatprj
         networks:
             my-bridge-network:
@@ -75,9 +77,9 @@ services:
             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
 #            - POSTGRES_PASSWORD=postgres123
             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
-        ports:
+#        ports:
 #            - "5433:5432"
-            - $CHATAPP_CLIENT1_DB_PORT_OUTER:$CHATAPP_CLIENT1_DB_PORT_INNER
+#            - $CHATAPP_CLIENT1_DB_PORT_OUTER:$CHATAPP_CLIENT1_DB_PORT_INNER
         volumes:
             - chatapp_volume1:/var/lib/postgresql/data
             - type: bind
@@ -99,9 +101,9 @@ services:
             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
 #            - POSTGRES_PASSWORD=postgres123
             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
-        ports:
+#        ports:
 #            - "5434:5432"
-            - $CHATAPP_CLIENT2_DB_PORT_OUTER:$CHATAPP_CLIENT2_DB_PORT_INNER
+#            - $CHATAPP_CLIENT2_DB_PORT_OUTER:$CHATAPP_CLIENT2_DB_PORT_INNER
         volumes:
             - chatapp_volume2:/var/lib/postgresql/data
             - type: bind

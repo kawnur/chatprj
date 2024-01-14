@@ -6,38 +6,56 @@ MainWindow* getMainWindowPtr() {
     return app->mainWindow_;
 }
 
-void MainWindow::buildSockets() {  // TODO move to manager
-    MainWindow* mainWindow = getMainWindowPtr();
+//void MainWindow::buildSockets() {  // TODO move to manager
+//    MainWindow* mainWindow = getMainWindowPtr();
 
-    PGconn* dbConnection = getDBConnection();
+//    PGconn* dbConnection = getDBConnection();
 
-    ConnStatusType status = PQstatus(dbConnection);
-    coutArgsWithSpaceSeparator("status:", status);
-    QString statusQString = QString::fromStdString(std::to_string((int)status));
-    mainWindow->addText(QString("status: ") + statusQString);
+//    ConnStatusType status = PQstatus(dbConnection);
+//    coutArgsWithSpaceSeparator("status:", status);
+//    QString statusQString = QString::fromStdString(std::to_string((int)status));
+//    logLine(QString("status: ") + statusQString);
 
-    PGresult* result = getsSocketsInfo(dbConnection);
+//    PGresult* result = getsSocketsInfo(dbConnection);
 
-    std::vector<std::vector<QString>> data = {
-        {"name1", "192.168.1.1", "7777"},
-        {"name2", "192.168.1.2", "7778"},
-        {"name3", "192.168.1.3", "7779"}
-    };
+//    std::vector<std::vector<QString>> data = {
+//        {"name1", "192.168.1.1", "7777"},
+//        {"name2", "192.168.1.2", "7778"},
+//        {"name3", "192.168.1.3", "7779"}
+//    };
 
-    for(auto& i : data) {
-        this->sockets_.emplace_back(i.at(0), i.at(1), i.at(2));
-    }
-}
+//    for(auto& i : data) {
+//        this->sockets_.emplace_back(i.at(0), i.at(1), i.at(2));
+//    }
+
+//    int j = 0;
+//    while(true) {
+//        logLine(std::to_string(j++));
+//    }
+//}
 
 void MainWindow::setLeftPanel() {}
 
-void MainWindow::connectToDb() {
-    this->buildSockets();
+//void MainWindow::testMainWindowRightPanel() {
+//    int j = 0;
 
-    for(auto& i : this->sockets_) {
-        this->leftPanelLayout_->addWidget(&i);
-    }
-}
+//    while(true) {
+//        coutWithEndl(j);
+//        logLine(std::to_string(j));
+//        j++;
+//        sleep(.1);
+////        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+//    }
+//}
+
+
+//void MainWindow::connectToDb() { // TODO move to manager
+//    this->buildSockets();
+
+//    for(auto& i : this->sockets_) {
+//        this->leftPanelLayout_->addWidget(&i);
+//    }
+//}
 
 
 //MainWindow* MainWindow::_instance = nullptr;
@@ -51,7 +69,19 @@ void MainWindow::connectToDb() {
 
 //MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 MainWindow::MainWindow() {
-    setWindowTitle(QString("MainWindow"));
+//    setWindowTitle(QString("MainWindow"));
+    setWindowTitle(std::getenv("CLIENT_NAME"));
+}
+
+void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
+    for(auto& i : *socketsPtr) {
+        this->sockets_.emplace_back(
+                    i.getName(),
+                    i.getIpaddress(),
+                    i.getPort());
+
+        this->leftPanelLayout_->addWidget(&this->sockets_.back());
+    }
 }
 
 //void MainWindow::set(QString role) {
@@ -133,6 +163,37 @@ void MainWindow::set() {
 //    centralPanelLayout_->addWidget(button_);
 
     centralWidgetLayout_->addWidget(centralPanel_);
+
+    // right panel
+
+    rightPanel_ = new QWidget(this);
+    this->leftPanel_->resize(4000, 1000);
+    rightPanelLayout_ = new QVBoxLayout(this);
+    rightPanelLayout_->setSpacing(0);
+    rightPanelLayout_->setContentsMargins(0, 0, 0, 0);
+    rightPanel_->setLayout(rightPanelLayout_);
+
+    plainTextEdit_ = new QPlainTextEdit(this);
+    plainTextEdit_->setReadOnly(true);
+    plainTextEdit_->setPlainText("");
+
+    plainTextEditPalette_ = new QPalette();
+    plainTextEditPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
+    plainTextEditPalette_->setColor(QPalette::Text, QColorConstants::Black);
+    plainTextEdit_->setAutoFillBackground(true);
+    plainTextEdit_->setPalette(*plainTextEditPalette_);
+
+    rightPanelLayout_->addWidget(plainTextEdit_);
+
+//    testPlainTextEditButton_ = new QPushButton("testPlainTextEditButton");
+//    connect(
+//                testPlainTextEditButton_,
+//                &QPushButton::clicked,
+//                this,
+//                &MainWindow::testMainWindowRightPanel);
+//    rightPanelLayout_->addWidget(testPlainTextEditButton_);
+
+    centralWidgetLayout_->addWidget(rightPanel_);
 }
 
 //int MainWindow::setClient(EchoClient* client) {
@@ -152,10 +213,10 @@ MainWindow::~MainWindow() {
 //    delete[] sockets_;
 }
 
-void MainWindow::addText(const QString& text) {
+void MainWindow::addTextToCentralPanel(const QString& text) {
     auto currentText = this->textItem_->text();
 
-    coutArgsWithSpaceSeparator(
+    logArgs(
                 "currentText:",
                 currentText.replace("\n", "NL").toStdString(),
                 ", text:",
@@ -168,6 +229,7 @@ void MainWindow::addText(const QString& text) {
     }
     else {
         newText = this->textItem_->text() + QString("\n") + text;
+//        newText = currentText + QString("\n") + text;
     }
 
     ++linesCount_;
@@ -254,6 +316,34 @@ void MainWindow::addText(const QString& text) {
 
 //    coutArgsWithSpaceSeparator("horizontalScrollBarPolicy:", this->graphicsView_->horizontalScrollBarPolicy());
 //    coutArgsWithSpaceSeparator("verticalScrollBarPolicy:", this->graphicsView_->verticalScrollBarPolicy());
+
+    QApplication::processEvents();
+}
+
+void MainWindow::addTextToRightPanel(const QString& text) {
+//    coutWithEndl("addTextToRightPanel");
+
+//    auto currentText = this->plainTextEdit_->toPlainText();
+
+//    coutArgsWithSpaceSeparator(
+//                "currentText:",
+//                currentText.replace("\n", "NL").toStdString(),
+//                ", text:",
+//                text.toStdString());
+
+//    QString newText;
+
+//    if(currentText == "") {
+//        newText = text;
+//    }
+//    else {
+//        newText = currentText + QString("\n") + text;
+//    }
+
+//    this->plainTextEdit_->setPlainText(newText);
+
+    this->plainTextEdit_->appendPlainText(text);
+//    this->plainTextEdit_->show();
 
     QApplication::processEvents();
 }

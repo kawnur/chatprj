@@ -30,9 +30,13 @@ set(PROJECT_SOURCES
     Dockerfile
     icmp_header.hpp  # tutorial boost asio
     ipv4_header.hpp  # tutorial boost asio
+    logging.cpp
+    logging.hpp
     main.cpp
     mainwindow.cpp
     mainwindow.hpp
+    manager.cpp
+    manager.hpp
     tutorial_boost_asio.cpp  # tutorial boost asio
     tutorial_boost_asio.hpp  # tutorial boost asio
     utils_cout.cpp

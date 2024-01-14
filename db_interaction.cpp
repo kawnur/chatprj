@@ -12,18 +12,10 @@ PGconn* getDBConnection() {
         QString dbLogin { std::getenv("CHATAPP_DB_USER") };
         QString dbPassword { std::getenv("CHATAPP_DB_PASSWORD") };
 
-//        coutArgsWithSpaceSeparator("address:", dbAddress.toStdString());
-//        coutArgsWithSpaceSeparator("port:", dbPort.toStdString());
-
-//        QString textAddress = QString("address: ") + dbAddress;
-//        mainWindow->addText(textAddress);
-        mainWindow->addText(QString("address: ") + dbAddress);
-
-//        QString textPort = QString("port: ") + dbPort;
-//        mainWindow->addText(textPort);
-        mainWindow->addText(QString("port: ") + dbPort);
-        mainWindow->addText(QString("login: ") + dbLogin);
-        mainWindow->addText(QString("password: ") + dbPassword);
+        logArgs("address: ", dbAddress);
+        logArgs("port: ", dbPort);
+        logArgs("login: ", dbLogin);
+        logArgs("password: ", dbPassword);
 
         dbConnection = PQsetdbLogin(
                     std::getenv("CHATAPP_DB_ADDRESS"),
@@ -34,11 +26,19 @@ PGconn* getDBConnection() {
                     std::getenv("CHATAPP_DB_USER"),
                     std::getenv("CHATAPP_DB_PASSWORD"));
 
+        ConnStatusType status = PQstatus(dbConnection);
+        logArgs("status: ", std::to_string(status));
+
+        if(status == ConnStatusType::CONNECTION_BAD) {  // TODO raise exception
+            logLine("DB connection status: CONNECTION_BAD");
+        }
+
 //        return dbConnection;
     }
     catch(std::exception& e) {
 //        coutWithEndl(e.what());
-        mainWindow->addText(QString(e.what()));
+//        mainWindow->addTextToCentralPanel(QString(e.what()));
+        logLine(QString(e.what()));
     }
 
     return dbConnection;

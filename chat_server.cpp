@@ -11,8 +11,8 @@ void ServerSession::do_read() {
     MainWindow* mainWindow = getMainWindowPtr();
 
 //    mainWindow->addText("do_read");
-    mainWindow->addText("do_read");
-    coutArgsWithSpaceSeparator("do_read");
+//    mainWindow->addTextToCentralPanel("do_read");
+    logLine("do_read");
 
     auto self(shared_from_this());
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
@@ -24,10 +24,10 @@ void ServerSession::do_read() {
                 std::string str(data_, length);
 
                 if(length > 0) {
-                    mainWindow->addText("Got: " + QString::fromStdString(str));
+                    mainWindow->addTextToCentralPanel("Got: " + QString::fromStdString(str));
                 }
 
-                coutArgsWithSpaceSeparator("Got:", str);
+                logArgs("Got:", str);
 
                 do_write(length);
             }
@@ -39,8 +39,8 @@ void ServerSession::do_write(std::size_t length) {
 //    MainWindow* mainWindow = MainWindow::instance();
     MainWindow* mainWindow = getMainWindowPtr();
 
-    mainWindow->addText("do_write");
-    coutArgsWithSpaceSeparator("do_write");
+//    mainWindow->addTextToCentralPanel("do_write");
+    logLine("do_write");
 
     auto self(shared_from_this());
     boost::asio::async_write(socket_, boost::asio::buffer(data_, length),

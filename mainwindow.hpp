@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include <QHBoxLayout>
 #include <QMainWindow>
+#include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QVBoxLayout>
 
@@ -17,8 +18,7 @@
 #include "widgets.hpp"
 
 
-MainWindow* getMainWindowPtr();
-
+class SocketInfo;
 class SocketInfoWidget;
 class TextEditWidget;
 
@@ -54,10 +54,17 @@ private:
     TextEditWidget* textEdit_;
 //    QPushButton* button_;
 
+    QWidget* rightPanel_;
     QVBoxLayout* rightPanelLayout_;
+    QPlainTextEdit* plainTextEdit_;
+    QPalette* plainTextEditPalette_;
 
-    void buildSockets();
+//    QPushButton* testPlainTextEditButton_;
+
+//    void buildSockets();
     void setLeftPanel();    
+
+//    void testMainWindowRightPanel();
 
 //    MainWindow(QWidget* parent = nullptr);
 //    MainWindow();
@@ -68,16 +75,20 @@ public:
     MainWindow();
 //    static MainWindow* instance();
 
+    void buildSocketInfoWidgets(std::vector<SocketInfo>*);
 //    void set(QString);
     void set();
-    void connectToDb();
+//    void connectToDb();
 //    int setClient(EchoClient*);
 //    EchoClient* getClient();
-    void addText(const QString&);
+    void addTextToCentralPanel(const QString&);
+    void addTextToRightPanel(const QString&);
 //    void addMessagesToView();
 //    void pushMessage(const QString&);
 //    void pushMessageAndAddText(const QString&);
 };
+
+MainWindow* getMainWindowPtr();
 
 //void addTextFunction(const QString&);
 

@@ -7,10 +7,12 @@
 #include "chat_client.hpp"
 #include "chat_server.hpp"
 #include "mainwindow.hpp"
+#include "manager.hpp"
 
 class ChatClient;
 class ChatServer;
 class MainWindow;
+class Manager;
 
 class ChatApp : public QApplication {
 
@@ -23,6 +25,7 @@ public:
     ChatServer* server_;
 
     MainWindow* mainWindow_;
+    Manager* manager_;
 
 //    ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {
 //        client_ = new ChatClient;
@@ -32,7 +35,7 @@ public:
     ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {};
     void set();
 
-    ~ChatApp() = default;
+    ~ChatApp();
 };
 
 ChatClient* getChatClientPtr();

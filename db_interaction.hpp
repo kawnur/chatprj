@@ -5,6 +5,7 @@
 #include <libpq-fe.h>
 #include <string>
 
+#include "logging.hpp"
 #include "mainwindow.hpp"
 #include "utils_cout.hpp"
 
