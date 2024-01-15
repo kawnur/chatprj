@@ -29,8 +29,6 @@ class MainWindow : public QMainWindow {
 private:
 //    static MainWindow* _instance;
 
-//    QString role_;
-
 //    std::queue<QString> messages_;
 
 //    EchoClient* client_;

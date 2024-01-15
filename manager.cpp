@@ -23,9 +23,9 @@ SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& p
 }
 
 void SocketInfo::print() {
-    logArgs("name: ", this->name_);
-    logArgs("ipaddress: ", this->ipaddress_);
-    logArgs("port: ", this->port_);
+    logArgs("name:", this->name_);
+    logArgs("ipaddress:", this->ipaddress_);
+    logArgs("port:", this->port_);
 }
 
 QString SocketInfo::getName() {
@@ -62,38 +62,46 @@ void Manager::buildSockets() {
     QString name, ipaddress, port;
 
     PGresult* result = getsSocketsInfo(dbConnection_);
+    std::stringstream ss;
+    ss << (void*)result;
+    logArgs("result:", ss.str());
+
+    if(result == nullptr) {
+//        this->sockets_.emplace_back("No socket info from DB...", "", "");
+        return;
+    }
 
     int ntuples = PQntuples(result);
-    logArgs("ntuples: ", std::to_string(ntuples));
+    logArgs("ntuples:", std::to_string(ntuples));
 
     int nfields = PQnfields(result);
-    logArgs("nfields: ", std::to_string(nfields));
+    logArgs("nfields:", std::to_string(nfields));
 
     for(int i = 0; i < ntuples; i++) {
         for(int j = 0; j < nfields; j++) {
             char* fname = PQfname(result, j);
             std::string fnameStr = (fname == nullptr)
                     ? "nullptr" : std::string(fname);
-            logArgs("fname: ", fnameStr);
+            logArgs("fname:", fnameStr);
 
             if(fnameStr == "name") {
                 name = PQgetvalue(result, i, j);
-                logArgs("value: ", name);
+                logArgs("value:", name);
             }
             else if(fnameStr == "ipaddress") {
                 ipaddress = PQgetvalue(result, i, j);
-                logArgs("value: ", ipaddress);
+                logArgs("value:", ipaddress);
             }
             else if(fnameStr == "port") {
                 port = PQgetvalue(result, i, j);
-                logArgs("value: ", port);
+                logArgs("value:", port);
             }
             else {
                 char* value = PQgetvalue(result, i, j);
                 auto logMark = (value == nullptr)
                         ? "nullptr" : std::string(value);
 
-                logArgs("ERROR: unknown field name: ", logMark);
+                logArgs("ERROR: unknown field name:", logMark);
                 break;
             }
 

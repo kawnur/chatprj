@@ -59,9 +59,13 @@ public:
     SocketInfoWidget(const SocketInfoWidget&);
     SocketInfoWidget(SocketInfoWidget&&) {};
     SocketInfoWidget(std::string&, std::string&, std::string&);
-    ~SocketInfoWidget() = default;
+    virtual ~SocketInfoWidget() = default;
 
     void print();
+    virtual bool isStub();
+
+protected:
+    SocketInfoWidget(const QString&);
 
 private:
     QString name_;
@@ -79,6 +83,17 @@ private:
 //    QPushButton* toggleIndicatorButton_;
 
     void set();
+};
+
+class SocketInfoStubWidget : public SocketInfoWidget {
+
+    Q_OBJECT
+
+public:
+    SocketInfoStubWidget() : SocketInfoWidget("No socket info from DB...") {};
+    ~SocketInfoStubWidget() = default;
+
+    bool isStub();
 };
 
 #endif // WIDGETS_HPP

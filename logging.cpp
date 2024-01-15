@@ -1,7 +1,15 @@
 #include "logging.hpp"
 
-template<> QString argForLogging(const std::string& str) {
-    return QString::fromStdString(str);
+template<> QString argForLogging<const std::string&>(const std::string& value) {
+    return QString::fromStdString(value);
+}
+
+QString argForLogging(const std::string& value) {
+    return QString::fromStdString(value);
+}
+
+QString argForLogging(const char* value) {
+    return QString(value);
 }
 
 void logLine(const QString& str) {

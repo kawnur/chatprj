@@ -6,34 +6,6 @@ MainWindow* getMainWindowPtr() {
     return app->mainWindow_;
 }
 
-//void MainWindow::buildSockets() {  // TODO move to manager
-//    MainWindow* mainWindow = getMainWindowPtr();
-
-//    PGconn* dbConnection = getDBConnection();
-
-//    ConnStatusType status = PQstatus(dbConnection);
-//    coutArgsWithSpaceSeparator("status:", status);
-//    QString statusQString = QString::fromStdString(std::to_string((int)status));
-//    logLine(QString("status: ") + statusQString);
-
-//    PGresult* result = getsSocketsInfo(dbConnection);
-
-//    std::vector<std::vector<QString>> data = {
-//        {"name1", "192.168.1.1", "7777"},
-//        {"name2", "192.168.1.2", "7778"},
-//        {"name3", "192.168.1.3", "7779"}
-//    };
-
-//    for(auto& i : data) {
-//        this->sockets_.emplace_back(i.at(0), i.at(1), i.at(2));
-//    }
-
-//    int j = 0;
-//    while(true) {
-//        logLine(std::to_string(j++));
-//    }
-//}
-
 void MainWindow::setLeftPanel() {}
 
 //void MainWindow::testMainWindowRightPanel() {
@@ -47,16 +19,6 @@ void MainWindow::setLeftPanel() {}
 ////        std::this_thread::sleep_for(std::chrono::milliseconds(200));
 //    }
 //}
-
-
-//void MainWindow::connectToDb() { // TODO move to manager
-//    this->buildSockets();
-
-//    for(auto& i : this->sockets_) {
-//        this->leftPanelLayout_->addWidget(&i);
-//    }
-//}
-
 
 //MainWindow* MainWindow::_instance = nullptr;
 
@@ -74,7 +36,14 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
-    for(auto& i : *socketsPtr) {
+    if(socketsPtr->size() == 0) {
+        SocketInfoStubWidget stub;
+        this->sockets_.push_back(stub);
+        logArgs("this->sockets_.size():", (int)this->sockets_.size());
+        return;
+    }
+
+    for(auto& i : *socketsPtr) {        
         this->sockets_.emplace_back(
                     i.getName(),
                     i.getIpaddress(),
@@ -84,11 +53,7 @@ void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
     }
 }
 
-//void MainWindow::set(QString role) {
 void MainWindow::set() {
-//    this->setWindowTitle(role);
-//    role_ = role;
-
     this->centralWidget_ = new QWidget(this);
     this->setCentralWidget(centralWidget_);
 
@@ -152,16 +117,6 @@ void MainWindow::set() {
     textEdit_ = new TextEditWidget(this);
     centralPanelLayout_->addWidget(textEdit_);
 
-//    AsioTest* test = AsioTest::instance();
-//    test->setRole(role_);
-//    test->runTestFunc(role_);
-
-//    this->messages_ = std::queue<QString>();
-
-//    button_ = new QPushButton("Run ASIO tests");
-//    connect(button_, &QPushButton::clicked, test, &AsioTest::runTest);
-//    centralPanelLayout_->addWidget(button_);
-
     centralWidgetLayout_->addWidget(centralPanel_);
 
     // right panel
@@ -210,7 +165,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 MainWindow::~MainWindow() {
-//    delete[] sockets_;
+    delete[] &sockets_;
 }
 
 void MainWindow::addTextToCentralPanel(const QString& text) {

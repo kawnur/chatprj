@@ -112,10 +112,16 @@ SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, st
     set();
 }
 
+SocketInfoWidget::SocketInfoWidget(const QString& name) : name_(name) {}
+
 void SocketInfoWidget::print() {
-    logArgs("name: ", this->name_);
-    logArgs("ipaddress: ", this->ipaddress_);
-    logArgs("port: ", this->port_);
+    logArgs("name:", this->name_);
+    logArgs("ipaddress:", this->ipaddress_);
+    logArgs("port:", this->port_);
+}
+
+bool SocketInfoWidget::isStub() {
+    return false;
 }
 
 void SocketInfoWidget::set() {
@@ -139,4 +145,8 @@ void SocketInfoWidget::set() {
 //    layout_->addWidget(toggleIndicatorButton_);
 
     // connect
+}
+
+bool SocketInfoStubWidget::isStub() {
+    return true;
 }

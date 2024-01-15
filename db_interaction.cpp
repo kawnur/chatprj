@@ -12,10 +12,10 @@ PGconn* getDBConnection() {
         QString dbLogin { std::getenv("CHATAPP_DB_USER") };
         QString dbPassword { std::getenv("CHATAPP_DB_PASSWORD") };
 
-        logArgs("address: ", dbAddress);
-        logArgs("port: ", dbPort);
-        logArgs("login: ", dbLogin);
-        logArgs("password: ", dbPassword);
+        logArgs("address:", dbAddress);
+        logArgs("port:", dbPort);
+        logArgs("login:", dbLogin);
+        logArgs("password:", dbPassword);
 
         dbConnection = PQsetdbLogin(
                     std::getenv("CHATAPP_DB_ADDRESS"),
@@ -28,6 +28,7 @@ PGconn* getDBConnection() {
 
         ConnStatusType status = PQstatus(dbConnection);
         logArgs("status: ", std::to_string(status));
+//        logArgs("status: ", status);
 
         if(status == ConnStatusType::CONNECTION_BAD) {  // TODO raise exception
             logLine("DB connection status: CONNECTION_BAD");
