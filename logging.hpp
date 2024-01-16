@@ -5,11 +5,17 @@
 #include <string>
 #include <type_traits>
 
-
 #include "mainwindow.hpp"
+#include "utils_cout.hpp"
 
 class MainWindow;
 MainWindow* getMainWindowPtr();
+
+template<typename T> QString argForLogging(T* const& value) {
+    std::stringstream ss;
+    ss << (void*)value;
+    return QString::fromStdString(ss.str());
+}
 
 template<
         typename T,
@@ -32,9 +38,12 @@ template<typename... Ts> void logArgs(Ts&&... args) {
     MainWindow* mainWindow = getMainWindowPtr();
     QString text;
 
+    text += QString("- ");
+
     ((text += (argForLogging(args) + QString(" "))), ...);
 
     mainWindow->addTextToRightPanel(text);
+    coutArgsWithSpaceSeparator(args...);
 }
 
 template<typename T> void logLine(const T& str) {

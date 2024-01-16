@@ -11,6 +11,18 @@ template<> int getSizeAsInt<std::string>(std::string& s) {
     return (int)s.size();
 }
 
+std::string argForCout(const QString& value) {
+    return value.toStdString();
+}
+
+std::string argForCout(const std::string& value) {
+    return value;
+}
+
+std::string argForCout(const char* value) {
+    return std::string(value);
+}
+
 void coutVector1(const std::vector<int>& v) {
     std::cout << std::endl;
 

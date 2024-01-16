@@ -8,6 +8,7 @@
 #include <QTextEdit>
 
 #include "mainwindow.hpp"
+#include "logging.hpp"
 
 
 class MainWindow;
@@ -46,26 +47,35 @@ private:
     QPalette* palette_;
 };
 
-class SocketInfoWidget : public QWidget {
+class SocketInfoBaseWidget : public QWidget {
 
     Q_OBJECT
 
 public:
-//    SocketInfo() = default;
-    SocketInfoWidget() {};
+    SocketInfoBaseWidget() = default;
+    SocketInfoBaseWidget(const SocketInfoBaseWidget&) {};
+    virtual ~SocketInfoBaseWidget() {};
+
+    virtual bool isStub() {};
+    virtual void set() {};
+};
+
+class SocketInfoWidget : public SocketInfoBaseWidget {
+
+    Q_OBJECT
+
+public:
+    SocketInfoWidget();
     SocketInfoWidget(QString&, QString&, QString&);
     SocketInfoWidget(QString&&, QString&&, QString&&);
 //    SocketInfo(const SocketInfo&) {};
     SocketInfoWidget(const SocketInfoWidget&);
     SocketInfoWidget(SocketInfoWidget&&) {};
     SocketInfoWidget(std::string&, std::string&, std::string&);
-    virtual ~SocketInfoWidget() = default;
+    ~SocketInfoWidget() {};
 
     void print();
-    virtual bool isStub();
-
-protected:
-    SocketInfoWidget(const QString&);
+    bool isStub() override;
 
 private:
     QString name_;
@@ -78,22 +88,30 @@ private:
     QLabel* nameLabel_;
     QLabel* ipaddressLabel_;
     QLabel* portLabel_;
-
     QPushButton* editButton_;
 //    QPushButton* toggleIndicatorButton_;
 
-    void set();
+    void set() override;
 };
 
-class SocketInfoStubWidget : public SocketInfoWidget {
+class SocketInfoStubWidget : public SocketInfoBaseWidget {
 
     Q_OBJECT
 
 public:
-    SocketInfoStubWidget() : SocketInfoWidget("No socket info from DB...") {};
-    ~SocketInfoStubWidget() = default;
+    SocketInfoStubWidget();
+    ~SocketInfoStubWidget() {};
 
-    bool isStub();
+    bool isStub() override;
+
+private:
+    QString mark_;
+
+    QHBoxLayout* layout_;
+
+    QLabel* markLabel_;
+
+    void set() override;
 };
 
 #endif // WIDGETS_HPP

@@ -55,16 +55,13 @@ void Manager::set() {
 
     MainWindow* mainWindow = getMainWindowPtr();
     mainWindow->buildSocketInfoWidgets(&this->sockets_);
-
 }
 
 void Manager::buildSockets() {
     QString name, ipaddress, port;
 
     PGresult* result = getsSocketsInfo(dbConnection_);
-    std::stringstream ss;
-    ss << (void*)result;
-    logArgs("result:", ss.str());
+    logArgs("result:", result);
 
     if(result == nullptr) {
 //        this->sockets_.emplace_back("No socket info from DB...", "", "");
@@ -72,10 +69,10 @@ void Manager::buildSockets() {
     }
 
     int ntuples = PQntuples(result);
-    logArgs("ntuples:", std::to_string(ntuples));
+    logArgs("ntuples:", ntuples);
 
     int nfields = PQnfields(result);
-    logArgs("nfields:", std::to_string(nfields));
+    logArgs("nfields:", nfields);
 
     for(int i = 0; i < ntuples; i++) {
         for(int j = 0; j < nfields; j++) {
@@ -104,9 +101,9 @@ void Manager::buildSockets() {
                 logArgs("ERROR: unknown field name:", logMark);
                 break;
             }
-
-            this->sockets_.emplace_back(name, ipaddress, port);
         }
+
+        this->sockets_.emplace_back(name, ipaddress, port);
     }
 }
 
@@ -117,6 +114,6 @@ void Manager::connectToDb() {
     logArgs("status: ", std::to_string(status));
 
     if(status == ConnStatusType::CONNECTION_BAD) {  // TODO raise exception
-        logLine("DB connection status: CONNECTION_BAD");
+        logArgs("DB connection status: CONNECTION_BAD");
     }
 }

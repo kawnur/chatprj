@@ -31,7 +31,7 @@ PGconn* getDBConnection() {
 //        logArgs("status: ", status);
 
         if(status == ConnStatusType::CONNECTION_BAD) {  // TODO raise exception
-            logLine("DB connection status: CONNECTION_BAD");
+            logArgs("DB connection status: CONNECTION_BAD");
         }
 
 //        return dbConnection;

@@ -13,7 +13,7 @@ void ChatApp::set() {
 
     mainWindow_ = new MainWindow;
     mainWindow_->set();
-//    mainWindow_->connectToDb();
+    mainWindow_->setLeftPanel();
 
     manager_ = new Manager;
     manager_->set();

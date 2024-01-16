@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
+#include <QString>
 #include <map>
 #include <set>
 #include <type_traits>
@@ -90,13 +91,30 @@ template<typename T> void coutWithoutInterval(T&& t) {
 	std::cout << t;
 }
 
+template<typename T> std::string argForCout(T* const& value) {
+    std::stringstream ss;
+    ss << (void*)value;
+    return ss.str();
+}
+
+template<typename T> std::string argForCout(const T& value) {
+    return std::to_string(value);
+}
+
+std::string argForCout(const QString&);
+std::string argForCout(const std::string&);
+std::string argForCout(const char*);
+
 template<typename... Ts> void coutArgsWithSeparator(char separator, Ts&&... args) {
 //	(std::cout << ... << args) << std::endl;
 //	auto l = [](auto& i){ std::cout << i << separator; }
 //	(l << ... << args) << std::endl;
 //	((std::cout << '\t')... << args) << std::endl;
 //	(l(args), ...);
-	((std::cout << args << separator), ...);
+
+//    ((std::cout << args << separator), ...);
+    ((std::cout << argForCout(args) << separator), ...);
+
 //	([&]{ std::cout << '\t' << i; }(), ...);
 //	(std::cout (<< '\t' <<) ... (<< '\t' <<) args) << std::endl;
 	endline(1);

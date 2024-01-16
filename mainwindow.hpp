@@ -19,7 +19,7 @@
 
 
 class SocketInfo;
-class SocketInfoWidget;
+class SocketInfoBaseWidget;
 class TextEditWidget;
 
 class MainWindow : public QMainWindow {
@@ -33,13 +33,14 @@ private:
 
 //    EchoClient* client_;
 
+// TODO rename panel child widgets according its functionality
+
     QWidget* centralWidget_;
     QHBoxLayout* centralWidgetLayout_;
 
     QWidget* leftPanel_;
     QVBoxLayout* leftPanelLayout_;
 //    QLineEdit* test_;
-    std::vector<SocketInfoWidget> sockets_;
 
     QWidget* centralPanel_;
     QVBoxLayout* centralPanelLayout_;
@@ -60,7 +61,8 @@ private:
 //    QPushButton* testPlainTextEditButton_;
 
 //    void buildSockets();
-    void setLeftPanel();    
+
+    void addStubWidgetToLeftPanel();
 
 //    void testMainWindowRightPanel();
 
@@ -76,6 +78,7 @@ public:
     void buildSocketInfoWidgets(std::vector<SocketInfo>*);
 //    void set(QString);
     void set();
+    void setLeftPanel();
 //    void connectToDb();
 //    int setClient(EchoClient*);
 //    EchoClient* getClient();

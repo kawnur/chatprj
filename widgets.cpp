@@ -82,6 +82,10 @@ void IndicatorWidget::toggle() {
     (this->isOn_ == true) ? this->setOff() : this->setOn();
 }
 
+SocketInfoWidget::SocketInfoWidget() {
+    logArgs("SocketInfoWidget()");
+}
+
 SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipaddress, QString& port) :
     name_(name), ipaddress_(ipaddress), port_(port) {
 
@@ -112,7 +116,23 @@ SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, st
     set();
 }
 
-SocketInfoWidget::SocketInfoWidget(const QString& name) : name_(name) {}
+//SocketInfoWidget::SocketInfoWidget(const QString& name) : name_(name) {
+////    logArgs("SocketInfoWidget(const QString& name)");
+
+//    set();
+
+//    IndicatorWidget* oldIndicator = indicator_;
+//    QPushButton* oldEditButton = editButton_;
+
+//    indicator_ = nullptr;
+//    editButton_ = nullptr;
+
+//    layout_->removeWidget(oldIndicator);
+//    layout_->removeWidget(oldEditButton);
+
+//    delete oldIndicator;
+//    delete oldEditButton;
+//}
 
 void SocketInfoWidget::print() {
     logArgs("name:", this->name_);
@@ -125,27 +145,44 @@ bool SocketInfoWidget::isStub() {
 }
 
 void SocketInfoWidget::set() {
-    layout_ = new QHBoxLayout(this);
-    indicator_ = new IndicatorWidget(this);
-    nameLabel_ = new QLabel(name_, this);
-    ipaddressLabel_ = new QLabel(ipaddress_, this);
-    portLabel_ = new QLabel(port_, this);
-    editButton_ = new QPushButton("Edit", this);
+    this->layout_ = new QHBoxLayout(this);
+    this->indicator_ = new IndicatorWidget(this);
+    this->nameLabel_ = new QLabel(this->name_, this);
+    this->ipaddressLabel_ = new QLabel(this->ipaddress_, this);
+    this->portLabel_ = new QLabel(this->port_, this);
+    this->editButton_ = new QPushButton("Edit", this);
 
 //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
 //    connect(
 //                toggleIndicatorButton_, &QPushButton::pressed,
 //                indicator_, &IndicatorWidget::toggle);
 
-    layout_->addWidget(indicator_);
-    layout_->addWidget(nameLabel_);
-    layout_->addWidget(ipaddressLabel_);
-    layout_->addWidget(portLabel_);
-    layout_->addWidget(editButton_);
+    this->layout_->addWidget(this->indicator_);
+    this->layout_->addWidget(this->nameLabel_);
+    this->layout_->addWidget(this->ipaddressLabel_);
+    this->layout_->addWidget(this->portLabel_);
+    this->layout_->addWidget(this->editButton_);
 //    layout_->addWidget(toggleIndicatorButton_);
 
     // connect
 }
+
+SocketInfoStubWidget::SocketInfoStubWidget() {
+    mark_ = "No socket info from DB...";
+
+    set();
+}
+
+void SocketInfoStubWidget::set() {
+    this->layout_ = new QHBoxLayout(this);
+    this->markLabel_ = new QLabel(this->mark_, this);
+
+    this->layout_->addWidget(this->markLabel_);
+}
+
+//SocketInfoStubWidget::~SocketInfoStubWidget() {
+//    logArgs("~SocketInfoStubWidget called");
+//}
 
 bool SocketInfoStubWidget::isStub() {
     return true;

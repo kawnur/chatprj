@@ -6,7 +6,30 @@ MainWindow* getMainWindowPtr() {
     return app->mainWindow_;
 }
 
-void MainWindow::setLeftPanel() {}
+void MainWindow::setLeftPanel() {
+    QList<SocketInfoBaseWidget*> leftPanelChildren =
+            this->leftPanel_->findChildren<SocketInfoBaseWidget*>(
+                Qt::FindDirectChildrenOnly);
+
+    if(leftPanelChildren.size() == 0) {
+        this->addStubWidgetToLeftPanel();
+    }
+    else {
+        logArgs(
+                    "WARNING: leftPanelChildren.size() != 0 "
+                    "at MainWindow::setLeftPanel()");
+    }
+}
+
+void MainWindow::addStubWidgetToLeftPanel() {
+    SocketInfoStubWidget* stub = new SocketInfoStubWidget;
+
+    SocketInfoBaseWidget* baseObjectCastPtr =
+            dynamic_cast<SocketInfoBaseWidget*>(stub);
+
+    baseObjectCastPtr->setParent(this->leftPanel_);
+    this->leftPanelLayout_->addWidget(baseObjectCastPtr);
+}
 
 //void MainWindow::testMainWindowRightPanel() {
 //    int j = 0;
@@ -36,20 +59,57 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
-    if(socketsPtr->size() == 0) {
-        SocketInfoStubWidget stub;
-        this->sockets_.push_back(stub);
-        logArgs("this->sockets_.size():", (int)this->sockets_.size());
-        return;
+    QList<SocketInfoBaseWidget*> leftPanelChildren =
+            this->leftPanel_->findChildren<SocketInfoBaseWidget*>(
+                Qt::FindDirectChildrenOnly);
+
+    auto socketsSize = socketsPtr->size();
+    auto childrenSize = leftPanelChildren.size();
+
+    logArgs("socketsSize:", socketsSize);
+    logArgs("childrenSize:", childrenSize);
+
+    for(auto& i : *socketsPtr) {
+        i.print();
     }
 
-    for(auto& i : *socketsPtr) {        
-        this->sockets_.emplace_back(
-                    i.getName(),
-                    i.getIpaddress(),
-                    i.getPort());
+    for(auto& child : leftPanelChildren) {
+        logArgs("child:", child);
 
-        this->leftPanelLayout_->addWidget(&this->sockets_.back());
+        if(child->isStub()) {
+            logArgs("child->isStub() == true");
+        }
+    }
+
+    if(socketsSize == 0) {
+        if(childrenSize == 0) {
+            logArgs("WARNING: strange case, empty sockets panel");
+
+            this->addStubWidgetToLeftPanel();
+        }
+    }
+    else {
+        if(childrenSize != 0) {
+            // TODO check if sockets already are children
+
+            for(auto& child : leftPanelChildren) {
+                if(child->isStub()) {
+                    this->leftPanelLayout_->removeWidget(child);
+                    delete child;
+                }
+            }
+
+            for(auto& i : *socketsPtr) {
+                SocketInfoWidget* widget = new SocketInfoWidget(
+                            i.getName(), i.getIpaddress(), i.getPort());
+
+                SocketInfoBaseWidget* widgetBase =
+                        dynamic_cast<SocketInfoBaseWidget*>(widget);
+
+                widgetBase->setParent(this->leftPanel_);
+                this->leftPanelLayout_->addWidget(widgetBase);
+            }
+        }
     }
 }
 
@@ -75,9 +135,7 @@ void MainWindow::set() {
 //    this->test_ = new QLineEdit;
 //    this->leftPanelLayout_->addWidget(this->test_);
 
-    this->sockets_ = std::vector<SocketInfoWidget>();
-
-    this->setLeftPanel();
+    this->addStubWidgetToLeftPanel();
 
     this->centralWidgetLayout_->addWidget(leftPanel_);
 
@@ -149,6 +207,9 @@ void MainWindow::set() {
 //    rightPanelLayout_->addWidget(testPlainTextEditButton_);
 
     centralWidgetLayout_->addWidget(rightPanel_);
+
+    // logging enabled, actions
+//    this->setLeftPanel();
 }
 
 //int MainWindow::setClient(EchoClient* client) {
@@ -165,7 +226,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 MainWindow::~MainWindow() {
-    delete[] &sockets_;
+//    delete[] &sockets_;
 }
 
 void MainWindow::addTextToCentralPanel(const QString& text) {
