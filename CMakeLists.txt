@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
     .env
+    alternative_realisations
     application.cpp
     application.hpp
     async_tcp_echo_server.cpp  # tutorial boost asio
@@ -27,6 +28,7 @@ set(PROJECT_SOURCES
     sql_scripts/sql_script_1_configure_db.sql
     sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
     sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
+    sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql
     Dockerfile
     icmp_header.hpp  # tutorial boost asio
     ipv4_header.hpp  # tutorial boost asio
@@ -80,6 +82,7 @@ target_link_libraries(chatapp PRIVATE pq)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db)
 
 file(COPY_FILE
     ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
@@ -90,6 +93,10 @@ file(COPY_FILE
     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_1_configure_db.sql)
 
 file(COPY_FILE
+    ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
+    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db/sql_script_1_configure_db.sql)
+
+file(COPY_FILE
     ${PROJECT_SOURCE_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql)
 
@@ -97,3 +104,6 @@ file(COPY_FILE
     ${PROJECT_SOURCE_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql)
 
+file(COPY_FILE
+    ${PROJECT_SOURCE_DIR}/sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql
+    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql)

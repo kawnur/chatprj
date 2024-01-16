@@ -66,6 +66,39 @@ services:
               source: $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
               target: /tmp/$WAYLAND_DISPLAY
 
+    client3:
+    #    command: "sleep infinity"
+    #        command: ["/my/app/chatapp", "--app"]
+        command: /my/app/chatapp --app
+        environment:
+            XDG_SESSION_TYPE: wayland
+            XDG_RUNTIME_DIR: /tmp
+            WAYLAND_DISPLAY: $WAYLAND_DISPLAY
+            QT_QPA_PLATFORM: wayland
+            CHATAPP_DB_ADDRESS: $CHATAPP_CLIENT3_DB_IPV4_ADDRESS
+            CHATAPP_DB_PORT: $CHATAPP_CLIENT3_DB_PORT_INNER
+            CHATAPP_DB_USER: $CHATAPP_DB_POSTGRES_USER
+            CHATAPP_DB_PASSWORD: $CHATAPP_DB_POSTGRES_PASSWORD
+            CLIENT_NAME: client3
+        image: chatprj
+        networks:
+            my-bridge-network:
+    #                ipv4_address: 172.21.0.3
+                ipv4_address: $CHATAPP_CLIENT3_IPV4_ADDRESS
+        expose:
+    #            - "5002"
+            - $CHATAPP_CLIENT_PORT
+        volumes:
+            - type: bind
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              target: /my/app
+            - type: bind
+              source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
+              target: /my/cmake
+            - type: bind
+              source: $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+              target: /tmp/$WAYLAND_DISPLAY
+
     client1_db:
         image: chatprj_db
         networks:
@@ -114,6 +147,31 @@ services:
               source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo/sql_scripts/client2_db
               target: /docker-entrypoint-initdb.d
 
+    client3_db:
+        image: chatprj_db
+        networks:
+            my-bridge-network:
+    #                ipv4_address: 172.21.0.5
+                ipv4_address: $CHATAPP_CLIENT3_DB_IPV4_ADDRESS
+        environment:
+    #            - POSTGRES_USER=postgres
+            - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
+    #            - POSTGRES_PASSWORD=postgres123
+            - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
+    #        ports:
+    #            - "5434:5432"
+    #            - $CHATAPP_CLIENT2_DB_PORT_OUTER:$CHATAPP_CLIENT2_DB_PORT_INNER
+        volumes:
+            - chatapp_volume3:/var/lib/postgresql/data
+            - type: bind
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              target: /my/app
+              # db setting scripts, run only when no db exists, to run scripts recreate docker volumes
+            - type: bind
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo/sql_scripts/client3_db
+              target: /docker-entrypoint-initdb.d
+
+
 networks:
     my-bridge-network:
         external: true
@@ -126,3 +184,4 @@ networks:
 volumes:
     chatapp_volume1:
     chatapp_volume2:
+    chatapp_volume3:

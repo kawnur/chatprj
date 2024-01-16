@@ -28,12 +28,10 @@ class MainWindow : public QMainWindow {
 
 private:
 //    static MainWindow* _instance;
-
 //    std::queue<QString> messages_;
-
 //    EchoClient* client_;
 
-// TODO rename panel child widgets according its functionality
+    // TODO rename panel child widgets according its functionality
 
     QWidget* centralWidget_;
     QHBoxLayout* centralWidgetLayout_;
@@ -44,19 +42,23 @@ private:
 
     QWidget* centralPanel_;
     QVBoxLayout* centralPanelLayout_;
-    QGraphicsScene* graphicsScene_;
-    QGraphicsView* graphicsView_;
-    QRectF* rect_;
-    QGraphicsSimpleTextItem* textItem_;
-    int linesCount_;
-    QFont* font_;
+//    QGraphicsScene* graphicsScene_;
+//    QGraphicsView* graphicsView_;
+//    QRectF* rect_;
+//    QGraphicsSimpleTextItem* textItem_;
+//    int linesCount_;
+//    QFont* font_;
+
+    QPlainTextEdit* chatHistoryWidget_;
+    QPalette* chatHistoryWidgetPalette_;
+
     TextEditWidget* textEdit_;
 //    QPushButton* button_;
 
     QWidget* rightPanel_;
     QVBoxLayout* rightPanelLayout_;
-    QPlainTextEdit* plainTextEdit_;
-    QPalette* plainTextEditPalette_;
+    QPlainTextEdit* appLogWidget_;
+    QPalette* appLogWidgetPalette_;
 
 //    QPushButton* testPlainTextEditButton_;
 
@@ -79,11 +81,10 @@ public:
 //    void set(QString);
     void set();
     void setLeftPanel();
-//    void connectToDb();
 //    int setClient(EchoClient*);
 //    EchoClient* getClient();
-    void addTextToCentralPanel(const QString&);
-    void addTextToRightPanel(const QString&);
+    void addTextToChatHistoryWidget(const QString&);
+    void addTextToAppLogWidget(const QString&);
 //    void addMessagesToView();
 //    void pushMessage(const QString&);
 //    void pushMessageAndAddText(const QString&);

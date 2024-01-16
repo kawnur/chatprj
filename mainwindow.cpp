@@ -147,30 +147,17 @@ void MainWindow::set() {
     centralPanelLayout_->setContentsMargins(0, 0, 0, 0);
     centralPanel_->setLayout(centralPanelLayout_);
 
-    graphicsScene_ = new QGraphicsScene(this);
-    textItem_ = graphicsScene_->addSimpleText("");
-    font_ = new QFont;
-    font_->setPixelSize(15);
-    textItem_->setFont(*font_);
+    chatHistoryWidget_ = new QPlainTextEdit(this);
+    chatHistoryWidget_->setReadOnly(true);
+    chatHistoryWidget_->setPlainText("");
 
-    linesCount_ = 0;
+    chatHistoryWidgetPalette_ = new QPalette();
+    chatHistoryWidgetPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
+    chatHistoryWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
+    chatHistoryWidget_->setAutoFillBackground(true);
+    chatHistoryWidget_->setPalette(*chatHistoryWidgetPalette_);
 
-    graphicsView_ = new QGraphicsView(graphicsScene_);
-//    graphicsView_->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    graphicsView_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    graphicsView_->setBackgroundBrush(QBrush(QColor(QColorConstants::LightGray)));
-//    graphicsView_->setResizeAnchor(QGraphicsView::AnchorViewCenter);
-    graphicsView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    graphicsView_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-
-    rect_ = new QRectF();
-    rect_->setWidth(500);
-    rect_->setHeight(10000);
-    graphicsScene_->setSceneRect(*rect_);
-//    graphicsView_->setSceneRect(*rect_);
-    centralPanelLayout_->addWidget(graphicsView_);
-
-    graphicsView_->viewport()->resize(100, 100);
+    centralPanelLayout_->addWidget(chatHistoryWidget_);
 
     textEdit_ = new TextEditWidget(this);
     centralPanelLayout_->addWidget(textEdit_);
@@ -186,17 +173,17 @@ void MainWindow::set() {
     rightPanelLayout_->setContentsMargins(0, 0, 0, 0);
     rightPanel_->setLayout(rightPanelLayout_);
 
-    plainTextEdit_ = new QPlainTextEdit(this);
-    plainTextEdit_->setReadOnly(true);
-    plainTextEdit_->setPlainText("");
+    appLogWidget_ = new QPlainTextEdit(this);
+    appLogWidget_->setReadOnly(true);
+    appLogWidget_->setPlainText("");
 
-    plainTextEditPalette_ = new QPalette();
-    plainTextEditPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
-    plainTextEditPalette_->setColor(QPalette::Text, QColorConstants::Black);
-    plainTextEdit_->setAutoFillBackground(true);
-    plainTextEdit_->setPalette(*plainTextEditPalette_);
+    appLogWidgetPalette_ = new QPalette();
+    appLogWidgetPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
+    appLogWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
+    appLogWidget_->setAutoFillBackground(true);
+    appLogWidget_->setPalette(*appLogWidgetPalette_);
 
-    rightPanelLayout_->addWidget(plainTextEdit_);
+    rightPanelLayout_->addWidget(appLogWidget_);
 
 //    testPlainTextEditButton_ = new QPushButton("testPlainTextEditButton");
 //    connect(
@@ -209,7 +196,7 @@ void MainWindow::set() {
     centralWidgetLayout_->addWidget(rightPanel_);
 
     // logging enabled, actions
-//    this->setLeftPanel();
+    this->setLeftPanel();
 }
 
 //int MainWindow::setClient(EchoClient* client) {
@@ -225,142 +212,15 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
 }
 
-MainWindow::~MainWindow() {
-//    delete[] &sockets_;
-}
+MainWindow::~MainWindow() {}
 
-void MainWindow::addTextToCentralPanel(const QString& text) {
-    auto currentText = this->textItem_->text();
-
-    logArgs(
-                "currentText:",
-                currentText.replace("\n", "NL").toStdString(),
-                ", text:",
-                text.toStdString());
-
-    QString newText;
-
-    if(currentText == "") {
-        newText = text;
-    }
-    else {
-        newText = this->textItem_->text() + QString("\n") + text;
-//        newText = currentText + QString("\n") + text;
-    }
-
-    ++linesCount_;
-
-    this->textItem_->setText(newText);
-
-    QFontInfo fontInfo = QFontInfo(this->textItem_->font());
-    int fontInfoPixelSize = fontInfo.pixelSize();
-
-    QFontMetrics fontMetrics = QFontMetrics(this->textItem_->font());
-    QRect boundingRect = fontMetrics.boundingRect(newText);
-    int boundingRectHeight = boundingRect.height();
-
-    auto textHeight = boundingRectHeight * linesCount_;
-
-//    coutArgsWithSpaceSeparator("fontInfoPixelSize:", fontInfoPixelSize);
-//    coutArgsWithSpaceSeparator("boundingRectHeight:", boundingRectHeight);
-//    coutArgsWithSpaceSeparator("font pixelSize:", this->textItem_->font().pixelSize());
-//    coutArgsWithSpaceSeparator("font pointSize:", this->textItem_->font().pointSize());
-
-//    coutArgsWithSpaceSeparator("rect topLeft x:", this->rect_->topLeft().x());
-//    coutArgsWithSpaceSeparator("rect topLeft y:", this->rect_->topLeft().y());
-//    coutArgsWithSpaceSeparator("rect bottomRight x:", this->rect_->bottomRight().x());
-//    coutArgsWithSpaceSeparator("rect bottomRight y:", this->rect_->bottomRight().y());
-//    coutArgsWithSpaceSeparator("rect width:", this->rect_->width());
-//    coutArgsWithSpaceSeparator("rect height:", this->rect_->height());
-
-//    coutArgsWithSpaceSeparator("textHeight:", textHeight);
-
-    auto viewportWidth = this->graphicsView_->viewport()->width();
-    auto viewportHeight = this->graphicsView_->viewport()->height();
-
-//    coutArgsWithSpaceSeparator("viewportWidth:", viewportWidth);
-//    coutArgsWithSpaceSeparator("viewportHeight:", viewportHeight);
-
-    auto verticalScrollBarWidth = this->graphicsView_->verticalScrollBar()->width();
-    auto verticalScrollBarHeight = this->graphicsView_->verticalScrollBar()->height();
-    auto horizontalScrollBarWidth = this->graphicsView_->horizontalScrollBar()->width();
-    auto horizontalScrollBarHeight = this->graphicsView_->horizontalScrollBar()->height();
-
-//    coutArgsWithSpaceSeparator("verticalScrollBarWidth:", verticalScrollBarWidth);
-//    coutArgsWithSpaceSeparator("verticalScrollBarHeight:", verticalScrollBarHeight);
-//    coutArgsWithSpaceSeparator("horizontalScrollBarWidth:", horizontalScrollBarWidth);
-//    coutArgsWithSpaceSeparator("horizontalScrollBarHeight:", horizontalScrollBarHeight);
-
-//    if(textHeight > viewportHeight) {
-    if(textHeight > this->rect_->height()) {
-        this->rect_->setHeight(textHeight);
-
-//        this->graphicsView_->viewport()->resize(viewportWidth, textHeight);
-
-//        this->graphicsView_->verticalScrollBar()->setPageStep(textHeight);
-//        this->graphicsView_->horizontalScrollBar()->setPageStep(viewportWidth);
-
-//        this->graphicsView_->verticalScrollBar()->setRange(0, textHeight - viewportHeight);
-//        this->graphicsView_->horizontalScrollBar()->setRange(0, viewportWidth);
-
-//        int hvalue = this->graphicsView_->horizontalScrollBar()->value();
-//        int vvalue = this->graphicsView_->verticalScrollBar()->value();
-//        QPoint topLeft = this->graphicsView_->viewport()->rect().topLeft();
-
-//        this->graphicsView_->viewport()->move(topLeft.x() - hvalue, topLeft.y() - vvalue);
-//        this->graphicsView_->viewport()->move(0, (-1) * boundingRectHeight);
-    }
-
-//    QApplication::processEvents();
-
-    this->graphicsView_->ensureVisible(
-                0,
-//                textHeight - boundingRectHeight + horizontalScrollBarHeight,
-                textHeight + linesCount_,
-//                this->rect_->height() + linesCount_,
-//                this->rect_->width(),
-                10,
-                boundingRectHeight,
-                0,
-                0);
-
-//    this->graphicsView_->setSceneRect(
-//                0,
-//                textSize - fontSize,
-//                10,
-//                10);
-
-//    coutArgsWithSpaceSeparator("horizontalScrollBarPolicy:", this->graphicsView_->horizontalScrollBarPolicy());
-//    coutArgsWithSpaceSeparator("verticalScrollBarPolicy:", this->graphicsView_->verticalScrollBarPolicy());
-
+void MainWindow::addTextToChatHistoryWidget(const QString& text) {
+    this->chatHistoryWidget_->appendPlainText(text);
     QApplication::processEvents();
 }
 
-void MainWindow::addTextToRightPanel(const QString& text) {
-//    coutWithEndl("addTextToRightPanel");
-
-//    auto currentText = this->plainTextEdit_->toPlainText();
-
-//    coutArgsWithSpaceSeparator(
-//                "currentText:",
-//                currentText.replace("\n", "NL").toStdString(),
-//                ", text:",
-//                text.toStdString());
-
-//    QString newText;
-
-//    if(currentText == "") {
-//        newText = text;
-//    }
-//    else {
-//        newText = currentText + QString("\n") + text;
-//    }
-
-//    this->plainTextEdit_->setPlainText(newText);
-
-    this->plainTextEdit_->appendPlainText(text);
-//    this->plainTextEdit_->show();
-
+void MainWindow::addTextToAppLogWidget(const QString& text) {
+    this->appLogWidget_->appendPlainText(text);
     QApplication::processEvents();
 }
 

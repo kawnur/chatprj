@@ -24,7 +24,7 @@ void ServerSession::do_read() {
                 std::string str(data_, length);
 
                 if(length > 0) {
-                    mainWindow->addTextToCentralPanel("Got: " + QString::fromStdString(str));
+                    mainWindow->addTextToChatHistoryWidget("Got: " + QString::fromStdString(str));
                 }
 
                 logArgs("Got:", str);

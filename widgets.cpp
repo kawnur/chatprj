@@ -21,7 +21,7 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event) {
 
             auto text = this->toPlainText();
 
-            mainWindow->addTextToCentralPanel(text);
+            mainWindow->addTextToChatHistoryWidget(text);
             this->setText("");
 
 //            auto client = mainWindow->getClient();

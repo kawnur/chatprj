@@ -42,13 +42,13 @@ template<typename... Ts> void logArgs(Ts&&... args) {
 
     ((text += (argForLogging(args) + QString(" "))), ...);
 
-    mainWindow->addTextToRightPanel(text);
+    mainWindow->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(args...);
 }
 
 template<typename T> void logLine(const T& str) {
     MainWindow* mainWindow = getMainWindowPtr();
-    mainWindow->addTextToRightPanel(QString(str));
+    mainWindow->addTextToAppLogWidget(QString(str));
 }
 
 void logLine(const QString&);
