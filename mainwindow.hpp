@@ -20,6 +20,7 @@
 
 class SocketInfo;
 class SocketInfoBaseWidget;
+class SocketInfoWidget;
 class TextEditWidget;
 
 class MainWindow : public QMainWindow {
@@ -49,6 +50,7 @@ private:
 //    int linesCount_;
 //    QFont* font_;
 
+    QLabel* companion_;
     QPlainTextEdit* chatHistoryWidget_;
     QPalette* chatHistoryWidgetPalette_;
 
@@ -65,22 +67,29 @@ private:
 //    void buildSockets();
 
     void addStubWidgetToLeftPanel();
+    void addSocketInfoWidgetToLeftPanel(SocketInfo*);
 
 //    void testMainWindowRightPanel();
+    void addTestSocketInfoWidgetToLeftPanel();
 
 //    MainWindow(QWidget* parent = nullptr);
 //    MainWindow();
-    void closeEvent(QCloseEvent*);
+    void closeEvent(QCloseEvent*) override;
     virtual ~MainWindow();
+
+    void keyPressEvent(QKeyEvent*) override;
 
 public:
     MainWindow();
 //    static MainWindow* instance();
 
+    SocketInfoWidget* selectedSocketInfoWidget_;
+
     void buildSocketInfoWidgets(std::vector<SocketInfo>*);
 //    void set(QString);
     void set();
     void setLeftPanel();
+    void setCompanion(QString&);
 //    int setClient(EchoClient*);
 //    EchoClient* getClient();
     void addTextToChatHistoryWidget(const QString&);

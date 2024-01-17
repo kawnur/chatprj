@@ -21,6 +21,11 @@ void MainWindow::setLeftPanel() {
     }
 }
 
+void MainWindow::setCompanion(QString& name) {
+    this->companion_->setText(name);
+    this->companion_->show();
+}
+
 void MainWindow::addStubWidgetToLeftPanel() {
     SocketInfoStubWidget* stub = new SocketInfoStubWidget;
 
@@ -29,6 +34,17 @@ void MainWindow::addStubWidgetToLeftPanel() {
 
     baseObjectCastPtr->setParent(this->leftPanel_);
     this->leftPanelLayout_->addWidget(baseObjectCastPtr);
+}
+
+void MainWindow::addSocketInfoWidgetToLeftPanel(SocketInfo* info) {
+    SocketInfoWidget* widget = new SocketInfoWidget(
+                info->getName(), info->getIpaddress(), info->getPort());
+
+    SocketInfoBaseWidget* widgetBase =
+            dynamic_cast<SocketInfoBaseWidget*>(widget);
+
+    widgetBase->setParent(this->leftPanel_);
+    this->leftPanelLayout_->addWidget(widgetBase);
 }
 
 //void MainWindow::testMainWindowRightPanel() {
@@ -42,6 +58,14 @@ void MainWindow::addStubWidgetToLeftPanel() {
 ////        std::this_thread::sleep_for(std::chrono::milliseconds(200));
 //    }
 //}
+
+void MainWindow::addTestSocketInfoWidgetToLeftPanel() {
+    SocketInfo* test1 = new SocketInfo("test1", "test1", "test1");
+    SocketInfo* test2 = new SocketInfo("test2", "test2", "test2");
+
+    this->addSocketInfoWidgetToLeftPanel(test1);
+    this->addSocketInfoWidgetToLeftPanel(test2);
+}
 
 //MainWindow* MainWindow::_instance = nullptr;
 
@@ -99,15 +123,16 @@ void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
                 }
             }
 
-            for(auto& i : *socketsPtr) {
-                SocketInfoWidget* widget = new SocketInfoWidget(
-                            i.getName(), i.getIpaddress(), i.getPort());
+            for(auto& i : *socketsPtr) {                
+//                SocketInfoWidget* widget = new SocketInfoWidget(
+//                            i.getName(), i.getIpaddress(), i.getPort());
 
-                SocketInfoBaseWidget* widgetBase =
-                        dynamic_cast<SocketInfoBaseWidget*>(widget);
+//                SocketInfoBaseWidget* widgetBase =
+//                        dynamic_cast<SocketInfoBaseWidget*>(widget);
 
-                widgetBase->setParent(this->leftPanel_);
-                this->leftPanelLayout_->addWidget(widgetBase);
+//                widgetBase->setParent(this->leftPanel_);
+//                this->leftPanelLayout_->addWidget(widgetBase);
+                this->addSocketInfoWidgetToLeftPanel(&i);
             }
         }
     }
@@ -146,6 +171,12 @@ void MainWindow::set() {
     centralPanelLayout_->setSpacing(0);
     centralPanelLayout_->setContentsMargins(0, 0, 0, 0);
     centralPanel_->setLayout(centralPanelLayout_);
+
+//    this->companion_ = nullptr;
+    this->companion_ = new QLabel("", this);
+    this->companion_->hide();
+
+    centralPanelLayout_->addWidget(this->companion_);
 
     chatHistoryWidget_ = new QPlainTextEdit(this);
     chatHistoryWidget_->setReadOnly(true);
@@ -195,8 +226,11 @@ void MainWindow::set() {
 
     centralWidgetLayout_->addWidget(rightPanel_);
 
+    selectedSocketInfoWidget_ = nullptr;
+
     // logging enabled, actions
     this->setLeftPanel();
+//    this->addTestSocketInfoWidgetToLeftPanel();
 }
 
 //int MainWindow::setClient(EchoClient* client) {
@@ -222,6 +256,20 @@ void MainWindow::addTextToChatHistoryWidget(const QString& text) {
 void MainWindow::addTextToAppLogWidget(const QString& text) {
     this->appLogWidget_->appendPlainText(text);
     QApplication::processEvents();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event) {
+    if(event->key() == Qt::Key_Escape) {
+        if(this->selectedSocketInfoWidget_ != nullptr) {
+            this->selectedSocketInfoWidget_->unselect();
+        }
+
+        this->selectedSocketInfoWidget_ = nullptr;
+
+        QString emptyName { "" };
+        this->setCompanion(emptyName);
+        this->companion_->hide();
+    }
 }
 
 //void MainWindow::addMessagesToView() {

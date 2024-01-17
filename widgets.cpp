@@ -145,6 +145,13 @@ bool SocketInfoWidget::isStub() {
 }
 
 void SocketInfoWidget::set() {
+    this->selectedColor_ = QColor(QColorConstants::DarkGray);
+    this->unselectedColor_ = QColor(QColorConstants::Gray);
+    this->palette_ = new QPalette();
+    this->palette_->setColor(QPalette::Window, this->unselectedColor_);
+    this->setAutoFillBackground(true);
+    this->setPalette(*palette_);
+
     this->layout_ = new QHBoxLayout(this);
     this->indicator_ = new IndicatorWidget(this);
     this->nameLabel_ = new QLabel(this->name_, this);
@@ -166,6 +173,38 @@ void SocketInfoWidget::set() {
 
     // connect
 }
+
+void SocketInfoWidget::changeColor(QColor& color) {
+    this->palette_ = new QPalette();  // TODO leak
+    this->palette_->setColor(QPalette::Window, color);
+
+    this->setAutoFillBackground(true);
+    this->setPalette(*this->palette_);
+}
+
+void SocketInfoWidget::select() {
+    this->changeColor(this->selectedColor_);
+}
+
+void SocketInfoWidget::unselect() {
+    this->changeColor(this->unselectedColor_);
+}
+
+void SocketInfoWidget::mousePressEvent(QMouseEvent* event) {
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    auto selected = mainWindow->selectedSocketInfoWidget_;
+
+    if(selected != nullptr) {
+        mainWindow->selectedSocketInfoWidget_->unselect();
+    }
+
+    mainWindow->selectedSocketInfoWidget_ = this;
+    this->select();
+    mainWindow->setCompanion(this->name_);
+}
+
+void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
 
 SocketInfoStubWidget::SocketInfoStubWidget() {
     mark_ = "No socket info from DB...";

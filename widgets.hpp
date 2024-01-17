@@ -77,10 +77,16 @@ public:
     void print();
     bool isStub() override;
 
+    void unselect();
+
 private:
     QString name_;
     QString ipaddress_;
     QString port_;
+
+    QColor selectedColor_;
+    QColor unselectedColor_;
+    QPalette* palette_;
 
     QHBoxLayout* layout_;
 
@@ -92,6 +98,12 @@ private:
 //    QPushButton* toggleIndicatorButton_;
 
     void set() override;
+
+    void changeColor(QColor&);
+    void select();
+
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
 };
 
 class SocketInfoStubWidget : public SocketInfoBaseWidget {
