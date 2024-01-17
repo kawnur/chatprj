@@ -4,6 +4,8 @@ services:
     #    command: "sleep infinity"
 #        command: ["/my/app/chatapp", "--app"]
         command: /my/app/chatapp --app
+        depends_on:
+            - client1_db
         environment:
             XDG_SESSION_TYPE: wayland
             XDG_RUNTIME_DIR: /tmp
@@ -37,6 +39,8 @@ services:
     #    command: "sleep infinity"
 #        command: ["/my/app/chatapp", "--app"]
         command: /my/app/chatapp --app
+        depends_on:
+            - client2_db
         environment:
             XDG_SESSION_TYPE: wayland
             XDG_RUNTIME_DIR: /tmp
@@ -70,6 +74,8 @@ services:
     #    command: "sleep infinity"
     #        command: ["/my/app/chatapp", "--app"]
         command: /my/app/chatapp --app
+        depends_on:
+            - client3_db
         environment:
             XDG_SESSION_TYPE: wayland
             XDG_RUNTIME_DIR: /tmp

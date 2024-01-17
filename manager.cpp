@@ -60,7 +60,7 @@ void Manager::set() {
 void Manager::buildSockets() {
     QString name, ipaddress, port;
 
-    PGresult* result = getsSocketsInfo(dbConnection_);
+    PGresult* result = getSocketsInfo(dbConnection_);
     logArgs("result:", result);
 
     if(result == nullptr) {

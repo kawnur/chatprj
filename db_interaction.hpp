@@ -11,6 +11,7 @@
 
 
 PGconn* getDBConnection();
-PGresult* getsSocketsInfo(PGconn*);
+PGresult* getSocketsInfo(PGconn*);
+PGresult* getMessages(PGconn*, const QString&);
 
 #endif // DB_INTERACTION_HPP

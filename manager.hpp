@@ -26,6 +26,29 @@ private:
     QString port_;
 };
 
+class Message {
+
+public:
+    Message();
+    ~Message() = default;
+
+private:
+    QString text_;
+};
+
+class Companion {
+public:
+    Companion();
+    ~Companion() = default;
+
+private:
+    SocketInfo* socketInfo_;
+    QString* inputBuffer_;
+
+    std::vector<Message> messages_;
+
+};
+
 class Manager : public QObject{
 public:
     Manager();

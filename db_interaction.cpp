@@ -45,8 +45,21 @@ PGconn* getDBConnection() {
     return dbConnection;
 }
 
-PGresult* getsSocketsInfo(PGconn* dbConnection) {
+PGresult* getSocketsInfo(PGconn* dbConnection) {
     const char* command = "SELECT name, ipaddress, port FROM sockets";
+    PGresult* result = PQexec(dbConnection, command);
+    return result;
+}
+
+PGresult* getMessages(PGconn* dbConnection, const QString& name) {
+    char* command =
+            "SELECT time, message, issent FROM sockets "
+            "WHERE name = ";
+    const char* nameChar = qPrintable(name);
+    std::strcat(command, nameChar);
+
+    logArgs(command);
+
     PGresult* result = PQexec(dbConnection, command);
     return result;
 }
