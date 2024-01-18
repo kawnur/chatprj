@@ -42,11 +42,11 @@ void SocketInfo::print() {
 //    return this->name_;
 //}
 
-QString SocketInfo::getIpaddress() {
+QString SocketInfo::getIpaddress() const {
     return this->ipaddress_;
 }
 
-QString SocketInfo::getPort() {
+QString SocketInfo::getPort() const {
     return this->port_;
 }
 
@@ -71,6 +71,22 @@ int Companion::getId() {
     return this->id_;
 }
 
+QString Companion::getName() const {
+    return this->name_;
+}
+
+SocketInfo* Companion::getSocketInfo() const {
+    return this->socketInfo_;
+}
+
+QString* Companion::getInputBuffer() const {
+    return this->inputBuffer_;
+}
+
+void Companion::setInputBuffer(const QString& text) {
+    *this->inputBuffer_ = text;
+}
+
 Manager::Manager() {
     dbConnection_ = nullptr;
 }
@@ -80,7 +96,7 @@ void Manager::set() {
     this->buildCompanions();
 
     MainWindow* mainWindow = getMainWindowPtr();
-//    mainWindow->buildSocketInfoWidgets(&this->sockets_);
+    mainWindow->buildSocketInfoWidgets(&this->companions_);
 }
 
 void Manager::buildCompanions() {

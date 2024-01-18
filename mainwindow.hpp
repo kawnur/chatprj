@@ -18,6 +18,7 @@
 #include "widgets.hpp"
 
 
+class Companion;
 class SocketInfo;
 class SocketInfoBaseWidget;
 class SocketInfoWidget;
@@ -50,7 +51,7 @@ private:
 //    int linesCount_;
 //    QFont* font_;
 
-    QLabel* companion_;
+    QLabel* companionNameLabel_;
     QPlainTextEdit* chatHistoryWidget_;
     QPalette* chatHistoryWidgetPalette_;
 
@@ -64,13 +65,20 @@ private:
 
 //    QPushButton* testPlainTextEditButton_;
 
+    std::map<SocketInfoBaseWidget*, const Companion*> map_;
+
 //    void buildSockets();
 
     void addStubWidgetToLeftPanel();
-    void addSocketInfoWidgetToLeftPanel(SocketInfo*);
+//    void addSocketInfoWidgetToLeftPanel(SocketInfo*);
+    void addSocketInfoWidgetToLeftPanel(const Companion*);
 
 //    void testMainWindowRightPanel();
     void addTestSocketInfoWidgetToLeftPanel();
+
+    SocketInfoBaseWidget* getMappedSocketInfoBaseWidgetByCompanion(const Companion*) const;
+
+
 
 //    MainWindow(QWidget* parent = nullptr);
 //    MainWindow();
@@ -83,13 +91,18 @@ public:
     MainWindow();
 //    static MainWindow* instance();
 
-    SocketInfoWidget* selectedSocketInfoWidget_;
+//    SocketInfoWidget* selectedSocketInfoWidget_;
+    Companion* selectedCompanion_;  // TODO make private
 
-    void buildSocketInfoWidgets(std::vector<SocketInfo>*);
+    const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
+    void resetSelectedCompanion(const Companion*);
+
+//    void buildSocketInfoWidgets(std::vector<SocketInfo>*);
+    void buildSocketInfoWidgets(std::vector<Companion*>*);
 //    void set(QString);
     void set();
     void setLeftPanel();
-    void setCompanion(QString&);
+//    void setCompanionNameLabel(QString&);
 //    int setClient(EchoClient*);
 //    EchoClient* getClient();
     void addTextToChatHistoryWidget(const QString&);

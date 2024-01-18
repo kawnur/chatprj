@@ -21,10 +21,10 @@ void MainWindow::setLeftPanel() {
     }
 }
 
-void MainWindow::setCompanion(QString& name) {
-    this->companion_->setText(name);
-    this->companion_->show();
-}
+//void MainWindow::setCompanion(QString& name) {
+//    this->companion_->setText(name);
+//    this->companion_->show();
+//}
 
 void MainWindow::addStubWidgetToLeftPanel() {
     SocketInfoStubWidget* stub = new SocketInfoStubWidget;
@@ -36,12 +36,20 @@ void MainWindow::addStubWidgetToLeftPanel() {
     this->leftPanelLayout_->addWidget(baseObjectCastPtr);
 }
 
-void MainWindow::addSocketInfoWidgetToLeftPanel(SocketInfo* info) {
+//void MainWindow::addSocketInfoWidgetToLeftPanel(SocketInfo* info) {
+void MainWindow::addSocketInfoWidgetToLeftPanel(const Companion* companion) {
+
+    const SocketInfo* socketInfo = companion->getSocketInfo();
+
     SocketInfoWidget* widget = new SocketInfoWidget(
-                info->getName(), info->getIpaddress(), info->getPort());
+                companion->getName(),
+                socketInfo->getIpaddress(),
+                socketInfo->getPort());
 
     SocketInfoBaseWidget* widgetBase =
             dynamic_cast<SocketInfoBaseWidget*>(widget);
+
+    this->map_[widgetBase] = companion;
 
     widgetBase->setParent(this->leftPanel_);
     this->leftPanelLayout_->addWidget(widgetBase);
@@ -59,13 +67,13 @@ void MainWindow::addSocketInfoWidgetToLeftPanel(SocketInfo* info) {
 //    }
 //}
 
-void MainWindow::addTestSocketInfoWidgetToLeftPanel() {
-    SocketInfo* test1 = new SocketInfo("test1", "test1");
-    SocketInfo* test2 = new SocketInfo("test2", "test2");
+//void MainWindow::addTestSocketInfoWidgetToLeftPanel() {
+//    SocketInfo* test1 = new SocketInfo("test1", "test1");
+//    SocketInfo* test2 = new SocketInfo("test2", "test2");
 
-    this->addSocketInfoWidgetToLeftPanel(test1);
-    this->addSocketInfoWidgetToLeftPanel(test2);
-}
+//    this->addSocketInfoWidgetToLeftPanel(test1);
+//    this->addSocketInfoWidgetToLeftPanel(test2);
+//}
 
 //MainWindow* MainWindow::_instance = nullptr;
 
@@ -76,26 +84,84 @@ void MainWindow::addTestSocketInfoWidgetToLeftPanel() {
 //    return _instance;
 //}
 
+SocketInfoBaseWidget* MainWindow::getMappedSocketInfoBaseWidgetByCompanion(
+        const Companion* companion) const {
+
+    auto findWidget = [&](const std::pair<SocketInfoBaseWidget*, const Companion*>& pair){
+        return pair.second == companion;
+    };
+
+    auto result = std::find_if(
+                this->map_.cbegin(), this->map_.cend(), findWidget);
+
+    return result->first;
+}
+
+const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
+        SocketInfoBaseWidget* widget) const {
+
+    return this->map_.at(widget);
+}
+
+void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO move to manager?
+    if(this->selectedCompanion_ != nullptr) {
+        auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
+                    this->selectedCompanion_);
+
+        auto widget = dynamic_cast<SocketInfoWidget*>(baseWidget);
+        widget->unselect();
+
+        this->companionNameLabel_->setText("");
+        this->companionNameLabel_->hide();
+
+        // TODO get read of buffer, create textwidgets for every companion
+        this->selectedCompanion_->setInputBuffer(this->chatHistoryWidget_->toPlainText());
+
+        this->chatHistoryWidget_->setPlainText("");
+        this->textEdit_->setText("");
+    }
+
+    if(newSelected != nullptr) {
+        this->selectedCompanion_ = newSelected;
+
+        auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
+                    this->selectedCompanion_);
+
+        auto widget = dynamic_cast<SocketInfoWidget*>(baseWidget);
+        widget->select();
+
+        this->companionNameLabel_->setText(this->selectedCompanion_->getName());
+        this->companionNameLabel_->show();
+
+        auto testString = QString(
+                    "Messages from history for " +
+                    this->selectedCompanion_->getName());
+
+        this->chatHistoryWidget_->setPlainText(testString);
+        this->textEdit_->setText(*this->selectedCompanion_->getInputBuffer());
+    }
+}
+
 //MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 MainWindow::MainWindow() {
 //    setWindowTitle(QString("MainWindow"));
     setWindowTitle(std::getenv("CLIENT_NAME"));
 }
 
-void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
+void MainWindow::buildSocketInfoWidgets(std::vector<Companion*>* companionsPtr) {
     QList<SocketInfoBaseWidget*> leftPanelChildren =
             this->leftPanel_->findChildren<SocketInfoBaseWidget*>(
                 Qt::FindDirectChildrenOnly);
 
-    auto socketsSize = socketsPtr->size();
+    auto companionsSize = companionsPtr->size();
     auto childrenSize = leftPanelChildren.size();
 
-    logArgs("socketsSize:", socketsSize);
+    logArgs("companionsSize:", companionsSize);
     logArgs("childrenSize:", childrenSize);
 
-    for(auto& i : *socketsPtr) {
-        i.print();
-    }
+//    for(auto& i : *companionsPtr) {
+//        i.print();
+//    }
 
     for(auto& child : leftPanelChildren) {
         logArgs("child:", child);
@@ -105,7 +171,7 @@ void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
         }
     }
 
-    if(socketsSize == 0) {
+    if(companionsSize == 0) {
         if(childrenSize == 0) {
             logArgs("WARNING: strange case, empty sockets panel");
 
@@ -123,7 +189,7 @@ void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
                 }
             }
 
-            for(auto& i : *socketsPtr) {                
+            for(auto& i : *companionsPtr) {
 //                SocketInfoWidget* widget = new SocketInfoWidget(
 //                            i.getName(), i.getIpaddress(), i.getPort());
 
@@ -132,7 +198,7 @@ void MainWindow::buildSocketInfoWidgets(std::vector<SocketInfo>* socketsPtr) {
 
 //                widgetBase->setParent(this->leftPanel_);
 //                this->leftPanelLayout_->addWidget(widgetBase);
-                this->addSocketInfoWidgetToLeftPanel(&i);
+                this->addSocketInfoWidgetToLeftPanel(i);
             }
         }
     }
@@ -173,10 +239,10 @@ void MainWindow::set() {
     centralPanel_->setLayout(centralPanelLayout_);
 
 //    this->companion_ = nullptr;
-    this->companion_ = new QLabel("", this);
-    this->companion_->hide();
+    this->companionNameLabel_ = new QLabel("", this);
+    this->companionNameLabel_->hide();
 
-    centralPanelLayout_->addWidget(this->companion_);
+    centralPanelLayout_->addWidget(this->companionNameLabel_);
 
     chatHistoryWidget_ = new QPlainTextEdit(this);
     chatHistoryWidget_->setReadOnly(true);
@@ -226,7 +292,10 @@ void MainWindow::set() {
 
     centralWidgetLayout_->addWidget(rightPanel_);
 
-    selectedSocketInfoWidget_ = nullptr;
+//    selectedSocketInfoWidget_ = nullptr;
+    selectedCompanion_ = nullptr;
+
+    map_ = std::map<SocketInfoBaseWidget*, const Companion*>();
 
     // logging enabled, actions
     this->setLeftPanel();
@@ -260,15 +329,27 @@ void MainWindow::addTextToAppLogWidget(const QString& text) {
 
 void MainWindow::keyPressEvent(QKeyEvent* event) {
     if(event->key() == Qt::Key_Escape) {
-        if(this->selectedSocketInfoWidget_ != nullptr) {
-            this->selectedSocketInfoWidget_->unselect();
-        }
+////        if(this->selectedSocketInfoWidget_ != nullptr) {
+//        if(this->selectedCompanion_ != nullptr) {
+////            this->selectedSocketInfoWidget_->unselect();
 
-        this->selectedSocketInfoWidget_ = nullptr;
+//            auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
+//                        this->selectedCompanion_);
 
-        QString emptyName { "" };
-        this->setCompanion(emptyName);
-        this->companion_->hide();
+//            auto widget = dynamic_cast<SocketInfoWidget*>(baseWidget);
+
+//            widget->unselect();
+//        }
+
+////        this->selectedSocketInfoWidget_ = nullptr;
+//        this->selectedCompanion_ = nullptr;
+
+////        QString emptyName { "" };
+////        this->setCompanionNameLabel(emptyName);
+////        this->companionNameLabel_->hide();
+
+//        this->resetCompanion();
+        this->resetSelectedCompanion(nullptr);
     }
 }
 

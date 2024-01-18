@@ -20,8 +20,8 @@ public:
 
     void print();
 //    QString getName();
-    QString getIpaddress();
-    QString getPort();
+    QString getIpaddress() const;
+    QString getPort() const;
 
 private:
 //    QString name_;
@@ -48,6 +48,10 @@ public:
     ~Companion() = default;
 
     int getId();
+    QString getName() const;
+    SocketInfo* getSocketInfo() const;
+    QString* getInputBuffer() const;
+    void setInputBuffer(QString&);
     void setSocketInfo(SocketInfo*);
     void addMessage(int, std::tm, const QString&, bool);
 
@@ -64,6 +68,8 @@ class Manager : public QObject{
 public:
     Manager();
     ~Manager() {};
+
+    Companion* currentCompanion_;
 
     void set();
 

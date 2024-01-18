@@ -89,7 +89,7 @@ SocketInfoWidget::SocketInfoWidget() {
 SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipaddress, QString& port) :
     name_(name), ipaddress_(ipaddress), port_(port) {
 
-    set();
+    set();  // TODO move from constructor
 }
 
 SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipaddress, QString&& port) :
@@ -193,15 +193,23 @@ void SocketInfoWidget::unselect() {
 void SocketInfoWidget::mousePressEvent(QMouseEvent* event) {
     MainWindow* mainWindow = getMainWindowPtr();
 
-    auto selected = mainWindow->selectedSocketInfoWidget_;
+//    auto selectedCompanion = mainWindow->selectedSocketInfoWidget_;
 
-    if(selected != nullptr) {
-        mainWindow->selectedSocketInfoWidget_->unselect();
-    }
+//    if(selected != nullptr) {
+//        mainWindow->selectedSocketInfoWidget_->unselect();
+//    }
 
-    mainWindow->selectedSocketInfoWidget_ = this;
-    this->select();
-    mainWindow->setCompanion(this->name_);
+//    mainWindow->selectedSocketInfoWidget_ = this;  // TODO check needed
+//    mainWindow
+//    this->select();
+//    mainWindow->setCompanion(this->name_);
+
+    auto base = dynamic_cast<SocketInfoBaseWidget*>(this);
+
+    auto newCompanion =
+            mainWindow->getMappedCompanionBySocketInfoBaseWidget(base);
+
+    mainWindow->resetSelectedCompanion(newCompanion);
 }
 
 void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}

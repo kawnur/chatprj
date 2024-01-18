@@ -8,9 +8,11 @@
 #include <QTextEdit>
 
 #include "mainwindow.hpp"
+#include "manager.hpp"
 #include "logging.hpp"
 
 
+class Companion;
 class MainWindow;
 
 class TextEditWidget : public QTextEdit {
@@ -77,9 +79,12 @@ public:
     void print();
     bool isStub() override;
 
+    void select();
     void unselect();
 
 private:
+    Companion* companion_;
+
     QString name_;
     QString ipaddress_;
     QString port_;
@@ -99,8 +104,7 @@ private:
 
     void set() override;
 
-    void changeColor(QColor&);
-    void select();
+    void changeColor(QColor&);    
 
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
@@ -118,9 +122,7 @@ public:
 
 private:
     QString mark_;
-
     QHBoxLayout* layout_;
-
     QLabel* markLabel_;
 
     void set() override;
