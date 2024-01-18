@@ -7,11 +7,23 @@
 
 #include "logging.hpp"
 #include "mainwindow.hpp"
+#include "manager.hpp"
 #include "utils_cout.hpp"
 
 
+class Companion;
+
 PGconn* getDBConnection();
-PGresult* getSocketsInfo(PGconn*);
-PGresult* getMessages(PGconn*, const QString&);
+PGresult* getCompanionsDBResult(PGconn*);
+PGresult* getSocketInfoDBResult(PGconn*, int);
+PGresult* getMessagesDBResult(PGconn*, int);
+
+void logUnknownField(const PGresult*, int, int);
+
+void getCompanionsDataFromDBResult(
+        std::vector<std::pair<int, QString>>*, const PGresult*);
+
+std::pair<QString, QString> getSocketInfoDataFromDBResult(const PGresult*);
+void getMessagesDataFromDBResultAndAdd(Companion*, const PGresult*);
 
 #endif // DB_INTERACTION_HPP

@@ -60,8 +60,8 @@ void MainWindow::addSocketInfoWidgetToLeftPanel(SocketInfo* info) {
 //}
 
 void MainWindow::addTestSocketInfoWidgetToLeftPanel() {
-    SocketInfo* test1 = new SocketInfo("test1", "test1", "test1");
-    SocketInfo* test2 = new SocketInfo("test2", "test2", "test2");
+    SocketInfo* test1 = new SocketInfo("test1", "test1");
+    SocketInfo* test2 = new SocketInfo("test2", "test2");
 
     this->addSocketInfoWidgetToLeftPanel(test1);
     this->addSocketInfoWidgetToLeftPanel(test2);

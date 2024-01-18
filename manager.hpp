@@ -8,20 +8,23 @@ class SocketInfo {
 public:
 //    SocketInfo() = default;
     SocketInfo() {};
-    SocketInfo(QString&, QString&, QString&);
-    SocketInfo(QString&&, QString&&, QString&&);
+//    SocketInfo(QString&, QString&, QString&);
+    SocketInfo(QString&, QString&);
+//    SocketInfo(QString&&, QString&&, QString&&);
+    SocketInfo(QString&&, QString&&);
     SocketInfo(const SocketInfo&);
     SocketInfo(SocketInfo&&) {};
-    SocketInfo(std::string&, std::string&, std::string&);
+//    SocketInfo(std::string&, std::string&, std::string&);
+    SocketInfo(std::string&, std::string&);
     ~SocketInfo() = default;
 
     void print();
-    QString getName();
+//    QString getName();
     QString getIpaddress();
     QString getPort();
 
 private:
-    QString name_;
+//    QString name_;
     QString ipaddress_;
     QString port_;
 };
@@ -29,39 +32,49 @@ private:
 class Message {
 
 public:
-    Message();
+    Message(int, std::tm, const QString&, bool);
     ~Message() = default;
 
 private:
+    int companion_id_;
+    std::tm time_;  // TODO add timezone support
     QString text_;
+    bool isSent_;
 };
 
 class Companion {
 public:
-    Companion();
+    Companion(int, QString&);
     ~Companion() = default;
 
+    int getId();
+    void setSocketInfo(SocketInfo*);
+    void addMessage(int, std::tm, const QString&, bool);
+
 private:
+    int id_;
+    QString name_;
     SocketInfo* socketInfo_;
     QString* inputBuffer_;
 
     std::vector<Message> messages_;
-
 };
 
 class Manager : public QObject{
 public:
     Manager();
-    ~Manager();
+    ~Manager() {};
 
     void set();
 
 private:
     void connectToDb();
-    void buildSockets();
+    void buildCompanions();
 
     PGconn* dbConnection_;
-    std::vector<SocketInfo> sockets_;
+    std::vector<Companion*> companions_;
 };
+
+Manager* getManagerPtr();
 
 #endif // MANAGER_HPP
