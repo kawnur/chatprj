@@ -61,10 +61,11 @@ PGresult* getSocketInfoDBResult(PGconn* dbConnection, int id) {
 
 PGresult* getMessagesDBResult(PGconn* dbConnection, int id) {
     QString commandQString =
-            "SELECT time, message, issent FROM sockets "
-            "ORDER BY time LIMIT 50 WHERE companion_id = ";
+            "SELECT time, message, issent FROM messages "
+            "WHERE companion_id = ";
     QString idQString = QString::fromStdString(std::to_string(id));
-    const char* command = qPrintable(commandQString + idQString);
+    QString suffix = " ORDER BY time LIMIT 50";
+    const char* command = qPrintable(commandQString + idQString + suffix);
 
     logArgs(command);
 

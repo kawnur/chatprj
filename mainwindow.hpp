@@ -24,6 +24,11 @@ class SocketInfoBaseWidget;
 class SocketInfoWidget;
 class TextEditWidget;
 
+struct WidgetGroup {
+    SocketInfoBaseWidget* socketInfoBase_;
+    TextEditWidget* textEdit_;
+};
+
 class MainWindow : public QMainWindow {
 
     Q_OBJECT
@@ -55,6 +60,7 @@ private:
     QPlainTextEdit* chatHistoryWidget_;
     QPalette* chatHistoryWidgetPalette_;
 
+//    TextEditWidget* textEditStub_;
     TextEditWidget* textEdit_;
 //    QPushButton* button_;
 
@@ -65,13 +71,16 @@ private:
 
 //    QPushButton* testPlainTextEditButton_;
 
-    std::map<SocketInfoBaseWidget*, const Companion*> map_;
+//    std::map<SocketInfoBaseWidget*, const Companion*> map_;
+//    std::map<const Companion*, SocketInfoBaseWidget*> map_;
+    std::map<const Companion*, WidgetGroup*> map_;
 
 //    void buildSockets();
 
     void addStubWidgetToLeftPanel();
 //    void addSocketInfoWidgetToLeftPanel(SocketInfo*);
     void addSocketInfoWidgetToLeftPanel(const Companion*);
+    void addTextEditWidgetToMapping(const Companion*);
 
 //    void testMainWindowRightPanel();
     void addTestSocketInfoWidgetToLeftPanel();
@@ -92,7 +101,7 @@ public:
 //    static MainWindow* instance();
 
 //    SocketInfoWidget* selectedSocketInfoWidget_;
-    Companion* selectedCompanion_;  // TODO make private
+    const Companion* selectedCompanion_;  // TODO make private
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     void resetSelectedCompanion(const Companion*);

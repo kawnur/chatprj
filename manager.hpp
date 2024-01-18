@@ -51,7 +51,7 @@ public:
     QString getName() const;
     SocketInfo* getSocketInfo() const;
     QString* getInputBuffer() const;
-    void setInputBuffer(QString&);
+    void setInputBuffer(const QString&);
     void setSocketInfo(SocketInfo*);
     void addMessage(int, std::tm, const QString&, bool);
 

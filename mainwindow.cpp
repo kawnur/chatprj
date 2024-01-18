@@ -49,11 +49,22 @@ void MainWindow::addSocketInfoWidgetToLeftPanel(const Companion* companion) {
     SocketInfoBaseWidget* widgetBase =
             dynamic_cast<SocketInfoBaseWidget*>(widget);
 
-    this->map_[widgetBase] = companion;
+//    this->map_[widgetBase] = companion;
+//    logArgs("map1");
+    this->map_[companion]->socketInfoBase_ = widgetBase;
 
     widgetBase->setParent(this->leftPanel_);
     this->leftPanelLayout_->addWidget(widgetBase);
 }
+
+void MainWindow::addTextEditWidgetToMapping(const Companion* companion) {
+    TextEditWidget* textEdit = new TextEditWidget(this);
+    textEdit->hide();
+    this->centralPanelLayout_->addWidget(textEdit);
+//    logArgs("map2");
+    this->map_[companion]->textEdit_ = textEdit;
+}
+
 
 //void MainWindow::testMainWindowRightPanel() {
 //    int j = 0;
@@ -87,8 +98,29 @@ void MainWindow::addSocketInfoWidgetToLeftPanel(const Companion* companion) {
 SocketInfoBaseWidget* MainWindow::getMappedSocketInfoBaseWidgetByCompanion(
         const Companion* companion) const {
 
-    auto findWidget = [&](const std::pair<SocketInfoBaseWidget*, const Companion*>& pair){
-        return pair.second == companion;
+//    auto findWidget = [&](const std::pair<SocketInfoBaseWidget*, const Companion*>& pair){
+//        return pair.second == companion;
+//    };
+
+//    auto result = std::find_if(
+//                this->map_.cbegin(), this->map_.cend(), findWidget);
+
+//    return result->first;
+//    logArgs("map3");
+    return this->map_.at(companion)->socketInfoBase_;
+}
+
+const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
+        SocketInfoBaseWidget* widget) const {
+
+//    return this->map_.at(widget);
+
+//    auto findWidget = [&](const std::pair<const Companion*, SocketInfoBaseWidget*>& pair){
+//        return pair.second == widget;
+//    };
+
+    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
+        return pair.second->socketInfoBase_ == widget;
     };
 
     auto result = std::find_if(
@@ -97,13 +129,10 @@ SocketInfoBaseWidget* MainWindow::getMappedSocketInfoBaseWidgetByCompanion(
     return result->first;
 }
 
-const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
-        SocketInfoBaseWidget* widget) const {
-
-    return this->map_.at(widget);
-}
-
 void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO move to manager?
+    logArgs("this->selectedCompanion_:", this->selectedCompanion_);
+    logArgs("newSelected:", newSelected);
+
     if(this->selectedCompanion_ != nullptr) {
         auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
                     this->selectedCompanion_);
@@ -114,16 +143,17 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO
         this->companionNameLabel_->setText("");
         this->companionNameLabel_->hide();
 
-        // TODO get read of buffer, create textwidgets for every companion
-        this->selectedCompanion_->setInputBuffer(this->chatHistoryWidget_->toPlainText());
-
         this->chatHistoryWidget_->setPlainText("");
-        this->textEdit_->setText("");
+
+        this->map_.at(this->selectedCompanion_)->textEdit_->hide();
+    }
+    else {
+        this->textEdit_->hide();
     }
 
-    if(newSelected != nullptr) {
-        this->selectedCompanion_ = newSelected;
+    this->selectedCompanion_ = newSelected;
 
+    if(newSelected != nullptr) {
         auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
                     this->selectedCompanion_);
 
@@ -138,7 +168,12 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO
                     this->selectedCompanion_->getName());
 
         this->chatHistoryWidget_->setPlainText(testString);
-        this->textEdit_->setText(*this->selectedCompanion_->getInputBuffer());
+
+        this->map_.at(this->selectedCompanion_)->textEdit_->show();
+    }
+    else {
+        this->textEdit_->setText("");
+        this->textEdit_->show();
     }
 }
 
@@ -198,7 +233,11 @@ void MainWindow::buildSocketInfoWidgets(std::vector<Companion*>* companionsPtr) 
 
 //                widgetBase->setParent(this->leftPanel_);
 //                this->leftPanelLayout_->addWidget(widgetBase);
+                WidgetGroup* wg = new WidgetGroup;
+                this->map_[i] = wg;
+
                 this->addSocketInfoWidgetToLeftPanel(i);
+                this->addTextEditWidgetToMapping(i);
             }
         }
     }
@@ -256,8 +295,12 @@ void MainWindow::set() {
 
     centralPanelLayout_->addWidget(chatHistoryWidget_);
 
-    textEdit_ = new TextEditWidget(this);
-    centralPanelLayout_->addWidget(textEdit_);
+//    this->textEditStub_ = new TextEditWidget(this);
+//    centralPanelLayout_->addWidget(this->textEditStub_);
+
+    this->textEdit_ = new TextEditWidget(this);
+    centralPanelLayout_->addWidget(this->textEdit_);
+//    this->textEdit_->hide();
 
     centralWidgetLayout_->addWidget(centralPanel_);
 
@@ -295,7 +338,9 @@ void MainWindow::set() {
 //    selectedSocketInfoWidget_ = nullptr;
     selectedCompanion_ = nullptr;
 
-    map_ = std::map<SocketInfoBaseWidget*, const Companion*>();
+//    map_ = std::map<SocketInfoBaseWidget*, const Companion*>();
+//    map_ = std::map<const Companion*, SocketInfoBaseWidget*>();
+    map_ = std::map<const Companion*, WidgetGroup*>();
 
     // logging enabled, actions
     this->setLeftPanel();
