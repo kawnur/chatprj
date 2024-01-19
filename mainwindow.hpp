@@ -24,16 +24,28 @@ class SocketInfoBaseWidget;
 class SocketInfoWidget;
 class TextEditWidget;
 
-struct ChatHistoryGroup {
-    QPlainTextEdit* textEdit_;
-    QPalette* palette_;
+
+class WidgetGroup : public QObject {
+
+    Q_OBJECT
+
+public:
+    WidgetGroup() {};
+    WidgetGroup(const Companion*);
+    ~WidgetGroup() = default;
+
+    SocketInfoBaseWidget* socketInfoBase_;
+
+    QPlainTextEdit* chatHistory_;
+    QPalette* chatHistoryPalette_;
+
+    TextEditWidget* textEdit_;
+
+public slots:
+    void sendMessage();
 };
 
-struct WidgetGroup {
-    SocketInfoBaseWidget* socketInfoBase_;
-    TextEditWidget* textEdit_;
-    ChatHistoryGroup* chatHistory_;
-};
+QString formatMessageForChatHistory(QString);
 
 class MainWindow : public QMainWindow {
 
@@ -49,9 +61,13 @@ private:
     QWidget* centralWidget_;
     QHBoxLayout* centralWidgetLayout_;
 
+    // left panel
+
     QWidget* leftPanel_;
     QVBoxLayout* leftPanelLayout_;
 //    QLineEdit* test_;
+
+    // central panel
 
     QWidget* centralPanel_;
     QVBoxLayout* centralPanelLayout_;
@@ -69,6 +85,8 @@ private:
 
     TextEditWidget* textEditStub_;
 //    QPushButton* button_;
+
+    // right panel
 
     QWidget* rightPanel_;
     QVBoxLayout* rightPanelLayout_;
@@ -103,13 +121,18 @@ public:
     const Companion* selectedCompanion_;  // TODO make private
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
+    const Companion* getMappedCompanionByTextEditWidget(TextEditWidget*) const;
+
     void resetSelectedCompanion(const Companion*);
 
-    void buildSocketInfoWidgets(std::vector<Companion*>*);
+    void buildWidgetGroups(std::vector<Companion*>*);
     void set();
     void setLeftPanel();
     void addTextToChatHistoryWidget(const QString&);
     void addTextToAppLogWidget(const QString&);
+
+    void addWidgetToLeftPanel(SocketInfoBaseWidget*);
+    void addWidgetToCentralPanel(QWidget*);
 };
 
 MainWindow* getMainWindowPtr();

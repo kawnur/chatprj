@@ -46,6 +46,14 @@ template<typename... Ts> void logArgs(Ts&&... args) {
     coutArgsWithSpaceSeparator(args...);
 }
 
+template<typename... Ts> void logArgsWarning(Ts&&... args) {
+    logArgs("ERROR:", args...);
+}
+
+template<typename... Ts> void logArgsError(Ts&&... args) {
+    logArgs("WARNING:", args...);
+}
+
 template<typename T> void logLine(const T& str) {
     MainWindow* mainWindow = getMainWindowPtr();
     mainWindow->addTextToAppLogWidget(QString(str));

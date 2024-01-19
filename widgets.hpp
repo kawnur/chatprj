@@ -20,11 +20,14 @@ class TextEditWidget : public QTextEdit {
     Q_OBJECT
 
 public:
-    TextEditWidget(MainWindow*);
+    TextEditWidget() = default;
     ~TextEditWidget() = default;
 
 private:
     void keyPressEvent(QKeyEvent*);
+
+signals:
+    void send();
 };
 
 class IndicatorWidget : public QWidget {

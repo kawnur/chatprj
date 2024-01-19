@@ -50,8 +50,6 @@ public:
     int getId();
     QString getName() const;
     SocketInfo* getSocketInfo() const;
-    QString* getInputBuffer() const;
-    void setInputBuffer(const QString&);
     void setSocketInfo(SocketInfo*);
     void addMessage(int, std::tm, const QString&, bool);
 
@@ -59,7 +57,6 @@ private:
     int id_;
     QString name_;
     SocketInfo* socketInfo_;
-    QString* inputBuffer_;
 
     std::vector<Message> messages_;
 };
@@ -68,8 +65,6 @@ class Manager : public QObject{
 public:
     Manager();
     ~Manager() {};
-
-    Companion* currentCompanion_;
 
     void set();
 

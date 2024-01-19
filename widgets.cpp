@@ -1,9 +1,5 @@
 #include "widgets.hpp"
 
-TextEditWidget::TextEditWidget(MainWindow* parent) {
-   setParent(parent);
-}
-
 void TextEditWidget::keyPressEvent(QKeyEvent* event) {
 //    coutWithEndl("keyPressEvent");
 //    coutArgsWithSpaceSeparator("event->type():", std::hex, event->type());
@@ -13,20 +9,10 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event) {
 
     if(event->type() == QEvent::KeyPress
             && event->key() == Qt::Key_Return) {
+
         if(event->modifiers() == Qt::NoModifier) {
-//            coutWithEndl("enter event");
-//            MainWindow* mainWindow = MainWindow::instance();
-
-            MainWindow* mainWindow = getMainWindowPtr();
-
-            auto text = this->toPlainText();
-
-            mainWindow->addTextToChatHistoryWidget(text);
+            this->send();
             this->setText("");
-
-//            auto client = mainWindow->getClient();
-            ChatClient* client = getChatClientPtr();
-            client->send(text);
         }
         else if(event->modifiers() == Qt::ControlModifier) {
             QKeyEvent eventEmulated = QKeyEvent(

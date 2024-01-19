@@ -53,9 +53,7 @@ QString SocketInfo::getPort() const {
 Message::Message(int companion_id, std::tm time, const QString& text, bool isSent) :
     companion_id_(companion_id), time_(time), text_(text), isSent_(isSent) {}
 
-Companion::Companion(int id, QString& name) : id_(id), name_(name) {
-    inputBuffer_ = new QString;
-}
+Companion::Companion(int id, QString& name) : id_(id), name_(name) {}
 
 void Companion::setSocketInfo(SocketInfo* socketInfo) {
     socketInfo_ = socketInfo;
@@ -79,14 +77,6 @@ SocketInfo* Companion::getSocketInfo() const {
     return this->socketInfo_;
 }
 
-QString* Companion::getInputBuffer() const {
-    return this->inputBuffer_;
-}
-
-void Companion::setInputBuffer(const QString& text) {
-    *this->inputBuffer_ = text;
-}
-
 Manager::Manager() {
     dbConnection_ = nullptr;
 }
@@ -96,7 +86,7 @@ void Manager::set() {
     this->buildCompanions();
 
     MainWindow* mainWindow = getMainWindowPtr();
-    mainWindow->buildSocketInfoWidgets(&this->companions_);
+    mainWindow->buildWidgetGroups(&this->companions_);
 }
 
 void Manager::buildCompanions() {
