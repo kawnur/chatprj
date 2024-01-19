@@ -21,11 +21,6 @@ void MainWindow::setLeftPanel() {
     }
 }
 
-//void MainWindow::setCompanion(QString& name) {
-//    this->companion_->setText(name);
-//    this->companion_->show();
-//}
-
 void MainWindow::addStubWidgetToLeftPanel() {
     SocketInfoStubWidget* stub = new SocketInfoStubWidget;
 
@@ -36,9 +31,7 @@ void MainWindow::addStubWidgetToLeftPanel() {
     this->leftPanelLayout_->addWidget(baseObjectCastPtr);
 }
 
-//void MainWindow::addSocketInfoWidgetToLeftPanel(SocketInfo* info) {
 void MainWindow::addSocketInfoWidgetToLeftPanel(const Companion* companion) {
-
     const SocketInfo* socketInfo = companion->getSocketInfo();
 
     SocketInfoWidget* widget = new SocketInfoWidget(
@@ -49,20 +42,39 @@ void MainWindow::addSocketInfoWidgetToLeftPanel(const Companion* companion) {
     SocketInfoBaseWidget* widgetBase =
             dynamic_cast<SocketInfoBaseWidget*>(widget);
 
-//    this->map_[widgetBase] = companion;
-//    logArgs("map1");
     this->map_[companion]->socketInfoBase_ = widgetBase;
 
     widgetBase->setParent(this->leftPanel_);
     this->leftPanelLayout_->addWidget(widgetBase);
 }
 
+void MainWindow::addChatHistoryWidgetToMapping(const Companion* companion) {
+    QPlainTextEdit* chatHistoryWidget_ = new QPlainTextEdit(this->centralPanel_);
+    chatHistoryWidget_->setReadOnly(true);
+    chatHistoryWidget_->setPlainText("");
+    chatHistoryWidget_->hide();
+
+    this->map_[companion]->chatHistory_->textEdit_ = chatHistoryWidget_;
+
+    QPalette* chatHistoryWidgetPalette_ = new QPalette();
+    chatHistoryWidgetPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
+    chatHistoryWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
+    chatHistoryWidget_->setAutoFillBackground(true);
+    chatHistoryWidget_->setPalette(*chatHistoryWidgetPalette_);
+
+    this->map_[companion]->chatHistory_->palette_ = chatHistoryWidgetPalette_;
+
+    this->centralPanelLayout_->addWidget(chatHistoryWidget_);
+}
+
 void MainWindow::addTextEditWidgetToMapping(const Companion* companion) {
     TextEditWidget* textEdit = new TextEditWidget(this);
     textEdit->hide();
-    this->centralPanelLayout_->addWidget(textEdit);
-//    logArgs("map2");
+    textEdit->setParent(this->centralPanel_);
+
     this->map_[companion]->textEdit_ = textEdit;
+
+    this->centralPanelLayout_->addWidget(textEdit);
 }
 
 
@@ -98,26 +110,11 @@ void MainWindow::addTextEditWidgetToMapping(const Companion* companion) {
 SocketInfoBaseWidget* MainWindow::getMappedSocketInfoBaseWidgetByCompanion(
         const Companion* companion) const {
 
-//    auto findWidget = [&](const std::pair<SocketInfoBaseWidget*, const Companion*>& pair){
-//        return pair.second == companion;
-//    };
-
-//    auto result = std::find_if(
-//                this->map_.cbegin(), this->map_.cend(), findWidget);
-
-//    return result->first;
-//    logArgs("map3");
     return this->map_.at(companion)->socketInfoBase_;
 }
 
 const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
         SocketInfoBaseWidget* widget) const {
-
-//    return this->map_.at(widget);
-
-//    auto findWidget = [&](const std::pair<const Companion*, SocketInfoBaseWidget*>& pair){
-//        return pair.second == widget;
-//    };
 
     auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
         return pair.second->socketInfoBase_ == widget;
@@ -130,35 +127,33 @@ const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
 }
 
 void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO move to manager?
-    logArgs("this->selectedCompanion_:", this->selectedCompanion_);
-    logArgs("newSelected:", newSelected);
+//    logArgs("this->selectedCompanion_:", this->selectedCompanion_);
+//    logArgs("newSelected:", newSelected);
 
     if(this->selectedCompanion_ != nullptr) {
-        auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
-                    this->selectedCompanion_);
+        auto widgetGroup = this->map_.at(this->selectedCompanion_);
 
-        auto widget = dynamic_cast<SocketInfoWidget*>(baseWidget);
-        widget->unselect();
+        dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBase_)->unselect();
 
         this->companionNameLabel_->setText("");
-        this->companionNameLabel_->hide();
+//        this->companionNameLabel_->hide();
 
-        this->chatHistoryWidget_->setPlainText("");
+        this->chatHistoryWidgetStub_->setPlainText("");
 
-        this->map_.at(this->selectedCompanion_)->textEdit_->hide();
+        widgetGroup->chatHistory_->textEdit_->hide();
+        widgetGroup->textEdit_->hide();
     }
     else {
-        this->textEdit_->hide();
+        this->chatHistoryWidgetStub_->hide();
+        this->textEditStub_->hide();
     }
 
     this->selectedCompanion_ = newSelected;
 
     if(newSelected != nullptr) {
-        auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
-                    this->selectedCompanion_);
+        auto widgetGroup = this->map_.at(this->selectedCompanion_);
 
-        auto widget = dynamic_cast<SocketInfoWidget*>(baseWidget);
-        widget->select();
+        dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBase_)->select();
 
         this->companionNameLabel_->setText(this->selectedCompanion_->getName());
         this->companionNameLabel_->show();
@@ -167,13 +162,17 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO
                     "Messages from history for " +
                     this->selectedCompanion_->getName());
 
-        this->chatHistoryWidget_->setPlainText(testString);
+        widgetGroup->chatHistory_->textEdit_->setPlainText(testString);
 
-        this->map_.at(this->selectedCompanion_)->textEdit_->show();
+        widgetGroup->chatHistory_->textEdit_->show();
+        widgetGroup->textEdit_->show();
     }
     else {
-        this->textEdit_->setText("");
-        this->textEdit_->show();
+        this->chatHistoryWidgetStub_->setPlainText("");
+        this->chatHistoryWidgetStub_->show();
+
+        this->textEditStub_->setText("");
+        this->textEditStub_->show();
     }
 }
 
@@ -193,10 +192,6 @@ void MainWindow::buildSocketInfoWidgets(std::vector<Companion*>* companionsPtr) 
 
     logArgs("companionsSize:", companionsSize);
     logArgs("childrenSize:", childrenSize);
-
-//    for(auto& i : *companionsPtr) {
-//        i.print();
-//    }
 
     for(auto& child : leftPanelChildren) {
         logArgs("child:", child);
@@ -225,18 +220,14 @@ void MainWindow::buildSocketInfoWidgets(std::vector<Companion*>* companionsPtr) 
             }
 
             for(auto& i : *companionsPtr) {
-//                SocketInfoWidget* widget = new SocketInfoWidget(
-//                            i.getName(), i.getIpaddress(), i.getPort());
+                WidgetGroup* widgetGroup = new WidgetGroup;
+                this->map_[i] = widgetGroup;
 
-//                SocketInfoBaseWidget* widgetBase =
-//                        dynamic_cast<SocketInfoBaseWidget*>(widget);
-
-//                widgetBase->setParent(this->leftPanel_);
-//                this->leftPanelLayout_->addWidget(widgetBase);
-                WidgetGroup* wg = new WidgetGroup;
-                this->map_[i] = wg;
+                ChatHistoryGroup* chatHistoryGroup = new ChatHistoryGroup;
+                this->map_[i]->chatHistory_ = chatHistoryGroup;
 
                 this->addSocketInfoWidgetToLeftPanel(i);
+                this->addChatHistoryWidgetToMapping(i);
                 this->addTextEditWidgetToMapping(i);
             }
         }
@@ -244,6 +235,9 @@ void MainWindow::buildSocketInfoWidgets(std::vector<Companion*>* companionsPtr) 
 }
 
 void MainWindow::set() {
+
+    // TODO use widget's palette instead of new
+
     this->centralWidget_ = new QWidget(this);
     this->setCentralWidget(centralWidget_);
 
@@ -271,59 +265,64 @@ void MainWindow::set() {
 
     // central panel
 
-    centralPanel_ = new QWidget(this);    
-    centralPanelLayout_ = new QVBoxLayout(this);
-    centralPanelLayout_->setSpacing(0);
-    centralPanelLayout_->setContentsMargins(0, 0, 0, 0);
-    centralPanel_->setLayout(centralPanelLayout_);
+    this->centralPanel_ = new QWidget(this);
+    this->centralPanelLayout_ = new QVBoxLayout(this);
+    this->centralPanelLayout_->setSpacing(0);
+    this->centralPanelLayout_->setContentsMargins(0, 0, 0, 0);
+    this->centralPanel_->setLayout(this->centralPanelLayout_);
 
 //    this->companion_ = nullptr;
     this->companionNameLabel_ = new QLabel("", this);
-    this->companionNameLabel_->hide();
+    this->companionNameLabelPalette_ = new QPalette();
+//    this->companionNameLabelPalette_->setColor(QPalette::Window, QColorConstants::LightGray);
+    this->companionNameLabelPalette_->setColor(QPalette::Window, QColor(0xa9a9a9));
+    this->companionNameLabel_->setAutoFillBackground(true);
+    this->companionNameLabel_->setPalette(*this->companionNameLabelPalette_);
+//    this->companionNameLabel_->hide();
 
-    centralPanelLayout_->addWidget(this->companionNameLabel_);
+    this->centralPanelLayout_->addWidget(this->companionNameLabel_);
 
-    chatHistoryWidget_ = new QPlainTextEdit(this);
-    chatHistoryWidget_->setReadOnly(true);
-    chatHistoryWidget_->setPlainText("");
+    this->chatHistoryWidgetStub_ = new QPlainTextEdit(this);
+    this->chatHistoryWidgetStub_->setReadOnly(true);
+    this->chatHistoryWidgetStub_->setPlainText("");
 
-    chatHistoryWidgetPalette_ = new QPalette();
-    chatHistoryWidgetPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
-    chatHistoryWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
-    chatHistoryWidget_->setAutoFillBackground(true);
-    chatHistoryWidget_->setPalette(*chatHistoryWidgetPalette_);
+    this->chatHistoryWidgetStubPalette_ = new QPalette();
+    this->chatHistoryWidgetStubPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
+//    chatHistoryWidgetStubPalette_->setColor(QPalette::Text, QColorConstants::Black);
+//    chatHistoryWidgetStub_->setAutoFillBackground(true);
+    this->chatHistoryWidgetStub_->setPalette(*this->chatHistoryWidgetStubPalette_);
 
-    centralPanelLayout_->addWidget(chatHistoryWidget_);
+    this->centralPanelLayout_->addWidget(this->chatHistoryWidgetStub_);
 
 //    this->textEditStub_ = new TextEditWidget(this);
 //    centralPanelLayout_->addWidget(this->textEditStub_);
 
-    this->textEdit_ = new TextEditWidget(this);
-    centralPanelLayout_->addWidget(this->textEdit_);
+    this->textEditStub_ = new TextEditWidget(this);
+    this->centralPanelLayout_->addWidget(this->textEditStub_);
 //    this->textEdit_->hide();
 
-    centralWidgetLayout_->addWidget(centralPanel_);
+    this->centralWidgetLayout_->addWidget(this->centralPanel_);
 
     // right panel
 
-    rightPanel_ = new QWidget(this);
+    this->rightPanel_ = new QWidget(this);
     this->leftPanel_->resize(4000, 1000);
-    rightPanelLayout_ = new QVBoxLayout(this);
-    rightPanelLayout_->setSpacing(0);
-    rightPanelLayout_->setContentsMargins(0, 0, 0, 0);
-    rightPanel_->setLayout(rightPanelLayout_);
+    this->rightPanelLayout_ = new QVBoxLayout(this);
+    this->rightPanelLayout_->setSpacing(0);
+    this->rightPanelLayout_->setContentsMargins(0, 0, 0, 0);
+    this->rightPanel_->setLayout(this->rightPanelLayout_);
 
-    appLogWidget_ = new QPlainTextEdit(this);
-    appLogWidget_->setReadOnly(true);
-    appLogWidget_->setPlainText("");
+    this->appLogWidget_ = new QPlainTextEdit(this);
+    this->appLogWidget_->setReadOnly(true);
+    this->appLogWidget_->setPlainText("");
 
-    appLogWidgetPalette_ = new QPalette();
-    appLogWidgetPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
-    appLogWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
-    appLogWidget_->setAutoFillBackground(true);
-    appLogWidget_->setPalette(*appLogWidgetPalette_);
+    this->appLogWidgetPalette_ = new QPalette();
+    this->appLogWidgetPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
+    this->appLogWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
+    this->appLogWidget_->setAutoFillBackground(true);
+    this->appLogWidget_->setPalette(*this->appLogWidgetPalette_);
 
-    rightPanelLayout_->addWidget(appLogWidget_);
+    this->rightPanelLayout_->addWidget(this->appLogWidget_);
 
 //    testPlainTextEditButton_ = new QPushButton("testPlainTextEditButton");
 //    connect(
@@ -333,28 +332,19 @@ void MainWindow::set() {
 //                &MainWindow::testMainWindowRightPanel);
 //    rightPanelLayout_->addWidget(testPlainTextEditButton_);
 
-    centralWidgetLayout_->addWidget(rightPanel_);
+    this->centralWidgetLayout_->addWidget(this->rightPanel_);
 
 //    selectedSocketInfoWidget_ = nullptr;
-    selectedCompanion_ = nullptr;
+    this->selectedCompanion_ = nullptr;
 
 //    map_ = std::map<SocketInfoBaseWidget*, const Companion*>();
 //    map_ = std::map<const Companion*, SocketInfoBaseWidget*>();
-    map_ = std::map<const Companion*, WidgetGroup*>();
+    this->map_ = std::map<const Companion*, WidgetGroup*>();
 
     // logging enabled, actions
     this->setLeftPanel();
 //    this->addTestSocketInfoWidgetToLeftPanel();
 }
-
-//int MainWindow::setClient(EchoClient* client) {
-//    this->client_ = client;
-//    return 0;
-//}
-
-//EchoClient*  MainWindow::getClient() {
-//    return this->client_;
-//}
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
@@ -363,7 +353,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 MainWindow::~MainWindow() {}
 
 void MainWindow::addTextToChatHistoryWidget(const QString& text) {
-    this->chatHistoryWidget_->appendPlainText(text);
+    this->chatHistoryWidgetStub_->appendPlainText(text);
     QApplication::processEvents();
 }
 
@@ -374,50 +364,6 @@ void MainWindow::addTextToAppLogWidget(const QString& text) {
 
 void MainWindow::keyPressEvent(QKeyEvent* event) {
     if(event->key() == Qt::Key_Escape) {
-////        if(this->selectedSocketInfoWidget_ != nullptr) {
-//        if(this->selectedCompanion_ != nullptr) {
-////            this->selectedSocketInfoWidget_->unselect();
-
-//            auto baseWidget = getMappedSocketInfoBaseWidgetByCompanion(
-//                        this->selectedCompanion_);
-
-//            auto widget = dynamic_cast<SocketInfoWidget*>(baseWidget);
-
-//            widget->unselect();
-//        }
-
-////        this->selectedSocketInfoWidget_ = nullptr;
-//        this->selectedCompanion_ = nullptr;
-
-////        QString emptyName { "" };
-////        this->setCompanionNameLabel(emptyName);
-////        this->companionNameLabel_->hide();
-
-//        this->resetCompanion();
         this->resetSelectedCompanion(nullptr);
     }
 }
-
-//void MainWindow::addMessagesToView() {
-//    while(this->messages_.size() > 0) {
-//    while(this->messages_.size() > 0) {
-//        this->addText(this->messages_.front());
-//        this->messages_.pop();
-//    }
-//}
-
-//void addTextFunction(const QString& text) {
-//    MainWindow* mainWindow = MainWindow::instance();
-//    mainWindow->addText(text);
-//}
-
-//void MainWindow::pushMessage(const QString& text) {
-//    this->messages_.push(text);
-//}
-
-//void MainWindow::pushMessageAndAddText(const QString& text) {
-////    this->messages_.push(text);
-
-////    std::thread(addTextFunction, text).detach();
-//    this->addText(text);
-//}
