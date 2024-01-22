@@ -41,6 +41,7 @@ public:
 
     void setOn();
     void setOff();
+    void setMe();
 
 public slots:
     void toggle();
@@ -49,6 +50,7 @@ private:
     bool isOn_;
     QColor onColor_;
     QColor offColor_;
+    QColor meColor_;
     QPalette* palette_;
 };
 
@@ -103,6 +105,7 @@ private:
     QLabel* ipaddressLabel_;
     QLabel* portLabel_;
     QPushButton* editButton_;
+    QPushButton* connectButton_;
 //    QPushButton* toggleIndicatorButton_;
 
     void set() override;

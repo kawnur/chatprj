@@ -16,7 +16,7 @@ WidgetGroup::WidgetGroup(const Companion* companion) {
 
     chatHistory_ = new QPlainTextEdit;
     chatHistory_->setReadOnly(true);
-    chatHistory_->setPlainText("");
+    this->buildChatHistory(companion);
     chatHistory_->hide();
 
     chatHistoryPalette_ = new QPalette();
@@ -36,20 +36,55 @@ WidgetGroup::WidgetGroup(const Companion* companion) {
 }
 
 void WidgetGroup::sendMessage() {
-    auto text = this->textEdit_->toPlainText();
+    MainWindow* mainWindow = getMainWindowPtr();
 
-    auto textFormatted = formatMessageForChatHistory(text);
+    const Companion* companion =
+            mainWindow->getMappedCompanionByWidgetGroup(this);
 
-    this->chatHistory_->appendPlainText(textFormatted);
-
-    // encrypt message
-    // add to DB
-    // send over network
-
+    Manager* manager = getManagerPtr();
+    manager->sendMessage(companion, this);
 }
 
-QString formatMessageForChatHistory(QString text) {
-    return QString("Me___timestamp___:\n\n\t") + text + QString("\n");
+QString WidgetGroup::formatMessage(const Companion* companion, const Message* message) {
+    auto companionId = message->getCompanionId();
+    auto authorId = message->getAuthorId();
+    auto time = message->getTime();
+    auto text = message->getText();
+    auto isSent = message->getIsSent();
+
+    QString sender = (companionId == authorId)
+            ? companion->getName() : "Me";
+
+    QString receiver = (companionId == authorId)
+            ? "Me" : companion->getName();
+
+    QString prefix = QString("From %1 to %2 at %3:\n")
+            .arg(sender, receiver, time);
+
+    QString messageIndent = "      ";
+
+    text.replace("\n", "\n" + messageIndent);
+
+    QString msg = prefix + messageIndent + text + QString("\n");
+    logArgs("message:", "#", msg, "#");
+
+    return msg;
+}
+
+void WidgetGroup::addMessageToChatHistory(const QString& message) {
+    this->chatHistory_->appendPlainText(message);
+}
+
+QString WidgetGroup::buildChatHistory(const Companion* companion) {
+    const std::vector<Message>* messages = companion->getMessagesPtr();
+    QString result { "" };
+
+    for(auto& message : *messages) {
+        this->addMessageToChatHistory(
+                    this->formatMessage(companion, &message));
+    }
+
+    return result;
 }
 
 MainWindow* getMainWindowPtr() {
@@ -136,6 +171,19 @@ const Companion* MainWindow::getMappedCompanionByTextEditWidget(
 
     auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
         return pair.second->textEdit_ == widget;
+    };
+
+    auto result = std::find_if(
+                this->map_.cbegin(), this->map_.cend(), findWidget);
+
+    return result->first;
+}
+
+const Companion* MainWindow::getMappedCompanionByWidgetGroup(
+        WidgetGroup* group) const {
+
+    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
+        return pair.second == group;
     };
 
     auto result = std::find_if(

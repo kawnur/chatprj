@@ -18,6 +18,8 @@ void ChatApp::set() {
     manager_->set();
 
     mainWindow_->show();
+
+//    testQString();  // TODO remove
 }
 
 ChatClient* getChatClientPtr() {

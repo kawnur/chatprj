@@ -19,6 +19,7 @@
 
 
 class Companion;
+class Message;
 class SocketInfo;
 class SocketInfoBaseWidget;
 class SocketInfoWidget;
@@ -35,17 +36,19 @@ public:
     ~WidgetGroup() = default;
 
     SocketInfoBaseWidget* socketInfoBase_;
-
     QPlainTextEdit* chatHistory_;
     QPalette* chatHistoryPalette_;
-
     TextEditWidget* textEdit_;
+
+    QString formatMessage(const Companion*, const Message*);
+    void addMessageToChatHistory(const QString&);
 
 public slots:
     void sendMessage();
-};
 
-QString formatMessageForChatHistory(QString);
+private:
+    QString buildChatHistory(const Companion*);
+};
 
 class MainWindow : public QMainWindow {
 
@@ -122,6 +125,8 @@ public:
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     const Companion* getMappedCompanionByTextEditWidget(TextEditWidget*) const;
+    const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
+
 
     void resetSelectedCompanion(const Companion*);
 

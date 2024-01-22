@@ -50,8 +50,32 @@ QString SocketInfo::getPort() const {
     return this->port_;
 }
 
-Message::Message(int companion_id, std::tm time, const QString& text, bool isSent) :
-    companion_id_(companion_id), time_(time), text_(text), isSent_(isSent) {}
+Message::Message(
+//        int companion_id, int author_id, std::tm time,
+        int companion_id, int author_id, const QString& time,
+        const QString& text, bool isSent) :
+    companion_id_(companion_id), author_id_(author_id), time_(time),
+    text_(text), isSent_(isSent) {}
+
+int Message::getCompanionId() const {
+    return this->companion_id_;
+}
+
+int Message::getAuthorId() const {
+    return this->author_id_;
+}
+
+QString Message::getTime() const {
+    return this->time_;
+}
+
+QString Message::getText() const {
+    return this->text_;
+}
+
+bool Message::getIsSent() const {
+    return this->isSent_;
+}
 
 Companion::Companion(int id, QString& name) : id_(id), name_(name) {}
 
@@ -60,9 +84,15 @@ void Companion::setSocketInfo(SocketInfo* socketInfo) {
 }
 
 void Companion::addMessage(
-        int companion_id, std::tm time, const QString& text, bool isSent) {
+//        int companion_id, int author_id, std::tm time,
+        int companion_id, int author_id, const QString& time,
+        const QString& text, bool isSent) {
 
-    this->messages_.emplace_back(companion_id, time, text, isSent);
+    this->messages_.emplace_back(companion_id, author_id, time, text, isSent);
+}
+
+const std::vector<Message>* Companion::getMessagesPtr() const {
+    return &this->messages_;
 }
 
 int Companion::getId() {
@@ -87,6 +117,42 @@ void Manager::set() {
 
     MainWindow* mainWindow = getMainWindowPtr();
     mainWindow->buildWidgetGroups(&this->companions_);
+}
+
+void Manager::sendMessage(const Companion* companion, WidgetGroup* group) {
+
+    auto findCompanion = [&](Companion* cmp){ return cmp == companion; };
+
+    Companion* companionPtr = *std::find_if(
+                this->companions_.cbegin(),
+                this->companions_.cend(),
+                findCompanion);
+
+    auto text = group->textEdit_->toPlainText();
+
+    // encrypt message
+    // add to DB
+
+    PGresult* pushToDBResult = pushMessageToDBAndReturn(
+                this->dbConnection_,
+                companion->getName(),
+                text);
+
+    std::pair<int, QString> result = getPushedMessageInfo(pushToDBResult);
+    logArgs("companion_id:", result.first, "timestamp:", result.second);
+
+    // add to companion's messages
+
+    companionPtr->addMessage(result.first, 1, result.second, text, false);
+
+    // add to widget
+
+    auto textFormatted = group->formatMessage(
+                companion, &companion->getMessagesPtr()->back());
+    group->addMessageToChatHistory(textFormatted);
+
+    // send over network
+
 }
 
 void Manager::buildCompanions() {

@@ -37,6 +37,7 @@ IndicatorWidget::IndicatorWidget(QWidget* parent) {
     isOn_ = false;
     onColor_ = QColor(QColorConstants::DarkGreen);
     offColor_ = QColor(QColorConstants::DarkRed);
+    meColor_ = QColor(0x6a6a6a);
 
     palette_ = new QPalette();
     palette_->setColor(QPalette::Window, offColor_);
@@ -61,6 +62,12 @@ void IndicatorWidget::setOn() {
 void IndicatorWidget::setOff() {
     this->isOn_ = false;
     this->palette_->setColor(QPalette::Window, offColor_);
+    this->setPalette(*this->palette_);
+}
+
+void IndicatorWidget::setMe() {
+    this->isOn_ = false;
+    this->palette_->setColor(QPalette::Window, meColor_);
     this->setPalette(*this->palette_);
 }
 
@@ -144,6 +151,13 @@ void SocketInfoWidget::set() {
     this->ipaddressLabel_ = new QLabel(this->ipaddress_, this);
     this->portLabel_ = new QLabel(this->port_, this);
     this->editButton_ = new QPushButton("Edit", this);
+    this->connectButton_ = new QPushButton("Connect", this);
+
+    if(this->name_ == "me") {
+        this->indicator_->setMe();
+        this->editButton_->hide();
+        this->connectButton_->hide();
+    }
 
 //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
 //    connect(
@@ -155,6 +169,7 @@ void SocketInfoWidget::set() {
     this->layout_->addWidget(this->ipaddressLabel_);
     this->layout_->addWidget(this->portLabel_);
     this->layout_->addWidget(this->editButton_);
+    this->layout_->addWidget(this->connectButton_);
 //    layout_->addWidget(toggleIndicatorButton_);
 
     // connect

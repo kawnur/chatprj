@@ -46,30 +46,51 @@ PGconn* getDBConnection() {
 }
 
 PGresult* getCompanionsDBResult(PGconn* dbConnection) {
-    const char* command = "SELECT id, name FROM companions";
+    const char* command =
+            "SELECT id, name FROM companions ";
+//            "WHERE id > 1";  // me
+
+    logArgs(command);
+
     PGresult* result = PQexec(dbConnection, command);
     return result;
 }
 
 PGresult* getSocketInfoDBResult(PGconn* dbConnection, int id) {
-    QString command =
+    QString command = QString(
             "SELECT ipaddress, port FROM sockets "
-            "WHERE id = " + QString::fromStdString(std::to_string(id));
+            "WHERE id = %1").arg(QString::fromStdString(std::to_string(id)));
     PGresult* result = PQexec(dbConnection, qPrintable(command));
     return result;
 }
 
+// TODO test sorting by timestamp with different timezones
 PGresult* getMessagesDBResult(PGconn* dbConnection, int id) {
-    QString commandQString =
-            "SELECT time, message, issent FROM messages "
-            "WHERE companion_id = ";
-    QString idQString = QString::fromStdString(std::to_string(id));
-    QString suffix = " ORDER BY time LIMIT 50";
-    const char* command = qPrintable(commandQString + idQString + suffix);
+    QString command = QString(
+            "SELECT author_id, timestamp_tz, message, issent "
+            "FROM messages WHERE companion_id = %1 "
+            "ORDER BY timestamp_tz LIMIT 50")
+            .arg(QString::fromStdString(std::to_string(id)));
 
     logArgs(command);
 
-    PGresult* result = PQexec(dbConnection, command);
+    PGresult* result = PQexec(dbConnection, qPrintable(command));
+    return result;
+}
+
+PGresult* pushMessageToDBAndReturn(
+        PGconn* dbConnection, const QString& name, const QString& message) {
+    QString command = QString(
+            "insert into messages "
+            "(companion_id, author_id, timestamp_tz, message, issent) "
+            "values ((select id from companions where name = '%1'), 1, "
+            "now(), '%2', false) returning companion_id, timestamp_tz")
+            .arg(name, message);
+
+    logArgs(command);
+
+    PGresult* result = PQexec(dbConnection, qPrintable(command));
+
     return result;
 }
 
@@ -78,7 +99,7 @@ void logUnknownField(const PGresult* result, int row, int column) {
     auto logMark = (value == nullptr)
             ? "nullptr" : std::string(value);
 
-    logArgs("ERROR: unknown field name:", logMark);
+    logArgsError("unknown field name:", logMark);
 }
 
 void getCompanionsDataFromDBResult(
@@ -131,7 +152,7 @@ std::pair<QString, QString> getSocketInfoDataFromDBResult(const PGresult* result
     logArgs("ntuples:", ntuples);
 
     if(ntuples > 1) {
-        logArgs("ERROR:", ntuples, "lines from OneToOne DB request for socket info");
+        logArgsError(ntuples, "lines from OneToOne DB request for socket info");
     }
 
     int nfields = PQnfields(result);
@@ -173,13 +194,15 @@ void getMessagesDataFromDBResultAndAdd(Companion* companion, const PGresult* res
     logArgs("nfields:", nfields);
 
     for(int i = 0; i < ntuples; i++) {
-        int companion_id;
-        std::tm time;
-        QString text;
+        int companion_id, author_id;
+//        std::tm time;
+        QString time;
+        QString message;
         bool isSent;
 
         for(int j = 0; j < nfields; j++) {
-            char* fname = PQfname(result, i);
+
+            char* fname = PQfname(result, j);
             std::string fnameStr = (fname == nullptr)
                     ? "nullptr" : std::string(fname);
             logArgs("fname:", fnameStr);
@@ -188,18 +211,23 @@ void getMessagesDataFromDBResultAndAdd(Companion* companion, const PGresult* res
                 companion_id = std::atoi(PQgetvalue(result, i, j));
                 logArgs("value:", companion_id);
             }
-            else if(fnameStr == "time") {
+            else if(fnameStr == "author_id") {
+                author_id = std::atoi(PQgetvalue(result, i, j));
+                logArgs("value:", author_id);
+            }
+            else if(fnameStr == "timestamp_tz") {
 
                 // TODO add modification to std::tm
-                const char* timeStr = PQgetvalue(result, 0, i);
+                const char* timeStr = PQgetvalue(result, i, j);
+                time = QString(timeStr);
                 logArgs("value:", timeStr);
             }
-            else if(fnameStr == "text") {
-                text = PQgetvalue(result, 0, i);
-                logArgs("value:", text);
+            else if(fnameStr == "message") {
+                message = PQgetvalue(result, i, j);
+                logArgs("value:", message);
             }
             else if(fnameStr == "issent") {
-                isSent = PQgetvalue(result, 0, i);
+                isSent = PQgetvalue(result, i, j);
                 logArgs("value:", isSent);
             }
             else {
@@ -213,6 +241,59 @@ void getMessagesDataFromDBResultAndAdd(Companion* companion, const PGresult* res
             }
         }
 
-        companion->addMessage(companion_id, time, text, isSent);
+        companion->addMessage(companion_id, author_id, time, message, isSent);
     }
+}
+
+std::pair<int, QString> getPushedMessageInfo(const PGresult* result) {
+    int companion_id;
+    QString time;
+
+    int ntuples = PQntuples(result);
+    logArgs("ntuples:", ntuples);
+
+    if(ntuples > 1) {
+        logArgsError(ntuples, "lines from OneToOne DB request for socket info");
+    }
+
+    int nfields = PQnfields(result);
+    logArgs("nfields:", nfields);
+
+    for(int i = 0; i < nfields; i++) {
+        char* fname = PQfname(result, i);
+        std::string fnameStr = (fname == nullptr)
+                ? "nullptr" : std::string(fname);
+        logArgs("fname:", fnameStr);
+
+        if(fnameStr == "companion_id") {
+            companion_id = std::atoi(PQgetvalue(result, 0, i));
+            logArgs("value:", companion_id);
+        }
+        else if(fnameStr == "timestamp_tz") {
+
+            // TODO add modification to std::tm
+            const char* timeStr = PQgetvalue(result, 0, i);
+            time = QString(timeStr);
+            logArgs("value:", timeStr);
+        }
+    }
+
+    return std::pair<int, QString>(companion_id, time);
+}
+
+void testQString() {
+    QString s1 = QString(
+            "insert into messages "
+            "(companion_id, timestamp_tz, message, issent) "
+            "values ((select id from companions where name = %1), "
+            "now(), %2, false) returning id").arg("'client2'").arg("'test'");
+
+    QString s2 = QString(
+            "insert into messages "
+            "(companion_id, timestamp_tz, message, issent) "
+            "values ((select id from companions where name = %1), "
+            "now(), %2, false) returning id").arg("'client2'", "'test'");
+
+    coutArgsWithSpaceSeparator("s1:", s1);
+    coutArgsWithSpaceSeparator("s2:", s2);
 }
