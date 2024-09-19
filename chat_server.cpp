@@ -2,11 +2,13 @@
 
 using boost::asio::ip::tcp;
 
-void ServerSession::start() {
+void ServerSession::start()
+{
     do_read();
 }
 
-void ServerSession::do_read() {
+void ServerSession::do_read()
+{
 //    MainWindow* mainWindow = MainWindow::instance();
     MainWindow* mainWindow = getMainWindowPtr();
 
@@ -16,14 +18,17 @@ void ServerSession::do_read() {
 
     auto self(shared_from_this());
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
-        [this, self](boost::system::error_code ec, std::size_t length) {
-            if (!ec) {
+        [this, self](boost::system::error_code ec, std::size_t length)
+        {
+            if (!ec)
+            {
 //                MainWindow* mainWindow = MainWindow::instance();
                 MainWindow* mainWindow = getMainWindowPtr();
 
                 std::string str(data_, length);
 
-                if(length > 0) {
+                if(length > 0)
+                {
                     mainWindow->addTextToChatHistoryWidget("Got: " + QString::fromStdString(str));
                 }
 
@@ -35,7 +40,8 @@ void ServerSession::do_read() {
     );
 }
 
-void ServerSession::do_write(std::size_t length) {
+void ServerSession::do_write(std::size_t length)
+{
 //    MainWindow* mainWindow = MainWindow::instance();
     MainWindow* mainWindow = getMainWindowPtr();
 
@@ -44,8 +50,10 @@ void ServerSession::do_write(std::size_t length) {
 
     auto self(shared_from_this());
     boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
-        [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-            if (!ec) {
+        [this, self](boost::system::error_code ec, std::size_t /*length*/)
+        {
+            if (!ec)
+            {
                 do_read();
             }
         }
@@ -59,10 +67,13 @@ void ServerSession::do_write(std::size_t length) {
 //    do_accept();
 //}
 
-void ChatServer::do_accept() {
+void ChatServer::do_accept()
+{
     acceptor_.async_accept(
-        [this](boost::system::error_code ec, tcp::socket socket) {
-            if(!ec) {
+        [this](boost::system::error_code ec, tcp::socket socket)
+        {
+            if(!ec)
+            {
 //                std::make_shared<class session>(std::move(socket))->start();
                 std::make_shared<ServerSession>(std::move(socket))->start();
             }

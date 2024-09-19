@@ -1,7 +1,7 @@
 services:
 
     client1:
-    #    command: "sleep infinity"
+        # command: "sleep infinity"
 #        command: ["/my/app/chatapp", "--app"]
         command: /my/app/chatapp --app
         depends_on:

@@ -15,8 +15,8 @@ class ChatServer;
 class MainWindow;
 class Manager;
 
-class ChatApp : public QApplication {
-
+class ChatApp : public QApplication
+{
 public:
 //    std::queue<QString> messages_;
 

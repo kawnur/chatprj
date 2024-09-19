@@ -21,8 +21,11 @@ PGresult* pushMessageToDBAndReturn(PGconn*, const QString&, const QString&);
 
 void logUnknownField(const PGresult*, int, int);
 
+bool getDataFromDBResult(
+    std::vector<std::map<const char*, const char*>>&, const PGresult*);
+
 void getCompanionsDataFromDBResult(
-        std::vector<std::pair<int, QString>>*, const PGresult*);
+    std::vector<std::pair<int, QString>>*, const PGresult*);
 
 std::pair<QString, QString> getSocketInfoDataFromDBResult(const PGresult*);
 void getMessagesDataFromDBResultAndAdd(Companion*, const PGresult*);

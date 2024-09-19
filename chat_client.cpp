@@ -2,7 +2,8 @@
 
 using boost::asio::ip::tcp;
 
-ChatClient::ChatClient() {
+ChatClient::ChatClient()
+{
 //    MainWindow* mainWindow = MainWindow::instance();
 //    MainWindow* mainWindow = getMainWindowPtr();
 //    setParent(mainWindow);
@@ -10,11 +11,13 @@ ChatClient::ChatClient() {
 //    mainWindow->addText("Enter message: ");
 }
 
-int ChatClient::send(QString text) {
+int ChatClient::send(QString text)
+{
 //    MainWindow* mainWindow = MainWindow::instance();
     MainWindow* mainWindow = getMainWindowPtr();
 
-    try{
+    try
+    {
         boost::asio::io_context io_context;
         tcp::socket s { io_context };
         tcp::resolver resolver(io_context);
@@ -45,7 +48,8 @@ int ChatClient::send(QString text) {
         mainWindow->addTextToChatHistoryWidget("Enter message: ");
     }
 
-    catch(std::exception& e) {
+    catch(std::exception& e)
+    {
         mainWindow->addTextToChatHistoryWidget("Exception: " + QString(e.what()));
     }
 

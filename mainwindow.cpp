@@ -1,6 +1,7 @@
 #include "mainwindow.hpp"
 
-WidgetGroup::WidgetGroup(const Companion* companion) {
+WidgetGroup::WidgetGroup(const Companion* companion)
+{
     MainWindow* mainWindow = getMainWindowPtr();
 
     const SocketInfo* socketInfo = companion->getSocketInfo();
@@ -35,7 +36,8 @@ WidgetGroup::WidgetGroup(const Companion* companion) {
     mainWindow->addWidgetToCentralPanel(textEdit_);
 }
 
-void WidgetGroup::sendMessage() {
+void WidgetGroup::sendMessage()
+{
     MainWindow* mainWindow = getMainWindowPtr();
 
     const Companion* companion =
@@ -45,7 +47,8 @@ void WidgetGroup::sendMessage() {
     manager->sendMessage(companion, this);
 }
 
-QString WidgetGroup::formatMessage(const Companion* companion, const Message* message) {
+QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)
+{
     auto companionId = message->getCompanionId();
     auto authorId = message->getAuthorId();
     auto time = message->getTime();
@@ -71,15 +74,18 @@ QString WidgetGroup::formatMessage(const Companion* companion, const Message* me
     return msg;
 }
 
-void WidgetGroup::addMessageToChatHistory(const QString& message) {
+void WidgetGroup::addMessageToChatHistory(const QString& message)
+{
     this->chatHistory_->appendPlainText(message);
 }
 
-QString WidgetGroup::buildChatHistory(const Companion* companion) {
+QString WidgetGroup::buildChatHistory(const Companion* companion)
+{
     const std::vector<Message>* messages = companion->getMessagesPtr();
     QString result { "" };
 
-    for(auto& message : *messages) {
+    for(auto& message : *messages)
+    {
         this->addMessageToChatHistory(
                     this->formatMessage(companion, &message));
     }
@@ -87,28 +93,33 @@ QString WidgetGroup::buildChatHistory(const Companion* companion) {
     return result;
 }
 
-MainWindow* getMainWindowPtr() {
+MainWindow* getMainWindowPtr()
+{
     QCoreApplication* coreApp = QCoreApplication::instance();
     ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
     return app->mainWindow_;
 }
 
-void MainWindow::setLeftPanel() {
+void MainWindow::setLeftPanel()
+{
     QList<SocketInfoBaseWidget*> leftPanelChildren =
             this->leftPanel_->findChildren<SocketInfoBaseWidget*>(
                 Qt::FindDirectChildrenOnly);
 
-    if(leftPanelChildren.size() == 0) {
+    if(leftPanelChildren.size() == 0)
+    {
         this->addStubWidgetToLeftPanel();
     }
-    else {
+    else
+    {
         logArgsWarning(
                     "leftPanelChildren.size() != 0 "
                     "at MainWindow::setLeftPanel()");
     }
 }
 
-void MainWindow::addStubWidgetToLeftPanel() {
+void MainWindow::addStubWidgetToLeftPanel()
+{
     SocketInfoStubWidget* stub = new SocketInfoStubWidget;
 
     SocketInfoBaseWidget* baseObjectCastPtr =
@@ -148,14 +159,14 @@ void MainWindow::addStubWidgetToLeftPanel() {
 //}
 
 SocketInfoBaseWidget* MainWindow::getMappedSocketInfoBaseWidgetByCompanion(
-        const Companion* companion) const {
-
+        const Companion* companion) const
+{
     return this->map_.at(companion)->socketInfoBase_;
 }
 
 const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
-        SocketInfoBaseWidget* widget) const {
-
+        SocketInfoBaseWidget* widget) const
+{
     auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
         return pair.second->socketInfoBase_ == widget;
     };
@@ -167,8 +178,8 @@ const Companion* MainWindow::getMappedCompanionBySocketInfoBaseWidget(
 }
 
 const Companion* MainWindow::getMappedCompanionByTextEditWidget(
-        TextEditWidget* widget) const {
-
+        TextEditWidget* widget) const
+{
     auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
         return pair.second->textEdit_ == widget;
     };
@@ -180,8 +191,8 @@ const Companion* MainWindow::getMappedCompanionByTextEditWidget(
 }
 
 const Companion* MainWindow::getMappedCompanionByWidgetGroup(
-        WidgetGroup* group) const {
-
+        WidgetGroup* group) const
+{
     auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
         return pair.second == group;
     };
@@ -192,11 +203,13 @@ const Companion* MainWindow::getMappedCompanionByWidgetGroup(
     return result->first;
 }
 
-void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO move to manager?
+void MainWindow::resetSelectedCompanion(const Companion* newSelected)
+{  // TODO move to manager?
 //    logArgs("this->selectedCompanion_:", this->selectedCompanion_);
 //    logArgs("newSelected:", newSelected);
 
-    if(this->selectedCompanion_ != nullptr) {
+    if(this->selectedCompanion_ != nullptr)
+    {
         auto widgetGroup = this->map_.at(this->selectedCompanion_);
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBase_)->unselect();
@@ -209,14 +222,16 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO
         widgetGroup->chatHistory_->hide();
         widgetGroup->textEdit_->hide();
     }
-    else {
+    else
+    {
         this->chatHistoryWidgetStub_->hide();
         this->textEditStub_->hide();
     }
 
     this->selectedCompanion_ = newSelected;
 
-    if(newSelected != nullptr) {
+    if(newSelected != nullptr)
+    {
         auto widgetGroup = this->map_.at(this->selectedCompanion_);
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBase_)->select();
@@ -227,7 +242,8 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected) {  // TODO
         widgetGroup->chatHistory_->show();
         widgetGroup->textEdit_->show();
     }
-    else {
+    else
+    {
         this->chatHistoryWidgetStub_->setPlainText("");
         this->chatHistoryWidgetStub_->show();
 
@@ -242,7 +258,8 @@ MainWindow::MainWindow() {
     setWindowTitle(std::getenv("CLIENT_NAME"));
 }
 
-void MainWindow::buildWidgetGroups(std::vector<Companion*>* companionsPtr) {
+void MainWindow::buildWidgetGroups(std::vector<Companion*>* companionsPtr)
+{
     QList<SocketInfoBaseWidget*> leftPanelChildren =
             this->leftPanel_->findChildren<SocketInfoBaseWidget*>(
                 Qt::FindDirectChildrenOnly);
@@ -253,33 +270,41 @@ void MainWindow::buildWidgetGroups(std::vector<Companion*>* companionsPtr) {
     logArgs("companionsSize:", companionsSize);
     logArgs("childrenSize:", childrenSize);
 
-    for(auto& child : leftPanelChildren) {
+    for(auto& child : leftPanelChildren)
+    {
         logArgs("child:", child);
 
-        if(child->isStub()) {
+        if(child->isStub())
+        {
             logArgs("child->isStub() == true");
         }
     }
 
-    if(companionsSize == 0) {
-        if(childrenSize == 0) {
+    if(companionsSize == 0)
+    {
+        if(childrenSize == 0)
+        {
             logArgsWarning("strange case, empty sockets panel");
-
             this->addStubWidgetToLeftPanel();
         }
     }
-    else {
-        if(childrenSize != 0) {
+    else
+    {
+        if(childrenSize != 0)
+        {
             // TODO check if sockets already are children
 
-            for(auto& child : leftPanelChildren) {
-                if(child->isStub()) {
+            for(auto& child : leftPanelChildren)
+            {
+                if(child->isStub())
+                {
                     this->leftPanelLayout_->removeWidget(child);
                     delete child;
                 }                
             }
 
-            for(auto& companion : *companionsPtr) {
+            for(auto& companion : *companionsPtr)
+            {
                 WidgetGroup* widgetGroup = new WidgetGroup(companion);
                 this->map_[companion] = widgetGroup;
             }
@@ -287,8 +312,8 @@ void MainWindow::buildWidgetGroups(std::vector<Companion*>* companionsPtr) {
     }
 }
 
-void MainWindow::set() {
-
+void MainWindow::set()
+{
     // TODO use widget's palette instead of new
 
     this->centralWidget_ = new QWidget(this);
@@ -400,34 +425,41 @@ void MainWindow::set() {
 //    this->addTestSocketInfoWidgetToLeftPanel();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent *event)
+{
     std::exit(0);
 }
 
 MainWindow::~MainWindow() {}
 
-void MainWindow::addTextToChatHistoryWidget(const QString& text) {
+void MainWindow::addTextToChatHistoryWidget(const QString& text)
+{
     this->chatHistoryWidgetStub_->appendPlainText(text);
     QApplication::processEvents();
 }
 
-void MainWindow::addTextToAppLogWidget(const QString& text) {
+void MainWindow::addTextToAppLogWidget(const QString& text)
+{
     this->appLogWidget_->appendPlainText(text);
     QApplication::processEvents();
 }
 
-void MainWindow::addWidgetToLeftPanel(SocketInfoBaseWidget* widget) {
+void MainWindow::addWidgetToLeftPanel(SocketInfoBaseWidget* widget)
+{
     widget->setParent(this->leftPanel_);
     this->leftPanelLayout_->addWidget(widget);
 }
 
-void MainWindow::addWidgetToCentralPanel(QWidget* widget) {
+void MainWindow::addWidgetToCentralPanel(QWidget* widget)
+{
     widget->setParent(this->centralPanel_);
     this->centralPanelLayout_->addWidget(widget);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event) {
-    if(event->key() == Qt::Key_Escape) {
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    if(event->key() == Qt::Key_Escape)
+    {
         this->resetSelectedCompanion(nullptr);
     }
 }

@@ -17,8 +17,8 @@ using boost::asio::ip::tcp;
 enum { max_length = 1024 };
 //short max_length = 1024;
 
-class ChatClient : public QObject {
-
+class ChatClient : public QObject
+{
     Q_OBJECT
 
 private:

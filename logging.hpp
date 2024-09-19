@@ -17,16 +17,14 @@ template<typename T> QString argForLogging(T* const& value) {
     return QString::fromStdString(ss.str());
 }
 
-template<
-        typename T,
-        typename std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+template<typename T,
+         typename std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
 QString argForLogging(const T& value) {
     return QString::fromStdString(std::to_string(value));
 }
 
-template<
-        typename T,
-        typename std::enable_if_t<!std::is_arithmetic_v<T>, bool> = true>
+template<typename T,
+         typename std::enable_if_t<!std::is_arithmetic_v<T>, bool> = true>
 QString argForLogging(const T& value) {
     return QString(value);
 }

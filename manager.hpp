@@ -6,8 +6,8 @@
 
 class WidgetGroup;
 
-class SocketInfo {
-
+class SocketInfo
+{
 public:
 //    SocketInfo() = default;
     SocketInfo() {};
@@ -32,8 +32,8 @@ private:
     QString port_;
 };
 
-class Message {
-
+class Message
+{
 public:
 //    Message(int, int, std::tm, const QString&, bool);
     Message(int, int, const QString&, const QString&, bool);
@@ -54,9 +54,10 @@ private:
     bool isSent_;
 };
 
-class Companion {
+class Companion
+{
 public:
-    Companion(int, QString&);
+    Companion(int, QString&&);
     ~Companion() = default;
 
     int getId();
@@ -75,7 +76,8 @@ private:
     std::vector<Message> messages_;
 };
 
-class Manager : public QObject{
+class Manager : public QObject
+{
 public:
     Manager();
     ~Manager() {};

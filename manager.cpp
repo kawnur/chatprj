@@ -5,8 +5,7 @@
 //}
 
 SocketInfo::SocketInfo(QString& ipaddress, QString& port) :
-    ipaddress_(ipaddress), port_(port) {
-}
+    ipaddress_(ipaddress), port_(port) {}
 
 //SocketInfo::SocketInfo(QString&& name, QString&& ipaddress, QString&& port) :
 //    name_(std::move(name)),
@@ -16,10 +15,10 @@ SocketInfo::SocketInfo(QString& ipaddress, QString& port) :
 
 SocketInfo::SocketInfo(QString&& ipaddress, QString&& port) :
     ipaddress_(std::move(ipaddress)),
-    port_(std::move(port)) {
-}
+    port_(std::move(port)) {}
 
-SocketInfo::SocketInfo(const SocketInfo& si) {
+SocketInfo::SocketInfo(const SocketInfo& si)
+{
 //    name_ = si.name_;
     ipaddress_ = si.ipaddress_;
     port_ = si.port_;
@@ -29,10 +28,10 @@ SocketInfo::SocketInfo(const SocketInfo& si) {
 SocketInfo::SocketInfo(std::string& ipaddress, std::string& port) :
 //    name_(QString::fromStdString(name)),
     ipaddress_(QString::fromStdString(ipaddress)),
-    port_(QString::fromStdString(port)) {
-}
+    port_(QString::fromStdString(port)) {}
 
-void SocketInfo::print() {
+void SocketInfo::print()
+{
 //    logArgs("name:", this->name_);
     logArgs("ipaddress:", this->ipaddress_);
     logArgs("port:", this->port_);
@@ -42,11 +41,13 @@ void SocketInfo::print() {
 //    return this->name_;
 //}
 
-QString SocketInfo::getIpaddress() const {
+QString SocketInfo::getIpaddress() const
+{
     return this->ipaddress_;
 }
 
-QString SocketInfo::getPort() const {
+QString SocketInfo::getPort() const
+{
     return this->port_;
 }
 
@@ -57,61 +58,73 @@ Message::Message(
     companion_id_(companion_id), author_id_(author_id), time_(time),
     text_(text), isSent_(isSent) {}
 
-int Message::getCompanionId() const {
+int Message::getCompanionId() const
+{
     return this->companion_id_;
 }
 
-int Message::getAuthorId() const {
+int Message::getAuthorId() const
+{
     return this->author_id_;
 }
 
-QString Message::getTime() const {
+QString Message::getTime() const
+{
     return this->time_;
 }
 
-QString Message::getText() const {
+QString Message::getText() const
+{
     return this->text_;
 }
 
-bool Message::getIsSent() const {
+bool Message::getIsSent() const
+{
     return this->isSent_;
 }
 
-Companion::Companion(int id, QString& name) : id_(id), name_(name) {}
+Companion::Companion(int id, QString&& name) : id_(id), name_(name) {}
 
-void Companion::setSocketInfo(SocketInfo* socketInfo) {
+void Companion::setSocketInfo(SocketInfo* socketInfo)
+{
     socketInfo_ = socketInfo;
 }
 
 void Companion::addMessage(
 //        int companion_id, int author_id, std::tm time,
         int companion_id, int author_id, const QString& time,
-        const QString& text, bool isSent) {
-
+        const QString& text, bool isSent)
+{
     this->messages_.emplace_back(companion_id, author_id, time, text, isSent);
 }
 
-const std::vector<Message>* Companion::getMessagesPtr() const {
+const std::vector<Message>* Companion::getMessagesPtr() const
+{
     return &this->messages_;
 }
 
-int Companion::getId() {
+int Companion::getId()
+{
     return this->id_;
 }
 
-QString Companion::getName() const {
+QString Companion::getName() const
+{
     return this->name_;
 }
 
-SocketInfo* Companion::getSocketInfo() const {
+SocketInfo* Companion::getSocketInfo() const
+{
     return this->socketInfo_;
 }
 
-Manager::Manager() {
+Manager::Manager()
+{
     dbConnection_ = nullptr;
 }
 
-void Manager::set() {
+void Manager::set()
+{
     this->connectToDb();
     this->buildCompanions();
 
@@ -119,8 +132,8 @@ void Manager::set() {
     mainWindow->buildWidgetGroups(&this->companions_);
 }
 
-void Manager::sendMessage(const Companion* companion, WidgetGroup* group) {
-
+void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
+{
     auto findCompanion = [&](Companion* cmp){ return cmp == companion; };
 
     Companion* companionPtr = *std::find_if(
@@ -155,63 +168,132 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group) {
 
 }
 
-void Manager::buildCompanions() {
+// void Manager::buildCompanions()
+// {
+//     PGresult* companionsDBResult = getCompanionsDBResult(dbConnection_);
+//     logArgs("companionsDBResult:", companionsDBResult);
+
+//     if(companionsDBResult == nullptr)
+//     {
+//         return;
+//     }
+
+//     std::vector<std::pair<int, QString>> companionsData;
+//     getCompanionsDataFromDBResult(&companionsData, companionsDBResult);
+
+//     for(auto& data : companionsData)
+//     {
+//         Companion* companion = new Companion(data.first, data.second);
+//         this->companions_.push_back(companion);
+
+//         PGresult* socketInfoDBResult =
+//             getSocketInfoDBResult(dbConnection_, data.first);  // TODO switch to getName?
+
+//         logArgs("socketInfoDBResult:", socketInfoDBResult);
+
+//         if(socketInfoDBResult == nullptr)
+//         {
+//             return;
+//         }
+
+//         std::pair<QString, QString> socketInfoData =
+//             getSocketInfoDataFromDBResult(socketInfoDBResult);
+
+//         SocketInfo* socketInfo = new SocketInfo(
+//             socketInfoData.first,
+//             socketInfoData.second);
+
+//         companion->setSocketInfo(socketInfo);
+
+//         PGresult* messagesDBResult =
+//             getMessagesDBResult(dbConnection_, data.first);
+
+//         if(messagesDBResult == nullptr)
+//         {
+//             return;
+//         }
+
+//         getMessagesDataFromDBResultAndAdd(companion, messagesDBResult);
+//     }
+// }
+void Manager::buildCompanions()
+{
     PGresult* companionsDBResult = getCompanionsDBResult(dbConnection_);
     logArgs("companionsDBResult:", companionsDBResult);
 
-    if(companionsDBResult == nullptr) {
+    if(companionsDBResult == nullptr)
+    {
         return;
     }
 
-    std::vector<std::pair<int, QString>> companionsData;
-    getCompanionsDataFromDBResult(&companionsData, companionsDBResult);
+    // std::vector<std::pair<int, QString>> companionsData;
+    // getCompanionsDataFromDBResult(&companionsData, companionsDBResult);
 
-    for(auto& data : companionsData) {
-        Companion* companion = new Companion(data.first, data.second);
-        this->companions_.push_back(companion);
+    std::map<const char*, const char*> companionsDataMapping {
+        {"id", nullptr},
+        {"name", nullptr}
+    };
 
-        PGresult* socketInfoDBResult =
+    std::vector<std::map<const char*, const char*>> companionsData { companionsDataMapping };
+
+    if(!getDataFromDBResult(companionsData, companionsDBResult))
+    {
+        for(auto& data : companionsData)
+        {
+            // Companion* companion = new Companion(data.first, data.second);
+            Companion* companion = new Companion(
+                std::atoi(data.at("id")), QString(data.at("name")));
+
+            this->companions_.push_back(companion);
+
+            PGresult* socketInfoDBResult =
                 getSocketInfoDBResult(dbConnection_, data.first);  // TODO switch to getName?
 
-        logArgs("socketInfoDBResult:", socketInfoDBResult);
+            logArgs("socketInfoDBResult:", socketInfoDBResult);
 
-        if(socketInfoDBResult == nullptr) {
-            return;
-        }
+            if(socketInfoDBResult == nullptr)
+            {
+                return;
+            }
 
-        std::pair<QString, QString> socketInfoData =
+            std::pair<QString, QString> socketInfoData =
                 getSocketInfoDataFromDBResult(socketInfoDBResult);
 
-        SocketInfo* socketInfo = new SocketInfo(
-                    socketInfoData.first,
-                    socketInfoData.second);
+            SocketInfo* socketInfo = new SocketInfo(
+                socketInfoData.first,
+                socketInfoData.second);
 
-        companion->setSocketInfo(socketInfo);
+            companion->setSocketInfo(socketInfo);
 
-        PGresult* messagesDBResult =
+            PGresult* messagesDBResult =
                 getMessagesDBResult(dbConnection_, data.first);
 
-        if(messagesDBResult == nullptr) {
-            return;
+            if(messagesDBResult == nullptr)
+            {
+                return;
+            }
+
+            getMessagesDataFromDBResultAndAdd(companion, messagesDBResult);
         }
-
-        getMessagesDataFromDBResultAndAdd(companion, messagesDBResult);
-
     }
+    else {}
 }
 
-void Manager::connectToDb() {
+void Manager::connectToDb()
+{
     dbConnection_ = getDBConnection();
 
     ConnStatusType status = PQstatus(dbConnection_);
     logArgs("status: ", std::to_string(status));
 
-    if(status == ConnStatusType::CONNECTION_BAD) {  // TODO raise exception
+    if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
+    {
         logArgs("DB connection status: CONNECTION_BAD");
     }
 }
 
-Manager* getManagerPtr() {
+Manager* getManagerPtr()
+{
     QCoreApplication* coreApp = QCoreApplication::instance();
     ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
     return app->manager_;

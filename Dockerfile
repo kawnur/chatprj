@@ -38,7 +38,7 @@ RUN dnf install -y perl
 RUN dnf install -y make
 
 #install ping
-RUN dnf install -y ping
+#RUN dnf install -y ping
 
 #install vim
 RUN dnf install -y vim

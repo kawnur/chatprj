@@ -16,8 +16,8 @@ using boost::asio::ip::tcp;
 //class ChatApp;
 
 class ServerSession
-        : public std::enable_shared_from_this<class ServerSession> {
-
+        : public std::enable_shared_from_this<class ServerSession>
+{
 public:
     ServerSession(tcp::socket socket) : socket_(std::move(socket)) {}
 
@@ -32,11 +32,12 @@ private:
     char data_[max_length];
 };
 
-class ChatServer {
-
+class ChatServer
+{
 public:
     ChatServer(boost::asio::io_context& io_context, short port)
-    : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)) {
+    : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
+    {
         do_accept();
     }
 //    ChatServer(short);
