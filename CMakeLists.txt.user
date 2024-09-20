@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 13.0.2, 2024-09-19T15:22:32. -->
+<!-- Written by QtCreator 13.0.2, 2024-09-20T16:23:35. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -98,7 +98,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{af54dc15-ce39-4242-be95-c61fab1ae090}</value>
-   <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">2</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">1</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
@@ -372,7 +372,7 @@
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -396,7 +396,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory">/home/user</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
   </valuemap>

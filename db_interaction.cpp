@@ -13,6 +13,10 @@ PGconn* getDBConnection()
         const char* dbPort { std::getenv("CHATAPP_DB_PORT") };
         const char* dbLogin { std::getenv("CHATAPP_DB_USER") };
         const char* dbPassword { std::getenv("CHATAPP_DB_PASSWORD") };
+        // const char* dbAddress = "172.21.0.12";
+        // const char* dbPort = "5432";
+        // const char* dbLogin = "postgres";
+        // const char* dbPassword = "postgres123";
 
         logArgs("address:", QString(dbAddress));
         logArgs("port:", QString(dbPort));
@@ -111,259 +115,62 @@ void logUnknownField(const PGresult* result, int row, int column)
 }
 
 bool getDataFromDBResult(
-    std::vector<std::map<const char*, const char*>>& data,
-    const PGresult* result)
+    std::vector<std::map<std::string, const char*>>& data,
+    const PGresult* result,
+    int maxTuples)
 {
     bool foundUnknownFields = false;
 
     int ntuples = PQntuples(result);
-    logArgs("ntuples:", ntuples);
-
-    data.resize(ntuples);
-
     int nfields = PQnfields(result);
-    logArgs("nfields:", nfields);
+    logArgs("ntuples:", ntuples, "nfields:", nfields);
+
+    if(ntuples == 0)
+    {
+        data.pop_back();
+        return foundUnknownFields;
+    }
+
+    if(maxTuples == 1 and ntuples > 1)
+    {
+        logArgsError(ntuples, "lines from OneToOne DB request for socket info");
+    }
+
+    // create additional maps in result vector
+    for(int i = 0; i < ntuples - 1; i++)
+    {
+        data.push_back(data.at(0));
+    }
 
     for(int i = 0; i < ntuples; i++)
     {
-        // int id;
-        // QString name;
+        std::string logString;
 
         for(int j = 0; j < nfields; j++)
         {
             char* fname = PQfname(result, j);
-            // std::string fnameStr = (fname == nullptr) ? "nullptr" : std::string(fname);
-            // logArgs("fname:", fnameStr);
+            std::string fnameString = (fname == nullptr) ? "nullptr" : std::string(fname);
 
-            if(data.at(i).count(fname) == 1)
+            auto found = data.at(i).count(fnameString);
+
+            if(found == 1)
             {
                 const char* value = PQgetvalue(result, i, j);
-                data.at(i).at(fname) = value;
-                // id = std::atoi(PQgetvalue(result, i, j));
-                logArgs(std::strcat(fname, ":"), value);
+                data.at(i).at(fnameString) = value;
+
+                logString += (fnameString + ": " + std::string(value) + " ");
             }
-            // else if(fnameStr == "name")
-            // {
-            //     name = PQgetvalue(result, i, j);
-            //     logArgs("value:", name);
-            // }
             else
             {
-                //                char* value = PQgetvalue(result, i, j);
-                //                auto logMark = (value == nullptr)
-                //                        ? "nullptr" : std::string(value);
-
-                //                logArgs("ERROR: unknown field name:", logMark);
                 foundUnknownFields = true;
                 logUnknownField(result, i, j);
-
-                // break;
             }
         }
 
-
-
-        // data->emplace_back(id, name);
+        logArgs(logString);
     }
 
     return foundUnknownFields;
-}
-
-void getCompanionsDataFromDBResult(
-        std::vector<std::pair<int, QString>>* data,
-        const PGresult* result)
-{
-    int ntuples = PQntuples(result);
-    logArgs("ntuples:", ntuples);
-
-    int nfields = PQnfields(result);
-    logArgs("nfields:", nfields);
-
-    for(int i = 0; i < ntuples; i++)
-    {
-        int id;
-        QString name;
-
-        for(int j = 0; j < nfields; j++)
-        {
-            char* fname = PQfname(result, j);
-            std::string fnameStr = (fname == nullptr) ? "nullptr" : std::string(fname);
-            logArgs("fname:", fnameStr);
-
-            if(fnameStr == "id")
-            {
-                id = std::atoi(PQgetvalue(result, i, j));
-                logArgs("value:", id);
-            }
-            else if(fnameStr == "name")
-            {
-                name = PQgetvalue(result, i, j);
-                logArgs("value:", name);
-            }
-            else
-            {
-//                char* value = PQgetvalue(result, i, j);
-//                auto logMark = (value == nullptr)
-//                        ? "nullptr" : std::string(value);
-
-//                logArgs("ERROR: unknown field name:", logMark);
-                logUnknownField(result, i, j);
-                break;
-            }
-        }
-
-        data->emplace_back(id, name);
-    }
-}
-
-std::pair<QString, QString> getSocketInfoDataFromDBResult(const PGresult* result)
-{
-    QString ipaddress, port;
-
-    int ntuples = PQntuples(result);
-    logArgs("ntuples:", ntuples);
-
-    if(ntuples > 1)
-    {
-        logArgsError(ntuples, "lines from OneToOne DB request for socket info");
-    }
-
-    int nfields = PQnfields(result);
-    logArgs("nfields:", nfields);
-
-    for(int i = 0; i < nfields; i++)
-    {
-        char* fname = PQfname(result, i);
-        std::string fnameStr = (fname == nullptr) ? "nullptr" : std::string(fname);
-        logArgs("fname:", fnameStr);
-
-        if(fnameStr == "ipaddress")
-        {
-            ipaddress = PQgetvalue(result, 0, i);
-            logArgs("value:", ipaddress);
-        }
-        else if(fnameStr == "port")
-        {
-            port = PQgetvalue(result, 0, i);
-            logArgs("value:", port);
-        }
-        else
-        {
-//                char* value = PQgetvalue(result, i, j);
-//                auto logMark = (value == nullptr)
-//                        ? "nullptr" : std::string(value);
-
-//                logArgs("ERROR: unknown field name:", logMark);
-            logUnknownField(result, 0, i);
-            break;
-        }
-    }
-
-    return std::pair<QString, QString>(ipaddress, port);
-}
-
-void getMessagesDataFromDBResultAndAdd(Companion* companion, const PGresult* result)
-{
-    int ntuples = PQntuples(result);
-    logArgs("ntuples:", ntuples);
-
-    int nfields = PQnfields(result);
-    logArgs("nfields:", nfields);
-
-    for(int i = 0; i < ntuples; i++)
-    {
-        int companion_id, author_id;
-//        std::tm time;
-        QString time;
-        QString message;
-        bool isSent;
-
-        for(int j = 0; j < nfields; j++)
-        {
-            char* fname = PQfname(result, j);
-            std::string fnameStr = (fname == nullptr) ? "nullptr" : std::string(fname);
-            logArgs("fname:", fnameStr);
-
-            if(fnameStr == "companion_id")
-            {
-                companion_id = std::atoi(PQgetvalue(result, i, j));
-                logArgs("value:", companion_id);
-            }
-            else if(fnameStr == "author_id")
-            {
-                author_id = std::atoi(PQgetvalue(result, i, j));
-                logArgs("value:", author_id);
-            }
-            else if(fnameStr == "timestamp_tz")
-            {
-                // TODO add modification to std::tm
-                const char* timeStr = PQgetvalue(result, i, j);
-                time = QString(timeStr);
-                logArgs("value:", timeStr);
-            }
-            else if(fnameStr == "message")
-            {
-                message = PQgetvalue(result, i, j);
-                logArgs("value:", message);
-            }
-            else if(fnameStr == "issent")
-            {
-                isSent = PQgetvalue(result, i, j);
-                logArgs("value:", isSent);
-            }
-            else
-            {
-    //                char* value = PQgetvalue(result, i, j);
-    //                auto logMark = (value == nullptr)
-    //                        ? "nullptr" : std::string(value);
-
-    //                logArgs("ERROR: unknown field name:", logMark);
-                logUnknownField(result, 0, i);
-                break;
-            }
-        }
-
-        companion->addMessage(companion_id, author_id, time, message, isSent);
-    }
-}
-
-std::pair<int, QString> getPushedMessageInfo(const PGresult* result)
-{
-    int companion_id;
-    QString time;
-
-    int ntuples = PQntuples(result);
-    logArgs("ntuples:", ntuples);
-
-    if(ntuples > 1)
-    {
-        logArgsError(ntuples, "lines from OneToOne DB request for socket info");
-    }
-
-    int nfields = PQnfields(result);
-    logArgs("nfields:", nfields);
-
-    for(int i = 0; i < nfields; i++)
-    {
-        char* fname = PQfname(result, i);
-        std::string fnameStr = (fname == nullptr) ? "nullptr" : std::string(fname);
-        logArgs("fname:", fnameStr);
-
-        if(fnameStr == "companion_id")
-        {
-            companion_id = std::atoi(PQgetvalue(result, 0, i));
-            logArgs("value:", companion_id);
-        }
-        else if(fnameStr == "timestamp_tz")
-        {
-            // TODO add modification to std::tm
-            const char* timeStr = PQgetvalue(result, 0, i);
-            time = QString(timeStr);
-            logArgs("value:", timeStr);
-        }
-    }
-
-    return std::pair<int, QString>(companion_id, time);
 }
 
 void testQString()

@@ -151,71 +151,36 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
                 companion->getName(),
                 text);
 
-    std::pair<int, QString> result = getPushedMessageInfo(pushToDBResult);
-    logArgs("companion_id:", result.first, "timestamp:", result.second);
+    std::map<std::string, const char*> messageInfoMapping
+        {
+            {std::string("companion_id"), nullptr},
+            {std::string("timestamp_tz"), nullptr}
+        };
 
-    // add to companion's messages
+    std::vector<std::map<std::string, const char*>> messageInfo { messageInfoMapping };
 
-    companionPtr->addMessage(result.first, 1, result.second, text, false);
+    if(!getDataFromDBResult(messageInfo, pushToDBResult, 1))
+    {
+        int companionId = std::atoi(messageInfo.at(0).at("companion_id"));
+        QString timestampTz { messageInfo.at(0).at("timestamp_tz") };
 
-    // add to widget
+        logArgs("companion_id:", companionId, "timestamp_tz:", timestampTz);
 
-    auto textFormatted = group->formatMessage(
-                companion, &companion->getMessagesPtr()->back());
-    group->addMessageToChatHistory(textFormatted);
+        // add to companion's messages
 
-    // send over network
+        companionPtr->addMessage(companionId, 1, timestampTz, text, false);
 
+        // add to widget
+
+        auto textFormatted = group->formatMessage(
+                    companion, &companion->getMessagesPtr()->back());
+        group->addMessageToChatHistory(textFormatted);
+
+        // send over network
+
+    }
 }
 
-// void Manager::buildCompanions()
-// {
-//     PGresult* companionsDBResult = getCompanionsDBResult(dbConnection_);
-//     logArgs("companionsDBResult:", companionsDBResult);
-
-//     if(companionsDBResult == nullptr)
-//     {
-//         return;
-//     }
-
-//     std::vector<std::pair<int, QString>> companionsData;
-//     getCompanionsDataFromDBResult(&companionsData, companionsDBResult);
-
-//     for(auto& data : companionsData)
-//     {
-//         Companion* companion = new Companion(data.first, data.second);
-//         this->companions_.push_back(companion);
-
-//         PGresult* socketInfoDBResult =
-//             getSocketInfoDBResult(dbConnection_, data.first);  // TODO switch to getName?
-
-//         logArgs("socketInfoDBResult:", socketInfoDBResult);
-
-//         if(socketInfoDBResult == nullptr)
-//         {
-//             return;
-//         }
-
-//         std::pair<QString, QString> socketInfoData =
-//             getSocketInfoDataFromDBResult(socketInfoDBResult);
-
-//         SocketInfo* socketInfo = new SocketInfo(
-//             socketInfoData.first,
-//             socketInfoData.second);
-
-//         companion->setSocketInfo(socketInfo);
-
-//         PGresult* messagesDBResult =
-//             getMessagesDBResult(dbConnection_, data.first);
-
-//         if(messagesDBResult == nullptr)
-//         {
-//             return;
-//         }
-
-//         getMessagesDataFromDBResultAndAdd(companion, messagesDBResult);
-//     }
-// }
 void Manager::buildCompanions()
 {
     PGresult* companionsDBResult = getCompanionsDBResult(dbConnection_);
@@ -226,28 +191,28 @@ void Manager::buildCompanions()
         return;
     }
 
-    // std::vector<std::pair<int, QString>> companionsData;
-    // getCompanionsDataFromDBResult(&companionsData, companionsDBResult);
-
-    std::map<const char*, const char*> companionsDataMapping {
-        {"id", nullptr},
-        {"name", nullptr}
+    std::map<std::string, const char*> companionsDataMapping
+    {
+        {std::string("id"), nullptr},
+        {std::string("name"), nullptr}
     };
 
-    std::vector<std::map<const char*, const char*>> companionsData { companionsDataMapping };
+    std::vector<std::map<std::string, const char*>> companionsData { companionsDataMapping };
 
-    if(!getDataFromDBResult(companionsData, companionsDBResult))
+    if(!getDataFromDBResult(companionsData, companionsDBResult, 0))
     {
         for(auto& data : companionsData)
         {
-            // Companion* companion = new Companion(data.first, data.second);
+            int id = std::atoi(data.at(std::string("id")));
+
             Companion* companion = new Companion(
-                std::atoi(data.at("id")), QString(data.at("name")));
+                id,
+                QString(data.at(std::string("name"))));
 
             this->companions_.push_back(companion);
 
             PGresult* socketInfoDBResult =
-                getSocketInfoDBResult(dbConnection_, data.first);  // TODO switch to getName?
+                getSocketInfoDBResult(dbConnection_, id);  // TODO switch to getName?
 
             logArgs("socketInfoDBResult:", socketInfoDBResult);
 
@@ -256,24 +221,58 @@ void Manager::buildCompanions()
                 return;
             }
 
-            std::pair<QString, QString> socketInfoData =
-                getSocketInfoDataFromDBResult(socketInfoDBResult);
-
-            SocketInfo* socketInfo = new SocketInfo(
-                socketInfoData.first,
-                socketInfoData.second);
-
-            companion->setSocketInfo(socketInfo);
-
-            PGresult* messagesDBResult =
-                getMessagesDBResult(dbConnection_, data.first);
-
-            if(messagesDBResult == nullptr)
+            std::map<std::string, const char*> socketsDataMapping
             {
-                return;
-            }
+                {std::string("ipaddress"), nullptr},
+                {std::string("port"), nullptr}
+            };
 
-            getMessagesDataFromDBResultAndAdd(companion, messagesDBResult);
+            std::vector<std::map<std::string, const char*>> socketsData { socketsDataMapping };
+
+            if(!getDataFromDBResult(socketsData, socketInfoDBResult, 1))
+            {
+                if(socketsData.size() == 0)
+                {
+                    continue;
+                }
+
+                SocketInfo* socketInfo = new SocketInfo(
+                    socketsData.at(0).at("ipaddress"),
+                    socketsData.at(0).at("port"));
+
+                companion->setSocketInfo(socketInfo);
+
+                PGresult* messagesDBResult = getMessagesDBResult(dbConnection_, id);
+
+                if(messagesDBResult == nullptr)
+                {
+                    return;
+                }
+
+                std::map<std::string, const char*> messagesDataMapping
+                {
+                    {std::string("companion_id"), nullptr},
+                    {std::string("author_id"), nullptr},
+                    {std::string("timestamp_tz"), nullptr},
+                    {std::string("message"), nullptr},
+                    {std::string("issent"), nullptr},
+                };
+
+                std::vector<std::map<std::string, const char*>> messagesData { messagesDataMapping };
+
+                if(!getDataFromDBResult(messagesData, messagesDBResult, 0))
+                {
+                    for(auto& message : messagesData)
+                    {
+                        companion->addMessage(
+                            id,
+                            std::atoi(message.at("author_id")),
+                            message.at("timestamp_tz"),
+                            message.at("message"),
+                            message.at("issent"));
+                    }
+                }
+            }
         }
     }
     else {}

@@ -26,7 +26,7 @@ services:
             - $CHATAPP_CLIENT_PORT
         volumes:
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
               target: /my/app
             - type: bind
               source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
@@ -61,7 +61,7 @@ services:
             - $CHATAPP_CLIENT_PORT
         volumes:
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
               target: /my/app
             - type: bind
               source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
@@ -96,7 +96,7 @@ services:
             - $CHATAPP_CLIENT_PORT
         volumes:
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
               target: /my/app
             - type: bind
               source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
@@ -122,11 +122,11 @@ services:
         volumes:
             - chatapp_volume1:/var/lib/postgresql/data
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
               target: /my/app
               # db setting scripts, run only when no db exists, to run scripts recreate docker volumes
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo/sql_scripts/client1_db
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug/sql_scripts/client1_db
               target: /docker-entrypoint-initdb.d
 
     client2_db:
@@ -146,11 +146,11 @@ services:
         volumes:
             - chatapp_volume2:/var/lib/postgresql/data
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
               target: /my/app
               # db setting scripts, run only when no db exists, to run scripts recreate docker volumes
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo/sql_scripts/client2_db
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug/sql_scripts/client2_db
               target: /docker-entrypoint-initdb.d
 
     client3_db:
@@ -170,11 +170,11 @@ services:
         volumes:
             - chatapp_volume3:/var/lib/postgresql/data
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
               target: /my/app
               # db setting scripts, run only when no db exists, to run scripts recreate docker volumes
             - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo/sql_scripts/client3_db
+              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug/sql_scripts/client3_db
               target: /docker-entrypoint-initdb.d
 
 
