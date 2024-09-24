@@ -45,11 +45,11 @@ template<typename... Ts> void logArgs(Ts&&... args) {
 }
 
 template<typename... Ts> void logArgsWarning(Ts&&... args) {
-    logArgs("ERROR:", args...);
+    logArgs("WARNING:", args...);
 }
 
 template<typename... Ts> void logArgsError(Ts&&... args) {
-    logArgs("WARNING:", args...);
+    logArgs("ERROR:", args...);
 }
 
 template<typename T> void logLine(const T& str) {

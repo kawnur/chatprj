@@ -13,7 +13,6 @@ ChatClient::ChatClient()
 
 int ChatClient::send(QString text)
 {
-//    MainWindow* mainWindow = MainWindow::instance();
     MainWindow* mainWindow = getMainWindowPtr();
 
     try

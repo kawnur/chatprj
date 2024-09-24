@@ -1,9 +1,17 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
+#include <boost/asio.hpp>
+
+#include "chat_client.hpp"
+#include "chat_server.hpp"
 #include "db_interaction.hpp"
+#include "logging.hpp"
 #include "mainwindow.hpp"
 
+
+class ChatClient;
+class ChatServer;
 class WidgetGroup;
 
 class SocketInfo
@@ -25,6 +33,7 @@ public:
 //    QString getName();
     QString getIpaddress() const;
     QString getPort() const;
+    uint16_t getPortInt() const;
 
 private:
 //    QString name_;
@@ -60,6 +69,8 @@ public:
     Companion(int, QString&&);
     ~Companion() = default;
 
+    bool initMessaging();
+
     int getId();
     QString getName() const;
     SocketInfo* getSocketInfo() const;
@@ -71,7 +82,12 @@ public:
 private:
     int id_;
     QString name_;
-    SocketInfo* socketInfo_;
+    SocketInfo* socketInfoPtr_;
+
+    ChatClient* clientPtr_;
+
+    boost::asio::io_context* io_contextPtr_;
+    ChatServer* serverPtr_;
 
     std::vector<Message> messages_;
 };
@@ -86,7 +102,7 @@ public:
     void sendMessage(const Companion*, WidgetGroup*);
 
 private:
-    void connectToDb();
+    bool connectToDb();
     void buildCompanions();
 
     PGconn* dbConnection_;

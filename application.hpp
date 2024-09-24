@@ -10,8 +10,8 @@
 #include "mainwindow.hpp"
 #include "manager.hpp"
 
-class ChatClient;
-class ChatServer;
+// class ChatClient;
+// class ChatServer;
 class MainWindow;
 class Manager;
 
@@ -20,10 +20,10 @@ class ChatApp : public QApplication
 public:
 //    std::queue<QString> messages_;
 
-    ChatClient* client_;
+    // ChatClient* client_;
 
-    boost::asio::io_context* io_context_;
-    ChatServer* server_;
+    // boost::asio::io_context* io_context_;
+    // ChatServer* server_;
 
     MainWindow* mainWindow_;
     Manager* manager_;
@@ -39,6 +39,6 @@ public:
     ~ChatApp();
 };
 
-ChatClient* getChatClientPtr();
+// ChatClient* getChatClientPtr();
 
 #endif // APPLICATION_HPP

@@ -133,10 +133,10 @@ bool getDataFromDBResult(
 
     if(maxTuples == 1 and ntuples > 1)
     {
-        logArgsError(ntuples, "lines from OneToOne DB request for socket info");
+        logArgsError(ntuples, "lines from OneToOne DB request");
     }
 
-    // create additional maps in result vector
+    // create additional elements in result vector
     for(int i = 0; i < ntuples - 1; i++)
     {
         data.push_back(data.at(0));

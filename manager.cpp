@@ -51,6 +51,11 @@ QString SocketInfo::getPort() const
     return this->port_;
 }
 
+uint16_t SocketInfo::getPortInt() const
+{
+    return this->port_.toInt(nullptr, 10);
+}
+
 Message::Message(
 //        int companion_id, int author_id, std::tm time,
         int companion_id, int author_id, const QString& time,
@@ -85,9 +90,32 @@ bool Message::getIsSent() const
 
 Companion::Companion(int id, QString&& name) : id_(id), name_(name) {}
 
+bool Companion::initMessaging()
+{
+    bool initialized = false;
+
+    try
+    {
+        clientPtr_ = new ChatClient;
+        io_contextPtr_ = new boost::asio::io_context;
+
+        serverPtr_ = new ChatServer(
+            *io_contextPtr_,
+            this->socketInfoPtr_->getPortInt());
+
+        initialized = true;
+    }
+    catch(std::exception& e)
+    {
+        logArgsError(e.what());
+    }
+
+    return initialized;
+}
+
 void Companion::setSocketInfo(SocketInfo* socketInfo)
 {
-    socketInfo_ = socketInfo;
+    socketInfoPtr_ = socketInfo;
 }
 
 void Companion::addMessage(
@@ -115,7 +143,7 @@ QString Companion::getName() const
 
 SocketInfo* Companion::getSocketInfo() const
 {
-    return this->socketInfo_;
+    return this->socketInfoPtr_;
 }
 
 Manager::Manager()
@@ -274,12 +302,18 @@ void Manager::buildCompanions()
                 }
             }
         }
+
+        for(auto& companionPtr : companions_)
+        {
+            companionPtr->initMessaging();
+        }
     }
     else {}
 }
 
-void Manager::connectToDb()
+bool Manager::connectToDb()
 {
+    bool connected = false;
     dbConnection_ = getDBConnection();
 
     ConnStatusType status = PQstatus(dbConnection_);
@@ -287,8 +321,10 @@ void Manager::connectToDb()
 
     if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
     {
-        logArgs("DB connection status: CONNECTION_BAD");
+        ("DB connection status: CONNECTION_BAD");
     }
+
+    return connected;
 }
 
 Manager* getManagerPtr()

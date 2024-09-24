@@ -74,7 +74,8 @@ int async_tcp_echo_server()
 
     boost::asio::io_context io_context;
 
-    class server s(io_context, std::atoi("5002"));
+    // class server s(io_context, std::atoi("5002"));
+    server s(io_context, std::atoi("5002"));
 
     io_context.run();
   }
