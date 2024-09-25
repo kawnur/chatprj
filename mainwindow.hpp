@@ -26,8 +26,8 @@ class SocketInfoWidget;
 class TextEditWidget;
 
 
-class WidgetGroup : public QObject {
-
+class WidgetGroup : public QObject
+{
     Q_OBJECT
 
 public:
@@ -50,8 +50,8 @@ private:
     QString buildChatHistory(const Companion*);
 };
 
-class MainWindow : public QMainWindow {
-
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 private:

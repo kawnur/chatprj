@@ -1,53 +1,64 @@
 #include "utils_cout.hpp"
 
 
-void endline(int n) {
-    for(int i = 0; i < n; i++) {
+void endline(int n)
+{
+    for(int i = 0; i < n; i++)
+    {
         std::cout << std::endl;
     }
 }
 
-template<> int getSizeAsInt<std::string>(std::string& s) {
+template<> int getSizeAsInt<std::string>(std::string& s)
+{
     return (int)s.size();
 }
 
-std::string argForCout(const QString& value) {
+std::string argForCout(const QString& value)
+{
     return value.toStdString();
 }
 
-std::string argForCout(const std::string& value) {
+std::string argForCout(const std::string& value)
+{
     return value;
 }
 
-std::string argForCout(const char* value) {
+std::string argForCout(const char* value)
+{
     return std::string(value);
 }
 
-void coutVector1(const std::vector<int>& v) {
+void coutVector1(const std::vector<int>& v)
+{
     std::cout << std::endl;
 
-    for(auto& i : v) {
+    for(auto& i : v)
+    {
         std::cout << i << '\t';
     }
 
     std::cout << std::endl;
-};
+}
 
-void coutVectorAndSum(const std::vector<int>& v) {
+void coutVectorAndSum(const std::vector<int>& v)
+{
     int sum = 0;
 
     std::cout << std::endl;
 
-    for(auto& i : v) {
+    for(auto& i : v)
+    {
         std::cout << i << '\t';
         sum += i;
     }
 
     std::cout << "sum: " << sum << '\t';
     std::cout << std::endl;
-};
+}
 
-void coutVectorWithIndexesHorizontally(const std::vector<int>& v) {
+void coutVectorWithIndexesHorizontally(const std::vector<int>& v)
+{
     std::cout << std::endl;
 
     auto compareStringLengths = [&](const int& i, const int& j) {
@@ -62,7 +73,8 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& v) {
 
     coutWithManipulators("Index: ", width);
 
-    for(int i = 0; i < (int)v.size(); i++) {
+    for(int i = 0; i < (int)v.size(); i++)
+    {
         coutWithManipulators(std::to_string(i), width);
     }
 
@@ -70,20 +82,23 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& v) {
 
     coutWithManipulators("Value: ", width);
 
-    for(int i = 0; i < (int)v.size(); i++) {
+    for(int i = 0; i < (int)v.size(); i++)
+    {
         coutWithManipulators(std::to_string(v.at(i)), width);
     }
 
     std::cout << std::endl;
-};
+}
 
 
 // array
 
-void printArray(std::array<int, 10>& a) {
+void printArray(std::array<int, 10>& a)
+{
     std::cout << "&a: " << &a << std::endl;
 
-    for(size_t i = 0; i < a.size(); i++) {
+    for(size_t i = 0; i < a.size(); i++)
+    {
         std::cout << "&a[" << i << "]: " << &a[i] << '\t';
         std::cout << "a[" << i << "]: " << a[i] << std::endl;
     }
@@ -96,9 +111,12 @@ void printArray(std::array<int, 10>& a) {
 
 // set
 
-void printSet(std::set<int>& s) {
+void printSet(std::set<int>& s)
+{
     std::cout << std::endl << "&s: " << &s << std::endl;
-    for(std::set<int>::iterator i = s.cbegin(); i != s.cend(); i++) {
+
+    for(std::set<int>::iterator i = s.cbegin(); i != s.cend(); i++)
+    {
         std::cout << "&(*i): " << &(*i) << '\t';
         std::cout << " *i: " << *i << std::endl;
     }
@@ -110,18 +128,22 @@ void printSet(std::set<int>& s) {
 
 
 // string
-void coutString(std::string::const_iterator it1, std::string::const_iterator it2) {
-    for(auto it = it1; it != it2; it++) {
+void coutString(std::string::const_iterator it1, std::string::const_iterator it2)
+{
+    for(auto it = it1; it != it2; it++)
+    {
         std::cout << *it;
     }
     endline(1);
 }
 
-void coutStringFull(std::string& s) {
+void coutStringFull(std::string& s)
+{
     coutString(s.begin(), s.end());
 }
 
-void coutHeader(const std::string& header) {
+void coutHeader(const std::string& header)
+{
     char marginSymbol = '#';
     char spaceSymbol = ' ';
     int marginSize = 5;

@@ -1,6 +1,7 @@
 #include "widgets.hpp"
 
-void TextEditWidget::keyPressEvent(QKeyEvent* event) {
+void TextEditWidget::keyPressEvent(QKeyEvent* event)
+{
 //    coutWithEndl("keyPressEvent");
 //    coutArgsWithSpaceSeparator("event->type():", std::hex, event->type());
 //    coutArgsWithSpaceSeparator("event->key():", std::hex, event->key());
@@ -8,13 +9,16 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event) {
 //    endline(1);
 
     if(event->type() == QEvent::KeyPress
-            && event->key() == Qt::Key_Return) {
+            && event->key() == Qt::Key_Return)
+    {
 
-        if(event->modifiers() == Qt::NoModifier) {
+        if(event->modifiers() == Qt::NoModifier)
+        {
             this->send();
             this->setText("");
         }
-        else if(event->modifiers() == Qt::ControlModifier) {
+        else if(event->modifiers() == Qt::ControlModifier)
+        {
             QKeyEvent eventEmulated = QKeyEvent(
                         QEvent::KeyPress,
                         Qt::Key_Return,
@@ -23,12 +27,14 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event) {
             QTextEdit::keyPressEvent(&eventEmulated);
         }
     }
-    else {
+    else
+    {
         QTextEdit::keyPressEvent(event);
     }
 }
 
-IndicatorWidget::IndicatorWidget(QWidget* parent) {
+IndicatorWidget::IndicatorWidget(QWidget* parent)
+{
     setParent(parent);
 
     setFixedWidth(15);
@@ -46,54 +52,61 @@ IndicatorWidget::IndicatorWidget(QWidget* parent) {
     setPalette(*palette_);
 }
 
-IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator) {
+IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator)
+{
     isOn_ = indicator->isOn_;
     onColor_ = indicator->onColor_;
     offColor_ = indicator->offColor_;
     palette_ = indicator->palette_;
 }
 
-void IndicatorWidget::setOn() {
+void IndicatorWidget::setOn()
+{
     this->isOn_ = true;
     this->palette_->setColor(QPalette::Window, onColor_);
     this->setPalette(*this->palette_);
 }
 
-void IndicatorWidget::setOff() {
+void IndicatorWidget::setOff()
+{
     this->isOn_ = false;
     this->palette_->setColor(QPalette::Window, offColor_);
     this->setPalette(*this->palette_);
 }
 
-void IndicatorWidget::setMe() {
+void IndicatorWidget::setMe()
+{
     this->isOn_ = false;
     this->palette_->setColor(QPalette::Window, meColor_);
     this->setPalette(*this->palette_);
 }
 
-void IndicatorWidget::toggle() {
+void IndicatorWidget::toggle()
+{
     (this->isOn_ == true) ? this->setOff() : this->setOn();
 }
 
-SocketInfoWidget::SocketInfoWidget() {
+SocketInfoWidget::SocketInfoWidget()
+{
     logArgs("SocketInfoWidget()");
 }
 
-SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipaddress, QString& port) :
-    name_(name), ipaddress_(ipaddress), port_(port) {
+// SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipaddress, QString& port) :
+//     name_(name), ipaddress_(ipaddress), port_(port) {
 
-    set();  // TODO move from constructor
-}
+//     set();  // TODO move from constructor
+// }
 
-SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipaddress, QString&& port) :
-    name_(std::move(name)),
-    ipaddress_(std::move(ipaddress)),
-    port_(std::move(port)) {
+// SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipaddress, QString&& port) :
+//     name_(std::move(name)),
+//     ipaddress_(std::move(ipaddress)),
+//     port_(std::move(port)) {
 
-    set();
-}
+//     set();
+// }
 
-SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si) {
+SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
+{
     name_ = si.name_;
     ipaddress_ = si.ipaddress_;
     port_ = si.port_;
@@ -104,8 +117,16 @@ SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si) {
 SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, std::string& port) :
     name_(QString::fromStdString(name)),
     ipaddress_(QString::fromStdString(ipaddress)),
-    port_(QString::fromStdString(port)) {
+    port_(QString::fromStdString(port))
+{
+    set();
+}
 
+SocketInfoWidget::SocketInfoWidget(std::string&& name, std::string&& ipaddress, std::string&& port) :
+    name_(QString::fromStdString(name)),
+    ipaddress_(QString::fromStdString(ipaddress)),
+    port_(QString::fromStdString(port))
+{
     set();
 }
 
@@ -127,17 +148,20 @@ SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, st
 //    delete oldEditButton;
 //}
 
-void SocketInfoWidget::print() {
+void SocketInfoWidget::print()
+{
     logArgs("name:", this->name_);
     logArgs("ipaddress:", this->ipaddress_);
     logArgs("port:", this->port_);
 }
 
-bool SocketInfoWidget::isStub() {
+bool SocketInfoWidget::isStub()
+{
     return false;
 }
 
-void SocketInfoWidget::set() {
+void SocketInfoWidget::set()
+{
     this->selectedColor_ = QColor(QColorConstants::DarkGray);
     this->unselectedColor_ = QColor(QColorConstants::Gray);
     this->palette_ = new QPalette();
@@ -153,7 +177,8 @@ void SocketInfoWidget::set() {
     this->editButton_ = new QPushButton("Edit", this);
     this->connectButton_ = new QPushButton("Connect", this);
 
-    if(this->name_ == "me") {
+    if(this->name_ == "me")
+    {
         this->indicator_->setMe();
         this->editButton_->hide();
         this->connectButton_->hide();
@@ -175,7 +200,8 @@ void SocketInfoWidget::set() {
     // connect
 }
 
-void SocketInfoWidget::changeColor(QColor& color) {
+void SocketInfoWidget::changeColor(QColor& color)
+{
     this->palette_ = new QPalette();  // TODO leak
     this->palette_->setColor(QPalette::Window, color);
 
@@ -183,15 +209,18 @@ void SocketInfoWidget::changeColor(QColor& color) {
     this->setPalette(*this->palette_);
 }
 
-void SocketInfoWidget::select() {
+void SocketInfoWidget::select()
+{
     this->changeColor(this->selectedColor_);
 }
 
-void SocketInfoWidget::unselect() {
+void SocketInfoWidget::unselect()
+{
     this->changeColor(this->unselectedColor_);
 }
 
-void SocketInfoWidget::mousePressEvent(QMouseEvent* event) {
+void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
+{
     MainWindow* mainWindow = getMainWindowPtr();
 
 //    auto selectedCompanion = mainWindow->selectedSocketInfoWidget_;
@@ -215,13 +244,15 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent* event) {
 
 void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
 
-SocketInfoStubWidget::SocketInfoStubWidget() {
+SocketInfoStubWidget::SocketInfoStubWidget()
+{
     mark_ = "No socket info from DB...";
 
     set();
 }
 
-void SocketInfoStubWidget::set() {
+void SocketInfoStubWidget::set()
+{
     this->layout_ = new QHBoxLayout(this);
     this->markLabel_ = new QLabel(this->mark_, this);
 
@@ -232,6 +263,7 @@ void SocketInfoStubWidget::set() {
 //    logArgs("~SocketInfoStubWidget called");
 //}
 
-bool SocketInfoStubWidget::isStub() {
+bool SocketInfoStubWidget::isStub()
+{
     return true;
 }

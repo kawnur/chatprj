@@ -3,7 +3,8 @@
 
 void checkProtocols() {}
 
-void coutEngineInfo(gpgme_engine_info_t* info) {
+void coutEngineInfo(gpgme_engine_info_t* info)
+{
     endline(1);
     coutWithEndl((*info)->next);
     coutWithEndl((*info)->protocol);
@@ -14,11 +15,13 @@ void coutEngineInfo(gpgme_engine_info_t* info) {
     endline(1);
 }
 
-std::string getStringFromCharPtr(const char* value) {
+std::string getStringFromCharPtr(const char* value)
+{
     return (value == nullptr) ? std::string("nullptr") : std::string(value);
 }
 
-void coutKeyInfo(const gpgme_key_t* const key) {
+void coutKeyInfo(const gpgme_key_t* const key)
+{
     endline(1);
 
     coutArgsWithSpaceSeparator("keylist_mode:", (*key)->keylist_mode);
@@ -55,7 +58,8 @@ void coutKeyInfo(const gpgme_key_t* const key) {
     endline(1);
 }
 
-void coutUserIdInfo(gpgme_key_t* key) {
+void coutUserIdInfo(gpgme_key_t* key)
+{
     _gpgme_user_id* uids = (*key)->uids;
 
     endline(1);
@@ -85,7 +89,8 @@ void coutUserIdInfo(gpgme_key_t* key) {
     endline(1);
 }
 
-void createKey(gpgme_ctx_t* contextPtr, const char* algoName) {
+void createKey(gpgme_ctx_t* contextPtr, const char* algoName)
+{
     // create key
     const char* userId = "user2";
     unsigned long reserved = 0;
@@ -99,18 +104,22 @@ void createKey(gpgme_ctx_t* contextPtr, const char* algoName) {
 
     coutWithEndl(errorCreateKey);
 
-    if(errorCreateKey == 0) {
+    if(errorCreateKey == 0)
+    {
         coutWithEndl("key created successfully");
     }
-    else if(errorCreateKey == GPG_ERR_NOT_SUPPORTED) {
+    else if(errorCreateKey == GPG_ERR_NOT_SUPPORTED)
+    {
         coutWithEndl("engine does not support the command");
     }
-    else {
+    else
+    {
         coutWithEndl("key creation: some other error");
     }
 }
 
-void listKeys(gpgme_ctx_t* contextPtr) {
+void listKeys(gpgme_ctx_t* contextPtr)
+{
     // list keys
     const char* pattern = NULL;
     int secret_only = 0;
@@ -120,26 +129,31 @@ void listKeys(gpgme_ctx_t* contextPtr) {
 
     auto errorKeylistStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
 
-    if(errorKeylistStart == GPG_ERR_INV_VALUE) {
+    if(errorKeylistStart == GPG_ERR_INV_VALUE)
+    {
         coutWithEndl("key listing: context is not a valid pointer");
     }
 
     gpgme_error_t errorKeylistNext = NULL;
 
-    while(errorKeylistNext != GPG_ERR_EOF && i < 4) {
+    while(errorKeylistNext != GPG_ERR_EOF && i < 4)
+    {
         gpgme_key_t r_key;
 //			coutArgsWithSpaceSeparator("&r_key:", &r_key);
 
         errorKeylistNext = gpgme_op_keylist_next(*contextPtr, &r_key);
 
-        if(errorKeylistNext == GPG_ERR_INV_VALUE) {
+        if(errorKeylistNext == GPG_ERR_INV_VALUE)
+        {
             coutWithEndl("key listing: context or r_key is not a valid pointer");
         }
-        else if(errorKeylistNext == GPG_ERR_ENOMEM) {
+        else if(errorKeylistNext == GPG_ERR_ENOMEM)
+        {
             coutWithEndl("key listing: there is not enough memory for the operation");
         }
 
-        if(r_key != nullptr) {
+        if(r_key != nullptr)
+        {
             coutKeyInfo(&r_key);
             coutUserIdInfo(&r_key);
         }
@@ -150,10 +164,12 @@ void listKeys(gpgme_ctx_t* contextPtr) {
 
     auto errorKeylistEnd = gpgme_op_keylist_end(*contextPtr);
 
-    if(errorKeylistEnd == GPG_ERR_INV_VALUE) {
+    if(errorKeylistEnd == GPG_ERR_INV_VALUE)
+    {
         coutWithEndl("key listing: context is not a valid pointer");
     }
-    else if(errorKeylistEnd == GPG_ERR_ENOMEM) {
+    else if(errorKeylistEnd == GPG_ERR_ENOMEM)
+    {
         coutWithEndl("key listing: there is not enough memory for the operation");
     }
 
@@ -161,56 +177,68 @@ void listKeys(gpgme_ctx_t* contextPtr) {
     coutArgsWithSpaceSeparator("i:", i);
 }
 
-void getKeyByUser(gpgme_ctx_t* contextPtr, gpgme_key_t* keyPtr, const char* name) {
+void getKeyByUser(gpgme_ctx_t* contextPtr, gpgme_key_t* keyPtr, const char* name)
+{
 
     const char* pattern = NULL;
     int secret_only = 0;
 
     auto errorKeylistStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
 
-    if(errorKeylistStart == GPG_ERR_INV_VALUE) {
+    if(errorKeylistStart == GPG_ERR_INV_VALUE)
+    {
         coutWithEndl("getKeyByUser: context is not a valid pointer");
     }
 
     gpgme_error_t errorKeylistNext = NULL;
 
-    while(true) {
+    while(true)
+    {
         errorKeylistNext = gpgme_op_keylist_next(*contextPtr, keyPtr);
 
-        if(errorKeylistNext == GPG_ERR_INV_VALUE) {
+        if(errorKeylistNext == GPG_ERR_INV_VALUE)
+        {
             coutWithEndl("key listing: context or r_key is not a valid pointer");
         }
-        else if(errorKeylistNext == GPG_ERR_ENOMEM) {
+        else if(errorKeylistNext == GPG_ERR_ENOMEM)
+        {
             coutWithEndl("key listing: there is not enough memory for the operation");
         }
 
-        if(strcmp((*keyPtr)->uids->name, name) == 0) {
+        if(strcmp((*keyPtr)->uids->name, name) == 0)
+        {
             coutWithEndl("key found");
             break;
         }
     }
 }
 
-void createDataObject(gpgme_data_t* dataPtr) {
+void createDataObject(gpgme_data_t* dataPtr)
+{
     auto errorDataCreation = gpgme_data_new(dataPtr);
 
-    if(errorDataCreation == GPG_ERR_NO_ERROR) {
+    if(errorDataCreation == GPG_ERR_NO_ERROR)
+    {
         coutWithEndl("data object was successfully created");
     }
-    else if(errorDataCreation == GPG_ERR_INV_VALUE) {
+    else if(errorDataCreation == GPG_ERR_INV_VALUE)
+    {
         coutWithEndl("is not a valid pointer");
     }
-    else if(errorDataCreation == GPG_ERR_ENOMEM) {
+    else if(errorDataCreation == GPG_ERR_ENOMEM)
+    {
         coutWithEndl("not enough memory");
     }
 }
 
-void printAsBytesTillNullTerminator(const char* value) {
+void printAsBytesTillNullTerminator(const char* value)
+{
     const char* p = value;
 
     int i = 0;
 
-    while(*p != '\0') {
+    while(*p != '\0')
+    {
         printf("%x ", *p);
         p++;
         i++;
@@ -218,12 +246,14 @@ void printAsBytesTillNullTerminator(const char* value) {
     endline(1);
 }
 
-void printAsBytes(const char* value, size_t size) {
+void printAsBytes(const char* value, size_t size)
+{
     const char* p = value;
 
     size_t i = 0;
 
-    while(i < size) {
+    while(i < size)
+    {
         printf("%x ", *p);
         p++;
         i++;
@@ -231,12 +261,14 @@ void printAsBytes(const char* value, size_t size) {
     endline(1);
 }
 
-void printAsChars(const char* value, size_t size) {
+void printAsChars(const char* value, size_t size)
+{
     const char* p = value;
 
     size_t i = 0;
 
-    while(i < size) {
+    while(i < size)
+    {
         printf("%c ", *p);
         p++;
         i++;
@@ -244,13 +276,16 @@ void printAsChars(const char* value, size_t size) {
     endline(1);
 }
 
-int getTerminatorPosition(const char* value, ssize_t size) {
+int getTerminatorPosition(const char* value, ssize_t size)
+{
     const char* p = value;
 
     int i = 0;
 
-    while(i < size) {
-        if(*p == '\0') {
+    while(i < size)
+    {
+        if(*p == '\0')
+        {
             return i;
         }
 
@@ -261,11 +296,13 @@ int getTerminatorPosition(const char* value, ssize_t size) {
     return -1;
 }
 
-void seekSetZero(gpgme_data_t& data) {
+void seekSetZero(gpgme_data_t& data)
+{
     auto off = gpgme_data_seek(data, 0, SEEK_SET);
 //		coutArgsWithSpaceSeparator("off:", off);
 
-    if(off == -1) {
+    if(off == -1)
+    {
         coutWithEndl("gpgme_data_seek error");
     }
 }
@@ -275,56 +312,69 @@ void encrypt(
         gpgme_key_t* keys,
         gpgme_encrypt_flags_t& flags,
         gpgme_data_t& data,
-        gpgme_data_t& dataEncrypt) {
+        gpgme_data_t& dataEncrypt)
+{
     seekSetZero(data);
     seekSetZero(dataEncrypt);
 
     auto errorEncryption = gpgme_op_encrypt(*contextPtr, keys, flags, data, dataEncrypt);
 
-    if(errorEncryption == GPG_ERR_NO_ERROR) {
+    if(errorEncryption == GPG_ERR_NO_ERROR)
+    {
         coutWithEndl("ciphertext created successfully");
     }
-    else if(errorEncryption == GPG_ERR_INV_VALUE) {
+    else if(errorEncryption == GPG_ERR_INV_VALUE)
+    {
         coutWithEndl("ctx, recp, plain or cipher is not a valid pointer");
     }
-    else if(errorEncryption == GPG_ERR_UNUSABLE_PUBKEY) {
+    else if(errorEncryption == GPG_ERR_UNUSABLE_PUBKEY)
+    {
         coutWithEndl("recp contains some invalid recipients");
     }
-    else if(errorEncryption == GPG_ERR_BAD_PASSPHRASE) {
+    else if(errorEncryption == GPG_ERR_BAD_PASSPHRASE)
+    {
         coutWithEndl("passphrase for the symmetric key could not be retrieved");
     }
 }
 
-void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt) {
+void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt)
+{
     seekSetZero(dataEncrypt);
     seekSetZero(dataDecrypt);
 
     auto errorDecryption = gpgme_op_decrypt(*contextPtr, dataEncrypt, dataDecrypt);
 
-    if(errorDecryption == GPG_ERR_NO_ERROR) {
+    if(errorDecryption == GPG_ERR_NO_ERROR)
+    {
         coutWithEndl("ciphertext decrypted successfully");
     }
-    else if(errorDecryption == GPG_ERR_INV_VALUE) {
+    else if(errorDecryption == GPG_ERR_INV_VALUE)
+    {
         coutWithEndl("ctx, plain or cipher is not a valid pointer");
     }
-    else if(errorDecryption == GPG_ERR_NO_DATA) {
+    else if(errorDecryption == GPG_ERR_NO_DATA)
+    {
         coutWithEndl("cipher does not contain any data to decrypt");
     }
-    else if(errorDecryption == GPG_ERR_DECRYPT_FAILED) {
+    else if(errorDecryption == GPG_ERR_DECRYPT_FAILED)
+    {
         coutWithEndl("cipher is not a valid cipher text");
     }
-    else if(errorDecryption == GPG_ERR_BAD_PASSPHRASE) {
+    else if(errorDecryption == GPG_ERR_BAD_PASSPHRASE)
+    {
         coutWithEndl("passphrase for the secret key could not be retrieved");
     }
 }
 
-ssize_t readData(gpgme_data_t& data, char* dataString, size_t size) {
+ssize_t readData(gpgme_data_t& data, char* dataString, size_t size)
+{
     seekSetZero(data);
 
     auto sizeRead = gpgme_data_read(data, dataString, size);
 //		coutArgsWithSpaceSeparator("sizeRead:", sizeRead);
 
-    if(sizeRead == -1) {
+    if(sizeRead == -1)
+    {
         coutWithEndl("gpgme_data_read error");
         //errno
     }
@@ -332,23 +382,27 @@ ssize_t readData(gpgme_data_t& data, char* dataString, size_t size) {
     return sizeRead;
 }
 
-void readData1(gpgme_data_t& data, std::string& dataString) {
+void readData1(gpgme_data_t& data, std::string& dataString)
+{
     seekSetZero(data);
 
     char* p = new char[2];
 
-    while(true) {
+    while(true)
+    {
         auto sizeRead = gpgme_data_read(data, p, 1);
 //			coutArgsWithSpaceSeparator("sizeRead:", sizeRead);
 
-        if(sizeRead == -1) {
+        if(sizeRead == -1)
+        {
             coutWithEndl("gpgme_data_read error");
             //errno
         }
 
         dataString.push_back(*p);
 
-        if(*p == '\0') {
+        if(*p == '\0')
+        {
             break;
         }
     }
@@ -356,7 +410,8 @@ void readData1(gpgme_data_t& data, std::string& dataString) {
     delete[] p;
 }
 
-char* readData2(gpgme_data_t& data) {
+char* readData2(gpgme_data_t& data)
+{
     seekSetZero(data);
 
     size_t blockSize = 10;
@@ -365,7 +420,8 @@ char* readData2(gpgme_data_t& data) {
     char* bufferHead = (char*)malloc(bufferSize);
     char* current = bufferHead;
 
-    while(true) {
+    while(true)
+    {
         sizeRead = gpgme_data_read(data, current, blockSize);
 
 //			coutArgsWithSpaceSeparator("blockSize:", blockSize);
@@ -375,12 +431,14 @@ char* readData2(gpgme_data_t& data) {
 //			printAsChars(bufferHead, bufferSize);
 //			printAsBytes(bufferHead, bufferSize);
 
-        if(sizeRead == -1) {
+        if(sizeRead == -1)
+        {
             coutWithEndl("gpgme_data_read error");
             //errno
         }
 
-        if(sizeRead < blockSize) {
+        if(sizeRead < blockSize)
+        {
             break;
         }
 
@@ -388,7 +446,8 @@ char* readData2(gpgme_data_t& data) {
         bufferHead = (char*)realloc(bufferHead, bufferSize);
         current = bufferHead + bufferSize - blockSize;
 
-        if(bufferHead == nullptr) {
+        if(bufferHead == nullptr)
+        {
             coutWithEndl("realloc failure");
         }
     }
@@ -397,10 +456,12 @@ char* readData2(gpgme_data_t& data) {
     bufferSize = bufferSize - (blockSize - sizeRead);
 //		coutArgsWithSpaceSeparator("bufferSize:", bufferSize);
 
-    if(bufferSize != 0) {
+    if(bufferSize != 0)
+    {
         bufferHead = (char*)realloc(bufferHead, bufferSize);
 
-        if(bufferHead == nullptr) {
+        if(bufferHead == nullptr)
+        {
             coutWithEndl("realloc failure");
         }
     }

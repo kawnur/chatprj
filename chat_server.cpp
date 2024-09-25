@@ -29,10 +29,9 @@ void ServerSession::do_read()
 
                 if(length > 0)
                 {
-                    mainWindow->addTextToChatHistoryWidget("Got: " + QString::fromStdString(str));
-                }
-
-                logArgs("Got:", str);
+                    // mainWindow->addTextToChatHistoryWidget("Got: " + QString::fromStdString(str));
+                    logArgs("Got:", str);
+                }                
 
                 do_write(length);
             }

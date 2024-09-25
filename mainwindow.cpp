@@ -51,15 +51,15 @@ QString WidgetGroup::formatMessage(const Companion* companion, const Message* me
 {
     auto companionId = message->getCompanionId();
     auto authorId = message->getAuthorId();
-    auto time = message->getTime();
-    auto text = message->getText();
+    auto time = QString::fromStdString(message->getTime());
+    auto text = QString::fromStdString(message->getText());
     auto isSent = message->getIsSent();
 
     QString sender = (companionId == authorId)
-            ? companion->getName() : "Me";
+        ? QString::fromStdString(companion->getName()) : "Me";
 
     QString receiver = (companionId == authorId)
-            ? "Me" : companion->getName();
+        ? "Me" : QString::fromStdString(companion->getName());
 
     QString prefix = QString("From %1 to %2 at %3:\n")
             .arg(sender, receiver, time);
@@ -103,8 +103,7 @@ MainWindow* getMainWindowPtr()
 void MainWindow::setLeftPanel()
 {
     QList<SocketInfoBaseWidget*> leftPanelChildren =
-            this->leftPanel_->findChildren<SocketInfoBaseWidget*>(
-                Qt::FindDirectChildrenOnly);
+            this->leftPanel_->findChildren<SocketInfoBaseWidget*>(Qt::FindDirectChildrenOnly);
 
     if(leftPanelChildren.size() == 0)
     {
@@ -113,8 +112,8 @@ void MainWindow::setLeftPanel()
     else
     {
         logArgsWarning(
-                    "leftPanelChildren.size() != 0 "
-                    "at MainWindow::setLeftPanel()");
+            "leftPanelChildren.size() != 0 "
+            "at MainWindow::setLeftPanel()");
     }
 }
 
@@ -236,7 +235,8 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected)
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBase_)->select();
 
-        this->companionNameLabel_->setText(this->selectedCompanion_->getName());
+        this->companionNameLabel_->setText(
+            QString::fromStdString(this->selectedCompanion_->getName()));
         this->companionNameLabel_->show();
 
         widgetGroup->chatHistory_->show();

@@ -19,74 +19,74 @@ class SocketInfo
 public:
 //    SocketInfo() = default;
     SocketInfo() {};
-//    SocketInfo(QString&, QString&, QString&);
-    SocketInfo(QString&, QString&);
-//    SocketInfo(QString&&, QString&&, QString&&);
-    SocketInfo(QString&&, QString&&);
+//    SocketInfo(std::string&, std::string&, std::string&);
+    SocketInfo(std::string&, std::string&);
+//    SocketInfo(std::string&&, std::string&&, std::string&&);
+    SocketInfo(std::string&&, std::string&&);
     SocketInfo(const SocketInfo&);
     SocketInfo(SocketInfo&&) {};
 //    SocketInfo(std::string&, std::string&, std::string&);
-    SocketInfo(std::string&, std::string&);
+    // SocketInfo(std::string&, std::string&);
     ~SocketInfo() = default;
 
     void print();
-//    QString getName();
-    QString getIpaddress() const;
-    QString getPort() const;
+//    std::string getName();
+    std::string getIpaddress() const;
+    std::string getPort() const;
     uint16_t getPortInt() const;
 
 private:
-//    QString name_;
-    QString ipaddress_;
-    QString port_;
+//    std::string name_;
+    std::string ipaddress_;
+    std::string port_;
 };
 
 class Message
 {
 public:
-//    Message(int, int, std::tm, const QString&, bool);
-    Message(int, int, const QString&, const QString&, bool);
+//    Message(int, int, std::tm, const std::string&, bool);
+    Message(int, int, const std::string&, const std::string&, bool);
     ~Message() = default;
 
     int getCompanionId() const;
     int getAuthorId() const;
-    QString getTime() const;
-    QString getText() const;
+    std::string getTime() const;
+    std::string getText() const;
     bool getIsSent() const;
 
 private:
     int companion_id_;
     int author_id_;
 //    std::tm time_;  // TODO add timezone support
-    QString time_;  // TODO add timezone support
-    QString text_;
+    std::string time_;  // TODO add timezone support
+    std::string text_;
     bool isSent_;
 };
 
 class Companion
 {
 public:
-    Companion(int, QString&&);
+    Companion(int, std::string&&);
     ~Companion() = default;
 
     bool initMessaging();
 
     int getId();
-    QString getName() const;
+    std::string getName() const;
     SocketInfo* getSocketInfo() const;
     void setSocketInfo(SocketInfo*);
-//    void addMessage(int, int, std::tm, const QString&, bool);
-    void addMessage(int, int, const QString&, const QString&, bool);
+//    void addMessage(int, int, std::tm, const std::string&, bool);
+    void addMessage(int, int, const std::string&, const std::string&, bool);
     const std::vector<Message>* getMessagesPtr() const;
 
 private:
     int id_;
-    QString name_;
+    std::string name_;
     SocketInfo* socketInfoPtr_;
 
     ChatClient* clientPtr_;
 
-    boost::asio::io_context* io_contextPtr_;
+    // boost::asio::io_context* io_contextPtr_;
     ChatServer* serverPtr_;
 
     std::vector<Message> messages_;
@@ -103,7 +103,7 @@ public:
 
 private:
     bool connectToDb();
-    void buildCompanions();
+    bool buildCompanions();
 
     PGconn* dbConnection_;
     std::vector<Companion*> companions_;

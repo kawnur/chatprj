@@ -15,8 +15,8 @@
 class Companion;
 class MainWindow;
 
-class TextEditWidget : public QTextEdit {
-
+class TextEditWidget : public QTextEdit
+{
     Q_OBJECT
 
 public:
@@ -30,8 +30,8 @@ signals:
     void send();
 };
 
-class IndicatorWidget : public QWidget {
-
+class IndicatorWidget : public QWidget
+{
     Q_OBJECT
 
 public:
@@ -54,8 +54,8 @@ private:
     QPalette* palette_;
 };
 
-class SocketInfoBaseWidget : public QWidget {
-
+class SocketInfoBaseWidget : public QWidget
+{
     Q_OBJECT
 
 public:
@@ -67,18 +67,19 @@ public:
     virtual void set() {};
 };
 
-class SocketInfoWidget : public SocketInfoBaseWidget {
-
+class SocketInfoWidget : public SocketInfoBaseWidget
+{
     Q_OBJECT
 
 public:
     SocketInfoWidget();
-    SocketInfoWidget(QString&, QString&, QString&);
-    SocketInfoWidget(QString&&, QString&&, QString&&);
+    // SocketInfoWidget(QString&, QString&, QString&);
+    // SocketInfoWidget(QString&&, QString&&, QString&&);
 //    SocketInfo(const SocketInfo&) {};
     SocketInfoWidget(const SocketInfoWidget&);
     SocketInfoWidget(SocketInfoWidget&&) {};
     SocketInfoWidget(std::string&, std::string&, std::string&);
+    SocketInfoWidget(std::string&&, std::string&&, std::string&&);
     ~SocketInfoWidget() {};
 
     void print();
@@ -116,8 +117,8 @@ private:
     void mouseReleaseEvent(QMouseEvent*) override;
 };
 
-class SocketInfoStubWidget : public SocketInfoBaseWidget {
-
+class SocketInfoStubWidget : public SocketInfoBaseWidget
+{
     Q_OBJECT
 
 public:

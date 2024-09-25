@@ -8,6 +8,7 @@
 #include <boost/asio.hpp>
 
 //#include "application.hpp"
+#include "logging.hpp"
 #include "mainwindow.hpp"
 
 
@@ -35,14 +36,18 @@ private:
 class ChatServer
 {
 public:
-    ChatServer(boost::asio::io_context& io_context, short port)
-    : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
+    // ChatServer(boost::asio::io_context& io_context, short port)
+    //     : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
+    ChatServer(uint16_t port)
+        : io_context_(), acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
     {
         do_accept();
     }
 //    ChatServer(short);
 
 private:
+    boost::asio::io_context io_context_;
+
     void do_accept();
 
 //    boost::asio::io_context io_context_;

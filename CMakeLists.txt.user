@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 13.0.2, 2024-09-24T17:43:58. -->
+<!-- Written by QtCreator 13.0.2, 2024-09-25T15:26:17. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -361,7 +361,12 @@
     <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-    <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
+    <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes">
+     <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
+     <value type="QString">CHATAPP_DB_PORT=5432</value>
+     <value type="QString">CHATAPP_DB_USER=postgres</value>
+     <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
+    </valuelist>
     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
     <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>

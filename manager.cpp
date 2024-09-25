@@ -1,19 +1,19 @@
 #include "manager.hpp"
 
-//SocketInfo::SocketInfo(QString& name, QString& ipaddress, QString& port) :
+//SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& port) :
 //    name_(name), ipaddress_(ipaddress), port_(port) {
 //}
 
-SocketInfo::SocketInfo(QString& ipaddress, QString& port) :
+SocketInfo::SocketInfo(std::string& ipaddress, std::string& port) :
     ipaddress_(ipaddress), port_(port) {}
 
-//SocketInfo::SocketInfo(QString&& name, QString&& ipaddress, QString&& port) :
+//SocketInfo::SocketInfo(std::string&& name, std::string&& ipaddress, std::string&& port) :
 //    name_(std::move(name)),
 //    ipaddress_(std::move(ipaddress)),
 //    port_(std::move(port)) {
 //}
 
-SocketInfo::SocketInfo(QString&& ipaddress, QString&& port) :
+SocketInfo::SocketInfo(std::string&& ipaddress, std::string&& port) :
     ipaddress_(std::move(ipaddress)),
     port_(std::move(port)) {}
 
@@ -25,10 +25,10 @@ SocketInfo::SocketInfo(const SocketInfo& si)
 }
 
 //SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& port) :
-SocketInfo::SocketInfo(std::string& ipaddress, std::string& port) :
-//    name_(QString::fromStdString(name)),
-    ipaddress_(QString::fromStdString(ipaddress)),
-    port_(QString::fromStdString(port)) {}
+// SocketInfo::SocketInfo(std::string& ipaddress, std::string& port) :
+// //    name_(std::string::fromStdString(name)),
+//     ipaddress_(std::string::fromStdString(ipaddress)),
+//     port_(std::string::fromStdString(port)) {}
 
 void SocketInfo::print()
 {
@@ -37,29 +37,29 @@ void SocketInfo::print()
     logArgs("port:", this->port_);
 }
 
-//QString SocketInfo::getName() {
+//std::string SocketInfo::getName() {
 //    return this->name_;
 //}
 
-QString SocketInfo::getIpaddress() const
+std::string SocketInfo::getIpaddress() const
 {
     return this->ipaddress_;
 }
 
-QString SocketInfo::getPort() const
+std::string SocketInfo::getPort() const
 {
     return this->port_;
 }
 
 uint16_t SocketInfo::getPortInt() const
 {
-    return this->port_.toInt(nullptr, 10);
+    return std::stoi(this->port_, nullptr, 10);
 }
 
 Message::Message(
 //        int companion_id, int author_id, std::tm time,
-        int companion_id, int author_id, const QString& time,
-        const QString& text, bool isSent) :
+        int companion_id, int author_id, const std::string& time,
+        const std::string& text, bool isSent) :
     companion_id_(companion_id), author_id_(author_id), time_(time),
     text_(text), isSent_(isSent) {}
 
@@ -73,12 +73,12 @@ int Message::getAuthorId() const
     return this->author_id_;
 }
 
-QString Message::getTime() const
+std::string Message::getTime() const
 {
     return this->time_;
 }
 
-QString Message::getText() const
+std::string Message::getText() const
 {
     return this->text_;
 }
@@ -88,7 +88,7 @@ bool Message::getIsSent() const
     return this->isSent_;
 }
 
-Companion::Companion(int id, QString&& name) : id_(id), name_(name) {}
+Companion::Companion(int id, std::string&& name) : id_(id), name_(name) {}
 
 bool Companion::initMessaging()
 {
@@ -96,12 +96,18 @@ bool Companion::initMessaging()
 
     try
     {
-        clientPtr_ = new ChatClient;
-        io_contextPtr_ = new boost::asio::io_context;
+        clientPtr_ = new ChatClient(
+            this->socketInfoPtr_->getIpaddress(),
+            this->socketInfoPtr_->getPort());
 
-        serverPtr_ = new ChatServer(
-            *io_contextPtr_,
-            this->socketInfoPtr_->getPortInt());
+        clientPtr_->connect();
+
+        // io_contextPtr_ = new boost::asio::io_context;
+
+        // serverPtr_ = new ChatServer(
+        //     *io_contextPtr_,
+        //     this->socketInfoPtr_->getPortInt());
+        serverPtr_ = new ChatServer(this->socketInfoPtr_->getPortInt());
 
         initialized = true;
     }
@@ -120,8 +126,8 @@ void Companion::setSocketInfo(SocketInfo* socketInfo)
 
 void Companion::addMessage(
 //        int companion_id, int author_id, std::tm time,
-        int companion_id, int author_id, const QString& time,
-        const QString& text, bool isSent)
+        int companion_id, int author_id, const std::string& time,
+        const std::string& text, bool isSent)
 {
     this->messages_.emplace_back(companion_id, author_id, time, text, isSent);
 }
@@ -136,7 +142,7 @@ int Companion::getId()
     return this->id_;
 }
 
-QString Companion::getName() const
+std::string Companion::getName() const
 {
     return this->name_;
 }
@@ -153,11 +159,20 @@ Manager::Manager()
 
 void Manager::set()
 {
-    this->connectToDb();
-    this->buildCompanions();
+    bool connectedToDB = this->connectToDb();
+    logArgs("connectedToDB:", connectedToDB);
 
-    MainWindow* mainWindow = getMainWindowPtr();
-    mainWindow->buildWidgetGroups(&this->companions_);
+    if(connectedToDB)
+    {
+        bool companionsBuilt = this->buildCompanions();
+        logArgs("companionsBuilt:", companionsBuilt);
+
+        if(companionsBuilt)
+        {
+            MainWindow* mainWindow = getMainWindowPtr();
+            mainWindow->buildWidgetGroups(&this->companions_);
+        }
+    }
 }
 
 void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
@@ -169,7 +184,7 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
                 this->companions_.cend(),
                 findCompanion);
 
-    auto text = group->textEdit_->toPlainText();
+    auto text = group->textEdit_->toPlainText().toStdString();
 
     // encrypt message
     // add to DB
@@ -190,7 +205,7 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
     if(!getDataFromDBResult(messageInfo, pushToDBResult, 1))
     {
         int companionId = std::atoi(messageInfo.at(0).at("companion_id"));
-        QString timestampTz { messageInfo.at(0).at("timestamp_tz") };
+        std::string timestampTz { messageInfo.at(0).at("timestamp_tz") };
 
         logArgs("companion_id:", companionId, "timestamp_tz:", timestampTz);
 
@@ -209,14 +224,17 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
     }
 }
 
-void Manager::buildCompanions()
+bool Manager::buildCompanions()
 {
+    bool companionsDataIsOk = true;
+
     PGresult* companionsDBResult = getCompanionsDBResult(dbConnection_);
     logArgs("companionsDBResult:", companionsDBResult);
 
     if(companionsDBResult == nullptr)
     {
-        return;
+        logArgsError("companionsDBResult == nullptr");
+        companionsDataIsOk = false;
     }
 
     std::map<std::string, const char*> companionsDataMapping
@@ -229,55 +247,67 @@ void Manager::buildCompanions()
 
     if(!getDataFromDBResult(companionsData, companionsDBResult, 0))
     {
-        for(auto& data : companionsData)
+        logArgsError("!getDataFromDBResult(companionsData, companionsDBResult, 0)");
+        companionsDataIsOk = false;
+    }
+
+    for(auto& data : companionsData)
+    {
+        int id = std::atoi(data.at(std::string("id")));
+
+        Companion* companion = new Companion(
+            id,
+            std::string(data.at(std::string("name"))));
+
+        this->companions_.push_back(companion);
+
+        PGresult* socketInfoDBResult =
+            getSocketInfoDBResult(dbConnection_, id);  // TODO switch to getName?
+
+        logArgs("socketInfoDBResult:", socketInfoDBResult);
+
+        if(socketInfoDBResult == nullptr)
         {
-            int id = std::atoi(data.at(std::string("id")));
+            logArgsError("socketInfoDBResult == nullptr");
+            companionsDataIsOk = false;
+        }
 
-            Companion* companion = new Companion(
-                id,
-                QString(data.at(std::string("name"))));
-
-            this->companions_.push_back(companion);
-
-            PGresult* socketInfoDBResult =
-                getSocketInfoDBResult(dbConnection_, id);  // TODO switch to getName?
-
-            logArgs("socketInfoDBResult:", socketInfoDBResult);
-
-            if(socketInfoDBResult == nullptr)
-            {
-                return;
-            }
-
-            std::map<std::string, const char*> socketsDataMapping
+        std::map<std::string, const char*> socketsDataMapping
             {
                 {std::string("ipaddress"), nullptr},
                 {std::string("port"), nullptr}
             };
 
-            std::vector<std::map<std::string, const char*>> socketsData { socketsDataMapping };
+        std::vector<std::map<std::string, const char*>> socketsData { socketsDataMapping };
 
-            if(!getDataFromDBResult(socketsData, socketInfoDBResult, 1))
+        if(!getDataFromDBResult(socketsData, socketInfoDBResult, 1))
+        {
+            logArgsError("!getDataFromDBResult(socketsData, socketInfoDBResult, 1)");
+            companionsDataIsOk = false;
+        }
+
+        if(socketsData.size() == 0)
+        {
+            continue;
+        }
+
+        SocketInfo* socketInfo = new SocketInfo(
+            socketsData.at(0).at("ipaddress"),
+            socketsData.at(0).at("port"));
+
+        companion->setSocketInfo(socketInfo);
+
+        if(companion->getId() != 0)  // TODO
+        {
+            PGresult* messagesDBResult = getMessagesDBResult(dbConnection_, id);
+
+            if(messagesDBResult == nullptr)
             {
-                if(socketsData.size() == 0)
-                {
-                    continue;
-                }
+                logArgsError("messagesDBResult == nullptr");
+                companionsDataIsOk = false;
+            }
 
-                SocketInfo* socketInfo = new SocketInfo(
-                    socketsData.at(0).at("ipaddress"),
-                    socketsData.at(0).at("port"));
-
-                companion->setSocketInfo(socketInfo);
-
-                PGresult* messagesDBResult = getMessagesDBResult(dbConnection_, id);
-
-                if(messagesDBResult == nullptr)
-                {
-                    return;
-                }
-
-                std::map<std::string, const char*> messagesDataMapping
+            std::map<std::string, const char*> messagesDataMapping
                 {
                     {std::string("companion_id"), nullptr},
                     {std::string("author_id"), nullptr},
@@ -286,29 +316,28 @@ void Manager::buildCompanions()
                     {std::string("issent"), nullptr},
                 };
 
-                std::vector<std::map<std::string, const char*>> messagesData { messagesDataMapping };
+            std::vector<std::map<std::string, const char*>> messagesData { messagesDataMapping };
 
-                if(!getDataFromDBResult(messagesData, messagesDBResult, 0))
-                {
-                    for(auto& message : messagesData)
-                    {
-                        companion->addMessage(
-                            id,
-                            std::atoi(message.at("author_id")),
-                            message.at("timestamp_tz"),
-                            message.at("message"),
-                            message.at("issent"));
-                    }
-                }
+            if(!getDataFromDBResult(messagesData, messagesDBResult, 0))
+            {
+                logArgsWarning("!getDataFromDBResult(messagesData, messagesDBResult, 0)");
             }
-        }
 
-        for(auto& companionPtr : companions_)
-        {
-            companionPtr->initMessaging();
+            for(auto& message : messagesData)
+            {
+                companion->addMessage(
+                    id,
+                    std::atoi(message.at("author_id")),
+                    message.at("timestamp_tz"),
+                    message.at("message"),
+                    message.at("issent"));
+            }
+
+            companion->initMessaging();
         }
     }
-    else {}
+
+    return companionsDataIsOk;
 }
 
 bool Manager::connectToDb()
@@ -317,11 +346,11 @@ bool Manager::connectToDb()
     dbConnection_ = getDBConnection();
 
     ConnStatusType status = PQstatus(dbConnection_);
-    logArgs("status: ", std::to_string(status));
+    // logArgs("DB connection status: ", status);
 
-    if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
+    if(status == ConnStatusType::CONNECTION_OK)  // TODO raise exception
     {
-        ("DB connection status: CONNECTION_BAD");
+        connected = true;
     }
 
     return connected;

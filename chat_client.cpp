@@ -2,7 +2,8 @@
 
 using boost::asio::ip::tcp;
 
-ChatClient::ChatClient()
+ChatClient::ChatClient(std::string&& ipaddress, std::string&& port) :
+    ipaddress_(ipaddress), port_(port), io_context_(), socket_(io_context_), resolver_(io_context_)
 {
 //    MainWindow* mainWindow = MainWindow::instance();
 //    MainWindow* mainWindow = getMainWindowPtr();
@@ -11,45 +12,69 @@ ChatClient::ChatClient()
 //    mainWindow->addText("Enter message: ");
 }
 
-int ChatClient::send(QString text)
+bool ChatClient::connect()
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    try
+    {
+        // boost::asio::io_context io_context_;
+        // tcp::socket socket_ { io_context_ };
+        // tcp::resolver resolver_ { io_context_ };
+        //        boost::asio::connect(s, resolver.resolve("localhost", "5002"));
+        //        boost::asio::connect(s, resolver.resolve("0.0.0.0", "5002"));
+        //        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
+        // boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
+        //        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
+        boost::asio::connect(this->socket_, this->resolver_.resolve(this->ipaddress_, this->port_));
+
+        // mainWindow->addTextToChatHistoryWidget("s.is_open(): "
+        //                     + QString::fromStdString(std::to_string(s.is_open())));
+        logArgs("socket_.is_open():", socket_.is_open());
+    }
+    catch(std::exception& e)
+    {
+        logArgsException(e.what());
+    }
+
+    return 0;
+}
+
+int ChatClient::send(std::string text)
+{
+    // MainWindow* mainWindow = getMainWindowPtr();
 
     try
     {
-        boost::asio::io_context io_context;
-        tcp::socket s { io_context };
-        tcp::resolver resolver(io_context);
-//        boost::asio::connect(s, resolver.resolve("localhost", "5002"));
-//        boost::asio::connect(s, resolver.resolve("0.0.0.0", "5002"));
-//        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
-        boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
-//        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
-        mainWindow->addTextToChatHistoryWidget("s.is_open(): "
-                            + QString::fromStdString(std::to_string(s.is_open())));
-
         char request[max_length];
 
-        mainWindow->addTextToChatHistoryWidget(QString("request: ") + QString(text));
+        // mainWindow->addTextToChatHistoryWidget(QString("request: ") + QString::fromStdString(text));
+        logArgs("request:", text);
 
-        auto textStdString = text.toStdString();
-        size_t request_length = textStdString.size();
-        std::strcpy(request, textStdString.data());
+        // auto textStdString = text.toStdString();
+        // size_t request_length = textStdString.size();
+        // std::strcpy(request, textStdString.data());
+        std::strcpy(request, text.data());
 
-        boost::asio::write(s, boost::asio::buffer(request, request_length));
+        // boost::asio::write(s, boost::asio::buffer(request, request_length));
+        boost::asio::write(this->socket_, boost::asio::buffer(request, text.size()));
 
         char reply[max_length];
-        size_t reply_length = boost::asio::read(s,
-            boost::asio::buffer(reply, request_length));
+        // size_t reply_length = boost::asio::read(s,
+        //                                         boost::asio::buffer(reply, request_length));
+        size_t reply_length = boost::asio::read(
+            this->socket_,
+            boost::asio::buffer(reply, text.size()));
 
         std::string str(reply, reply_length);
-        mainWindow->addTextToChatHistoryWidget("Reply is: " + QString::fromStdString(str));
-        mainWindow->addTextToChatHistoryWidget("Enter message: ");
+        // mainWindow->addTextToChatHistoryWidget("Reply is: " + QString::fromStdString(str));
+        logArgs("reply:", str);
+        // mainWindow->addTextToChatHistoryWidget("Enter message: ");
+        logArgs("Enter message:");
     }
 
     catch(std::exception& e)
     {
-        mainWindow->addTextToChatHistoryWidget("Exception: " + QString(e.what()));
+        // mainWindow->addTextToChatHistoryWidget("Exception: " + QString(e.what()));
+        logArgsException(e.what());
     }
 
     return 0;

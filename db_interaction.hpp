@@ -17,13 +17,11 @@ PGconn* getDBConnection();
 PGresult* getCompanionsDBResult(PGconn*);
 PGresult* getSocketInfoDBResult(PGconn*, int);
 PGresult* getMessagesDBResult(PGconn*, int);
-PGresult* pushMessageToDBAndReturn(PGconn*, const QString&, const QString&);
+PGresult* pushMessageToDBAndReturn(PGconn*, const std::string&, const std::string&);
 
 void logUnknownField(const PGresult*, int, int);
 
 bool getDataFromDBResult(
     std::vector<std::map<std::string, const char*>>&, const PGresult*, int);
-
-void testQString();
 
 #endif // DB_INTERACTION_HPP

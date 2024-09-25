@@ -3,7 +3,7 @@
 PGconn* getDBConnection()
 {
     // TODO make connection to db secure
-    MainWindow* mainWindow = getMainWindowPtr();
+    // MainWindow* mainWindow = getMainWindowPtr();
 
     PGconn* dbConnection = nullptr;
 
@@ -13,15 +13,11 @@ PGconn* getDBConnection()
         const char* dbPort { std::getenv("CHATAPP_DB_PORT") };
         const char* dbLogin { std::getenv("CHATAPP_DB_USER") };
         const char* dbPassword { std::getenv("CHATAPP_DB_PASSWORD") };
-        // const char* dbAddress = "172.21.0.12";
-        // const char* dbPort = "5432";
-        // const char* dbLogin = "postgres";
-        // const char* dbPassword = "postgres123";
 
-        logArgs("address:", QString(dbAddress));
-        logArgs("port:", QString(dbPort));
-        logArgs("login:", QString(dbLogin));
-        logArgs("password:", QString(dbPassword));
+        logArgs("DB connection address:", dbAddress);
+        logArgs("DB connection port:", dbPort);
+        logArgs("DB connection login:", dbLogin);
+        logArgs("DB connection password:", dbPassword);
 
         dbConnection = PQsetdbLogin(
                     dbAddress,
@@ -33,21 +29,16 @@ PGconn* getDBConnection()
                     dbPassword);
 
         ConnStatusType status = PQstatus(dbConnection);
-        logArgs("status: ", std::to_string(status));
-//        logArgs("status: ", status);
+        logArgs("DB connection status: ", std::to_string(status));
 
         if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
         {
-            logArgs("DB connection status: CONNECTION_BAD");
+            logArgsError("DB connection status: CONNECTION_BAD");
         }
-
-//        return dbConnection;
     }
     catch(std::exception& e)
     {
-//        coutWithEndl(e.what());
-//        mainWindow->addTextToCentralPanel(QString(e.what()));
-        logLine(QString(e.what()));
+        logLine(e.what());
     }
 
     return dbConnection;
@@ -67,42 +58,46 @@ PGresult* getCompanionsDBResult(PGconn* dbConnection)
 
 PGresult* getSocketInfoDBResult(PGconn* dbConnection, int id)
 {
-    QString command = QString(
+    std::string command = std::string(
             "SELECT ipaddress, port FROM sockets "
-            "WHERE id = %1").arg(QString::fromStdString(std::to_string(id)));
+            "WHERE id = ") + std::to_string(id);
 
-    PGresult* result = PQexec(dbConnection, qPrintable(command));
+    logArgs(command);
+
+    PGresult* result = PQexec(dbConnection, command.data());
     return result;
 }
 
 // TODO test sorting by timestamp with different timezones
 PGresult* getMessagesDBResult(PGconn* dbConnection, int id)
 {
-    QString command = QString(
+    std::string command = std::string(
             "SELECT author_id, timestamp_tz, message, issent "
-            "FROM messages WHERE companion_id = %1 "
-            "ORDER BY timestamp_tz LIMIT 50")
-            .arg(QString::fromStdString(std::to_string(id)));
+            "FROM messages WHERE companion_id = ")
+            + std::to_string(id)
+            + std::string(" ORDER BY timestamp_tz LIMIT 50");
 
     logArgs(command);
 
-    PGresult* result = PQexec(dbConnection, qPrintable(command));
+    PGresult* result = PQexec(dbConnection, command.data());
     return result;
 }
 
 PGresult* pushMessageToDBAndReturn(
-        PGconn* dbConnection, const QString& name, const QString& message)
+    PGconn* dbConnection, const std::string& name, const std::string& message)
 {
-    QString command = QString(
+    std::string command = std::string(
             "insert into messages "
             "(companion_id, author_id, timestamp_tz, message, issent) "
-            "values ((select id from companions where name = '%1'), 1, "
-            "now(), '%2', false) returning companion_id, timestamp_tz")
-            .arg(name, message);
+            "values ((select id from companions where name = '")
+            + name
+            + std::string("'), 1, now(), '")
+            + message
+            + std::string("', false) returning companion_id, timestamp_tz");
 
     logArgs(command);
 
-    PGresult* result = PQexec(dbConnection, qPrintable(command));
+    PGresult* result = PQexec(dbConnection, command.data());
     return result;
 }
 
@@ -119,7 +114,7 @@ bool getDataFromDBResult(
     const PGresult* result,
     int maxTuples)
 {
-    bool foundUnknownFields = false;
+    bool dataIsOk = false;
 
     int ntuples = PQntuples(result);
     int nfields = PQnfields(result);
@@ -128,7 +123,7 @@ bool getDataFromDBResult(
     if(ntuples == 0)
     {
         data.pop_back();
-        return foundUnknownFields;
+        return dataIsOk;
     }
 
     if(maxTuples == 1 and ntuples > 1)
@@ -141,6 +136,8 @@ bool getDataFromDBResult(
     {
         data.push_back(data.at(0));
     }
+
+    dataIsOk = true;
 
     for(int i = 0; i < ntuples; i++)
     {
@@ -162,7 +159,7 @@ bool getDataFromDBResult(
             }
             else
             {
-                foundUnknownFields = true;
+                dataIsOk = false;
                 logUnknownField(result, i, j);
             }
         }
@@ -170,23 +167,5 @@ bool getDataFromDBResult(
         logArgs(logString);
     }
 
-    return foundUnknownFields;
-}
-
-void testQString()
-{
-    QString s1 = QString(
-            "insert into messages "
-            "(companion_id, timestamp_tz, message, issent) "
-            "values ((select id from companions where name = %1), "
-            "now(), %2, false) returning id").arg("'client2'").arg("'test'");
-
-    QString s2 = QString(
-            "insert into messages "
-            "(companion_id, timestamp_tz, message, issent) "
-            "values ((select id from companions where name = %1), "
-            "now(), %2, false) returning id").arg("'client2'", "'test'");
-
-    coutArgsWithSpaceSeparator("s1:", s1);
-    coutArgsWithSpaceSeparator("s2:", s2);
+    return dataIsOk;
 }

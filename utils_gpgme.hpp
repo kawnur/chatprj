@@ -7,7 +7,8 @@
 #include "utils_cout.hpp"
 
 
-extern "C" {
+extern "C"
+{
 #include <gpgme.h>
 };
 
@@ -24,20 +25,25 @@ extern "C" {
 
 //};
 
-namespace TestGpgme {
-	template<typename T, typename U> void coutFuncResult(T (*type)(int), U (*func)(T)) {
+namespace TestGpgme
+{
+    template<typename T, typename U> void coutFuncResult(T (*type)(int), U (*func)(T))
+    {
 		int i = 0;
 
-		while(true) {
+        while(true)
+        {
 //			auto type = gpgme_protocol_t(i);
 			auto typeVal = type(i);
 //			auto protocol = gpgme_get_protocol_name(type);
 			auto result = func(typeVal);
 
-			if(result != nullptr) {
+            if(result != nullptr)
+            {
 				coutArgsWithSpaceSeparator(i, std::string(result));
 			}
-			else {
+            else
+            {
 				break;
 			}
 
@@ -49,8 +55,9 @@ namespace TestGpgme {
     void coutEngineInfo(gpgme_engine_info_t*);
     std::string getStringFromCharPtr(const char*);
 
-//	template<typename T> std::optional<std::string, T> getPtrOrString(T* t) {
-	template<typename T> auto getPtrOrString(T* t) {
+//	template<typename T> std::optional<std::string, T> getPtrOrString(T* t)
+    template<typename T> auto getPtrOrString(T* t)
+    {
 		return (t == nullptr) ? std::string("nullptr") : t;
 	}
 
