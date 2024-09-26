@@ -45,7 +45,7 @@ IndicatorWidget::IndicatorWidget(QWidget* parent)
     offColor_ = QColor(QColorConstants::DarkRed);
     meColor_ = QColor(0x6a6a6a);
 
-    palette_ = new QPalette();
+    palette_ = new QPalette;  // TODO set parent or delete
     palette_->setColor(QPalette::Window, offColor_);
 
     setAutoFillBackground(true);
@@ -164,7 +164,7 @@ void SocketInfoWidget::set()
 {
     this->selectedColor_ = QColor(QColorConstants::DarkGray);
     this->unselectedColor_ = QColor(QColorConstants::Gray);
-    this->palette_ = new QPalette();
+    this->palette_ = new QPalette;  // TODO set parent or delete
     this->palette_->setColor(QPalette::Window, this->unselectedColor_);
     this->setAutoFillBackground(true);
     this->setPalette(*palette_);
@@ -202,7 +202,7 @@ void SocketInfoWidget::set()
 
 void SocketInfoWidget::changeColor(QColor& color)
 {
-    this->palette_ = new QPalette();  // TODO leak
+    this->palette_ = new QPalette;  // TODO set parent or delete
     this->palette_->setColor(QPalette::Window, color);
 
     this->setAutoFillBackground(true);

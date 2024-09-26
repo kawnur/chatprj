@@ -7,9 +7,9 @@ WidgetGroup::WidgetGroup(const Companion* companion)
     const SocketInfo* socketInfo = companion->getSocketInfo();
 
     SocketInfoWidget* widget = new SocketInfoWidget(
-                companion->getName(),
-                socketInfo->getIpaddress(),
-                socketInfo->getPort());
+        companion->getName(),
+        socketInfo->getIpaddress(),
+        socketInfo->getPort());
 
     socketInfoBase_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
 
@@ -20,7 +20,7 @@ WidgetGroup::WidgetGroup(const Companion* companion)
     this->buildChatHistory(companion);
     chatHistory_->hide();
 
-    chatHistoryPalette_ = new QPalette();
+    chatHistoryPalette_ = new QPalette;  // TODO set parent or delete
     chatHistoryPalette_->setColor(QPalette::Base, QColorConstants::LightGray);
     chatHistoryPalette_->setColor(QPalette::Text, QColorConstants::Black);
     chatHistory_->setAutoFillBackground(true);

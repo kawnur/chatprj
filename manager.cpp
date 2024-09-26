@@ -90,6 +90,13 @@ bool Message::getIsSent() const
 
 Companion::Companion(int id, std::string&& name) : id_(id), name_(name) {}
 
+Companion::~Companion()
+{
+    delete socketInfoPtr_;
+    delete clientPtr_;
+    delete serverPtr_;
+}
+
 bool Companion::initMessaging()
 {
     bool initialized = false;
@@ -155,6 +162,14 @@ SocketInfo* Companion::getSocketInfo() const
 Manager::Manager()
 {
     dbConnection_ = nullptr;
+}
+
+Manager::~Manager()
+{
+    for(auto& companion : this->companions_)
+    {
+        delete companion;
+    }
 }
 
 void Manager::set()

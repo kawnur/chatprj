@@ -67,7 +67,7 @@ class Companion
 {
 public:
     Companion(int, std::string&&);
-    ~Companion() = default;
+    ~Companion();
 
     bool initMessaging();
 
@@ -96,7 +96,7 @@ class Manager : public QObject
 {
 public:
     Manager();
-    ~Manager() {};
+    ~Manager();
 
     void set();
     void sendMessage(const Companion*, WidgetGroup*);
