@@ -105,8 +105,8 @@ private:
     bool connectToDb();
     bool buildCompanions();
 
-    PGconn* dbConnection_;
-    std::vector<Companion*> companions_;
+    PGconn* dbConnectionPtr_;
+    std::vector<Companion*> companionPtrs_;
 };
 
 Manager* getManagerPtr();

@@ -45,11 +45,11 @@ IndicatorWidget::IndicatorWidget(QWidget* parent)
     offColor_ = QColor(QColorConstants::DarkRed);
     meColor_ = QColor(0x6a6a6a);
 
-    palette_ = new QPalette;  // TODO set parent or delete
-    palette_->setColor(QPalette::Window, offColor_);
+    palettePtr_ = new QPalette;  // TODO set parent or delete
+    palettePtr_->setColor(QPalette::Window, offColor_);
 
     setAutoFillBackground(true);
-    setPalette(*palette_);
+    setPalette(*palettePtr_);
 }
 
 IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator)
@@ -57,28 +57,28 @@ IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator)
     isOn_ = indicator->isOn_;
     onColor_ = indicator->onColor_;
     offColor_ = indicator->offColor_;
-    palette_ = indicator->palette_;
+    palettePtr_ = indicator->palettePtr_;
 }
 
 void IndicatorWidget::setOn()
 {
     this->isOn_ = true;
-    this->palette_->setColor(QPalette::Window, onColor_);
-    this->setPalette(*this->palette_);
+    this->palettePtr_->setColor(QPalette::Window, onColor_);
+    this->setPalette(*this->palettePtr_);
 }
 
 void IndicatorWidget::setOff()
 {
     this->isOn_ = false;
-    this->palette_->setColor(QPalette::Window, offColor_);
-    this->setPalette(*this->palette_);
+    this->palettePtr_->setColor(QPalette::Window, offColor_);
+    this->setPalette(*this->palettePtr_);
 }
 
 void IndicatorWidget::setMe()
 {
     this->isOn_ = false;
-    this->palette_->setColor(QPalette::Window, meColor_);
-    this->setPalette(*this->palette_);
+    this->palettePtr_->setColor(QPalette::Window, meColor_);
+    this->setPalette(*this->palettePtr_);
 }
 
 void IndicatorWidget::toggle()
@@ -164,24 +164,24 @@ void SocketInfoWidget::set()
 {
     this->selectedColor_ = QColor(QColorConstants::DarkGray);
     this->unselectedColor_ = QColor(QColorConstants::Gray);
-    this->palette_ = new QPalette;  // TODO set parent or delete
-    this->palette_->setColor(QPalette::Window, this->unselectedColor_);
+    this->palettePtr_ = new QPalette;  // TODO set parent or delete
+    this->palettePtr_->setColor(QPalette::Window, this->unselectedColor_);
     this->setAutoFillBackground(true);
-    this->setPalette(*palette_);
+    this->setPalette(*palettePtr_);
 
-    this->layout_ = new QHBoxLayout(this);
-    this->indicator_ = new IndicatorWidget(this);
-    this->nameLabel_ = new QLabel(this->name_, this);
-    this->ipaddressLabel_ = new QLabel(this->ipaddress_, this);
-    this->portLabel_ = new QLabel(this->port_, this);
-    this->editButton_ = new QPushButton("Edit", this);
-    this->connectButton_ = new QPushButton("Connect", this);
+    this->layoutPtr_ = new QHBoxLayout(this);
+    this->indicatorPtr_ = new IndicatorWidget(this);
+    this->nameLabelPtr_ = new QLabel(this->name_, this);
+    this->ipaddressLabelPtr_ = new QLabel(this->ipaddress_, this);
+    this->portLabelPtr_ = new QLabel(this->port_, this);
+    this->editButtonPtr_ = new QPushButton("Edit", this);
+    this->connectButtonPtr_ = new QPushButton("Connect", this);
 
     if(this->name_ == "me")
     {
-        this->indicator_->setMe();
-        this->editButton_->hide();
-        this->connectButton_->hide();
+        this->indicatorPtr_->setMe();
+        this->editButtonPtr_->hide();
+        this->connectButtonPtr_->hide();
     }
 
 //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
@@ -189,12 +189,12 @@ void SocketInfoWidget::set()
 //                toggleIndicatorButton_, &QPushButton::pressed,
 //                indicator_, &IndicatorWidget::toggle);
 
-    this->layout_->addWidget(this->indicator_);
-    this->layout_->addWidget(this->nameLabel_);
-    this->layout_->addWidget(this->ipaddressLabel_);
-    this->layout_->addWidget(this->portLabel_);
-    this->layout_->addWidget(this->editButton_);
-    this->layout_->addWidget(this->connectButton_);
+    this->layoutPtr_->addWidget(this->indicatorPtr_);
+    this->layoutPtr_->addWidget(this->nameLabelPtr_);
+    this->layoutPtr_->addWidget(this->ipaddressLabelPtr_);
+    this->layoutPtr_->addWidget(this->portLabelPtr_);
+    this->layoutPtr_->addWidget(this->editButtonPtr_);
+    this->layoutPtr_->addWidget(this->connectButtonPtr_);
 //    layout_->addWidget(toggleIndicatorButton_);
 
     // connect
@@ -202,11 +202,11 @@ void SocketInfoWidget::set()
 
 void SocketInfoWidget::changeColor(QColor& color)
 {
-    this->palette_ = new QPalette;  // TODO set parent or delete
-    this->palette_->setColor(QPalette::Window, color);
+    this->palettePtr_ = new QPalette;  // TODO set parent or delete
+    this->palettePtr_->setColor(QPalette::Window, color);
 
     this->setAutoFillBackground(true);
-    this->setPalette(*this->palette_);
+    this->setPalette(*this->palettePtr_);
 }
 
 void SocketInfoWidget::select()
@@ -253,10 +253,10 @@ SocketInfoStubWidget::SocketInfoStubWidget()
 
 void SocketInfoStubWidget::set()
 {
-    this->layout_ = new QHBoxLayout(this);
-    this->markLabel_ = new QLabel(this->mark_, this);
+    this->layoutPtr_ = new QHBoxLayout(this);
+    this->markLabelPtr_ = new QLabel(this->mark_, this);
 
-    this->layout_->addWidget(this->markLabel_);
+    this->layoutPtr_->addWidget(this->markLabelPtr_);
 }
 
 //SocketInfoStubWidget::~SocketInfoStubWidget() {

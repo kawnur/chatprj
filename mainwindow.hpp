@@ -35,10 +35,10 @@ public:
     WidgetGroup(const Companion*);
     ~WidgetGroup() = default;
 
-    SocketInfoBaseWidget* socketInfoBase_;
-    QPlainTextEdit* chatHistory_;
-    QPalette* chatHistoryPalette_;
-    TextEditWidget* textEdit_;
+    SocketInfoBaseWidget* socketInfoBasePtr_;
+    QPlainTextEdit* chatHistoryPtr_;
+    QPalette* chatHistoryPalettePtr_;
+    TextEditWidget* textEditPtr_;
 
     QString formatMessage(const Companion*, const Message*);
     void addMessageToChatHistory(const QString&);
@@ -61,19 +61,19 @@ private:
 
     // TODO rename panel child widgets according its functionality
 
-    QWidget* centralWidget_;
-    QHBoxLayout* centralWidgetLayout_;
+    QWidget* centralWidgetPtr_;
+    QHBoxLayout* centralWidgetLayoutPtr_;
 
     // left panel
 
-    QWidget* leftPanel_;
-    QVBoxLayout* leftPanelLayout_;
+    QWidget* leftPanelPtr_;
+    QVBoxLayout* leftPanelLayoutPtr_;
 //    QLineEdit* test_;
 
     // central panel
 
-    QWidget* centralPanel_;
-    QVBoxLayout* centralPanelLayout_;
+    QWidget* centralPanelPtr_;
+    QVBoxLayout* centralPanelLayoutPtr_;
 //    QGraphicsScene* graphicsScene_;
 //    QGraphicsView* graphicsView_;
 //    QRectF* rect_;
@@ -81,20 +81,20 @@ private:
 //    int linesCount_;
 //    QFont* font_;
 
-    QLabel* companionNameLabel_;
-    QPalette* companionNameLabelPalette_;
-    QPlainTextEdit* chatHistoryWidgetStub_;
-    QPalette* chatHistoryWidgetStubPalette_;
+    QLabel* companionNameLabelPtr_;
+    QPalette* companionNameLabelPalettePtr_;
+    QPlainTextEdit* chatHistoryWidgetStubPtr_;
+    QPalette* chatHistoryWidgetStubPalettePtr_;
 
-    TextEditWidget* textEditStub_;
+    TextEditWidget* textEditStubPtr_;
 //    QPushButton* button_;
 
     // right panel
 
-    QWidget* rightPanel_;
-    QVBoxLayout* rightPanelLayout_;
-    QPlainTextEdit* appLogWidget_;
-    QPalette* appLogWidgetPalette_;
+    QWidget* rightPanelPtr_;
+    QVBoxLayout* rightPanelLayoutPtr_;
+    QPlainTextEdit* appLogWidgetPtr_;
+    QPalette* appLogWidgetPalettePtr_;
 
 //    QPushButton* testPlainTextEditButton_;
 

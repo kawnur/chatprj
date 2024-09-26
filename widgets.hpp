@@ -51,7 +51,7 @@ private:
     QColor onColor_;
     QColor offColor_;
     QColor meColor_;
-    QPalette* palette_;
+    QPalette* palettePtr_;
 };
 
 class SocketInfoBaseWidget : public QWidget
@@ -89,7 +89,7 @@ public:
     void unselect();
 
 private:
-    Companion* companion_;
+    Companion* companionPtr_;
 
     QString name_;
     QString ipaddress_;
@@ -97,16 +97,16 @@ private:
 
     QColor selectedColor_;
     QColor unselectedColor_;
-    QPalette* palette_;
+    QPalette* palettePtr_;
 
-    QHBoxLayout* layout_;
+    QHBoxLayout* layoutPtr_;
 
-    IndicatorWidget* indicator_;
-    QLabel* nameLabel_;
-    QLabel* ipaddressLabel_;
-    QLabel* portLabel_;
-    QPushButton* editButton_;
-    QPushButton* connectButton_;
+    IndicatorWidget* indicatorPtr_;
+    QLabel* nameLabelPtr_;
+    QLabel* ipaddressLabelPtr_;
+    QLabel* portLabelPtr_;
+    QPushButton* editButtonPtr_;
+    QPushButton* connectButtonPtr_;
 //    QPushButton* toggleIndicatorButton_;
 
     void set() override;
@@ -129,8 +129,8 @@ public:
 
 private:
     QString mark_;
-    QHBoxLayout* layout_;
-    QLabel* markLabel_;
+    QHBoxLayout* layoutPtr_;
+    QLabel* markLabelPtr_;
 
     void set() override;
 };

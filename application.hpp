@@ -25,8 +25,8 @@ public:
     // boost::asio::io_context* io_context_;
     // ChatServer* server_;
 
-    MainWindow* mainWindow_;
-    Manager* manager_;
+    MainWindow* mainWindowPtr_;
+    Manager* managerPtr_;
 
 //    ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {
 //        client_ = new ChatClient;

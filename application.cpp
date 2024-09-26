@@ -2,7 +2,7 @@
 
 ChatApp::~ChatApp()
 {
-    delete manager_;
+    delete managerPtr_;
 }
 
 void ChatApp::set()
@@ -14,13 +14,13 @@ void ChatApp::set()
 
     // server_ = new ChatServer(*io_context_, 5002);
 
-    mainWindow_ = new MainWindow;
-    mainWindow_->set();
+    mainWindowPtr_ = new MainWindow;
+    mainWindowPtr_->set();
 
-    manager_ = new Manager;
-    manager_->set();
+    managerPtr_ = new Manager;
+    managerPtr_->set();
 
-    mainWindow_->show();
+    mainWindowPtr_->show();
 
 //    testQString();  // TODO remove
 }
