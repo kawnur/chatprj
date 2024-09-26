@@ -16,6 +16,8 @@ bool ChatClient::connect()
 {
     try
     {
+        logArgs("ChatClient connects to", this->ipaddress_, this->port_);
+
         // boost::asio::io_context io_context_;
         // tcp::socket socket_ { io_context_ };
         // tcp::resolver resolver_ { io_context_ };
@@ -44,31 +46,32 @@ int ChatClient::send(std::string text)
 
     try
     {
-        char request[max_length];
+        // char request[max_length] = { 0 };
 
         // mainWindow->addTextToChatHistoryWidget(QString("request: ") + QString::fromStdString(text));
-        logArgs("request:", text);
+        // logArgs("request:", text);
 
         // auto textStdString = text.toStdString();
         // size_t request_length = textStdString.size();
         // std::strcpy(request, textStdString.data());
-        std::strcpy(request, text.data());
+        // std::strcpy(request, text.data());
 
         // boost::asio::write(s, boost::asio::buffer(request, request_length));
-        boost::asio::write(this->socket_, boost::asio::buffer(request, text.size()));
+        // boost::asio::write(this->socket_, boost::asio::buffer(request, text.size()));
+        boost::asio::write(this->socket_, boost::asio::buffer(text.data(), text.size()));
 
-        char reply[max_length];
-        // size_t reply_length = boost::asio::read(s,
-        //                                         boost::asio::buffer(reply, request_length));
-        size_t reply_length = boost::asio::read(
-            this->socket_,
-            boost::asio::buffer(reply, text.size()));
+        // char reply[max_length] = { 0 };
+        // // size_t reply_length = boost::asio::read(s,
+        // //                                         boost::asio::buffer(reply, request_length));
+        // size_t reply_length = boost::asio::read(
+        //     this->socket_,
+        //     boost::asio::buffer(reply, text.size()));
 
-        std::string str(reply, reply_length);
-        // mainWindow->addTextToChatHistoryWidget("Reply is: " + QString::fromStdString(str));
-        logArgs("reply:", str);
-        // mainWindow->addTextToChatHistoryWidget("Enter message: ");
-        logArgs("Enter message:");
+        // std::string str(reply, reply_length);
+        // // mainWindow->addTextToChatHistoryWidget("Reply is: " + QString::fromStdString(str));
+        // logArgs("reply:", str);
+        // // mainWindow->addTextToChatHistoryWidget("Enter message: ");
+        // logArgs("Enter message:");
     }
 
     catch(std::exception& e)

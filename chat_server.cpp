@@ -66,6 +66,12 @@ void ServerSession::do_write(std::size_t length)
 //    do_accept();
 //}
 
+void ChatServer::run()
+{
+    // this->io_context_.run();
+    std::thread([this](){ this->io_context_.run(); }).detach();
+}
+
 void ChatServer::do_accept()
 {
     acceptor_.async_accept(

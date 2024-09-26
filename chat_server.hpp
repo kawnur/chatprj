@@ -45,6 +45,8 @@ public:
     }
 //    ChatServer(short);
 
+    void run();
+
 private:
     boost::asio::io_context io_context_;
 

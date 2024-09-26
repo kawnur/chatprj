@@ -103,18 +103,20 @@ bool Companion::initMessaging()
 
     try
     {
-        clientPtr_ = new ChatClient(
-            this->socketInfoPtr_->getIpaddress(),
-            this->socketInfoPtr_->getPort());
-
-        clientPtr_->connect();
-
         // io_contextPtr_ = new boost::asio::io_context;
 
         // serverPtr_ = new ChatServer(
         //     *io_contextPtr_,
         //     this->socketInfoPtr_->getPortInt());
-        serverPtr_ = new ChatServer(this->socketInfoPtr_->getPortInt());
+        this->serverPtr_ = new ChatServer(this->socketInfoPtr_->getPortInt());
+
+        this->serverPtr_->run();
+
+        this->clientPtr_ = new ChatClient(
+            this->socketInfoPtr_->getIpaddress(),
+            this->socketInfoPtr_->getPort());
+
+        this->clientPtr_->connect();
 
         initialized = true;
     }
@@ -142,6 +144,12 @@ void Companion::addMessage(
 const std::vector<Message>* Companion::getMessagesPtr() const
 {
     return &this->messages_;
+}
+
+bool Companion::sendLastMessage()
+{
+    auto text = this->messages_.back().getText();
+    auto sendResult = this->clientPtr_->send(text);
 }
 
 int Companion::getId()
@@ -195,19 +203,20 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
     auto findCompanion = [&](Companion* cmp){ return cmp == companion; };
 
     Companion* companionPtr = *std::find_if(
-                this->companionPtrs_.cbegin(),
-                this->companionPtrs_.cend(),
-                findCompanion);
+        this->companionPtrs_.cbegin(),
+        this->companionPtrs_.cend(),
+        findCompanion);
 
     auto text = group->textEditPtr_->toPlainText().toStdString();
 
     // encrypt message
-    // add to DB
 
-    PGresult* pushToDBResult = pushMessageToDBAndReturn(
-                this->dbConnectionPtr_,
-                companion->getName(),
-                text);
+    // add to DB and get timestamp
+
+    PGresult* pushToDBResultPtr = pushMessageToDBAndReturn(
+        this->dbConnectionPtr_,
+        companionPtr->getName(),
+        text);
 
     std::map<std::string, const char*> messageInfoMapping
         {
@@ -217,26 +226,30 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
 
     std::vector<std::map<std::string, const char*>> messageInfo { messageInfoMapping };
 
-    if(!getDataFromDBResult(messageInfo, pushToDBResult, 1))
+    if(!getDataFromDBResult(messageInfo, pushToDBResultPtr, 1))
     {
-        int companionId = std::atoi(messageInfo.at(0).at("companion_id"));
-        std::string timestampTz { messageInfo.at(0).at("timestamp_tz") };
-
-        logArgs("companion_id:", companionId, "timestamp_tz:", timestampTz);
-
-        // add to companion's messages
-
-        companionPtr->addMessage(companionId, 1, timestampTz, text, false);
-
-        // add to widget
-
-        auto textFormatted = group->formatMessage(
-                    companion, &companion->getMessagesPtr()->back());
-        group->addMessageToChatHistory(textFormatted);
-
-        // send over network
-
+        logArgsError("!getDataFromDBResult(messageInfo, pushToDBResultPtr, 1)");
+        // companionsDataIsOk = false;
     }
+
+    int companionId = std::atoi(messageInfo.at(0).at("companion_id"));
+    std::string timestampTz { messageInfo.at(0).at("timestamp_tz") };
+
+    logArgs("companion_id:", companionId, "timestamp_tz:", timestampTz);
+
+    // add to companion's messages
+
+    companionPtr->addMessage(companionId, 1, timestampTz, text, false);
+
+    // add to widget
+
+    auto textFormatted = group->formatMessage(
+                companionPtr, &companionPtr->getMessagesPtr()->back());
+    group->addMessageToChatHistory(textFormatted);
+
+    // send over network
+
+    companionPtr->sendLastMessage();
 }
 
 bool Manager::buildCompanions()
@@ -312,7 +325,7 @@ bool Manager::buildCompanions()
 
         companionPtr->setSocketInfo(socketInfoPtr);
 
-        if(companionPtr->getId() != 0)  // TODO change condition
+        if(companionPtr->getId() > 1)  // TODO change condition
         {
             PGresult* messagesDBResultPtr = getMessagesDBResult(dbConnectionPtr_, id);
 

@@ -78,6 +78,7 @@ public:
 //    void addMessage(int, int, std::tm, const std::string&, bool);
     void addMessage(int, int, const std::string&, const std::string&, bool);
     const std::vector<Message>* getMessagesPtr() const;
+    bool sendLastMessage();
 
 private:
     int id_;
