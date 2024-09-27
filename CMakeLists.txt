@@ -7,31 +7,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
-    .env
-    alternative_realisations
     application.cpp
     application.hpp
-    async_tcp_echo_server.cpp  # tutorial boost asio
-    async_tcp_echo_server.hpp  # tutorial boost asio
-    blocking_tcp_echo_client.cpp  # tutorial boost asio
-    blocking_tcp_echo_client.hpp  # tutorial boost asio
-    blocking_tcp_echo_server.cpp  # tutorial boost asio
-    blocking_tcp_echo_server.hpp  # tutorial boost asio
-    build.py
     chat_client.cpp
     chat_client.hpp
     chat_server.cpp
     chat_server.hpp
-    compose.yaml
     db_interaction.cpp
     db_interaction.hpp
-    sql_scripts/sql_script_1_configure_db.sql
-    sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
-    sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
-    sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql
-    Dockerfile
-    icmp_header.hpp  # tutorial boost asio
-    ipv4_header.hpp  # tutorial boost asio
     logging.cpp
     logging.hpp
     main.cpp
@@ -39,8 +22,6 @@ set(PROJECT_SOURCES
     mainwindow.hpp
     manager.cpp
     manager.hpp
-    tutorial_boost_asio.cpp  # tutorial boost asio
-    tutorial_boost_asio.hpp  # tutorial boost asio
     utils_cout.cpp
     utils_cout.hpp
     utils_gpgme.cpp

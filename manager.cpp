@@ -313,7 +313,6 @@ bool Manager::buildCompanions()
             continue;
         }
 
-        // workaround to get server unique port number
         // TODO use port number pool
         SocketInfo* socketInfoPtr = new SocketInfo(
             socketsData.at(0).at("ipaddress"),
