@@ -17,28 +17,22 @@ class WidgetGroup;
 class SocketInfo
 {
 public:
-//    SocketInfo() = default;
     SocketInfo() {};
-//    SocketInfo(std::string&, std::string&, std::string&);
-    SocketInfo(std::string&, std::string&);
-//    SocketInfo(std::string&&, std::string&&, std::string&&);
-    SocketInfo(std::string&&, std::string&&);
+    SocketInfo(std::string&, uint16_t&, uint16_t&);
+    SocketInfo(std::string&&, uint16_t&&, uint16_t&&);
     SocketInfo(const SocketInfo&);
     SocketInfo(SocketInfo&&) {};
-//    SocketInfo(std::string&, std::string&, std::string&);
-    // SocketInfo(std::string&, std::string&);
     ~SocketInfo() = default;
 
     void print();
-//    std::string getName();
-    std::string getIpaddress() const;
-    std::string getPort() const;
-    uint16_t getPortInt() const;
+    std::string getIpAddress() const;
+    uint16_t getServerPort() const;
+    uint16_t getClientPort() const;
 
 private:
-//    std::string name_;
-    std::string ipaddress_;
-    std::string port_;
+    std::string ipAddress_;
+    uint16_t serverPort_;  // port number to open server at
+    uint16_t clientPort_;  // port number to connect with client to
 };
 
 class Message

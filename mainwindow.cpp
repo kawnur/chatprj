@@ -8,8 +8,9 @@ WidgetGroup::WidgetGroup(const Companion* companion)
 
     SocketInfoWidget* widget = new SocketInfoWidget(
         companion->getName(),
-        socketInfo->getIpaddress(),
-        socketInfo->getPort());
+        socketInfo->getIpAddress(),
+        socketInfo->getServerPort(),
+        socketInfo->getClientPort());
 
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
 

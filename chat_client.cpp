@@ -2,8 +2,8 @@
 
 using boost::asio::ip::tcp;
 
-ChatClient::ChatClient(std::string&& ipaddress, std::string&& port) :
-    ipaddress_(ipaddress), port_(port), io_context_(), socket_(io_context_), resolver_(io_context_)
+ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
+    ipAddress_(ipAddress), port_(port), io_context_(), socket_(io_context_), resolver_(io_context_)
 {
 //    MainWindow* mainWindow = MainWindow::instance();
 //    MainWindow* mainWindow = getMainWindowPtr();
@@ -16,7 +16,7 @@ bool ChatClient::connect()
 {
     try
     {
-        logArgs("ChatClient connects to", this->ipaddress_, this->port_);
+        logArgs("ChatClient connects to", this->ipAddress_, this->port_);
 
         // boost::asio::io_context io_context_;
         // tcp::socket socket_ { io_context_ };
@@ -26,7 +26,10 @@ bool ChatClient::connect()
         //        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
         // boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
         //        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
-        boost::asio::connect(this->socket_, this->resolver_.resolve(this->ipaddress_, this->port_));
+        boost::asio::connect(
+            this->socket_,
+            this->resolver_.resolve(this->ipAddress_, std::to_string(this->port_))
+        );
 
         // mainWindow->addTextToChatHistoryWidget("s.is_open(): "
         //                     + QString::fromStdString(std::to_string(s.is_open())));

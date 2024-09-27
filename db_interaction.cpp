@@ -59,7 +59,7 @@ PGresult* getCompanionsDBResult(PGconn* dbConnection)
 PGresult* getSocketInfoDBResult(PGconn* dbConnection, int id)
 {
     std::string command = std::string(
-            "SELECT ipaddress, port FROM sockets "
+            "SELECT ipaddress, server_port, client_port FROM sockets "
             "WHERE id = ") + std::to_string(id);
 
     logArgs(command);

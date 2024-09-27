@@ -6,8 +6,10 @@ create table public.companions (
 create table public.sockets (
     id int not null primary key references public.companions (id),
     ipaddress inet not null,
-    port integer not null,
-    constraint port check (port >= 0 and port <= 65535)
+    server_port integer not null,
+    client_port integer not null,
+    constraint server_port check (server_port >= 0 and server_port <= 65535),
+    constraint client_port check (client_port >= 0 and client_port <= 65535)
 );
 
 create table public.messages (

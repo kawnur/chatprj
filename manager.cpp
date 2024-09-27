@@ -1,59 +1,42 @@
 #include "manager.hpp"
 
-//SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& port) :
-//    name_(name), ipaddress_(ipaddress), port_(port) {
-//}
+SocketInfo::SocketInfo(
+    std::string& ipAddress, uint16_t& serverPort, uint16_t& clientPort) :
+    ipAddress_(ipAddress), serverPort_(serverPort), clientPort_(clientPort) {}
 
-SocketInfo::SocketInfo(std::string& ipaddress, std::string& port) :
-    ipaddress_(ipaddress), port_(port) {}
-
-//SocketInfo::SocketInfo(std::string&& name, std::string&& ipaddress, std::string&& port) :
-//    name_(std::move(name)),
-//    ipaddress_(std::move(ipaddress)),
-//    port_(std::move(port)) {
-//}
-
-SocketInfo::SocketInfo(std::string&& ipaddress, std::string&& port) :  // TODO ???
-    ipaddress_(std::move(ipaddress)),
-    port_(std::move(port)) {}
+SocketInfo::SocketInfo(
+    std::string&& ipAddress, uint16_t&& serverPort, uint16_t&& clientPort) :  // TODO ???
+    ipAddress_(std::move(ipAddress)),
+    serverPort_(std::move(serverPort)),
+    clientPort_(std::move(clientPort)) {}
 
 SocketInfo::SocketInfo(const SocketInfo& si)
 {
-//    name_ = si.name_;
-    ipaddress_ = si.ipaddress_;
-    port_ = si.port_;
+    ipAddress_ = si.ipAddress_;
+    serverPort_ = si.serverPort_;
+    clientPort_ = si.clientPort_;
 }
-
-//SocketInfo::SocketInfo(std::string& name, std::string& ipaddress, std::string& port) :
-// SocketInfo::SocketInfo(std::string& ipaddress, std::string& port) :
-// //    name_(std::string::fromStdString(name)),
-//     ipaddress_(std::string::fromStdString(ipaddress)),
-//     port_(std::string::fromStdString(port)) {}
 
 void SocketInfo::print()
 {
-//    logArgs("name:", this->name_);
-    logArgs("ipaddress:", this->ipaddress_);
-    logArgs("port:", this->port_);
+    logArgs("ipAddress:", this->ipAddress_);
+    logArgs("serverPort_:", this->serverPort_);
+    logArgs("clientPort_:", this->clientPort_);
 }
 
-//std::string SocketInfo::getName() {
-//    return this->name_;
-//}
-
-std::string SocketInfo::getIpaddress() const
+std::string SocketInfo::getIpAddress() const
 {
-    return this->ipaddress_;
+    return this->ipAddress_;
 }
 
-std::string SocketInfo::getPort() const
+uint16_t SocketInfo::getServerPort() const
 {
-    return this->port_;
+    return this->serverPort_;
 }
 
-uint16_t SocketInfo::getPortInt() const
+uint16_t SocketInfo::getClientPort() const
 {
-    return std::stoi(this->port_, nullptr, 10);
+    return this->clientPort_;
 }
 
 Message::Message(
@@ -88,7 +71,14 @@ bool Message::getIsSent() const
     return this->isSent_;
 }
 
-Companion::Companion(int id, std::string&& name) : id_(id), name_(name) {}
+Companion::Companion(int id, std::string&& name) : id_(id), name_(name)
+{
+    // this->serverPtr_ = new ChatServer(this->socketInfoPtr_->getPortInt());
+
+    // this->clientPtr_ = new ChatClient(
+    //     this->socketInfoPtr_->getIpaddress(),
+    //     this->socketInfoPtr_->getPort());
+}
 
 Companion::~Companion()
 {
@@ -108,13 +98,14 @@ bool Companion::initMessaging()
         // serverPtr_ = new ChatServer(
         //     *io_contextPtr_,
         //     this->socketInfoPtr_->getPortInt());
-        this->serverPtr_ = new ChatServer(this->socketInfoPtr_->getPortInt());
+
+        this->serverPtr_ = new ChatServer(this->socketInfoPtr_->getServerPort());
 
         this->serverPtr_->run();
 
         this->clientPtr_ = new ChatClient(
-            this->socketInfoPtr_->getIpaddress(),
-            this->socketInfoPtr_->getPort());
+            this->socketInfoPtr_->getIpAddress(),
+            this->socketInfoPtr_->getClientPort());
 
         this->clientPtr_->connect();
 
@@ -150,6 +141,8 @@ bool Companion::sendLastMessage()
 {
     auto text = this->messages_.back().getText();
     auto sendResult = this->clientPtr_->send(text);
+
+    return true;
 }
 
 int Companion::getId()
@@ -303,7 +296,8 @@ bool Manager::buildCompanions()
         std::map<std::string, const char*> socketsDataMapping
             {
                 {std::string("ipaddress"), nullptr},
-                {std::string("port"), nullptr}
+                {std::string("server_port"), nullptr},
+                {std::string("client_port"), nullptr}
             };
 
         std::vector<std::map<std::string, const char*>> socketsData { socketsDataMapping };
@@ -319,9 +313,12 @@ bool Manager::buildCompanions()
             continue;
         }
 
+        // workaround to get server unique port number
+        // TODO use port number pool
         SocketInfo* socketInfoPtr = new SocketInfo(
             socketsData.at(0).at("ipaddress"),
-            socketsData.at(0).at("port"));
+            std::atoi(socketsData.at(0).at("server_port")),
+            std::atoi(socketsData.at(0).at("client_port")));
 
         companionPtr->setSocketInfo(socketInfoPtr);
 

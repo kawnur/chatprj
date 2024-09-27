@@ -91,15 +91,15 @@ SocketInfoWidget::SocketInfoWidget()
     logArgs("SocketInfoWidget()");
 }
 
-// SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipaddress, QString& port) :
-//     name_(name), ipaddress_(ipaddress), port_(port) {
+// SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipAddress, QString& port) :
+//     name_(name), ipAddress_(ipAddress), port_(port) {
 
 //     set();  // TODO move from constructor
 // }
 
-// SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipaddress, QString&& port) :
+// SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipAddress, QString&& port) :
 //     name_(std::move(name)),
-//     ipaddress_(std::move(ipaddress)),
+//     ipAddress_(std::move(ipAddress)),
 //     port_(std::move(port)) {
 
 //     set();
@@ -108,24 +108,29 @@ SocketInfoWidget::SocketInfoWidget()
 SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
 {
     name_ = si.name_;
-    ipaddress_ = si.ipaddress_;
-    port_ = si.port_;
+    ipAddress_ = si.ipAddress_;
+    serverPort_ = si.serverPort_;
+    clientPort_ = si.clientPort_;
 
     set();
 }
 
-SocketInfoWidget::SocketInfoWidget(std::string& name, std::string& ipaddress, std::string& port) :
+SocketInfoWidget::SocketInfoWidget(
+    std::string& name, std::string& ipAddress, uint16_t& serverPort, uint16_t& clientPort) :
     name_(QString::fromStdString(name)),
-    ipaddress_(QString::fromStdString(ipaddress)),
-    port_(QString::fromStdString(port))
+    ipAddress_(QString::fromStdString(ipAddress)),
+    serverPort_(serverPort),
+    clientPort_(clientPort)
 {
     set();
 }
 
-SocketInfoWidget::SocketInfoWidget(std::string&& name, std::string&& ipaddress, std::string&& port) :
+SocketInfoWidget::SocketInfoWidget(
+    std::string&& name, std::string&& ipAddress, uint16_t&& serverPort, uint16_t&& clientPort) :
     name_(QString::fromStdString(name)),
-    ipaddress_(QString::fromStdString(ipaddress)),
-    port_(QString::fromStdString(port))
+    ipAddress_(QString::fromStdString(ipAddress)),
+    serverPort_(serverPort),
+    clientPort_(clientPort)
 {
     set();
 }
@@ -151,8 +156,9 @@ SocketInfoWidget::SocketInfoWidget(std::string&& name, std::string&& ipaddress, 
 void SocketInfoWidget::print()
 {
     logArgs("name:", this->name_);
-    logArgs("ipaddress:", this->ipaddress_);
-    logArgs("port:", this->port_);
+    logArgs("ipAddress:", this->ipAddress_);
+    logArgs("serverPort_:", this->serverPort_);
+    logArgs("clientPort_:", this->clientPort_);
 }
 
 bool SocketInfoWidget::isStub()
@@ -172,8 +178,13 @@ void SocketInfoWidget::set()
     this->layoutPtr_ = new QHBoxLayout(this);
     this->indicatorPtr_ = new IndicatorWidget(this);
     this->nameLabelPtr_ = new QLabel(this->name_, this);
-    this->ipaddressLabelPtr_ = new QLabel(this->ipaddress_, this);
-    this->portLabelPtr_ = new QLabel(this->port_, this);
+    this->ipAddressLabelPtr_ = new QLabel(this->ipAddress_, this);
+
+    QString serverPortQString = QString::fromStdString(std::to_string(this->serverPort_));
+    QString clientPortQString = QString::fromStdString(std::to_string(this->clientPort_));
+
+    this->serverPortLabelPtr_ = new QLabel(serverPortQString, this);
+    this->clientPortLabelPtr_ = new QLabel(clientPortQString, this);
     this->editButtonPtr_ = new QPushButton("Edit", this);
     this->connectButtonPtr_ = new QPushButton("Connect", this);
 
@@ -191,8 +202,9 @@ void SocketInfoWidget::set()
 
     this->layoutPtr_->addWidget(this->indicatorPtr_);
     this->layoutPtr_->addWidget(this->nameLabelPtr_);
-    this->layoutPtr_->addWidget(this->ipaddressLabelPtr_);
-    this->layoutPtr_->addWidget(this->portLabelPtr_);
+    this->layoutPtr_->addWidget(this->ipAddressLabelPtr_);
+    this->layoutPtr_->addWidget(this->serverPortLabelPtr_);
+    this->layoutPtr_->addWidget(this->clientPortLabelPtr_);
     this->layoutPtr_->addWidget(this->editButtonPtr_);
     this->layoutPtr_->addWidget(this->connectButtonPtr_);
 //    layout_->addWidget(toggleIndicatorButton_);

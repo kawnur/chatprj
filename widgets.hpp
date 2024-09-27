@@ -78,8 +78,8 @@ public:
 //    SocketInfo(const SocketInfo&) {};
     SocketInfoWidget(const SocketInfoWidget&);
     SocketInfoWidget(SocketInfoWidget&&) {};
-    SocketInfoWidget(std::string&, std::string&, std::string&);
-    SocketInfoWidget(std::string&&, std::string&&, std::string&&);
+    SocketInfoWidget(std::string&, std::string&, uint16_t&, uint16_t&);
+    SocketInfoWidget(std::string&&, std::string&&, uint16_t&&, uint16_t&&);
     ~SocketInfoWidget() {};
 
     void print();
@@ -92,8 +92,9 @@ private:
     Companion* companionPtr_;
 
     QString name_;
-    QString ipaddress_;
-    QString port_;
+    QString ipAddress_;
+    uint16_t serverPort_;
+    uint16_t clientPort_;
 
     QColor selectedColor_;
     QColor unselectedColor_;
@@ -103,8 +104,9 @@ private:
 
     IndicatorWidget* indicatorPtr_;
     QLabel* nameLabelPtr_;
-    QLabel* ipaddressLabelPtr_;
-    QLabel* portLabelPtr_;
+    QLabel* ipAddressLabelPtr_;
+    QLabel* serverPortLabelPtr_;
+    QLabel* clientPortLabelPtr_;
     QPushButton* editButtonPtr_;
     QPushButton* connectButtonPtr_;
 //    QPushButton* toggleIndicatorButton_;

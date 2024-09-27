@@ -18,15 +18,15 @@ enum { max_length = 1024 };
 class ChatClient
 {
 private:
-    std::string ipaddress_;
-    std::string port_;
+    std::string ipAddress_;
+    uint16_t port_;
 
     boost::asio::io_context io_context_;
     tcp::socket socket_;
     tcp::resolver resolver_;
 
 public:
-    ChatClient(std::string&&, std::string&&);
+    ChatClient(std::string&&, uint16_t&&);
     ~ChatClient() = default;
 
     bool connect();
