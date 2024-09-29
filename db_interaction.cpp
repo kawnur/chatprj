@@ -1,23 +1,42 @@
 #include "db_interaction.hpp"
 
+const char* getValueFromEnvironmentVariable(const char* variableName)
+{
+    const char* valuePtr { std::getenv(variableName) };
+
+    if(!valuePtr)
+    {
+        logArgsError("Did not find environment variable", variableName);
+    }
+
+    return valuePtr;
+}
+
 PGconn* getDBConnection()
 {
     // TODO make connection to db secure
-    // MainWindow* mainWindow = getMainWindowPtr();
 
     PGconn* dbConnection = nullptr;
 
     try
     {
-        const char* dbAddress { std::getenv("CHATAPP_DB_ADDRESS") };
-        const char* dbPort { std::getenv("CHATAPP_DB_PORT") };
-        const char* dbLogin { std::getenv("CHATAPP_DB_USER") };
-        const char* dbPassword { std::getenv("CHATAPP_DB_PASSWORD") };
+        const char* dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
+        const char* dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
+        const char* dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
+        const char* dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
 
-        logArgs("DB connection address:", dbAddress);
-        logArgs("DB connection port:", dbPort);
-        logArgs("DB connection login:", dbLogin);
-        logArgs("DB connection password:", dbPassword);
+        for(auto& value : { dbAddress, dbPort, dbLogin, dbPassword })
+        {
+            if(!value)
+            {
+                return nullptr;
+            }
+        }
+
+        logArgs("DB connection; address:", dbAddress,
+                "port:", dbPort,
+                "login:", dbLogin,
+                "password:", dbPassword);
 
         dbConnection = PQsetdbLogin(
                     dbAddress,
@@ -44,67 +63,62 @@ PGconn* getDBConnection()
     return dbConnection;
 }
 
-PGresult* getCompanionsDBResult(PGconn* dbConnection)
+PGresult* sendDBRequestAndReturnResult(
+    const PGconn* dbConnection, const char* command)
 {
-    const char* command =
-            "SELECT id, name FROM companions ";
-//            "WHERE id > 1";  // me
-
     logArgs(command);
 
-    PGresult* result = PQexec(dbConnection, command);
+    PGresult* result = PQexec(const_cast<PGconn*>(dbConnection), command);
     return result;
 }
 
-PGresult* getSocketInfoDBResult(PGconn* dbConnection, int id)
+PGresult* getCompanionsDBResult(const PGconn* dbConnection)
+{
+    const char* command = "SELECT id, name FROM companions";
+
+    return sendDBRequestAndReturnResult(dbConnection, command);
+}
+
+PGresult* getSocketInfoDBResult(const PGconn* dbConnection, int id)
 {
     std::string command = std::string(
-            "SELECT ipaddress, server_port, client_port FROM sockets "
-            "WHERE id = ") + std::to_string(id);
+        "SELECT ipaddress, server_port, client_port "
+        "FROM sockets WHERE id = ") + std::to_string(id);
 
-    logArgs(command);
-
-    PGresult* result = PQexec(dbConnection, command.data());
-    return result;
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
 // TODO test sorting by timestamp with different timezones
-PGresult* getMessagesDBResult(PGconn* dbConnection, int id)
+PGresult* getMessagesDBResult(const PGconn* dbConnection, int id)
 {
     std::string command = std::string(
-            "SELECT author_id, timestamp_tz, message, issent "
-            "FROM messages WHERE companion_id = ")
-            + std::to_string(id)
-            + std::string(" ORDER BY timestamp_tz LIMIT 50");
+        "SELECT author_id, timestamp_tz, message, issent "
+        "FROM messages WHERE companion_id = ")
+        + std::to_string(id)
+        + std::string(" ORDER BY timestamp_tz LIMIT 50");
 
-    logArgs(command);
-
-    PGresult* result = PQexec(dbConnection, command.data());
-    return result;
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
 PGresult* pushMessageToDBAndReturn(
-    PGconn* dbConnection, const std::string& name, const std::string& message)
+    const PGconn* dbConnection, const std::string& name, const std::string& message)
 {
     std::string command = std::string(
-            "insert into messages "
-            "(companion_id, author_id, timestamp_tz, message, issent) "
-            "values ((select id from companions where name = '")
-            + name
-            + std::string("'), 1, now(), '")
-            + message
-            + std::string("', false) returning companion_id, timestamp_tz");
+        "insert into messages "
+        "(companion_id, author_id, timestamp_tz, message, issent) "
+        "values ((select id from companions where name = '")
+        + name
+        + std::string("'), 1, now(), '")
+        + message
+        + std::string("', false) returning companion_id, timestamp_tz");
 
-    logArgs(command);
-
-    PGresult* result = PQexec(dbConnection, command.data());
-    return result;
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
 void logUnknownField(const PGresult* result, int row, int column)
 {
     char* value = PQgetvalue(result, row, column);
-    auto logMark = (value == nullptr) ? "nullptr" : std::string(value);
+    auto logMark = (value) ? std::string(value) : "nullptr";
 
     logArgsError("unknown field name:", logMark);
 }
@@ -146,7 +160,7 @@ bool getDataFromDBResult(
         for(int j = 0; j < nfields; j++)
         {
             char* fname = PQfname(result, j);
-            std::string fnameString = (fname == nullptr) ? "nullptr" : std::string(fname);
+            std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
             auto found = data.at(i).count(fnameString);
 

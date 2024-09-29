@@ -33,7 +33,7 @@ public:
 //        server_ = new ChatServer(5002);
 //        mainWindow_ = new MainWindow;
 //    }
-    ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {};
+    ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {}
     void set();
 
     ~ChatApp();

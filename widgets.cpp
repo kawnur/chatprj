@@ -1,5 +1,60 @@
 #include "widgets.hpp"
 
+QString getInitialConnectButtonLabel()
+{
+    try
+    {
+        if(connectButtonLabels.empty())
+        {
+            return QString("");
+        }
+        else
+        {
+            return connectButtonLabels.at(0);
+        }
+    }
+    catch(...)
+    {
+        return QString("_?_");
+    }
+}
+
+QString getNextConnectButtonLabel(QString& currentLabel)
+{
+    try
+    {
+        if(connectButtonLabels.empty())
+        {
+            return QString("");
+        }
+        else
+        {
+            auto currentIterator = std::find(
+                connectButtonLabels.begin(),
+                connectButtonLabels.end(),
+                currentLabel);
+
+            if(currentIterator == connectButtonLabels.end())
+            {
+                return *connectButtonLabels.begin();
+            }
+
+            auto nextIterator = currentIterator + 1;
+
+            if(nextIterator == connectButtonLabels.end())
+            {
+                nextIterator = connectButtonLabels.begin();
+            }
+
+            return *nextIterator;
+        }
+    }
+    catch(...)
+    {
+        return QString("_?_");
+    }
+}
+
 void TextEditWidget::keyPressEvent(QKeyEvent* event)
 {
 //    coutWithEndl("keyPressEvent");
@@ -8,10 +63,8 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event)
 //    coutArgsWithSpaceSeparator("event->modifiers():", std::hex, event->modifiers());
 //    endline(1);
 
-    if(event->type() == QEvent::KeyPress
-            && event->key() == Qt::Key_Return)
+    if(event->type() == QEvent::KeyPress && event->key() == Qt::Key_Return)
     {
-
         if(event->modifiers() == Qt::NoModifier)
         {
             this->send();
@@ -20,9 +73,9 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event)
         else if(event->modifiers() == Qt::ControlModifier)
         {
             QKeyEvent eventEmulated = QKeyEvent(
-                        QEvent::KeyPress,
-                        Qt::Key_Return,
-                        Qt::NoModifier);
+                QEvent::KeyPress,
+                Qt::Key_Return,
+                Qt::NoModifier);
 
             QTextEdit::keyPressEvent(&eventEmulated);
         }
@@ -33,10 +86,8 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event)
     }
 }
 
-IndicatorWidget::IndicatorWidget(QWidget* parent)
+IndicatorWidget::IndicatorWidget()
 {
-    setParent(parent);
-
     setFixedWidth(15);
     setFixedHeight(15);
 
@@ -102,7 +153,7 @@ SocketInfoWidget::SocketInfoWidget()
 //     ipAddress_(std::move(ipAddress)),
 //     port_(std::move(port)) {
 
-//     set();
+//     setParentForChildren();
 // }
 
 SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
@@ -112,7 +163,7 @@ SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
     serverPort_ = si.serverPort_;
     clientPort_ = si.clientPort_;
 
-    set();
+    initializeFields();
 }
 
 SocketInfoWidget::SocketInfoWidget(
@@ -122,7 +173,7 @@ SocketInfoWidget::SocketInfoWidget(
     serverPort_(serverPort),
     clientPort_(clientPort)
 {
-    set();
+    initializeFields();
 }
 
 SocketInfoWidget::SocketInfoWidget(
@@ -132,7 +183,7 @@ SocketInfoWidget::SocketInfoWidget(
     serverPort_(serverPort),
     clientPort_(clientPort)
 {
-    set();
+    initializeFields();
 }
 
 //SocketInfoWidget::SocketInfoWidget(const QString& name) : name_(name) {
@@ -153,12 +204,21 @@ SocketInfoWidget::SocketInfoWidget(
 //    delete oldEditButton;
 //}
 
+SocketInfoWidget::~SocketInfoWidget()
+{
+    // cannot set parent
+    delete this->palettePtr_;
+}
+
+
 void SocketInfoWidget::print()
 {
-    logArgs("name:", this->name_);
-    logArgs("ipAddress:", this->ipAddress_);
-    logArgs("serverPort_:", this->serverPort_);
-    logArgs("clientPort_:", this->clientPort_);
+    logArgs(
+        "name:", this->name_,
+        "ipAddress:", this->ipAddress_,
+        "serverPort_:", this->serverPort_,
+        "clientPort_:", this->clientPort_
+    );
 }
 
 bool SocketInfoWidget::isStub()
@@ -166,29 +226,31 @@ bool SocketInfoWidget::isStub()
     return false;
 }
 
-void SocketInfoWidget::set()
+void SocketInfoWidget::initializeFields()
 {
-    this->selectedColor_ = QColor(QColorConstants::DarkGray);
-    this->unselectedColor_ = QColor(QColorConstants::Gray);
-    this->palettePtr_ = new QPalette;  // TODO set parent or delete
-    this->palettePtr_->setColor(QPalette::Window, this->unselectedColor_);
-    this->setAutoFillBackground(true);
-    this->setPalette(*palettePtr_);
+    selectedColor_ = QColor(QColorConstants::DarkGray);
+    unselectedColor_ = QColor(QColorConstants::Gray);
+    palettePtr_ = new QPalette;
+    palettePtr_->setColor(QPalette::Window, unselectedColor_);
+    setAutoFillBackground(true);
+    setPalette(*palettePtr_);
 
-    this->layoutPtr_ = new QHBoxLayout(this);
-    this->indicatorPtr_ = new IndicatorWidget(this);
-    this->nameLabelPtr_ = new QLabel(this->name_, this);
-    this->ipAddressLabelPtr_ = new QLabel(this->ipAddress_, this);
+    layoutPtr_ = new QHBoxLayout;
+    indicatorPtr_ = new IndicatorWidget;
+    nameLabelPtr_ = new QLabel(name_);
+    ipAddressLabelPtr_ = new QLabel(ipAddress_);
 
-    QString serverPortQString = QString::fromStdString(std::to_string(this->serverPort_));
-    QString clientPortQString = QString::fromStdString(std::to_string(this->clientPort_));
+    QString serverPortQString = QString::fromStdString(std::to_string(serverPort_));
+    QString clientPortQString = QString::fromStdString(std::to_string(clientPort_));
 
-    this->serverPortLabelPtr_ = new QLabel(serverPortQString, this);
-    this->clientPortLabelPtr_ = new QLabel(clientPortQString, this);
-    this->editButtonPtr_ = new QPushButton("Edit", this);
-    this->connectButtonPtr_ = new QPushButton("Connect", this);
+    serverPortLabelPtr_ = new QLabel(serverPortQString);
+    clientPortLabelPtr_ = new QLabel(clientPortQString);
+    editButtonPtr_ = new QPushButton("Edit");
+    connectButtonPtr_ = new QPushButton(getInitialConnectButtonLabel());
 
-    if(this->name_ == "me")
+    // connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction);
+
+    if(this->name_ == "me")  // TODO ???
     {
         this->indicatorPtr_->setMe();
         this->editButtonPtr_->hide();
@@ -210,6 +272,48 @@ void SocketInfoWidget::set()
 //    layout_->addWidget(toggleIndicatorButton_);
 
     // connect
+}
+
+void SocketInfoWidget::setParentForChildren()
+{
+    this->layoutPtr_->setParent(this);
+    this->indicatorPtr_->setParent(this);
+    this->nameLabelPtr_->setParent(this);
+    this->ipAddressLabelPtr_->setParent(this);
+    this->serverPortLabelPtr_->setParent(this);
+    this->clientPortLabelPtr_->setParent(this);
+    this->editButtonPtr_->setParent(this);
+    this->connectButtonPtr_->setParent(this);
+}
+
+void SocketInfoWidget::setConnections()
+{
+    connect(
+        this->connectButtonPtr_, &QPushButton::clicked,
+        this, &SocketInfoWidget::clientAction);
+}
+
+void SocketInfoWidget::clientAction()
+{
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    const Companion* companion =
+        mainWindow->getMappedCompanionBySocketInfoBaseWidget(this);
+
+    // if(const_cast<Companion*>(companion)->startClient())
+    if(const_cast<Companion*>(companion)->connectClient())
+    {
+        // change connect button text
+        QString currentText = this->connectButtonPtr_->text();
+        QString nextText = getNextConnectButtonLabel(currentText);
+        this->connectButtonPtr_->setText(nextText);
+
+        // change indicator color
+        this->indicatorPtr_->toggle();
+    }
+
+    // Manager* manager = getManagerPtr();
+    // manager->sendMessage(companion, this);
 }
 
 void SocketInfoWidget::changeColor(QColor& color)
@@ -260,10 +364,10 @@ SocketInfoStubWidget::SocketInfoStubWidget()
 {
     mark_ = "No socket info from DB...";
 
-    set();
+    setParentForChildren();
 }
 
-void SocketInfoStubWidget::set()
+void SocketInfoStubWidget::setParentForChildren()
 {
     this->layoutPtr_ = new QHBoxLayout(this);
     this->markLabelPtr_ = new QLabel(this->mark_, this);

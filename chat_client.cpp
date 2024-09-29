@@ -14,6 +14,8 @@ ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
 
 bool ChatClient::connect()
 {
+    bool connected = false;
+
     try
     {
         logArgs("ChatClient connects to", this->ipAddress_, this->port_);
@@ -33,14 +35,53 @@ bool ChatClient::connect()
 
         // mainWindow->addTextToChatHistoryWidget("s.is_open(): "
         //                     + QString::fromStdString(std::to_string(s.is_open())));
+
+
         logArgs("socket_.is_open():", socket_.is_open());
+
+        connected = true;  // TODO check connection state
     }
     catch(std::exception& e)
     {
         logArgsException(e.what());
     }
 
-    return 0;
+    return connected;
+}
+
+bool ChatClient::disconnect()
+{
+    bool disconnected = false;
+
+    try
+    {
+        logArgs("ChatClient disconnects from", this->ipAddress_, this->port_);
+
+        // boost::asio::io_context io_context_;
+        // tcp::socket socket_ { io_context_ };
+        // tcp::resolver resolver_ { io_context_ };
+        //        boost::asio::connect(s, resolver.resolve("localhost", "5002"));
+        //        boost::asio::connect(s, resolver.resolve("0.0.0.0", "5002"));
+        //        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
+        // boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
+        //        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
+
+        this->socket_.close();
+
+        // mainWindow->addTextToChatHistoryWidget("s.is_open(): "
+        //                     + QString::fromStdString(std::to_string(s.is_open())));
+
+
+        logArgs("socket_.is_open():", socket_.is_open());
+
+        disconnected = true;  // TODO check connection state
+    }
+    catch(std::exception& e)
+    {
+        logArgsException(e.what());
+    }
+
+    return disconnected;
 }
 
 int ChatClient::send(std::string text)

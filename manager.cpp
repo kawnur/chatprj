@@ -71,14 +71,10 @@ bool Message::getIsSent() const
     return this->isSent_;
 }
 
-Companion::Companion(int id, std::string&& name) : id_(id), name_(name)
-{
-    // this->serverPtr_ = new ChatServer(this->socketInfoPtr_->getPortInt());
-
-    // this->clientPtr_ = new ChatClient(
-    //     this->socketInfoPtr_->getIpaddress(),
-    //     this->socketInfoPtr_->getPort());
-}
+Companion::Companion(int id, std::string&& name) :
+    id_(id), name_(name), socketInfoPtr_(nullptr),
+    clientPtr_(nullptr), serverPtr_(nullptr), messages_(std::vector<Message>())
+{}
 
 Companion::~Companion()
 {
@@ -87,7 +83,7 @@ Companion::~Companion()
     delete serverPtr_;
 }
 
-bool Companion::initMessaging()
+bool Companion::startServer()
 {
     bool initialized = false;
 
@@ -103,12 +99,6 @@ bool Companion::initMessaging()
 
         this->serverPtr_->run();
 
-        this->clientPtr_ = new ChatClient(
-            this->socketInfoPtr_->getIpAddress(),
-            this->socketInfoPtr_->getClientPort());
-
-        this->clientPtr_->connect();
-
         initialized = true;
     }
     catch(std::exception& e)
@@ -117,6 +107,59 @@ bool Companion::initMessaging()
     }
 
     return initialized;
+}
+
+bool Companion::createClient()
+{
+    bool initialized = false;
+
+    try
+    {
+        // io_contextPtr_ = new boost::asio::io_context;
+
+        // serverPtr_ = new ChatServer(
+        //     *io_contextPtr_,
+        //     this->socketInfoPtr_->getPortInt());
+
+        this->clientPtr_ = new ChatClient(
+            this->socketInfoPtr_->getIpAddress(),
+            this->socketInfoPtr_->getClientPort());
+
+        // initialized = this->clientPtr_->connect();
+        initialized = true;
+    }
+    catch(std::exception& e)
+    {
+        logArgsError(e.what());
+    }
+
+    return initialized;
+}
+
+bool Companion::connectClient()
+{
+    bool connected = false;
+
+    try
+    {
+        // io_contextPtr_ = new boost::asio::io_context;
+
+        // serverPtr_ = new ChatServer(
+        //     *io_contextPtr_,
+        //     this->socketInfoPtr_->getPortInt());
+
+        // this->clientPtr_ = new ChatClient(
+        //     this->socketInfoPtr_->getIpAddress(),
+        //     this->socketInfoPtr_->getClientPort());
+
+        connected = this->clientPtr_->connect();
+    }
+    catch(std::exception& e)
+    {
+        logArgsError(e.what());
+    }
+
+    return connected;
 }
 
 void Companion::setSocketInfo(SocketInfo* socketInfo)
@@ -160,13 +203,14 @@ SocketInfo* Companion::getSocketInfo() const
     return this->socketInfoPtr_;
 }
 
-Manager::Manager()
-{
-    dbConnectionPtr_ = nullptr;
-}
+Manager::Manager() :
+    dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
+{}
 
 Manager::~Manager()
 {
+    delete dbConnectionPtr_;
+
     for(auto& companion : this->companionPtrs_)
     {
         delete companion;
@@ -176,7 +220,7 @@ Manager::~Manager()
 void Manager::set()
 {
     bool connectedToDB = this->connectToDb();
-    logArgs("connectedToDB:", connectedToDB);
+    // logArgs("connectedToDB:", connectedToDB);
 
     if(connectedToDB)
     {
@@ -188,6 +232,14 @@ void Manager::set()
             MainWindow* mainWindow = getMainWindowPtr();
             mainWindow->buildWidgetGroups(&this->companionPtrs_);
         }
+        else
+        {
+            logArgsError("problems with companions initialization");
+        }
+    }
+    else
+    {
+        logArgsError("problems with DB connection");
     }
 }
 
@@ -249,13 +301,15 @@ bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
 
-    PGresult* companionsDBResultPtr = getCompanionsDBResult(dbConnectionPtr_);
+    PGresult* companionsDBResultPtr = getCompanionsDBResult(this->dbConnectionPtr_);
     logArgs("companionsDBResultPtr:", companionsDBResultPtr);
 
-    if(companionsDBResultPtr == nullptr)
+    if(!companionsDBResultPtr)
     {
-        logArgsError("companionsDBResultPtr == nullptr");
+        logArgsError("companionsDBResultPtr is nullptr");
         companionsDataIsOk = false;
+
+        return companionsDataIsOk;
     }
 
     std::map<std::string, const char*> companionsDataMapping
@@ -270,11 +324,19 @@ bool Manager::buildCompanions()
     {
         logArgsError("!getDataFromDBResult(companionsData, companionsDBResultPtr, 0)");
         companionsDataIsOk = false;
+
+        return companionsDataIsOk;
     }
 
     for(auto& data : companionsData)
     {
         int id = std::atoi(data.at(std::string("id")));
+
+        if(id == 0)
+        {
+            logArgsError("id == 0");
+            continue;
+        }
 
         Companion* companionPtr = new Companion(
             id,
@@ -283,22 +345,22 @@ bool Manager::buildCompanions()
         this->companionPtrs_.push_back(companionPtr);
 
         PGresult* socketInfoDBResultPtr =
-            getSocketInfoDBResult(dbConnectionPtr_, id);  // TODO switch to getName?
+            getSocketInfoDBResult(this->dbConnectionPtr_, id);  // TODO switch to getName?
 
         logArgs("socketInfoDBResultPtr:", socketInfoDBResultPtr);
 
-        if(socketInfoDBResultPtr == nullptr)
+        if(!socketInfoDBResultPtr)
         {
-            logArgsError("socketInfoDBResultPtr == nullptr");
+            logArgsError("socketInfoDBResultPtr is nullptr");
             companionsDataIsOk = false;
         }
 
         std::map<std::string, const char*> socketsDataMapping
-            {
-                {std::string("ipaddress"), nullptr},
-                {std::string("server_port"), nullptr},
-                {std::string("client_port"), nullptr}
-            };
+        {
+            {std::string("ipaddress"), nullptr},
+            {std::string("server_port"), nullptr},
+            {std::string("client_port"), nullptr}
+        };
 
         std::vector<std::map<std::string, const char*>> socketsData { socketsDataMapping };
 
@@ -308,43 +370,42 @@ bool Manager::buildCompanions()
             companionsDataIsOk = false;
         }
 
-        if(socketsData.size() == 0)
+        if(socketsData.size() > 0)
         {
-            continue;
+            // TODO use port number pool
+            SocketInfo* socketInfoPtr = new SocketInfo(
+                socketsData.at(0).at("ipaddress"),
+                std::atoi(socketsData.at(0).at("server_port")),
+                std::atoi(socketsData.at(0).at("client_port")));
+
+            companionPtr->setSocketInfo(socketInfoPtr);
         }
-
-        // TODO use port number pool
-        SocketInfo* socketInfoPtr = new SocketInfo(
-            socketsData.at(0).at("ipaddress"),
-            std::atoi(socketsData.at(0).at("server_port")),
-            std::atoi(socketsData.at(0).at("client_port")));
-
-        companionPtr->setSocketInfo(socketInfoPtr);
 
         if(companionPtr->getId() > 1)  // TODO change condition
         {
             PGresult* messagesDBResultPtr = getMessagesDBResult(dbConnectionPtr_, id);
 
-            if(messagesDBResultPtr == nullptr)
+            if(!messagesDBResultPtr)
             {
-                logArgsError("messagesDBResultPtr == nullptr");
+                logArgsError("messagesDBResultPtr is nullptr");
                 companionsDataIsOk = false;
             }
 
             std::map<std::string, const char*> messagesDataMapping
-                {
-                    {std::string("companion_id"), nullptr},
-                    {std::string("author_id"), nullptr},
-                    {std::string("timestamp_tz"), nullptr},
-                    {std::string("message"), nullptr},
-                    {std::string("issent"), nullptr},
-                };
+            {
+                {std::string("companion_id"), nullptr},
+                {std::string("author_id"), nullptr},
+                {std::string("timestamp_tz"), nullptr},
+                {std::string("message"), nullptr},
+                {std::string("issent"), nullptr},
+            };
 
             std::vector<std::map<std::string, const char*>> messagesData { messagesDataMapping };
 
             if(!getDataFromDBResult(messagesData, messagesDBResultPtr, 0))
             {
                 logArgsWarning("!getDataFromDBResult(messagesData, messagesDBResultPtr, 0)");
+                companionsDataIsOk = false;
             }
 
             for(auto& message : messagesData)
@@ -357,7 +418,14 @@ bool Manager::buildCompanions()
                     message.at("issent"));
             }
 
-            companionPtr->initMessaging();
+            if(!companionPtr->startServer())
+            {
+                logArgsError("problem with server start for companion id", id);
+            }
+            if(!companionPtr->createClient())
+            {
+                logArgsError("problem with client creation for companion id", id);
+            }
         }
     }
 
@@ -367,7 +435,12 @@ bool Manager::buildCompanions()
 bool Manager::connectToDb()
 {
     bool connected = false;
-    dbConnectionPtr_ = getDBConnection();
+    this->dbConnectionPtr_ = getDBConnection();
+
+    if(!this->dbConnectionPtr_)
+    {
+        return connected;
+    }
 
     ConnStatusType status = PQstatus(dbConnectionPtr_);
     // logArgs("DB connection status: ", status);

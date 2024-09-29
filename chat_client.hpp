@@ -30,6 +30,7 @@ public:
     ~ChatClient() = default;
 
     bool connect();
+    bool disconnect();
 
     int send(std::string);
 };

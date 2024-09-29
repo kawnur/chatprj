@@ -1,6 +1,5 @@
 #include "utils_gpgme.hpp"
 
-
 void checkProtocols() {}
 
 void coutEngineInfo(gpgme_engine_info_t* info)
@@ -17,7 +16,7 @@ void coutEngineInfo(gpgme_engine_info_t* info)
 
 std::string getStringFromCharPtr(const char* value)
 {
-    return (value == nullptr) ? std::string("nullptr") : std::string(value);
+    return (value) ? std::string(value) : std::string("nullptr");
 }
 
 void coutKeyInfo(const gpgme_key_t* const key)
@@ -446,7 +445,7 @@ char* readData2(gpgme_data_t& data)
         bufferHead = (char*)realloc(bufferHead, bufferSize);
         current = bufferHead + bufferSize - blockSize;
 
-        if(bufferHead == nullptr)
+        if(!bufferHead)
         {
             coutWithEndl("realloc failure");
         }
@@ -460,7 +459,7 @@ char* readData2(gpgme_data_t& data)
     {
         bufferHead = (char*)realloc(bufferHead, bufferSize);
 
-        if(bufferHead == nullptr)
+        if(!bufferHead)
         {
             coutWithEndl("realloc failure");
         }

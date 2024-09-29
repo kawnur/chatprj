@@ -45,6 +45,7 @@ public:
 
 public slots:
     void sendMessage();
+    // void connectToServer();
 
 private:
     QString buildChatHistory(const Companion*);
@@ -113,12 +114,15 @@ private:
 
 //    MainWindow(QWidget* parent = nullptr);
     void closeEvent(QCloseEvent*) override;
-    virtual ~MainWindow();
+    // virtual ~MainWindow();
 
     void keyPressEvent(QKeyEvent*) override;
 
+    ~MainWindow();
+
 public:
     MainWindow();
+
 //    static MainWindow* instance();
 
     const Companion* selectedCompanion_;  // TODO make private
@@ -127,12 +131,14 @@ public:
     const Companion* getMappedCompanionByTextEditWidget(TextEditWidget*) const;
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
-
     void resetSelectedCompanion(const Companion*);
 
     void buildWidgetGroups(std::vector<Companion*>*);
-    void set();
+
+    void setParentForChildren();
     void setLeftPanel();
+    void set();
+
     void addTextToChatHistoryWidget(const QString&);
     void addTextToAppLogWidget(const QString&);
 

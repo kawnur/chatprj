@@ -58,7 +58,7 @@ namespace TestGpgme
 //	template<typename T> std::optional<std::string, T> getPtrOrString(T* t)
     template<typename T> auto getPtrOrString(T* t)
     {
-		return (t == nullptr) ? std::string("nullptr") : t;
+        return (t) ? t : std::string("nullptr");  // TODO ???
 	}
 
     void coutKeyInfo(const gpgme_key_t* const);

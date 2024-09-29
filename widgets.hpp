@@ -15,6 +15,15 @@
 class Companion;
 class MainWindow;
 
+const std::vector<QString> connectButtonLabels
+{
+    "Connect",
+    "Disconnect"
+};
+
+QString getInitialConnectButtonLabel();
+QString getNextConnectButtonLabel();
+
 class TextEditWidget : public QTextEdit
 {
     Q_OBJECT
@@ -35,7 +44,7 @@ class IndicatorWidget : public QWidget
     Q_OBJECT
 
 public:
-    IndicatorWidget(QWidget*);
+    IndicatorWidget();
     IndicatorWidget(const IndicatorWidget*);
     ~IndicatorWidget() = default;
 
@@ -60,11 +69,20 @@ class SocketInfoBaseWidget : public QWidget
 
 public:
     SocketInfoBaseWidget() = default;
-    SocketInfoBaseWidget(const SocketInfoBaseWidget&) {};
-    virtual ~SocketInfoBaseWidget() {};
+    SocketInfoBaseWidget(const SocketInfoBaseWidget&) = default;
+    virtual ~SocketInfoBaseWidget() {}
 
-    virtual bool isStub() {};
-    virtual void set() {};
+    virtual bool isStub() { return false; }
+    void initializeFields();  // non-virtual because is called from constructor
+
+    virtual void set()
+    {
+        setParentForChildren();
+        setConnections();
+    }
+
+    virtual void setParentForChildren() { return; }
+    virtual void setConnections() { return; }
 };
 
 class SocketInfoWidget : public SocketInfoBaseWidget
@@ -80,13 +98,20 @@ public:
     SocketInfoWidget(SocketInfoWidget&&) {};
     SocketInfoWidget(std::string&, std::string&, uint16_t&, uint16_t&);
     SocketInfoWidget(std::string&&, std::string&&, uint16_t&&, uint16_t&&);
-    ~SocketInfoWidget() {};
+    ~SocketInfoWidget();
 
     void print();
     bool isStub() override;
 
     void select();
     void unselect();
+
+    // void set() override;
+    void setParentForChildren() override;
+    void setConnections() override;
+
+public slots:
+    void clientAction();
 
 private:
     Companion* companionPtr_;
@@ -111,9 +136,9 @@ private:
     QPushButton* connectButtonPtr_;
 //    QPushButton* toggleIndicatorButton_;
 
-    void set() override;
+    void initializeFields();
 
-    void changeColor(QColor&);    
+    void changeColor(QColor&);
 
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
@@ -125,16 +150,20 @@ class SocketInfoStubWidget : public SocketInfoBaseWidget
 
 public:
     SocketInfoStubWidget();
-    ~SocketInfoStubWidget() {};
+    ~SocketInfoStubWidget() = default;
 
     bool isStub() override;
+
+    // void set() override;
+    void setParentForChildren() override;
+    void setConnections() override {}
 
 private:
     QString mark_;
     QHBoxLayout* layoutPtr_;
     QLabel* markLabelPtr_;
 
-    void set() override;
+    void initializeFields();
 };
 
 #endif // WIDGETS_HPP

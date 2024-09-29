@@ -63,7 +63,9 @@ public:
     Companion(int, std::string&&);
     ~Companion();
 
-    bool initMessaging();
+    bool startServer();
+    bool createClient();
+    bool connectClient();
 
     int getId();
     std::string getName() const;

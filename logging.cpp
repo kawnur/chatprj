@@ -1,6 +1,5 @@
 #include "logging.hpp"
 
-
 template<> QString argForLogging<const std::string&>(const std::string& value)
 {
     return QString::fromStdString(value);

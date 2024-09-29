@@ -60,31 +60,31 @@ target_link_libraries(chatapp PRIVATE pq)
 
 # copy sql scripts
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db)
+# file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts)
+# file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db)
+# file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db)
+# file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db)
 
-file(COPY_FILE
-    ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
-    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_1_configure_db.sql)
+# file(COPY_FILE
+#     ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
+#     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_1_configure_db.sql)
 
-file(COPY_FILE
-    ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
-    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_1_configure_db.sql)
+# file(COPY_FILE
+#     ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
+#     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_1_configure_db.sql)
 
-file(COPY_FILE
-    ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
-    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db/sql_script_1_configure_db.sql)
+# file(COPY_FILE
+#     ${PROJECT_SOURCE_DIR}/sql_scripts/sql_script_1_configure_db.sql
+#     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db/sql_script_1_configure_db.sql)
 
-file(COPY_FILE
-    ${PROJECT_SOURCE_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
-    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql)
+# file(COPY_FILE
+#     ${PROJECT_SOURCE_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql
+#     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client1_db/sql_script_2_create_data_client1_db.sql)
 
-file(COPY_FILE
-    ${PROJECT_SOURCE_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
-    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql)
+# file(COPY_FILE
+#     ${PROJECT_SOURCE_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql
+#     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client2_db/sql_script_2_create_data_client2_db.sql)
 
-file(COPY_FILE
-    ${PROJECT_SOURCE_DIR}/sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql
-    ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql)
+# file(COPY_FILE
+#     ${PROJECT_SOURCE_DIR}/sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql
+#     ${CMAKE_CURRENT_BINARY_DIR}/sql_scripts/client3_db/sql_script_2_create_data_client3_db.sql)
