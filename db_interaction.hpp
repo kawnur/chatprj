@@ -10,7 +10,6 @@
 #include "manager.hpp"
 #include "utils_cout.hpp"
 
-
 class Companion;
 
 const char* getValueFromEnvironmentVariable(const char*);

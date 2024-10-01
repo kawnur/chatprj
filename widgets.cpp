@@ -149,9 +149,9 @@ SocketInfoWidget::SocketInfoWidget()
 // }
 
 // SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipAddress, QString&& port) :
-//     name_(std::move(name)),
-//     ipAddress_(std::move(ipAddress)),
-//     port_(std::move(port)) {
+//     name_(name),
+//     ipAddress_(ipAddress),
+//     port_(port) {
 
 //     setParentForChildren();
 // }
@@ -236,6 +236,7 @@ void SocketInfoWidget::initializeFields()
     setPalette(*palettePtr_);
 
     layoutPtr_ = new QHBoxLayout;
+    setLayout(layoutPtr_);
     indicatorPtr_ = new IndicatorWidget;
     nameLabelPtr_ = new QLabel(name_);
     ipAddressLabelPtr_ = new QLabel(ipAddress_);
@@ -248,13 +249,13 @@ void SocketInfoWidget::initializeFields()
     editButtonPtr_ = new QPushButton("Edit");
     connectButtonPtr_ = new QPushButton(getInitialConnectButtonLabel());
 
-    // connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction);
+    connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction);
 
-    if(this->name_ == "me")  // TODO ???
+    if(name_ == "me")  // TODO ???
     {
-        this->indicatorPtr_->setMe();
-        this->editButtonPtr_->hide();
-        this->connectButtonPtr_->hide();
+        indicatorPtr_->setMe();
+        editButtonPtr_->hide();
+        connectButtonPtr_->hide();
     }
 
 //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
@@ -262,35 +263,19 @@ void SocketInfoWidget::initializeFields()
 //                toggleIndicatorButton_, &QPushButton::pressed,
 //                indicator_, &IndicatorWidget::toggle);
 
-    this->layoutPtr_->addWidget(this->indicatorPtr_);
-    this->layoutPtr_->addWidget(this->nameLabelPtr_);
-    this->layoutPtr_->addWidget(this->ipAddressLabelPtr_);
-    this->layoutPtr_->addWidget(this->serverPortLabelPtr_);
-    this->layoutPtr_->addWidget(this->clientPortLabelPtr_);
-    this->layoutPtr_->addWidget(this->editButtonPtr_);
-    this->layoutPtr_->addWidget(this->connectButtonPtr_);
-//    layout_->addWidget(toggleIndicatorButton_);
+    std::initializer_list<QWidget*> widgets
+    {
+        // mainWindow->testLabel1_,
+        indicatorPtr_, nameLabelPtr_, ipAddressLabelPtr_, serverPortLabelPtr_,
+        clientPortLabelPtr_, editButtonPtr_, connectButtonPtr_
+    };
+
+    for(auto& widget : widgets)
+    {
+        layoutPtr_->addWidget(widget);
+    }
 
     // connect
-}
-
-void SocketInfoWidget::setParentForChildren()
-{
-    this->layoutPtr_->setParent(this);
-    this->indicatorPtr_->setParent(this);
-    this->nameLabelPtr_->setParent(this);
-    this->ipAddressLabelPtr_->setParent(this);
-    this->serverPortLabelPtr_->setParent(this);
-    this->clientPortLabelPtr_->setParent(this);
-    this->editButtonPtr_->setParent(this);
-    this->connectButtonPtr_->setParent(this);
-}
-
-void SocketInfoWidget::setConnections()
-{
-    connect(
-        this->connectButtonPtr_, &QPushButton::clicked,
-        this, &SocketInfoWidget::clientAction);
 }
 
 void SocketInfoWidget::clientAction()
@@ -364,22 +349,108 @@ SocketInfoStubWidget::SocketInfoStubWidget()
 {
     mark_ = "No socket info from DB...";
 
-    setParentForChildren();
+    layoutPtr_ = new QHBoxLayout;
+    setLayout(layoutPtr_);
+
+    markLabelPtr_ = new QLabel(mark_);
+    layoutPtr_->addWidget(markLabelPtr_);
 }
-
-void SocketInfoStubWidget::setParentForChildren()
-{
-    this->layoutPtr_ = new QHBoxLayout(this);
-    this->markLabelPtr_ = new QLabel(this->mark_, this);
-
-    this->layoutPtr_->addWidget(this->markLabelPtr_);
-}
-
-//SocketInfoStubWidget::~SocketInfoStubWidget() {
-//    logArgs("~SocketInfoStubWidget called");
-//}
 
 bool SocketInfoStubWidget::isStub()
 {
     return true;
+}
+
+WidgetGroup::WidgetGroup(const Companion* companion)
+{
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    const SocketInfo* socketInfoPtr = companion->getSocketInfoPtr();
+
+    SocketInfoWidget* widget = new SocketInfoWidget(
+        companion->getName(),
+        socketInfoPtr->getIpAddress(),
+        socketInfoPtr->getServerPort(),
+        socketInfoPtr->getClientPort());
+
+    socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
+    mainWindow->addWidgetToLeftPanel(socketInfoBasePtr_);
+
+    chatHistoryPtr_ = new QPlainTextEdit;
+    // chatHistoryPtr_->setStyleSheet("border-bottom: 1px solid black");
+    chatHistoryPtr_->setReadOnly(true);
+    buildChatHistory(companion);
+    chatHistoryPtr_->hide();
+
+    chatHistoryPalettePtr_ = new QPalette;  // TODO set parent or delete
+    chatHistoryPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
+    chatHistoryPalettePtr_->setColor(QPalette::Text, QColorConstants::Black);
+    chatHistoryPtr_->setAutoFillBackground(true);
+    chatHistoryPtr_->setPalette(*chatHistoryPalettePtr_);
+
+    mainWindow->addWidgetToCentralPanel(chatHistoryPtr_);
+
+    textEditPtr_ = new TextEditWidget;
+    textEditPtr_->hide();
+
+    connect(textEditPtr_, &TextEditWidget::send, this, &WidgetGroup::sendMessage);
+
+    mainWindow->addWidgetToCentralPanel(textEditPtr_);
+}
+
+void WidgetGroup::sendMessage()
+{
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    const Companion* companion =
+        mainWindow->getMappedCompanionByWidgetGroup(this);
+
+    Manager* manager = getManagerPtr();
+    manager->sendMessage(companion, this);
+}
+
+QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)
+{
+    auto companionId = message->getCompanionId();
+    auto authorId = message->getAuthorId();
+    auto time = QString::fromStdString(message->getTime());
+    auto text = QString::fromStdString(message->getText());
+    auto isSent = message->getIsSent();
+
+    QString sender = (companionId == authorId)
+                         ? QString::fromStdString(companion->getName()) : "Me";
+
+    QString receiver = (companionId == authorId)
+                           ? "Me" : QString::fromStdString(companion->getName());
+
+    QString prefix = QString("From %1 to %2 at %3:\n")
+                         .arg(sender, receiver, time);
+
+    QString messageIndent = "      ";
+
+    text.replace("\n", "\n" + messageIndent);
+
+    QString msg = prefix + messageIndent + text + QString("\n");
+    logArgs("message:", "#", msg, "#");
+
+    return msg;
+}
+
+void WidgetGroup::addMessageToChatHistory(const QString& message)
+{
+    this->chatHistoryPtr_->appendPlainText(message);
+}
+
+QString WidgetGroup::buildChatHistory(const Companion* companion)
+{
+    const std::vector<Message>* messages = companion->getMessagesPtr();
+    QString result { "" };
+
+    for(auto& message : *messages)
+    {
+        this->addMessageToChatHistory(
+            this->formatMessage(companion, &message));
+    }
+
+    return result;
 }

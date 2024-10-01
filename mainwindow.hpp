@@ -17,49 +17,15 @@
 #include "utils_cout.hpp"
 #include "widgets.hpp"
 
-
-class Companion;
-class Message;
-class SocketInfo;
 class SocketInfoBaseWidget;
 class SocketInfoWidget;
 class TextEditWidget;
-
-
-class WidgetGroup : public QObject
-{
-    Q_OBJECT
-
-public:
-    WidgetGroup() {};
-    WidgetGroup(const Companion*);
-    ~WidgetGroup() = default;
-
-    SocketInfoBaseWidget* socketInfoBasePtr_;
-    QPlainTextEdit* chatHistoryPtr_;
-    QPalette* chatHistoryPalettePtr_;
-    TextEditWidget* textEditPtr_;
-
-    QString formatMessage(const Companion*, const Message*);
-    void addMessageToChatHistory(const QString&);
-
-public slots:
-    void sendMessage();
-    // void connectToServer();
-
-private:
-    QString buildChatHistory(const Companion*);
-};
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 private:
-//    static MainWindow* _instance;
-//    std::queue<QString> messages_;
-//    EchoClient* client_;
-
     // TODO rename panel child widgets according its functionality
 
     QWidget* centralWidgetPtr_;
@@ -69,7 +35,6 @@ private:
 
     QWidget* leftPanelPtr_;
     QVBoxLayout* leftPanelLayoutPtr_;
-//    QLineEdit* test_;
 
     // central panel
 
@@ -112,9 +77,7 @@ private:
 
     SocketInfoBaseWidget* getMappedSocketInfoBaseWidgetByCompanion(const Companion*) const;
 
-//    MainWindow(QWidget* parent = nullptr);
     void closeEvent(QCloseEvent*) override;
-    // virtual ~MainWindow();
 
     void keyPressEvent(QKeyEvent*) override;
 
@@ -122,8 +85,6 @@ private:
 
 public:
     MainWindow();
-
-//    static MainWindow* instance();
 
     const Companion* selectedCompanion_;  // TODO make private
 
@@ -135,7 +96,6 @@ public:
 
     void buildWidgetGroups(std::vector<Companion*>*);
 
-    void setParentForChildren();
     void setLeftPanel();
     void set();
 

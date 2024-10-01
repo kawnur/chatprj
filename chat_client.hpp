@@ -9,7 +9,6 @@
 //#include "application.hpp"
 #include "mainwindow.hpp"
 
-
 using boost::asio::ip::tcp;
 
 enum { max_length = 1024 };

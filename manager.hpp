@@ -9,7 +9,6 @@
 #include "logging.hpp"
 #include "mainwindow.hpp"
 
-
 class ChatClient;
 class ChatServer;
 class WidgetGroup;
@@ -69,7 +68,7 @@ public:
 
     int getId();
     std::string getName() const;
-    SocketInfo* getSocketInfo() const;
+    SocketInfo* getSocketInfoPtr() const;
     void setSocketInfo(SocketInfo*);
 //    void addMessage(int, int, std::tm, const std::string&, bool);
     void addMessage(int, int, const std::string&, const std::string&, bool);

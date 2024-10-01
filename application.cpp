@@ -17,10 +17,10 @@ void ChatApp::set()
     mainWindowPtr_ = new MainWindow;
     mainWindowPtr_->set();
 
-    mainWindowPtr_->show();
-
     managerPtr_ = new Manager;
     managerPtr_->set();
+
+    mainWindowPtr_->show();
 
     // mainWindowPtr_->show();
 

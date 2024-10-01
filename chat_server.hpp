@@ -11,7 +11,6 @@
 #include "logging.hpp"
 #include "mainwindow.hpp"
 
-
 using boost::asio::ip::tcp;
 
 //class ChatApp;

@@ -1,101 +1,5 @@
 #include "mainwindow.hpp"
 
-WidgetGroup::WidgetGroup(const Companion* companion)
-{
-    MainWindow* mainWindow = getMainWindowPtr();
-
-    const SocketInfo* socketInfo = companion->getSocketInfo();
-
-    SocketInfoWidget* widget = new SocketInfoWidget(
-        companion->getName(),
-        socketInfo->getIpAddress(),
-        socketInfo->getServerPort(),
-        socketInfo->getClientPort());
-
-    widget->set();
-
-    socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
-
-    mainWindow->addWidgetToLeftPanel(socketInfoBasePtr_);
-
-    chatHistoryPtr_ = new QPlainTextEdit;
-    chatHistoryPtr_->setReadOnly(true);
-    this->buildChatHistory(companion);
-    chatHistoryPtr_->hide();
-
-    chatHistoryPalettePtr_ = new QPalette;  // TODO set parent or delete
-    chatHistoryPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
-    chatHistoryPalettePtr_->setColor(QPalette::Text, QColorConstants::Black);
-    chatHistoryPtr_->setAutoFillBackground(true);
-    chatHistoryPtr_->setPalette(*chatHistoryPalettePtr_);
-
-    mainWindow->addWidgetToCentralPanel(chatHistoryPtr_);
-
-    textEditPtr_ = new TextEditWidget;
-    textEditPtr_->hide();
-
-    connect(textEditPtr_, &TextEditWidget::send, this, &WidgetGroup::sendMessage);
-
-    mainWindow->addWidgetToCentralPanel(textEditPtr_);
-}
-
-void WidgetGroup::sendMessage()
-{
-    MainWindow* mainWindow = getMainWindowPtr();
-
-    const Companion* companion =
-            mainWindow->getMappedCompanionByWidgetGroup(this);
-
-    Manager* manager = getManagerPtr();
-    manager->sendMessage(companion, this);
-}
-
-QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)
-{
-    auto companionId = message->getCompanionId();
-    auto authorId = message->getAuthorId();
-    auto time = QString::fromStdString(message->getTime());
-    auto text = QString::fromStdString(message->getText());
-    auto isSent = message->getIsSent();
-
-    QString sender = (companionId == authorId)
-        ? QString::fromStdString(companion->getName()) : "Me";
-
-    QString receiver = (companionId == authorId)
-        ? "Me" : QString::fromStdString(companion->getName());
-
-    QString prefix = QString("From %1 to %2 at %3:\n")
-            .arg(sender, receiver, time);
-
-    QString messageIndent = "      ";
-
-    text.replace("\n", "\n" + messageIndent);
-
-    QString msg = prefix + messageIndent + text + QString("\n");
-    logArgs("message:", "#", msg, "#");
-
-    return msg;
-}
-
-void WidgetGroup::addMessageToChatHistory(const QString& message)
-{
-    this->chatHistoryPtr_->appendPlainText(message);
-}
-
-QString WidgetGroup::buildChatHistory(const Companion* companion)
-{
-    const std::vector<Message>* messages = companion->getMessagesPtr();
-    QString result { "" };
-
-    for(auto& message : *messages)
-    {
-        this->addMessageToChatHistory(
-                    this->formatMessage(companion, &message));
-    }
-
-    return result;
-}
-
 MainWindow* getMainWindowPtr()
 {
     QCoreApplication* coreApp = QCoreApplication::instance();
@@ -110,7 +14,6 @@ void MainWindow::addStubWidgetToLeftPanel()
     SocketInfoBaseWidget* baseObjectCastPtr =
             dynamic_cast<SocketInfoBaseWidget*>(stub);
 
-    baseObjectCastPtr->setParent(this->leftPanelPtr_);
     this->leftPanelLayoutPtr_->addWidget(baseObjectCastPtr);
 }
 
@@ -238,9 +141,9 @@ void MainWindow::resetSelectedCompanion(const Companion* newSelected)
     }
 }
 
-//MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-MainWindow::MainWindow() {
-//    setWindowTitle(QString("MainWindow"));
+//MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
+MainWindow::MainWindow()
+{
     setWindowTitle(std::getenv("CLIENT_NAME"));
 
     centralWidgetPtr_ = new QWidget;
@@ -253,33 +156,39 @@ MainWindow::MainWindow() {
 
     // left panel
 
-    leftPanelPtr_ = new QWidget;
-    leftPanelPtr_->resize(2000, 1000);
-    leftPanelLayoutPtr_ = new QVBoxLayout;
+    leftPanelPtr_ = new QWidget(centralWidgetPtr_);
+    // leftPanelPtr_->setStyleSheet("border-right: 1px solid black");
+    leftPanelPtr_->resize(2000, 1000);  // TODO ???
+    leftPanelLayoutPtr_ = new QVBoxLayout(leftPanelPtr_);
     leftPanelLayoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     leftPanelLayoutPtr_->setSpacing(0);
     leftPanelLayoutPtr_->setContentsMargins(0, 0, 0, 0);
     leftPanelPtr_->setLayout(leftPanelLayoutPtr_);
 
-    //    test_ = new QLineEdit;
-    //    leftPanelLayout_->addWidget(this->test_);
-
-    addStubWidgetToLeftPanel();
-
     centralWidgetLayoutPtr_->addWidget(leftPanelPtr_);
+
+    // add stub widget to left panel
+    SocketInfoStubWidget* stub = new SocketInfoStubWidget;
+
+    SocketInfoBaseWidget* baseObjectCastPtr =
+        dynamic_cast<SocketInfoBaseWidget*>(stub);
+
+    leftPanelLayoutPtr_->addWidget(baseObjectCastPtr);
+
+    leftPanelPtr_->resize(4000, 1000);  // TODO ???
 
     // central panel
 
-    centralPanelPtr_ = new QWidget;
+    centralPanelPtr_ = new QWidget(centralWidgetPtr_);
+    // centralPanelPtr_->setStyleSheet("border-right: 1px solid black");
     centralPanelLayoutPtr_ = new QVBoxLayout;
     centralPanelLayoutPtr_->setSpacing(0);
     centralPanelLayoutPtr_->setContentsMargins(0, 0, 0, 0);
     centralPanelPtr_->setLayout(centralPanelLayoutPtr_);
 
-    //    companion_ = nullptr;
-    companionNameLabelPtr_ = new QLabel("");
+    companionNameLabelPtr_ = new QLabel("", centralPanelPtr_);
+    // companionNameLabelPtr_->setStyleSheet("border-bottom: 1px solid black");
     companionNameLabelPalettePtr_ = new QPalette;
-    //    companionNameLabelPalette_->setColor(QPalette::Window, QColorConstants::LightGray);
     companionNameLabelPalettePtr_->setColor(QPalette::Window, QColor(0xa9a9a9));
     companionNameLabelPtr_->setAutoFillBackground(true);
     companionNameLabelPtr_->setPalette(*companionNameLabelPalettePtr_);
@@ -287,7 +196,7 @@ MainWindow::MainWindow() {
 
     centralPanelLayoutPtr_->addWidget(companionNameLabelPtr_);
 
-    chatHistoryWidgetStubPtr_ = new QPlainTextEdit;
+    chatHistoryWidgetStubPtr_ = new QPlainTextEdit(centralPanelPtr_);
     chatHistoryWidgetStubPtr_->setReadOnly(true);
     chatHistoryWidgetStubPtr_->setPlainText("");
 
@@ -299,11 +208,7 @@ MainWindow::MainWindow() {
 
     centralPanelLayoutPtr_->addWidget(chatHistoryWidgetStubPtr_);
 
-    //    textEditStub_ = new TextEditWidget;
-    //    centralPanelLayout_->addWidget(textEditStub_);
-
     textEditStubPtr_ = new TextEditWidget;
-    textEditStubPtr_->setParent(centralWidgetPtr_);
     centralPanelLayoutPtr_->addWidget(textEditStubPtr_);
     //    textEdit_->hide();
 
@@ -311,19 +216,20 @@ MainWindow::MainWindow() {
 
     // right panel
 
-    rightPanelPtr_ = new QWidget;
-    leftPanelPtr_->resize(4000, 1000);
+    rightPanelPtr_ = new QWidget(centralWidgetPtr_);
+    // rightPanelPtr_->setStyleSheet("border-right: 1px solid black");
     rightPanelLayoutPtr_ = new QVBoxLayout;
     rightPanelLayoutPtr_->setSpacing(0);
     rightPanelLayoutPtr_->setContentsMargins(0, 0, 0, 0);
     rightPanelPtr_->setLayout(rightPanelLayoutPtr_);
 
-    appLogWidgetPtr_ = new QPlainTextEdit;
+    appLogWidgetPtr_ = new QPlainTextEdit(centralWidgetPtr_);
+    // appLogWidgetPtr_->setStyleSheet("border-left: 1px solid black");
     appLogWidgetPtr_->setReadOnly(true);
     appLogWidgetPtr_->setPlainText("");
 
     appLogWidgetPalettePtr_ = new QPalette;
-    appLogWidgetPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
+    appLogWidgetPalettePtr_->setColor(QPalette::Base, QColor(0xcccaca));
     appLogWidgetPalettePtr_->setColor(QPalette::Text, QColorConstants::Black);
     appLogWidgetPtr_->setAutoFillBackground(true);
     appLogWidgetPtr_->setPalette(*appLogWidgetPalettePtr_);
@@ -360,36 +266,6 @@ MainWindow::~MainWindow()
     delete this->appLogWidgetPalettePtr_;
 }
 
-void MainWindow::setParentForChildren()
-{
-    // TODO use widget's palette instead of new
-
-    this->centralWidgetPtr_->setParent(this);
-    this->centralWidgetLayoutPtr_->setParent(this);
-
-    // left panel
-
-    this->leftPanelPtr_->setParent(this);
-    this->leftPanelLayoutPtr_->setParent(this);
-
-    // central panel
-
-    this->centralPanelPtr_->setParent(this);
-    this->centralPanelLayoutPtr_->setParent(this);
-    this->companionNameLabelPtr_->setParent(this);
-    // this->companionNameLabelPalettePtr_->setParent(this);
-    this->chatHistoryWidgetStubPtr_->setParent(this);
-    // this->chatHistoryWidgetStubPalettePtr_->setParent(this);
-    this->textEditStubPtr_->setParent(this);
-
-    // right panel
-
-    this->rightPanelPtr_->setParent(this);
-    this->rightPanelLayoutPtr_->setParent(this);
-    this->appLogWidgetPtr_->setParent(this);
-    // this->appLogWidgetPalettePtr_->setParent(this);
-}
-
 void MainWindow::setLeftPanel()
 {
     QList<SocketInfoBaseWidget*> leftPanelChildren =
@@ -409,7 +285,6 @@ void MainWindow::setLeftPanel()
 
 void MainWindow::set()
 {
-    this->setParentForChildren();
     this->setLeftPanel();
 }
 
@@ -464,119 +339,6 @@ void MainWindow::buildWidgetGroups(std::vector<Companion*>* companionsPtr)
     }
 }
 
-// void MainWindow::set()
-// {
-//     // TODO use widget's palette instead of new
-
-//     this->centralWidgetPtr_ = new QWidget(this);
-//     this->setCentralWidget(centralWidgetPtr_);
-
-//     this->centralWidgetLayoutPtr_ = new QHBoxLayout(this);
-//     this->centralWidgetLayoutPtr_->setSpacing(0);
-//     this->centralWidgetLayoutPtr_->setContentsMargins(0, 0, 0, 0);
-//     this->centralWidgetPtr_->setLayout(centralWidgetLayoutPtr_);
-
-//     // left panel
-
-//     this->leftPanelPtr_ = new QWidget(this);
-//     this->leftPanelPtr_->resize(2000, 1000);
-//     this->leftPanelLayoutPtr_ = new QVBoxLayout(this);
-//     this->leftPanelLayoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-//     this->leftPanelLayoutPtr_->setSpacing(0);
-//     this->leftPanelLayoutPtr_->setContentsMargins(0, 0, 0, 0);
-//     this->leftPanelPtr_->setLayout(leftPanelLayoutPtr_);
-
-// //    this->test_ = new QLineEdit;
-// //    this->leftPanelLayout_->addWidget(this->test_);
-
-//     this->addStubWidgetToLeftPanel();
-
-//     this->centralWidgetLayoutPtr_->addWidget(leftPanelPtr_);
-
-//     // central panel
-
-//     this->centralPanelPtr_ = new QWidget(this);
-//     this->centralPanelLayoutPtr_ = new QVBoxLayout(this);
-//     this->centralPanelLayoutPtr_->setSpacing(0);
-//     this->centralPanelLayoutPtr_->setContentsMargins(0, 0, 0, 0);
-//     this->centralPanelPtr_->setLayout(this->centralPanelLayoutPtr_);
-
-// //    this->companion_ = nullptr;
-//     this->companionNameLabelPtr_ = new QLabel("", this);
-//     this->companionNameLabelPalettePtr_ = new QPalette();
-// //    this->companionNameLabelPalette_->setColor(QPalette::Window, QColorConstants::LightGray);
-//     this->companionNameLabelPalettePtr_->setColor(QPalette::Window, QColor(0xa9a9a9));
-//     this->companionNameLabelPtr_->setAutoFillBackground(true);
-//     this->companionNameLabelPtr_->setPalette(*this->companionNameLabelPalettePtr_);
-// //    this->companionNameLabel_->hide();
-
-//     this->centralPanelLayoutPtr_->addWidget(this->companionNameLabelPtr_);
-
-//     this->chatHistoryWidgetStubPtr_ = new QPlainTextEdit(this);
-//     this->chatHistoryWidgetStubPtr_->setReadOnly(true);
-//     this->chatHistoryWidgetStubPtr_->setPlainText("");
-
-//     this->chatHistoryWidgetStubPalettePtr_ = new QPalette();
-//     this->chatHistoryWidgetStubPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
-// //    chatHistoryWidgetStubPalette_->setColor(QPalette::Text, QColorConstants::Black);
-// //    chatHistoryWidgetStub_->setAutoFillBackground(true);
-//     this->chatHistoryWidgetStubPtr_->setPalette(*this->chatHistoryWidgetStubPalettePtr_);
-
-//     this->centralPanelLayoutPtr_->addWidget(this->chatHistoryWidgetStubPtr_);
-
-// //    this->textEditStub_ = new TextEditWidget(this);
-// //    centralPanelLayout_->addWidget(this->textEditStub_);
-
-//     this->textEditStubPtr_ = new TextEditWidget();
-//     textEditStubPtr_->setParent(this->centralWidgetPtr_);
-//     this->centralPanelLayoutPtr_->addWidget(this->textEditStubPtr_);
-// //    this->textEdit_->hide();
-
-//     this->centralWidgetLayoutPtr_->addWidget(this->centralPanelPtr_);
-
-//     // right panel
-
-//     this->rightPanelPtr_ = new QWidget(this);
-//     this->leftPanelPtr_->resize(4000, 1000);
-//     this->rightPanelLayoutPtr_ = new QVBoxLayout(this);
-//     this->rightPanelLayoutPtr_->setSpacing(0);
-//     this->rightPanelLayoutPtr_->setContentsMargins(0, 0, 0, 0);
-//     this->rightPanelPtr_->setLayout(this->rightPanelLayoutPtr_);
-
-//     this->appLogWidgetPtr_ = new QPlainTextEdit(this);
-//     this->appLogWidgetPtr_->setReadOnly(true);
-//     this->appLogWidgetPtr_->setPlainText("");
-
-//     this->appLogWidgetPalettePtr_ = new QPalette();
-//     this->appLogWidgetPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
-//     this->appLogWidgetPalettePtr_->setColor(QPalette::Text, QColorConstants::Black);
-//     this->appLogWidgetPtr_->setAutoFillBackground(true);
-//     this->appLogWidgetPtr_->setPalette(*this->appLogWidgetPalettePtr_);
-
-//     this->rightPanelLayoutPtr_->addWidget(this->appLogWidgetPtr_);
-
-// //    testPlainTextEditButton_ = new QPushButton("testPlainTextEditButton");
-// //    connect(
-// //                testPlainTextEditButton_,
-// //                &QPushButton::clicked,
-// //                this,
-// //                &MainWindow::testMainWindowRightPanel);
-// //    rightPanelLayout_->addWidget(testPlainTextEditButton_);
-
-//     this->centralWidgetLayoutPtr_->addWidget(this->rightPanelPtr_);
-
-// //    selectedSocketInfoWidget_ = nullptr;
-//     this->selectedCompanion_ = nullptr;
-
-// //    map_ = std::map<SocketInfoBaseWidget*, const Companion*>();
-// //    map_ = std::map<const Companion*, SocketInfoBaseWidget*>();
-//     this->map_ = std::map<const Companion*, WidgetGroup*>();
-
-//     // logging enabled, actions
-//     this->setLeftPanel();
-// //    this->addTestSocketInfoWidgetToLeftPanel();
-// }
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     std::exit(0);
@@ -596,13 +358,11 @@ void MainWindow::addTextToAppLogWidget(const QString& text)
 
 void MainWindow::addWidgetToLeftPanel(SocketInfoBaseWidget* widget)
 {
-    widget->setParent(this->leftPanelPtr_);
     this->leftPanelLayoutPtr_->addWidget(widget);
 }
 
 void MainWindow::addWidgetToCentralPanel(QWidget* widget)
 {
-    widget->setParent(this->centralPanelPtr_);
     this->centralPanelLayoutPtr_->addWidget(widget);
 }
 

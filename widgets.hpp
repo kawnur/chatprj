@@ -11,8 +11,8 @@
 #include "manager.hpp"
 #include "logging.hpp"
 
-
 class Companion;
+class Message;
 class MainWindow;
 
 const std::vector<QString> connectButtonLabels
@@ -74,15 +74,6 @@ public:
 
     virtual bool isStub() { return false; }
     void initializeFields();  // non-virtual because is called from constructor
-
-    virtual void set()
-    {
-        setParentForChildren();
-        setConnections();
-    }
-
-    virtual void setParentForChildren() { return; }
-    virtual void setConnections() { return; }
 };
 
 class SocketInfoWidget : public SocketInfoBaseWidget
@@ -105,10 +96,6 @@ public:
 
     void select();
     void unselect();
-
-    // void set() override;
-    void setParentForChildren() override;
-    void setConnections() override;
 
 public slots:
     void clientAction();
@@ -154,16 +141,37 @@ public:
 
     bool isStub() override;
 
-    // void set() override;
-    void setParentForChildren() override;
-    void setConnections() override {}
-
 private:
     QString mark_;
     QHBoxLayout* layoutPtr_;
     QLabel* markLabelPtr_;
 
     void initializeFields();
+};
+
+class WidgetGroup : public QObject
+{
+    Q_OBJECT
+
+public:
+    WidgetGroup() = default;
+    WidgetGroup(const Companion*);
+    ~WidgetGroup() = default;
+
+    SocketInfoBaseWidget* socketInfoBasePtr_;
+    QPlainTextEdit* chatHistoryPtr_;
+    QPalette* chatHistoryPalettePtr_;
+    TextEditWidget* textEditPtr_;
+
+    QString formatMessage(const Companion*, const Message*);
+    void addMessageToChatHistory(const QString&);
+
+public slots:
+    void sendMessage();
+    // void connectToServer();
+
+private:
+    QString buildChatHistory(const Companion*);
 };
 
 #endif // WIDGETS_HPP

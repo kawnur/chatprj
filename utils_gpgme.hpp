@@ -6,7 +6,6 @@
 
 #include "utils_cout.hpp"
 
-
 extern "C"
 {
 #include <gpgme.h>

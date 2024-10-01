@@ -12,7 +12,6 @@
 #include <type_traits>
 #include <vector>
 
-
 void endline(int);
 
 //void coutWithManipulators(auto&& s, int width) {

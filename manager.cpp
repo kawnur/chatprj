@@ -6,9 +6,9 @@ SocketInfo::SocketInfo(
 
 SocketInfo::SocketInfo(
     std::string&& ipAddress, uint16_t&& serverPort, uint16_t&& clientPort) :  // TODO ???
-    ipAddress_(std::move(ipAddress)),
-    serverPort_(std::move(serverPort)),
-    clientPort_(std::move(clientPort)) {}
+    ipAddress_(ipAddress),
+    serverPort_(serverPort),
+    clientPort_(clientPort) {}
 
 SocketInfo::SocketInfo(const SocketInfo& si)
 {
@@ -198,7 +198,7 @@ std::string Companion::getName() const
     return this->name_;
 }
 
-SocketInfo* Companion::getSocketInfo() const
+SocketInfo* Companion::getSocketInfoPtr() const
 {
     return this->socketInfoPtr_;
 }
@@ -405,7 +405,6 @@ bool Manager::buildCompanions()
             if(!getDataFromDBResult(messagesData, messagesDBResultPtr, 0))
             {
                 logArgsWarning("!getDataFromDBResult(messagesData, messagesDBResultPtr, 0)");
-                companionsDataIsOk = false;
             }
 
             for(auto& message : messagesData)
