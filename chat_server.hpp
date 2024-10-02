@@ -37,6 +37,8 @@ class ChatServer
 public:
     // ChatServer(boost::asio::io_context& io_context, short port)
     //     : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
+
+    // TODO what if port is blocked?
     ChatServer(uint16_t port)
         : io_context_(), acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
     {

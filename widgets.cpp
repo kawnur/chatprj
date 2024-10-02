@@ -265,7 +265,6 @@ void SocketInfoWidget::initializeFields()
 
     std::initializer_list<QWidget*> widgets
     {
-        // mainWindow->testLabel1_,
         indicatorPtr_, nameLabelPtr_, ipAddressLabelPtr_, serverPortLabelPtr_,
         clientPortLabelPtr_, editButtonPtr_, connectButtonPtr_
     };
@@ -280,10 +279,13 @@ void SocketInfoWidget::initializeFields()
 
 void SocketInfoWidget::clientAction()
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    // MainWindow* mainWindow = getMainWindowPtr();
+    Manager* manager = getManagerPtr();
 
+    // const Companion* companion =
+    //     mainWindow->getMappedCompanionBySocketInfoBaseWidget(this);
     const Companion* companion =
-        mainWindow->getMappedCompanionBySocketInfoBaseWidget(this);
+        manager->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // if(const_cast<Companion*>(companion)->startClient())
     if(const_cast<Companion*>(companion)->connectClient())
@@ -323,6 +325,7 @@ void SocketInfoWidget::unselect()
 void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
 {
     MainWindow* mainWindow = getMainWindowPtr();
+    Manager* manager = getManagerPtr();
 
 //    auto selectedCompanion = mainWindow->selectedSocketInfoWidget_;
 
@@ -338,9 +341,9 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
     auto base = dynamic_cast<SocketInfoBaseWidget*>(this);
 
     auto newCompanion =
-            mainWindow->getMappedCompanionBySocketInfoBaseWidget(base);
+        manager->getMappedCompanionBySocketInfoBaseWidget(base);
 
-    mainWindow->resetSelectedCompanion(newCompanion);
+    manager->resetSelectedCompanion(newCompanion);
 }
 
 void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
@@ -400,12 +403,11 @@ WidgetGroup::WidgetGroup(const Companion* companion)
 
 void WidgetGroup::sendMessage()
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    Manager* manager = getManagerPtr();
 
     const Companion* companion =
-        mainWindow->getMappedCompanionByWidgetGroup(this);
+        manager->getMappedCompanionByWidgetGroup(this);
 
-    Manager* manager = getManagerPtr();
     manager->sendMessage(companion, this);
 }
 

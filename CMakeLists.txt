@@ -22,6 +22,8 @@ set(PROJECT_SOURCES
     mainwindow.hpp
     manager.cpp
     manager.hpp
+    utils.cpp
+    utils.hpp
     utils_cout.cpp
     utils_cout.hpp
     utils_gpgme.cpp

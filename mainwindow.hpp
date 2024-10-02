@@ -11,9 +11,8 @@
 #include <QVBoxLayout>
 
 #include "application.hpp"
-//#include "blocking_tcp_echo_client.hpp"
 #include "db_interaction.hpp"
-//#include "tutorial_boost_asio.hpp"
+#include "manager.hpp"
 #include "utils_cout.hpp"
 #include "widgets.hpp"
 
@@ -64,18 +63,7 @@ private:
 
 //    QPushButton* testPlainTextEditButton_;
 
-    std::map<const Companion*, WidgetGroup*> map_;
-
-    void addStubWidgetToLeftPanel();
-//    void addSocketInfoWidgetToLeftPanel(SocketInfo*);
-    void addSocketInfoWidgetToLeftPanel(const Companion*);
-    void addChatHistoryWidgetToMapping(const Companion*);
-    void addTextEditWidgetToMapping(const Companion*);
-
 //    void testMainWindowRightPanel();
-    void addTestSocketInfoWidgetToLeftPanel();
-
-    SocketInfoBaseWidget* getMappedSocketInfoBaseWidgetByCompanion(const Companion*) const;
 
     void closeEvent(QCloseEvent*) override;
 
@@ -86,15 +74,7 @@ private:
 public:
     MainWindow();
 
-    const Companion* selectedCompanion_;  // TODO make private
-
-    const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
-    const Companion* getMappedCompanionByTextEditWidget(TextEditWidget*) const;
-    const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
-
-    void resetSelectedCompanion(const Companion*);
-
-    void buildWidgetGroups(std::vector<Companion*>*);
+    void addStubWidgetToLeftPanel();
 
     void setLeftPanel();
     void set();
@@ -104,6 +84,12 @@ public:
 
     void addWidgetToLeftPanel(SocketInfoBaseWidget*);
     void addWidgetToCentralPanel(QWidget*);
+
+    size_t getLeftPanelChildrenSize();
+    void removeStubsFromLeftPanel();
+
+    void oldSelectedCompanionActions(const Companion*);
+    void newSelectedCompanionActions(const Companion*);
 };
 
 MainWindow* getMainWindowPtr();

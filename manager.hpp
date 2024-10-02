@@ -11,6 +11,8 @@
 
 class ChatClient;
 class ChatServer;
+class MainWindow;
+class SocketInfoBaseWidget;
 class WidgetGroup;
 
 class SocketInfo
@@ -97,9 +99,21 @@ public:
     void set();
     void sendMessage(const Companion*, WidgetGroup*);
 
+    const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
+    const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
+    // const WidgetGroup* getWidgetGroupByCompanion(Companion*) const;
+
+    void resetSelectedCompanion(const Companion*);
+
 private:
+    const Companion* selectedCompanion_;
+
+    std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;
+
     bool connectToDb();
     bool buildCompanions();
+
+    void buildWidgetGroups();
 
     PGconn* dbConnectionPtr_;
     std::vector<Companion*> companionPtrs_;

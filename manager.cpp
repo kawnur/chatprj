@@ -111,7 +111,7 @@ bool Companion::startServer()
 
 bool Companion::createClient()
 {
-    bool initialized = false;
+    bool created = false;
 
     try
     {
@@ -125,15 +125,15 @@ bool Companion::createClient()
             this->socketInfoPtr_->getIpAddress(),
             this->socketInfoPtr_->getClientPort());
 
-        // initialized = this->clientPtr_->connect();
-        initialized = true;
+        // created = this->clientPtr_->connect();
+        created = true;
     }
     catch(std::exception& e)
     {
         logArgsError(e.what());
     }
 
-    return initialized;
+    return created;
 }
 
 bool Companion::connectClient()
@@ -205,7 +205,9 @@ SocketInfo* Companion::getSocketInfoPtr() const
 
 Manager::Manager() :
     dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
-{}
+{
+     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
+}
 
 Manager::~Manager()
 {
@@ -229,8 +231,7 @@ void Manager::set()
 
         if(companionsBuilt)
         {
-            MainWindow* mainWindow = getMainWindowPtr();
-            mainWindow->buildWidgetGroups(&this->companionPtrs_);
+            this->buildWidgetGroups();
         }
         else
         {
@@ -295,6 +296,65 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
     // send over network
 
     companionPtr->sendLastMessage();
+}
+
+const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
+    SocketInfoBaseWidget* widget) const
+{
+    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
+        return pair.second->socketInfoBasePtr_ == widget;
+    };
+
+    auto result = std::find_if(
+        this->mapCompanionToWidgetGroup_.cbegin(),
+        this->mapCompanionToWidgetGroup_.cend(),
+        findWidget);
+
+    return result->first;
+}
+
+const Companion* Manager::getMappedCompanionByWidgetGroup(
+    WidgetGroup* groupPtr) const
+{
+    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
+        return pair.second == groupPtr;
+    };
+
+    auto result = std::find_if(
+        this->mapCompanionToWidgetGroup_.cbegin(),
+        this->mapCompanionToWidgetGroup_.cend(),
+        findWidget);
+
+    return result->first;
+}
+
+void Manager::resetSelectedCompanion(const Companion* newSelected)
+{
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    if(this->selectedCompanion_)
+    {
+        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanion_);  // TODO try catch
+
+        dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->unselect();
+
+        widgetGroup->chatHistoryPtr_->hide();
+        widgetGroup->textEditPtr_->hide();
+    }
+    mainWindow->oldSelectedCompanionActions(this->selectedCompanion_);
+
+    this->selectedCompanion_ = newSelected;
+
+    if(this->selectedCompanion_)
+    {
+        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanion_);
+
+        dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->select();
+
+        widgetGroup->chatHistoryPtr_->show();
+        widgetGroup->textEditPtr_->show();
+    }
+    mainWindow->newSelectedCompanionActions(this->selectedCompanion_);
 }
 
 bool Manager::buildCompanions()
@@ -429,6 +489,38 @@ bool Manager::buildCompanions()
     }
 
     return companionsDataIsOk;
+}
+
+void Manager::buildWidgetGroups()
+{
+    MainWindow* mainWindow = getMainWindowPtr();
+
+    auto companionsSize = this->companionPtrs_.size();
+    auto childrenSize = mainWindow->getLeftPanelChildrenSize();
+
+    logArgs("companionsSize:", companionsSize);
+    logArgs("childrenSize:", childrenSize);
+
+    if(companionsSize == 0 && childrenSize == 0)
+    {
+        logArgsWarning("strange case, empty sockets panel");
+        mainWindow->addStubWidgetToLeftPanel();
+    }
+    else
+    {
+        if(childrenSize != 0)
+        {
+            // TODO check if sockets already are children
+
+            mainWindow->removeStubsFromLeftPanel();
+
+            for(auto& companion : this->companionPtrs_)
+            {
+                WidgetGroup* widgetGroup = new WidgetGroup(companion);
+                this->mapCompanionToWidgetGroup_[companion] = widgetGroup;
+            }
+        }
+    }
 }
 
 bool Manager::connectToDb()
