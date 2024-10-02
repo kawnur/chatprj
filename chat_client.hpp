@@ -8,6 +8,7 @@
 
 //#include "application.hpp"
 #include "mainwindow.hpp"
+#include "utils.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -31,7 +32,7 @@ public:
     bool connect();
     bool disconnect();
 
-    int send(std::string);
+    bool send(std::string);
 };
 
 #endif // CHAT_CLIENT

@@ -18,7 +18,7 @@ PGconn* getDBConnection()
 
     PGconn* dbConnection = nullptr;
 
-    try
+    auto connectLambda = [&]()
     {
         const char* dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
         const char* dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
@@ -29,7 +29,7 @@ PGconn* getDBConnection()
         {
             if(!value)
             {
-                return nullptr;
+                return;
             }
         }
 
@@ -54,11 +54,9 @@ PGconn* getDBConnection()
         {
             logArgsError("DB connection status: CONNECTION_BAD");
         }
-    }
-    catch(std::exception& e)
-    {
-        logLine(e.what());
-    }
+    };
+
+    runAndLogException(connectLambda);
 
     return dbConnection;
 }

@@ -3,6 +3,8 @@
 
 #include "logging.hpp"
 
+template<typename... Ts> void logArgsException(Ts&&... args);
+
 template<typename F, typename... Ts>
 void runAndLogException(F func, Ts&&... args)
 {

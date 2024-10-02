@@ -85,9 +85,9 @@ Companion::~Companion()
 
 bool Companion::startServer()
 {
-    bool initialized = false;
+    bool started = false;
 
-    try
+    auto startLambda = [this](bool& value)
     {
         // io_contextPtr_ = new boost::asio::io_context;
 
@@ -99,21 +99,19 @@ bool Companion::startServer()
 
         this->serverPtr_->run();
 
-        initialized = true;
-    }
-    catch(std::exception& e)
-    {
-        logArgsError(e.what());
-    }
+        value = true;
+    };
 
-    return initialized;
+    runAndLogException(startLambda, started);
+
+    return started;
 }
 
 bool Companion::createClient()
 {
     bool created = false;
 
-    try
+    auto createLambda = [this](bool& value)
     {
         // io_contextPtr_ = new boost::asio::io_context;
 
@@ -126,12 +124,10 @@ bool Companion::createClient()
             this->socketInfoPtr_->getClientPort());
 
         // created = this->clientPtr_->connect();
-        created = true;
-    }
-    catch(std::exception& e)
-    {
-        logArgsError(e.what());
-    }
+        value = true;
+    };
+
+    runAndLogException(createLambda, created);
 
     return created;
 }
@@ -140,7 +136,7 @@ bool Companion::connectClient()
 {
     bool connected = false;
 
-    try
+    auto connectLambda = [this](bool& value)
     {
         // io_contextPtr_ = new boost::asio::io_context;
 
@@ -152,12 +148,10 @@ bool Companion::connectClient()
         //     this->socketInfoPtr_->getIpAddress(),
         //     this->socketInfoPtr_->getClientPort());
 
-        connected = this->clientPtr_->connect();
-    }
-    catch(std::exception& e)
-    {
-        logArgsError(e.what());
-    }
+        value = this->clientPtr_->connect();
+    };
+
+    runAndLogException(connectLambda, connected);
 
     return connected;
 }
@@ -185,7 +179,7 @@ bool Companion::sendLastMessage()
     auto text = this->messages_.back().getText();
     auto sendResult = this->clientPtr_->send(text);
 
-    return true;
+    return sendResult;
 }
 
 int Companion::getId()
@@ -206,7 +200,8 @@ SocketInfo* Companion::getSocketInfoPtr() const
 Manager::Manager() :
     dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
 {
-     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
+    mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
+    selectedCompanion_ = nullptr;
 }
 
 Manager::~Manager()

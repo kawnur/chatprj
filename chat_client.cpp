@@ -16,35 +16,21 @@ bool ChatClient::connect()
 {
     bool connected = false;
 
-    try
+    auto connectLambda = [this](bool& value)
     {
         logArgs("ChatClient connects to", this->ipAddress_, this->port_);
 
-        // boost::asio::io_context io_context_;
-        // tcp::socket socket_ { io_context_ };
-        // tcp::resolver resolver_ { io_context_ };
-        //        boost::asio::connect(s, resolver.resolve("localhost", "5002"));
-        //        boost::asio::connect(s, resolver.resolve("0.0.0.0", "5002"));
-        //        boost::asio::connect(s, resolver.resolve("172.21.0.3", "5002"));
-        // boost::asio::connect(s, resolver.resolve("chatprj-server-1", "5002"));
-        //        boost::asio::connect(s, resolver.resolve("host.docker.internal", "5002"));
         boost::asio::connect(
             this->socket_,
             this->resolver_.resolve(this->ipAddress_, std::to_string(this->port_))
         );
 
-        // mainWindow->addTextToChatHistoryWidget("s.is_open(): "
-        //                     + QString::fromStdString(std::to_string(s.is_open())));
+        logArgs("socket_.is_open():", this->socket_.is_open());
 
+        value = true;  // TODO check connection state
+    };
 
-        logArgs("socket_.is_open():", socket_.is_open());
-
-        connected = true;  // TODO check connection state
-    }
-    catch(std::exception& e)
-    {
-        logArgsException(e.what());
-    }
+    runAndLogException(connectLambda, connected);
 
     return connected;
 }
@@ -53,7 +39,7 @@ bool ChatClient::disconnect()
 {
     bool disconnected = false;
 
-    try
+    auto disconnectLambda = [this](bool& value)
     {
         logArgs("ChatClient disconnects from", this->ipAddress_, this->port_);
 
@@ -74,21 +60,19 @@ bool ChatClient::disconnect()
 
         logArgs("socket_.is_open():", socket_.is_open());
 
-        disconnected = true;  // TODO check connection state
-    }
-    catch(std::exception& e)
-    {
-        logArgsException(e.what());
-    }
+        value = true;  // TODO check connection state
+    };
+
+    runAndLogException(disconnectLambda, disconnected);
 
     return disconnected;
 }
 
-int ChatClient::send(std::string text)
+bool ChatClient::send(std::string text)
 {
-    // MainWindow* mainWindow = getMainWindowPtr();
+    bool sent = false;
 
-    try
+    auto sendLambda = [&, this](bool& value)
     {
         // char request[max_length] = { 0 };
 
@@ -116,13 +100,11 @@ int ChatClient::send(std::string text)
         // logArgs("reply:", str);
         // // mainWindow->addTextToChatHistoryWidget("Enter message: ");
         // logArgs("Enter message:");
-    }
 
-    catch(std::exception& e)
-    {
-        // mainWindow->addTextToChatHistoryWidget("Exception: " + QString(e.what()));
-        logArgsException(e.what());
-    }
+        value = true;
+    };
 
-    return 0;
+    runAndLogException(sendLambda, sent);
+
+    return sent;
 }
