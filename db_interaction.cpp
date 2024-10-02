@@ -176,7 +176,7 @@ bool getDataFromDBResult(
             }
         }
 
-        logArgs(logString);
+        // logArgs(logString);
     }
 
     return dataIsOk;

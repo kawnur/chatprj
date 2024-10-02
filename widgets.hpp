@@ -15,10 +15,13 @@ class Companion;
 class Message;
 class MainWindow;
 
+const QString CONNECT_BUTTON_CONNECT_LABEL { "Connect" };
+const QString CONNECT_BUTTON_DISCONNECT_LABEL { "Disconnect" };
+
 const std::vector<QString> connectButtonLabels
 {
-    "Connect",
-    "Disconnect"
+    CONNECT_BUTTON_CONNECT_LABEL,
+    CONNECT_BUTTON_DISCONNECT_LABEL
 };
 
 QString getInitialConnectButtonLabel();

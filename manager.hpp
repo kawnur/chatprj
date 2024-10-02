@@ -67,6 +67,7 @@ public:
     bool startServer();
     bool createClient();
     bool connectClient();
+    bool disconnectClient();
 
     int getId();
     std::string getName() const;

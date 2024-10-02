@@ -40,7 +40,7 @@ public:
 
     // TODO what if port is blocked?
     ChatServer(uint16_t port)
-        : io_context_(), acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
+        : port_(port), io_context_(), acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
     {
         do_accept();
     }
@@ -50,6 +50,7 @@ public:
 
 private:
     boost::asio::io_context io_context_;
+    uint16_t port_;
 
     void do_accept();
 

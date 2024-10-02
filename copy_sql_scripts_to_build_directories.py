@@ -81,5 +81,6 @@ if symbol != 'Y':
 else:
     for pair in copyJobs:
         for dest in pair[1]:
+            dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(pair[0], dest)
 

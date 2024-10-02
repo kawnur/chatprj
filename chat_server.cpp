@@ -14,7 +14,7 @@ void ServerSession::do_read()
 
 //    mainWindow->addText("do_read");
 //    mainWindow->addTextToCentralPanel("do_read");
-    logLine("do_read");
+    logArgs("do_read");
 
     auto self(shared_from_this());
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
@@ -45,7 +45,7 @@ void ServerSession::do_write(std::size_t length)
     MainWindow* mainWindow = getMainWindowPtr();
 
 //    mainWindow->addTextToCentralPanel("do_write");
-    logLine("do_write");
+    logArgs("do_write");
 
     auto self(shared_from_this());
     boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
@@ -74,6 +74,8 @@ void ChatServer::run()
 
 void ChatServer::do_accept()
 {
+    logArgs("ChatServer starts on", port_);
+
     acceptor_.async_accept(
         [this](boost::system::error_code ec, tcp::socket socket)
         {

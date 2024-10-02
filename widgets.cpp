@@ -279,28 +279,34 @@ void SocketInfoWidget::initializeFields()
 
 void SocketInfoWidget::clientAction()
 {
-    // MainWindow* mainWindow = getMainWindowPtr();
+    bool result = false;
     Manager* manager = getManagerPtr();
 
-    // const Companion* companion =
-    //     mainWindow->getMappedCompanionBySocketInfoBaseWidget(this);
     const Companion* companion =
         manager->getMappedCompanionBySocketInfoBaseWidget(this);
 
-    // if(const_cast<Companion*>(companion)->startClient())
-    if(const_cast<Companion*>(companion)->connectClient())
+    // TODO change to states
+    QString currentText = this->connectButtonPtr_->text();
+
+    if(currentText == CONNECT_BUTTON_CONNECT_LABEL)
+    {
+        result = const_cast<Companion*>(companion)->connectClient();
+    }
+    else if(currentText == CONNECT_BUTTON_DISCONNECT_LABEL)
+    {
+        result = const_cast<Companion*>(companion)->disconnectClient();
+    }
+
+    if(result)
     {
         // change connect button text
-        QString currentText = this->connectButtonPtr_->text();
+        // QString currentText = this->connectButtonPtr_->text();
         QString nextText = getNextConnectButtonLabel(currentText);
         this->connectButtonPtr_->setText(nextText);
 
         // change indicator color
         this->indicatorPtr_->toggle();
     }
-
-    // Manager* manager = getManagerPtr();
-    // manager->sendMessage(companion, this);
 }
 
 void SocketInfoWidget::changeColor(QColor& color)
@@ -433,7 +439,7 @@ QString WidgetGroup::formatMessage(const Companion* companion, const Message* me
     text.replace("\n", "\n" + messageIndent);
 
     QString msg = prefix + messageIndent + text + QString("\n");
-    logArgs("message:", "#", msg, "#");
+    // logArgs("message:", "#", msg, "#");
 
     return msg;
 }

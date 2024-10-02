@@ -132,28 +132,62 @@ bool Companion::createClient()
     return created;
 }
 
+// bool Companion::connectClient()
+// {
+//     bool connected = false;
+
+//     auto connectLambda = [this](bool& value)
+//     {
+//         // io_contextPtr_ = new boost::asio::io_context;
+
+//         // serverPtr_ = new ChatServer(
+//         //     *io_contextPtr_,
+//         //     this->socketInfoPtr_->getPortInt());
+
+//         // this->clientPtr_ = new ChatClient(
+//         //     this->socketInfoPtr_->getIpAddress(),
+//         //     this->socketInfoPtr_->getClientPort());
+
+//         value = this->clientPtr_->connect();
+//     };
+
+//     runAndLogException(connectLambda, connected);
+
+//     return connected;
+// }
+
+// bool Companion::disconnectClient()
+// {
+//     bool disconnected = false;
+
+//     auto disconnectLambda = [this](bool& value)
+//     {
+//         // io_contextPtr_ = new boost::asio::io_context;
+
+//         // serverPtr_ = new ChatServer(
+//         //     *io_contextPtr_,
+//         //     this->socketInfoPtr_->getPortInt());
+
+//         // this->clientPtr_ = new ChatClient(
+//         //     this->socketInfoPtr_->getIpAddress(),
+//         //     this->socketInfoPtr_->getClientPort());
+
+//         value = this->clientPtr_->disconnect();
+//     };
+
+//     runAndLogException(disconnectLambda, disconnected);
+
+//     return disconnected;
+// }
+
 bool Companion::connectClient()
 {
-    bool connected = false;
+    return this->clientPtr_->connect();
+}
 
-    auto connectLambda = [this](bool& value)
-    {
-        // io_contextPtr_ = new boost::asio::io_context;
-
-        // serverPtr_ = new ChatServer(
-        //     *io_contextPtr_,
-        //     this->socketInfoPtr_->getPortInt());
-
-        // this->clientPtr_ = new ChatClient(
-        //     this->socketInfoPtr_->getIpAddress(),
-        //     this->socketInfoPtr_->getClientPort());
-
-        value = this->clientPtr_->connect();
-    };
-
-    runAndLogException(connectLambda, connected);
-
-    return connected;
+bool Companion::disconnectClient()
+{
+    return this->clientPtr_->disconnect();
 }
 
 void Companion::setSocketInfo(SocketInfo* socketInfo)
