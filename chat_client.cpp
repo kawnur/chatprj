@@ -3,14 +3,7 @@
 using boost::asio::ip::tcp;
 
 ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
-    ipAddress_(ipAddress), port_(port), io_context_(), socket_(io_context_), resolver_(io_context_)
-{
-//    MainWindow* mainWindow = MainWindow::instance();
-//    MainWindow* mainWindow = getMainWindowPtr();
-//    setParent(mainWindow);
-//    mainWindow->addText("Echo client started");
-//    mainWindow->addText("Enter message: ");
-}
+    ipAddress_(ipAddress), port_(port), io_context_(), socket_(io_context_), resolver_(io_context_) {}
 
 bool ChatClient::connect()
 {
@@ -54,10 +47,6 @@ bool ChatClient::disconnect()
 
         this->socket_.close();
 
-        // mainWindow->addTextToChatHistoryWidget("s.is_open(): "
-        //                     + QString::fromStdString(std::to_string(s.is_open())));
-
-
         logArgs("socket_.is_open():", socket_.is_open());
 
         value = true;  // TODO check connection state
@@ -76,7 +65,6 @@ bool ChatClient::send(std::string text)
     {
         // char request[max_length] = { 0 };
 
-        // mainWindow->addTextToChatHistoryWidget(QString("request: ") + QString::fromStdString(text));
         // logArgs("request:", text);
 
         // auto textStdString = text.toStdString();
@@ -96,9 +84,7 @@ bool ChatClient::send(std::string text)
         //     boost::asio::buffer(reply, text.size()));
 
         // std::string str(reply, reply_length);
-        // // mainWindow->addTextToChatHistoryWidget("Reply is: " + QString::fromStdString(str));
         // logArgs("reply:", str);
-        // // mainWindow->addTextToChatHistoryWidget("Enter message: ");
         // logArgs("Enter message:");
 
         value = true;

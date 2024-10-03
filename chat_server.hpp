@@ -10,16 +10,18 @@
 //#include "application.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
+#include "manager.hpp"
 
 using boost::asio::ip::tcp;
 
-//class ChatApp;
+class Companion;
 
 class ServerSession
         : public std::enable_shared_from_this<class ServerSession>
 {
 public:
-    ServerSession(tcp::socket socket) : socket_(std::move(socket)) {}
+    ServerSession(Companion* companionPtr, tcp::socket socket)
+        : companionPtr_(companionPtr), socket_(std::move(socket)) {}
 
     void start();
 
@@ -27,6 +29,7 @@ private:
     void do_read();
     void do_write(std::size_t);
 
+    Companion* companionPtr_;
     tcp::socket socket_;
     enum { max_length = 1024 };
     char data_[max_length];
@@ -39,8 +42,9 @@ public:
     //     : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
 
     // TODO what if port is blocked?
-    ChatServer(uint16_t port)
-        : port_(port), io_context_(), acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
+    ChatServer(Companion* companionPtr, uint16_t port)
+        : companionPtr_(companionPtr), port_(port), io_context_(),
+        acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
     {
         do_accept();
     }
@@ -51,6 +55,7 @@ public:
 private:
     boost::asio::io_context io_context_;
     uint16_t port_;
+    Companion* companionPtr_;
 
     void do_accept();
 

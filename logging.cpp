@@ -22,13 +22,13 @@ QString argForLogging(const bool& value)
 
 void logLine(const QString& str)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
-    mainWindow->addTextToAppLogWidget(str);
+    MainWindow* mainWindowPtr = getMainWindowPtr();
+    mainWindowPtr->addTextToAppLogWidget(str);
 }
 
 void logLine(const std::string& str)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
-    mainWindow->addTextToAppLogWidget(QString::fromStdString(str));
+    MainWindow* mainWindowPtr = getMainWindowPtr();
+    mainWindowPtr->addTextToAppLogWidget(QString::fromStdString(str));
 }
 

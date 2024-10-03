@@ -36,14 +36,14 @@ QString argForLogging(const bool&);
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    MainWindow* mainWindowPtr = getMainWindowPtr();
     QString text;
 
     text += QString("- ");
 
     ((text += (argForLogging(args) + QString(" "))), ...);
 
-    mainWindow->addTextToAppLogWidget(text);
+    mainWindowPtr->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(args...);
 }
 
@@ -64,8 +64,8 @@ template<typename... Ts> void logArgsError(Ts&&... args)
 
 template<typename T> void logLine(const T& str)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
-    mainWindow->addTextToAppLogWidget(QString(str));
+    MainWindow* mainWindowPtr = getMainWindowPtr();
+    mainWindowPtr->addTextToAppLogWidget(QString(str));
 }
 
 void logLine(const QString&);

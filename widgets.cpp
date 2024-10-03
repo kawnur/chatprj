@@ -280,10 +280,10 @@ void SocketInfoWidget::initializeFields()
 void SocketInfoWidget::clientAction()
 {
     bool result = false;
-    Manager* manager = getManagerPtr();
+    Manager* managerPtr = getManagerPtr();
 
     const Companion* companion =
-        manager->getMappedCompanionBySocketInfoBaseWidget(this);
+        managerPtr->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
     QString currentText = this->connectButtonPtr_->text();
@@ -330,26 +330,14 @@ void SocketInfoWidget::unselect()
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
-    Manager* manager = getManagerPtr();
-
-//    auto selectedCompanion = mainWindow->selectedSocketInfoWidget_;
-
-//    if(selected != nullptr) {
-//        mainWindow->selectedSocketInfoWidget_->unselect();
-//    }
-
-//    mainWindow->selectedSocketInfoWidget_ = this;  // TODO check needed
-//    mainWindow
-//    this->select();
-//    mainWindow->setCompanion(this->name_);
+    Manager* managerPtr = getManagerPtr();
 
     auto base = dynamic_cast<SocketInfoBaseWidget*>(this);
 
     auto newCompanion =
-        manager->getMappedCompanionBySocketInfoBaseWidget(base);
+        managerPtr->getMappedCompanionBySocketInfoBaseWidget(base);
 
-    manager->resetSelectedCompanion(newCompanion);
+    managerPtr->resetSelectedCompanion(newCompanion);
 }
 
 void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
@@ -372,7 +360,7 @@ bool SocketInfoStubWidget::isStub()
 
 WidgetGroup::WidgetGroup(const Companion* companion)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    MainWindow* mainWindowPtr = getMainWindowPtr();
 
     const SocketInfo* socketInfoPtr = companion->getSocketInfoPtr();
 
@@ -383,7 +371,7 @@ WidgetGroup::WidgetGroup(const Companion* companion)
         socketInfoPtr->getClientPort());
 
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
-    mainWindow->addWidgetToLeftPanel(socketInfoBasePtr_);
+    mainWindowPtr->addWidgetToLeftPanel(socketInfoBasePtr_);
 
     chatHistoryPtr_ = new QPlainTextEdit;
     // chatHistoryPtr_->setStyleSheet("border-bottom: 1px solid black");
@@ -397,24 +385,27 @@ WidgetGroup::WidgetGroup(const Companion* companion)
     chatHistoryPtr_->setAutoFillBackground(true);
     chatHistoryPtr_->setPalette(*chatHistoryPalettePtr_);
 
-    mainWindow->addWidgetToCentralPanel(chatHistoryPtr_);
+    mainWindowPtr->addWidgetToCentralPanel(chatHistoryPtr_);
 
     textEditPtr_ = new TextEditWidget;
     textEditPtr_->hide();
 
     connect(textEditPtr_, &TextEditWidget::send, this, &WidgetGroup::sendMessage);
 
-    mainWindow->addWidgetToCentralPanel(textEditPtr_);
+    mainWindowPtr->addWidgetToCentralPanel(textEditPtr_);
 }
 
 void WidgetGroup::sendMessage()
 {
-    Manager* manager = getManagerPtr();
+    Manager* managerPtr = getManagerPtr();
 
-    const Companion* companion =
-        manager->getMappedCompanionByWidgetGroup(this);
+    auto text = this->textEditPtr_->toPlainText().toStdString();
 
-    manager->sendMessage(companion, this);
+    // const Companion* companion =
+    //     manager->getMappedCompanionByWidgetGroup(this);
+
+    // manager->sendMessage(companion, this);
+    managerPtr->sendMessage(this, text);
 }
 
 QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)

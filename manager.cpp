@@ -95,7 +95,7 @@ bool Companion::startServer()
         //     *io_contextPtr_,
         //     this->socketInfoPtr_->getPortInt());
 
-        this->serverPtr_ = new ChatServer(this->socketInfoPtr_->getServerPort());
+        this->serverPtr_ = new ChatServer(this, this->socketInfoPtr_->getServerPort());
 
         this->serverPtr_->run();
 
@@ -196,7 +196,6 @@ void Companion::setSocketInfo(SocketInfo* socketInfo)
 }
 
 void Companion::addMessage(
-//        int companion_id, int author_id, std::tm time,
         int companion_id, int author_id, const std::string& time,
         const std::string& text, bool isSent)
 {
@@ -208,12 +207,15 @@ const std::vector<Message>* Companion::getMessagesPtr() const
     return &this->messages_;
 }
 
-bool Companion::sendLastMessage()
+void Companion::sendLastMessage()
 {
     auto text = this->messages_.back().getText();
     auto sendResult = this->clientPtr_->send(text);
 
-    return sendResult;
+    if(!sendResult)
+    {
+        logArgsError("client message sending error");
+    }
 }
 
 int Companion::getId()
@@ -235,7 +237,7 @@ Manager::Manager() :
     dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
 {
     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
-    selectedCompanion_ = nullptr;
+    selectedCompanionPtr_ = nullptr;
 }
 
 Manager::~Manager()
@@ -273,24 +275,14 @@ void Manager::set()
     }
 }
 
-void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
+std::pair<int, std::string> Manager::pushMessageToDB(
+    const std::string& companionName, const std::string& authorName, const std::string& text)
 {
-    auto findCompanion = [&](Companion* cmp){ return cmp == companion; };
-
-    Companion* companionPtr = *std::find_if(
-        this->companionPtrs_.cbegin(),
-        this->companionPtrs_.cend(),
-        findCompanion);
-
-    auto text = group->textEditPtr_->toPlainText().toStdString();
-
-    // encrypt message
-
-    // add to DB and get timestamp
-
     PGresult* pushToDBResultPtr = pushMessageToDBAndReturn(
         this->dbConnectionPtr_,
-        companionPtr->getName(),
+        companionName,
+        authorName,
+        std::string("companion_id"),
         text);
 
     std::map<std::string, const char*> messageInfoMapping
@@ -307,24 +299,79 @@ void Manager::sendMessage(const Companion* companion, WidgetGroup* group)
         // companionsDataIsOk = false;
     }
 
+    if(messageInfo.size() == 0)
+    {
+        logArgsError("messageInfo.size() == 0");
+        return std::pair<int, std::string>(0, "");
+    }
+
     int companionId = std::atoi(messageInfo.at(0).at("companion_id"));
     std::string timestampTz { messageInfo.at(0).at("timestamp_tz") };
 
-    logArgs("companion_id:", companionId, "timestamp_tz:", timestampTz);
+    logArgs("companionId:", companionId, "timestampTz:", timestampTz);
+
+    return std::pair<int, std::string>(companionId, timestampTz);
+}
+
+void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
+{
+    Companion* companionPtr =
+        const_cast<Companion*>(this->getMappedCompanionByWidgetGroup(groupPtr));
+
+    // encrypt message
+
+    // add to DB and get timestamp
+
+    auto pair = this->pushMessageToDB(companionPtr->getName(), std::string("me"), text);
+
+    if(pair.first == 0 || pair.second == "")
+    {
+        logArgsError("error adding message to db");
+        return;
+    }
 
     // add to companion's messages
 
-    companionPtr->addMessage(companionId, 1, timestampTz, text, false);
+    companionPtr->addMessage(pair.first, 1, pair.second, text, false);
 
     // add to widget
 
-    auto textFormatted = group->formatMessage(
+    auto textFormatted = groupPtr->formatMessage(
                 companionPtr, &companionPtr->getMessagesPtr()->back());
-    group->addMessageToChatHistory(textFormatted);
+
+    groupPtr->addMessageToChatHistory(textFormatted);
 
     // send over network
 
     companionPtr->sendLastMessage();
+}
+
+void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
+{
+    // add to DB and get timestamp
+
+    auto pair = this->pushMessageToDB(companionPtr->getName(), companionPtr->getName(), text);
+
+    if(pair.first == 0 || pair.second == "")
+    {
+        logArgsError("error adding message to db");
+        return;
+    }
+
+    // add to companion's messages
+
+    companionPtr->addMessage(pair.first, pair.first, pair.second, text, false);
+
+    // decrypt message
+
+    // add to widget
+
+    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
+
+    auto textFormatted = groupPtr->formatMessage(
+        companionPtr, &companionPtr->getMessagesPtr()->back());
+
+    groupPtr->addMessageToChatHistory(textFormatted);
 }
 
 const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
@@ -359,31 +406,31 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
 
 void Manager::resetSelectedCompanion(const Companion* newSelected)
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    MainWindow* mainWindowPtr = getMainWindowPtr();
 
-    if(this->selectedCompanion_)
+    if(this->selectedCompanionPtr_)
     {
-        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanion_);  // TODO try catch
+        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);  // TODO try catch
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->unselect();
 
         widgetGroup->chatHistoryPtr_->hide();
         widgetGroup->textEditPtr_->hide();
     }
-    mainWindow->oldSelectedCompanionActions(this->selectedCompanion_);
+    mainWindowPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
 
-    this->selectedCompanion_ = newSelected;
+    this->selectedCompanionPtr_ = newSelected;
 
-    if(this->selectedCompanion_)
+    if(this->selectedCompanionPtr_)
     {
-        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanion_);
+        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->select();
 
         widgetGroup->chatHistoryPtr_->show();
         widgetGroup->textEditPtr_->show();
     }
-    mainWindow->newSelectedCompanionActions(this->selectedCompanion_);
+    mainWindowPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
 bool Manager::buildCompanions()
@@ -522,10 +569,10 @@ bool Manager::buildCompanions()
 
 void Manager::buildWidgetGroups()
 {
-    MainWindow* mainWindow = getMainWindowPtr();
+    MainWindow* mainWindowPtr = getMainWindowPtr();
 
     auto companionsSize = this->companionPtrs_.size();
-    auto childrenSize = mainWindow->getLeftPanelChildrenSize();
+    auto childrenSize = mainWindowPtr->getLeftPanelChildrenSize();
 
     logArgs("companionsSize:", companionsSize);
     logArgs("childrenSize:", childrenSize);
@@ -533,7 +580,7 @@ void Manager::buildWidgetGroups()
     if(companionsSize == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
-        mainWindow->addStubWidgetToLeftPanel();
+        mainWindowPtr->addStubWidgetToLeftPanel();
     }
     else
     {
@@ -541,7 +588,7 @@ void Manager::buildWidgetGroups()
         {
             // TODO check if sockets already are children
 
-            mainWindow->removeStubsFromLeftPanel();
+            mainWindowPtr->removeStubsFromLeftPanel();
 
             for(auto& companion : this->companionPtrs_)
             {

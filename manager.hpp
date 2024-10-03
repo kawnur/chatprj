@@ -2,6 +2,7 @@
 #define MANAGER_HPP
 
 #include <boost/asio.hpp>
+#include <string>
 
 #include "chat_client.hpp"
 #include "chat_server.hpp"
@@ -76,7 +77,7 @@ public:
 //    void addMessage(int, int, std::tm, const std::string&, bool);
     void addMessage(int, int, const std::string&, const std::string&, bool);
     const std::vector<Message>* getMessagesPtr() const;
-    bool sendLastMessage();
+    void sendLastMessage();
 
 private:
     int id_;
@@ -98,18 +99,22 @@ public:
     ~Manager();
 
     void set();
-    void sendMessage(const Companion*, WidgetGroup*);
+    void sendMessage(WidgetGroup*, const std::string&);
+    void receiveMessage(Companion*, const std::string&);
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
-    const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
     // const WidgetGroup* getWidgetGroupByCompanion(Companion*) const;
 
     void resetSelectedCompanion(const Companion*);
 
 private:
-    const Companion* selectedCompanion_;
+    const Companion* selectedCompanionPtr_;
 
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;
+
+    const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
+
+    std::pair<int, std::string> pushMessageToDB(const std::string&, const std::string&, const std::string&);
 
     bool connectToDb();
     bool buildCompanions();

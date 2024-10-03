@@ -263,7 +263,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     if(event->key() == Qt::Key_Escape)
     {
         // this->resetSelectedCompanion(nullptr);
-        Manager* manager = getManagerPtr();
-        manager->resetSelectedCompanion(nullptr);
+        Manager* managerPtr = getManagerPtr();
+        managerPtr->resetSelectedCompanion(nullptr);
     }
 }

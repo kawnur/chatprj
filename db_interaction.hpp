@@ -18,7 +18,10 @@ PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
 PGresult* getCompanionsDBResult(const PGconn*);
 PGresult* getSocketInfoDBResult(const PGconn*, int);
 PGresult* getMessagesDBResult(const PGconn*, int);
-PGresult* pushMessageToDBAndReturn(const PGconn*, const std::string&, const std::string&);
+
+PGresult* pushMessageToDBAndReturn(const PGconn*, const std::string&,
+                                   const std::string&, const std::string&,
+                                   const std::string&);
 
 void logUnknownField(const PGresult*, int, int);
 

@@ -99,16 +99,21 @@ PGresult* getMessagesDBResult(const PGconn* dbConnection, int id)
 }
 
 PGresult* pushMessageToDBAndReturn(
-    const PGconn* dbConnection, const std::string& name, const std::string& message)
+    const PGconn* dbConnection, const std::string& companionName,
+    const std::string& authorName, const std::string& returningFieldName, const std::string& message)
 {
     std::string command = std::string(
         "insert into messages "
         "(companion_id, author_id, timestamp_tz, message, issent) "
         "values ((select id from companions where name = '")
-        + name
-        + std::string("'), 1, now(), '")
+        + companionName
+        + std::string("'), (select id from companions where name = '")
+        + authorName
+        + std::string("'), now(), '")
         + message
-        + std::string("', false) returning companion_id, timestamp_tz");
+        + std::string("', false) returning ")
+        + returningFieldName
+        + std::string(", timestamp_tz");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }

@@ -9,28 +9,23 @@ void ServerSession::start()
 
 void ServerSession::do_read()
 {
-//    MainWindow* mainWindow = MainWindow::instance();
-    MainWindow* mainWindow = getMainWindowPtr();
-
-//    mainWindow->addText("do_read");
-//    mainWindow->addTextToCentralPanel("do_read");
     logArgs("do_read");
 
     auto self(shared_from_this());
+
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
         [this, self](boost::system::error_code ec, std::size_t length)
         {
             if (!ec)
             {
-//                MainWindow* mainWindow = MainWindow::instance();
-                MainWindow* mainWindow = getMainWindowPtr();
-
                 std::string str(data_, length);
 
                 if(length > 0)
                 {
-                    // mainWindow->addTextToChatHistoryWidget("Got: " + QString::fromStdString(str));
-                    logArgs("Got:", str);
+                    logArgs("server got message:", str);
+
+                    Manager* managerPtr = getManagerPtr();
+                    managerPtr->receiveMessage(this->companionPtr_, str);
                 }                
 
                 do_write(length);
@@ -41,13 +36,10 @@ void ServerSession::do_read()
 
 void ServerSession::do_write(std::size_t length)
 {
-//    MainWindow* mainWindow = MainWindow::instance();
-    MainWindow* mainWindow = getMainWindowPtr();
-
-//    mainWindow->addTextToCentralPanel("do_write");
     logArgs("do_write");
 
     auto self(shared_from_this());
+
     boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
         [this, self](boost::system::error_code ec, std::size_t /*length*/)
         {
@@ -82,7 +74,7 @@ void ChatServer::do_accept()
             if(!ec)
             {
 //                std::make_shared<class session>(std::move(socket))->start();
-                std::make_shared<ServerSession>(std::move(socket))->start();
+                std::make_shared<ServerSession>(this->companionPtr_, std::move(socket))->start();
             }
 
             do_accept();
@@ -92,12 +84,9 @@ void ChatServer::do_accept()
 
 //int async_tcp_echo_server()
 //{
-//  MainWindow* mainWindow = MainWindow::instance();
-
 //  try
 //  {
 
-//    mainWindow->addText("Echo server started");
 //    coutWithEndl("Echo server started");
 
 //    boost::asio::io_context io_context;
@@ -108,7 +97,6 @@ void ChatServer::do_accept()
 //  }
 //  catch (std::exception& e)
 //  {
-//    mainWindow->addText("Exception: " + QString(e.what()));
 //    coutArgsWithSpaceSeparator("Exception:", e.what());
 //  }
 
