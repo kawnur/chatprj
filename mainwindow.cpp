@@ -34,6 +34,15 @@ MainWindow::MainWindow()
 {
     setWindowTitle(std::getenv("CLIENT_NAME"));
 
+    // menu bar
+
+    menuBarPalettePtr_ = new QPalette;
+    menuBarPalettePtr_->setColor(QPalette::Window, QColor(0x777777));
+    menuBar()->setAutoFillBackground(true);
+    menuBar()->setPalette(*menuBarPalettePtr_);
+
+    // central widget
+
     centralWidgetPtr_ = new QWidget;
     setCentralWidget(centralWidgetPtr_);
 
@@ -169,6 +178,7 @@ void MainWindow::setLeftPanel()
 
 void MainWindow::set()
 {
+    this->createMenu();
     this->setLeftPanel();
 }
 
@@ -258,6 +268,12 @@ void MainWindow::newSelectedCompanionActions(const Companion* companion)
     }
 }
 
+void MainWindow::addNewCompanion()
+{
+    Manager* managerPtr = getManagerPtr();
+    managerPtr->addNewCompanion();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() == Qt::Key_Escape)
@@ -266,4 +282,17 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
         Manager* managerPtr = getManagerPtr();
         managerPtr->resetSelectedCompanion(nullptr);
     }
+}
+
+void MainWindow::createMenu()
+{
+    QMenu* fileMenu = menuBar()->addMenu("File");
+    QAction* exitAction = new QAction("Exit", this);
+    fileMenu->addAction(exitAction);
+    connect(exitAction, &QAction::triggered, this, &QCoreApplication::quit);
+
+    QMenu* companionMenu = menuBar()->addMenu("Companion");
+    QAction* addCompanionAction = new QAction("Add new companion", this);
+    companionMenu->addAction(addCompanionAction);
+    connect(addCompanionAction, &QAction::triggered, this, &MainWindow::addNewCompanion);
 }

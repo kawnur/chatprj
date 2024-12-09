@@ -433,6 +433,11 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
     mainWindowPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
+void Manager::addNewCompanion()
+{
+    coutWithEndl("Manager::addNewCompanion()");
+}
+
 bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;

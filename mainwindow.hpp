@@ -6,6 +6,8 @@
 #include <QGraphicsView>
 #include <QHBoxLayout>
 #include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
 #include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QVBoxLayout>
@@ -29,6 +31,8 @@ private:
 
     QWidget* centralWidgetPtr_;
     QHBoxLayout* centralWidgetLayoutPtr_;
+
+    QPalette* menuBarPalettePtr_;
 
     // left panel
 
@@ -69,6 +73,8 @@ private:
 
     void keyPressEvent(QKeyEvent*) override;
 
+    void createMenu();
+
     ~MainWindow();
 
 public:
@@ -90,6 +96,9 @@ public:
 
     void oldSelectedCompanionActions(const Companion*);
     void newSelectedCompanionActions(const Companion*);
+
+private slots:
+    void addNewCompanion();
 };
 
 MainWindow* getMainWindowPtr();

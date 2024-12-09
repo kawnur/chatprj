@@ -107,6 +107,8 @@ public:
 
     void resetSelectedCompanion(const Companion*);
 
+    void addNewCompanion();
+
 private:
     const Companion* selectedCompanionPtr_;
 
