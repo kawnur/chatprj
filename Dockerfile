@@ -1,6 +1,7 @@
 # Client container image
-# To build run 'docker build -t chatprj --file <this_file_path> /'
-# Build context / used to copy lib by host abspath
+# To build run 'docker build -t chatprj --target chatprj --file <this_file_path> /'
+# Build context / is used to copy lib by host abspath
+
 FROM fedora AS chatprj
 
 RUN mkdir -p /my/app /my/qt /my/boost /my/cmake
@@ -10,7 +11,7 @@ ADD /home/user/sources/boost/boost_1_76_0/boost_1_76_0.tar.gz /my/boost/
 ADD /home/user/sources/cmake/cmake-3.24.0-linux-x86_64 /my/cmake
 
 #install C Development Tools and Libraries
-RUN sudo dnf groupinstall -y "C Development Tools and Libraries"
+#RUN sudo dnf groupinstall -y "C Development Tools and Libraries"
 
 #install compilers
 RUN dnf install -y gcc
@@ -76,7 +77,10 @@ WORKDIR /my/app
 
 
 # DB container image
-FROM postgres:12 as chatprj_db
+# To build run 'docker build -t chatprj_db --target chatprj_db --file <this_file_path> /'
+# Build context / is used to copy lib by host abspath
+
+FROM postgres:12 AS chatprj_db
 
 RUN mkdir -p /my/app
 
