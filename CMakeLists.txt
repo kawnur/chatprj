@@ -45,7 +45,7 @@ find_package(Boost REQUIRED COMPONENTS thread)
 #find_package(Boost REQUIRED)
 
 #find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Widgets)
 #find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql)
 #find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
@@ -56,7 +56,7 @@ add_executable(chatapp ${PROJECT_SOURCES})
 target_link_libraries(chatapp PRIVATE gpgme Boost::thread)
 #target_link_libraries(chatapp PRIVATE gpgme Boost)
 #target_link_libraries(chatapp PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets)
 #target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql)
 target_link_libraries(chatapp PRIVATE pq)
 

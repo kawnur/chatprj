@@ -1,9 +1,13 @@
 #ifndef WIDGETS_HPP
 #define WIDGETS_HPP
 
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
 
@@ -176,5 +180,49 @@ public slots:
 private:
     QString buildChatHistory(const Companion*);
 };
+
+// class InputFormElementWidget : public QWidget
+// {
+//     Q_OBJECT
+
+// public:
+//     InputFormElementWidget(std::string&&);
+//     ~InputFormElementWidget();
+
+// private:
+//     std::string label_;
+
+//     QHBoxLayout* layoutPtr_;
+
+//     QLabel* labelPtr_;
+//     QLineEdit* editPtr_;
+// };
+
+class NewCompanionDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    NewCompanionDialog(QWidget*);
+    ~NewCompanionDialog();
+
+private:
+    QFormLayout* layoutPtr_;
+
+    QLabel* nameLabelPtr_;
+    QLineEdit* nameEditPtr_;
+
+    QLabel* ipAddressLabelPtr_;
+    QLineEdit* ipAddressEditPtr_;
+
+    QLabel* portLabelPtr_;
+    QLineEdit* portEditPtr_;
+
+    QDialogButtonBox* buttonBoxPtr_;
+
+    void sendData();
+
+};
+
 
 #endif // WIDGETS_HPP

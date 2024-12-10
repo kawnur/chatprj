@@ -280,10 +280,13 @@ void SocketInfoWidget::initializeFields()
 void SocketInfoWidget::clientAction()
 {
     bool result = false;
-    Manager* managerPtr = getManagerPtr();
+    // Manager* managerPtr = getManagerPtr();
+
+    // const Companion* companion =
+    //     managerPtr->getMappedCompanionBySocketInfoBaseWidget(this);
 
     const Companion* companion =
-        managerPtr->getMappedCompanionBySocketInfoBaseWidget(this);
+        getManagerPtr()->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
     QString currentText = this->connectButtonPtr_->text();
@@ -397,7 +400,7 @@ WidgetGroup::WidgetGroup(const Companion* companion)
 
 void WidgetGroup::sendMessage()
 {
-    Manager* managerPtr = getManagerPtr();
+    // Manager* managerPtr = getManagerPtr();
 
     auto text = this->textEditPtr_->toPlainText().toStdString();
 
@@ -405,7 +408,8 @@ void WidgetGroup::sendMessage()
     //     manager->getMappedCompanionByWidgetGroup(this);
 
     // manager->sendMessage(companion, this);
-    managerPtr->sendMessage(this, text);
+    // managerPtr->sendMessage(this, text);
+    getManagerPtr()->sendMessage(this, text);
 }
 
 QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)
@@ -452,4 +456,85 @@ QString WidgetGroup::buildChatHistory(const Companion* companion)
     }
 
     return result;
+}
+
+// InputFormElementWidget::InputFormElementWidget(std::string&& label)
+// {
+//     label_ = label;
+
+//     layoutPtr_ = new QHBoxLayout;
+
+//     labelPtr_ = new QLabel(QString::fromStdString(label_));
+//     editPtr_ = new QLineEdit;
+
+//     layoutPtr_->addWidget(labelPtr_);
+//     layoutPtr_->addWidget(editPtr_);
+// }
+
+// InputFormElementWidget::~InputFormElementWidget()
+// {
+//     // didn't set parent for members
+//     delete this->layoutPtr_;
+//     delete this->labelPtr_;
+//     delete this->editPtr_;
+// }
+
+NewCompanionDialog::NewCompanionDialog(QWidget* parent)
+{
+    // setParent(parent);
+
+    setWindowTitle("Add new companion");
+
+    // setModal(true);
+    // setWindowFlag(Qt::Window);
+
+    layoutPtr_ = new QFormLayout;
+    // layoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    // layoutPtr_->setSpacing(0);
+    // layoutPtr_->setContentsMargins(0, 0, 0, 0);
+    setLayout(layoutPtr_);
+
+    nameLabelPtr_ = new QLabel("Name");
+    nameEditPtr_ = new QLineEdit;
+
+    ipAddressLabelPtr_ = new QLabel("IpAddress");
+    ipAddressEditPtr_ = new QLineEdit;
+
+    portLabelPtr_ = new QLabel("Port");
+    portEditPtr_ = new QLineEdit;
+
+    layoutPtr_->addRow(nameLabelPtr_, nameEditPtr_);
+    layoutPtr_->addRow(ipAddressLabelPtr_, ipAddressEditPtr_);
+    layoutPtr_->addRow(portLabelPtr_, portEditPtr_);
+
+    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &NewCompanionDialog::sendData);  // TODO this in ctor
+    connect(buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);  // TODO this in ctor
+
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
+NewCompanionDialog::~NewCompanionDialog()
+{
+    delete this->layoutPtr_;
+    delete this->nameLabelPtr_;
+    delete this->nameEditPtr_;
+    delete this->ipAddressLabelPtr_;
+    delete this->ipAddressEditPtr_;
+    delete this->portLabelPtr_;
+    delete this->portEditPtr_;
+    delete this->buttonBoxPtr_;
+}
+
+void NewCompanionDialog::sendData()
+{
+    auto name = this->nameEditPtr_->text().toStdString();
+    auto ipAddress = this->ipAddressEditPtr_->text().toStdString();
+    auto port = this->portEditPtr_->text().toStdString();
+
+    logArgs("name", name);
+    logArgs("ipAddress", ipAddress);
+    logArgs("port", port);
+
+    getManagerPtr()->addNewCompanion(name, ipAddress, port);
 }

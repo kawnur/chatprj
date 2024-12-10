@@ -15,8 +15,13 @@ class Companion;
 const char* getValueFromEnvironmentVariable(const char*);
 PGconn* getDBConnection();
 PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
+
 PGresult* getCompanionsDBResult(const PGconn*);
+PGresult* getCompanionByNameDBResult(const PGconn*, const std::string&);
+
 PGresult* getSocketInfoDBResult(const PGconn*, int);
+PGresult* getSocketByIpAddressAndPortDBResult(const PGconn*, const std::string&, const std::string&);
+
 PGresult* getMessagesDBResult(const PGconn*, int);
 
 PGresult* pushMessageToDBAndReturn(const PGconn*, const std::string&,

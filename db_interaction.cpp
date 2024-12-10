@@ -77,11 +77,34 @@ PGresult* getCompanionsDBResult(const PGconn* dbConnection)
     return sendDBRequestAndReturnResult(dbConnection, command);
 }
 
+PGresult* getCompanionByNameDBResult(const PGconn* dbConnection, const std::string& name)
+{
+    std::string command = std::string(
+        "SELECT id FROM companions WHERE name = '")
+        + name + std::string("'");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
 PGresult* getSocketInfoDBResult(const PGconn* dbConnection, int id)
 {
     std::string command = std::string(
         "SELECT ipaddress, server_port, client_port "
         "FROM sockets WHERE id = ") + std::to_string(id);
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* getSocketByIpAddressAndPortDBResult(
+    const PGconn* dbConnection, const std::string& ipAddress, const std::string& port)
+{
+    std::string command = std::string(
+        "SELECT id FROM sockets "
+        "WHERE ipaddress = '")
+        + ipAddress
+        + std::string("' AND client_port = '")
+        + port
+        + std::string("'");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }

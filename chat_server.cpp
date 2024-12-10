@@ -24,8 +24,9 @@ void ServerSession::do_read()
                 {
                     logArgs("server got message:", str);
 
-                    Manager* managerPtr = getManagerPtr();
-                    managerPtr->receiveMessage(this->companionPtr_, str);
+                    // Manager* managerPtr = getManagerPtr();
+                    // managerPtr->receiveMessage(this->companionPtr_, str);
+                    getManagerPtr()->receiveMessage(this->companionPtr_, str);
                 }                
 
                 do_write(length);

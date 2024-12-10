@@ -1,6 +1,8 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <QHostAddress>
+
 #include "logging.hpp"
 
 template<typename... Ts> void logArgsException(Ts&&... args);
@@ -17,5 +19,13 @@ void runAndLogException(F func, Ts&&... args)
         logArgsException(e.what());
     }
 }
+
+// data validation
+
+bool validateCompanionName(const std::string&);
+bool validateIpAddress(const std::string&);
+bool validatePort(const std::string&);
+
+bool validateCompanionData(const std::string&, const std::string&, const std::string&);
 
 #endif // UTILS_HPP

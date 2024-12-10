@@ -433,9 +433,79 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
     mainWindowPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
-void Manager::addNewCompanion()
+void Manager::addNewCompanion(
+    const std::string& name,
+    const std::string& ipAddress,
+    const std::string& port)
 {
-    coutWithEndl("Manager::addNewCompanion()");
+    // validate data
+    if(validateCompanionData(name, ipAddress, port))
+    {
+        // check if companion with such name already exists
+        PGresult* companionDBResultPtr = getCompanionByNameDBResult(this->dbConnectionPtr_, name);
+        logArgs("companionDBResultPtr:", companionDBResultPtr);
+
+        if(!companionDBResultPtr)
+        {
+            logArgsError("companionDBResultPtr is nullptr");
+            // companionsDataIsOk = false;
+
+            // return companionsDataIsOk;
+        }
+
+        std::map<std::string, const char*> companionsIdMapping
+            {
+                {std::string("id"), nullptr}
+            };
+
+        std::vector<std::map<std::string, const char*>> companionIdData { companionsIdMapping };
+
+        if(!getDataFromDBResult(companionIdData, companionDBResultPtr, 0))
+        {
+            logArgsError("!getDataFromDBResult(companionsData, companionsDBResultPtr, 0)");
+            // companionsDataIsOk = false;
+
+            // return companionsDataIsOk;
+        }
+
+        // check if such socket already exists
+        PGresult* socketDBResultPtr = getSocketByIpAddressAndPortDBResult(this->dbConnectionPtr_, ipAddress, port);
+        logArgs("socketDBResultPtr:", socketDBResultPtr);
+
+        if(!socketDBResultPtr)
+        {
+            logArgsError("socketDBResultPtr is nullptr");
+            // companionsDataIsOk = false;
+
+            // return companionsDataIsOk;
+        }
+
+        std::map<std::string, const char*> socketIdMapping
+            {
+                {std::string("id"), nullptr}
+            };
+
+        std::vector<std::map<std::string, const char*>> socketIdData { socketIdMapping };
+
+        if(!getDataFromDBResult(socketIdData, socketDBResultPtr, 0))
+        {
+            logArgsError("!getDataFromDBResult(socketIdData, socketDBResultPtr, 0)");
+            // companionsDataIsOk = false;
+
+            // return companionsDataIsOk;
+        }
+
+
+    }
+
+
+    // create Companion object
+    // create SocketInfo object
+    // add to mapping
+    // push to db
+    // show result widget
+
+    // delete dialog;
 }
 
 bool Manager::buildCompanions()

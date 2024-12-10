@@ -9,6 +9,7 @@
 #include "db_interaction.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
+#include "utils.hpp"
 
 class ChatClient;
 class ChatServer;
@@ -107,7 +108,7 @@ public:
 
     void resetSelectedCompanion(const Companion*);
 
-    void addNewCompanion();
+    void addNewCompanion(const std::string&, const std::string&, const std::string&);
 
 private:
     PGconn* dbConnectionPtr_;
