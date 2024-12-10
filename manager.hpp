@@ -110,8 +110,11 @@ public:
     void addNewCompanion();
 
 private:
+    PGconn* dbConnectionPtr_;
+
     const Companion* selectedCompanionPtr_;
 
+    std::vector<Companion*> companionPtrs_;
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
@@ -122,9 +125,6 @@ private:
     bool buildCompanions();
 
     void buildWidgetGroups();
-
-    PGconn* dbConnectionPtr_;
-    std::vector<Companion*> companionPtrs_;
 };
 
 Manager* getManagerPtr();

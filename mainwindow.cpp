@@ -154,6 +154,7 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
     // cannot set parent for palette
+    delete this->menuBarPalettePtr_;
     delete this->companionNameLabelPalettePtr_;
     delete this->chatHistoryWidgetStubPalettePtr_;
     delete this->appLogWidgetPalettePtr_;
