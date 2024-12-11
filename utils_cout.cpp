@@ -25,7 +25,7 @@ std::string argForCout(const std::string& value)
 
 std::string argForCout(const char* value)
 {
-    return std::string(value);
+    return (value) ? std::string(value) : std::string("0x0");
 }
 
 void coutVector1(const std::vector<int>& v)

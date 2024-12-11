@@ -266,12 +266,15 @@ void Manager::set()
         }
         else
         {
-            logArgsError("problems with companions initialization");
+            logArgsError("problem with companions initialization");
         }
     }
     else
     {
-        logArgsError("problems with DB connection");
+        std::string message { "problem with DB connection" };
+        std::vector<std::string> messageVector { message };
+        getGraphicManagerPtr()->createErrorDialog(messageVector);
+        logArgsError(message);
     }
 }
 
@@ -454,6 +457,8 @@ void Manager::addNewCompanion(
 
         if(!companionDBResultPtr)
         {
+            std::vector<std::string> dbRequestErrors { "Database request error" };
+            getGraphicManagerPtr()->createErrorDialog(dbRequestErrors);
             logArgsError("companionDBResultPtr is nullptr");
             // companionsDataIsOk = false;
 
@@ -474,6 +479,21 @@ void Manager::addNewCompanion(
 
             // return companionsDataIsOk;
         }
+
+        logArgs("companionIdData.size():", companionIdData.size());
+
+        for(auto& elem : companionIdData)
+        {
+            for(auto& item : elem)
+            {
+                logArgs(item.first, item.second);
+            }
+        }
+
+        // if(false)
+        // {
+
+        // }
 
         // check if such socket already exists
         PGresult* socketDBResultPtr = getSocketByIpAddressAndPortDBResult(this->dbConnectionPtr_, ipAddress, port);
@@ -506,7 +526,7 @@ void Manager::addNewCompanion(
     }
     else
     {
-        getGraphicManagerPtr()->createWarningDialog(validationErrors);
+        getGraphicManagerPtr()->createErrorDialog(validationErrors);
 
     }
 
@@ -769,9 +789,10 @@ void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
 }
 
-void GraphicManager::createWarningDialog(const std::vector<std::string>& validationErrors)
+void GraphicManager::createErrorDialog(const std::vector<std::string>& messages)
 {
-    WarningDialog* dialog = new WarningDialog(this->mainWindowPtr_, validationErrors);
+    // TODO delete objects for closed dialoges
+    ErrorDialog* dialog = new ErrorDialog(this->mainWindowPtr_, messages);
     dialog->show();
 }
 

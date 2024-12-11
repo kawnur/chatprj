@@ -223,13 +223,13 @@ private:
     void sendData();
 };
 
-class WarningDialog : public QDialog {
+class ErrorDialog : public QDialog {
 
     Q_OBJECT
 
 public:
-    WarningDialog(QWidget*, const std::vector<std::string>&);
-    ~WarningDialog();
+    ErrorDialog(QWidget*, const std::vector<std::string>&);
+    ~ErrorDialog();
 
 private:
     QVBoxLayout* layoutPtr_;

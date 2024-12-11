@@ -543,14 +543,14 @@ void NewCompanionDialog::sendData()
     getManagerPtr()->addNewCompanion(name, ipAddress, port);
 }
 
-WarningDialog::WarningDialog(QWidget* parent, const std::vector<std::string>& validationErrors)
+ErrorDialog::ErrorDialog(QWidget* parent, const std::vector<std::string>& validationErrors)
 {
     setParent(parent);
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    this->setWindowTitle("WARNING");
+    this->setWindowTitle("ERROR");
 
     layoutPtr_ = new QVBoxLayout;
     setLayout(layoutPtr_);
@@ -558,14 +558,15 @@ WarningDialog::WarningDialog(QWidget* parent, const std::vector<std::string>& va
     textEditPtr_ = new QPlainTextEdit;
     textEditPtr_->setReadOnly(true);
 
-    if(validationErrors.empty())
-    {
-        textEditPtr_->setPlainText("NO WARNINGS");
-    }
-    else
+    // if(validationErrors.empty())
+    // {
+    //     textEditPtr_->setPlainText("NO ERRORS");
+    // }
+    // else
+    if(!validationErrors.empty())
     {
         logArgs("validationErrors.size():", validationErrors.size());
-        std::string text { "Warning messages:\n\n" };
+        std::string text { "Error messages:\n\n" };
 
         for(auto& error : validationErrors)
         {
@@ -582,7 +583,7 @@ WarningDialog::WarningDialog(QWidget* parent, const std::vector<std::string>& va
     layoutPtr_->addWidget(buttonBoxPtr_);
 }
 
-WarningDialog::~WarningDialog()
+ErrorDialog::~ErrorDialog()
 {
     delete this->layoutPtr_;
     delete this->textEditPtr_;

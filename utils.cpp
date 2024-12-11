@@ -40,7 +40,7 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
     {
         long long portNumber = std::stoll(port, nullptr, 10);
 
-        bool result = (portNumber >= 0) && (portNumber <= 65535);
+        result = (portNumber >= 0) && (portNumber <= 65535);
 
         if(!result)
         {
