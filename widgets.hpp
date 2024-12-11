@@ -228,7 +228,7 @@ class WarningDialog : public QDialog {
     Q_OBJECT
 
 public:
-    WarningDialog(QWidget*);
+    WarningDialog(QWidget*, const std::vector<std::string>&);
     ~WarningDialog();
 
 private:

@@ -147,6 +147,8 @@ public:
     void addWidgetToLeftPanel(SocketInfoBaseWidget*);
     void addWidgetToCentralPanel(QWidget*);
 
+    void createWarningDialog(const std::vector<std::string>&);
+
 private:
     MainWindow* mainWindowPtr_;
 

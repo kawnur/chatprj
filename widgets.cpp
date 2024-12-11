@@ -485,12 +485,12 @@ QString WidgetGroup::buildChatHistory(const Companion* companion)
 
 NewCompanionDialog::NewCompanionDialog(QWidget* parent)
 {
-    // setParent(parent);
+    setParent(parent);
 
     setWindowTitle("Add new companion");
 
-    // setModal(true);
-    // setWindowFlag(Qt::Window);
+    setModal(true);
+    setWindowFlag(Qt::Window);
 
     layoutPtr_ = new QFormLayout;
     // layoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -543,7 +543,7 @@ void NewCompanionDialog::sendData()
     getManagerPtr()->addNewCompanion(name, ipAddress, port);
 }
 
-WarningDialog::WarningDialog(QWidget* parent)
+WarningDialog::WarningDialog(QWidget* parent, const std::vector<std::string>& validationErrors)
 {
     setParent(parent);
 
@@ -557,7 +557,24 @@ WarningDialog::WarningDialog(QWidget* parent)
 
     textEditPtr_ = new QPlainTextEdit;
     textEditPtr_->setReadOnly(true);
-    textEditPtr_->setPlainText("");
+
+    if(validationErrors.empty())
+    {
+        textEditPtr_->setPlainText("NO WARNINGS");
+    }
+    else
+    {
+        logArgs("validationErrors.size():", validationErrors.size());
+        std::string text { "Warning messages:\n\n" };
+
+        for(auto& error : validationErrors)
+        {
+            text += (std::string("- ") + error + std::string("\n"));
+        }
+
+        textEditPtr_->setPlainText(QString::fromStdString(text));
+    }
+
     layoutPtr_->addWidget(textEditPtr_);
 
     QDialogButtonBox* buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);

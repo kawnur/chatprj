@@ -506,6 +506,7 @@ void Manager::addNewCompanion(
     }
     else
     {
+        getGraphicManagerPtr()->createWarningDialog(validationErrors);
 
     }
 
@@ -766,6 +767,12 @@ void GraphicManager::addWidgetToLeftPanel(SocketInfoBaseWidget* widget)
 void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
 {
     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
+}
+
+void GraphicManager::createWarningDialog(const std::vector<std::string>& validationErrors)
+{
+    WarningDialog* dialog = new WarningDialog(this->mainWindowPtr_, validationErrors);
+    dialog->show();
 }
 
 GraphicManager* getGraphicManagerPtr()

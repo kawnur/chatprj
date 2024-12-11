@@ -32,13 +32,25 @@ bool validateIpAddress(std::vector<std::string>& validationErrors, const std::st
 
 bool validatePort(std::vector<std::string>& validationErrors, const std::string& port)
 {
-    long long portNumber = std::stoll(port, nullptr, 10);
+    bool result = false;
 
-    bool result = (portNumber >= 0) && (portNumber <= 65535);
+    std::string errorMessage("port number must be greater than 0 and lower than 65536");
 
-    if(!result)
+    try
     {
-        validationErrors.push_back(std::string("port number must be greater than 0 and lower than 65536"));
+        long long portNumber = std::stoll(port, nullptr, 10);
+
+        bool result = (portNumber >= 0) && (portNumber <= 65535);
+
+        if(!result)
+        {
+            validationErrors.push_back(errorMessage);
+        }
+    }
+    catch(std::out_of_range)
+    {
+        validationErrors.push_back(
+            errorMessage + std::string(", port number is too big, std::out_of_range"));
     }
 
     logArgs("validatePort result:", result);
@@ -52,9 +64,11 @@ bool validateCompanionData(
     const std::string& ipAddress,
     const std::string& port)
 {
-    bool result = validateCompanionName(validationErrors, name) &&
-        validateIpAddress(validationErrors, ipAddress) &&
-        validatePort(validationErrors, port);
+    bool nameValidationResult = validateCompanionName(validationErrors, name);
+    bool ipAddressValidationResult = validateIpAddress(validationErrors, ipAddress);
+    bool portValidationResult = validatePort(validationErrors, port);
+
+    bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
 
     logArgs("validateCompanionData result:", result);
 
