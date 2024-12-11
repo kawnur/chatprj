@@ -1,11 +1,11 @@
 #include "mainwindow.hpp"
 
-MainWindow* getMainWindowPtr()
-{
-    QCoreApplication* coreApp = QCoreApplication::instance();
-    ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
-    return app->mainWindowPtr_;
-}
+// MainWindow* getMainWindowPtr()
+// {
+//     QCoreApplication* coreApp = QCoreApplication::instance();
+//     ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
+//     return app->mainWindowPtr_;
+// }
 
 void MainWindow::addStubWidgetToLeftPanel()
 {

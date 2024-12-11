@@ -406,7 +406,8 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
 
 void Manager::resetSelectedCompanion(const Companion* newSelected)
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
+    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     if(this->selectedCompanionPtr_)
     {
@@ -417,7 +418,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
         widgetGroup->chatHistoryPtr_->hide();
         widgetGroup->textEditPtr_->hide();
     }
-    mainWindowPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
+    // mainWindowPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
+    graphicManagerPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
 
     this->selectedCompanionPtr_ = newSelected;
 
@@ -430,7 +432,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
         widgetGroup->chatHistoryPtr_->show();
         widgetGroup->textEditPtr_->show();
     }
-    mainWindowPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
+    // mainWindowPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
+    graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
 void Manager::addNewCompanion(
@@ -439,7 +442,11 @@ void Manager::addNewCompanion(
     const std::string& port)
 {
     // validate data
-    if(validateCompanionData(name, ipAddress, port))
+    std::vector<std::string> validationErrors {};
+
+    bool validationResult = validateCompanionData(validationErrors, name, ipAddress, port);
+
+    if(validationResult)
     {
         // check if companion with such name already exists
         PGresult* companionDBResultPtr = getCompanionByNameDBResult(this->dbConnectionPtr_, name);
@@ -495,6 +502,10 @@ void Manager::addNewCompanion(
             // return companionsDataIsOk;
         }
 
+
+    }
+    else
+    {
 
     }
 
@@ -644,10 +655,12 @@ bool Manager::buildCompanions()
 
 void Manager::buildWidgetGroups()
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
+    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     auto companionsSize = this->companionPtrs_.size();
-    auto childrenSize = mainWindowPtr->getLeftPanelChildrenSize();
+    // auto childrenSize = mainWindowPtr->getLeftPanelChildrenSize();
+    auto childrenSize = graphicManagerPtr->getLeftPanelChildrenSize();
 
     logArgs("companionsSize:", companionsSize);
     logArgs("childrenSize:", childrenSize);
@@ -655,7 +668,8 @@ void Manager::buildWidgetGroups()
     if(companionsSize == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
-        mainWindowPtr->addStubWidgetToLeftPanel();
+        // mainWindowPtr->addStubWidgetToLeftPanel();
+        graphicManagerPtr->addStubWidgetToLeftPanel();
     }
     else
     {
@@ -663,7 +677,8 @@ void Manager::buildWidgetGroups()
         {
             // TODO check if sockets already are children
 
-            mainWindowPtr->removeStubsFromLeftPanel();
+            // mainWindowPtr->removeStubsFromLeftPanel();
+            graphicManagerPtr->removeStubsFromLeftPanel();
 
             for(auto& companion : this->companionPtrs_)
             {
@@ -700,4 +715,62 @@ Manager* getManagerPtr()
     QCoreApplication* coreApp = QCoreApplication::instance();
     ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
     return app->managerPtr_;
+}
+
+GraphicManager::GraphicManager()
+{
+    mainWindowPtr_ = new MainWindow;    
+}
+
+void GraphicManager::set()
+{
+    mainWindowPtr_->set();
+    mainWindowPtr_->show();
+}
+
+void GraphicManager::addTextToAppLogWidget(const QString& text)
+{
+    this->mainWindowPtr_->addTextToAppLogWidget(text);
+}
+
+void GraphicManager::oldSelectedCompanionActions(const Companion* companion)
+{
+    this->mainWindowPtr_->oldSelectedCompanionActions(companion);
+}
+
+void GraphicManager::newSelectedCompanionActions(const Companion* companion)
+{
+    this->mainWindowPtr_->newSelectedCompanionActions(companion);
+}
+
+size_t GraphicManager::getLeftPanelChildrenSize()
+{
+    return this->mainWindowPtr_->getLeftPanelChildrenSize();
+}
+
+void GraphicManager::addStubWidgetToLeftPanel()
+{
+    this->mainWindowPtr_->addStubWidgetToLeftPanel();
+}
+
+void GraphicManager::removeStubsFromLeftPanel()
+{
+    this->mainWindowPtr_->removeStubsFromLeftPanel();
+}
+
+void GraphicManager::addWidgetToLeftPanel(SocketInfoBaseWidget* widget)
+{
+    this->mainWindowPtr_->addWidgetToLeftPanel(widget);
+}
+
+void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
+{
+    this->mainWindowPtr_->addWidgetToCentralPanel(widget);
+}
+
+GraphicManager* getGraphicManagerPtr()
+{
+    QCoreApplication* coreApp = QCoreApplication::instance();
+    ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
+    return app->graphicManagerPtr_;
 }

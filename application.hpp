@@ -12,7 +12,8 @@
 
 // class ChatClient;
 // class ChatServer;
-class MainWindow;
+// class MainWindow;
+class GraphicManager;
 class Manager;
 
 class ChatApp : public QApplication
@@ -25,7 +26,8 @@ public:
     // boost::asio::io_context* io_context_;
     // ChatServer* server_;
 
-    MainWindow* mainWindowPtr_;
+    // MainWindow* mainWindowPtr_;
+    GraphicManager* graphicManagerPtr_;
     Manager* managerPtr_;
 
 //    ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {

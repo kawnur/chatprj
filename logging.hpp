@@ -6,10 +6,13 @@
 #include <type_traits>
 
 #include "mainwindow.hpp"
+#include "manager.hpp"
 #include "utils_cout.hpp"
 
 class MainWindow;
-MainWindow* getMainWindowPtr();
+class GraphicManager;
+// MainWindow* getMainWindowPtr();
+GraphicManager* getGraphicManagerPtr();
 
 template<typename T> QString argForLogging(T* const& value)
 {
@@ -36,14 +39,15 @@ QString argForLogging(const bool&);
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
     QString text;
 
     text += QString("- ");
 
     ((text += (argForLogging(args) + QString(" "))), ...);
 
-    mainWindowPtr->addTextToAppLogWidget(text);
+    // mainWindowPtr->addTextToAppLogWidget(text);
+    getGraphicManagerPtr()->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(args...);
 }
 
@@ -62,14 +66,15 @@ template<typename... Ts> void logArgsError(Ts&&... args)
     logArgs("ERROR:", args...);
 }
 
-template<typename T> void logLine(const T& str)
+template<typename T> void logLine(const T& string)
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
-    mainWindowPtr->addTextToAppLogWidget(QString(str));
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
+    // mainWindowPtr->addTextToAppLogWidget(QString(str));
+    getGraphicManagerPtr()->addTextToAppLogWidget(QString(string));
 }
 
 void logLine(const QString&);
-void logLine(const std::string&);
+void logLine(const std::string&string);
 
 
 #endif // LOGGING_HPP

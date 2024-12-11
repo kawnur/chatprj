@@ -20,15 +20,17 @@ QString argForLogging(const bool& value)
     return (value) ? QString("true") : QString("false");
 }
 
-void logLine(const QString& str)
+void logLine(const QString& string)
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
-    mainWindowPtr->addTextToAppLogWidget(str);
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
+    // mainWindowPtr->addTextToAppLogWidget(str);
+    getGraphicManagerPtr()->addTextToAppLogWidget(string);
 }
 
-void logLine(const std::string& str)
+void logLine(const std::string& string)
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
-    mainWindowPtr->addTextToAppLogWidget(QString::fromStdString(str));
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
+    // mainWindowPtr->addTextToAppLogWidget(QString::fromStdString(string));
+    getGraphicManagerPtr()->addTextToAppLogWidget(QString::fromStdString(string));
 }
 

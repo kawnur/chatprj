@@ -93,7 +93,7 @@ private:
     std::vector<Message> messages_;
 };
 
-class Manager : public QObject
+class Manager : public QObject  // TODO do we need inheritance?
 {
 public:
     Manager();
@@ -129,5 +129,29 @@ private:
 };
 
 Manager* getManagerPtr();
+
+class GraphicManager
+{
+public:
+    GraphicManager();
+    ~GraphicManager() = default;
+
+    void set();
+
+    void addTextToAppLogWidget(const QString&);
+    void oldSelectedCompanionActions(const Companion*);
+    void newSelectedCompanionActions(const Companion*);
+    size_t getLeftPanelChildrenSize();
+    void addStubWidgetToLeftPanel();
+    void removeStubsFromLeftPanel();
+    void addWidgetToLeftPanel(SocketInfoBaseWidget*);
+    void addWidgetToCentralPanel(QWidget*);
+
+private:
+    MainWindow* mainWindowPtr_;
+
+};
+
+GraphicManager* getGraphicManagerPtr();
 
 #endif // MANAGER_HPP

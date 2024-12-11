@@ -221,8 +221,22 @@ private:
     QDialogButtonBox* buttonBoxPtr_;
 
     void sendData();
-
 };
+
+class WarningDialog : public QDialog {
+
+    Q_OBJECT
+
+public:
+    WarningDialog(QWidget*);
+    ~WarningDialog();
+
+private:
+    QVBoxLayout* layoutPtr_;
+    QPlainTextEdit* textEditPtr_;
+    QDialogButtonBox* buttonBoxPtr_;
+};
+
 
 
 #endif // WIDGETS_HPP

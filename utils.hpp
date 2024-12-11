@@ -26,6 +26,8 @@ bool validateCompanionName(const std::string&);
 bool validateIpAddress(const std::string&);
 bool validatePort(const std::string&);
 
-bool validateCompanionData(const std::string&, const std::string&, const std::string&);
+bool validateCompanionData(
+    std::vector<std::string>&, const std::string&,
+    const std::string&, const std::string&);
 
 #endif // UTILS_HPP

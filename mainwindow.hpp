@@ -29,10 +29,10 @@ class MainWindow : public QMainWindow
 private:
     // TODO rename panel child widgets according its functionality
 
+    QPalette* menuBarPalettePtr_;
+
     QWidget* centralWidgetPtr_;
     QHBoxLayout* centralWidgetLayoutPtr_;
-
-    QPalette* menuBarPalettePtr_;
 
     // left panel
 
@@ -101,7 +101,7 @@ private slots:
     // void addNewCompanion();
 };
 
-MainWindow* getMainWindowPtr();
+// MainWindow* getMainWindowPtr();
 
 //void addTextFunction(const QString&);
 

@@ -363,7 +363,8 @@ bool SocketInfoStubWidget::isStub()
 
 WidgetGroup::WidgetGroup(const Companion* companion)
 {
-    MainWindow* mainWindowPtr = getMainWindowPtr();
+    // MainWindow* mainWindowPtr = getMainWindowPtr();
+    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     const SocketInfo* socketInfoPtr = companion->getSocketInfoPtr();
 
@@ -374,7 +375,8 @@ WidgetGroup::WidgetGroup(const Companion* companion)
         socketInfoPtr->getClientPort());
 
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
-    mainWindowPtr->addWidgetToLeftPanel(socketInfoBasePtr_);
+    // mainWindowPtr->addWidgetToLeftPanel(socketInfoBasePtr_);
+    graphicManagerPtr->addWidgetToLeftPanel(socketInfoBasePtr_);
 
     chatHistoryPtr_ = new QPlainTextEdit;
     // chatHistoryPtr_->setStyleSheet("border-bottom: 1px solid black");
@@ -388,14 +390,16 @@ WidgetGroup::WidgetGroup(const Companion* companion)
     chatHistoryPtr_->setAutoFillBackground(true);
     chatHistoryPtr_->setPalette(*chatHistoryPalettePtr_);
 
-    mainWindowPtr->addWidgetToCentralPanel(chatHistoryPtr_);
+    // mainWindowPtr->addWidgetToCentralPanel(chatHistoryPtr_);
+    graphicManagerPtr->addWidgetToCentralPanel(chatHistoryPtr_);
 
     textEditPtr_ = new TextEditWidget;
     textEditPtr_->hide();
 
     connect(textEditPtr_, &TextEditWidget::send, this, &WidgetGroup::sendMessage);
 
-    mainWindowPtr->addWidgetToCentralPanel(textEditPtr_);
+    // mainWindowPtr->addWidgetToCentralPanel(textEditPtr_);
+    graphicManagerPtr->addWidgetToCentralPanel(textEditPtr_);
 }
 
 void WidgetGroup::sendMessage()
@@ -537,4 +541,33 @@ void NewCompanionDialog::sendData()
     logArgs("port", port);
 
     getManagerPtr()->addNewCompanion(name, ipAddress, port);
+}
+
+WarningDialog::WarningDialog(QWidget* parent)
+{
+    setParent(parent);
+
+    setModal(true);
+    setWindowFlag(Qt::Window);
+
+    this->setWindowTitle("WARNING");
+
+    layoutPtr_ = new QVBoxLayout;
+    setLayout(layoutPtr_);
+
+    textEditPtr_ = new QPlainTextEdit;
+    textEditPtr_->setReadOnly(true);
+    textEditPtr_->setPlainText("");
+    layoutPtr_->addWidget(textEditPtr_);
+
+    QDialogButtonBox* buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+    connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);  // TODO this in ctor
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
+WarningDialog::~WarningDialog()
+{
+    delete this->layoutPtr_;
+    delete this->textEditPtr_;
+    delete this->buttonBoxPtr_;
 }
