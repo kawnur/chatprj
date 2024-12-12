@@ -288,28 +288,22 @@ std::pair<int, std::string> Manager::pushMessageToDB(
         std::string("companion_id"),
         text);
 
-    std::map<std::string, const char*> messageInfoMapping
-        {
-            {std::string("companion_id"), nullptr},
-            {std::string("timestamp_tz"), nullptr}
-        };
+    DBReplyData messageData(2, "companion_id", "timestamp_tz");
 
-    std::vector<std::map<std::string, const char*>> messageInfo { messageInfoMapping };
-
-    if(!getDataFromDBResult(messageInfo, pushToDBResultPtr, 1))
+    if(!getDataFromDBResult(messageData, pushToDBResultPtr, 1))
     {
         logArgsError("!getDataFromDBResult(messageInfo, pushToDBResultPtr, 1)");
         // companionsDataIsOk = false;
     }
 
-    if(messageInfo.size() == 0)
+    if(messageData.size() == 0)
     {
         logArgsError("messageInfo.size() == 0");
         return std::pair<int, std::string>(0, "");
     }
 
-    int companionId = std::atoi(messageInfo.at(0).at("companion_id"));
-    std::string timestampTz { messageInfo.at(0).at("timestamp_tz") };
+    int companionId = std::atoi(messageData.getValue(0, "companion_id"));
+    std::string timestampTz { messageData.getValue(0, "timestamp_tz") };
 
     logArgs("companionId:", companionId, "timestampTz:", timestampTz);
 
@@ -409,7 +403,6 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
 
 void Manager::resetSelectedCompanion(const Companion* newSelected)
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     if(this->selectedCompanionPtr_)
@@ -421,7 +414,6 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
         widgetGroup->chatHistoryPtr_->hide();
         widgetGroup->textEditPtr_->hide();
     }
-    // mainWindowPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
     graphicManagerPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
 
     this->selectedCompanionPtr_ = newSelected;
@@ -435,7 +427,6 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
         widgetGroup->chatHistoryPtr_->show();
         widgetGroup->textEditPtr_->show();
     }
-    // mainWindowPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
     graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
@@ -465,12 +456,7 @@ void Manager::addNewCompanion(
             // return companionsDataIsOk;
         }
 
-        std::map<std::string, const char*> companionsIdMapping
-            {
-                {std::string("id"), nullptr}
-            };
-
-        std::vector<std::map<std::string, const char*>> companionIdData { companionsIdMapping };
+        DBReplyData companionIdData(1, "id");
 
         if(!getDataFromDBResult(companionIdData, companionDBResultPtr, 0))
         {
@@ -482,13 +468,7 @@ void Manager::addNewCompanion(
 
         logArgs("companionIdData.size():", companionIdData.size());
 
-        for(auto& elem : companionIdData)
-        {
-            for(auto& item : elem)
-            {
-                logArgs(item.first, item.second);
-            }
-        }
+        companionIdData.logData();
 
         // if(false)
         // {
@@ -507,12 +487,7 @@ void Manager::addNewCompanion(
             // return companionsDataIsOk;
         }
 
-        std::map<std::string, const char*> socketIdMapping
-            {
-                {std::string("id"), nullptr}
-            };
-
-        std::vector<std::map<std::string, const char*>> socketIdData { socketIdMapping };
+        DBReplyData socketIdData(1, "id");
 
         if(!getDataFromDBResult(socketIdData, socketDBResultPtr, 0))
         {
@@ -555,13 +530,7 @@ bool Manager::buildCompanions()
         return companionsDataIsOk;
     }
 
-    std::map<std::string, const char*> companionsDataMapping
-    {
-        {std::string("id"), nullptr},
-        {std::string("name"), nullptr}
-    };
-
-    std::vector<std::map<std::string, const char*>> companionsData { companionsDataMapping };
+    DBReplyData companionsData(2, "id", "name");
 
     if(!getDataFromDBResult(companionsData, companionsDBResultPtr, 0))
     {
@@ -571,9 +540,9 @@ bool Manager::buildCompanions()
         return companionsDataIsOk;
     }
 
-    for(auto& data : companionsData)
+    for(size_t index = 0; index < companionsData.size(); index++)  // TODO switch to iterators
     {
-        int id = std::atoi(data.at(std::string("id")));
+        int id = std::atoi(companionsData.getValue(index, "id"));
 
         if(id == 0)
         {
@@ -583,7 +552,7 @@ bool Manager::buildCompanions()
 
         Companion* companionPtr = new Companion(
             id,
-            std::string(data.at(std::string("name"))));
+            std::string(companionsData.getValue(index, "name")));
 
         this->companionPtrs_.push_back(companionPtr);
 
@@ -598,14 +567,7 @@ bool Manager::buildCompanions()
             companionsDataIsOk = false;
         }
 
-        std::map<std::string, const char*> socketsDataMapping
-        {
-            {std::string("ipaddress"), nullptr},
-            {std::string("server_port"), nullptr},
-            {std::string("client_port"), nullptr}
-        };
-
-        std::vector<std::map<std::string, const char*>> socketsData { socketsDataMapping };
+        DBReplyData socketsData(3, "ipaddress", "server_port", "client_port");
 
         if(!getDataFromDBResult(socketsData, socketInfoDBResultPtr, 1))
         {
@@ -617,9 +579,9 @@ bool Manager::buildCompanions()
         {
             // TODO use port number pool
             SocketInfo* socketInfoPtr = new SocketInfo(
-                socketsData.at(0).at("ipaddress"),
-                std::atoi(socketsData.at(0).at("server_port")),
-                std::atoi(socketsData.at(0).at("client_port")));
+                socketsData.getValue(0, "ipaddress"),
+                std::atoi(socketsData.getValue(0, "server_port")),
+                std::atoi(socketsData.getValue(0, "client_port")));
 
             companionPtr->setSocketInfo(socketInfoPtr);
         }
@@ -634,30 +596,22 @@ bool Manager::buildCompanions()
                 companionsDataIsOk = false;
             }
 
-            std::map<std::string, const char*> messagesDataMapping
-            {
-                {std::string("companion_id"), nullptr},
-                {std::string("author_id"), nullptr},
-                {std::string("timestamp_tz"), nullptr},
-                {std::string("message"), nullptr},
-                {std::string("issent"), nullptr},
-            };
-
-            std::vector<std::map<std::string, const char*>> messagesData { messagesDataMapping };
+            DBReplyData messagesData(
+                5, "companion_id", "author_id", "timestamp_tz", "message", "issent");
 
             if(!getDataFromDBResult(messagesData, messagesDBResultPtr, 0))
             {
                 logArgsWarning("!getDataFromDBResult(messagesData, messagesDBResultPtr, 0)");
             }
 
-            for(auto& message : messagesData)
+            for(size_t i = 0; i < messagesData.size(); i++)  // TODO switch to iterators
             {
                 companionPtr->addMessage(
                     id,
-                    std::atoi(message.at("author_id")),
-                    message.at("timestamp_tz"),
-                    message.at("message"),
-                    message.at("issent"));
+                    std::atoi(messagesData.getValue(i, "author_id")),
+                    messagesData.getValue(i, "timestamp_tz"),
+                    messagesData.getValue(i, "message"),
+                    messagesData.getValue(i, "issent"));
             }
 
             if(!companionPtr->startServer())
@@ -676,11 +630,9 @@ bool Manager::buildCompanions()
 
 void Manager::buildWidgetGroups()
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     auto companionsSize = this->companionPtrs_.size();
-    // auto childrenSize = mainWindowPtr->getLeftPanelChildrenSize();
     auto childrenSize = graphicManagerPtr->getLeftPanelChildrenSize();
 
     logArgs("companionsSize:", companionsSize);
@@ -689,7 +641,6 @@ void Manager::buildWidgetGroups()
     if(companionsSize == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
-        // mainWindowPtr->addStubWidgetToLeftPanel();
         graphicManagerPtr->addStubWidgetToLeftPanel();
     }
     else
@@ -698,7 +649,6 @@ void Manager::buildWidgetGroups()
         {
             // TODO check if sockets already are children
 
-            // mainWindowPtr->removeStubsFromLeftPanel();
             graphicManagerPtr->removeStubsFromLeftPanel();
 
             for(auto& companion : this->companionPtrs_)

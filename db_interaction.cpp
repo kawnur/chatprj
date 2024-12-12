@@ -1,5 +1,74 @@
 #include "db_interaction.hpp"
 
+DBReplyData::DBReplyData(int count, ...)
+    : data_(std::vector<std::map<std::string, const char*>>(1))
+{
+    va_list args;
+    va_start(args, count);
+
+    for(int i = 0; i < count; i++)
+    {
+        auto key = std::string(va_arg(args, char*));
+
+        // coutWithEndl(key);
+
+        data_.at(0).insert({key, nullptr});
+    }
+
+    va_end(args);
+}
+
+DBReplyData::~DBReplyData()
+{
+    // delete[] &(this->data_);
+}
+
+void DBReplyData::clear()
+{
+    this->data_.clear();
+}
+
+void DBReplyData::fill(size_t count)
+{
+    size_t size = this->data_.size();
+
+    for(int i = 0; i < count - size; i++)
+    {
+        this->data_.push_back(this->data_.at(0));
+    }
+}
+
+size_t DBReplyData::count(size_t position, std::string key)
+{
+    return this->data_.at(position).count(key);
+}
+
+void DBReplyData::push(size_t position, std::string key, const char* value)
+{
+    this->data_.at(position).at(key) = value;
+}
+
+size_t DBReplyData::size()
+{
+    return this->data_.size();
+}
+
+const char* DBReplyData::getValue(size_t position, std::string key)
+{
+    return this->data_.at(position).at(key);
+}
+
+void DBReplyData::logData()
+{
+    for(auto& elem : this->data_)
+    {
+        for(auto& item : elem)
+        {
+            logArgs(item.first, item.second);
+        }
+    }
+}
+
 const char* getValueFromEnvironmentVariable(const char* variableName)
 {
     const char* valuePtr { std::getenv(variableName) };
@@ -150,7 +219,8 @@ void logUnknownField(const PGresult* result, int row, int column)
 }
 
 bool getDataFromDBResult(
-    std::vector<std::map<std::string, const char*>>& data,
+    // std::vector<std::map<std::string, const char*>>& data,
+    DBReplyData& data,
     const PGresult* result,
     int maxTuples)
 {
@@ -162,7 +232,8 @@ bool getDataFromDBResult(
 
     if(ntuples == 0)
     {
-        data.pop_back();
+        // data.pop_back();
+        data.clear();
         return dataIsOk;
     }
 
@@ -172,10 +243,11 @@ bool getDataFromDBResult(
     }
 
     // create additional elements in result vector
-    for(int i = 0; i < ntuples - 1; i++)
-    {
-        data.push_back(data.at(0));
-    }
+    // for(int i = 0; i < ntuples - 1; i++)
+    // {
+    //     data.push_back(data.at(0));
+    // }
+    data.fill(ntuples);
 
     dataIsOk = true;
 
@@ -188,12 +260,14 @@ bool getDataFromDBResult(
             char* fname = PQfname(result, j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
-            auto found = data.at(i).count(fnameString);
+            // auto found = data.at(i).count(fnameString);
+            auto found = data.count(i, fnameString);
 
             if(found == 1)
             {
                 const char* value = PQgetvalue(result, i, j);
-                data.at(i).at(fnameString) = value;
+                // data.at(i).at(fnameString) = value;
+                data.push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");
             }

@@ -12,6 +12,24 @@
 
 class Companion;
 
+class DBReplyData
+{
+public:
+    DBReplyData(int count, ...);
+    ~DBReplyData();
+
+    void clear();
+    void fill(size_t);
+    size_t count(size_t, std::string);
+    void push(size_t, std::string, const char*);
+    size_t size();
+    const char* getValue(size_t, std::string);
+    void logData();
+
+private:
+    std::vector<std::map<std::string, const char*>> data_;
+};
+
 const char* getValueFromEnvironmentVariable(const char*);
 PGconn* getDBConnection();
 PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
@@ -30,7 +48,9 @@ PGresult* pushMessageToDBAndReturn(const PGconn*, const std::string&,
 
 void logUnknownField(const PGresult*, int, int);
 
-bool getDataFromDBResult(
-    std::vector<std::map<std::string, const char*>>&, const PGresult*, int);
+// bool getDataFromDBResult(
+//     std::vector<std::map<std::string, const char*>>&, const PGresult*, int);
+
+bool getDataFromDBResult(DBReplyData&, const PGresult*, int);
 
 #endif // DB_INTERACTION_HPP
