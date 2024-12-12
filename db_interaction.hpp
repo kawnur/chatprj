@@ -42,14 +42,10 @@ PGresult* getSocketByIpAddressAndPortDBResult(const PGconn*, const std::string&,
 
 PGresult* getMessagesDBResult(const PGconn*, int);
 
-PGresult* pushMessageToDBAndReturn(const PGconn*, const std::string&,
-                                   const std::string&, const std::string&,
-                                   const std::string&);
+PGresult* pushMessageToDBAndReturn(
+    const PGconn*, const std::string&, const std::string&, const std::string&, const std::string&);
 
 void logUnknownField(const PGresult*, int, int);
-
-// bool getDataFromDBResult(
-//     std::vector<std::map<std::string, const char*>>&, const PGresult*, int);
 
 bool getDataFromDBResult(DBReplyData&, const PGresult*, int);
 

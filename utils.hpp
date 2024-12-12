@@ -30,4 +30,9 @@ bool validateCompanionData(
     std::vector<std::string>&, const std::string&,
     const std::string&, const std::string&);
 
+std::string buildErrorDialogText(const std::vector<std::string>&);
+
+void showErrorDialogAndLogError(const std::string&);
+
+
 #endif // UTILS_HPP

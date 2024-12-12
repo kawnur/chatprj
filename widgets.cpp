@@ -543,7 +543,7 @@ void NewCompanionDialog::sendData()
     getManagerPtr()->addNewCompanion(name, ipAddress, port);
 }
 
-ErrorDialog::ErrorDialog(QWidget* parent, const std::vector<std::string>& validationErrors)
+ErrorDialog::ErrorDialog(QWidget* parent, const std::string& text)
 {
     setParent(parent);
 
@@ -558,23 +558,7 @@ ErrorDialog::ErrorDialog(QWidget* parent, const std::vector<std::string>& valida
     textEditPtr_ = new QPlainTextEdit;
     textEditPtr_->setReadOnly(true);
 
-    // if(validationErrors.empty())
-    // {
-    //     textEditPtr_->setPlainText("NO ERRORS");
-    // }
-    // else
-    if(!validationErrors.empty())
-    {
-        logArgs("validationErrors.size():", validationErrors.size());
-        std::string text { "Error messages:\n\n" };
-
-        for(auto& error : validationErrors)
-        {
-            text += (std::string("- ") + error + std::string("\n"));
-        }
-
-        textEditPtr_->setPlainText(QString::fromStdString(text));
-    }
+    textEditPtr_->setPlainText(QString::fromStdString(text));
 
     layoutPtr_->addWidget(textEditPtr_);
 

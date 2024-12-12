@@ -74,3 +74,29 @@ bool validateCompanionData(
 
     return result;
 }
+
+std::string buildErrorDialogText(const std::vector<std::string>& messages)
+{
+    if(messages.empty())
+    {
+        return std::string("");
+    }
+    else
+    {
+        logArgs("errors.size():", messages.size());
+        std::string text { "Error messages:\n\n" };
+
+        for(auto& message : messages)
+        {
+            text += (std::string("- ") + message + std::string("\n"));
+        }
+
+        return text;
+    }
+}
+
+void showErrorDialogAndLogError(const std::string& message)
+{
+    getGraphicManagerPtr()->createErrorDialog(message);
+    logArgsError(message);
+}

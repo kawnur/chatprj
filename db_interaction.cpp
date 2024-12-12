@@ -219,7 +219,6 @@ void logUnknownField(const PGresult* result, int row, int column)
 }
 
 bool getDataFromDBResult(
-    // std::vector<std::map<std::string, const char*>>& data,
     DBReplyData& data,
     const PGresult* result,
     int maxTuples)
@@ -232,7 +231,6 @@ bool getDataFromDBResult(
 
     if(ntuples == 0)
     {
-        // data.pop_back();
         data.clear();
         return dataIsOk;
     }
@@ -243,10 +241,6 @@ bool getDataFromDBResult(
     }
 
     // create additional elements in result vector
-    // for(int i = 0; i < ntuples - 1; i++)
-    // {
-    //     data.push_back(data.at(0));
-    // }
     data.fill(ntuples);
 
     dataIsOk = true;
@@ -260,13 +254,11 @@ bool getDataFromDBResult(
             char* fname = PQfname(result, j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
-            // auto found = data.at(i).count(fnameString);
             auto found = data.count(i, fnameString);
 
             if(found == 1)
             {
                 const char* value = PQgetvalue(result, i, j);
-                // data.at(i).at(fnameString) = value;
                 data.push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");

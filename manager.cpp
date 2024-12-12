@@ -271,10 +271,7 @@ void Manager::set()
     }
     else
     {
-        std::string message { "problem with DB connection" };
-        std::vector<std::string> messageVector { message };
-        getGraphicManagerPtr()->createErrorDialog(messageVector);
-        logArgsError(message);
+        showErrorDialogAndLogError("problem with DB connection");
     }
 }
 
@@ -448,11 +445,8 @@ void Manager::addNewCompanion(
 
         if(!companionDBResultPtr)
         {
-            std::vector<std::string> dbRequestErrors { "Database request error" };
-            getGraphicManagerPtr()->createErrorDialog(dbRequestErrors);
-            logArgsError("companionDBResultPtr is nullptr");
+            showErrorDialogAndLogError("Database request error, companionDBResultPtr is nullptr");
             // companionsDataIsOk = false;
-
             // return companionsDataIsOk;
         }
 
@@ -496,13 +490,11 @@ void Manager::addNewCompanion(
 
             // return companionsDataIsOk;
         }
-
-
     }
     else
     {
-        getGraphicManagerPtr()->createErrorDialog(validationErrors);
-
+        getGraphicManagerPtr()->createErrorDialog(
+            buildErrorDialogText(validationErrors));
     }
 
 
@@ -739,10 +731,10 @@ void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
 }
 
-void GraphicManager::createErrorDialog(const std::vector<std::string>& messages)
+void GraphicManager::createErrorDialog(const std::string& message)
 {
     // TODO delete objects for closed dialoges
-    ErrorDialog* dialog = new ErrorDialog(this->mainWindowPtr_, messages);
+    ErrorDialog* dialog = new ErrorDialog(this->mainWindowPtr_, message);
     dialog->show();
 }
 

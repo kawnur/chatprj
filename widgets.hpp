@@ -228,7 +228,7 @@ class ErrorDialog : public QDialog {
     Q_OBJECT
 
 public:
-    ErrorDialog(QWidget*, const std::vector<std::string>&);
+    ErrorDialog(QWidget*, const std::string&);
     ~ErrorDialog();
 
 private:
