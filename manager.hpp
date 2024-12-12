@@ -2,6 +2,7 @@
 #define MANAGER_HPP
 
 #include <boost/asio.hpp>
+#include <memory>
 #include <string>
 
 #include "chat_client.hpp"
@@ -13,9 +14,14 @@
 
 class ChatClient;
 class ChatServer;
+class DBReplyData;
 class MainWindow;
 class SocketInfoBaseWidget;
 class WidgetGroup;
+
+bool getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
+template<typename... Ts> void logArgs(Ts&&... args);
+void showErrorDialogAndLogError(const std::string&);
 
 class SocketInfo
 {
@@ -63,6 +69,7 @@ private:
 class Companion
 {
 public:
+    Companion(int, const std::string&);
     Companion(int, std::string&&);
     ~Companion();
 
@@ -126,6 +133,46 @@ private:
     bool buildCompanions();
 
     void buildWidgetGroups();
+
+    Companion* addCompanionObject(int, const std::string&);
+
+    template<typename... Ts>
+    std::shared_ptr<DBReplyData> getDBDataPtr(
+        const std::string& mark, PGresult*(*func)(Ts...),
+        const std::vector<std::string>& keys, Ts... args)
+    {
+        logArgs("############################");
+        logArgs(mark);
+
+        PGresult* dbResultPtr = func(this->dbConnectionPtr_, args...);
+        logArgs("dbResultPtr:", dbResultPtr);
+
+        if(!dbResultPtr)
+        {
+            showErrorDialogAndLogError("Database request error, dbResultPtr is nullptr");
+            // companionsDataIsOk = false;
+            // return companionsDataIsOk;
+            return nullptr;
+        }
+
+        // DBReplyData companionIdData(1, "id");
+        // DBReplyData dbData(keys);
+        std::shared_ptr<DBReplyData> dbDataPtr = std::make_shared<DBReplyData>(keys);
+
+        if(!getDataFromDBResult(dbDataPtr, dbResultPtr, 0))
+        {
+            showErrorDialogAndLogError("Error getting db data from dbResultPtr");
+            // companionsDataIsOk = false;
+            // return companionsDataIsOk;
+            return nullptr;
+        }
+
+        logArgs("dbDataPtr->size():", dbDataPtr->size());
+        dbDataPtr->logData();
+        logArgs("############################");
+
+        return dbDataPtr;
+    }
 };
 
 Manager* getManagerPtr();

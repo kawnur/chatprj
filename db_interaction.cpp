@@ -18,6 +18,15 @@ DBReplyData::DBReplyData(int count, ...)
     va_end(args);
 }
 
+DBReplyData::DBReplyData(const std::vector<std::string>& keys)
+    : data_(std::vector<std::map<std::string, const char*>>(1))
+{
+    for(auto& key : keys)
+    {
+        data_.at(0).insert({key, nullptr});
+    }
+}
+
 DBReplyData::~DBReplyData()
 {
     // delete[] &(this->data_);
@@ -26,6 +35,11 @@ DBReplyData::~DBReplyData()
 void DBReplyData::clear()
 {
     this->data_.clear();
+}
+
+bool DBReplyData::isEmpty()
+{
+    return this->data_.empty();
 }
 
 void DBReplyData::fill(size_t count)
@@ -60,6 +74,8 @@ const char* DBReplyData::getValue(size_t position, std::string key)
 
 void DBReplyData::logData()
 {
+    logArgs("############################");
+
     for(auto& elem : this->data_)
     {
         for(auto& item : elem)
@@ -67,6 +83,8 @@ void DBReplyData::logData()
             logArgs(item.first, item.second);
         }
     }
+
+    logArgs("############################");
 }
 
 const char* getValueFromEnvironmentVariable(const char* variableName)
@@ -190,20 +208,34 @@ PGresult* getMessagesDBResult(const PGconn* dbConnection, int id)
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
-PGresult* pushMessageToDBAndReturn(
-    const PGconn* dbConnection, const std::string& companionName,
-    const std::string& authorName, const std::string& returningFieldName, const std::string& message)
+PGresult* pushCompanionToDBAndReturn(
+    const PGconn* dbConnection, const std::string& companionName)
 {
     std::string command = std::string(
-        "insert into messages "
-        "(companion_id, author_id, timestamp_tz, message, issent) "
-        "values ((select id from companions where name = '")
+        "INSERT INTO companions "
+        "(name) "
+        "VALUES ('")
         + companionName
-        + std::string("'), (select id from companions where name = '")
+        + std::string("') RETURNING id");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* pushMessageToDBAndReturn(
+    const PGconn* dbConnection, const std::string& companionName,
+    const std::string& authorName, const std::string& returningFieldName,
+    const std::string& message)
+{
+    std::string command = std::string(
+        "INSERT INTO messages "
+        "(companion_id, author_id, timestamp_tz, message, issent) "
+        "VALUES ((SELECT id FROM companions WHERE name = '")
+        + companionName
+        + std::string("'), (SELECT id FROM companions WHERE name = '")
         + authorName
         + std::string("'), now(), '")
         + message
-        + std::string("', false) returning ")
+        + std::string("', false) RETURNING ")
         + returningFieldName
         + std::string(", timestamp_tz");
 
@@ -220,6 +252,7 @@ void logUnknownField(const PGresult* result, int row, int column)
 
 bool getDataFromDBResult(
     DBReplyData& data,
+    // std::shared_ptr<DBReplyData>& dataPtr,
     const PGresult* result,
     int maxTuples)
 {
@@ -232,6 +265,7 @@ bool getDataFromDBResult(
     if(ntuples == 0)
     {
         data.clear();
+        // dataPtr->clear();
         return dataIsOk;
     }
 
@@ -242,6 +276,7 @@ bool getDataFromDBResult(
 
     // create additional elements in result vector
     data.fill(ntuples);
+    // dataPtr->fill(ntuples);
 
     dataIsOk = true;
 
@@ -260,6 +295,70 @@ bool getDataFromDBResult(
             {
                 const char* value = PQgetvalue(result, i, j);
                 data.push(i, fnameString, value);
+                // dataPtr->push(i, fnameString, value);
+
+                logString += (fnameString + ": " + std::string(value) + " ");
+            }
+            else
+            {
+                dataIsOk = false;
+                logUnknownField(result, i, j);
+            }
+        }
+
+        // logArgs(logString);
+    }
+
+    return dataIsOk;
+}
+
+bool getDataFromDBResult(
+    // DBReplyData& data,
+    std::shared_ptr<DBReplyData>& dataPtr,
+    const PGresult* result,
+    int maxTuples)
+{
+    bool dataIsOk = false;
+
+    int ntuples = PQntuples(result);
+    int nfields = PQnfields(result);
+    logArgs("ntuples:", ntuples, "nfields:", nfields);
+
+    if(ntuples == 0)
+    {
+        // data.clear();
+        dataPtr->clear();
+        return dataIsOk;
+    }
+
+    if(maxTuples == 1 and ntuples > 1)
+    {
+        logArgsError(ntuples, "lines from OneToOne DB request");
+    }
+
+    // create additional elements in result vector
+    // data.fill(ntuples);
+    dataPtr->fill(ntuples);
+
+    dataIsOk = true;
+
+    for(int i = 0; i < ntuples; i++)
+    {
+        std::string logString;
+
+        for(int j = 0; j < nfields; j++)
+        {
+            char* fname = PQfname(result, j);
+            std::string fnameString = (fname) ? std::string(fname) : "nullptr";
+
+            // auto found = data.count(i, fnameString);
+            auto found = dataPtr->count(i, fnameString);
+
+            if(found == 1)
+            {
+                const char* value = PQgetvalue(result, i, j);
+                // data.push(i, fnameString, value);
+                dataPtr->push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");
             }

@@ -16,9 +16,11 @@ class DBReplyData
 {
 public:
     DBReplyData(int count, ...);
+    DBReplyData(const std::vector<std::string>&);
     ~DBReplyData();
 
     void clear();
+    bool isEmpty();
     void fill(size_t);
     size_t count(size_t, std::string);
     void push(size_t, std::string, const char*);
@@ -42,11 +44,13 @@ PGresult* getSocketByIpAddressAndPortDBResult(const PGconn*, const std::string&,
 
 PGresult* getMessagesDBResult(const PGconn*, int);
 
+PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
 PGresult* pushMessageToDBAndReturn(
     const PGconn*, const std::string&, const std::string&, const std::string&, const std::string&);
 
 void logUnknownField(const PGresult*, int, int);
 
 bool getDataFromDBResult(DBReplyData&, const PGresult*, int);
+bool getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
 
 #endif // DB_INTERACTION_HPP
