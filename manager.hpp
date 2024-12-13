@@ -19,7 +19,7 @@ class MainWindow;
 class SocketInfoBaseWidget;
 class WidgetGroup;
 
-bool getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
+int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
 template<typename... Ts> void logArgs(Ts&&... args);
 void showErrorDialogAndLogError(const std::string&);
 
@@ -138,38 +138,45 @@ private:
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
-        const std::string& mark, PGresult*(*func)(Ts...),
-        const std::vector<std::string>& keys, Ts... args)
+        bool logging,
+        const char* mark,
+        PGresult*(*func)(const PGconn*, const Ts&...),
+        std::vector<std::string>&& keys,
+        const Ts&... args)
     {
-        logArgs("############################");
-        logArgs(mark);
+        if(logging)
+        {
+            logArgs("############################");  // TODO move to constants
+            logArgs(mark);
+        }
 
         PGresult* dbResultPtr = func(this->dbConnectionPtr_, args...);
-        logArgs("dbResultPtr:", dbResultPtr);
+
+        if(logging)
+        {
+            logArgs("dbResultPtr:", dbResultPtr);
+        }
 
         if(!dbResultPtr)
         {
             showErrorDialogAndLogError("Database request error, dbResultPtr is nullptr");
-            // companionsDataIsOk = false;
-            // return companionsDataIsOk;
             return nullptr;
         }
 
-        // DBReplyData companionIdData(1, "id");
-        // DBReplyData dbData(keys);
         std::shared_ptr<DBReplyData> dbDataPtr = std::make_shared<DBReplyData>(keys);
 
-        if(!getDataFromDBResult(dbDataPtr, dbResultPtr, 0))
+        if(getDataFromDBResult(dbDataPtr, dbResultPtr, 0) == -1)
         {
             showErrorDialogAndLogError("Error getting db data from dbResultPtr");
-            // companionsDataIsOk = false;
-            // return companionsDataIsOk;
             return nullptr;
         }
 
-        logArgs("dbDataPtr->size():", dbDataPtr->size());
-        dbDataPtr->logData();
-        logArgs("############################");
+        if(logging)
+        {
+            logArgs("dbDataPtr->size():", dbDataPtr->size());
+            dbDataPtr->logData();
+            logArgs("############################");
+        }
 
         return dbDataPtr;
     }

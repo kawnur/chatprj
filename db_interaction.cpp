@@ -173,7 +173,7 @@ PGresult* getCompanionByNameDBResult(const PGconn* dbConnection, const std::stri
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
-PGresult* getSocketInfoDBResult(const PGconn* dbConnection, int id)
+PGresult* getSocketInfoDBResult(const PGconn* dbConnection, const int& id)
 {
     std::string command = std::string(
         "SELECT ipaddress, server_port, client_port "
@@ -197,7 +197,7 @@ PGresult* getSocketByIpAddressAndPortDBResult(
 }
 
 // TODO test sorting by timestamp with different timezones
-PGresult* getMessagesDBResult(const PGconn* dbConnection, int id)
+PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
 {
     std::string command = std::string(
         "SELECT author_id, timestamp_tz, message, issent "
@@ -250,75 +250,13 @@ void logUnknownField(const PGresult* result, int row, int column)
     logArgsError("unknown field name:", logMark);
 }
 
-bool getDataFromDBResult(
-    DBReplyData& data,
-    // std::shared_ptr<DBReplyData>& dataPtr,
-    const PGresult* result,
-    int maxTuples)
-{
-    bool dataIsOk = false;
-
-    int ntuples = PQntuples(result);
-    int nfields = PQnfields(result);
-    logArgs("ntuples:", ntuples, "nfields:", nfields);
-
-    if(ntuples == 0)
-    {
-        data.clear();
-        // dataPtr->clear();
-        return dataIsOk;
-    }
-
-    if(maxTuples == 1 and ntuples > 1)
-    {
-        logArgsError(ntuples, "lines from OneToOne DB request");
-    }
-
-    // create additional elements in result vector
-    data.fill(ntuples);
-    // dataPtr->fill(ntuples);
-
-    dataIsOk = true;
-
-    for(int i = 0; i < ntuples; i++)
-    {
-        std::string logString;
-
-        for(int j = 0; j < nfields; j++)
-        {
-            char* fname = PQfname(result, j);
-            std::string fnameString = (fname) ? std::string(fname) : "nullptr";
-
-            auto found = data.count(i, fnameString);
-
-            if(found == 1)
-            {
-                const char* value = PQgetvalue(result, i, j);
-                data.push(i, fnameString, value);
-                // dataPtr->push(i, fnameString, value);
-
-                logString += (fnameString + ": " + std::string(value) + " ");
-            }
-            else
-            {
-                dataIsOk = false;
-                logUnknownField(result, i, j);
-            }
-        }
-
-        // logArgs(logString);
-    }
-
-    return dataIsOk;
-}
-
-bool getDataFromDBResult(
+int getDataFromDBResult(
     // DBReplyData& data,
     std::shared_ptr<DBReplyData>& dataPtr,
     const PGresult* result,
     int maxTuples)
 {
-    bool dataIsOk = false;
+    int dataIsOk = 0;
 
     int ntuples = PQntuples(result);
     int nfields = PQnfields(result);
@@ -340,7 +278,7 @@ bool getDataFromDBResult(
     // data.fill(ntuples);
     dataPtr->fill(ntuples);
 
-    dataIsOk = true;
+    dataIsOk = 1;
 
     for(int i = 0; i < ntuples; i++)
     {
@@ -364,7 +302,7 @@ bool getDataFromDBResult(
             }
             else
             {
-                dataIsOk = false;
+                dataIsOk = -1;  // TODO return ?
                 logUnknownField(result, i, j);
             }
         }

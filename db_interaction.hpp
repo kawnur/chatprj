@@ -39,10 +39,10 @@ PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
 PGresult* getCompanionsDBResult(const PGconn*);
 PGresult* getCompanionByNameDBResult(const PGconn*, const std::string&);
 
-PGresult* getSocketInfoDBResult(const PGconn*, int);
+PGresult* getSocketInfoDBResult(const PGconn*, const int&);
 PGresult* getSocketByIpAddressAndPortDBResult(const PGconn*, const std::string&, const std::string&);
 
-PGresult* getMessagesDBResult(const PGconn*, int);
+PGresult* getMessagesDBResult(const PGconn*, const int&);
 
 PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
 PGresult* pushMessageToDBAndReturn(
@@ -50,7 +50,6 @@ PGresult* pushMessageToDBAndReturn(
 
 void logUnknownField(const PGresult*, int, int);
 
-bool getDataFromDBResult(DBReplyData&, const PGresult*, int);
-bool getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
+int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
 
 #endif // DB_INTERACTION_HPP

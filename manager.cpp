@@ -283,31 +283,23 @@ void Manager::set()
 std::pair<int, std::string> Manager::pushMessageToDB(
     const std::string& companionName, const std::string& authorName, const std::string& text)
 {
-    PGresult* pushToDBResultPtr = pushMessageToDBAndReturn(
-        this->dbConnectionPtr_,
-        companionName,
-        authorName,
-        std::string("companion_id"),
-        text);
+    std::shared_ptr<DBReplyData> messageDataPtr = this->getDBDataPtr(
+        true,
+        "pushMessageToDBAndReturn",
+        &pushMessageToDBAndReturn,
+        std::vector<std::string> {
+            std::string("companion_id"), std::string("timestamp_tz")
+        },
+        companionName, authorName, std::string("companion_id"), text);
 
-    // DBReplyData messageData(2, "companion_id", "timestamp_tz");
-    std::vector<std::string> messageKeys { "companion_id", "timestamp_tz" };
-    DBReplyData messageData(messageKeys);
-
-    if(!getDataFromDBResult(messageData, pushToDBResultPtr, 1))
+    if(messageDataPtr->isEmpty())
     {
-        logArgsError("!getDataFromDBResult(messageInfo, pushToDBResultPtr, 1)");
-        // companionsDataIsOk = false;
-    }
-
-    if(messageData.size() == 0)
-    {
-        logArgsError("messageInfo.size() == 0");
+        logArgsError("messageDataPtr->isEmpty()");
         return std::pair<int, std::string>(0, "");
     }
 
-    int companionId = std::atoi(messageData.getValue(0, "companion_id"));
-    std::string timestampTz { messageData.getValue(0, "timestamp_tz") };
+    int companionId = std::atoi(messageDataPtr->getValue(0, "companion_id"));
+    std::string timestampTz { messageDataPtr->getValue(0, "timestamp_tz") };
 
     logArgs("companionId:", companionId, "timestampTz:", timestampTz);
 
@@ -447,36 +439,12 @@ void Manager::addNewCompanion(
     if(validationResult)
     {
         // check if companion with such name already exists
-        // PGresult* companionDBResultPtr = getCompanionByNameDBResult(this->dbConnectionPtr_, name);
-        // logArgs("companionDBResultPtr:", companionDBResultPtr);
-
-        // if(!companionDBResultPtr)
-        // {
-        //     showErrorDialogAndLogError("Database request error, companionDBResultPtr is nullptr");
-        //     // companionsDataIsOk = false;
-        //     // return companionsDataIsOk;
-        // }
-
-        // // DBReplyData companionIdData(1, "id");
-        // std::vector<std::string> companionKeys { "id" };
-        // DBReplyData companionIdData(companionKeys);
-
-        // if(!getDataFromDBResult(companionIdData, companionDBResultPtr, 0))
-        // {
-        //     logArgsError("!getDataFromDBResult(companionsData, companionsDBResultPtr, 0)");
-        //     // companionsDataIsOk = false;
-        //     // return companionsDataIsOk;
-        // }
-
-        // logArgs("companionIdData.size():", companionIdData.size());
-
-        // companionIdData.logData();
-
-        const std::string mark { "getCompanionByNameDBResult" };
-        const std::vector<std::string> companionKeys { "id" };
-
         std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
-            mark, &getCompanionByNameDBResult, companionKeys, name);
+            true,
+            "getCompanionByNameDBResult",
+            &getCompanionByNameDBResult,
+            std::vector<std::string> { std::string("id") },
+            name);
 
         if(!companionIdDataPtr)
         {
@@ -491,32 +459,20 @@ void Manager::addNewCompanion(
         }
 
         // check if such socket already exists
-        PGresult* socketDBResultPtr = getSocketByIpAddressAndPortDBResult(this->dbConnectionPtr_, ipAddress, port);
-        logArgs("socketDBResultPtr:", socketDBResultPtr);
+        std::shared_ptr<DBReplyData> socketIdDataPtr = this->getDBDataPtr(
+            true,
+            "getSocketByIpAddressAndPortDBResult",
+            &getSocketByIpAddressAndPortDBResult,
+            std::vector<std::string> { std::string("id") },
+            ipAddress, port);
 
-        if(!socketDBResultPtr)
+        if(!socketIdDataPtr)
         {
-            showErrorDialogAndLogError("Database request error, socketDBResultPtr is nullptr");
-            // companionsDataIsOk = false;
-            // return companionsDataIsOk;
+            showErrorDialogAndLogError("Error getting data from db");
+            return;
         }
 
-        // DBReplyData socketIdData(1, "id");
-        std::vector<std::string> socketIdKeys { "id" };
-        DBReplyData socketIdData(socketIdKeys);
-
-        if(!getDataFromDBResult(socketIdData, socketDBResultPtr, 0))
-        {
-            logArgsError("!getDataFromDBResult(socketIdData, socketDBResultPtr, 0)");
-            // companionsDataIsOk = false;
-            // return companionsDataIsOk;
-        }
-
-        logArgs("socketIdData.size():", socketIdData.size());
-
-        socketIdData.logData();
-
-        if(!socketIdData.isEmpty())
+        if(!socketIdDataPtr->isEmpty())
         {
             showErrorDialogAndLogError("Companion with such socket already exists");
             return;
@@ -559,32 +515,20 @@ bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
 
-    PGresult* companionsDBResultPtr = getCompanionsDBResult(this->dbConnectionPtr_);
-    logArgs("companionsDBResultPtr:", companionsDBResultPtr);
+    std::shared_ptr<DBReplyData> companionsDataPtr = this->getDBDataPtr(
+        true,
+        "getCompanionsDBResult",
+        &getCompanionsDBResult,
+        std::vector<std::string> { std::string("id"), std::string("name") });
 
-    if(!companionsDBResultPtr)
+    if(!companionsDataPtr)
     {
-        logArgsError("companionsDBResultPtr is nullptr");
-        companionsDataIsOk = false;
-
-        return companionsDataIsOk;
+        return false;
     }
 
-    // DBReplyData companionsData(2, "id", "name");
-    std::vector<std::string> companionsKeys { "id", "name" };
-    DBReplyData companionsData(companionsKeys);
-
-    if(!getDataFromDBResult(companionsData, companionsDBResultPtr, 0))
+    for(size_t index = 0; index < companionsDataPtr->size(); index++)  // TODO switch to iterators
     {
-        logArgsError("!getDataFromDBResult(companionsData, companionsDBResultPtr, 0)");
-        companionsDataIsOk = false;
-
-        return companionsDataIsOk;
-    }
-
-    for(size_t index = 0; index < companionsData.size(); index++)  // TODO switch to iterators
-    {
-        int id = std::atoi(companionsData.getValue(index, "id"));
+        int id = std::atoi(companionsDataPtr->getValue(index, "id"));
 
         // if(id == 0)
         // {
@@ -592,85 +536,56 @@ bool Manager::buildCompanions()
         //     continue;
         // }
 
-        // Companion* companionPtr = new Companion(
-        //     id,
-        //     std::string(companionsData.getValue(index, "name")));
-
-        // this->companionPtrs_.push_back(companionPtr);
-
         Companion* companionPtr = this->addCompanionObject(
             id,
-            std::string(companionsData.getValue(index, "name")));
+            std::string(companionsDataPtr->getValue(index, "name")));
 
         if(!companionPtr)
         {
             continue;
         }
 
-        PGresult* socketInfoDBResultPtr =
-            getSocketInfoDBResult(this->dbConnectionPtr_, id);  // TODO switch to getName?
+        std::shared_ptr<DBReplyData> socketsDataPtr = this->getDBDataPtr(
+            true,
+            "getSocketInfoDBResult",
+            &getSocketInfoDBResult,
+            std::vector<std::string> {
+                std::string("ipaddress"), std::string("server_port"), std::string("client_port")
+            },
+            id);
 
-        logArgs("socketInfoDBResultPtr:", socketInfoDBResultPtr);
-
-        if(!socketInfoDBResultPtr)
-        {
-            logArgsError("socketInfoDBResultPtr is nullptr");
-            companionsDataIsOk = false;
-        }
-
-        // DBReplyData socketsData(3, "ipaddress", "server_port", "client_port");
-        std::vector<std::string> socketsKeys { "ipaddress", "server_port", "client_port" };
-        DBReplyData socketsData(socketsKeys);
-
-        if(!getDataFromDBResult(socketsData, socketInfoDBResultPtr, 1))
-        {
-            logArgsError("!getDataFromDBResult(socketsData, socketInfoDBResultPtr, 1)");
-            companionsDataIsOk = false;
-        }
-
-        if(socketsData.size() > 0)
+        if(socketsDataPtr->size() > 0)
         {
             // TODO use port number pool
             SocketInfo* socketInfoPtr = new SocketInfo(
-                socketsData.getValue(0, "ipaddress"),
-                std::atoi(socketsData.getValue(0, "server_port")),
-                std::atoi(socketsData.getValue(0, "client_port")));
+                socketsDataPtr->getValue(0, "ipaddress"),
+                std::atoi(socketsDataPtr->getValue(0, "server_port")),
+                std::atoi(socketsDataPtr->getValue(0, "client_port")));
 
             companionPtr->setSocketInfo(socketInfoPtr);
         }
 
         if(companionPtr->getId() > 1)  // TODO change condition
         {
-            PGresult* messagesDBResultPtr = getMessagesDBResult(dbConnectionPtr_, id);
+            std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
+                false,
+                "getMessagesDBResult",
+                &getMessagesDBResult,
+                std::vector<std::string> {
+                    std::string("companion_id"), std::string("author_id"),
+                    std::string("timestamp_tz"), std::string("message"),
+                    std::string("issent")
+                },
+                id);
 
-            if(!messagesDBResultPtr)
-            {
-                logArgsError("messagesDBResultPtr is nullptr");
-                companionsDataIsOk = false;
-            }
-
-            // DBReplyData messagesData(
-            //     5, "companion_id", "author_id", "timestamp_tz", "message", "issent");
-            std::vector<std::string> messagesKeys
-            {
-                    "companion_id", "author_id", "timestamp_tz", "message", "issent"
-            };
-
-            DBReplyData messagesData(messagesKeys);
-
-            if(!getDataFromDBResult(messagesData, messagesDBResultPtr, 0))
-            {
-                logArgsWarning("!getDataFromDBResult(messagesData, messagesDBResultPtr, 0)");
-            }
-
-            for(size_t i = 0; i < messagesData.size(); i++)  // TODO switch to iterators
+            for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
             {
                 companionPtr->addMessage(
                     id,
-                    std::atoi(messagesData.getValue(i, "author_id")),
-                    messagesData.getValue(i, "timestamp_tz"),
-                    messagesData.getValue(i, "message"),
-                    messagesData.getValue(i, "issent"));
+                    std::atoi(messagesDataPtr->getValue(i, "author_id")),
+                    messagesDataPtr->getValue(i, "timestamp_tz"),
+                    messagesDataPtr->getValue(i, "message"),
+                    messagesDataPtr->getValue(i, "issent"));
             }
 
             if(!companionPtr->startServer())
