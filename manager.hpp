@@ -7,6 +7,7 @@
 
 #include "chat_client.hpp"
 #include "chat_server.hpp"
+#include "constants.hpp"
 #include "db_interaction.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
@@ -27,8 +28,15 @@ class SocketInfo
 {
 public:
     SocketInfo() {};
-    SocketInfo(std::string&, uint16_t&, uint16_t&);
-    SocketInfo(std::string&&, uint16_t&&, uint16_t&&);
+    SocketInfo(std::string&, uint16_t&, uint16_t&);  // TODO remove
+    SocketInfo(std::string&&, uint16_t&&, uint16_t&&);  // TODO remove
+
+    template<typename T, typename U, typename P> SocketInfo
+        (T&& ipAddress, U&& serverPort, P&& clientPort) :
+        ipAddress_(std::forward<T>(ipAddress)),
+        serverPort_(std::forward<U>(serverPort)),
+        clientPort_(std::forward<P>(clientPort)) {}
+
     SocketInfo(const SocketInfo&);
     SocketInfo(SocketInfo&&) {};
     ~SocketInfo() = default;
@@ -115,7 +123,7 @@ public:
 
     void resetSelectedCompanion(const Companion*);
 
-    void addNewCompanion(const std::string&, const std::string&, const std::string&);
+    bool addNewCompanion(const std::string&, const std::string&, const std::string&);
 
 private:
     PGconn* dbConnectionPtr_;
@@ -135,6 +143,7 @@ private:
     void buildWidgetGroups();
 
     Companion* addCompanionObject(int, const std::string&);
+    void createWidgetGroupAndAddToMapping(Companion*);
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
@@ -144,16 +153,12 @@ private:
         std::vector<std::string>&& keys,
         const Ts&... args)
     {
-        if(logging)
-        {
-            logArgs("############################");  // TODO move to constants
-            logArgs(mark);
-        }
-
         PGresult* dbResultPtr = func(this->dbConnectionPtr_, args...);
 
         if(logging)
         {
+            logArgs(LOG_DELIMITER);
+            logArgs(mark);
             logArgs("dbResultPtr:", dbResultPtr);
         }
 
@@ -175,7 +180,7 @@ private:
         {
             logArgs("dbDataPtr->size():", dbDataPtr->size());
             dbDataPtr->logData();
-            logArgs("############################");
+            logArgs(LOG_DELIMITER);
         }
 
         return dbDataPtr;
@@ -201,7 +206,7 @@ public:
     void addWidgetToLeftPanel(SocketInfoBaseWidget*);
     void addWidgetToCentralPanel(QWidget*);
 
-    void createErrorDialog(const std::string&);
+    void createDialog(QDialog*, const DialogType, const std::string&);
 
 private:
     MainWindow* mainWindowPtr_;

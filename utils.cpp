@@ -52,6 +52,11 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
         validationErrors.push_back(
             errorMessage + std::string(", port number is too big, std::out_of_range"));
     }
+    catch(std::invalid_argument)
+    {
+        validationErrors.push_back(
+            errorMessage + std::string(", port number is invalid, std::invalid_argument"));
+    }
 
     logArgs("validatePort result:", result);
 
@@ -75,7 +80,7 @@ bool validateCompanionData(
     return result;
 }
 
-std::string buildErrorDialogText(const std::vector<std::string>& messages)
+std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages)
 {
     if(messages.empty())
     {
@@ -83,8 +88,10 @@ std::string buildErrorDialogText(const std::vector<std::string>& messages)
     }
     else
     {
-        logArgs("errors.size():", messages.size());
-        std::string text { "Error messages:\n\n" };
+        std::string text(header);
+
+        logArgs("messages.size():", messages.size());
+        // std::string text { "Error messages:\n\n" };
 
         for(auto& message : messages)
         {
@@ -97,6 +104,6 @@ std::string buildErrorDialogText(const std::vector<std::string>& messages)
 
 void showErrorDialogAndLogError(const std::string& message)
 {
-    getGraphicManagerPtr()->createErrorDialog(message);
+    getGraphicManagerPtr()->createDialog(nullptr, DialogType::ERROR, message);
     logArgsError(message);
 }

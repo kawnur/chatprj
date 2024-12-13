@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QTextEdit>
 
+#include "constants.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "logging.hpp"
@@ -223,18 +224,21 @@ private:
     void sendData();
 };
 
-class ErrorDialog : public QDialog {
+class Dialog : public QDialog {
 
     Q_OBJECT
 
 public:
-    ErrorDialog(QWidget*, const std::string&);
-    ~ErrorDialog();
+    Dialog(QDialog*, QWidget*, DialogType, const std::string&);
+    ~Dialog();
 
-private:
+private:    
+    QDialog* parentDialogPtr_;
     QVBoxLayout* layoutPtr_;
     QPlainTextEdit* textEditPtr_;
     QDialogButtonBox* buttonBoxPtr_;
+
+    void closeDialogs();
 };
 
 

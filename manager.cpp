@@ -426,15 +426,15 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
     graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
-void Manager::addNewCompanion(
+bool Manager::addNewCompanion(
     const std::string& name,
     const std::string& ipAddress,
-    const std::string& port)
+    const std::string& clientPortStr)
 {
     // data validation and checking
     std::vector<std::string> validationErrors {};
 
-    bool validationResult = validateCompanionData(validationErrors, name, ipAddress, port);
+    bool validationResult = validateCompanionData(validationErrors, name, ipAddress, clientPortStr);
 
     if(validationResult)
     {
@@ -449,13 +449,13 @@ void Manager::addNewCompanion(
         if(!companionIdDataPtr)
         {
             showErrorDialogAndLogError("Error getting data from db");
-            return;
+            return false;
         }
 
         if(!companionIdDataPtr->isEmpty())
         {
             showErrorDialogAndLogError("Companion with such name already exists");
-            return;
+            return false;
         }
 
         // check if such socket already exists
@@ -464,57 +464,98 @@ void Manager::addNewCompanion(
             "getSocketByIpAddressAndPortDBResult",
             &getSocketByIpAddressAndPortDBResult,
             std::vector<std::string> { std::string("id") },
-            ipAddress, port);
+            ipAddress, clientPortStr);
 
         if(!socketIdDataPtr)
         {
             showErrorDialogAndLogError("Error getting data from db");
-            return;
+            return false;
         }
 
         if(!socketIdDataPtr->isEmpty())
         {
             showErrorDialogAndLogError("Companion with such socket already exists");
-            return;
+            return false;
         }
     }
     else
     {
-        getGraphicManagerPtr()->createErrorDialog(
-            buildErrorDialogText(validationErrors));
+        getGraphicManagerPtr()->createDialog(
+            nullptr,
+            DialogType::ERROR,
+            buildDialogText(
+                std::string { "Error messages:\n\n" }, validationErrors));
     }
 
     // push companion data to db
-    // PGresult* pushToDBResultPtr = pushCompanionToDBAndReturn(this->dbConnectionPtr_, name);
+    std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
+        true,
+        "pushCompanionToDBAndReturn",
+        &pushCompanionToDBAndReturn,
+        std::vector<std::string> { std::string("id") },
+        name);
 
+    if(!companionIdDataPtr)
+    {
+        showErrorDialogAndLogError("Error getting data from db");
+        return false;
+    }
 
+    if(companionIdDataPtr->isEmpty())
+    {
+        showErrorDialogAndLogError("Empty db reply to new companion pushing");
+        return false;
+    }
 
+    int id = std::atoi(companionIdDataPtr->getValue(0, "id"));
 
+    // push socket data to db
+    uint16_t serverPort = 5000 + id + 1;  // TODO change
 
-    // create Companion object
-    // bool addResult = this->addCompanionObject(
-    //     std::atoi(companionsData.getValue(index, "id")),
-    //     std::string(companionsData.getValue(index, "name")));
+    std::shared_ptr<DBReplyData> socketDataPtr = this->getDBDataPtr(
+        true,
+        "pushSocketToDB",
+        &pushSocketToDBAndReturn,
+        std::vector<std::string>{ std::string("id") },
+        name, ipAddress, std::to_string(serverPort), clientPortStr);
 
-    // if(!addResult)
-    // {
-    //     return;
-    // }
+    if(!socketDataPtr)
+    {
+        showErrorDialogAndLogError("Error getting data from db");
+        return false;
+    }
 
+    if(socketDataPtr->isEmpty())
+    {
+        showErrorDialogAndLogError("Empty db reply to new socket pushing");
+        return false;
+    }
 
+    // create Companion object    
+    Companion* companionPtr = this->addCompanionObject(id, name);
+
+    if(!companionPtr)
+    {
+        return false;
+    }
 
     // create SocketInfo object
-    // add to mapping
+    SocketInfo* socketInfoPtr = new SocketInfo(
+        ipAddress, serverPort, std::stoi(clientPortStr));
 
-    // show result widget
+    companionPtr->setSocketInfo(socketInfoPtr);
 
-    // delete dialog;
+    // add companion and widget group to mapping
+    this->createWidgetGroupAndAddToMapping(companionPtr);
+
+    return true;
 }
 
 bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
 
+    // get companion data
     std::shared_ptr<DBReplyData> companionsDataPtr = this->getDBDataPtr(
         true,
         "getCompanionsDBResult",
@@ -530,12 +571,7 @@ bool Manager::buildCompanions()
     {
         int id = std::atoi(companionsDataPtr->getValue(index, "id"));
 
-        // if(id == 0)
-        // {
-        //     logArgsError("id == 0");
-        //     continue;
-        // }
-
+        // create companion object
         Companion* companionPtr = this->addCompanionObject(
             id,
             std::string(companionsDataPtr->getValue(index, "name")));
@@ -545,6 +581,7 @@ bool Manager::buildCompanions()
             continue;
         }
 
+        // get socket data object
         std::shared_ptr<DBReplyData> socketsDataPtr = this->getDBDataPtr(
             true,
             "getSocketInfoDBResult",
@@ -567,6 +604,7 @@ bool Manager::buildCompanions()
 
         if(companionPtr->getId() > 1)  // TODO change condition
         {
+            // get messages data
             std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
                 false,
                 "getMessagesDBResult",
@@ -627,8 +665,9 @@ void Manager::buildWidgetGroups()
 
             for(auto& companion : this->companionPtrs_)
             {
-                WidgetGroup* widgetGroup = new WidgetGroup(companion);
-                this->mapCompanionToWidgetGroup_[companion] = widgetGroup;
+                // WidgetGroup* widgetGroup = new WidgetGroup(companion);
+                // this->mapCompanionToWidgetGroup_[companion] = widgetGroup;
+                this->createWidgetGroupAndAddToMapping(companion);
             }
         }
     }
@@ -646,6 +685,12 @@ Companion* Manager::addCompanionObject(int id, const std::string& name)
     this->companionPtrs_.push_back(companionPtr);
 
     return companionPtr;
+}
+
+void Manager::createWidgetGroupAndAddToMapping(Companion* companionPtr)
+{
+    WidgetGroup* widgetGroupPtr = new WidgetGroup(companionPtr);
+    this->mapCompanionToWidgetGroup_[companionPtr] = widgetGroupPtr;
 }
 
 bool Manager::connectToDb()
@@ -727,10 +772,10 @@ void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
 }
 
-void GraphicManager::createErrorDialog(const std::string& message)
+void GraphicManager::createDialog(QDialog* parentDialog, const DialogType dialogType, const std::string& message)
 {
     // TODO delete objects for closed dialoges
-    ErrorDialog* dialog = new ErrorDialog(this->mainWindowPtr_, message);
+    Dialog* dialog = new Dialog(parentDialog, this->mainWindowPtr_, dialogType, message);
     dialog->show();
 }
 

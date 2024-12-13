@@ -30,7 +30,7 @@ bool validateCompanionData(
     std::vector<std::string>&, const std::string&,
     const std::string&, const std::string&);
 
-std::string buildErrorDialogText(const std::vector<std::string>&);
+std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
 void showErrorDialogAndLogError(const std::string&);
 

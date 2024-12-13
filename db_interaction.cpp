@@ -221,6 +221,27 @@ PGresult* pushCompanionToDBAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
+PGresult* pushSocketToDBAndReturn(
+    const PGconn* dbConnection, const std::string& companionName,
+    const std::string& ipAddress, const std::string& serverPort,
+    const std::string& clientPort)
+{
+    std::string command = std::string(
+        "INSERT INTO sockets "
+        "(id, ipaddress, server_port, client_port) "
+        "VALUES ((SELECT id FROM companions WHERE name = '")
+        + companionName
+        + std::string("'), '")
+        + ipAddress
+        + std::string("', ")
+        + serverPort
+        + std::string(", ")
+        + clientPort
+        + std::string(") RETURNING id");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
 PGresult* pushMessageToDBAndReturn(
     const PGconn* dbConnection, const std::string& companionName,
     const std::string& authorName, const std::string& returningFieldName,
@@ -237,7 +258,7 @@ PGresult* pushMessageToDBAndReturn(
         + message
         + std::string("', false) RETURNING ")
         + returningFieldName
-        + std::string(", timestamp_tz");
+        + std::string(", timestamp_tz)");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }

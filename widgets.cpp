@@ -533,24 +533,42 @@ NewCompanionDialog::~NewCompanionDialog()
 void NewCompanionDialog::sendData()
 {
     auto name = this->nameEditPtr_->text().toStdString();
-    auto ipAddress = this->ipAddressEditPtr_->text().toStdString();
+
+    auto ipAddressFromWidget = this->ipAddressEditPtr_->text().toStdString();  // TODO change
+    QHostAddress hostAddress { QString::fromStdString(ipAddressFromWidget) };
+    auto ipAddress = hostAddress.toString().toStdString();
+
     auto port = this->portEditPtr_->text().toStdString();
 
     logArgs("name", name);
     logArgs("ipAddress", ipAddress);
     logArgs("port", port);
 
-    getManagerPtr()->addNewCompanion(name, ipAddress, port);
+    if(getManagerPtr()->addNewCompanion(name, ipAddress, port))
+    {
+        getGraphicManagerPtr()->createDialog(
+            this,
+            DialogType::INFO,
+            buildDialogText(
+                std::string { "New companion added:\n\n" },
+                std::vector<std::string> {
+                    std::string("name: ") + name,
+                    std::string("ipAddress: ") + ipAddress,
+                    std::string("port: ") + port }));
+    }
 }
 
-ErrorDialog::ErrorDialog(QWidget* parent, const std::string& text)
+Dialog::Dialog(QDialog* parentDialog, QWidget* parent, DialogType dialogType, const std::string& text)
 {
     setParent(parent);
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    this->setWindowTitle("ERROR");
+    this->setWindowTitle(
+        QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
+
+    parentDialogPtr_ = parentDialog;
 
     layoutPtr_ = new QVBoxLayout;
     setLayout(layoutPtr_);
@@ -563,13 +581,28 @@ ErrorDialog::ErrorDialog(QWidget* parent, const std::string& text)
     layoutPtr_->addWidget(textEditPtr_);
 
     QDialogButtonBox* buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-    connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);  // TODO this in ctor
+
+    if(parentDialog)
+    {
+        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &Dialog::closeDialogs);  // TODO this in ctor
+    }
+    else
+    {
+        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);  // TODO this in ctor
+    }
+
     layoutPtr_->addWidget(buttonBoxPtr_);
 }
 
-ErrorDialog::~ErrorDialog()
+Dialog::~Dialog()
 {
     delete this->layoutPtr_;
     delete this->textEditPtr_;
     delete this->buttonBoxPtr_;
+}
+
+void Dialog::closeDialogs()
+{
+    this->close();
+    this->parentDialogPtr_->close();
 }

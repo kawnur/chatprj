@@ -13,6 +13,7 @@ set(PROJECT_SOURCES
     chat_client.hpp
     chat_server.cpp
     chat_server.hpp
+    constants.hpp
     db_interaction.cpp
     db_interaction.hpp
     logging.cpp

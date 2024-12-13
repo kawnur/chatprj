@@ -40,13 +40,21 @@ PGresult* getCompanionsDBResult(const PGconn*);
 PGresult* getCompanionByNameDBResult(const PGconn*, const std::string&);
 
 PGresult* getSocketInfoDBResult(const PGconn*, const int&);
-PGresult* getSocketByIpAddressAndPortDBResult(const PGconn*, const std::string&, const std::string&);
+
+PGresult* getSocketByIpAddressAndPortDBResult(
+    const PGconn*, const std::string&, const std::string&);
 
 PGresult* getMessagesDBResult(const PGconn*, const int&);
 
 PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
+
+PGresult* pushSocketToDBAndReturn(
+    const PGconn*, const std::string&, const std::string&,
+    const std::string&, const std::string&);
+
 PGresult* pushMessageToDBAndReturn(
-    const PGconn*, const std::string&, const std::string&, const std::string&, const std::string&);
+    const PGconn*, const std::string&, const std::string&,
+    const std::string&, const std::string&);
 
 void logUnknownField(const PGresult*, int, int);
 
