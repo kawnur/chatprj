@@ -8,6 +8,7 @@
 #include "chat_client.hpp"
 #include "chat_server.hpp"
 #include "constants.hpp"
+#include "data.hpp"
 #include "db_interaction.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
@@ -15,6 +16,7 @@
 
 class ChatClient;
 class ChatServer;
+class CompanionDataDialog;
 class DBReplyData;
 class MainWindow;
 class SocketInfoBaseWidget;
@@ -108,6 +110,40 @@ private:
     std::vector<Message> messages_;
 };
 
+class CompanionAction : public QObject
+{
+    Q_OBJECT
+
+public:
+    CompanionAction(CompanionActionType, MainWindow*, Companion*);
+    ~CompanionAction();
+
+    void set();
+
+    CompanionActionType getActionType();
+
+    std::string getName();
+    std::string getIpAddress();
+    std::string getServerPort();
+    std::string getClientPort();
+
+    CompanionDataDialog* getFormDialogPtr();
+
+public slots:
+    void sendData();
+
+private:
+    CompanionActionType actionType_;
+    CompanionData* dataPtr_;
+
+    MainWindow* mainWindowPtr_;
+    Companion* companionPtr_;
+
+    CompanionDataDialog* formDialogPtr_;
+
+    // void sendData();
+};
+
 class Manager : public QObject  // TODO do we need inheritance?
 {
 public:
@@ -123,7 +159,8 @@ public:
 
     void resetSelectedCompanion(const Companion*);
 
-    bool addNewCompanion(const std::string&, const std::string&, const std::string&);
+    // void addNewCompanion(const std::string&, const std::string&, const std::string&);
+    void addNewCompanion(CompanionAction*);
 
 private:
     PGconn* dbConnectionPtr_;
@@ -139,7 +176,6 @@ private:
 
     bool connectToDb();
     bool buildCompanions();
-
     void buildWidgetGroups();
 
     Companion* addCompanionObject(int, const std::string&);
@@ -172,7 +208,7 @@ private:
 
         if(getDataFromDBResult(dbDataPtr, dbResultPtr, 0) == -1)
         {
-            showErrorDialogAndLogError("Error getting db data from dbResultPtr");
+            showErrorDialogAndLogError("Error getting data from dbResultPtr");
             return nullptr;
         }
 
@@ -207,6 +243,12 @@ public:
     void addWidgetToCentralPanel(QWidget*);
 
     void createDialog(QDialog*, const DialogType, const std::string&);
+
+    void addNewCompanion();
+    void editCompanion(Companion*);
+
+    void sendCompanionDataToManager(CompanionAction*);
+    void showCompanionCreationInfoDialog(CompanionAction*);
 
 private:
     MainWindow* mainWindowPtr_;

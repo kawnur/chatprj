@@ -4,14 +4,7 @@ QString getInitialConnectButtonLabel()
 {
     try
     {
-        if(connectButtonLabels.empty())
-        {
-            return QString("");
-        }
-        else
-        {
-            return connectButtonLabels.at(0);
-        }
+        return connectButtonLabels.empty() ? QString("") : connectButtonLabels.at(0);
     }
     catch(...)
     {
@@ -186,6 +179,16 @@ SocketInfoWidget::SocketInfoWidget(
     initializeFields();
 }
 
+SocketInfoWidget::SocketInfoWidget(Companion* companionPtr) :
+    companionPtr_(companionPtr),
+    name_(QString::fromStdString(companionPtr->getName())),
+    ipAddress_(QString::fromStdString(companionPtr->getSocketInfoPtr()->getIpAddress())),
+    serverPort_(companionPtr->getSocketInfoPtr()->getServerPort()),
+    clientPort_(companionPtr->getSocketInfoPtr()->getClientPort())
+{
+    initializeFields();
+}
+
 //SocketInfoWidget::SocketInfoWidget(const QString& name) : name_(name) {
 ////    logArgs("SocketInfoWidget(const QString& name)");
 
@@ -249,6 +252,7 @@ void SocketInfoWidget::initializeFields()
     editButtonPtr_ = new QPushButton("Edit");
     connectButtonPtr_ = new QPushButton(getInitialConnectButtonLabel());
 
+    connect(this->editButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::editAction);
     connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction);
 
     if(name_ == "me")  // TODO ???
@@ -275,6 +279,11 @@ void SocketInfoWidget::initializeFields()
     }
 
     // connect
+}
+
+void SocketInfoWidget::editAction()
+{
+    getGraphicManagerPtr()->editCompanion(this->companionPtr_);
 }
 
 void SocketInfoWidget::clientAction()
@@ -361,18 +370,19 @@ bool SocketInfoStubWidget::isStub()
     return true;
 }
 
-WidgetGroup::WidgetGroup(const Companion* companion)
+WidgetGroup::WidgetGroup(const Companion* companionPtr)
 {
     // MainWindow* mainWindowPtr = getMainWindowPtr();
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
-    const SocketInfo* socketInfoPtr = companion->getSocketInfoPtr();
+    const SocketInfo* socketInfoPtr = companionPtr->getSocketInfoPtr();
 
-    SocketInfoWidget* widget = new SocketInfoWidget(
-        companion->getName(),
-        socketInfoPtr->getIpAddress(),
-        socketInfoPtr->getServerPort(),
-        socketInfoPtr->getClientPort());
+    // SocketInfoWidget* widget = new SocketInfoWidget(
+    //     companion->getName(),
+    //     socketInfoPtr->getIpAddress(),
+    //     socketInfoPtr->getServerPort(),
+    //     socketInfoPtr->getClientPort());
+    SocketInfoWidget* widget = new SocketInfoWidget(const_cast<Companion*>(companionPtr));
 
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
     // mainWindowPtr->addWidgetToLeftPanel(socketInfoBasePtr_);
@@ -381,7 +391,7 @@ WidgetGroup::WidgetGroup(const Companion* companion)
     chatHistoryPtr_ = new QPlainTextEdit;
     // chatHistoryPtr_->setStyleSheet("border-bottom: 1px solid black");
     chatHistoryPtr_->setReadOnly(true);
-    buildChatHistory(companion);
+    buildChatHistory(companionPtr);
     chatHistoryPtr_->hide();
 
     chatHistoryPalettePtr_ = new QPalette;  // TODO set parent or delete
@@ -483,14 +493,17 @@ QString WidgetGroup::buildChatHistory(const Companion* companion)
 //     delete this->editPtr_;
 // }
 
-NewCompanionDialog::NewCompanionDialog(QWidget* parent)
+CompanionDataDialog::CompanionDataDialog(
+    CompanionActionType actionType, QWidget* parentPtr, Companion* companionPtr)
 {
-    setParent(parent);
+    setParent(parentPtr);
 
     setWindowTitle("Add new companion");
 
     setModal(true);
     setWindowFlag(Qt::Window);
+
+    actionType_ = actionType;
 
     layoutPtr_ = new QFormLayout;
     // layoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -507,18 +520,23 @@ NewCompanionDialog::NewCompanionDialog(QWidget* parent)
     portLabelPtr_ = new QLabel("Port");
     portEditPtr_ = new QLineEdit;
 
+    if(actionType_ == CompanionActionType::UPDATE && companionPtr)
+    {
+        nameEditPtr_->setText(QString::fromStdString(companionPtr->getName()));
+        ipAddressEditPtr_->setText(QString::fromStdString(companionPtr->getSocketInfoPtr()->getIpAddress()));
+        portEditPtr_->setText(QString::fromStdString(std::to_string(companionPtr->getSocketInfoPtr()->getClientPort())));
+    }
+
     layoutPtr_->addRow(nameLabelPtr_, nameEditPtr_);
     layoutPtr_->addRow(ipAddressLabelPtr_, ipAddressEditPtr_);
     layoutPtr_->addRow(portLabelPtr_, portEditPtr_);
 
     buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &NewCompanionDialog::sendData);  // TODO this in ctor
-    connect(buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);  // TODO this in ctor
 
     layoutPtr_->addWidget(buttonBoxPtr_);
 }
 
-NewCompanionDialog::~NewCompanionDialog()
+CompanionDataDialog::~CompanionDataDialog()
 {
     delete this->layoutPtr_;
     delete this->nameLabelPtr_;
@@ -530,32 +548,30 @@ NewCompanionDialog::~NewCompanionDialog()
     delete this->buttonBoxPtr_;
 }
 
-void NewCompanionDialog::sendData()
+void CompanionDataDialog::set(CompanionAction* actionPtr)
 {
-    auto name = this->nameEditPtr_->text().toStdString();
+    this->actionPtr_ = actionPtr;
 
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &CompanionAction::sendData);  // TODO this in ctor
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);  // TODO this in ctor
+}
+
+std::string CompanionDataDialog::getNameString()
+{
+    return this->nameEditPtr_->text().toStdString();
+}
+
+std::string CompanionDataDialog::getIpAddressString()
+{
     auto ipAddressFromWidget = this->ipAddressEditPtr_->text().toStdString();  // TODO change
     QHostAddress hostAddress { QString::fromStdString(ipAddressFromWidget) };
-    auto ipAddress = hostAddress.toString().toStdString();
 
-    auto port = this->portEditPtr_->text().toStdString();
+    return hostAddress.toString().toStdString();
+}
 
-    logArgs("name", name);
-    logArgs("ipAddress", ipAddress);
-    logArgs("port", port);
-
-    if(getManagerPtr()->addNewCompanion(name, ipAddress, port))
-    {
-        getGraphicManagerPtr()->createDialog(
-            this,
-            DialogType::INFO,
-            buildDialogText(
-                std::string { "New companion added:\n\n" },
-                std::vector<std::string> {
-                    std::string("name: ") + name,
-                    std::string("ipAddress: ") + ipAddress,
-                    std::string("port: ") + port }));
-    }
+std::string CompanionDataDialog::getPortString()
+{
+    return this->portEditPtr_->text().toStdString();
 }
 
 Dialog::Dialog(QDialog* parentDialog, QWidget* parent, DialogType dialogType, const std::string& text)

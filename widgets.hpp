@@ -17,10 +17,11 @@
 #include "logging.hpp"
 
 class Companion;
+class CompanionAction;
 class Message;
 class MainWindow;
 
-const QString CONNECT_BUTTON_CONNECT_LABEL { "Connect" };
+const QString CONNECT_BUTTON_CONNECT_LABEL { "Connect" };  // TODO move to constants
 const QString CONNECT_BUTTON_DISCONNECT_LABEL { "Disconnect" };
 
 const std::vector<QString> connectButtonLabels
@@ -97,6 +98,7 @@ public:
     SocketInfoWidget(SocketInfoWidget&&) {};
     SocketInfoWidget(std::string&, std::string&, uint16_t&, uint16_t&);
     SocketInfoWidget(std::string&&, std::string&&, uint16_t&&, uint16_t&&);
+    SocketInfoWidget(Companion*);
     ~SocketInfoWidget();
 
     void print();
@@ -106,6 +108,7 @@ public:
     void unselect();
 
 public slots:
+    void editAction();
     void clientAction();
 
 private:
@@ -199,15 +202,24 @@ private:
 //     QLineEdit* editPtr_;
 // };
 
-class NewCompanionDialog : public QDialog
+class CompanionDataDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    NewCompanionDialog(QWidget*);
-    ~NewCompanionDialog();
+    CompanionDataDialog(CompanionActionType, QWidget*, Companion*);
+    ~CompanionDataDialog();
+
+    void set(CompanionAction*);
+
+    std::string getNameString();
+    std::string getIpAddressString();
+    std::string getPortString();
 
 private:
+    CompanionActionType actionType_;
+    CompanionAction* actionPtr_;
+
     QFormLayout* layoutPtr_;
 
     QLabel* nameLabelPtr_;
@@ -221,7 +233,7 @@ private:
 
     QDialogButtonBox* buttonBoxPtr_;
 
-    void sendData();
+    // void sendData();
 };
 
 class Dialog : public QDialog {
@@ -232,7 +244,9 @@ public:
     Dialog(QDialog*, QWidget*, DialogType, const std::string&);
     ~Dialog();
 
-private:    
+private:
+    CompanionActionType actionType_;
+
     QDialog* parentDialogPtr_;
     QVBoxLayout* layoutPtr_;
     QPlainTextEdit* textEditPtr_;

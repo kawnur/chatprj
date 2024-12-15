@@ -238,6 +238,68 @@ SocketInfo* Companion::getSocketInfoPtr() const
     return this->socketInfoPtr_;
 }
 
+CompanionAction::CompanionAction(
+    CompanionActionType actionType, MainWindow* mainWindowPtr, Companion* companionPtr) :
+    actionType_(actionType), mainWindowPtr_(mainWindowPtr), companionPtr_(companionPtr),
+    dataPtr_(nullptr)
+{
+    formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
+}
+
+CompanionAction::~CompanionAction() {}
+
+void CompanionAction::set()
+{
+    this->formDialogPtr_->set(this);
+    formDialogPtr_->show();
+}
+
+CompanionActionType CompanionAction::getActionType()
+{
+    return this->actionType_;
+}
+
+std::string CompanionAction::getName()
+{
+    return this->dataPtr_->getName();
+}
+
+std::string CompanionAction::getIpAddress()
+{
+    return this->dataPtr_->getIpAddress();
+}
+
+std::string CompanionAction::getServerPort()
+{
+    return this->dataPtr_->getServerPort();
+}
+
+std::string CompanionAction::getClientPort()
+{
+    return this->dataPtr_->getClientPort();
+}
+
+CompanionDataDialog* CompanionAction::getFormDialogPtr()
+{
+    return this->formDialogPtr_;
+}
+
+void CompanionAction::sendData()
+{
+    auto name = this->formDialogPtr_->getNameString();
+    auto ipAddress = this->formDialogPtr_->getIpAddressString();
+
+    std::string serverPort { "" };
+
+    auto clientPort = this->formDialogPtr_->getPortString();
+
+    logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);
+
+    this->dataPtr_ = new CompanionData(name, ipAddress, serverPort, clientPort);
+
+    getGraphicManagerPtr()->sendCompanionDataToManager(this);
+}
+
 Manager::Manager() :
     dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
 {
@@ -426,11 +488,16 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
     graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
 }
 
-bool Manager::addNewCompanion(
-    const std::string& name,
-    const std::string& ipAddress,
-    const std::string& clientPortStr)
+// void Manager::addNewCompanion(
+//     const std::string& name,
+//     const std::string& ipAddress,
+//     const std::string& clientPortStr)
+void Manager::addNewCompanion(CompanionAction* companionActionPtr)
 {
+    auto name = companionActionPtr->getName();
+    auto ipAddress = companionActionPtr->getIpAddress();
+    auto clientPortStr = companionActionPtr->getClientPort();
+
     // data validation and checking
     std::vector<std::string> validationErrors {};
 
@@ -449,13 +516,13 @@ bool Manager::addNewCompanion(
         if(!companionIdDataPtr)
         {
             showErrorDialogAndLogError("Error getting data from db");
-            return false;
+            return;
         }
 
         if(!companionIdDataPtr->isEmpty())
         {
             showErrorDialogAndLogError("Companion with such name already exists");
-            return false;
+            return;
         }
 
         // check if such socket already exists
@@ -469,13 +536,13 @@ bool Manager::addNewCompanion(
         if(!socketIdDataPtr)
         {
             showErrorDialogAndLogError("Error getting data from db");
-            return false;
+            return;
         }
 
         if(!socketIdDataPtr->isEmpty())
         {
             showErrorDialogAndLogError("Companion with such socket already exists");
-            return false;
+            return;
         }
     }
     else
@@ -498,13 +565,13 @@ bool Manager::addNewCompanion(
     if(!companionIdDataPtr)
     {
         showErrorDialogAndLogError("Error getting data from db");
-        return false;
+        return;
     }
 
     if(companionIdDataPtr->isEmpty())
     {
         showErrorDialogAndLogError("Empty db reply to new companion pushing");
-        return false;
+        return;
     }
 
     int id = std::atoi(companionIdDataPtr->getValue(0, "id"));
@@ -522,13 +589,13 @@ bool Manager::addNewCompanion(
     if(!socketDataPtr)
     {
         showErrorDialogAndLogError("Error getting data from db");
-        return false;
+        return;
     }
 
     if(socketDataPtr->isEmpty())
     {
         showErrorDialogAndLogError("Empty db reply to new socket pushing");
-        return false;
+        return;
     }
 
     // create Companion object    
@@ -536,7 +603,7 @@ bool Manager::addNewCompanion(
 
     if(!companionPtr)
     {
-        return false;
+        return;
     }
 
     // create SocketInfo object
@@ -548,7 +615,8 @@ bool Manager::addNewCompanion(
     // add companion and widget group to mapping
     this->createWidgetGroupAndAddToMapping(companionPtr);
 
-    return true;
+    // show info dialog
+    getGraphicManagerPtr()->showCompanionCreationInfoDialog(companionActionPtr);
 }
 
 bool Manager::buildCompanions()
@@ -772,11 +840,59 @@ void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
 }
 
-void GraphicManager::createDialog(QDialog* parentDialog, const DialogType dialogType, const std::string& message)
+void GraphicManager::createDialog(
+    QDialog* parentDialog, const DialogType dialogType, const std::string& message)
 {
     // TODO delete objects for closed dialoges
     Dialog* dialog = new Dialog(parentDialog, this->mainWindowPtr_, dialogType, message);
     dialog->show();
+}
+
+void GraphicManager::addNewCompanion()
+{
+    // CompanionDataDialog* newCompanionDialogPtr = new CompanionDataDialog(this->mainWindowPtr_, nullptr);
+    // newCompanionDialogPtr->show();
+
+    CompanionAction* actionPtr = new CompanionAction(
+        CompanionActionType::CREATE, this->mainWindowPtr_, nullptr);
+    actionPtr->set();
+}
+
+void GraphicManager::editCompanion(Companion* companionPtr)
+{
+    CompanionDataDialog* newCompanionDialogPtr = new CompanionDataDialog(
+        CompanionActionType::UPDATE, this->mainWindowPtr_, companionPtr);
+    newCompanionDialogPtr->show();
+}
+
+void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
+{
+    switch(actionPtr->getActionType())
+    {
+    case CompanionActionType::CREATE:
+        getManagerPtr()->addNewCompanion(actionPtr);
+    case CompanionActionType::UPDATE:
+        return;
+    }
+}
+
+void GraphicManager::showCompanionCreationInfoDialog(CompanionAction* companionActionPtr)
+{
+    auto name = companionActionPtr->getName();
+    auto ipAddress = companionActionPtr->getIpAddress();
+    auto clientPortStr = companionActionPtr->getClientPort();
+
+    this->createDialog(
+        companionActionPtr->getFormDialogPtr(),
+        DialogType::INFO,
+        buildDialogText(
+            std::string { "New companion added:\n\n" },
+            std::vector<std::string> {
+                std::string("name: ") + name,
+                std::string("ipAddress: ") + ipAddress,
+                std::string("port: ") + clientPortStr }));
+
+    delete companionActionPtr;
 }
 
 GraphicManager* getGraphicManagerPtr()

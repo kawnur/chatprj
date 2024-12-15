@@ -13,6 +13,14 @@ enum class DialogType
     ERROR
 };
 
+enum class CompanionActionType
+{
+    CREATE,
+    // READ,
+    UPDATE,
+    DELETE
+};
+
 const std::map<DialogType, std::string> dialogTypeStringRepresentation
 {
     { DialogType::INFO, std::string("INFO") },

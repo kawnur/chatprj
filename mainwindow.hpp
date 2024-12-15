@@ -98,7 +98,7 @@ public:
     void newSelectedCompanionActions(const Companion*);
 
 private slots:
-    // void addNewCompanion();
+    void addNewCompanion();
 };
 
 // MainWindow* getMainWindowPtr();
