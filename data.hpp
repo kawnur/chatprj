@@ -9,10 +9,10 @@ public:
     CompanionData(const std::string&, const std::string&, const std::string&, const std::string&);
     ~CompanionData() = default;
 
-    std::string getName();
-    std::string getIpAddress();
-    std::string getServerPort();
-    std::string getClientPort();
+    std::string getName() const;
+    std::string getIpAddress() const;
+    std::string getServerPort() const;
+    std::string getClientPort() const;
 
 private:
     std::string name_;

@@ -283,7 +283,7 @@ void SocketInfoWidget::initializeFields()
 
 void SocketInfoWidget::editAction()
 {
-    getGraphicManagerPtr()->editCompanion(this->companionPtr_);
+    getGraphicManagerPtr()->updateCompanion(this->companionPtr_);
 }
 
 void SocketInfoWidget::clientAction()
@@ -338,6 +338,17 @@ void SocketInfoWidget::select()
 void SocketInfoWidget::unselect()
 {
     this->changeColor(this->unselectedColor_);
+}
+
+void SocketInfoWidget::update()
+{
+    this->name_ = QString::fromStdString(this->companionPtr_->getName());
+    this->nameLabelPtr_->setText(this->name_);
+    this->ipAddress_ = QString::fromStdString(this->companionPtr_->getIpAddress());
+    this->ipAddressLabelPtr_->setText(this->ipAddress_);
+    this->clientPort_ = this->companionPtr_->getClientPort();
+    this->clientPortLabelPtr_->setText(QString::fromStdString(std::to_string(this->clientPort_)));
+    // QApplication::processEvents();
 }
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
@@ -552,8 +563,8 @@ void CompanionDataDialog::set(CompanionAction* actionPtr)
 {
     this->actionPtr_ = actionPtr;
 
-    connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &CompanionAction::sendData);  // TODO this in ctor
-    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);  // TODO this in ctor
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &CompanionAction::sendData);
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
 std::string CompanionDataDialog::getNameString()

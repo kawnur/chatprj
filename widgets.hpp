@@ -107,6 +107,8 @@ public:
     void select();
     void unselect();
 
+    void update();
+
 public slots:
     void editAction();
     void clientAction();

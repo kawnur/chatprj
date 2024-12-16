@@ -48,6 +48,8 @@ public:
     uint16_t getServerPort() const;
     uint16_t getClientPort() const;
 
+    void updateData(const CompanionData*);
+
 private:
     std::string ipAddress_;
     uint16_t serverPort_;  // port number to open server at
@@ -90,6 +92,10 @@ public:
 
     int getId();
     std::string getName() const;
+    std::string getIpAddress() const;
+    uint16_t getServerPort() const;
+    uint16_t getClientPort() const;
+
     SocketInfo* getSocketInfoPtr() const;
     void setSocketInfo(SocketInfo*);
 //    void addMessage(int, int, std::tm, const std::string&, bool);
@@ -97,8 +103,10 @@ public:
     const std::vector<Message>* getMessagesPtr() const;
     void sendLastMessage();
 
+    void updateData(const CompanionData*);
+
 private:
-    int id_;
+    int id_;  // TODO change type
     std::string name_;
     SocketInfo* socketInfoPtr_;
 
@@ -122,12 +130,16 @@ public:
 
     CompanionActionType getActionType();
 
-    std::string getName();
-    std::string getIpAddress();
-    std::string getServerPort();
-    std::string getClientPort();
+    std::string getName() const;
+    std::string getIpAddress() const;
+    std::string getServerPort() const;
+    std::string getClientPort() const;
+
+    int getCompanionId() const;
+    Companion* getCompanionPtr() const;
 
     CompanionDataDialog* getFormDialogPtr();
+    void updateCompanionObjectData();
 
 public slots:
     void sendData();
@@ -159,8 +171,8 @@ public:
 
     void resetSelectedCompanion(const Companion*);
 
-    // void addNewCompanion(const std::string&, const std::string&, const std::string&);
-    void addNewCompanion(CompanionAction*);
+    void createCompanion(CompanionAction*);
+    void updateCompanion(CompanionAction*);
 
 private:
     PGconn* dbConnectionPtr_;
@@ -180,6 +192,10 @@ private:
 
     Companion* addCompanionObject(int, const std::string&);
     void createWidgetGroupAndAddToMapping(Companion*);
+
+    bool companionDataValidation(CompanionAction*);
+    bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
+    bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
@@ -244,11 +260,11 @@ public:
 
     void createDialog(QDialog*, const DialogType, const std::string&);
 
-    void addNewCompanion();
-    void editCompanion(Companion*);
+    void createCompanion();
+    void updateCompanion(Companion*);
 
     void sendCompanionDataToManager(CompanionAction*);
-    void showCompanionCreationInfoDialog(CompanionAction*);
+    void showCompanionInfoDialog(CompanionAction*, std::string&&);
 
 private:
     MainWindow* mainWindowPtr_;

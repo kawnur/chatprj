@@ -6,22 +6,22 @@ CompanionData::CompanionData(
     name_(name), ipAddress_(ipAddress),
     serverPort_(serverPort), clientPort_(clientPort) {}
 
-std::string CompanionData::getName()
+std::string CompanionData::getName() const
 {
     return this->name_;
 }
 
-std::string CompanionData::getIpAddress()
+std::string CompanionData::getIpAddress() const
 {
     return this->ipAddress_;
 }
 
-std::string CompanionData::getServerPort()
+std::string CompanionData::getServerPort() const
 {
     return this->serverPort_;
 }
 
-std::string CompanionData::getClientPort()
+std::string CompanionData::getClientPort() const
 {
     return this->clientPort_;
 }

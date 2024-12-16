@@ -11,6 +11,7 @@
 #include "utils_cout.hpp"
 
 class Companion;
+class CompanionAction;
 
 class DBReplyData
 {
@@ -26,6 +27,7 @@ public:
     void push(size_t, std::string, const char*);
     size_t size();
     const char* getValue(size_t, std::string);
+    bool findValue(const std::string&, const std::string&);
     void logData();
 
 private:
@@ -39,6 +41,8 @@ PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
 PGresult* getCompanionsDBResult(const PGconn*);
 PGresult* getCompanionByNameDBResult(const PGconn*, const std::string&);
 
+PGresult* getCompanionAndSocketDBResult(const PGconn*, const int&);
+
 PGresult* getSocketInfoDBResult(const PGconn*, const int&);
 
 PGresult* getSocketByIpAddressAndPortDBResult(
@@ -47,6 +51,8 @@ PGresult* getSocketByIpAddressAndPortDBResult(
 PGresult* getMessagesDBResult(const PGconn*, const int&);
 
 PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
+PGresult* updateCompanionAndReturn(const PGconn*, const std::string&);
+PGresult* updateCompanionAndSocketAndReturn(const PGconn*, const CompanionAction&);
 
 PGresult* pushSocketToDBAndReturn(
     const PGconn*, const std::string&, const std::string&,

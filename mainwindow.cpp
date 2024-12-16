@@ -269,11 +269,9 @@ void MainWindow::newSelectedCompanionActions(const Companion* companion)
     }
 }
 
-void MainWindow::addNewCompanion()
+void MainWindow::createCompanion()
 {
-    // Manager* managerPtr = getManagerPtr();
-    // managerPtr->addNewCompanion();
-    getGraphicManagerPtr()->addNewCompanion();
+    getGraphicManagerPtr()->createCompanion();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -294,12 +292,8 @@ void MainWindow::createMenu()
     fileMenu->addAction(exitAction);
     connect(exitAction, &QAction::triggered, this, &QCoreApplication::quit);
 
-    // NewCompanionDialog* newCompanionDialogPtr = new NewCompanionDialog(this);
-
     QMenu* companionMenu = menuBar()->addMenu("Companion");
     QAction* addCompanionAction = new QAction("Add new companion", this);
     companionMenu->addAction(addCompanionAction);
-    // connect(addCompanionAction, &QAction::triggered, newCompanionDialogPtr, &NewCompanionDialog::show);
-    // connect(addCompanionAction, &QAction::triggered, getGraphicManagerPtr(), &GraphicManager::addNewCompanion);
-    connect(addCompanionAction, &QAction::triggered, this, &MainWindow::addNewCompanion);
+    connect(addCompanionAction, &QAction::triggered, this, &MainWindow::createCompanion);
 }

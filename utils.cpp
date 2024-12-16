@@ -65,13 +65,11 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
 
 bool validateCompanionData(
     std::vector<std::string>& validationErrors,
-    const std::string& name,
-    const std::string& ipAddress,
-    const std::string& port)
+    const CompanionAction* companionActionPtr)
 {
-    bool nameValidationResult = validateCompanionName(validationErrors, name);
-    bool ipAddressValidationResult = validateIpAddress(validationErrors, ipAddress);
-    bool portValidationResult = validatePort(validationErrors, port);
+    bool nameValidationResult = validateCompanionName(validationErrors, companionActionPtr->getName());
+    bool ipAddressValidationResult = validateIpAddress(validationErrors, companionActionPtr->getIpAddress());
+    bool portValidationResult = validatePort(validationErrors, companionActionPtr->getClientPort());
 
     bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
 
@@ -100,6 +98,12 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
 
         return text;
     }
+}
+
+void showWarningDialogAndLogWarning(const std::string& message)
+{
+    getGraphicManagerPtr()->createDialog(nullptr, DialogType::WARNING, message);
+    logArgsWarning(message);
 }
 
 void showErrorDialogAndLogError(const std::string& message)

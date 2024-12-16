@@ -72,6 +72,20 @@ const char* DBReplyData::getValue(size_t position, std::string key)
     return this->data_.at(position).at(key);
 }
 
+bool DBReplyData::findValue(const std::string& key, const std::string& value)
+{
+    auto findLambda = [&](
+        // std::iterator<std::vector<std::map<std::string, const char*>>>& iterator)
+        auto& iterator)
+    {
+        return std::string(iterator.at(key)) == value;
+    };
+
+    auto findMapResult = std::find_if(this->data_.begin(), this->data_.end(), findLambda);
+
+    return (findMapResult == this->data_.end()) ? false : true;
+}
+
 void DBReplyData::logData()
 {
     logArgs("############################");
@@ -173,6 +187,17 @@ PGresult* getCompanionByNameDBResult(const PGconn* dbConnection, const std::stri
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
+PGresult* getCompanionAndSocketDBResult(const PGconn* dbConnection, const int& id)
+{
+    std::string command = std::string(
+        "SELECT companions.name, sockets.ipaddress, sockets.client_port "
+        "FROM companions JOIN sockets ON companions.id = sockets.id "
+        "WHERE companions.id = ")
+        + std::to_string(id);
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
 PGresult* getSocketInfoDBResult(const PGconn* dbConnection, const int& id)
 {
     std::string command = std::string(
@@ -212,11 +237,42 @@ PGresult* pushCompanionToDBAndReturn(
     const PGconn* dbConnection, const std::string& companionName)
 {
     std::string command = std::string(
-        "INSERT INTO companions "
-        "(name) "
-        "VALUES ('")
-        + companionName
-        + std::string("') RETURNING id");
+                              "INSERT INTO companions "
+                              "(name) "
+                              "VALUES ('")
+                          + companionName
+                          + std::string("') RETURNING id");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* updateCompanionAndReturn(  // TODO change function names
+    const PGconn* dbConnection, const std::string& companionName)
+{
+    std::string command = std::string(
+                              "INSERT INTO companions "
+                              "(name) "
+                              "VALUES ('")
+                          + companionName
+                          + std::string("') RETURNING id");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* updateCompanionAndSocketAndReturn(
+    const PGconn* dbConnection, const CompanionAction& companionAction)
+{
+    std::string command = std::string(
+        "WITH update_name AS (UPDATE companions set name = '")
+        + companionAction.getName()
+        + std::string("' WHERE id = ")
+        + std::to_string(companionAction.getCompanionId())
+        + std::string(" RETURNING id) UPDATE sockets "
+        "set ipaddress = '")
+        + companionAction.getIpAddress()
+        + std::string("', client_port = '")
+        + companionAction.getClientPort()
+        + std::string("' WHERE id in (SELECT id FROM update_name) RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
