@@ -110,8 +110,9 @@ public:
     void update();
 
 public slots:
-    void editAction();
-    void deleteAction();
+    void updateCompanionAction();
+    void clearHistoryAction();
+    void deleteCompanionAction();
     void clientAction();
 
 private:
@@ -265,18 +266,19 @@ protected:
     QDialogButtonBox* buttonBoxPtr_;
 };
 
-class DeleteCompanionTextDialog : public TextDialog
+class TwoButtonsTextDialog : public TextDialog
 {
     Q_OBJECT
 
 public:
-    DeleteCompanionTextDialog(QDialog*, QWidget*, DialogType, const std::string&);
-    ~DeleteCompanionTextDialog() = default;
+    TwoButtonsTextDialog(QDialog*, QWidget*, DialogType, const std::string&, std::string&&);
+    ~TwoButtonsTextDialog() = default;
 
     void set(CompanionAction*);
 
 private:
     CompanionAction* actionPtr_;
+    std::string buttonText_;
 
     void acceptAction();
 

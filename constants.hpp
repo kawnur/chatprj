@@ -18,7 +18,8 @@ enum class CompanionActionType
     CREATE,
     // READ,
     UPDATE,
-    DELETE
+    DELETE,
+    CLEAR_HISTORY
 };
 
 const std::map<CompanionActionType, std::string> actionTypeStringRepresentation
@@ -35,5 +36,6 @@ const std::map<DialogType, std::string> dialogTypeStringRepresentation
 };
 
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
+const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 
 #endif // CONSTANTS_HPP

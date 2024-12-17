@@ -18,7 +18,7 @@ class ChatClient;
 class ChatServer;
 class CompanionDataDialog;
 class DBReplyData;
-class DeleteCompanionTextDialog;
+class TwoButtonsTextDialog;
 class MainWindow;
 class SocketInfoBaseWidget;
 class WidgetGroup;
@@ -153,7 +153,7 @@ private:
     Companion* companionPtr_;
 
     CompanionDataDialog* formDialogPtr_;
-    DeleteCompanionTextDialog* deleteDialogPtr_;
+    TwoButtonsTextDialog* deleteDialogPtr_;
 
     // void sendData();
 };
@@ -176,6 +176,7 @@ public:
     void createCompanion(CompanionAction*);
     void updateCompanion(CompanionAction*);
     void deleteCompanion(CompanionAction*);
+    void clearCompanionHistory(CompanionAction*);
 
 private:
     PGconn* dbConnectionPtr_;
@@ -270,6 +271,7 @@ public:
 
     void createCompanion();
     void updateCompanion(Companion*);
+    void clearCompanionHistory(Companion*);
     void deleteCompanion(Companion*);
 
     void sendCompanionDataToManager(CompanionAction*);

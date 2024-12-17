@@ -270,16 +270,26 @@ CompanionAction::CompanionAction(
     actionType_(actionType), mainWindowPtr_(mainWindowPtr), companionPtr_(companionPtr),
     dataPtr_(nullptr)
 {
-    if(actionType == CompanionActionType::DELETE)
+    switch(actionType)
     {
-        formDialogPtr_ = nullptr;
-        deleteDialogPtr_ = new DeleteCompanionTextDialog(
-            nullptr, this->mainWindowPtr_, DialogType::WARNING, deleteCompanionDialogText);
-    }
-    else
-    {
+    case CompanionActionType::UPDATE:
         formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
         deleteDialogPtr_ = nullptr;
+        break;
+
+    case CompanionActionType::DELETE:
+        formDialogPtr_ = nullptr;
+        deleteDialogPtr_ = new TwoButtonsTextDialog(
+            nullptr, this->mainWindowPtr_, DialogType::WARNING,
+            deleteCompanionDialogText, std::string("Delete companion"));
+        break;
+
+    case CompanionActionType::CLEAR_HISTORY:
+        formDialogPtr_ = nullptr;
+        deleteDialogPtr_ = new TwoButtonsTextDialog(
+            nullptr, this->mainWindowPtr_, DialogType::WARNING,
+            clearCompanionHistoryDialogText, std::string("Clear history"));
+        break;
     }
 }
 
@@ -349,19 +359,20 @@ void CompanionAction::sendData()
     std::string serverPort { "" };
     std::string clientPort;
 
-    if(this->actionType_ == CompanionActionType::DELETE)
+    switch(this->actionType_)
     {
-        name = this->companionPtr_->getName();
-        ipAddress = this->companionPtr_->getIpAddress();
-
-        clientPort = std::to_string(this->companionPtr_->getClientPort());
-    }
-    else
-    {
+    case CompanionActionType::UPDATE:
         name = this->formDialogPtr_->getNameString();
         ipAddress = this->formDialogPtr_->getIpAddressString();
-
         clientPort = this->formDialogPtr_->getPortString();
+        break;
+
+    case CompanionActionType::DELETE:
+    case CompanionActionType::CLEAR_HISTORY:
+        name = this->companionPtr_->getName();
+        ipAddress = this->companionPtr_->getIpAddress();
+        clientPort = std::to_string(this->companionPtr_->getClientPort());
+        break;
     }
 
     logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);
@@ -921,6 +932,33 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
         companionActionPtr, std::string { "Companion deleted:\n\n" });
 }
 
+void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
+{
+    // delete companion chat messages from db
+    std::shared_ptr<DBReplyData> companionIdMessagesDataPtr = this->getDBDataPtr(
+        true,
+        "deleteMessagesFromDBAndReturn",
+        &deleteMessagesFromDBAndReturn,
+        std::vector<std::string> { std::string("id") },
+        *companionActionPtr);
+
+    if(!companionIdMessagesDataPtr)
+    {
+        showErrorDialogAndLogError("Error getting data from db");
+        return;
+    }
+
+    if(companionIdMessagesDataPtr->isEmpty())
+    {
+        // no return, may be companion without messages
+        // showWarningDialogAndLogWarning("Empty db reply to companion messages deletion");
+    }
+
+    // show info dialog
+    getGraphicManagerPtr()->showCompanionInfoDialog(
+        companionActionPtr, std::string { "Companion chat history cleared:\n\n" });
+}
+
 bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
@@ -1168,6 +1206,13 @@ void GraphicManager::updateCompanion(Companion* companionPtr)
     actionPtr->set();
 }
 
+void GraphicManager::clearCompanionHistory(Companion* companionPtr)
+{
+    CompanionAction* actionPtr = new CompanionAction(
+        CompanionActionType::CLEAR_HISTORY, this->mainWindowPtr_, companionPtr);
+    actionPtr->set();
+}
+
 void GraphicManager::deleteCompanion(Companion* companionPtr)
 {
     CompanionAction* actionPtr = new CompanionAction(
@@ -1187,6 +1232,9 @@ void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
         break;
     case CompanionActionType::DELETE:
         getManagerPtr()->deleteCompanion(actionPtr);
+        break;
+    case CompanionActionType::CLEAR_HISTORY:
+        getManagerPtr()->clearCompanionHistory(actionPtr);
         break;
     }
 }
