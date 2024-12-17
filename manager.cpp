@@ -270,7 +270,17 @@ CompanionAction::CompanionAction(
     actionType_(actionType), mainWindowPtr_(mainWindowPtr), companionPtr_(companionPtr),
     dataPtr_(nullptr)
 {
-    formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
+    if(actionType == CompanionActionType::DELETE)
+    {
+        formDialogPtr_ = nullptr;
+        deleteDialogPtr_ = new DeleteCompanionTextDialog(
+            nullptr, this->mainWindowPtr_, DialogType::WARNING, deleteCompanionDialogText);
+    }
+    else
+    {
+        formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
+        deleteDialogPtr_ = nullptr;
+    }
 }
 
 CompanionAction::~CompanionAction()
@@ -280,8 +290,16 @@ CompanionAction::~CompanionAction()
 
 void CompanionAction::set()
 {
-    this->formDialogPtr_->set(this);
-    formDialogPtr_->show();
+    if(this->actionType_ == CompanionActionType::DELETE)
+    {
+        this->deleteDialogPtr_->set(this);
+        this->deleteDialogPtr_->show();
+    }
+    else
+    {
+        this->formDialogPtr_->set(this);
+        this->formDialogPtr_->show();
+    }
 }
 
 CompanionActionType CompanionAction::getActionType()
@@ -326,12 +344,25 @@ CompanionDataDialog* CompanionAction::getFormDialogPtr()
 
 void CompanionAction::sendData()
 {
-    auto name = this->formDialogPtr_->getNameString();
-    auto ipAddress = this->formDialogPtr_->getIpAddressString();
-
+    std::string name;
+    std::string ipAddress;
     std::string serverPort { "" };
+    std::string clientPort;
 
-    auto clientPort = this->formDialogPtr_->getPortString();
+    if(this->actionType_ == CompanionActionType::DELETE)
+    {
+        name = this->companionPtr_->getName();
+        ipAddress = this->companionPtr_->getIpAddress();
+
+        clientPort = std::to_string(this->companionPtr_->getClientPort());
+    }
+    else
+    {
+        name = this->formDialogPtr_->getNameString();
+        ipAddress = this->formDialogPtr_->getIpAddressString();
+
+        clientPort = this->formDialogPtr_->getPortString();
+    }
 
     logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);
 
@@ -372,7 +403,7 @@ void Manager::set()
         bool companionsBuilt = this->buildCompanions();
         logArgs("companionsBuilt:", companionsBuilt);
 
-        if(companionsBuilt)
+        if(companionsBuilt)  // TODO rewrite
         {
             this->buildWidgetGroups();
         }
@@ -641,6 +672,63 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
     return true;
 }
 
+void Manager::deleteCompanionObject(Companion* companionPtr)
+{
+    this->deleteWidgetGroupAndDeleteFromMapping(companionPtr);
+}
+
+void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
+{
+    auto findMapLambda = [&](auto iterator)
+    {
+        return iterator.first == companionPtr;
+    };
+
+    auto findMapResult = std::find_if(
+        this->mapCompanionToWidgetGroup_.begin(),
+        this->mapCompanionToWidgetGroup_.end(),
+        findMapLambda);
+
+    if(findMapResult == this->mapCompanionToWidgetGroup_.end())
+    {
+        showErrorDialogAndLogError("Companion was not found in mapping at deletion");
+    }
+    else
+    {
+        auto findVectorLambda = [&](auto iterator)
+        {
+            return iterator == companionPtr;
+        };
+
+        auto findVectorResult = std::find_if(
+            this->companionPtrs_.begin(),
+            this->companionPtrs_.end(),
+            findVectorLambda);
+
+        if(findVectorResult == this->companionPtrs_.end())
+        {
+            showErrorDialogAndLogError("Companion was not found in vector at deletion");
+        }
+        else
+        {
+            this->companionPtrs_.erase(findVectorResult);
+        }
+
+        if(this->selectedCompanionPtr_ == companionPtr)
+        {
+            this->selectedCompanionPtr_ = nullptr;
+        }
+
+        // delete companion
+        delete findMapResult->first;
+
+        // delete widget group
+        delete findMapResult->second;
+
+        this->mapCompanionToWidgetGroup_.erase(findMapResult);
+    }
+}
+
 bool Manager::companionDataValidation(CompanionAction* companionActionPtr)
 {
     std::vector<std::string> validationErrors {};
@@ -649,7 +737,7 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr)
 
     if(!validationResult)
     {
-        getGraphicManagerPtr()->createDialog(
+        getGraphicManagerPtr()->createTextDialog(
             nullptr,
             DialogType::ERROR,
             buildDialogText(
@@ -781,6 +869,56 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
         companionActionPtr, std::string { "Companion updated:\n\n" });
+}
+
+void Manager::deleteCompanion(CompanionAction* companionActionPtr)
+{
+    // delete companion chat messages from db
+    std::shared_ptr<DBReplyData> companionIdMessagesDataPtr = this->getDBDataPtr(
+        true,
+        "deleteMessagesFromDBAndReturn",
+        &deleteMessagesFromDBAndReturn,
+        std::vector<std::string> { std::string("id") },
+        *companionActionPtr);
+
+    if(!companionIdMessagesDataPtr)
+    {
+        showErrorDialogAndLogError("Error getting data from db");
+        return;
+    }
+
+    if(companionIdMessagesDataPtr->isEmpty())
+    {
+        // no return, may be companion without messages
+        // showWarningDialogAndLogWarning("Empty db reply to companion messages deletion");
+    }
+
+    // delete companion and socket from db
+    std::shared_ptr<DBReplyData> companionIdCompanionDataPtr = this->getDBDataPtr(
+        true,
+        "deleteCompanionAndSocketAndReturn",
+        &deleteCompanionAndSocketAndReturn,
+        std::vector<std::string> { std::string("id") },
+        *companionActionPtr);
+
+    if(!companionIdCompanionDataPtr)
+    {
+        showErrorDialogAndLogError("Error getting data from db");
+        return;
+    }
+
+    if(companionIdCompanionDataPtr->isEmpty())
+    {
+        showErrorDialogAndLogError("Empty db reply to companion deletion");
+        return;
+    }
+
+    // delete companion object
+    this->deleteCompanionObject(companionActionPtr->getCompanionPtr());
+
+    // show info dialog
+    getGraphicManagerPtr()->showCompanionInfoDialog(
+        companionActionPtr, std::string { "Companion deleted:\n\n" });
 }
 
 bool Manager::buildCompanions()
@@ -992,6 +1130,11 @@ void GraphicManager::removeStubsFromLeftPanel()
     this->mainWindowPtr_->removeStubsFromLeftPanel();
 }
 
+void GraphicManager::removeWidgetFromLeftPanel(SocketInfoBaseWidget* widget)
+{
+    this->mainWindowPtr_->removeWidgetFromLeftPanel(widget);
+}
+
 void GraphicManager::addWidgetToLeftPanel(SocketInfoBaseWidget* widget)
 {
     this->mainWindowPtr_->addWidgetToLeftPanel(widget);
@@ -1002,11 +1145,12 @@ void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
 }
 
-void GraphicManager::createDialog(
+void GraphicManager::createTextDialog(
     QDialog* parentDialog, const DialogType dialogType, const std::string& message)
 {
     // TODO delete objects for closed dialoges
-    Dialog* dialog = new Dialog(parentDialog, this->mainWindowPtr_, dialogType, message);
+    TextDialog* dialog = new TextDialog(parentDialog, this->mainWindowPtr_, dialogType, message);
+    dialog->set(parentDialog);
     dialog->show();
 }
 
@@ -1024,21 +1168,33 @@ void GraphicManager::updateCompanion(Companion* companionPtr)
     actionPtr->set();
 }
 
+void GraphicManager::deleteCompanion(Companion* companionPtr)
+{
+    CompanionAction* actionPtr = new CompanionAction(
+        CompanionActionType::DELETE, this->mainWindowPtr_, companionPtr);
+    actionPtr->set();
+}
+
 void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
 {
     switch(actionPtr->getActionType())
     {
     case CompanionActionType::CREATE:
         getManagerPtr()->createCompanion(actionPtr);
+        break;
     case CompanionActionType::UPDATE:
-        getManagerPtr()->updateCompanion(actionPtr);;
+        getManagerPtr()->updateCompanion(actionPtr);
+        break;
+    case CompanionActionType::DELETE:
+        getManagerPtr()->deleteCompanion(actionPtr);
+        break;
     }
 }
 
 void GraphicManager::showCompanionInfoDialog(
     CompanionAction* companionActionPtr, std::string&& header)
 {
-    this->createDialog(
+    this->createTextDialog(
         companionActionPtr->getFormDialogPtr(),
         DialogType::INFO,
         buildDialogText(

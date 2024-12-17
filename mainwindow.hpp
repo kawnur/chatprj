@@ -92,7 +92,9 @@ public:
     void addWidgetToCentralPanel(QWidget*);
 
     size_t getLeftPanelChildrenSize();
+
     void removeStubsFromLeftPanel();
+    void removeWidgetFromLeftPanel(SocketInfoBaseWidget*);
 
     void oldSelectedCompanionActions(const Companion*);
     void newSelectedCompanionActions(const Companion*);

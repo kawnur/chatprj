@@ -18,6 +18,7 @@ class ChatClient;
 class ChatServer;
 class CompanionDataDialog;
 class DBReplyData;
+class DeleteCompanionTextDialog;
 class MainWindow;
 class SocketInfoBaseWidget;
 class WidgetGroup;
@@ -152,6 +153,7 @@ private:
     Companion* companionPtr_;
 
     CompanionDataDialog* formDialogPtr_;
+    DeleteCompanionTextDialog* deleteDialogPtr_;
 
     // void sendData();
 };
@@ -173,13 +175,14 @@ public:
 
     void createCompanion(CompanionAction*);
     void updateCompanion(CompanionAction*);
+    void deleteCompanion(CompanionAction*);
 
 private:
     PGconn* dbConnectionPtr_;
 
     const Companion* selectedCompanionPtr_;
 
-    std::vector<Companion*> companionPtrs_;
+    std::vector<Companion*> companionPtrs_;  // TODO modify containers
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
@@ -192,6 +195,9 @@ private:
 
     Companion* addCompanionObject(int, const std::string&);
     void createWidgetGroupAndAddToMapping(Companion*);
+
+    void deleteCompanionObject(Companion*);
+    void deleteWidgetGroupAndDeleteFromMapping(Companion*);
 
     bool companionDataValidation(CompanionAction*);
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
@@ -209,7 +215,7 @@ private:
 
         if(logging)
         {
-            logArgs(LOG_DELIMITER);
+            logArgs(logDelimiter);
             logArgs(mark);
             logArgs("dbResultPtr:", dbResultPtr);
         }
@@ -232,7 +238,7 @@ private:
         {
             logArgs("dbDataPtr->size():", dbDataPtr->size());
             dbDataPtr->logData();
-            logArgs(LOG_DELIMITER);
+            logArgs(logDelimiter);
         }
 
         return dbDataPtr;
@@ -254,14 +260,17 @@ public:
     void newSelectedCompanionActions(const Companion*);
     size_t getLeftPanelChildrenSize();
     void addStubWidgetToLeftPanel();
-    void removeStubsFromLeftPanel();
     void addWidgetToLeftPanel(SocketInfoBaseWidget*);
     void addWidgetToCentralPanel(QWidget*);
 
-    void createDialog(QDialog*, const DialogType, const std::string&);
+    void removeStubsFromLeftPanel();
+    void removeWidgetFromLeftPanel(SocketInfoBaseWidget*);
+
+    void createTextDialog(QDialog*, const DialogType, const std::string&);
 
     void createCompanion();
     void updateCompanion(Companion*);
+    void deleteCompanion(Companion*);
 
     void sendCompanionDataToManager(CompanionAction*);
     void showCompanionInfoDialog(CompanionAction*, std::string&&);

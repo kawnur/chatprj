@@ -278,12 +278,30 @@ void SocketInfoWidget::initializeFields()
         layoutPtr_->addWidget(widget);
     }
 
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, this, &SocketInfoWidget::slotCustomMenuRequested);
+
     // connect
+}
+
+void SocketInfoWidget::slotCustomMenuRequested(QPoint pos)
+{
+    QMenu* menu = new QMenu(this);
+    QAction* deleteCompanionAction = new QAction("Delete companion", this);
+    menu->addAction(deleteCompanionAction);
+    connect(deleteCompanionAction, &QAction::triggered, this, &SocketInfoWidget::deleteAction);
+
+    menu->popup(this->mapToGlobal(pos));
 }
 
 void SocketInfoWidget::editAction()
 {
     getGraphicManagerPtr()->updateCompanion(this->companionPtr_);
+}
+
+void SocketInfoWidget::deleteAction()
+{
+    getGraphicManagerPtr()->deleteCompanion(this->companionPtr_);
 }
 
 void SocketInfoWidget::clientAction()
@@ -423,6 +441,17 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr)
     graphicManagerPtr->addWidgetToCentralPanel(textEditPtr_);
 }
 
+WidgetGroup::~WidgetGroup()
+{
+    coutWithEndl("WidgetGroup::~WidgetGroup()");
+    getGraphicManagerPtr()->removeWidgetFromLeftPanel(this->socketInfoBasePtr_);
+    delete this->socketInfoBasePtr_;
+
+    delete this->chatHistoryPtr_;
+    delete this->chatHistoryPalettePtr_;
+    delete this->textEditPtr_;
+}
+
 void WidgetGroup::sendMessage()
 {
     // Manager* managerPtr = getManagerPtr();
@@ -509,7 +538,8 @@ CompanionDataDialog::CompanionDataDialog(
 {
     setParent(parentPtr);
 
-    setWindowTitle("Add new companion");
+    setWindowTitle(
+        QString::fromStdString(actionTypeStringRepresentation.at(actionType)));
 
     setModal(true);
     setWindowFlag(Qt::Window);
@@ -585,7 +615,9 @@ std::string CompanionDataDialog::getPortString()
     return this->portEditPtr_->text().toStdString();
 }
 
-Dialog::Dialog(QDialog* parentDialog, QWidget* parent, DialogType dialogType, const std::string& text)
+TextDialog::TextDialog(
+    QDialog* parentDialog, QWidget* parent,
+    DialogType dialogType, const std::string& text)
 {
     setParent(parent);
 
@@ -606,30 +638,58 @@ Dialog::Dialog(QDialog* parentDialog, QWidget* parent, DialogType dialogType, co
     textEditPtr_->setPlainText(QString::fromStdString(text));
 
     layoutPtr_->addWidget(textEditPtr_);
-
-    QDialogButtonBox* buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-
-    if(parentDialog)
-    {
-        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &Dialog::closeDialogs);  // TODO this in ctor
-    }
-    else
-    {
-        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);  // TODO this in ctor
-    }
-
-    layoutPtr_->addWidget(buttonBoxPtr_);
 }
 
-Dialog::~Dialog()
+TextDialog::~TextDialog()
 {
     delete this->layoutPtr_;
     delete this->textEditPtr_;
     delete this->buttonBoxPtr_;
 }
 
-void Dialog::closeDialogs()
+void TextDialog::set(QDialog* parentDialog)
+{
+    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+
+    if(parentDialog)
+    {
+        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::closeDialogs);
+    }
+    else
+    {
+        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    }
+
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
+void TextDialog::closeDialogs()
 {
     this->close();
     this->parentDialogPtr_->close();
+}
+
+DeleteCompanionTextDialog::DeleteCompanionTextDialog(
+    QDialog* parentDialog, QWidget* parent, DialogType dialogType, const std::string& text) :
+    TextDialog(parentDialog, parent, dialogType, text) {}
+
+void DeleteCompanionTextDialog::set(CompanionAction* actionPtr)
+{
+    this->actionPtr_ = actionPtr;
+
+    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Cancel);
+
+    buttonBoxPtr_->addButton("Delete companion", QDialogButtonBox::AcceptRole);
+
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    // connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &CompanionAction::sendData);
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &DeleteCompanionTextDialog::acceptAction);
+
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
+void DeleteCompanionTextDialog::acceptAction()  // TODO rename to accept and overload
+{
+    this->close();
+    this->actionPtr_->sendData();
 }

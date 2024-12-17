@@ -235,6 +235,37 @@ void MainWindow::removeStubsFromLeftPanel()
     }
 }
 
+void MainWindow::removeWidgetFromLeftPanel(SocketInfoBaseWidget* widgetPtr)
+{
+    QList<SocketInfoBaseWidget*> leftPanelChildren =
+        this->leftPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+            Qt::FindDirectChildrenOnly);
+
+    qsizetype index = leftPanelChildren.indexOf(widgetPtr);
+
+    if(index == -1)
+    {
+        showErrorDialogAndLogError("SocketInfoBaseWidget was not found in left panel");
+    }
+    else if(index == 0)
+    {
+
+    }
+    else if(index > 0)
+    {
+        Manager* managerPtr = getManagerPtr();
+
+        auto previousWidget = leftPanelChildren.at(index - 1);
+
+        auto previousCompanionPtr = managerPtr->
+            getMappedCompanionBySocketInfoBaseWidget(previousWidget);
+
+        managerPtr->resetSelectedCompanion(previousCompanionPtr);
+
+        this->leftPanelLayoutPtr_->removeWidget(widgetPtr);
+    }
+}
+
 void MainWindow::oldSelectedCompanionActions(const Companion* companion)
 {
     if(companion)

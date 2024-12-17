@@ -49,6 +49,7 @@ public:
         do_accept();
     }
 //    ChatServer(short);
+    ~ChatServer() = default;
 
     void run();
 

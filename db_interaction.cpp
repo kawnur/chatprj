@@ -272,7 +272,7 @@ PGresult* updateCompanionAndSocketAndReturn(
         + companionAction.getIpAddress()
         + std::string("', client_port = '")
         + companionAction.getClientPort()
-        + std::string("' WHERE id in (SELECT id FROM update_name) RETURNING id");
+        + std::string("' WHERE id IN (SELECT id FROM update_name) RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
@@ -315,6 +315,29 @@ PGresult* pushMessageToDBAndReturn(
         + std::string("', false) RETURNING ")
         + returningFieldName
         + std::string(", timestamp_tz)");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* deleteMessagesFromDBAndReturn(
+    const PGconn* dbConnection, const CompanionAction& companionAction)
+{
+    std::string command = std::string(
+        "DELETE FROM messages WHERE companion_id = ")
+        + std::to_string(companionAction.getCompanionId())
+        + std::string(" RETURNING companion_id");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* deleteCompanionAndSocketAndReturn(
+    const PGconn* dbConnection, const CompanionAction& companionAction)
+{
+    std::string command = std::string(
+        "WITH delete_socket AS (DELETE FROM sockets WHERE id = ")
+        + std::to_string(companionAction.getCompanionId())
+        + std::string(" RETURNING id) DELETE FROM companions WHERE id IN "
+        "(SELECT id FROM delete_socket) RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }

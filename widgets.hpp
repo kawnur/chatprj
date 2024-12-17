@@ -111,6 +111,7 @@ public:
 
 public slots:
     void editAction();
+    void deleteAction();
     void clientAction();
 
 private:
@@ -138,10 +139,13 @@ private:
 
     void initializeFields();
 
+    void slotCustomMenuRequested(QPoint);
+
     void changeColor(QColor&);
 
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
+
 };
 
 class SocketInfoStubWidget : public SocketInfoBaseWidget
@@ -169,7 +173,7 @@ class WidgetGroup : public QObject
 public:
     WidgetGroup() = default;
     WidgetGroup(const Companion*);
-    ~WidgetGroup() = default;
+    ~WidgetGroup();
 
     SocketInfoBaseWidget* socketInfoBasePtr_;
     QPlainTextEdit* chatHistoryPtr_;
@@ -238,25 +242,44 @@ private:
     // void sendData();
 };
 
-class Dialog : public QDialog {
-
+class TextDialog : public QDialog
+{
     Q_OBJECT
 
 public:
-    Dialog(QDialog*, QWidget*, DialogType, const std::string&);
-    ~Dialog();
+    TextDialog(QDialog*, QWidget*, DialogType, const std::string&);
+    ~TextDialog();
+
+    void set(QDialog*);
 
 private:
     CompanionActionType actionType_;
 
     QDialog* parentDialogPtr_;
-    QVBoxLayout* layoutPtr_;
     QPlainTextEdit* textEditPtr_;
-    QDialogButtonBox* buttonBoxPtr_;
 
     void closeDialogs();
+
+protected:
+    QVBoxLayout* layoutPtr_;
+    QDialogButtonBox* buttonBoxPtr_;
 };
 
+class DeleteCompanionTextDialog : public TextDialog
+{
+    Q_OBJECT
 
+public:
+    DeleteCompanionTextDialog(QDialog*, QWidget*, DialogType, const std::string&);
+    ~DeleteCompanionTextDialog() = default;
+
+    void set(CompanionAction*);
+
+private:
+    CompanionAction* actionPtr_;
+
+    void acceptAction();
+
+};
 
 #endif // WIDGETS_HPP

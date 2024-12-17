@@ -62,6 +62,9 @@ PGresult* pushMessageToDBAndReturn(
     const PGconn*, const std::string&, const std::string&,
     const std::string&, const std::string&);
 
+PGresult* deleteMessagesFromDBAndReturn(const PGconn*, const CompanionAction&);
+PGresult* deleteCompanionAndSocketAndReturn(const PGconn*, const CompanionAction&);
+
 void logUnknownField(const PGresult*, int, int);
 
 int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
