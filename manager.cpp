@@ -272,6 +272,7 @@ CompanionAction::CompanionAction(
 {
     switch(actionType)
     {
+    case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
         formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
         deleteDialogPtr_ = nullptr;
@@ -300,15 +301,19 @@ CompanionAction::~CompanionAction()
 
 void CompanionAction::set()
 {
-    if(this->actionType_ == CompanionActionType::DELETE)
+    switch(this->actionType_)
     {
-        this->deleteDialogPtr_->set(this);
-        this->deleteDialogPtr_->show();
-    }
-    else
-    {
+    case CompanionActionType::CREATE:
+    case CompanionActionType::UPDATE:
         this->formDialogPtr_->set(this);
         this->formDialogPtr_->show();
+        break;
+
+    case CompanionActionType::DELETE:
+    case CompanionActionType::CLEAR_HISTORY:
+        this->deleteDialogPtr_->set(this);
+        this->deleteDialogPtr_->show();
+        break;
     }
 }
 
@@ -361,6 +366,7 @@ void CompanionAction::sendData()
 
     switch(this->actionType_)
     {
+    case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
         name = this->formDialogPtr_->getNameString();
         ipAddress = this->formDialogPtr_->getIpAddressString();
@@ -939,7 +945,7 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
         true,
         "deleteMessagesFromDBAndReturn",
         &deleteMessagesFromDBAndReturn,
-        std::vector<std::string> { std::string("id") },
+        std::vector<std::string> { std::string("companion_id") },
         *companionActionPtr);
 
     if(!companionIdMessagesDataPtr)
@@ -953,6 +959,13 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
         // no return, may be companion without messages
         // showWarningDialogAndLogWarning("Empty db reply to companion messages deletion");
     }
+
+    // clear chat history widget
+
+    WidgetGroup* widgetGroupPtr =
+        this->mapCompanionToWidgetGroup_.at(companionActionPtr->getCompanionPtr());
+
+    getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
 
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
@@ -1211,6 +1224,11 @@ void GraphicManager::clearCompanionHistory(Companion* companionPtr)
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::CLEAR_HISTORY, this->mainWindowPtr_, companionPtr);
     actionPtr->set();
+}
+
+void GraphicManager::clearChatHistory(WidgetGroup* widgetGroupPtr)
+{
+    widgetGroupPtr->clearChatHistory();
 }
 
 void GraphicManager::deleteCompanion(Companion* companionPtr)

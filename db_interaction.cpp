@@ -314,7 +314,7 @@ PGresult* pushMessageToDBAndReturn(
         + message
         + std::string("', false) RETURNING ")
         + returningFieldName
-        + std::string(", timestamp_tz)");
+        + std::string(", timestamp_tz");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }

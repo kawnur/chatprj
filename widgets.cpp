@@ -508,6 +508,11 @@ void WidgetGroup::addMessageToChatHistory(const QString& message)
     this->chatHistoryPtr_->appendPlainText(message);
 }
 
+void WidgetGroup::clearChatHistory()
+{
+    this->chatHistoryPtr_->clear();
+}
+
 QString WidgetGroup::buildChatHistory(const Companion* companion)
 {
     const std::vector<Message>* messages = companion->getMessagesPtr();

@@ -183,6 +183,7 @@ public:
 
     QString formatMessage(const Companion*, const Message*);
     void addMessageToChatHistory(const QString&);
+    void clearChatHistory();
 
 public slots:
     void sendMessage();

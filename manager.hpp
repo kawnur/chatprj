@@ -272,6 +272,7 @@ public:
     void createCompanion();
     void updateCompanion(Companion*);
     void clearCompanionHistory(Companion*);
+    void clearChatHistory(WidgetGroup*);
     void deleteCompanion(Companion*);
 
     void sendCompanionDataToManager(CompanionAction*);
