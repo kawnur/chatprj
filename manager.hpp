@@ -14,13 +14,15 @@
 #include "mainwindow.hpp"
 #include "utils.hpp"
 
+class CentralPanelWidget;
 class ChatClient;
 class ChatServer;
 class CompanionDataDialog;
 class DBReplyData;
-class TwoButtonsTextDialog;
 class MainWindow;
+class RightPanelWidget;
 class SocketInfoBaseWidget;
+class TwoButtonsTextDialog;
 class WidgetGroup;
 
 int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
@@ -166,6 +168,7 @@ public:
 
     void set();
     void sendMessage(WidgetGroup*, const std::string&);
+    void sendMessage(Companion*, const std::string&);
     void receiveMessage(Companion*, const std::string&);
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
@@ -255,17 +258,21 @@ public:
     ~GraphicManager() = default;
 
     void set();
+    void sendMessage(WidgetGroup*, const std::string&);
+    void sendMessage(Companion*, const std::string&);
 
     void addTextToAppLogWidget(const QString&);
     void oldSelectedCompanionActions(const Companion*);
     void newSelectedCompanionActions(const Companion*);
-    size_t getLeftPanelChildrenSize();
-    void addStubWidgetToLeftPanel();
-    void addWidgetToLeftPanel(SocketInfoBaseWidget*);
-    void addWidgetToCentralPanel(QWidget*);
+    size_t getCompanionPanelChildrenSize();
+    void addStubWidgetToCompainonPanel();
+    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+    // void addWidgetToCentralPanel(QWidget*);
+    void setMainWindowCentralPanel(CentralPanelWidget*);
+    void setMainWindowRightPanel(RightPanelWidget*);
 
-    void removeStubsFromLeftPanel();
-    void removeWidgetFromLeftPanel(SocketInfoBaseWidget*);
+    void removeStubsFromCompanionPanel();
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
     void createTextDialog(QDialog*, const DialogType, const std::string&);
 

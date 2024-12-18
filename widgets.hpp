@@ -38,10 +38,11 @@ class TextEditWidget : public QTextEdit
     Q_OBJECT
 
 public:
-    TextEditWidget() = default;
-    ~TextEditWidget() = default;
+    TextEditWidget();
+    ~TextEditWidget();
 
 private:
+    QPalette* palettePtr_;
     void keyPressEvent(QKeyEvent*);
 
 signals:
@@ -167,6 +168,88 @@ private:
     void initializeFields();
 };
 
+class ShowHideWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    ShowHideWidget();
+    ~ShowHideWidget();
+
+private:
+    QVBoxLayout* layoutPtr_;
+    QLabel* labelPtr_;
+    QPalette* palettePtr_;
+};
+
+class LeftPanelWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    LeftPanelWidget(QWidget*);
+    ~LeftPanelWidget();
+
+    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+
+private:
+    QVBoxLayout* layoutPtr_;
+    QPalette* palettePtr_;
+
+    QWidget* companionPanelPtr_;
+    QVBoxLayout* companionPanelLayoutPtr_;
+
+    QSpacerItem* spacerPtr_;
+    ShowHideWidget* showHideWidgetPtr_;
+};
+
+class CentralPanelWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    CentralPanelWidget();
+    ~CentralPanelWidget();
+
+    void set(Companion*);
+
+private:
+    Companion* companionPtr_;
+
+    QVBoxLayout* layoutPtr_;
+    //    QGraphicsScene* graphicsScene_;
+    //    QGraphicsView* graphicsView_;
+    //    QRectF* rect_;
+    //    QGraphicsSimpleTextItem* textItem_;
+    //    int linesCount_;
+    //    QFont* font_;
+
+    QLabel* companionNameLabelPtr_;
+    QPalette* companionNameLabelPalettePtr_;
+    QPlainTextEdit* chatHistoryWidgetPtr_;
+    QPalette* chatHistoryWidgetPalettePtr_;
+
+    TextEditWidget* textEditPtr_;
+    QPalette* textEditPalettePtr_;
+    //    QPushButton* button_;
+
+    void sendMessage();
+};
+
+class RightPanelWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    RightPanelWidget();
+    ~RightPanelWidget();
+
+private:
+    QVBoxLayout* layoutPtr_;
+    QPlainTextEdit* appLogWidgetPtr_;
+    QPalette* appLogWidgetPalettePtr_;
+};
+
 class WidgetGroup : public QObject
 {
     Q_OBJECT
@@ -177,38 +260,37 @@ public:
     ~WidgetGroup();
 
     SocketInfoBaseWidget* socketInfoBasePtr_;
-    QPlainTextEdit* chatHistoryPtr_;
-    QPalette* chatHistoryPalettePtr_;
-    TextEditWidget* textEditPtr_;
 
-    QString formatMessage(const Companion*, const Message*);
+    // QPlainTextEdit* chatHistoryPtr_;
+    // QPalette* chatHistoryPalettePtr_;
+    // TextEditWidget* textEditPtr_;
+    // QPalette* textEditPalettePtr_;
+    CentralPanelWidget* centralPanelPtr_;
+
+    QString formatMessage(const Companion*, const Message*);  // TODO move to widget
     void addMessageToChatHistory(const QString&);
     void clearChatHistory();
 
 public slots:
-    void sendMessage();
+    // void sendMessage();
     // void connectToServer();
 
 private:
     QString buildChatHistory(const Companion*);
 };
 
-// class InputFormElementWidget : public QWidget
-// {
-//     Q_OBJECT
+class StubWidgetGroup
+{
+public:
+    StubWidgetGroup();
+    ~StubWidgetGroup();
 
-// public:
-//     InputFormElementWidget(std::string&&);
-//     ~InputFormElementWidget();
-
-// private:
-//     std::string label_;
-
-//     QHBoxLayout* layoutPtr_;
-
-//     QLabel* labelPtr_;
-//     QLineEdit* editPtr_;
-// };
+private:
+    SocketInfoStubWidget* socketInfoPtr_;
+    QWidget* leftPanelPtr_;
+    CentralPanelWidget* centralPanelPtr_;
+    QWidget* rightPanelPtr_;
+};
 
 class CompanionDataDialog : public QDialog
 {
@@ -282,7 +364,6 @@ private:
     std::string buttonText_;
 
     void acceptAction();
-
 };
 
 #endif // WIDGETS_HPP

@@ -10,6 +10,7 @@
 #include <QMenuBar>
 #include <QPlainTextEdit>
 #include <QScrollBar>
+#include <QSpacerItem>
 #include <QVBoxLayout>
 
 #include "application.hpp"
@@ -18,6 +19,8 @@
 #include "utils_cout.hpp"
 #include "widgets.hpp"
 
+class LeftPanelWidget;
+class ShowHideWidget;
 class SocketInfoBaseWidget;
 class SocketInfoWidget;
 class TextEditWidget;
@@ -36,34 +39,48 @@ private:
 
     // left panel
 
-    QWidget* leftPanelPtr_;
-    QVBoxLayout* leftPanelLayoutPtr_;
+    LeftPanelWidget* leftPanelPtr_;
+
+    // QWidget* leftPanelPtr_;
+    // QVBoxLayout* leftPanelLayoutPtr_;
+    // QPalette* leftPanelPalettePtr_;
+
+    // QWidget* companionPanelPtr_;
+    // QVBoxLayout* companionPanelLayoutPtr_;
+
+    // QSpacerItem* spacerPtr_;
+    // ShowHideWidget* showHideWidgetPtr_;
 
     // central panel
 
-    QWidget* centralPanelPtr_;
-    QVBoxLayout* centralPanelLayoutPtr_;
-//    QGraphicsScene* graphicsScene_;
-//    QGraphicsView* graphicsView_;
-//    QRectF* rect_;
-//    QGraphicsSimpleTextItem* textItem_;
-//    int linesCount_;
-//    QFont* font_;
+    CentralPanelWidget* centralPanelPtr_;
 
-    QLabel* companionNameLabelPtr_;
-    QPalette* companionNameLabelPalettePtr_;
-    QPlainTextEdit* chatHistoryWidgetStubPtr_;
-    QPalette* chatHistoryWidgetStubPalettePtr_;
+//     QWidget* centralPanelPtr_;
+//     QVBoxLayout* centralPanelLayoutPtr_;
+// //    QGraphicsScene* graphicsScene_;
+// //    QGraphicsView* graphicsView_;
+// //    QRectF* rect_;
+// //    QGraphicsSimpleTextItem* textItem_;
+// //    int linesCount_;
+// //    QFont* font_;
 
-    TextEditWidget* textEditStubPtr_;
+//     QLabel* companionNameLabelPtr_;
+//     QPalette* companionNameLabelPalettePtr_;
+//     QPlainTextEdit* chatHistoryWidgetStubPtr_;
+//     QPalette* chatHistoryWidgetStubPalettePtr_;
+
+//     TextEditWidget* textEditStubPtr_;
+//     QPalette* textEditStubPalettePtr_;
 //    QPushButton* button_;
 
     // right panel
 
-    QWidget* rightPanelPtr_;
-    QVBoxLayout* rightPanelLayoutPtr_;
-    QPlainTextEdit* appLogWidgetPtr_;
-    QPalette* appLogWidgetPalettePtr_;
+    RightPanelWidget* rightPanelPtr_;
+
+    // QWidget* rightPanelPtr_;
+    // QVBoxLayout* rightPanelLayoutPtr_;
+    // QPlainTextEdit* appLogWidgetPtr_;
+    // QPalette* appLogWidgetPalettePtr_;
 
 //    QPushButton* testPlainTextEditButton_;
 
@@ -80,21 +97,23 @@ private:
 public:
     MainWindow();
 
-    void addStubWidgetToLeftPanel();
+    void addStubWidgetToCompanionPanel();
 
-    void setLeftPanel();
+    void setCompanionPanel();
     void set();
 
-    void addTextToChatHistoryWidget(const QString&);
+    // void addTextToChatHistoryWidget(const QString&);
     void addTextToAppLogWidget(const QString&);
 
-    void addWidgetToLeftPanel(SocketInfoBaseWidget*);
-    void addWidgetToCentralPanel(QWidget*);
+    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+    // void addWidgetToCentralPanel(QWidget*);
+    void setCentralPanel(CentralPanelWidget*);
+    void setRightPanel(RightPanelWidget*);
 
-    size_t getLeftPanelChildrenSize();
+    size_t getCompanionPanelChildrenSize();
 
-    void removeStubsFromLeftPanel();
-    void removeWidgetFromLeftPanel(SocketInfoBaseWidget*);
+    void removeStubsFromCompanionPanel();
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
     void oldSelectedCompanionActions(const Companion*);
     void newSelectedCompanionActions(const Companion*);

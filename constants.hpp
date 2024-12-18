@@ -38,4 +38,13 @@ const std::map<DialogType, std::string> dialogTypeStringRepresentation
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 
+// colors
+const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;
+const uint32_t leftPanelBackgroundColor = 0xd1d1d1;
+const uint32_t companionNameLabelBackgroundColor = 0xa9a9a9;
+const uint32_t indicatorMeColor = 0x6a6a6a;
+const uint32_t showHideBackGroundColor = 0x7a7a7a;
+const uint32_t textEditBackgroundColor = 0xdadada;
+const uint32_t appLogBackgroundColor = 0xcccaca;
+
 #endif // CONSTANTS_HPP
