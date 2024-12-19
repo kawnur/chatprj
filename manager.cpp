@@ -494,7 +494,7 @@ void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
     companionPtr->sendLastMessage();
 }
 
-void Manager::sendMessage(Cmopanion* companionPtr, const std::string& text)
+void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
     // Companion* companionPtr =
     //     const_cast<Companion*>(this->getMappedCompanionByWidgetGroup(groupPtr));
@@ -560,8 +560,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
 const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     SocketInfoBaseWidget* widget) const
 {
-    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair){
-        return pair.second->socketInfoBasePtr_ == widget;
+    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair)
+    {
+        // return pair.second->socketInfoBasePtr_ == widget;
+        return pair.second->getSocketInfoBasePtr() == widget;
     };
 
     auto result = std::find_if(
@@ -595,12 +597,17 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
     {
         auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);  // TODO try catch
 
-        dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->unselect();
+        dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->unselect();
 
-        widgetGroup->chatHistoryPtr_->hide();
-        widgetGroup->textEditPtr_->hide();
+        // widgetGroup->chatHistoryPtr_->hide();
+        // widgetGroup->textEditPtr_->hide();
+        widgetGroup->hideCentralPanel();
     }
-    graphicManagerPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
+    // graphicManagerPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
+    else
+    {
+        graphicManagerPtr->hideCentralPanelStub();
+    }
 
     this->selectedCompanionPtr_ = newSelected;
 
@@ -608,12 +615,17 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
     {
         auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
 
-        dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->select();
+        dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->select();
 
-        widgetGroup->chatHistoryPtr_->show();
-        widgetGroup->textEditPtr_->show();
+        // widgetGroup->chatHistoryPtr_->show();
+        // widgetGroup->textEditPtr_->show();
+        widgetGroup->showCentralPanel();
     }
-    graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
+    // graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
+    else
+    {
+        graphicManagerPtr->showCentralPanelStub();
+    }
 }
 
 bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companionActionPtr)
@@ -916,7 +928,7 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
     auto widgetGroup = this->mapCompanionToWidgetGroup_.at(
         companionActionPtr->getCompanionPtr());  // TODO try catch
 
-    dynamic_cast<SocketInfoWidget*>(widgetGroup->socketInfoBasePtr_)->update();
+    dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->update();
 
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
@@ -1102,13 +1114,12 @@ void Manager::buildWidgetGroups()
     auto companionsSize = this->companionPtrs_.size();
     auto childrenSize = graphicManagerPtr->getCompanionPanelChildrenSize();
 
-    logArgs("companionsSize:", companionsSize);
-    logArgs("childrenSize:", childrenSize);
+    logArgs("companionsSize:", companionsSize, "childrenSize:", childrenSize);
 
     if(companionsSize == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
-        graphicManagerPtr->addStubWidgetToCompainonPanel();
+        // graphicManagerPtr->addStubWidgetToCompainonPanel();
     }
     else
     {
@@ -1176,13 +1187,46 @@ Manager* getManagerPtr()
 
 GraphicManager::GraphicManager()
 {
-    mainWindowPtr_ = new MainWindow;    
+    // stubWidgetsPtr_ = new StubWidgetGroup;
+    // mainWindowPtr_ = new MainWindow;
 }
 
 void GraphicManager::set()
 {
-    mainWindowPtr_->set();
-    mainWindowPtr_->show();
+    stubWidgetsPtr_ = new StubWidgetGroup;
+    mainWindowPtr_ = new MainWindow;
+
+    // this->stubWidgetsPtr_->set();
+    this->mainWindowPtr_->set();
+    this->mainWindowPtr_->show();
+}
+
+void GraphicManager::buildMainWindow()
+{
+    // this->centralWidgetLayoutPtr_->addWidget(this->leftPanelPtr_);
+
+
+    // getGraphicManagerPtr()->setParentsForStubs(
+    //     this->leftPanelPtr_, this->centralWidgetPtr_);
+
+    // getGraphicManagerPtr()->setStubWidgets();
+
+    // this->centralWidgetLayoutPtr_->addWidget(this->rightPanelPtr_);
+
+    // getGraphicManagerPtr()->showCentralPanelStub();
+
+
+}
+
+void GraphicManager::setParentsForStubs(
+    QWidget* leftContainerPtr, QWidget* centralContainerPtr)
+{
+    this->stubWidgetsPtr_->setParents(leftContainerPtr, centralContainerPtr);
+}
+
+void GraphicManager::setStubWidgets()
+{
+    this->stubWidgetsPtr_->set();
 }
 
 void GraphicManager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
@@ -1200,24 +1244,83 @@ void GraphicManager::addTextToAppLogWidget(const QString& text)
     this->mainWindowPtr_->addTextToAppLogWidget(text);
 }
 
-void GraphicManager::oldSelectedCompanionActions(const Companion* companion)
-{
-    this->mainWindowPtr_->oldSelectedCompanionActions(companion);
-}
+// void GraphicManager::oldSelectedCompanionActions(const Companion* companion)
+// {
+//     // if(companion)
+//     // {
+//     //     this->companionNameLabelPtr_->setText("");
+//     //     //        this->companionNameLabel_->hide();
 
-void GraphicManager::newSelectedCompanionActions(const Companion* companion)
-{
-    this->mainWindowPtr_->newSelectedCompanionActions(companion);
-}
+//     //     this->chatHistoryWidgetStubPtr_->setPlainText("");
+//     // }
+//     // else
+//     // {
+//     //     this->chatHistoryWidgetStubPtr_->hide();
+//     //     this->textEditStubPtr_->hide();
+//     // }
+//     if(!companion)
+//     {
+//         this->stubWidgetsPtr_->hideCentralPanel();
+//     }
+// }
+
+// void GraphicManager::newSelectedCompanionActions(const Companion* companion)
+// {
+//     if(companion)
+//     {
+//         this->companionNameLabelPtr_->setText(
+//             QString::fromStdString(companion->getName()));
+//         this->companionNameLabelPtr_->show();
+//     }
+//     else
+//     {
+//         // this->chatHistoryWidgetStubPtr_->setPlainText("");
+//         // this->chatHistoryWidgetStubPtr_->show();
+
+//         // this->textEditStubPtr_->setText("");
+//         // this->textEditStubPtr_->show();
+//         this->stubWidgetsPtr_->showCentralPanel();
+//     }
+// }
 
 size_t GraphicManager::getCompanionPanelChildrenSize()
 {
     return this->mainWindowPtr_->getCompanionPanelChildrenSize();
 }
 
-void GraphicManager::addStubWidgetToCompainonPanel()
+// void GraphicManager::addWidgetToMainWindowLeftContainer(QWidget* widgetPtr)
+// {
+//     this->mainWindowPtr_->addWidgetToLeftContainerAndSetParentTo(widgetPtr);
+// }
+
+// void GraphicManager::addWidgetToMainWindowCentralContainer(QWidget* widgetPtr)
+// {
+//     this->mainWindowPtr_->addWidgetToCentralContainerAndSetParentTo(widgetPtr);
+// }
+
+// void GraphicManager::addWidgetToMainWindowRightContainer(QWidget* widgetPtr)
+// {
+//     this->mainWindowPtr_->addWidgetToRightContainerAndSetParentTo(widgetPtr);
+// }
+
+// void GraphicManager::addStubWidgetToCompainonPanel()
+// {
+//     // this->mainWindowPtr_->addStubWidgetToCompanionPanel();
+// }
+
+void GraphicManager::addWidgetToMainWindowLeftContainerAndSetParentTo(QWidget* widgetPtr)
 {
-    this->mainWindowPtr_->addStubWidgetToCompanionPanel();
+    this->mainWindowPtr_->addWidgetToLeftContainerAndSetParentTo(widgetPtr);
+}
+
+void GraphicManager::addWidgetToMainWindowCentralContainerAndSetParentTo(QWidget* widgetPtr)
+{
+    this->mainWindowPtr_->addWidgetToCentralContainerAndSetParentTo(widgetPtr);
+}
+
+void GraphicManager::addWidgetToMainWindowRightContainerAndSetParentTo(QWidget* widgetPtr)
+{
+    this->mainWindowPtr_->addWidgetToRightContainerAndSetParentTo(widgetPtr);
 }
 
 void GraphicManager::removeStubsFromCompanionPanel()
@@ -1230,6 +1333,11 @@ void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget
     this->mainWindowPtr_->removeWidgetFromCompanionPanel(widget);
 }
 
+// void GraphicManager::addWidgetToMainWindow(QWidget* widgetPtr)
+// {
+//     this->mainWindowPtr_->addWidgetToCentralWidgetLayout(widgetPtr);
+// }
+
 void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 {
     this->mainWindowPtr_->addWidgetToCompanionPanel(widget);
@@ -1240,15 +1348,20 @@ void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 //     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
 // }
 
-void GraphicManager::setMainWindowCentralPanel(CentralPanelWidget* widget)
-{
-    this->mainWindowPtr_->setCentralPanel(widget);
-}
+// void GraphicManager::setMainWindowLeftPanel(LeftPanelWidget* widget)
+// {
+//     this->mainWindowPtr_->setLeftPanel(widget);
+// }
 
-void GraphicManager::setMainWindowRightPanel(RightPanelWidget* widget)
-{
-    this->mainWindowPtr_->setCentralPanel(widget);
-}
+// void GraphicManager::setMainWindowCentralPanel(CentralPanelWidget* widget)
+// {
+//     this->mainWindowPtr_->setCentralPanel(widget);
+// }
+
+// void GraphicManager::setMainWindowRightPanel(RightPanelWidget* widget)
+// {
+//     this->mainWindowPtr_->setRightPanel(widget);
+// }
 
 void GraphicManager::createTextDialog(
     QDialog* parentDialog, const DialogType dialogType, const std::string& message)
@@ -1325,6 +1438,36 @@ void GraphicManager::showCompanionInfoDialog(
                 std::string("port: ") + companionActionPtr->getClientPort() }));
 
     delete companionActionPtr;
+}
+
+void GraphicManager::hideCentralPanelStub()
+{
+    this->stubWidgetsPtr_->hideCentralPanel();
+}
+
+void GraphicManager::showCentralPanelStub()
+{
+    this->stubWidgetsPtr_->showCentralPanel();
+}
+
+void GraphicManager::hideInfo()
+{
+    this->mainWindowPtr_->hideLeftAndRightPanels();
+
+    this->stubWidgetsPtr_->showStubPanels();
+
+}
+
+void GraphicManager::showInfo()
+{
+    this->mainWindowPtr_->showLeftAndRightPanels();
+
+    this->stubWidgetsPtr_->hideStubPanels();
+}
+
+MainWindow* GraphicManager::getMainWindowPtr()
+{
+    return this->mainWindowPtr_;
 }
 
 GraphicManager* getGraphicManagerPtr()

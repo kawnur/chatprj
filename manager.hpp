@@ -19,9 +19,11 @@ class ChatClient;
 class ChatServer;
 class CompanionDataDialog;
 class DBReplyData;
+class LeftPanelWidget;
 class MainWindow;
 class RightPanelWidget;
 class SocketInfoBaseWidget;
+class StubWidgetGroup;
 class TwoButtonsTextDialog;
 class WidgetGroup;
 
@@ -258,18 +260,36 @@ public:
     ~GraphicManager() = default;
 
     void set();
+
+    void buildMainWindow();
+
+    void setParentsForStubs(QWidget*, QWidget*);
+    void setStubWidgets();
+
     void sendMessage(WidgetGroup*, const std::string&);
     void sendMessage(Companion*, const std::string&);
 
     void addTextToAppLogWidget(const QString&);
-    void oldSelectedCompanionActions(const Companion*);
-    void newSelectedCompanionActions(const Companion*);
+    // void oldSelectedCompanionActions(const Companion*);
+    // void newSelectedCompanionActions(const Companion*);
     size_t getCompanionPanelChildrenSize();
-    void addStubWidgetToCompainonPanel();
+    // void addStubWidgetToCompainonPanel();
+
+    // void addWidgetToMainWindow(QWidget*);
+    // void addWidgetToMainWindowLeftContainer(QWidget*);
+    // void addWidgetToMainWindowCentralContainer(QWidget*);
+    // void addWidgetToMainWindowRightContainer(QWidget*);
+
+    void addWidgetToMainWindowLeftContainerAndSetParentTo(QWidget*);
+    void addWidgetToMainWindowCentralContainerAndSetParentTo(QWidget*);
+    void addWidgetToMainWindowRightContainerAndSetParentTo(QWidget*);
+
+
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
     // void addWidgetToCentralPanel(QWidget*);
-    void setMainWindowCentralPanel(CentralPanelWidget*);
-    void setMainWindowRightPanel(RightPanelWidget*);
+    // void setMainWindowLeftPanel(LeftPanelWidget*);
+    // void setMainWindowCentralPanel(CentralPanelWidget*);
+    // void setMainWindowRightPanel(RightPanelWidget*);
 
     void removeStubsFromCompanionPanel();
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
@@ -285,9 +305,17 @@ public:
     void sendCompanionDataToManager(CompanionAction*);
     void showCompanionInfoDialog(CompanionAction*, std::string&&);
 
-private:
-    MainWindow* mainWindowPtr_;
+    void hideCentralPanelStub();
+    void showCentralPanelStub();
 
+    void hideInfo();
+    void showInfo();
+
+    MainWindow* getMainWindowPtr();
+
+private:
+    StubWidgetGroup* stubWidgetsPtr_;
+    MainWindow* mainWindowPtr_;
 };
 
 GraphicManager* getGraphicManagerPtr();

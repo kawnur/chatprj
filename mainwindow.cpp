@@ -7,15 +7,15 @@
 //     return app->mainWindowPtr_;
 // }
 
-void MainWindow::addStubWidgetToCompanionPanel()
-{
-    SocketInfoStubWidget* stub = new SocketInfoStubWidget;
+// void MainWindow::addStubWidgetToCompanionPanel()
+// {
+//     SocketInfoStubWidget* stub = new SocketInfoStubWidget;
 
-    SocketInfoBaseWidget* baseObjectCastPtr =
-            dynamic_cast<SocketInfoBaseWidget*>(stub);
+//     SocketInfoBaseWidget* baseObjectCastPtr =
+//             dynamic_cast<SocketInfoBaseWidget*>(stub);
 
-    this->companionPanelLayoutPtr_->addWidget(baseObjectCastPtr);
-}
+//     this->companionPanelLayoutPtr_->addWidget(baseObjectCastPtr);
+// }
 
 //void MainWindow::testMainWindowRightPanel() {
 //    int j = 0;
@@ -47,14 +47,23 @@ MainWindow::MainWindow()
     centralWidgetPtr_ = new QWidget;
     setCentralWidget(centralWidgetPtr_);
 
-    centralWidgetLayoutPtr_ = new QHBoxLayout;
+    centralWidgetLayoutPtr_ = new QHBoxLayout(centralWidgetPtr_);
     centralWidgetLayoutPtr_->setSpacing(0);
     centralWidgetLayoutPtr_->setContentsMargins(0, 0, 0, 0);
     centralWidgetPtr_->setLayout(centralWidgetLayoutPtr_);
 
     // left panel
+    // leftContainerWidgetPtr_ = new QWidget(centralWidgetPtr_);
+    // leftContainerWidgetLayoutPtr_ = new QVBoxLayout(leftContainerWidgetPtr_);
+    // leftContainerWidgetLayoutPtr_->setSpacing(0);
+    // leftContainerWidgetLayoutPtr_->setContentsMargins(0, 0, 0, 0);
+    // leftContainerWidgetPtr_->setLayout(leftContainerWidgetLayoutPtr_);
 
-    leftPanelPtr_ = new LeftPanelWidget(centralWidgetPtr_);
+    leftContainerWidgetPtr_ = new MainWindowContainerWidget(centralWidgetPtr_);
+    centralWidgetLayoutPtr_->addWidget(leftContainerWidgetPtr_);
+
+    leftPanelPtr_ = new LeftPanelWidget(leftContainerWidgetPtr_);
+    leftContainerWidgetPtr_->addWidgetToLayout(leftPanelPtr_);
 
     // leftPanelWidgetPtr_ = new LeftPanelWidget;
 
@@ -71,7 +80,7 @@ MainWindow::MainWindow()
 
     // leftPanelPtr_->setLayout(leftPanelLayoutPtr_);
 
-    centralWidgetLayoutPtr_->addWidget(leftPanelPtr_);
+    // centralWidgetLayoutPtr_->addWidget(leftPanelPtr_);
 
     // companionPanelPtr_ = new QWidget(leftPanelPtr_);
     // // leftPanelPtr_->setStyleSheet("border-right: 1px solid black");
@@ -103,7 +112,17 @@ MainWindow::MainWindow()
 
     // central panel
 
-    centralPanelPtr_ = new CentralPanelWidget(centralWidgetPtr_);
+    // centralPanelPtr_ = new CentralPanelWidget(centralWidgetPtr_, "");
+    // centralContainerWidgetPtr_ = new QWidget(centralWidgetPtr_);
+    // centralContainerWidgetLayoutPtr_ = new QVBoxLayout(centralContainerWidgetPtr_);
+    // centralContainerWidgetLayoutPtr_->setSpacing(0);
+    // centralContainerWidgetLayoutPtr_->setContentsMargins(0, 0, 0, 0);
+    // centralContainerWidgetPtr_->setLayout(centralContainerWidgetLayoutPtr_);
+
+    centralContainerWidgetPtr_ = new MainWindowContainerWidget(centralWidgetPtr_);
+    centralWidgetLayoutPtr_->addWidget(centralContainerWidgetPtr_);
+
+    centralPanelPtr_ = nullptr;
 
     // centralPanelPtr_ = new QWidget(centralWidgetPtr_);
     // // centralPanelPtr_->setStyleSheet("border-right: 1px solid black");
@@ -142,11 +161,22 @@ MainWindow::MainWindow()
     // centralPanelLayoutPtr_->addWidget(textEditStubPtr_);
     // //    textEdit_->hide();
 
-    centralWidgetLayoutPtr_->addWidget(centralPanelPtr_);
+    // centralWidgetLayoutPtr_->addWidget(centralPanelPtr_);
 
     // right panel
+    // rightContainerWidgetPtr_= new QWidget(centralWidgetPtr_);
+    // rightContainerWidgetLayoutPtr_ = new QVBoxLayout(rightContainerWidgetPtr_);
+    // rightContainerWidgetLayoutPtr_->setSpacing(0);
+    // rightContainerWidgetLayoutPtr_->setContentsMargins(0, 0, 0, 0);
+    // rightContainerWidgetPtr_->setLayout(rightContainerWidgetLayoutPtr_);
 
-    rightPanelPtr_ = new RightPanelWidget(centralWidgetPtr_);
+    rightContainerWidgetPtr_ = new MainWindowContainerWidget(centralWidgetPtr_);
+    centralWidgetLayoutPtr_->addWidget(rightContainerWidgetPtr_);
+
+    rightPanelPtr_ = new RightPanelWidget(rightContainerWidgetPtr_);
+    rightPanelPtr_->set();
+
+    rightContainerWidgetPtr_->addWidgetToLayout(rightPanelPtr_);
 
     // rightPanelPtr_ = new QWidget(centralWidgetPtr_);
     // // rightPanelPtr_->setStyleSheet("border-right: 1px solid black");
@@ -176,7 +206,7 @@ MainWindow::MainWindow()
     //                &MainWindow::testMainWindowRightPanel);
     //    rightPanelLayout_->addWidget(testPlainTextEditButton_);
 
-    centralWidgetLayoutPtr_->addWidget(rightPanelPtr_);
+    // centralWidgetLayoutPtr_->addWidget(rightPanelPtr_);
 
     //    selectedSocketInfoWidget_ = nullptr;
     // selectedCompanion_ = nullptr;
@@ -196,28 +226,43 @@ MainWindow::~MainWindow()
     // delete this->appLogWidgetPalettePtr_;
 }
 
-void MainWindow::setCompanionPanel()
-{
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
-            Qt::FindDirectChildrenOnly);
+// void MainWindow::setCompanionPanel()
+// {
+//     QList<SocketInfoBaseWidget*> companionPanelChildren =
+//         this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+//             Qt::FindDirectChildrenOnly);
 
-    if(companionPanelChildren.size() == 0)
-    {
-        this->addStubWidgetToCompanionPanel();
-    }
-    else
-    {
-        logArgsWarning(
-            "companionPanelChildren.size() != 0 "
-            "at MainWindow::setCompanionPanel()");
-    }
-}
+//     if(companionPanelChildren.size() == 0)
+//     {
+//         this->addStubWidgetToCompanionPanel();
+//     }
+//     else
+//     {
+//         logArgsWarning(
+//             "companionPanelChildren.size() != 0 "
+//             "at MainWindow::setCompanionPanel()");
+//     }
+// }
 
 void MainWindow::set()
 {
     this->createMenu();
-    this->setCompanionPanel();
+    // this->setCompanionPanel();
+
+    getGraphicManagerPtr()->setParentsForStubs(
+        this->leftContainerWidgetPtr_, this->centralContainerWidgetPtr_);
+
+    getGraphicManagerPtr()->setStubWidgets();
+
+    getGraphicManagerPtr()->showCentralPanelStub();
+
+    this->showHideWidgetPtr_ = new ShowHideWidget;
+    this->addWidgetToLeftContainerAndSetParentTo(showHideWidgetPtr_);
+}
+
+void MainWindow::addLeftPanelToLayout()
+{
+    this->centralWidgetLayoutPtr_->addWidget(this->leftPanelPtr_);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -233,13 +278,35 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::addTextToAppLogWidget(const QString& text)
 {
-    this->appLogWidgetPtr_->appendPlainText(text);
+    // this->appLogWidgetPtr_->appendPlainText(text);
+    this->rightPanelPtr_->addTextToAppLogWidget(text);
     QApplication::processEvents();
 }
 
-void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
+void MainWindow::addWidgetToLeftContainerAndSetParentTo(QWidget* widgetPtr)
 {
-    this->leftPanelWidgetPtr_->addWidgetToCompanionPanel(widget);
+    this->leftContainerWidgetPtr_->addWidgetToLayoutAndSetParentTo(widgetPtr);
+}
+
+void MainWindow::addWidgetToCentralContainerAndSetParentTo(QWidget* widgetPtr)
+{
+    this->centralContainerWidgetPtr_->addWidgetToLayoutAndSetParentTo(widgetPtr);
+}
+
+void MainWindow::addWidgetToRightContainerAndSetParentTo(QWidget* widgetPtr)
+{
+    this->rightContainerWidgetPtr_->addWidgetToLayoutAndSetParentTo(widgetPtr);
+}
+
+// void MainWindow::addWidgetToCentralWidgetLayout(QWidget* widgetPtr)
+// {
+//     this->centralWidgetLayoutPtr_->addWidget(widgetPtr);
+// }
+
+void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widgetPtr)
+{
+    // this->leftPanelWidgetPtr_->addWidgetToCompanionPanel(widget);
+    this->leftPanelPtr_->addWidgetToCompanionPanel(widgetPtr);
 }
 
 // void MainWindow::addWidgetToCentralPanel(QWidget* widget)
@@ -247,105 +314,129 @@ void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 //     this->centralPanelLayoutPtr_->addWidget(widget);
 // }
 
-void MainWindow::setCentralPanel(CentralPanelWidget* widget)
+void MainWindow::setLeftPanel(LeftPanelWidget* widgetPtr)
 {
-    this->centralPanelWidgetPtr_ = widget;
+    this->leftPanelPtr_ = widgetPtr;
 }
 
-void MainWindow::setRightPanel(RightPanelWidget* widget)
+void MainWindow::setCentralPanel(CentralPanelWidget* widgetPtr)
 {
-    this->rightPanelWidgetPtr_ = widget;
+    // this->centralPanelWidgetPtr_ = widget;
+    this->centralPanelPtr_ = widgetPtr;
+}
+
+void MainWindow::setRightPanel(RightPanelWidget* widgetPtr)
+{
+    // this->rightPanelWidgetPtr_ = widget;
+    this->rightPanelPtr_ = widgetPtr;
 }
 
 size_t MainWindow::getCompanionPanelChildrenSize()
 {
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
-            Qt::FindDirectChildrenOnly);
+    // QList<SocketInfoBaseWidget*> companionPanelChildren =
+    //     this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+    //         Qt::FindDirectChildrenOnly);
 
-    return companionPanelChildren.size();
+    // return companionPanelChildren.size();
+    return this->leftPanelPtr_->getCompanionPanelChildrenSize();
 }
 
-void MainWindow::removeStubsFromCompanionPanel()
+void MainWindow::removeStubsFromCompanionPanel()  // TODO do we need remove?
 {
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
-            Qt::FindDirectChildrenOnly);
+    // QList<SocketInfoBaseWidget*> companionPanelChildren =
+    //     this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+    //         Qt::FindDirectChildrenOnly);
 
-    for(auto& child : companionPanelChildren)
-    {
-        if(child->isStub())
-        {
-            this->companionPanelLayoutPtr_->removeWidget(child);
-            delete child;
-        }
-    }
+    // for(auto& child : companionPanelChildren)
+    // {
+    //     if(child->isStub())
+    //     {
+    //         this->companionPanelLayoutPtr_->removeWidget(child);
+    //         delete child;
+    //     }
+    // }
+    this->leftPanelPtr_->removeStubsFromCompanionPanel();
 }
 
-void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)
+void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)  // TODO do we nedd remove?
 {
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
-            Qt::FindDirectChildrenOnly);
+    // QList<SocketInfoBaseWidget*> companionPanelChildren =
+    //     this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+    //         Qt::FindDirectChildrenOnly);
 
-    qsizetype index = companionPanelChildren.indexOf(widgetPtr);
+    // qsizetype index = companionPanelChildren.indexOf(widgetPtr);
 
-    if(index == -1)
-    {
-        showErrorDialogAndLogError("SocketInfoBaseWidget was not found in companion panel");
-    }
-    else if(index == 0)
-    {
+    // if(index == -1)
+    // {
+    //     showErrorDialogAndLogError("SocketInfoBaseWidget was not found in companion panel");
+    // }
+    // else if(index == 0)
+    // {
 
-    }
-    else if(index > 0)
-    {
-        Manager* managerPtr = getManagerPtr();
+    // }
+    // else if(index > 0)
+    // {
+    //     Manager* managerPtr = getManagerPtr();
 
-        auto previousWidget = companionPanelChildren.at(index - 1);
+    //     auto previousWidget = companionPanelChildren.at(index - 1);
 
-        auto previousCompanionPtr = managerPtr->
-            getMappedCompanionBySocketInfoBaseWidget(previousWidget);
+    //     auto previousCompanionPtr = managerPtr->
+    //         getMappedCompanionBySocketInfoBaseWidget(previousWidget);
 
-        managerPtr->resetSelectedCompanion(previousCompanionPtr);
+    //     managerPtr->resetSelectedCompanion(previousCompanionPtr);
 
-        this->companionPanelLayoutPtr_->removeWidget(widgetPtr);
-    }
+    //     this->companionPanelLayoutPtr_->removeWidget(widgetPtr);
+    // }
+    this->leftPanelPtr_->removeWidgetFromCompanionPanel(widgetPtr);
 }
 
-void MainWindow::oldSelectedCompanionActions(const Companion* companion)
+void MainWindow::hideLeftAndRightPanels()
 {
-    if(companion)
-    {
-        this->companionNameLabelPtr_->setText("");
-        //        this->companionNameLabel_->hide();
-
-        this->chatHistoryWidgetStubPtr_->setPlainText("");
-    }
-    else
-    {
-        this->chatHistoryWidgetStubPtr_->hide();
-        this->textEditStubPtr_->hide();
-    }
+    this->leftPanelPtr_->hide();
+    this->rightPanelPtr_->hide();
 }
 
-void MainWindow::newSelectedCompanionActions(const Companion* companion)
+void MainWindow::showLeftAndRightPanels()
 {
-    if(companion)
-    {
-        this->companionNameLabelPtr_->setText(
-            QString::fromStdString(companion->getName()));
-        this->companionNameLabelPtr_->show();
-    }
-    else
-    {
-        this->chatHistoryWidgetStubPtr_->setPlainText("");
-        this->chatHistoryWidgetStubPtr_->show();
-
-        this->textEditStubPtr_->setText("");
-        this->textEditStubPtr_->show();
-    }
+    this->leftPanelPtr_->show();
+    this->rightPanelPtr_->show();
 }
+
+// void MainWindow::oldSelectedCompanionActions(const Companion* companion)
+// {
+//     // if(companion)
+//     // {
+//     //     this->companionNameLabelPtr_->setText("");
+//     //     //        this->companionNameLabel_->hide();
+
+//     //     this->chatHistoryWidgetStubPtr_->setPlainText("");
+//     // }
+//     // else
+//     // {
+//     //     this->chatHistoryWidgetStubPtr_->hide();
+//     //     this->textEditStubPtr_->hide();
+//     // }
+//     this->centralPanelPtr_->oldSelectedCompanionActions(companion);
+// }
+
+// void MainWindow::newSelectedCompanionActions(const Companion* companion)
+// {
+//     // if(companion)
+//     // {
+//     //     this->companionNameLabelPtr_->setText(
+//     //         QString::fromStdString(companion->getName()));
+//     //     this->companionNameLabelPtr_->show();
+//     // }
+//     // else
+//     // {
+//     //     this->chatHistoryWidgetStubPtr_->setPlainText("");
+//     //     this->chatHistoryWidgetStubPtr_->show();
+
+//     //     this->textEditStubPtr_->setText("");
+//     //     this->textEditStubPtr_->show();
+//     // }
+//     this->centralPanelPtr_->newSelectedCompanionActions(companion);
+// }
 
 void MainWindow::createCompanion()
 {

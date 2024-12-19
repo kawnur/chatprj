@@ -177,9 +177,15 @@ public:
     ~ShowHideWidget();
 
 private:
+    bool show_;
+
     QVBoxLayout* layoutPtr_;
     QLabel* labelPtr_;
     QPalette* palettePtr_;
+
+    void mousePressEvent(QMouseEvent*) override;
+    void hideInfo();
+    void showInfo();
 };
 
 class LeftPanelWidget : public QWidget
@@ -191,6 +197,9 @@ public:
     ~LeftPanelWidget();
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+    size_t getCompanionPanelChildrenSize();
+    void removeStubsFromCompanionPanel();  // TODO do we need remove?
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);  // TODO do we nedd remove?
 
 private:
     QVBoxLayout* layoutPtr_;
@@ -200,7 +209,7 @@ private:
     QVBoxLayout* companionPanelLayoutPtr_;
 
     QSpacerItem* spacerPtr_;
-    ShowHideWidget* showHideWidgetPtr_;
+    // ShowHideWidget* showHideWidgetPtr_;
 };
 
 class CentralPanelWidget : public QWidget
@@ -208,10 +217,18 @@ class CentralPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    CentralPanelWidget();
+    CentralPanelWidget(QWidget*, const std::string&);
     ~CentralPanelWidget();
 
     void set(Companion*);
+
+    void hideWidgets();
+    void showWidgets();
+    // void oldSelectedCompanionActions(const Companion*);
+    // void newSelectedCompanionActions(const Companion*);
+
+    void addMessageToChatHistory(const QString&);
+    void clearChatHistory();
 
 private:
     Companion* companionPtr_;
@@ -241,8 +258,11 @@ class RightPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    RightPanelWidget();
+    RightPanelWidget(QWidget*);
     ~RightPanelWidget();
+
+    void set();
+    void addTextToAppLogWidget(const QString&);
 
 private:
     QVBoxLayout* layoutPtr_;
@@ -259,6 +279,20 @@ public:
     WidgetGroup(const Companion*);
     ~WidgetGroup();
 
+    QString formatMessage(const Companion*, const Message*);  // TODO move to widget
+    void addMessageToChatHistory(const QString&);
+    void clearChatHistory();
+
+    void hideCentralPanel();
+    void showCentralPanel();
+
+    SocketInfoBaseWidget* getSocketInfoBasePtr();
+
+public slots:
+    // void sendMessage();
+    // void connectToServer();
+
+private:
     SocketInfoBaseWidget* socketInfoBasePtr_;
 
     // QPlainTextEdit* chatHistoryPtr_;
@@ -267,15 +301,6 @@ public:
     // QPalette* textEditPalettePtr_;
     CentralPanelWidget* centralPanelPtr_;
 
-    QString formatMessage(const Companion*, const Message*);  // TODO move to widget
-    void addMessageToChatHistory(const QString&);
-    void clearChatHistory();
-
-public slots:
-    // void sendMessage();
-    // void connectToServer();
-
-private:
     QString buildChatHistory(const Companion*);
 };
 
@@ -285,11 +310,34 @@ public:
     StubWidgetGroup();
     ~StubWidgetGroup();
 
+    void set();
+    void setParents(QWidget*, QWidget*);
+    void hideCentralPanel();
+    void showCentralPanel();
+
+    void hideStubPanels();
+    void showStubPanels();;
+
 private:
     SocketInfoStubWidget* socketInfoPtr_;
-    QWidget* leftPanelPtr_;
+    LeftPanelWidget* leftPanelPtr_;
     CentralPanelWidget* centralPanelPtr_;
-    QWidget* rightPanelPtr_;
+    RightPanelWidget* rightPanelPtr_;
+};
+
+class MainWindowContainerWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MainWindowContainerWidget(QWidget*);
+    ~MainWindowContainerWidget();
+
+    void addWidgetToLayout(QWidget*);
+    void addWidgetToLayoutAndSetParentTo(QWidget*);
+
+private:
+    QVBoxLayout* layoutPtr_;
 };
 
 class CompanionDataDialog : public QDialog
@@ -300,7 +348,7 @@ public:
     CompanionDataDialog(CompanionActionType, QWidget*, Companion*);
     ~CompanionDataDialog();
 
-    void set(CompanionAction*);
+    void set(CompanionAction*);    
 
     std::string getNameString();
     std::string getIpAddressString();

@@ -20,6 +20,7 @@
 #include "widgets.hpp"
 
 class LeftPanelWidget;
+class MainWindowContainerWidget;
 class ShowHideWidget;
 class SocketInfoBaseWidget;
 class SocketInfoWidget;
@@ -38,6 +39,9 @@ private:
     QHBoxLayout* centralWidgetLayoutPtr_;
 
     // left panel
+    // QWidget* leftContainerWidgetPtr_;
+    // QVBoxLayout* leftContainerWidgetLayoutPtr_;
+    MainWindowContainerWidget* leftContainerWidgetPtr_;
 
     LeftPanelWidget* leftPanelPtr_;
 
@@ -52,6 +56,9 @@ private:
     // ShowHideWidget* showHideWidgetPtr_;
 
     // central panel
+    // QWidget* centralContainerWidgetPtr_;
+    // QVBoxLayout* centralContainerWidgetLayoutPtr_;
+    MainWindowContainerWidget* centralContainerWidgetPtr_;
 
     CentralPanelWidget* centralPanelPtr_;
 
@@ -74,6 +81,9 @@ private:
 //    QPushButton* button_;
 
     // right panel
+    // QWidget* rightContainerWidgetPtr_;
+    // QVBoxLayout* rightContainerWidgetLayoutPtr_;
+    MainWindowContainerWidget* rightContainerWidgetPtr_;
 
     RightPanelWidget* rightPanelPtr_;
 
@@ -86,6 +96,8 @@ private:
 
 //    void testMainWindowRightPanel();
 
+    ShowHideWidget* showHideWidgetPtr_;
+
     void closeEvent(QCloseEvent*) override;
 
     void keyPressEvent(QKeyEvent*) override;
@@ -97,16 +109,24 @@ private:
 public:
     MainWindow();
 
-    void addStubWidgetToCompanionPanel();
+    // void addStubWidgetToCompanionPanel();
 
-    void setCompanionPanel();
+    // void setCompanionPanel();
     void set();
+
+    void addLeftPanelToLayout();
 
     // void addTextToChatHistoryWidget(const QString&);
     void addTextToAppLogWidget(const QString&);
 
+    void addWidgetToLeftContainerAndSetParentTo(QWidget*);
+    void addWidgetToCentralContainerAndSetParentTo(QWidget*);
+    void addWidgetToRightContainerAndSetParentTo(QWidget*);
+
+    // void addWidgetToCentralWidgetLayout(QWidget*);
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
     // void addWidgetToCentralPanel(QWidget*);
+    void setLeftPanel(LeftPanelWidget*);
     void setCentralPanel(CentralPanelWidget*);
     void setRightPanel(RightPanelWidget*);
 
@@ -115,8 +135,11 @@ public:
     void removeStubsFromCompanionPanel();
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
-    void oldSelectedCompanionActions(const Companion*);
-    void newSelectedCompanionActions(const Companion*);
+    void hideLeftAndRightPanels();
+    void showLeftAndRightPanels();
+
+    // void oldSelectedCompanionActions(const Companion*);
+    // void newSelectedCompanionActions(const Companion*);
 
 private slots:
     void createCompanion();
