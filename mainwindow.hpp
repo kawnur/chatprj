@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include <QGraphicsBlurEffect>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 #include <QGraphicsView>
@@ -30,6 +31,30 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+public:
+    MainWindow();
+    ~MainWindow();
+
+    void set();
+
+    void addTextToAppLogWidget(const QString&);
+
+    void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, QWidget*);
+
+    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+
+    size_t getCompanionPanelChildrenSize();
+
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
+
+    void hideLeftAndRightPanels();
+    void showLeftAndRightPanels();
+
+    int getLeftPanelWidgetWidth();
+
+private slots:
+    void createCompanion();
+
 private:
     // TODO rename panel child widgets according its functionality
 
@@ -39,62 +64,16 @@ private:
     QHBoxLayout* centralWidgetLayoutPtr_;
 
     // left panel
-    // QWidget* leftContainerWidgetPtr_;
-    // QVBoxLayout* leftContainerWidgetLayoutPtr_;
     MainWindowContainerWidget* leftContainerWidgetPtr_;
-
     LeftPanelWidget* leftPanelPtr_;
 
-    // QWidget* leftPanelPtr_;
-    // QVBoxLayout* leftPanelLayoutPtr_;
-    // QPalette* leftPanelPalettePtr_;
-
-    // QWidget* companionPanelPtr_;
-    // QVBoxLayout* companionPanelLayoutPtr_;
-
-    // QSpacerItem* spacerPtr_;
-    // ShowHideWidget* showHideWidgetPtr_;
-
     // central panel
-    // QWidget* centralContainerWidgetPtr_;
-    // QVBoxLayout* centralContainerWidgetLayoutPtr_;
     MainWindowContainerWidget* centralContainerWidgetPtr_;
-
     CentralPanelWidget* centralPanelPtr_;
 
-//     QWidget* centralPanelPtr_;
-//     QVBoxLayout* centralPanelLayoutPtr_;
-// //    QGraphicsScene* graphicsScene_;
-// //    QGraphicsView* graphicsView_;
-// //    QRectF* rect_;
-// //    QGraphicsSimpleTextItem* textItem_;
-// //    int linesCount_;
-// //    QFont* font_;
-
-//     QLabel* companionNameLabelPtr_;
-//     QPalette* companionNameLabelPalettePtr_;
-//     QPlainTextEdit* chatHistoryWidgetStubPtr_;
-//     QPalette* chatHistoryWidgetStubPalettePtr_;
-
-//     TextEditWidget* textEditStubPtr_;
-//     QPalette* textEditStubPalettePtr_;
-//    QPushButton* button_;
-
     // right panel
-    // QWidget* rightContainerWidgetPtr_;
-    // QVBoxLayout* rightContainerWidgetLayoutPtr_;
     MainWindowContainerWidget* rightContainerWidgetPtr_;
-
     RightPanelWidget* rightPanelPtr_;
-
-    // QWidget* rightPanelPtr_;
-    // QVBoxLayout* rightPanelLayoutPtr_;
-    // QPlainTextEdit* appLogWidgetPtr_;
-    // QPalette* appLogWidgetPalettePtr_;
-
-//    QPushButton* testPlainTextEditButton_;
-
-//    void testMainWindowRightPanel();
 
     ShowHideWidget* showHideWidgetPtr_;
 
@@ -102,55 +81,9 @@ private:
         mapContainerPtrToContainerPosition;
 
     void closeEvent(QCloseEvent*) override;
-
     void keyPressEvent(QKeyEvent*) override;
 
     void createMenu();
-
-    ~MainWindow();
-
-public:
-    MainWindow();
-
-    // void addStubWidgetToCompanionPanel();
-
-    // void setCompanionPanel();
-    void set();
-
-    void addLeftPanelToLayout();
-
-    // void addTextToChatHistoryWidget(const QString&);
-    void addTextToAppLogWidget(const QString&);
-
-    void addWidgetToContainerAndSetParentTo(
-        MainWindowContainerPosition, QWidget*);
-
-    // void addWidgetToCentralWidgetLayout(QWidget*);
-    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
-    // void addWidgetToCentralPanel(QWidget*);
-    void setLeftPanel(LeftPanelWidget*);
-    void setCentralPanel(CentralPanelWidget*);
-    void setRightPanel(RightPanelWidget*);
-
-    size_t getCompanionPanelChildrenSize();
-
-    void removeStubsFromCompanionPanel();
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
-
-    void hideLeftAndRightPanels();
-    void showLeftAndRightPanels();
-
-    QSize getLeftPanelWidgetSize();
-
-    // void oldSelectedCompanionActions(const Companion*);
-    // void newSelectedCompanionActions(const Companion*);
-
-private slots:
-    void createCompanion();
 };
-
-// MainWindow* getMainWindowPtr();
-
-//void addTextFunction(const QString&);
 
 #endif // MAINWINDOW_HPP

@@ -46,7 +46,6 @@ template<typename... Ts> void logArgs(Ts&&... args)
 
     ((text += (argForLogging(args) + QString(" "))), ...);
 
-    // mainWindowPtr->addTextToAppLogWidget(text);
     getGraphicManagerPtr()->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(args...);
 }
@@ -68,8 +67,6 @@ template<typename... Ts> void logArgsError(Ts&&... args)
 
 template<typename T> void logLine(const T& string)
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
-    // mainWindowPtr->addTextToAppLogWidget(QString(str));
     getGraphicManagerPtr()->addTextToAppLogWidget(QString(string));
 }
 

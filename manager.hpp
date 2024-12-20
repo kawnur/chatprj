@@ -266,8 +266,6 @@ public:
 
     void set();
 
-    void buildMainWindow();
-
     void setParentsForStubs(QWidget*, QWidget*);
     void setStubWidgets();
 
@@ -275,12 +273,7 @@ public:
     void sendMessage(Companion*, const std::string&);
 
     void addTextToAppLogWidget(const QString&);
-    // void oldSelectedCompanionActions(const Companion*);
-    // void newSelectedCompanionActions(const Companion*);
     size_t getCompanionPanelChildrenSize();
-    // void addStubWidgetToCompainonPanel();
-
-    // void addWidgetToMainWindow(QWidget*);
 
     void hideWidgetGroupCentralPanel(WidgetGroup*);
     void showWidgetGroupCentralPanel(WidgetGroup*);
@@ -289,12 +282,7 @@ public:
         MainWindowContainerPosition, QWidget*);
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
-    // void addWidgetToCentralPanel(QWidget*);
-    // void setMainWindowLeftPanel(LeftPanelWidget*);
-    // void setMainWindowCentralPanel(CentralPanelWidget*);
-    // void setMainWindowRightPanel(RightPanelWidget*);
 
-    void removeStubsFromCompanionPanel();
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
     void createTextDialog(QDialog*, const DialogType, const std::string&);
@@ -307,6 +295,8 @@ public:
 
     void sendCompanionDataToManager(CompanionAction*);
     void showCompanionInfoDialog(CompanionAction*, std::string&&);
+
+    void hideCompanionPanelStub();
 
     void hideCentralPanelStub();
     void showCentralPanelStub();

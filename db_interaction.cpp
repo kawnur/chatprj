@@ -351,7 +351,6 @@ void logUnknownField(const PGresult* result, int row, int column)
 }
 
 int getDataFromDBResult(
-    // DBReplyData& data,
     std::shared_ptr<DBReplyData>& dataPtr,
     const PGresult* result,
     int maxTuples)
@@ -364,7 +363,6 @@ int getDataFromDBResult(
 
     if(ntuples == 0)
     {
-        // data.clear();
         dataPtr->clear();
         return dataIsOk;
     }
@@ -375,7 +373,6 @@ int getDataFromDBResult(
     }
 
     // create additional elements in result vector
-    // data.fill(ntuples);
     dataPtr->fill(ntuples);
 
     dataIsOk = 1;
@@ -389,13 +386,11 @@ int getDataFromDBResult(
             char* fname = PQfname(result, j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
-            // auto found = data.count(i, fnameString);
             auto found = dataPtr->count(i, fnameString);
 
             if(found == 1)
             {
                 const char* value = PQgetvalue(result, i, j);
-                // data.push(i, fnameString, value);
                 dataPtr->push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");

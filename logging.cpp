@@ -22,15 +22,11 @@ QString argForLogging(const bool& value)
 
 void logLine(const QString& string)
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
-    // mainWindowPtr->addTextToAppLogWidget(str);
     getGraphicManagerPtr()->addTextToAppLogWidget(string);
 }
 
 void logLine(const std::string& string)
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
-    // mainWindowPtr->addTextToAppLogWidget(QString::fromStdString(string));
     getGraphicManagerPtr()->addTextToAppLogWidget(QString::fromStdString(string));
 }
 

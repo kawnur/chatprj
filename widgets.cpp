@@ -148,20 +148,6 @@ SocketInfoWidget::SocketInfoWidget()
     logArgs("SocketInfoWidget()");
 }
 
-// SocketInfoWidget::SocketInfoWidget(QString& name, QString& ipAddress, QString& port) :
-//     name_(name), ipAddress_(ipAddress), port_(port) {
-
-//     set();  // TODO move from constructor
-// }
-
-// SocketInfoWidget::SocketInfoWidget(QString&& name, QString&& ipAddress, QString&& port) :
-//     name_(name),
-//     ipAddress_(ipAddress),
-//     port_(port) {
-
-//     setParentForChildren();
-// }
-
 SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
 {
     name_ = si.name_;
@@ -202,39 +188,17 @@ SocketInfoWidget::SocketInfoWidget(Companion* companionPtr) :
     initializeFields();
 }
 
-//SocketInfoWidget::SocketInfoWidget(const QString& name) : name_(name) {
-////    logArgs("SocketInfoWidget(const QString& name)");
-
-//    set();
-
-//    IndicatorWidget* oldIndicator = indicator_;
-//    QPushButton* oldEditButton = editButton_;
-
-//    indicator_ = nullptr;
-//    editButton_ = nullptr;
-
-//    layout_->removeWidget(oldIndicator);
-//    layout_->removeWidget(oldEditButton);
-
-//    delete oldIndicator;
-//    delete oldEditButton;
-//}
-
 SocketInfoWidget::~SocketInfoWidget()
 {
     // cannot set parent
     delete this->palettePtr_;
 }
 
-
 void SocketInfoWidget::print()
 {
     logArgs(
-        "name:", this->name_,
-        "ipAddress:", this->ipAddress_,
-        "serverPort_:", this->serverPort_,
-        "clientPort_:", this->clientPort_
-    );
+        "name:", this->name_, "ipAddress:", this->ipAddress_,
+        "serverPort_:", this->serverPort_, "clientPort_:", this->clientPort_);
 }
 
 bool SocketInfoWidget::isStub()
@@ -330,10 +294,6 @@ void SocketInfoWidget::deleteCompanionAction()
 void SocketInfoWidget::clientAction()
 {
     bool result = false;
-    // Manager* managerPtr = getManagerPtr();
-
-    // const Companion* companion =
-    //     managerPtr->getMappedCompanionBySocketInfoBaseWidget(this);
 
     const Companion* companion =
         getManagerPtr()->getMappedCompanionBySocketInfoBaseWidget(this);
@@ -353,7 +313,6 @@ void SocketInfoWidget::clientAction()
     if(result)
     {
         // change connect button text
-        // QString currentText = this->connectButtonPtr_->text();
         QString nextText = getNextConnectButtonLabel(currentText);
         this->connectButtonPtr_->setText(nextText);
 
@@ -389,7 +348,6 @@ void SocketInfoWidget::update()
     this->ipAddressLabelPtr_->setText(this->ipAddress_);
     this->clientPort_ = this->companionPtr_->getClientPort();
     this->clientPortLabelPtr_->setText(QString::fromStdString(std::to_string(this->clientPort_)));
-    // QApplication::processEvents();
 }
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
@@ -457,9 +415,6 @@ LeftPanelWidget::LeftPanelWidget(QWidget* parent)
     spacerPtr_ = new QSpacerItem(
         0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
     layoutPtr_->addSpacerItem(spacerPtr_);
-
-    // showHideWidgetPtr_ = new ShowHideWidget;
-    // layoutPtr_->addWidget(showHideWidgetPtr_);
 }
 
 LeftPanelWidget::~LeftPanelWidget()
@@ -469,7 +424,6 @@ LeftPanelWidget::~LeftPanelWidget()
     delete this->companionPanelPtr_;
     delete this->companionPanelLayoutPtr_;
     delete this->spacerPtr_;
-    // delete this->showHideWidgetPtr_;
 }
 
 void LeftPanelWidget::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
@@ -484,22 +438,6 @@ size_t LeftPanelWidget::getCompanionPanelChildrenSize()
             Qt::FindDirectChildrenOnly);
 
     return companionPanelChildren.size();
-}
-
-void LeftPanelWidget::removeStubsFromCompanionPanel()  // TODO do we need remove?
-{
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
-            Qt::FindDirectChildrenOnly);
-
-    for(auto& child : companionPanelChildren)
-    {
-        if(child->isStub())
-        {
-            this->companionPanelLayoutPtr_->removeWidget(child);
-            delete child;
-        }
-    }
 }
 
 void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)  // TODO do we nedd remove?
@@ -533,6 +471,22 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widge
     }
 }
 
+int LeftPanelWidget::getLastCompanionPanelChildWidth()
+{
+    QList<SocketInfoBaseWidget*> companionPanelChildren =
+        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+            Qt::FindDirectChildrenOnly);
+
+    if(companionPanelChildren.size() == 0)
+    {
+        return -1;
+    }
+    else
+    {
+        return companionPanelChildren.at(companionPanelChildren.size() - 1)->width();
+    }
+}
+
 CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
 {
     if(parent)
@@ -545,14 +499,12 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     layoutPtr_->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutPtr_);
 
-    // companionNameLabelPtr_ = new QLabel("");
     companionNameLabelPtr_ = new QLabel(QString::fromStdString(name));
     // companionNameLabelPtr_->setStyleSheet("border-bottom: 1px solid black");
     companionNameLabelPalettePtr_ = new QPalette;
     companionNameLabelPalettePtr_->setColor(QPalette::Window, QColor(companionNameLabelBackgroundColor));
     companionNameLabelPtr_->setAutoFillBackground(true);
     companionNameLabelPtr_->setPalette(*companionNameLabelPalettePtr_);
-    //    companionNameLabel_->hide();
 
     layoutPtr_->addWidget(companionNameLabelPtr_);
 
@@ -562,15 +514,12 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
 
     chatHistoryWidgetPalettePtr_ = new QPalette;
     chatHistoryWidgetPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
-    //    chatHistoryWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
-    //    chatHistoryWidgetPtr_->setAutoFillBackground(true);
     chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
 
     layoutPtr_->addWidget(chatHistoryWidgetPtr_);
 
     textEditPtr_ = new TextEditWidget;    
     layoutPtr_->addWidget(textEditPtr_);
-    //    textEdit_->hide();
 }
 
 CentralPanelWidget::~CentralPanelWidget()
@@ -589,56 +538,6 @@ void CentralPanelWidget::set(Companion* companionPtr)
     this->companionPtr_ = companionPtr;
     connect(this->textEditPtr_, &TextEditWidget::send, this, &CentralPanelWidget::sendMessage);
 }
-
-void CentralPanelWidget::hideWidgets()
-{
-    this->chatHistoryWidgetPtr_->hide();
-    this->textEditPtr_->hide();
-    // QApplication::processEvents();
-    // this->hide();
-}
-
-void CentralPanelWidget::showWidgets()
-{
-    this->chatHistoryWidgetPtr_->show();
-    this->textEditPtr_->show();
-    // QApplication::processEvents();
-    // this->show();
-}
-
-// void CentralPanelWidget::oldSelectedCompanionActions(const Companion* companion)
-// {
-//     if(companion)
-//     {
-//         this->companionNameLabelPtr_->setText("");
-//         //        this->companionNameLabel_->hide();
-
-//         this->chatHistoryWidgetStubPtr_->setPlainText("");
-//     }
-//     else
-//     {
-//         this->chatHistoryWidgetStubPtr_->hide();
-//         this->textEditStubPtr_->hide();
-//     }
-// }
-
-// void CentralPanelWidget::newSelectedCompanionActions(const Companion* companion)
-// {
-//     if(companion)
-//     {
-//         this->companionNameLabelPtr_->setText(
-//             QString::fromStdString(companion->getName()));
-//         this->companionNameLabelPtr_->show();
-//     }
-//     else
-//     {
-//         this->chatHistoryWidgetStubPtr_->setPlainText("");
-//         this->chatHistoryWidgetStubPtr_->show();
-
-//         this->textEditStubPtr_->setText("");
-//         this->textEditStubPtr_->show();
-//     }
-// }
 
 void CentralPanelWidget::addMessageToChatHistory(const QString& message)
 {
@@ -709,81 +608,33 @@ void RightPanelWidget::addTextToAppLogWidget(const QString& text)
 
 WidgetGroup::WidgetGroup(const Companion* companionPtr)
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     const SocketInfo* socketInfoPtr = companionPtr->getSocketInfoPtr();
 
-    // SocketInfoWidget* widget = new SocketInfoWidget(
-    //     companion->getName(),
-    //     socketInfoPtr->getIpAddress(),
-    //     socketInfoPtr->getServerPort(),
-    //     socketInfoPtr->getClientPort());
-    SocketInfoWidget* widget = new SocketInfoWidget(const_cast<Companion*>(companionPtr));
+    SocketInfoWidget* widget = new SocketInfoWidget(
+        const_cast<Companion*>(companionPtr));
 
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
-    // mainWindowPtr->addWidgetToLeftPanel(socketInfoBasePtr_);
     graphicManagerPtr->addWidgetToCompanionPanel(socketInfoBasePtr_);
-
-    // chatHistoryPtr_ = new QPlainTextEdit;
-    // // chatHistoryPtr_->setStyleSheet("border-bottom: 1px solid black");
-    // chatHistoryPtr_->setReadOnly(true);
-    // buildChatHistory(companionPtr);
-    // chatHistoryPtr_->hide();
-
-    // chatHistoryPalettePtr_ = new QPalette;  // TODO set parent or delete
-    // chatHistoryPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
-    // chatHistoryPalettePtr_->setColor(QPalette::Text, QColorConstants::Black);
-    // chatHistoryPtr_->setAutoFillBackground(true);
-    // chatHistoryPtr_->setPalette(*chatHistoryPalettePtr_);
-
-    // mainWindowPtr->addWidgetToCentralPanel(chatHistoryPtr_);
-    // graphicManagerPtr->addWidgetToCentralPanel(chatHistoryPtr_);
-
-    // textEditPtr_ = new TextEditWidget;
-    // textEditPtr_->hide();
-
-    // connect(textEditPtr_, &TextEditWidget::send, this, &WidgetGroup::sendMessage);
-
-    // mainWindowPtr->addWidgetToCentralPanel(textEditPtr_);
-    // graphicManagerPtr->addWidgetToCentralPanel(textEditPtr_);
 
     centralPanelPtr_ = new CentralPanelWidget(
         getGraphicManagerPtr()->getMainWindowPtr(), companionPtr->getName());
+
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr));
-    // graphicManagerPtr->setMainWindowCentralPanel(centralPanelPtr_);
-    // graphicManagerPtr->addWidgetToMainWindowCentralContainerAndSetParentTo(centralPanelPtr_);
+
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::CENTRAL, centralPanelPtr_);
+
     centralPanelPtr_->hide();
 }
 
 WidgetGroup::~WidgetGroup()
 {
-    // coutWithEndl("WidgetGroup::~WidgetGroup()");
     getGraphicManagerPtr()->removeWidgetFromCompanionPanel(this->socketInfoBasePtr_);
     delete this->socketInfoBasePtr_;
     delete this->centralPanelPtr_;
-
-    // delete this->chatHistoryPtr_;
-    // delete this->chatHistoryPalettePtr_;
-    // delete this->textEditPtr_;
-    // delete this->textEditPalettePtr_;
 }
-
-// void WidgetGroup::sendMessage()
-// {
-//     // Manager* managerPtr = getManagerPtr();
-
-//     auto text = this->textEditPtr_->toPlainText().toStdString();
-
-//     // const Companion* companion =
-//     //     manager->getMappedCompanionByWidgetGroup(this);
-
-//     // manager->sendMessage(companion, this);
-//     // managerPtr->sendMessage(this, text);
-//     getManagerPtr()->sendMessage(this, text);
-// }
 
 QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)  // TODO move to utils
 {
@@ -807,32 +658,27 @@ QString WidgetGroup::formatMessage(const Companion* companion, const Message* me
     text.replace("\n", "\n" + messageIndent);
 
     QString msg = prefix + messageIndent + text + QString("\n");
-    // logArgs("message:", "#", msg, "#");
 
     return msg;
 }
 
 void WidgetGroup::addMessageToChatHistory(const QString& message)
 {
-    // this->chatHistoryPtr_->appendPlainText(message);
     this->centralPanelPtr_->addMessageToChatHistory(message);
 }
 
 void WidgetGroup::clearChatHistory()
 {
-    // this->chatHistoryPtr_->clear();
     this->centralPanelPtr_->clearChatHistory();
 }
 
 void WidgetGroup::hideCentralPanel()
 {
-    // this->centralPanelPtr_->hideWidgets();
     this->centralPanelPtr_->hide();
 }
 
 void WidgetGroup::showCentralPanel()
 {
-    // this->centralPanelPtr_->showWidgets();
     this->centralPanelPtr_->show();
 }
 
@@ -854,27 +700,6 @@ QString WidgetGroup::buildChatHistory(const Companion* companion)
 
     return result;
 }
-
-// InputFormElementWidget::InputFormElementWidget(std::string&& label)
-// {
-//     label_ = label;
-
-//     layoutPtr_ = new QHBoxLayout;
-
-//     labelPtr_ = new QLabel(QString::fromStdString(label_));
-//     editPtr_ = new QLineEdit;
-
-//     layoutPtr_->addWidget(labelPtr_);
-//     layoutPtr_->addWidget(editPtr_);
-// }
-
-// InputFormElementWidget::~InputFormElementWidget()
-// {
-//     // didn't set parent for members
-//     delete this->layoutPtr_;
-//     delete this->labelPtr_;
-//     delete this->editPtr_;
-// }
 
 StubWidgetGroup::StubWidgetGroup()
 {
@@ -900,37 +725,32 @@ void StubWidgetGroup::set()
         dynamic_cast<SocketInfoBaseWidget*>(socketInfoPtr_);
 
     graphicManagerPtr->addWidgetToCompanionPanel(baseObjectCastPtr);
-    // baseObjectCastPtr->hide();
 
-    // graphicManagerPtr->setMainWindowLeftPanel(leftPanelPtr_);
-    // graphicManagerPtr->addWidgetToMainWindowLeftContainerAndSetParentTo(
-    //     this->leftPanelPtr_);
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::LEFT, this->leftPanelPtr_);
-    leftPanelPtr_->hide();
 
-    // graphicManagerPtr->setMainWindowCentralPanel(centralPanelPtr_);
-    // graphicManagerPtr->addWidgetToMainWindowCentralContainerAndSetParentTo(
-    //     this->centralPanelPtr_);
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::CENTRAL, this->centralPanelPtr_);
-    centralPanelPtr_->hide();
 
-    // graphicManagerPtr->setMainWindowRightPanel(rightPanelPtr_);
-    // graphicManagerPtr->addWidgetToMainWindowRightContainerAndSetParentTo(
-    //     this->rightPanelPtr_);
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::RIGHT, this->rightPanelPtr_);
+
+    leftPanelPtr_->hide();
+    centralPanelPtr_->hide();
     rightPanelPtr_->hide();
 }
 
 void StubWidgetGroup::setParents(
     QWidget* leftContainerPtr, QWidget* centralContainerPtr)
 {
-    // this->socketInfoPtr_;
     this->leftPanelPtr_->setParent(centralContainerPtr);
     this->centralPanelPtr_->setParent(centralContainerPtr);
     this->rightPanelPtr_->setParent(centralContainerPtr);
+}
+
+void StubWidgetGroup::hideSocketInfoStubWidget()
+{
+    this->socketInfoPtr_->hide();
 }
 
 void StubWidgetGroup::hideCentralPanel()
@@ -962,13 +782,9 @@ void StubWidgetGroup::showStubPanels()
     this->rightPanelPtr_->show();
 }
 
-void StubWidgetGroup::setStubPanelsSize(
-    const QSize& leftPanelSize, const QSize& centralPanelSize,
-    const QSize& rightPanelSize)
+void StubWidgetGroup::setLeftPanelWidth(int width)
 {
-    this->leftPanelPtr_->resize(leftPanelSize);
-    this->centralPanelPtr_->resize(centralPanelSize);
-    this->rightPanelPtr_->resize(rightPanelSize);
+    this->leftPanelPtr_->resize(width, this->leftPanelPtr_->height());
 }
 
 MainWindowContainerWidget::MainWindowContainerWidget(QWidget* widgetPtr)
@@ -1020,9 +836,6 @@ CompanionDataDialog::CompanionDataDialog(
     actionType_ = actionType;
 
     layoutPtr_ = new QFormLayout;
-    // layoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    // layoutPtr_->setSpacing(0);
-    // layoutPtr_->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutPtr_);
 
     nameLabelPtr_ = new QLabel("Name");

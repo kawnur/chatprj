@@ -46,7 +46,6 @@ void SocketInfo::updateData(const CompanionData* dataPtr)
 }
 
 Message::Message(
-//        int companion_id, int author_id, std::tm time,
         int companion_id, int author_id, const std::string& time,
         const std::string& text, bool isSent) :
     companion_id_(companion_id), author_id_(author_id), time_(time),
@@ -496,9 +495,6 @@ void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
-    // Companion* companionPtr =
-    //     const_cast<Companion*>(this->getMappedCompanionByWidgetGroup(groupPtr));
-
     WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
 
     // encrypt message
@@ -562,7 +558,6 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
 {
     auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair)
     {
-        // return pair.second->socketInfoBasePtr_ == widget;
         return pair.second->getSocketInfoBasePtr() == widget;
     };
 
@@ -599,11 +594,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->unselect();
 
-        // widgetGroup->chatHistoryPtr_->hide();
-        // widgetGroup->textEditPtr_->hide();
         widgetGroup->hideCentralPanel();
     }
-    // graphicManagerPtr->oldSelectedCompanionActions(this->selectedCompanionPtr_);
     else
     {
         graphicManagerPtr->hideCentralPanelStub();
@@ -617,11 +609,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->select();
 
-        // widgetGroup->chatHistoryPtr_->show();
-        // widgetGroup->textEditPtr_->show();
         widgetGroup->showCentralPanel();
     }
-    // graphicManagerPtr->newSelectedCompanionActions(this->selectedCompanionPtr_);
     else
     {
         graphicManagerPtr->showCentralPanelStub();
@@ -1025,10 +1014,6 @@ void Manager::hideSelectedCompanionCentralPanel()
         auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
         getGraphicManagerPtr()->hideWidgetGroupCentralPanel(groupPtr);
     }
-    else
-    {
-        // getGraphicManagerPtr()->hideCentralPanelStub();
-    }
 }
 
 void Manager::showSelectedCompanionCentralPanel()
@@ -1037,10 +1022,6 @@ void Manager::showSelectedCompanionCentralPanel()
     {
         auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
         getGraphicManagerPtr()->showWidgetGroupCentralPanel(groupPtr);
-    }
-    else
-    {
-        // getGraphicManagerPtr()->showCentralPanelStub();
     }
 }
 
@@ -1150,7 +1131,6 @@ void Manager::buildWidgetGroups()
     if(companionsSize == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
-        // graphicManagerPtr->addStubWidgetToCompainonPanel();
     }
     else
     {
@@ -1158,7 +1138,8 @@ void Manager::buildWidgetGroups()
         {
             // TODO check if sockets already are children
 
-            graphicManagerPtr->removeStubsFromCompanionPanel();
+            // hide companion panel stub widget
+            graphicManagerPtr->hideCompanionPanelStub();
 
             for(auto& companion : this->companionPtrs_)
             {
@@ -1232,23 +1213,6 @@ void GraphicManager::set()
     this->mainWindowPtr_->show();
 }
 
-void GraphicManager::buildMainWindow()
-{
-    // this->centralWidgetLayoutPtr_->addWidget(this->leftPanelPtr_);
-
-
-    // getGraphicManagerPtr()->setParentsForStubs(
-    //     this->leftPanelPtr_, this->centralWidgetPtr_);
-
-    // getGraphicManagerPtr()->setStubWidgets();
-
-    // this->centralWidgetLayoutPtr_->addWidget(this->rightPanelPtr_);
-
-    // getGraphicManagerPtr()->showCentralPanelStub();
-
-
-}
-
 void GraphicManager::setParentsForStubs(
     QWidget* leftContainerPtr, QWidget* centralContainerPtr)
 {
@@ -1275,54 +1239,10 @@ void GraphicManager::addTextToAppLogWidget(const QString& text)
     this->mainWindowPtr_->addTextToAppLogWidget(text);
 }
 
-// void GraphicManager::oldSelectedCompanionActions(const Companion* companion)
-// {
-//     // if(companion)
-//     // {
-//     //     this->companionNameLabelPtr_->setText("");
-//     //     //        this->companionNameLabel_->hide();
-
-//     //     this->chatHistoryWidgetStubPtr_->setPlainText("");
-//     // }
-//     // else
-//     // {
-//     //     this->chatHistoryWidgetStubPtr_->hide();
-//     //     this->textEditStubPtr_->hide();
-//     // }
-//     if(!companion)
-//     {
-//         this->stubWidgetsPtr_->hideCentralPanel();
-//     }
-// }
-
-// void GraphicManager::newSelectedCompanionActions(const Companion* companion)
-// {
-//     if(companion)
-//     {
-//         this->companionNameLabelPtr_->setText(
-//             QString::fromStdString(companion->getName()));
-//         this->companionNameLabelPtr_->show();
-//     }
-//     else
-//     {
-//         // this->chatHistoryWidgetStubPtr_->setPlainText("");
-//         // this->chatHistoryWidgetStubPtr_->show();
-
-//         // this->textEditStubPtr_->setText("");
-//         // this->textEditStubPtr_->show();
-//         this->stubWidgetsPtr_->showCentralPanel();
-//     }
-// }
-
 size_t GraphicManager::getCompanionPanelChildrenSize()
 {
     return this->mainWindowPtr_->getCompanionPanelChildrenSize();
 }
-
-// void GraphicManager::addStubWidgetToCompainonPanel()
-// {
-//     // this->mainWindowPtr_->addStubWidgetToCompanionPanel();
-// }
 
 void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroup* groupPtr)
 {
@@ -1341,45 +1261,15 @@ void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
         position, widgetPtr);
 }
 
-void GraphicManager::removeStubsFromCompanionPanel()
-{
-    this->mainWindowPtr_->removeStubsFromCompanionPanel();
-}
-
 void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget)
 {
     this->mainWindowPtr_->removeWidgetFromCompanionPanel(widget);
 }
 
-// void GraphicManager::addWidgetToMainWindow(QWidget* widgetPtr)
-// {
-//     this->mainWindowPtr_->addWidgetToCentralWidgetLayout(widgetPtr);
-// }
-
 void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 {
     this->mainWindowPtr_->addWidgetToCompanionPanel(widget);
 }
-
-// void GraphicManager::addWidgetToCentralPanel(QWidget* widget)
-// {
-//     this->mainWindowPtr_->addWidgetToCentralPanel(widget);
-// }
-
-// void GraphicManager::setMainWindowLeftPanel(LeftPanelWidget* widget)
-// {
-//     this->mainWindowPtr_->setLeftPanel(widget);
-// }
-
-// void GraphicManager::setMainWindowCentralPanel(CentralPanelWidget* widget)
-// {
-//     this->mainWindowPtr_->setCentralPanel(widget);
-// }
-
-// void GraphicManager::setMainWindowRightPanel(RightPanelWidget* widget)
-// {
-//     this->mainWindowPtr_->setRightPanel(widget);
-// }
 
 void GraphicManager::createTextDialog(
     QDialog* parentDialog, const DialogType dialogType, const std::string& message)
@@ -1458,6 +1348,11 @@ void GraphicManager::showCompanionInfoDialog(
     delete companionActionPtr;
 }
 
+void GraphicManager::hideCompanionPanelStub()
+{
+    this->stubWidgetsPtr_->hideSocketInfoStubWidget();
+}
+
 void GraphicManager::hideCentralPanelStub()
 {
     this->stubWidgetsPtr_->hideCentralPanel();
@@ -1470,11 +1365,8 @@ void GraphicManager::showCentralPanelStub()
 
 void GraphicManager::hideInfo()
 {
-    // QSize size(100, 100);
-
-    // this->stubWidgetsPtr_->setStubPanelsSize(
-    //     this->mainWindowPtr_->getLeftPanelWidgetSize(),
-    //     size, size);
+    this->stubWidgetsPtr_->setLeftPanelWidth(
+        this->mainWindowPtr_->getLeftPanelWidgetWidth());
 
     this->mainWindowPtr_->hideLeftAndRightPanels();
 

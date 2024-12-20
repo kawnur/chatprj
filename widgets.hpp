@@ -92,9 +92,6 @@ class SocketInfoWidget : public SocketInfoBaseWidget
 
 public:
     SocketInfoWidget();
-    // SocketInfoWidget(QString&, QString&, QString&);
-    // SocketInfoWidget(QString&&, QString&&, QString&&);
-//    SocketInfo(const SocketInfo&) {};
     SocketInfoWidget(const SocketInfoWidget&);
     SocketInfoWidget(SocketInfoWidget&&) {};
     SocketInfoWidget(std::string&, std::string&, uint16_t&, uint16_t&);
@@ -198,8 +195,9 @@ public:
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
     size_t getCompanionPanelChildrenSize();
-    void removeStubsFromCompanionPanel();  // TODO do we need remove?
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);  // TODO do we nedd remove?
+
+    int getLastCompanionPanelChildWidth();
 
 private:
     QVBoxLayout* layoutPtr_;
@@ -209,7 +207,6 @@ private:
     QVBoxLayout* companionPanelLayoutPtr_;
 
     QSpacerItem* spacerPtr_;
-    // ShowHideWidget* showHideWidgetPtr_;
 };
 
 class CentralPanelWidget : public QWidget
@@ -221,11 +218,6 @@ public:
     ~CentralPanelWidget();
 
     void set(Companion*);
-
-    void hideWidgets();
-    void showWidgets();
-    // void oldSelectedCompanionActions(const Companion*);
-    // void newSelectedCompanionActions(const Companion*);
 
     void addMessageToChatHistory(const QString&);
     void clearChatHistory();
@@ -288,17 +280,8 @@ public:
 
     SocketInfoBaseWidget* getSocketInfoBasePtr();
 
-public slots:
-    // void sendMessage();
-    // void connectToServer();
-
 private:
     SocketInfoBaseWidget* socketInfoBasePtr_;
-
-    // QPlainTextEdit* chatHistoryPtr_;
-    // QPalette* chatHistoryPalettePtr_;
-    // TextEditWidget* textEditPtr_;
-    // QPalette* textEditPalettePtr_;
     CentralPanelWidget* centralPanelPtr_;
 
     QString buildChatHistory(const Companion*);
@@ -312,13 +295,16 @@ public:
 
     void set();
     void setParents(QWidget*, QWidget*);
+
+    void hideSocketInfoStubWidget();
+
     void hideCentralPanel();
     void showCentralPanel();
 
     void hideStubPanels();
     void showStubPanels();
 
-    void setStubPanelsSize(const QSize&, const QSize&, const QSize&);
+    void setLeftPanelWidth(int);
 
 private:
     SocketInfoStubWidget* socketInfoPtr_;
@@ -372,8 +358,6 @@ private:
     QLineEdit* portEditPtr_;
 
     QDialogButtonBox* buttonBoxPtr_;
-
-    // void sendData();
 };
 
 class TextDialog : public QDialog

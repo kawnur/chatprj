@@ -35,5 +35,4 @@ std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 void showWarningDialogAndLogWarning(const std::string&);
 void showErrorDialogAndLogError(const std::string&);
 
-
 #endif // UTILS_HPP
