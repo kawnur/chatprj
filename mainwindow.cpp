@@ -214,6 +214,11 @@ MainWindow::MainWindow()
     // logging enabled, actions
     // setLeftPanel();
     //    addTestSocketInfoWidgetToLeftPanel();
+
+    // map container ptr to position
+    mapContainerPtrToContainerPosition[MainWindowContainerPosition::LEFT] = leftContainerWidgetPtr_;
+    mapContainerPtrToContainerPosition[MainWindowContainerPosition::CENTRAL] = centralContainerWidgetPtr_;
+    mapContainerPtrToContainerPosition[MainWindowContainerPosition::RIGHT] = rightContainerWidgetPtr_;
 }
 
 MainWindow::~MainWindow()
@@ -257,7 +262,9 @@ void MainWindow::set()
     getGraphicManagerPtr()->showCentralPanelStub();
 
     this->showHideWidgetPtr_ = new ShowHideWidget;
-    this->addWidgetToLeftContainerAndSetParentTo(showHideWidgetPtr_);
+    // this->addWidgetToLeftContainerAndSetParentTo(showHideWidgetPtr_);
+    this->addWidgetToContainerAndSetParentTo(
+        MainWindowContainerPosition::LEFT, this->showHideWidgetPtr_);
 }
 
 void MainWindow::addLeftPanelToLayout()
@@ -283,19 +290,11 @@ void MainWindow::addTextToAppLogWidget(const QString& text)
     QApplication::processEvents();
 }
 
-void MainWindow::addWidgetToLeftContainerAndSetParentTo(QWidget* widgetPtr)
+void MainWindow::addWidgetToContainerAndSetParentTo(
+    MainWindowContainerPosition position, QWidget* widgetPtr)
 {
-    this->leftContainerWidgetPtr_->addWidgetToLayoutAndSetParentTo(widgetPtr);
-}
-
-void MainWindow::addWidgetToCentralContainerAndSetParentTo(QWidget* widgetPtr)
-{
-    this->centralContainerWidgetPtr_->addWidgetToLayoutAndSetParentTo(widgetPtr);
-}
-
-void MainWindow::addWidgetToRightContainerAndSetParentTo(QWidget* widgetPtr)
-{
-    this->rightContainerWidgetPtr_->addWidgetToLayoutAndSetParentTo(widgetPtr);
+    this->mapContainerPtrToContainerPosition.at(position)->
+        addWidgetToLayoutAndSetParentTo(widgetPtr);
 }
 
 // void MainWindow::addWidgetToCentralWidgetLayout(QWidget* widgetPtr)
@@ -400,6 +399,11 @@ void MainWindow::showLeftAndRightPanels()
 {
     this->leftPanelPtr_->show();
     this->rightPanelPtr_->show();
+}
+
+QSize MainWindow::getLeftPanelWidgetSize()
+{
+    return this->leftPanelPtr_->size();
 }
 
 // void MainWindow::oldSelectedCompanionActions(const Companion* companion)

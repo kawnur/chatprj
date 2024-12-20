@@ -1018,6 +1018,37 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
         companionActionPtr, std::string { "Companion chat history cleared:\n\n" });
 }
 
+void Manager::hideSelectedCompanionCentralPanel()
+{
+    if(this->selectedCompanionPtr_)
+    {
+        auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        getGraphicManagerPtr()->hideWidgetGroupCentralPanel(groupPtr);
+    }
+    else
+    {
+        // getGraphicManagerPtr()->hideCentralPanelStub();
+    }
+}
+
+void Manager::showSelectedCompanionCentralPanel()
+{
+    if(this->selectedCompanionPtr_)
+    {
+        auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        getGraphicManagerPtr()->showWidgetGroupCentralPanel(groupPtr);
+    }
+    else
+    {
+        // getGraphicManagerPtr()->showCentralPanelStub();
+    }
+}
+
+bool Manager::isSelectedCompanionNullptr()
+{
+    return this->selectedCompanionPtr_ == nullptr;
+}
+
 bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
@@ -1288,39 +1319,26 @@ size_t GraphicManager::getCompanionPanelChildrenSize()
     return this->mainWindowPtr_->getCompanionPanelChildrenSize();
 }
 
-// void GraphicManager::addWidgetToMainWindowLeftContainer(QWidget* widgetPtr)
-// {
-//     this->mainWindowPtr_->addWidgetToLeftContainerAndSetParentTo(widgetPtr);
-// }
-
-// void GraphicManager::addWidgetToMainWindowCentralContainer(QWidget* widgetPtr)
-// {
-//     this->mainWindowPtr_->addWidgetToCentralContainerAndSetParentTo(widgetPtr);
-// }
-
-// void GraphicManager::addWidgetToMainWindowRightContainer(QWidget* widgetPtr)
-// {
-//     this->mainWindowPtr_->addWidgetToRightContainerAndSetParentTo(widgetPtr);
-// }
-
 // void GraphicManager::addStubWidgetToCompainonPanel()
 // {
 //     // this->mainWindowPtr_->addStubWidgetToCompanionPanel();
 // }
 
-void GraphicManager::addWidgetToMainWindowLeftContainerAndSetParentTo(QWidget* widgetPtr)
+void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroup* groupPtr)
 {
-    this->mainWindowPtr_->addWidgetToLeftContainerAndSetParentTo(widgetPtr);
+    groupPtr->hideCentralPanel();
 }
 
-void GraphicManager::addWidgetToMainWindowCentralContainerAndSetParentTo(QWidget* widgetPtr)
+void GraphicManager::showWidgetGroupCentralPanel(WidgetGroup* groupPtr)
 {
-    this->mainWindowPtr_->addWidgetToCentralContainerAndSetParentTo(widgetPtr);
+    groupPtr->showCentralPanel();
 }
 
-void GraphicManager::addWidgetToMainWindowRightContainerAndSetParentTo(QWidget* widgetPtr)
+void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
+    MainWindowContainerPosition position, QWidget* widgetPtr)
 {
-    this->mainWindowPtr_->addWidgetToRightContainerAndSetParentTo(widgetPtr);
+    this->mainWindowPtr_->addWidgetToContainerAndSetParentTo(
+        position, widgetPtr);
 }
 
 void GraphicManager::removeStubsFromCompanionPanel()
@@ -1452,15 +1470,24 @@ void GraphicManager::showCentralPanelStub()
 
 void GraphicManager::hideInfo()
 {
+    // QSize size(100, 100);
+
+    // this->stubWidgetsPtr_->setStubPanelsSize(
+    //     this->mainWindowPtr_->getLeftPanelWidgetSize(),
+    //     size, size);
+
     this->mainWindowPtr_->hideLeftAndRightPanels();
 
-    this->stubWidgetsPtr_->showStubPanels();
+    getManagerPtr()->hideSelectedCompanionCentralPanel();
 
+    this->stubWidgetsPtr_->showStubPanels();
 }
 
 void GraphicManager::showInfo()
 {
     this->mainWindowPtr_->showLeftAndRightPanels();
+
+    getManagerPtr()->showSelectedCompanionCentralPanel();
 
     this->stubWidgetsPtr_->hideStubPanels();
 }

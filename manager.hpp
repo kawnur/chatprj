@@ -183,6 +183,11 @@ public:
     void deleteCompanion(CompanionAction*);
     void clearCompanionHistory(CompanionAction*);
 
+    void hideSelectedCompanionCentralPanel();
+    void showSelectedCompanionCentralPanel();
+
+    bool isSelectedCompanionNullptr();
+
 private:
     PGconn* dbConnectionPtr_;
 
@@ -276,14 +281,12 @@ public:
     // void addStubWidgetToCompainonPanel();
 
     // void addWidgetToMainWindow(QWidget*);
-    // void addWidgetToMainWindowLeftContainer(QWidget*);
-    // void addWidgetToMainWindowCentralContainer(QWidget*);
-    // void addWidgetToMainWindowRightContainer(QWidget*);
 
-    void addWidgetToMainWindowLeftContainerAndSetParentTo(QWidget*);
-    void addWidgetToMainWindowCentralContainerAndSetParentTo(QWidget*);
-    void addWidgetToMainWindowRightContainerAndSetParentTo(QWidget*);
+    void hideWidgetGroupCentralPanel(WidgetGroup*);
+    void showWidgetGroupCentralPanel(WidgetGroup*);
 
+    void addWidgetToMainWindowContainerAndSetParentTo(
+        MainWindowContainerPosition, QWidget*);
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
     // void addWidgetToCentralPanel(QWidget*);

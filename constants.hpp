@@ -22,6 +22,13 @@ enum class CompanionActionType
     CLEAR_HISTORY
 };
 
+enum class MainWindowContainerPosition
+{
+    LEFT,
+    CENTRAL,
+    RIGHT
+};
+
 const std::map<CompanionActionType, std::string> actionTypeStringRepresentation
 {
     { CompanionActionType::CREATE, std::string("Add new companion") },
@@ -37,6 +44,7 @@ const std::map<DialogType, std::string> dialogTypeStringRepresentation
 
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
+const std::string socketInfoStubWidget { "No companion info from DB..." };
 
 // colors
 const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;

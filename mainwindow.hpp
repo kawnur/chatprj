@@ -98,6 +98,9 @@ private:
 
     ShowHideWidget* showHideWidgetPtr_;
 
+    std::map<MainWindowContainerPosition, MainWindowContainerWidget*>
+        mapContainerPtrToContainerPosition;
+
     void closeEvent(QCloseEvent*) override;
 
     void keyPressEvent(QKeyEvent*) override;
@@ -119,9 +122,8 @@ public:
     // void addTextToChatHistoryWidget(const QString&);
     void addTextToAppLogWidget(const QString&);
 
-    void addWidgetToLeftContainerAndSetParentTo(QWidget*);
-    void addWidgetToCentralContainerAndSetParentTo(QWidget*);
-    void addWidgetToRightContainerAndSetParentTo(QWidget*);
+    void addWidgetToContainerAndSetParentTo(
+        MainWindowContainerPosition, QWidget*);
 
     // void addWidgetToCentralWidgetLayout(QWidget*);
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
@@ -137,6 +139,8 @@ public:
 
     void hideLeftAndRightPanels();
     void showLeftAndRightPanels();
+
+    QSize getLeftPanelWidgetSize();
 
     // void oldSelectedCompanionActions(const Companion*);
     // void newSelectedCompanionActions(const Companion*);

@@ -408,7 +408,7 @@ void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
 
 SocketInfoStubWidget::SocketInfoStubWidget()
 {
-    mark_ = "No socket info from DB...";
+    mark_ = QString::fromStdString(socketInfoStubWidget);
 
     layoutPtr_ = new QHBoxLayout;
     setLayout(layoutPtr_);
@@ -592,18 +592,18 @@ void CentralPanelWidget::set(Companion* companionPtr)
 
 void CentralPanelWidget::hideWidgets()
 {
-    // this->chatHistoryWidgetPtr_->hide();
-    // this->textEditPtr_->hide();
+    this->chatHistoryWidgetPtr_->hide();
+    this->textEditPtr_->hide();
     // QApplication::processEvents();
-    this->hide();
+    // this->hide();
 }
 
 void CentralPanelWidget::showWidgets()
 {
-    // this->chatHistoryWidgetPtr_->show();
-    // this->textEditPtr_->show();
+    this->chatHistoryWidgetPtr_->show();
+    this->textEditPtr_->show();
     // QApplication::processEvents();
-    this->show();
+    // this->show();
 }
 
 // void CentralPanelWidget::oldSelectedCompanionActions(const Companion* companion)
@@ -752,7 +752,9 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr)
         getGraphicManagerPtr()->getMainWindowPtr(), companionPtr->getName());
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr));
     // graphicManagerPtr->setMainWindowCentralPanel(centralPanelPtr_);
-    graphicManagerPtr->addWidgetToMainWindowCentralContainerAndSetParentTo(centralPanelPtr_);
+    // graphicManagerPtr->addWidgetToMainWindowCentralContainerAndSetParentTo(centralPanelPtr_);
+    graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
+        MainWindowContainerPosition::CENTRAL, centralPanelPtr_);
     centralPanelPtr_->hide();
 }
 
@@ -824,12 +826,14 @@ void WidgetGroup::clearChatHistory()
 
 void WidgetGroup::hideCentralPanel()
 {
-    this->centralPanelPtr_->hideWidgets();
+    // this->centralPanelPtr_->hideWidgets();
+    this->centralPanelPtr_->hide();
 }
 
 void WidgetGroup::showCentralPanel()
 {
-    this->centralPanelPtr_->showWidgets();
+    // this->centralPanelPtr_->showWidgets();
+    this->centralPanelPtr_->show();
 }
 
 SocketInfoBaseWidget* WidgetGroup::getSocketInfoBasePtr()
@@ -896,21 +900,27 @@ void StubWidgetGroup::set()
         dynamic_cast<SocketInfoBaseWidget*>(socketInfoPtr_);
 
     graphicManagerPtr->addWidgetToCompanionPanel(baseObjectCastPtr);
-    baseObjectCastPtr->hide();
+    // baseObjectCastPtr->hide();
 
     // graphicManagerPtr->setMainWindowLeftPanel(leftPanelPtr_);
-    graphicManagerPtr->addWidgetToMainWindowLeftContainerAndSetParentTo(
-        this->leftPanelPtr_);
+    // graphicManagerPtr->addWidgetToMainWindowLeftContainerAndSetParentTo(
+    //     this->leftPanelPtr_);
+    graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
+        MainWindowContainerPosition::LEFT, this->leftPanelPtr_);
     leftPanelPtr_->hide();
 
     // graphicManagerPtr->setMainWindowCentralPanel(centralPanelPtr_);
-    graphicManagerPtr->addWidgetToMainWindowCentralContainerAndSetParentTo(
-        this->centralPanelPtr_);
+    // graphicManagerPtr->addWidgetToMainWindowCentralContainerAndSetParentTo(
+    //     this->centralPanelPtr_);
+    graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
+        MainWindowContainerPosition::CENTRAL, this->centralPanelPtr_);
     centralPanelPtr_->hide();
 
     // graphicManagerPtr->setMainWindowRightPanel(rightPanelPtr_);
-    graphicManagerPtr->addWidgetToMainWindowRightContainerAndSetParentTo(
-        this->rightPanelPtr_);
+    // graphicManagerPtr->addWidgetToMainWindowRightContainerAndSetParentTo(
+    //     this->rightPanelPtr_);
+    graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
+        MainWindowContainerPosition::RIGHT, this->rightPanelPtr_);
     rightPanelPtr_->hide();
 }
 
@@ -936,7 +946,12 @@ void StubWidgetGroup::showCentralPanel()
 void StubWidgetGroup::hideStubPanels()
 {
     this->leftPanelPtr_->hide();
-    this->centralPanelPtr_->hide();
+
+    if(!getManagerPtr()->isSelectedCompanionNullptr())
+    {
+        this->centralPanelPtr_->hide();
+    }
+
     this->rightPanelPtr_->hide();
 }
 
@@ -945,6 +960,15 @@ void StubWidgetGroup::showStubPanels()
     this->leftPanelPtr_->show();
     this->centralPanelPtr_->show();
     this->rightPanelPtr_->show();
+}
+
+void StubWidgetGroup::setStubPanelsSize(
+    const QSize& leftPanelSize, const QSize& centralPanelSize,
+    const QSize& rightPanelSize)
+{
+    this->leftPanelPtr_->resize(leftPanelSize);
+    this->centralPanelPtr_->resize(centralPanelSize);
+    this->rightPanelPtr_->resize(rightPanelSize);
 }
 
 MainWindowContainerWidget::MainWindowContainerWidget(QWidget* widgetPtr)
@@ -1171,6 +1195,7 @@ ShowHideWidget::~ShowHideWidget()
 void ShowHideWidget::mousePressEvent(QMouseEvent* event)
 {
     (this->show_) ? this->hideInfo() : this->showInfo();
+    this->show_ = !(this->show_);
 }
 
 void ShowHideWidget::hideInfo()

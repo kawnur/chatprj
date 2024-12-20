@@ -316,7 +316,9 @@ public:
     void showCentralPanel();
 
     void hideStubPanels();
-    void showStubPanels();;
+    void showStubPanels();
+
+    void setStubPanelsSize(const QSize&, const QSize&, const QSize&);
 
 private:
     SocketInfoStubWidget* socketInfoPtr_;
