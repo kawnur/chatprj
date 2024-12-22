@@ -52,6 +52,8 @@ public:
 
     int getLeftPanelWidgetWidth();
 
+    void setGraphicsEffectToNullptr();
+
 private slots:
     void createCompanion();
 
@@ -79,6 +81,8 @@ private:
 
     std::map<MainWindowContainerPosition, MainWindowContainerWidget*>
         mapContainerPtrToContainerPosition;
+
+    QGraphicsBlurEffect* blurEffectPtr_;
 
     void closeEvent(QCloseEvent*) override;
     void keyPressEvent(QKeyEvent*) override;

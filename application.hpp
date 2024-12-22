@@ -26,21 +26,13 @@ public:
     // boost::asio::io_context* io_context_;
     // ChatServer* server_;
 
-    // MainWindow* mainWindowPtr_;
     GraphicManager* graphicManagerPtr_;
     Manager* managerPtr_;
 
-//    ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {
-//        client_ = new ChatClient;
-//        server_ = new ChatServer(5002);
-//        mainWindow_ = new MainWindow;
-//    }
     ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {}
     void set();
 
     ~ChatApp();
 };
-
-// ChatClient* getChatClientPtr();
 
 #endif // APPLICATION_HPP

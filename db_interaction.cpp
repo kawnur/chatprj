@@ -233,6 +233,13 @@ PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
+PGresult* getPasswordDBResult(const PGconn* dbConnection)
+{
+    const char* command = "SELECT password FROM password WHERE id = 1";
+
+    return sendDBRequestAndReturnResult(dbConnection, command);
+}
+
 PGresult* pushCompanionToDBAndReturn(
     const PGconn* dbConnection, const std::string& companionName)
 {

@@ -901,16 +901,97 @@ std::string CompanionDataDialog::getPortString()
     return this->portEditPtr_->text().toStdString();
 }
 
-TextDialog::TextDialog(
-    QDialog* parentDialog, QWidget* parent,
-    DialogType dialogType, const std::string& text)
+NewPasswordDialog::NewPasswordDialog()
 {
-    setParent(parent);
+    setWindowTitle(QString::fromStdString(newPasswordDialogTitle));
+
+    setParent(getGraphicManagerPtr()->getMainWindowPtr());
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    this->setWindowTitle(
+    layoutPtr_ = new QFormLayout;
+    setLayout(layoutPtr_);
+
+    firstLabelPtr_ = new QLabel(QString::fromStdString(newPasswordDialogFirstLabel));
+    firstEditPtr_ = new QLineEdit;
+
+    secondLabelPtr_ = new QLabel(QString::fromStdString(newPasswordDialogSecondLabel));
+    secondEditPtr_ = new QLineEdit;
+
+    layoutPtr_->addRow(firstLabelPtr_, firstEditPtr_);
+    layoutPtr_->addRow(secondLabelPtr_, secondEditPtr_);
+
+    // buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
+NewPasswordDialog::~NewPasswordDialog()
+{
+    delete this->layoutPtr_;
+    delete this->firstLabelPtr_;
+    delete this->firstEditPtr_;
+    delete this->secondLabelPtr_;
+    delete this->secondEditPtr_;
+    delete this->buttonBoxPtr_;
+}
+
+void NewPasswordDialog::set()
+{
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &NewPasswordDialog::sendData);
+    // connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
+}
+
+void NewPasswordDialog::sendData()
+{
+    auto text1 = this->firstEditPtr_->text();
+    auto text2 = this->secondEditPtr_->text();
+
+    if(text1 == text2)
+    {
+        getGraphicManagerPtr()->createTextDialog(
+            this,
+            DialogType::INFO,
+            TextDialogAction::CLOSE_PARENT_AND_SELF,
+            std::string("New password created"),
+            // [this]()
+            // {
+            //     unsetMainWindowBlurAndCloseDialogs();
+            // }
+            &TextDialog::unsetMainWindowBlurAndCloseDialogs
+            );
+
+        // getGraphicManagerPtr()->setMainWindowGraphicsEffectToNullptr();
+
+
+    }
+    else
+    {
+        getGraphicManagerPtr()->createTextDialog(
+            this,
+            DialogType::ERROR,
+            TextDialogAction::ACCEPT,
+            std::string("Entered passwords are not equal"),
+            nullptr);
+
+
+    }
+}
+
+TextDialog::TextDialog(
+    QDialog* parentDialog, QWidget* parent,
+    DialogType dialogType, TextDialogAction action, const std::string& text)
+{
+    setParent(parent);
+
+    action_ = action;
+
+    setModal(true);
+    setWindowModality(Qt::WindowModal);
+    setWindowFlag(Qt::Window);
+
+    setWindowTitle(
         QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
 
     parentDialogPtr_ = parentDialog;
@@ -926,6 +1007,47 @@ TextDialog::TextDialog(
     layoutPtr_->addWidget(textEditPtr_);
 }
 
+TextDialog::TextDialog(
+    QDialog* parentDialog, QWidget* parent,
+    DialogType dialogType, TextDialogAction action, const std::string& text,
+    // std::function<void()>&& func)
+    void(TextDialog::*slot)())
+{
+    setParent(parent);
+
+    action_ = action;
+
+    setModal(true);
+    setWindowFlag(Qt::Window);
+
+    setWindowTitle(
+        QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
+
+    parentDialogPtr_ = parentDialog;
+
+    layoutPtr_ = new QVBoxLayout;
+    setLayout(layoutPtr_);
+
+    textEditPtr_ = new QPlainTextEdit;
+    textEditPtr_->setReadOnly(true);
+
+    textEditPtr_->setPlainText(QString::fromStdString(text));
+
+    layoutPtr_->addWidget(textEditPtr_);
+
+    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+
+    if(slot)
+    {
+        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, slot);
+    }
+    else
+    {
+        connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::act);
+    }
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
 TextDialog::~TextDialog()
 {
     delete this->layoutPtr_;
@@ -935,18 +1057,21 @@ TextDialog::~TextDialog()
 
 void TextDialog::set(QDialog* parentDialog)
 {
-    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+    // if(parentDialog)
+    // {
+    //     connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::closeDialogs);
+    // }
+    // else
+    // {
+    //     connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    // }
+    // connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::act);
+}
 
-    if(parentDialog)
-    {
-        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::closeDialogs);
-    }
-    else
-    {
-        connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    }
-
-    layoutPtr_->addWidget(buttonBoxPtr_);
+void TextDialog::unsetMainWindowBlurAndCloseDialogs()
+{
+    getGraphicManagerPtr()->setMainWindowGraphicsEffectToNullptr();
+    this->closeDialogs();
 }
 
 void TextDialog::closeDialogs()
@@ -955,10 +1080,23 @@ void TextDialog::closeDialogs()
     this->parentDialogPtr_->close();
 }
 
+void TextDialog::act()
+{
+    if(this->action_ == TextDialogAction::CLOSE_PARENT_AND_SELF and this->parentDialogPtr_)
+    {
+        this->closeDialogs();
+    }
+    else
+    {
+        this->accept();
+    }
+}
+
 TwoButtonsTextDialog::TwoButtonsTextDialog(
     QDialog* parentDialog, QWidget* parent, DialogType dialogType,
     const std::string& text, std::string&& buttonText) :
-    TextDialog(parentDialog, parent, dialogType, text), buttonText_(std::move(buttonText)) {}
+    TextDialog(parentDialog, parent, dialogType, TextDialogAction::ACCEPT, text),
+    buttonText_(std::move(buttonText)) {}
 
 void TwoButtonsTextDialog::set(CompanionAction* actionPtr)
 {

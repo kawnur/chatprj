@@ -24,6 +24,7 @@ class MainWindow;
 class RightPanelWidget;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
+class TextDialog;
 class TwoButtonsTextDialog;
 class WidgetGroup;
 
@@ -188,6 +189,8 @@ public:
 
     bool isSelectedCompanionNullptr();
 
+    void authenticateUser();
+
 private:
     PGconn* dbConnectionPtr_;
 
@@ -285,7 +288,13 @@ public:
 
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
-    void createTextDialog(QDialog*, const DialogType, const std::string&);
+    void createTextDialog(
+        QDialog*, const DialogType, const TextDialogAction, const std::string&);
+
+    void createTextDialog(
+        QDialog*, const DialogType, const TextDialogAction,
+        // const std::string&, std::function<void()>&&);
+        const std::string&, void(TextDialog::*)());
 
     void createCompanion();
     void updateCompanion(Companion*);
@@ -305,6 +314,13 @@ public:
     void showInfo();
 
     MainWindow* getMainWindowPtr();
+
+    void createEntrancePassword();
+    // void
+
+    void setMainWindowGraphicsEffectToNullptr();
+
+    void getEntrancePassword();
 
 private:
     StubWidgetGroup* stubWidgetsPtr_;

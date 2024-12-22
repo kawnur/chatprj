@@ -51,6 +51,11 @@ MainWindow::MainWindow()
 
     mapContainerPtrToContainerPosition[MainWindowContainerPosition::RIGHT] =
         rightContainerWidgetPtr_;
+    
+    // blur effect
+    blurEffectPtr_ = new QGraphicsBlurEffect;
+    blurEffectPtr_->setBlurRadius(10);
+
 }
 
 MainWindow::~MainWindow()
@@ -58,6 +63,7 @@ MainWindow::~MainWindow()
     // cannot set parent for palette
     delete this->menuBarPalettePtr_;
     delete this->centralWidgetPtr_;
+    delete this->blurEffectPtr_;
 }
 
 void MainWindow::set()
@@ -75,6 +81,9 @@ void MainWindow::set()
 
     this->addWidgetToContainerAndSetParentTo(
         MainWindowContainerPosition::LEFT, this->showHideWidgetPtr_);
+
+    // this->blurEffectPtr_->setParent(this);
+    this->setGraphicsEffect(this->blurEffectPtr_);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

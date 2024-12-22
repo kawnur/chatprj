@@ -1,3 +1,8 @@
+create table public.passwords (
+    id int not null primary key generated always as identity,
+    password varchar(30) not null
+);
+
 create table public.companions (
     id int not null primary key generated always as identity,
     name varchar(30) not null unique

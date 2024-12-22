@@ -29,6 +29,12 @@ enum class MainWindowContainerPosition
     RIGHT
 };
 
+enum class TextDialogAction
+{
+    CLOSE_PARENT_AND_SELF,
+    ACCEPT
+};
+
 const std::map<CompanionActionType, std::string> actionTypeStringRepresentation
 {
     { CompanionActionType::CREATE, std::string("Add new companion") },
@@ -45,6 +51,15 @@ const std::map<DialogType, std::string> dialogTypeStringRepresentation
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const std::string socketInfoStubWidget { "No companion info from DB..." };
+
+// new password dialog
+const std::string newPasswordDialogTitle { "New password creation" };
+const std::string newPasswordDialogFirstLabel { "Enter password:" };
+const std::string newPasswordDialogSecondLabel { "Reenter password:" };
+
+// authentication dialog
+const std::string authenticationDialogTitle { "Authentication" };
+const std::string authenticationDialogLabel { "Enter password:" };
 
 // colors
 const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;

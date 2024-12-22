@@ -40,7 +40,6 @@ PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
 
 PGresult* getCompanionsDBResult(const PGconn*);
 PGresult* getCompanionByNameDBResult(const PGconn*, const std::string&);
-
 PGresult* getCompanionAndSocketDBResult(const PGconn*, const int&);
 
 PGresult* getSocketInfoDBResult(const PGconn*, const int&);
@@ -49,6 +48,8 @@ PGresult* getSocketByIpAddressAndPortDBResult(
     const PGconn*, const std::string&, const std::string&);
 
 PGresult* getMessagesDBResult(const PGconn*, const int&);
+
+PGresult* getPasswordDBResult(const PGconn*);
 
 PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
 PGresult* updateCompanionAndReturn(const PGconn*, const std::string&);

@@ -793,6 +793,7 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr)
         getGraphicManagerPtr()->createTextDialog(
             nullptr,
             DialogType::ERROR,
+            TextDialogAction::ACCEPT,
             buildDialogText(
                 std::string { "Error messages:\n\n" }, validationErrors));
 
@@ -1030,6 +1031,32 @@ bool Manager::isSelectedCompanionNullptr()
     return this->selectedCompanionPtr_ == nullptr;
 }
 
+void Manager::authenticateUser()
+{
+    // do we have password in db?
+    std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
+        true,
+        "getPasswordDBResult",
+        &getPasswordDBResult,
+        std::vector<std::string> { std::string("id") });
+
+    if(!passwordDataPtr)
+    {
+        showErrorDialogAndLogError("Error getting password from db");
+        return;
+    }
+
+    if(passwordDataPtr->isEmpty())
+    {
+        getGraphicManagerPtr()->createEntrancePassword();
+
+    }
+    else
+    {
+        getGraphicManagerPtr()->getEntrancePassword();
+    }
+}
+
 bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
@@ -1201,6 +1228,9 @@ GraphicManager::GraphicManager()
 {
     // stubWidgetsPtr_ = new StubWidgetGroup;
     // mainWindowPtr_ = new MainWindow;
+
+    // stubWidgetsPtr_ = nullptr;
+    // mainWindowPtr_ = nullptr;
 }
 
 void GraphicManager::set()
@@ -1272,11 +1302,28 @@ void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 }
 
 void GraphicManager::createTextDialog(
-    QDialog* parentDialog, const DialogType dialogType, const std::string& message)
+    QDialog* parentDialog, const DialogType dialogType,
+    const TextDialogAction action, const std::string& message)
 {
     // TODO delete objects for closed dialoges
-    TextDialog* dialog = new TextDialog(parentDialog, this->mainWindowPtr_, dialogType, message);
+    TextDialog* dialog = new TextDialog(
+        parentDialog, this->mainWindowPtr_, dialogType, action, message);
+
     dialog->set(parentDialog);
+    dialog->show();
+}
+
+void GraphicManager::createTextDialog(
+    QDialog* parentDialog, const DialogType dialogType,
+    const TextDialogAction action, const std::string& message,
+    // std::function<void()>&& func)
+    void(TextDialog::*func)())
+{
+    // TODO delete objects for closed dialoges
+    TextDialog* dialog = new TextDialog(
+        parentDialog, this->mainWindowPtr_, dialogType, action, message, func);
+
+    // dialog->set(parentDialog);
     dialog->show();
 }
 
@@ -1338,6 +1385,7 @@ void GraphicManager::showCompanionInfoDialog(
     this->createTextDialog(
         companionActionPtr->getFormDialogPtr(),
         DialogType::INFO,
+        TextDialogAction::CLOSE_PARENT_AND_SELF,
         buildDialogText(
             std::move(header),
             std::vector<std::string> {
@@ -1387,6 +1435,24 @@ void GraphicManager::showInfo()
 MainWindow* GraphicManager::getMainWindowPtr()
 {
     return this->mainWindowPtr_;
+}
+
+void GraphicManager::createEntrancePassword()
+{
+    NewPasswordDialog* dialogPtr = new NewPasswordDialog;
+    dialogPtr->set();
+    dialogPtr->show();
+}
+
+void GraphicManager::setMainWindowGraphicsEffectToNullptr()
+{
+    this->mainWindowPtr_->setGraphicsEffect(nullptr);
+}
+
+void GraphicManager::getEntrancePassword()
+{
+
+
 }
 
 GraphicManager* getGraphicManagerPtr()

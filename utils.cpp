@@ -102,12 +102,14 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
 
 void showWarningDialogAndLogWarning(const std::string& message)
 {
-    getGraphicManagerPtr()->createTextDialog(nullptr, DialogType::WARNING, message);
+    getGraphicManagerPtr()->createTextDialog(
+        nullptr, DialogType::WARNING, TextDialogAction::ACCEPT, message);
     logArgsWarning(message);
 }
 
 void showErrorDialogAndLogError(const std::string& message)
 {
-    getGraphicManagerPtr()->createTextDialog(nullptr, DialogType::ERROR, message);
+    getGraphicManagerPtr()->createTextDialog(
+        nullptr, DialogType::ERROR, TextDialogAction::ACCEPT, message);
     logArgsError(message);
 }

@@ -18,22 +18,10 @@ void ChatApp::set()
     graphicManagerPtr_ = new GraphicManager;
     graphicManagerPtr_->set();
 
-    // mainWindowPtr_ = new MainWindow;
-    // mainWindowPtr_->set();
-
     managerPtr_ = new Manager;
     managerPtr_->set();
 
-    // mainWindowPtr_->show();
+    managerPtr_->authenticateUser();
 
-    // mainWindowPtr_->show();
 
-//    testQString();  // TODO remove
 }
-
-// ChatClient* getChatClientPtr()
-// {
-//     QCoreApplication* coreApp = QCoreApplication::instance();
-//     ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
-//     return app->client_;
-// }

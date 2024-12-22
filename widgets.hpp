@@ -360,23 +360,58 @@ private:
     QDialogButtonBox* buttonBoxPtr_;
 };
 
+class NewPasswordDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    NewPasswordDialog();
+    ~NewPasswordDialog();
+
+    void set();
+
+private:
+    QFormLayout* layoutPtr_;
+
+    QLabel* firstLabelPtr_;
+    QLineEdit* firstEditPtr_;
+
+    QLabel* secondLabelPtr_;
+    QLineEdit* secondEditPtr_;
+
+    QDialogButtonBox* buttonBoxPtr_;
+
+    void sendData();
+    // void closeDialogs() {};
+};
+
 class TextDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    TextDialog(QDialog*, QWidget*, DialogType, const std::string&);
+    TextDialog(QDialog*, QWidget*, DialogType, TextDialogAction, const std::string&);
+
+    TextDialog(
+        QDialog*, QWidget*, DialogType, TextDialogAction,
+        // const std::string&, std::function<void()>&&);
+        const std::string&, void(TextDialog::*)());
+
     ~TextDialog();
 
     void set(QDialog*);
 
-private:
-    CompanionActionType actionType_;
+    void closeDialogs();
+public slots:
+    void unsetMainWindowBlurAndCloseDialogs();
 
+private:
+    TextDialogAction action_;
     QDialog* parentDialogPtr_;
     QPlainTextEdit* textEditPtr_;
 
-    void closeDialogs();
+
+    void act();
 
 protected:
     QVBoxLayout* layoutPtr_;
