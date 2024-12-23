@@ -279,16 +279,36 @@ CompanionAction::CompanionAction(
 
     case CompanionActionType::DELETE:
         formDialogPtr_ = nullptr;
-        deleteDialogPtr_ = new TwoButtonsTextDialog(
-            nullptr, this->mainWindowPtr_, DialogType::WARNING,
-            deleteCompanionDialogText, std::string("Delete companion"));
+        // deleteDialogPtr_ = new TwoButtonsTextDialog(
+        //     nullptr, this->mainWindowPtr_, DialogType::WARNING,
+        //     deleteCompanionDialogText, std::string("Delete companion"));
+        deleteDialogPtr_ = new ActionTextDialog(
+            nullptr,
+            DialogType::WARNING,
+            deleteCompanionDialogText,
+            std::vector<ButtonInfo> {
+                ButtonInfo(
+                    cancelButtonText, QDialogButtonBox::RejectRole, &TextDialog::reject),
+                ButtonInfo(
+                    deleteCompanionButtonText, QDialogButtonBox::AcceptRole,
+                    &TextDialog::acceptAction) });
         break;
 
     case CompanionActionType::CLEAR_HISTORY:
         formDialogPtr_ = nullptr;
-        deleteDialogPtr_ = new TwoButtonsTextDialog(
-            nullptr, this->mainWindowPtr_, DialogType::WARNING,
-            clearCompanionHistoryDialogText, std::string("Clear history"));
+        // deleteDialogPtr_ = new ActionTextDialog(
+        //     nullptr, this->mainWindowPtr_, DialogType::WARNING,
+        //     clearCompanionHistoryDialogText, std::string("Clear history"));
+        deleteDialogPtr_ = new ActionTextDialog(
+            nullptr,
+            DialogType::WARNING,
+            clearCompanionHistoryDialogText,
+            std::vector<ButtonInfo> {
+                ButtonInfo(
+                    cancelButtonText, QDialogButtonBox::RejectRole, &TextDialog::reject),
+                ButtonInfo(
+                    clearHistoryButtonText, QDialogButtonBox::AcceptRole,
+                    &TextDialog::acceptAction) });
         break;
     }
 }
@@ -790,12 +810,24 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr)
 
     if(!validationResult)
     {
-        getGraphicManagerPtr()->createTextDialog(
+        // auto buttonInfo = std::make_tuple(
+        //     okButtonText, QDialogButtonBox::AcceptRole, &QDialog::accept);
+
+        // std::vector<std::tuple<
+        //     const std::string&,
+        //     QDialogButtonBox::ButtonRole,
+        //     void(TextDialog::*)()>> buttonInfoVector { buttonInfo };
+
+        getGraphicManagerPtr()->createTextDialogAndShow(
             nullptr,
             DialogType::ERROR,
-            TextDialogAction::ACCEPT,
+            // TextDialogAction::ACCEPT,
             buildDialogText(
-                std::string { "Error messages:\n\n" }, validationErrors));
+                std::string { "Error messages:\n\n" }, validationErrors),
+            std::vector<ButtonInfo>{ ButtonInfo(
+                okButtonText,
+                QDialogButtonBox::AcceptRole,
+                &QDialog::accept) });
 
         return false;
     }
@@ -1301,30 +1333,15 @@ void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
     this->mainWindowPtr_->addWidgetToCompanionPanel(widget);
 }
 
-void GraphicManager::createTextDialog(
-    QDialog* parentDialog, const DialogType dialogType,
-    const TextDialogAction action, const std::string& message)
+void GraphicManager::createTextDialogAndShow(
+    QWidget* parentPtr, DialogType dialogType, const std::string& text,
+    std::vector<ButtonInfo>&& buttonInfo)
 {
-    // TODO delete objects for closed dialoges
-    TextDialog* dialog = new TextDialog(
-        parentDialog, this->mainWindowPtr_, dialogType, action, message);
+    // TODO delete objects for closed dialoges?
+    TextDialog* dialogPtr = new TextDialog(
+        parentPtr, dialogType, text, std::move(buttonInfo));
 
-    dialog->set(parentDialog);
-    dialog->show();
-}
-
-void GraphicManager::createTextDialog(
-    QDialog* parentDialog, const DialogType dialogType,
-    const TextDialogAction action, const std::string& message,
-    // std::function<void()>&& func)
-    void(TextDialog::*func)())
-{
-    // TODO delete objects for closed dialoges
-    TextDialog* dialog = new TextDialog(
-        parentDialog, this->mainWindowPtr_, dialogType, action, message, func);
-
-    // dialog->set(parentDialog);
-    dialog->show();
+    dialogPtr->show();
 }
 
 void GraphicManager::createCompanion()
@@ -1382,16 +1399,35 @@ void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
 void GraphicManager::showCompanionInfoDialog(
     CompanionAction* companionActionPtr, std::string&& header)
 {
-    this->createTextDialog(
-        companionActionPtr->getFormDialogPtr(),
+    QWidget* parentPtr = nullptr;
+    void (TextDialog::*functionPtr)() = nullptr;
+
+    auto formDialogPtr = companionActionPtr->getFormDialogPtr();
+
+    if(formDialogPtr)
+    {
+        parentPtr = formDialogPtr;
+        functionPtr = &TextDialog::closeSelfAndParentDialog;
+    }
+    else
+    {
+        functionPtr = &TextDialog::closeSelf;
+    }
+
+    this->createTextDialogAndShow(
+        parentPtr,
         DialogType::INFO,
-        TextDialogAction::CLOSE_PARENT_AND_SELF,
         buildDialogText(
             std::move(header),
             std::vector<std::string> {
                 std::string("name: ") + companionActionPtr->getName(),
                 std::string("ipAddress: ") + companionActionPtr->getIpAddress(),
-                std::string("port: ") + companionActionPtr->getClientPort() }));
+                std::string("port: ") + companionActionPtr->getClientPort() }),
+        std::vector<ButtonInfo>( {
+            ButtonInfo(
+                okButtonText,
+                QDialogButtonBox::AcceptRole,
+                functionPtr) }));
 
     delete companionActionPtr;
 }

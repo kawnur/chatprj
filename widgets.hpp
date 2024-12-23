@@ -385,46 +385,88 @@ private:
     // void closeDialogs() {};
 };
 
+class TextDialog;
+
+class ButtonInfo
+{
+public:
+    ButtonInfo(
+        const std::string&, QDialogButtonBox::ButtonRole, void (TextDialog::*)());
+
+    ~ButtonInfo() = default;
+
+    std::string buttonText_;
+    QDialogButtonBox::ButtonRole buttonRole_;
+    void (TextDialog::*functionPtr_)();
+
+private:
+};
+
 class TextDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    TextDialog(QDialog*, QWidget*, DialogType, TextDialogAction, const std::string&);
+    // TextDialog(QDialog*, QWidget*, DialogType, TextDialogAction, const std::string&);
+
+    // TextDialog(
+    //     // QDialog*, QWidget*, DialogType, TextDialogAction,
+    //     // QWidget*, DialogType, TextDialogAction,
+    //     QWidget*, DialogType,
+    //     // const std::string&, std::function<void()>&&);
+    //     // const std::string&, void(TextDialog::*)());
+    //     const std::string&,
+    //     std::vector<
+    //         std::tuple<
+    //             const std::string&,
+    //             QDialogButtonBox::ButtonRole,
+    //             void(TextDialog::*)()>>&);
 
     TextDialog(
-        QDialog*, QWidget*, DialogType, TextDialogAction,
-        // const std::string&, std::function<void()>&&);
-        const std::string&, void(TextDialog::*)());
+        QWidget*, DialogType, const std::string&,
+        std::vector<ButtonInfo>&&);
 
     ~TextDialog();
 
     void set(QDialog*);
 
-    void closeDialogs();
+    void closeSelf();
+    void closeSelfAndParentDialog();
+
+    virtual void acceptAction() {};
 public slots:
     void unsetMainWindowBlurAndCloseDialogs();
+    void reject() override;
 
 private:
-    TextDialogAction action_;
-    QDialog* parentDialogPtr_;
+    // TextDialogAction action_;
+    // QDialog* parentDialogPtr_;
     QPlainTextEdit* textEditPtr_;
 
 
-    void act();
+    // void act();
 
 protected:
     QVBoxLayout* layoutPtr_;
     QDialogButtonBox* buttonBoxPtr_;
 };
 
-class TwoButtonsTextDialog : public TextDialog
+class ActionTextDialog : public TextDialog
 {
     Q_OBJECT
 
 public:
-    TwoButtonsTextDialog(QDialog*, QWidget*, DialogType, const std::string&, std::string&&);
-    ~TwoButtonsTextDialog() = default;
+    // ActionTextDialog(
+    //     QDialog*, QWidget*, DialogType, const std::string&, std::string&&,
+    //     std::vector<
+    //         std::tuple<
+    //             const std::string&,
+    //             QDialogButtonBox::ButtonRole,
+    //             void(TextDialog::*)()>>&);
+    ActionTextDialog(
+        QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>&&);
+
+    ~ActionTextDialog() = default;
 
     void set(CompanionAction*);
 
@@ -432,7 +474,7 @@ private:
     CompanionAction* actionPtr_;
     std::string buttonText_;
 
-    void acceptAction();
+    void acceptAction() override;
 };
 
 #endif // WIDGETS_HPP

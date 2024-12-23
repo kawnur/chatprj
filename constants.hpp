@@ -29,11 +29,11 @@ enum class MainWindowContainerPosition
     RIGHT
 };
 
-enum class TextDialogAction
-{
-    CLOSE_PARENT_AND_SELF,
-    ACCEPT
-};
+// enum class TextDialogAction
+// {
+//     CLOSE_PARENT_AND_SELF,
+//     ACCEPT
+// };
 
 const std::map<CompanionActionType, std::string> actionTypeStringRepresentation
 {
@@ -60,6 +60,15 @@ const std::string newPasswordDialogSecondLabel { "Reenter password:" };
 // authentication dialog
 const std::string authenticationDialogTitle { "Authentication" };
 const std::string authenticationDialogLabel { "Enter password:" };
+
+// info dialogs
+const std::string newPasswordCreatedLabel { "New password created" };
+
+const std::string okButtonText { "OK" };
+const std::string cancelButtonText { "Cancel" };
+const std::string clearHistoryButtonText { "Clear history" };
+const std::string deleteCompanionButtonText { "Delete companion" };
+
 
 // colors
 const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;

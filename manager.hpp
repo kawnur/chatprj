@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <memory>
+#include <QDialogButtonBox>
 #include <string>
 
 #include "chat_client.hpp"
@@ -14,6 +15,7 @@
 #include "mainwindow.hpp"
 #include "utils.hpp"
 
+class ButtonInfo;
 class CentralPanelWidget;
 class ChatClient;
 class ChatServer;
@@ -25,7 +27,7 @@ class RightPanelWidget;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
 class TextDialog;
-class TwoButtonsTextDialog;
+class ActionTextDialog;
 class WidgetGroup;
 
 int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
@@ -158,7 +160,7 @@ private:
     Companion* companionPtr_;
 
     CompanionDataDialog* formDialogPtr_;
-    TwoButtonsTextDialog* deleteDialogPtr_;
+    ActionTextDialog* deleteDialogPtr_;
 
     // void sendData();
 };
@@ -288,13 +290,9 @@ public:
 
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
-    void createTextDialog(
-        QDialog*, const DialogType, const TextDialogAction, const std::string&);
-
-    void createTextDialog(
-        QDialog*, const DialogType, const TextDialogAction,
-        // const std::string&, std::function<void()>&&);
-        const std::string&, void(TextDialog::*)());
+    void createTextDialogAndShow(
+        QWidget*, DialogType, const std::string&,
+        std::vector<ButtonInfo>&&);
 
     void createCompanion();
     void updateCompanion(Companion*);
