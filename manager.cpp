@@ -1449,23 +1449,31 @@ void GraphicManager::showCentralPanelStub()
 
 void GraphicManager::hideInfo()
 {
-    this->stubWidgetsPtr_->setLeftPanelWidth(
-        this->mainWindowPtr_->getLeftPanelWidgetWidth());
+    // show-hide using blur
+    this->enableMainWindowBlurEffect();
 
-    this->mainWindowPtr_->hideLeftAndRightPanels();
+    // show-hide using stubs
+    // this->stubWidgetsPtr_->setLeftPanelWidth(
+    //     this->mainWindowPtr_->getLeftPanelWidgetWidth());
 
-    getManagerPtr()->hideSelectedCompanionCentralPanel();
+    // this->mainWindowPtr_->hideLeftAndRightPanels();
 
-    this->stubWidgetsPtr_->showStubPanels();
+    // getManagerPtr()->hideSelectedCompanionCentralPanel();
+
+    // this->stubWidgetsPtr_->showStubPanels();
 }
 
 void GraphicManager::showInfo()
 {
-    this->mainWindowPtr_->showLeftAndRightPanels();
+    // show-hide using blur
+    this->disableMainWindowBlurEffect();
 
-    getManagerPtr()->showSelectedCompanionCentralPanel();
+    // show-hide using stubs
+    // this->mainWindowPtr_->showLeftAndRightPanels();
 
-    this->stubWidgetsPtr_->hideStubPanels();
+    // getManagerPtr()->showSelectedCompanionCentralPanel();
+
+    // this->stubWidgetsPtr_->hideStubPanels();
 }
 
 MainWindow* GraphicManager::getMainWindowPtr()
@@ -1475,14 +1483,21 @@ MainWindow* GraphicManager::getMainWindowPtr()
 
 void GraphicManager::createEntrancePassword()
 {
+    this->enableMainWindowBlurEffect();
+
     NewPasswordDialog* dialogPtr = new NewPasswordDialog;
     dialogPtr->set();
     dialogPtr->show();
 }
 
-void GraphicManager::setMainWindowGraphicsEffectToNullptr()
+void GraphicManager::enableMainWindowBlurEffect()
 {
-    this->mainWindowPtr_->setGraphicsEffect(nullptr);
+    this->mainWindowPtr_->enableBlurEffect();
+}
+
+void GraphicManager::disableMainWindowBlurEffect()
+{
+    this->mainWindowPtr_->disableBlurEffect();
 }
 
 void GraphicManager::getEntrancePassword()

@@ -52,7 +52,11 @@ public:
 
     int getLeftPanelWidgetWidth();
 
-    void setGraphicsEffectToNullptr();
+    void enableWidgetsForShowHide();
+    void disableWidgetsForShowHide();
+
+    void enableBlurEffect();
+    void disableBlurEffect();
 
 private slots:
     void createCompanion();
@@ -88,6 +92,8 @@ private:
     void keyPressEvent(QKeyEvent*) override;
 
     void createMenu();
+
+    void setBlurEffect();
 };
 
 #endif // MAINWINDOW_HPP

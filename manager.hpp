@@ -316,7 +316,8 @@ public:
     void createEntrancePassword();
     // void
 
-    void setMainWindowGraphicsEffectToNullptr();
+    void enableMainWindowBlurEffect();
+    void disableMainWindowBlurEffect();
 
     void getEntrancePassword();
 

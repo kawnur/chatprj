@@ -52,10 +52,7 @@ MainWindow::MainWindow()
     mapContainerPtrToContainerPosition[MainWindowContainerPosition::RIGHT] =
         rightContainerWidgetPtr_;
     
-    // blur effect
-    blurEffectPtr_ = new QGraphicsBlurEffect;
-    blurEffectPtr_->setBlurRadius(10);
-
+    // blur effect moved to set
 }
 
 MainWindow::~MainWindow()
@@ -82,8 +79,7 @@ void MainWindow::set()
     this->addWidgetToContainerAndSetParentTo(
         MainWindowContainerPosition::LEFT, this->showHideWidgetPtr_);
 
-    // this->blurEffectPtr_->setParent(this);
-    this->setGraphicsEffect(this->blurEffectPtr_);
+    this->setBlurEffect();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -136,6 +132,37 @@ int MainWindow::getLeftPanelWidgetWidth()
     return this->leftPanelPtr_->getLastCompanionPanelChildWidth();
 }
 
+void MainWindow::enableWidgetsForShowHide()
+{
+    this->menuBar()->setEnabled(true);
+    this->leftPanelPtr_->setEnabled(true);
+    this->centralContainerWidgetPtr_->setEnabled(true);
+    this->rightContainerWidgetPtr_->setEnabled(true);
+}
+
+void MainWindow::disableWidgetsForShowHide()
+{
+    this->menuBar()->setEnabled(false);
+    this->leftPanelPtr_->setEnabled(false);
+    this->centralContainerWidgetPtr_->setEnabled(false);
+    this->rightContainerWidgetPtr_->setEnabled(false);
+}
+
+void MainWindow::enableBlurEffect()
+{
+    this->disableWidgetsForShowHide();
+    this->setGraphicsEffect(this->blurEffectPtr_);
+}
+
+void MainWindow::disableBlurEffect()
+{
+    this->enableWidgetsForShowHide();
+    this->setGraphicsEffect(nullptr);
+
+    // // setGraphicsEffect deletes previous effect object
+    this->setBlurEffect();
+}
+
 void MainWindow::createCompanion()
 {
     getGraphicManagerPtr()->createCompanion();
@@ -160,4 +187,10 @@ void MainWindow::createMenu()
     QAction* addCompanionAction = new QAction("Add new companion", this);
     companionMenu->addAction(addCompanionAction);
     connect(addCompanionAction, &QAction::triggered, this, &MainWindow::createCompanion);
+}
+
+void MainWindow::setBlurEffect()
+{
+    blurEffectPtr_ = new QGraphicsBlurEffect;
+    blurEffectPtr_->setBlurRadius(30);
 }

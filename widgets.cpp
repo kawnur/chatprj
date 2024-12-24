@@ -939,7 +939,9 @@ NewPasswordDialog::~NewPasswordDialog()
 
 void NewPasswordDialog::set()
 {
-    connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &NewPasswordDialog::sendData);
+    connect(
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
+        this, &NewPasswordDialog::sendData);
     // connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
@@ -1170,7 +1172,7 @@ void TextDialog::set(QDialog* parentDialog)
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 {
-    getGraphicManagerPtr()->setMainWindowGraphicsEffectToNullptr();
+    getGraphicManagerPtr()->disableMainWindowBlurEffect();
     this->closeSelfAndParentDialog();
 }
 
