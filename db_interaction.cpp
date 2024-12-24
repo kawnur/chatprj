@@ -244,11 +244,11 @@ PGresult* pushCompanionToDBAndReturn(
     const PGconn* dbConnection, const std::string& companionName)
 {
     std::string command = std::string(
-                              "INSERT INTO companions "
-                              "(name) "
-                              "VALUES ('")
-                          + companionName
-                          + std::string("') RETURNING id");
+        "INSERT INTO companions "
+        "(name) "
+        "VALUES ('")
+        + companionName
+        + std::string("') RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
@@ -257,11 +257,11 @@ PGresult* updateCompanionAndReturn(  // TODO change function names
     const PGconn* dbConnection, const std::string& companionName)
 {
     std::string command = std::string(
-                              "INSERT INTO companions "
-                              "(name) "
-                              "VALUES ('")
-                          + companionName
-                          + std::string("') RETURNING id");
+        "INSERT INTO companions "
+        "(name) "
+        "VALUES ('")
+        + companionName
+        + std::string("') RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
@@ -322,6 +322,17 @@ PGresult* pushMessageToDBAndReturn(
         + std::string("', false) RETURNING ")
         + returningFieldName
         + std::string(", timestamp_tz");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
+PGresult* pushPasswordToDBAndReturn(const PGconn* dbConnection, const std::string& password)
+{
+    std::string command = std::string(
+        "INSERT INTO passwords (password) "
+        "VALUES ('")
+        + password
+        + std::string("') RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }

@@ -15,24 +15,26 @@
 #include "mainwindow.hpp"
 #include "utils.hpp"
 
+class ActionTextDialog;
 class ButtonInfo;
 class CentralPanelWidget;
 class ChatClient;
 class ChatServer;
 class CompanionDataDialog;
 class DBReplyData;
+class Dialog;
 class LeftPanelWidget;
 class MainWindow;
+class QWidget;
 class RightPanelWidget;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
 class TextDialog;
-class ActionTextDialog;
 class WidgetGroup;
 
 int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
 template<typename... Ts> void logArgs(Ts&&... args);
-void showErrorDialogAndLogError(const std::string&);
+void showErrorDialogAndLogError(QWidget*, const std::string&);
 
 class SocketInfo
 {
@@ -126,7 +128,26 @@ private:
     std::vector<Message> messages_;
 };
 
-class CompanionAction : public QObject
+class Action : public QObject
+{
+    Q_OBJECT
+
+public:
+    Action(Dialog* dialogPtr) : dialogPtr_(dialogPtr) {}
+    ~Action() = default;
+
+    void set();
+
+    Dialog* getDialogPtr();
+
+    virtual void sendData() {}
+
+protected:
+    Dialog* dialogPtr_;
+};
+
+// class CompanionAction : public QObject
+class CompanionAction : public Action
 {
     Q_OBJECT
 
@@ -134,7 +155,7 @@ public:
     CompanionAction(CompanionActionType, MainWindow*, Companion*);
     ~CompanionAction();
 
-    void set();
+    // void set();
 
     CompanionActionType getActionType();
 
@@ -146,11 +167,11 @@ public:
     int getCompanionId() const;
     Companion* getCompanionPtr() const;
 
-    CompanionDataDialog* getFormDialogPtr();
+    // CompanionDataDialog* getFormDialogPtr();
     void updateCompanionObjectData();
 
 public slots:
-    void sendData();
+    void sendData() override;
 
 private:
     CompanionActionType actionType_;
@@ -159,10 +180,26 @@ private:
     MainWindow* mainWindowPtr_;
     Companion* companionPtr_;
 
-    CompanionDataDialog* formDialogPtr_;
-    ActionTextDialog* deleteDialogPtr_;
+    // CompanionDataDialog* formDialogPtr_;
+    // ActionTextDialog* deleteDialogPtr_;
 
     // void sendData();
+};
+
+class PasswordAction : public Action
+{
+    Q_OBJECT
+
+public:
+    PasswordAction();
+    ~PasswordAction() = default;
+
+    std::string getPassword();
+
+    void sendData() override;
+
+private:
+    const std::string* passwordPtr_;
 };
 
 class Manager : public QObject  // TODO do we need inheritance?
@@ -186,12 +223,14 @@ public:
     void deleteCompanion(CompanionAction*);
     void clearCompanionHistory(CompanionAction*);
 
+    void createUserPassword(PasswordAction*);
+
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
 
     bool isSelectedCompanionNullptr();
 
-    void authenticateUser();
+    void startUserAuthentication();
 
 private:
     PGconn* dbConnectionPtr_;
@@ -199,7 +238,7 @@ private:
     const Companion* selectedCompanionPtr_;
 
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
-    std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;
+    std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
@@ -216,6 +255,8 @@ private:
     void deleteWidgetGroupAndDeleteFromMapping(Companion*);
 
     bool companionDataValidation(CompanionAction*);
+    bool passwordDataValidation(PasswordAction*);
+
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
 
@@ -238,7 +279,7 @@ private:
 
         if(!dbResultPtr)
         {
-            showErrorDialogAndLogError("Database request error, dbResultPtr is nullptr");
+            showErrorDialogAndLogError(nullptr, "Database request error, dbResultPtr is nullptr");
             return nullptr;
         }
 
@@ -246,7 +287,7 @@ private:
 
         if(getDataFromDBResult(dbDataPtr, dbResultPtr, 0) == -1)
         {
-            showErrorDialogAndLogError("Error getting data from dbResultPtr");
+            showErrorDialogAndLogError(nullptr, "Error getting data from dbResultPtr");
             return nullptr;
         }
 
@@ -302,6 +343,8 @@ public:
 
     void sendCompanionDataToManager(CompanionAction*);
     void showCompanionInfoDialog(CompanionAction*, std::string&&);
+
+    void sendNewPasswordDataToManager(PasswordAction*);
 
     void hideCompanionPanelStub();
 

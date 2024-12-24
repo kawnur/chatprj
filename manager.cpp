@@ -264,25 +264,39 @@ SocketInfo* Companion::getSocketInfoPtr() const
     return this->socketInfoPtr_;
 }
 
+void Action::set()
+{
+    this->dialogPtr_->setAction(this);
+    this->dialogPtr_->show();
+}
+
+Dialog* Action::getDialogPtr()
+{
+    return this->dialogPtr_;
+}
+
 CompanionAction::CompanionAction(
     CompanionActionType actionType, MainWindow* mainWindowPtr, Companion* companionPtr) :
     actionType_(actionType), mainWindowPtr_(mainWindowPtr), companionPtr_(companionPtr),
-    dataPtr_(nullptr)
+    dataPtr_(nullptr), Action(nullptr)
 {
     switch(actionType)
     {
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
-        formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
-        deleteDialogPtr_ = nullptr;
+        // formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
+        // deleteDialogPtr_ = nullptr;
+        dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
         break;
 
     case CompanionActionType::DELETE:
-        formDialogPtr_ = nullptr;
+        // formDialogPtr_ = nullptr;
         // deleteDialogPtr_ = new TwoButtonsTextDialog(
         //     nullptr, this->mainWindowPtr_, DialogType::WARNING,
         //     deleteCompanionDialogText, std::string("Delete companion"));
-        deleteDialogPtr_ = new ActionTextDialog(
+        // deleteDialogPtr_ = new ActionTextDialog(
+        // dialogPtr_ = new ActionTextDialog(
+        dialogPtr_ = new TextDialog(
             nullptr,
             DialogType::WARNING,
             deleteCompanionDialogText,
@@ -295,11 +309,13 @@ CompanionAction::CompanionAction(
         break;
 
     case CompanionActionType::CLEAR_HISTORY:
-        formDialogPtr_ = nullptr;
+        // formDialogPtr_ = nullptr;
         // deleteDialogPtr_ = new ActionTextDialog(
         //     nullptr, this->mainWindowPtr_, DialogType::WARNING,
         //     clearCompanionHistoryDialogText, std::string("Clear history"));
-        deleteDialogPtr_ = new ActionTextDialog(
+        // deleteDialogPtr_ = new ActionTextDialog(
+        // dialogPtr_ = new ActionTextDialog(
+        dialogPtr_ = new TextDialog(
             nullptr,
             DialogType::WARNING,
             clearCompanionHistoryDialogText,
@@ -318,23 +334,23 @@ CompanionAction::~CompanionAction()
     delete this->dataPtr_;
 }
 
-void CompanionAction::set()
-{
-    switch(this->actionType_)
-    {
-    case CompanionActionType::CREATE:
-    case CompanionActionType::UPDATE:
-        this->formDialogPtr_->set(this);
-        this->formDialogPtr_->show();
-        break;
+// void CompanionAction::set()
+// {
+//     switch(this->actionType_)
+//     {
+//     case CompanionActionType::CREATE:
+//     case CompanionActionType::UPDATE:
+//         this->formDialogPtr_->set(this);
+//         this->formDialogPtr_->show();
+//         break;
 
-    case CompanionActionType::DELETE:
-    case CompanionActionType::CLEAR_HISTORY:
-        this->deleteDialogPtr_->set(this);
-        this->deleteDialogPtr_->show();
-        break;
-    }
-}
+//     case CompanionActionType::DELETE:
+//     case CompanionActionType::CLEAR_HISTORY:
+//         this->deleteDialogPtr_->set(this);
+//         this->deleteDialogPtr_->show();
+//         break;
+//     }
+// }
 
 CompanionActionType CompanionAction::getActionType()
 {
@@ -371,10 +387,10 @@ Companion* CompanionAction::getCompanionPtr() const
     return this->companionPtr_;
 }
 
-CompanionDataDialog* CompanionAction::getFormDialogPtr()
-{
-    return this->formDialogPtr_;
-}
+// CompanionDataDialog* CompanionAction::getFormDialogPtr()
+// {
+//     return this->formDialogPtr_;
+// }
 
 void CompanionAction::sendData()
 {
@@ -387,10 +403,19 @@ void CompanionAction::sendData()
     {
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
-        name = this->formDialogPtr_->getNameString();
-        ipAddress = this->formDialogPtr_->getIpAddressString();
-        clientPort = this->formDialogPtr_->getPortString();
+    {
+        // name = this->formDialogPtr_->getNameString();
+        // ipAddress = this->formDialogPtr_->getIpAddressString();
+        // clientPort = this->formDialogPtr_->getPortString();
+
+        CompanionDataDialog* dataDialogPtr =
+            dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
+
+        name = dataDialogPtr->getNameString();
+        ipAddress = dataDialogPtr->getIpAddressString();
+        clientPort = dataDialogPtr->getPortString();
         break;
+    }
 
     case CompanionActionType::DELETE:
     case CompanionActionType::CLEAR_HISTORY:
@@ -411,6 +436,42 @@ void CompanionAction::updateCompanionObjectData()
 {
     this->companionPtr_->updateData(this->dataPtr_);
 }
+
+PasswordAction::PasswordAction() : Action(nullptr)
+{
+    dialogPtr_ = new NewPasswordDialog;
+}
+
+std::string PasswordAction::getPassword()
+{
+    return *this->passwordPtr_;
+}
+
+void PasswordAction::sendData()
+{
+    NewPasswordDialog* passwordDialogPtr =
+        dynamic_cast<NewPasswordDialog*>(this->dialogPtr_);
+
+    auto text1 = passwordDialogPtr->getFirstEditText();
+    auto text2 = passwordDialogPtr->getSecondEditText();
+
+    if(text1 == text2)
+    {
+        if(text1.size() == 0)
+        {
+            showErrorDialogAndLogError(this->getDialogPtr(), "Empty password is invalid");
+            return;
+        }
+
+        this->passwordPtr_ = &text1;
+        getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
+    }
+    else
+    {
+        showErrorDialogAndLogError(this->getDialogPtr(), "Entered passwords are not equal");
+    }
+}
+
 
 Manager::Manager() :
     dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
@@ -450,7 +511,7 @@ void Manager::set()
     }
     else
     {
-        showErrorDialogAndLogError("problem with DB connection");
+        showErrorDialogAndLogError(nullptr, "problem with DB connection");
     }
 }
 
@@ -649,13 +710,13 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
 
     if(!companionIdDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return false;
     }
 
     if(!companionIdDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError("Companion with such name already exists");
+        showErrorDialogAndLogError(nullptr, "Companion with such name already exists");
         return false;
     }
 
@@ -670,13 +731,13 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
 
     if(!socketIdDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return false;
     }
 
     if(!socketIdDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError("Companion with such socket already exists");
+        showErrorDialogAndLogError(nullptr, "Companion with such socket already exists");
         return false;
     }
 
@@ -695,7 +756,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 
     if(!companionIdDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return false;
     }
 
@@ -710,7 +771,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
     if(nameExistsAtOtherCompanion)
     {
         // no return
-        showWarningDialogAndLogWarning("Companion with such name already exists");
+        showWarningDialogAndLogWarning(nullptr, "Companion with such name already exists");
     }
 
     // check if such socket already exists
@@ -724,7 +785,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 
     if(!socketIdDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return false;
     }
 
@@ -738,7 +799,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 
     if(socketExistsAtOtherCompanion)
     {
-        showErrorDialogAndLogError("Companion with such socket already exists");
+        showErrorDialogAndLogError(nullptr, "Companion with such socket already exists");
         return false;
     }
 
@@ -764,7 +825,7 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
 
     if(findMapResult == this->mapCompanionToWidgetGroup_.end())
     {
-        showErrorDialogAndLogError("Companion was not found in mapping at deletion");
+        showErrorDialogAndLogError(nullptr, "Companion was not found in mapping at deletion");
     }
     else
     {
@@ -780,7 +841,7 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
 
         if(findVectorResult == this->companionPtrs_.end())
         {
-            showErrorDialogAndLogError("Companion was not found in vector at deletion");
+            showErrorDialogAndLogError(nullptr, "Companion was not found in vector at deletion");
         }
         else
         {
@@ -810,24 +871,27 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr)
 
     if(!validationResult)
     {
-        // auto buttonInfo = std::make_tuple(
-        //     okButtonText, QDialogButtonBox::AcceptRole, &QDialog::accept);
-
-        // std::vector<std::tuple<
-        //     const std::string&,
-        //     QDialogButtonBox::ButtonRole,
-        //     void(TextDialog::*)()>> buttonInfoVector { buttonInfo };
-
-        getGraphicManagerPtr()->createTextDialogAndShow(
+        showErrorDialogAndLogError(
             nullptr,
-            DialogType::ERROR,
-            // TextDialogAction::ACCEPT,
-            buildDialogText(
-                std::string { "Error messages:\n\n" }, validationErrors),
-            std::vector<ButtonInfo>{ ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                &QDialog::accept) });
+            buildDialogText(std::string { "Error messages:\n\n" }, validationErrors));
+
+        return false;
+    }
+
+    return true;
+}
+
+bool Manager::passwordDataValidation(PasswordAction* passwordActionPtr)
+{
+    std::vector<std::string> validationErrors {};
+
+    bool validationResult = validatePassword(validationErrors, passwordActionPtr->getPassword());
+
+    if(!validationResult)
+    {
+        showErrorDialogAndLogError(
+            nullptr,
+            buildDialogText(std::string { "Error messages:\n\n" }, validationErrors));
 
         return false;
     }
@@ -858,13 +922,13 @@ void Manager::createCompanion(CompanionAction* companionActionPtr)
 
     if(!companionIdDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return;
     }
 
     if(companionIdDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError("Empty db reply to new companion pushing");
+        showErrorDialogAndLogError(nullptr, "Empty db reply to new companion pushing");
         return;
     }
 
@@ -882,13 +946,13 @@ void Manager::createCompanion(CompanionAction* companionActionPtr)
 
     if(!socketDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return;
     }
 
     if(socketDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError("Empty db reply to new socket pushing");
+        showErrorDialogAndLogError(nullptr, "Empty db reply to new socket pushing");
         return;
     }
 
@@ -933,13 +997,13 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
 
     if(!companionIdDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return;
     }
 
     if(companionIdDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError("Empty db reply to companion update");
+        showErrorDialogAndLogError(nullptr, "Empty db reply to companion update");
         return;
     }
 
@@ -969,7 +1033,7 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 
     if(!companionIdMessagesDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return;
     }
 
@@ -989,13 +1053,13 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 
     if(!companionIdCompanionDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return;
     }
 
     if(companionIdCompanionDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError("Empty db reply to companion deletion");
+        showErrorDialogAndLogError(nullptr, "Empty db reply to companion deletion");
         return;
     }
 
@@ -1019,7 +1083,7 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
 
     if(!companionIdMessagesDataPtr)
     {
-        showErrorDialogAndLogError("Error getting data from db");
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
         return;
     }
 
@@ -1038,6 +1102,38 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
         companionActionPtr, std::string { "Companion chat history cleared:\n\n" });
+}
+
+void Manager::createUserPassword(PasswordAction* actionPtr)
+{
+    // data validation and checking
+    if(!(this->passwordDataValidation(actionPtr)))
+    {
+        return;
+    }
+
+    // push password data to db
+    std::shared_ptr<DBReplyData> passwordIdDataPtr = this->getDBDataPtr(
+        true,
+        "pushPasswordToDBAndReturn",
+        &pushPasswordToDBAndReturn,
+        std::vector<std::string> { std::string("id") },
+        actionPtr->getPassword());
+
+    if(!passwordIdDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        return;
+    }
+
+    if(passwordIdDataPtr->isEmpty())
+    {
+        showErrorDialogAndLogError(nullptr, "Empty db reply to new password pushing");
+        return;
+    }
+
+    // show dialog
+    showInfoDialogAndLogInfo(actionPtr->getDialogPtr(), newPasswordCreatedLabel);
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -1063,7 +1159,7 @@ bool Manager::isSelectedCompanionNullptr()
     return this->selectedCompanionPtr_ == nullptr;
 }
 
-void Manager::authenticateUser()
+void Manager::startUserAuthentication()
 {
     // do we have password in db?
     std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
@@ -1074,7 +1170,7 @@ void Manager::authenticateUser()
 
     if(!passwordDataPtr)
     {
-        showErrorDialogAndLogError("Error getting password from db");
+        showErrorDialogAndLogError(nullptr, "Error getting password from db");
         return;
     }
 
@@ -1402,7 +1498,8 @@ void GraphicManager::showCompanionInfoDialog(
     QWidget* parentPtr = nullptr;
     void (TextDialog::*functionPtr)() = nullptr;
 
-    auto formDialogPtr = companionActionPtr->getFormDialogPtr();
+    // auto formDialogPtr = companionActionPtr->getFormDialogPtr();
+    auto formDialogPtr = companionActionPtr->getDialogPtr();
 
     if(formDialogPtr)
     {
@@ -1430,6 +1527,11 @@ void GraphicManager::showCompanionInfoDialog(
                 functionPtr) }));
 
     delete companionActionPtr;
+}
+
+void GraphicManager::sendNewPasswordDataToManager(PasswordAction* aciotnPtr)
+{
+    getManagerPtr()->createUserPassword(aciotnPtr);
 }
 
 void GraphicManager::hideCompanionPanelStub()
@@ -1485,9 +1587,8 @@ void GraphicManager::createEntrancePassword()
 {
     this->enableMainWindowBlurEffect();
 
-    NewPasswordDialog* dialogPtr = new NewPasswordDialog;
-    dialogPtr->set();
-    dialogPtr->show();
+    PasswordAction* actionPtr = new PasswordAction;
+    actionPtr->set();
 }
 
 void GraphicManager::enableMainWindowBlurEffect()

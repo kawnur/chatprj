@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
     utils_cout.hpp
     utils_gpgme.cpp
     utils_gpgme.hpp
+    utils_widgets.cpp
+    utils_widgets.hpp
     widgets.cpp
     widgets.hpp
 )

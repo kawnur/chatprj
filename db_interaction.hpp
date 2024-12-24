@@ -63,6 +63,8 @@ PGresult* pushMessageToDBAndReturn(
     const PGconn*, const std::string&, const std::string&,
     const std::string&, const std::string&);
 
+PGresult* pushPasswordToDBAndReturn(const PGconn*, const std::string&);
+
 PGresult* deleteMessagesFromDBAndReturn(const PGconn*, const CompanionAction&);
 PGresult* deleteCompanionAndSocketAndReturn(const PGconn*, const CompanionAction&);
 

@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+// TODO move all constants to constants.hpp
+
 bool validateCompanionName(std::vector<std::string>& validationErrors, const std::string& name)
 {
     bool result = (name.size() <= 30);
@@ -78,6 +80,20 @@ bool validateCompanionData(
     return result;
 }
 
+bool validatePassword(std::vector<std::string>& validationErrors, const std::string& password)
+{
+    bool result = (password.size() <= 30);
+
+    if(!result)
+    {
+        validationErrors.push_back(std::string("password length is greater than 30"));
+    }
+
+    logArgs("validatePassword result:", result);
+
+    return result;
+}
+
 std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages)
 {
     if(messages.empty())
@@ -100,10 +116,36 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
     }
 }
 
-void showWarningDialogAndLogWarning(const std::string& message)
+void showInfoDialogAndLogInfo(QWidget* parentPtr, const std::string& message)
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
-        nullptr, DialogType::WARNING, message,
+        parentPtr, DialogType::INFO, message,
+        std::vector<ButtonInfo>( {
+            ButtonInfo(
+                okButtonText,
+                QDialogButtonBox::AcceptRole,
+                &QDialog::accept) }));
+
+    logArgsInfo(message);
+}
+
+void showInfoDialogAndLogInfo(QWidget* parentPtr, std::string&& message)
+{
+    getGraphicManagerPtr()->createTextDialogAndShow(
+        parentPtr, DialogType::INFO, std::move(message),
+        std::vector<ButtonInfo>( {
+            ButtonInfo(
+                okButtonText,
+                QDialogButtonBox::AcceptRole,
+                &QDialog::accept) }));
+
+    logArgsInfo(message);
+}
+
+void showWarningDialogAndLogWarning(QWidget* parentPtr, const std::string& message)
+{
+    getGraphicManagerPtr()->createTextDialogAndShow(
+        parentPtr, DialogType::WARNING, message,
         std::vector<ButtonInfo>( {
             ButtonInfo(
                 okButtonText,
@@ -113,10 +155,23 @@ void showWarningDialogAndLogWarning(const std::string& message)
     logArgsWarning(message);
 }
 
-void showErrorDialogAndLogError(const std::string& message)
+void showErrorDialogAndLogError(QWidget* parentPtr, const std::string& message)
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
-        nullptr, DialogType::ERROR, message,
+        parentPtr, DialogType::ERROR, message,
+        std::vector<ButtonInfo>( {
+            ButtonInfo(
+                okButtonText,
+                QDialogButtonBox::AcceptRole,
+                &QDialog::accept) }));
+
+    logArgsError(message);
+}
+
+void showErrorDialogAndLogError(QWidget* parentPtr, std::string&& message)
+{
+    getGraphicManagerPtr()->createTextDialogAndShow(
+        parentPtr, DialogType::ERROR, std::move(message),
         std::vector<ButtonInfo>( {
             ButtonInfo(
                 okButtonText,

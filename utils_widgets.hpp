@@ -1,0 +1,4 @@
+#ifndef UTILS_WIDGETS_HPP
+#define UTILS_WIDGETS_HPP
+
+#endif // UTILS_WIDGETS_HPP

@@ -50,6 +50,11 @@ template<typename... Ts> void logArgs(Ts&&... args)
     coutArgsWithSpaceSeparator(args...);
 }
 
+template<typename... Ts> void logArgsInfo(Ts&&... args)
+{
+    logArgs("INFO:", args...);
+}
+
 template<typename... Ts> void logArgsException(Ts&&... args)
 {
     logArgs("EXCEPTION:", args...);

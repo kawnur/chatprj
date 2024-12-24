@@ -21,7 +21,7 @@ void ChatApp::set()
     managerPtr_ = new Manager;
     managerPtr_->set();
 
-    managerPtr_->authenticateUser();
+    managerPtr_->startUserAuthentication();
 
 
 }

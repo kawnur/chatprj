@@ -24,15 +24,20 @@ void runAndLogException(F func, Ts&&... args)
 
 // data validation
 
-bool validateCompanionName(const std::string&);
-bool validateIpAddress(const std::string&);
-bool validatePort(const std::string&);
+bool validateCompanionName(std::vector<std::string>&, const std::string&);
+bool validateIpAddress(std::vector<std::string>&, const std::string&);
+bool validatePort(std::vector<std::string>&, const std::string&);
 
 bool validateCompanionData(std::vector<std::string>&, const CompanionAction*);
 
+bool validatePassword(std::vector<std::string>&, const std::string&);
+
 std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
-void showWarningDialogAndLogWarning(const std::string&);
-void showErrorDialogAndLogError(const std::string&);
+void showInfoDialogAndLogInfo(QWidget*, const std::string&);
+void showInfoDialogAndLogInfo(QWidget*, std::string&&);
+void showWarningDialogAndLogWarning(QWidget*, const std::string&);
+void showErrorDialogAndLogError(QWidget*, const std::string&);
+void showErrorDialogAndLogError(QWidget*, std::string&&);
 
 #endif // UTILS_HPP
