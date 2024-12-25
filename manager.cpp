@@ -479,7 +479,9 @@ void PasswordAction::sendData()
 
 
 Manager::Manager() :
-    dbConnectionPtr_(nullptr), companionPtrs_(std::vector<Companion*>())
+    dbConnectionPtr_(nullptr),
+    userIsAuthenticated_(false),
+    companionPtrs_(std::vector<Companion*>())
 {
     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
     selectedCompanionPtr_ = nullptr;
@@ -637,6 +639,11 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
         companionPtr, &companionPtr->getMessagesPtr()->back());
 
     groupPtr->addMessageToChatHistory(textFormatted);
+}
+
+bool Manager::getUserIsAuthenticated()
+{
+    return this->userIsAuthenticated_;
 }
 
 const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
@@ -1173,6 +1180,8 @@ void Manager::authenticateUser(PasswordAction* actionPtr)
     {
         if(passwordDataPtr->getValue(0, "password") == actionPtr->getPassword())
         {
+            this->userIsAuthenticated_ = true;
+
             logArgsInfo("user successfully authenticated");
             graphicManagerPtr->disableMainWindowBlurEffect();
 
@@ -1642,7 +1651,9 @@ void GraphicManager::hideInfo()
 
 void GraphicManager::showInfo()
 {
-    this->showInfoViaBlur();
+    getManagerPtr()->startUserAuthentication();
+
+    // this->showInfoViaBlur();
     // this->showInfoViaStubs();
 }
 

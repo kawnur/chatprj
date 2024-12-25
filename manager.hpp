@@ -205,6 +205,8 @@ public:
     void sendMessage(Companion*, const std::string&);
     void receiveMessage(Companion*, const std::string&);
 
+    bool getUserIsAuthenticated();
+
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     // const WidgetGroup* getWidgetGroupByCompanion(Companion*) const;
 
@@ -228,6 +230,7 @@ public:
 private:
     PGconn* dbConnectionPtr_;
 
+    bool userIsAuthenticated_;
     const Companion* selectedCompanionPtr_;
 
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
