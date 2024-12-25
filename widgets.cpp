@@ -508,7 +508,9 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
 
     layoutPtr_->addWidget(companionNameLabelPtr_);
 
-    chatHistoryWidgetPtr_ = new QPlainTextEdit;
+    // chatHistoryWidgetPtr_ = new QPlainTextEdit;
+    chatHistoryWidgetPtr_ = new QTextEdit;
+    chatHistoryWidgetPtr_->setTextColor(QColorConstants::Green);
     chatHistoryWidgetPtr_->setReadOnly(true);
     chatHistoryWidgetPtr_->setPlainText("");
 
@@ -541,7 +543,9 @@ void CentralPanelWidget::set(Companion* companionPtr)
 
 void CentralPanelWidget::addMessageToChatHistory(const QString& message)
 {
-    this->chatHistoryWidgetPtr_->appendPlainText(message);
+    // this->chatHistoryWidgetPtr_->appendPlainText(message);
+    // this->chatHistoryWidgetPtr_->append(message);
+    this->chatHistoryWidgetPtr_->insertHtml(message);
 }
 
 void CentralPanelWidget::clearChatHistory()
@@ -623,6 +627,8 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr)
 
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr));
 
+    buildChatHistory(companionPtr);
+
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::CENTRAL, centralPanelPtr_);
 
@@ -644,20 +650,25 @@ QString WidgetGroup::formatMessage(const Companion* companion, const Message* me
     auto text = QString::fromStdString(message->getText());
     auto isSent = message->getIsSent();
 
-    QString sender = (companionId == authorId)
-                         ? QString::fromStdString(companion->getName()) : "Me";
+    QString color, sender, receiver;
 
-    QString receiver = (companionId == authorId)
-                           ? "Me" : QString::fromStdString(companion->getName());
+    if(companionId == authorId)
+    {
+        color = "#00115e";
+        sender = QString::fromStdString(companion->getName());
+        receiver = "Me";
+    }
+    else
+    {
+        color = "#115e00";
+        sender = "Me";
+        receiver = QString::fromStdString(companion->getName());
+    }
 
-    QString prefix = QString("From %1 to %2 at %3:\n")
-                         .arg(sender, receiver, time);
+    QString prefix = QString("<font color=\"%1\"><br><b><i>From %2 to %3 at %4:</i></b><br>")
+        .arg(color, sender, receiver, time);
 
-    QString messageIndent = "      ";
-
-    text.replace("\n", "\n" + messageIndent);
-
-    QString msg = prefix + messageIndent + text + QString("\n");
+    QString msg = prefix + text + QString("</font><br>");
 
     return msg;
 }

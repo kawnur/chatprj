@@ -236,7 +236,8 @@ private:
 
     QLabel* companionNameLabelPtr_;
     QPalette* companionNameLabelPalettePtr_;
-    QPlainTextEdit* chatHistoryWidgetPtr_;
+    // QPlainTextEdit* chatHistoryWidgetPtr_;
+    QTextEdit* chatHistoryWidgetPtr_;
     QPalette* chatHistoryWidgetPalettePtr_;
 
     TextEditWidget* textEditPtr_;
