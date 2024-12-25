@@ -859,7 +859,6 @@ CompanionDataDialog::CompanionDataDialog(
     layoutPtr_->addRow(portLabelPtr_, portEditPtr_);
 
     buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
     layoutPtr_->addWidget(buttonBoxPtr_);
 }
 
@@ -875,14 +874,10 @@ CompanionDataDialog::~CompanionDataDialog()
     delete this->buttonBoxPtr_;
 }
 
-void CompanionDataDialog::setAction(Action* actionPtr)
+void CompanionDataDialog::set()
 {
-    this->actionPtr_ = dynamic_cast<CompanionAction*>(actionPtr);
-
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
-        // dynamic_cast<CompanionAction*>(this->actionPtr_), &CompanionAction::sendData);
-        this->actionPtr_, &Action::sendData);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData);
 
     connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
@@ -905,7 +900,7 @@ std::string CompanionDataDialog::getPortString()
     return this->portEditPtr_->text().toStdString();
 }
 
-NewPasswordDialog::NewPasswordDialog()
+CreatePasswordDialog::CreatePasswordDialog()
 {
     setWindowTitle(QString::fromStdString(newPasswordDialogTitle));
 
@@ -926,12 +921,11 @@ NewPasswordDialog::NewPasswordDialog()
     layoutPtr_->addRow(firstLabelPtr_, firstEditPtr_);
     layoutPtr_->addRow(secondLabelPtr_, secondEditPtr_);
 
-    // buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
     layoutPtr_->addWidget(buttonBoxPtr_);
 }
 
-NewPasswordDialog::~NewPasswordDialog()
+CreatePasswordDialog::~CreatePasswordDialog()
 {
     delete this->layoutPtr_;
     delete this->firstLabelPtr_;
@@ -941,147 +935,66 @@ NewPasswordDialog::~NewPasswordDialog()
     delete this->buttonBoxPtr_;
 }
 
-void NewPasswordDialog::set()
+void CreatePasswordDialog::set()
 {
     connect(
         this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData);
 }
 
-std::string NewPasswordDialog::getFirstEditText()
+std::string CreatePasswordDialog::getFirstEditText()
 {
     return this->firstEditPtr_->text().toStdString();
 }
 
-std::string NewPasswordDialog::getSecondEditText()
+std::string CreatePasswordDialog::getSecondEditText()
 {
     return this->secondEditPtr_->text().toStdString();
 }
 
-// void NewPasswordDialog::sendData()
-// {
-//     auto text1 = this->firstEditPtr_->text();
-//     auto text2 = this->secondEditPtr_->text();
+GetPasswordDialog::GetPasswordDialog()
+{
+    setWindowTitle(QString::fromStdString(getPasswordDialogTitle));
 
-//     if(text1 == text2)
-//     {
-//         if(text1.size() == 0)
-//         {
-//             showErrorDialogAndLogError(this, "Empty password is invalid");
-//             return;
-//         }
+    setParent(getGraphicManagerPtr()->getMainWindowPtr());
 
-//         getGraphicManagerPtr()->sendNewPasswordDataToManager(this->actionPtr_);
-//     }
-//     else
-//     {
-//         showErrorDialogAndLogError(this, "Entered passwords are not equal");
-//     }
-// }
+    setModal(true);
+    setWindowFlag(Qt::Window);
+
+    layoutPtr_ = new QFormLayout;
+    setLayout(layoutPtr_);
+
+    labelPtr_ = new QLabel(QString::fromStdString(getPasswordDialogLabel));
+    editPtr_ = new QLineEdit;
+
+    layoutPtr_->addRow(labelPtr_, editPtr_);
+
+    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+    layoutPtr_->addWidget(buttonBoxPtr_);
+}
+
+GetPasswordDialog::~GetPasswordDialog()
+{
+    delete this->layoutPtr_;
+    delete this->labelPtr_;
+    delete this->editPtr_;
+    delete this->buttonBoxPtr_;
+}
+
+void GetPasswordDialog::set()
+{
+    connect(
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData);
+}
+
+std::string GetPasswordDialog::getEditText()
+{
+    return this->editPtr_->text().toStdString();
+}
 
 ButtonInfo::ButtonInfo(
     const std::string& buttonText, QDialogButtonBox::ButtonRole buttonRole,
     void (TextDialog::*functionPtr)()) :
     buttonText_(buttonText), buttonRole_(buttonRole), functionPtr_(functionPtr) {}
-
-// TextDialog::TextDialog(
-//     QDialog* parentDialog, QWidget* parent,
-//     DialogType dialogType, TextDialogAction action, const std::string& text)
-// {
-//     setParent(parent);
-
-//     action_ = action;
-
-//     setModal(true);
-//     setWindowModality(Qt::WindowModal);
-//     setWindowFlag(Qt::Window);
-
-//     setWindowTitle(
-//         QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
-
-//     parentDialogPtr_ = parentDialog;
-
-//     layoutPtr_ = new QVBoxLayout;
-//     setLayout(layoutPtr_);
-
-//     textEditPtr_ = new QPlainTextEdit;
-//     textEditPtr_->setReadOnly(true);
-
-//     textEditPtr_->setPlainText(QString::fromStdString(text));
-
-//     layoutPtr_->addWidget(textEditPtr_);
-// }
-
-// TextDialog::TextDialog(
-//     // QDialog* parentDialog, QWidget* parent,
-//     QWidget* parentPtr,
-//     // DialogType dialogType, TextDialogAction action, const std::string& text,
-//     DialogType dialogType, const std::string& text,
-//     // std::function<void()>&& func)
-//     // void(TextDialog::*slot)())
-//     std::vector<
-//         std::tuple<
-//             const std::string&,
-//             QDialogButtonBox::ButtonRole,
-//             void(TextDialog::*)()>>& buttonInfo)
-// {
-//     if(parentPtr)
-//     {
-//         setParent(parentPtr);
-//     }
-//     else
-//     {
-//         setParent(getGraphicManagerPtr()->getMainWindowPtr());
-//     }
-
-//     // action_ = action;
-
-//     setModal(true);
-//     setWindowFlag(Qt::Window);
-
-//     setWindowTitle(
-//         QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
-
-//     // parentDialogPtr_ = parentDialog;
-
-//     layoutPtr_ = new QVBoxLayout;
-//     setLayout(layoutPtr_);
-
-//     textEditPtr_ = new QPlainTextEdit;
-//     textEditPtr_->setReadOnly(true);
-
-//     textEditPtr_->setPlainText(QString::fromStdString(text));
-
-//     layoutPtr_->addWidget(textEditPtr_);
-
-//     // set button box
-//     // buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-//     buttonBoxPtr_ = new QDialogButtonBox;
-
-//     for(auto& info : buttonInfo)
-//     {
-//         QPushButton* buttonPtr = buttonBoxPtr_->addButton(
-//             QString::fromStdString(std::get<0>(info)),
-//             std::get<1>(info));
-
-//         connect(
-//             buttonBoxPtr_,
-//             // &QDialogButtonBox::clicked(dynamic_cast<QAbstractButton*>(buttonPtr)),
-//             &QDialogButtonBox::clicked,
-//             this,
-//             std::get<2>(info));
-//     }
-
-//     // if(slot)
-//     // {
-//     //     connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, slot);
-//     // }
-//     // else
-//     // {
-//     //     connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::act);
-//     // }
-
-//     layoutPtr_->addWidget(buttonBoxPtr_);
-// }
 
 TextDialog::TextDialog(
     QWidget* parentPtr, DialogType dialogType, const std::string& text,
@@ -1096,33 +1009,39 @@ TextDialog::TextDialog(
         setParent(getGraphicManagerPtr()->getMainWindowPtr());
     }
 
-    // action_ = action;
-
     setModal(true);
     setWindowFlag(Qt::Window);
 
     setWindowTitle(
         QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
 
-    // parentDialogPtr_ = parentDialog;
-
     layoutPtr_ = new QVBoxLayout;
     setLayout(layoutPtr_);
 
     textEditPtr_ = new QPlainTextEdit;
     textEditPtr_->setReadOnly(true);
-
     textEditPtr_->setPlainText(QString::fromStdString(text));
-
     layoutPtr_->addWidget(textEditPtr_);
 
     // set button box
-    // buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
     buttonBoxPtr_ = new QDialogButtonBox;
+    layoutPtr_->addWidget(buttonBoxPtr_);
 
-    for(auto& info : buttonsInfo)
+    buttonsInfo_ = std::move(buttonsInfo);
+}
+
+TextDialog::~TextDialog()
+{
+    delete this->layoutPtr_;
+    delete this->textEditPtr_;
+    delete this->buttonBoxPtr_;
+}
+
+void TextDialog::set()
+{
+    for(auto& info : this->buttonsInfo_)
     {
-        QPushButton* buttonPtr = buttonBoxPtr_->addButton(
+        QPushButton* buttonPtr = this->buttonBoxPtr_->addButton(
             QString::fromStdString(info.buttonText_),
             info.buttonRole_);
 
@@ -1139,38 +1058,7 @@ TextDialog::TextDialog(
             showErrorDialogAndLogError(nullptr, "Unmanaged button role");
         }
     }
-
-    // if(slot)
-    // {
-    //     connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, slot);
-    // }
-    // else
-    // {
-    //     connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::act);
-    // }
-
-    layoutPtr_->addWidget(buttonBoxPtr_);
 }
-
-TextDialog::~TextDialog()
-{
-    delete this->layoutPtr_;
-    delete this->textEditPtr_;
-    delete this->buttonBoxPtr_;
-}
-
-// void TextDialog::set(QDialog* parentDialog)
-// {
-//     // if(parentDialog)
-//     // {
-//     //     connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::closeDialogs);
-//     // }
-//     // else
-//     // {
-//     //     connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, &QDialog::accept);
-//     // }
-//     // connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &TextDialog::act);
-// }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 {
@@ -1198,60 +1086,13 @@ void TextDialog::closeSelfAndParentDialog()
 {
     this->close();
 
-    if(this->parent())
+    auto parentPtr = this->parent();
+
+    if(parentPtr)
     {
-        dynamic_cast<QWidget*>(this->parent())->close();
+        dynamic_cast<QWidget*>(parentPtr)->close();
     }
 }
-
-// void TextDialog::act()
-// {
-//     if(this->action_ == TextDialogAction::CLOSE_PARENT_AND_SELF and this->parentDialogPtr_)
-//     {
-//         this->closeDialogs();
-//     }
-//     else
-//     {
-//         this->accept();
-//     }
-// }
-
-// ActionTextDialog::ActionTextDialog(
-//     QDialog* parentDialog, QWidget* parent, DialogType dialogType,
-//     const std::string& text, std::string&& buttonText,
-//     std::vector<
-//         std::tuple<
-//             const std::string&,
-//             QDialogButtonBox::ButtonRole,
-//             void(TextDialog::*)()>>& buttonInfo) :
-//     TextDialog(parentDialog, parent, dialogType, text, buttonInfo),
-//     buttonText_(std::move(buttonText)) {}
-
-// ActionTextDialog::ActionTextDialog(
-//     QWidget* parentPtr, DialogType dialogType, const std::string& text,
-//     std::vector<ButtonInfo>&& buttonsInfo) :
-//     TextDialog(parentPtr, dialogType, text, std::move(buttonsInfo)) {}
-
-// // void ActionTextDialog::set(CompanionAction* actionPtr)
-// // {
-// //     this->actionPtr_ = actionPtr;
-
-// //     // buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Cancel);
-
-// //     // buttonBoxPtr_->addButton(
-// //     //     QString::fromStdString(this->buttonText_), QDialogButtonBox::AcceptRole);
-
-// //     // connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
-// //     // connect(this->buttonBoxPtr_, &QDialogButtonBox::accepted, this, &ActionTextDialog::acceptAction);
-
-// //     // layoutPtr_->addWidget(buttonBoxPtr_);
-// // }
-
-// void ActionTextDialog::acceptAction()  // TODO rename to accept and overload
-// {
-//     this->close();
-//     this->actionPtr_->sendData();
-// }
 
 ShowHideWidget::ShowHideWidget()
 {

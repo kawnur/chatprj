@@ -337,7 +337,8 @@ public:
     Dialog() = default;
     ~Dialog() = default;
 
-    virtual void setAction(Action*) {}
+    void setAction(Action* actionPtr) { this->actionPtr_ = actionPtr; }
+    virtual void set() {}
 
 protected:
     Action* actionPtr_;
@@ -351,7 +352,7 @@ public:
     CompanionDataDialog(CompanionActionType, QWidget*, Companion*);
     ~CompanionDataDialog();
 
-    void setAction(Action*) override;
+    void set() override;
 
     std::string getNameString();
     std::string getIpAddressString();
@@ -359,7 +360,6 @@ public:
 
 private:
     CompanionActionType actionType_;
-    // CompanionAction* actionPtr_;
 
     QFormLayout* layoutPtr_;
 
@@ -375,15 +375,15 @@ private:
     QDialogButtonBox* buttonBoxPtr_;
 };
 
-class NewPasswordDialog : public Dialog
+class CreatePasswordDialog : public Dialog
 {
     Q_OBJECT
 
 public:
-    NewPasswordDialog();
-    ~NewPasswordDialog();
+    CreatePasswordDialog();
+    ~CreatePasswordDialog();
 
-    void set();
+    void set() override;
 
     std::string getFirstEditText();
     std::string getSecondEditText();
@@ -398,9 +398,27 @@ private:
     QLineEdit* secondEditPtr_;
 
     QDialogButtonBox* buttonBoxPtr_;
+};
 
-    // void sendData();
-    // void closeDialogs() {};
+class GetPasswordDialog : public Dialog
+{
+    Q_OBJECT
+
+public:
+    GetPasswordDialog();
+    ~GetPasswordDialog();
+
+    void set() override;
+
+    std::string getEditText();
+
+private:
+    QFormLayout* layoutPtr_;
+
+    QLabel* labelPtr_;
+    QLineEdit* editPtr_;
+
+    QDialogButtonBox* buttonBoxPtr_;
 };
 
 class TextDialog;
@@ -425,33 +443,14 @@ class TextDialog : public Dialog
     Q_OBJECT
 
 public:
-    // TextDialog(QDialog*, QWidget*, DialogType, TextDialogAction, const std::string&);
-
-    // TextDialog(
-    //     // QDialog*, QWidget*, DialogType, TextDialogAction,
-    //     // QWidget*, DialogType, TextDialogAction,
-    //     QWidget*, DialogType,
-    //     // const std::string&, std::function<void()>&&);
-    //     // const std::string&, void(TextDialog::*)());
-    //     const std::string&,
-    //     std::vector<
-    //         std::tuple<
-    //             const std::string&,
-    //             QDialogButtonBox::ButtonRole,
-    //             void(TextDialog::*)()>>&);
-
-    TextDialog(
-        QWidget*, DialogType, const std::string&,
-        std::vector<ButtonInfo>&&);
-
+    TextDialog(QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>&&);
     ~TextDialog();
 
-    // void set(QDialog*);
+    void set() override;
 
     void closeSelf();
     void closeSelfAndParentDialog();
 
-    // virtual void acceptAction() {}
     void acceptAction();
 
 public slots:
@@ -459,42 +458,11 @@ public slots:
     void reject() override;
 
 private:
-    // TextDialogAction action_;
-    // QDialog* parentDialogPtr_;
     QPlainTextEdit* textEditPtr_;
-
-
-    // void act();
-
-protected:
     QVBoxLayout* layoutPtr_;
     QDialogButtonBox* buttonBoxPtr_;
+
+    std::vector<ButtonInfo> buttonsInfo_;
 };
-
-// class ActionTextDialog : public TextDialog
-// {
-//     Q_OBJECT
-
-// public:
-//     // ActionTextDialog(
-//     //     QDialog*, QWidget*, DialogType, const std::string&, std::string&&,
-//     //     std::vector<
-//     //         std::tuple<
-//     //             const std::string&,
-//     //             QDialogButtonBox::ButtonRole,
-//     //             void(TextDialog::*)()>>&);
-//     ActionTextDialog(
-//         QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>&&);
-
-//     ~ActionTextDialog() = default;
-
-//     // void set(CompanionAction*);
-
-// private:
-//     // CompanionAction* actionPtr_;
-//     std::string buttonText_;
-
-//     void acceptAction() override;
-// };
 
 #endif // WIDGETS_HPP

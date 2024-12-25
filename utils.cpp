@@ -116,7 +116,8 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
     }
 }
 
-void showInfoDialogAndLogInfo(QWidget* parentPtr, const std::string& message)
+void showInfoDialogAndLogInfo(
+    QWidget* parentPtr, const std::string& message, void (TextDialog::*functionPtr)())
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, message,
@@ -124,7 +125,8 @@ void showInfoDialogAndLogInfo(QWidget* parentPtr, const std::string& message)
             ButtonInfo(
                 okButtonText,
                 QDialogButtonBox::AcceptRole,
-                &QDialog::accept) }));
+                // &QDialog::accept) }));
+                functionPtr) }));
 
     logArgsInfo(message);
 }

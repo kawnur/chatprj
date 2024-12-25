@@ -146,7 +146,6 @@ protected:
     Dialog* dialogPtr_;
 };
 
-// class CompanionAction : public QObject
 class CompanionAction : public Action
 {
     Q_OBJECT
@@ -154,8 +153,6 @@ class CompanionAction : public Action
 public:
     CompanionAction(CompanionActionType, MainWindow*, Companion*);
     ~CompanionAction();
-
-    // void set();
 
     CompanionActionType getActionType();
 
@@ -167,7 +164,6 @@ public:
     int getCompanionId() const;
     Companion* getCompanionPtr() const;
 
-    // CompanionDataDialog* getFormDialogPtr();
     void updateCompanionObjectData();
 
 public slots:
@@ -179,11 +175,6 @@ private:
 
     MainWindow* mainWindowPtr_;
     Companion* companionPtr_;
-
-    // CompanionDataDialog* formDialogPtr_;
-    // ActionTextDialog* deleteDialogPtr_;
-
-    // void sendData();
 };
 
 class PasswordAction : public Action
@@ -191,14 +182,15 @@ class PasswordAction : public Action
     Q_OBJECT
 
 public:
-    PasswordAction();
-    ~PasswordAction() = default;
+    PasswordAction(PasswordActionType);
+    ~PasswordAction();
 
     std::string getPassword();
 
     void sendData() override;
 
 private:
+    PasswordActionType actionType_;
     const std::string* passwordPtr_;
 };
 
@@ -224,6 +216,7 @@ public:
     void clearCompanionHistory(CompanionAction*);
 
     void createUserPassword(PasswordAction*);
+    void authenticateUser(PasswordAction*);
 
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
@@ -345,11 +338,18 @@ public:
     void showCompanionInfoDialog(CompanionAction*, std::string&&);
 
     void sendNewPasswordDataToManager(PasswordAction*);
+    void sendExistingPasswordDataToManager(PasswordAction*);
 
     void hideCompanionPanelStub();
 
     void hideCentralPanelStub();
     void showCentralPanelStub();
+
+    void hideInfoViaBlur();
+    void showInfoViaBlur();
+
+    void hideInfoViaStubs();
+    void showInfoViaStubs();
 
     void hideInfo();
     void showInfo();

@@ -6,6 +6,7 @@
 #include "logging.hpp"
 
 class CompanionAction;
+class TextDialog;
 
 template<typename... Ts> void logArgsException(Ts&&... args);
 
@@ -34,7 +35,7 @@ bool validatePassword(std::vector<std::string>&, const std::string&);
 
 std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
-void showInfoDialogAndLogInfo(QWidget*, const std::string&);
+void showInfoDialogAndLogInfo(QWidget*, const std::string&, void (TextDialog::*)());
 void showInfoDialogAndLogInfo(QWidget*, std::string&&);
 void showWarningDialogAndLogWarning(QWidget*, const std::string&);
 void showErrorDialogAndLogError(QWidget*, const std::string&);

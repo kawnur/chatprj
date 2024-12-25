@@ -267,6 +267,7 @@ SocketInfo* Companion::getSocketInfoPtr() const
 void Action::set()
 {
     this->dialogPtr_->setAction(this);
+    this->dialogPtr_->set();
     this->dialogPtr_->show();
 }
 
@@ -284,18 +285,10 @@ CompanionAction::CompanionAction(
     {
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
-        // formDialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
-        // deleteDialogPtr_ = nullptr;
         dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
         break;
 
     case CompanionActionType::DELETE:
-        // formDialogPtr_ = nullptr;
-        // deleteDialogPtr_ = new TwoButtonsTextDialog(
-        //     nullptr, this->mainWindowPtr_, DialogType::WARNING,
-        //     deleteCompanionDialogText, std::string("Delete companion"));
-        // deleteDialogPtr_ = new ActionTextDialog(
-        // dialogPtr_ = new ActionTextDialog(
         dialogPtr_ = new TextDialog(
             nullptr,
             DialogType::WARNING,
@@ -309,12 +302,6 @@ CompanionAction::CompanionAction(
         break;
 
     case CompanionActionType::CLEAR_HISTORY:
-        // formDialogPtr_ = nullptr;
-        // deleteDialogPtr_ = new ActionTextDialog(
-        //     nullptr, this->mainWindowPtr_, DialogType::WARNING,
-        //     clearCompanionHistoryDialogText, std::string("Clear history"));
-        // deleteDialogPtr_ = new ActionTextDialog(
-        // dialogPtr_ = new ActionTextDialog(
         dialogPtr_ = new TextDialog(
             nullptr,
             DialogType::WARNING,
@@ -333,24 +320,6 @@ CompanionAction::~CompanionAction()
 {
     delete this->dataPtr_;
 }
-
-// void CompanionAction::set()
-// {
-//     switch(this->actionType_)
-//     {
-//     case CompanionActionType::CREATE:
-//     case CompanionActionType::UPDATE:
-//         this->formDialogPtr_->set(this);
-//         this->formDialogPtr_->show();
-//         break;
-
-//     case CompanionActionType::DELETE:
-//     case CompanionActionType::CLEAR_HISTORY:
-//         this->deleteDialogPtr_->set(this);
-//         this->deleteDialogPtr_->show();
-//         break;
-//     }
-// }
 
 CompanionActionType CompanionAction::getActionType()
 {
@@ -387,11 +356,6 @@ Companion* CompanionAction::getCompanionPtr() const
     return this->companionPtr_;
 }
 
-// CompanionDataDialog* CompanionAction::getFormDialogPtr()
-// {
-//     return this->formDialogPtr_;
-// }
-
 void CompanionAction::sendData()
 {
     std::string name;
@@ -404,10 +368,6 @@ void CompanionAction::sendData()
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
     {
-        // name = this->formDialogPtr_->getNameString();
-        // ipAddress = this->formDialogPtr_->getIpAddressString();
-        // clientPort = this->formDialogPtr_->getPortString();
-
         CompanionDataDialog* dataDialogPtr =
             dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
 
@@ -437,9 +397,28 @@ void CompanionAction::updateCompanionObjectData()
     this->companionPtr_->updateData(this->dataPtr_);
 }
 
-PasswordAction::PasswordAction() : Action(nullptr)
+PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)
 {
-    dialogPtr_ = new NewPasswordDialog;
+    actionType_ = actionType;
+
+    switch(actionType)
+    {
+    case PasswordActionType::CREATE:
+        dialogPtr_ = new CreatePasswordDialog;
+        break;
+
+    case PasswordActionType::GET:
+        dialogPtr_ = new GetPasswordDialog;
+        break;
+    }
+}
+
+PasswordAction::~PasswordAction()
+{
+    if(this->actionType_ == PasswordActionType::GET)
+    {
+        this->dialogPtr_->close();
+    }
 }
 
 std::string PasswordAction::getPassword()
@@ -449,26 +428,52 @@ std::string PasswordAction::getPassword()
 
 void PasswordAction::sendData()
 {
-    NewPasswordDialog* passwordDialogPtr =
-        dynamic_cast<NewPasswordDialog*>(this->dialogPtr_);
-
-    auto text1 = passwordDialogPtr->getFirstEditText();
-    auto text2 = passwordDialogPtr->getSecondEditText();
-
-    if(text1 == text2)
+    switch(this->actionType_)
     {
-        if(text1.size() == 0)
+    case PasswordActionType::CREATE:
         {
-            showErrorDialogAndLogError(this->getDialogPtr(), "Empty password is invalid");
-            return;
-        }
+            CreatePasswordDialog* passwordDialogPtr =
+                dynamic_cast<CreatePasswordDialog*>(this->dialogPtr_);
 
-        this->passwordPtr_ = &text1;
-        getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
-    }
-    else
-    {
-        showErrorDialogAndLogError(this->getDialogPtr(), "Entered passwords are not equal");
+            auto text1 = passwordDialogPtr->getFirstEditText();
+            auto text2 = passwordDialogPtr->getSecondEditText();
+
+            if(text1 == text2)
+            {
+                if(text1.size() == 0)
+                {
+                    showErrorDialogAndLogError(this->getDialogPtr(), "Empty password is invalid");
+                    return;
+                }
+
+                this->passwordPtr_ = &text1;
+                getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
+            }
+            else
+            {
+                showErrorDialogAndLogError(this->getDialogPtr(), "Entered passwords are not equal");
+            }
+
+            break;
+        }
+    case PasswordActionType::GET:
+        {
+            GetPasswordDialog* passwordDialogPtr =
+                dynamic_cast<GetPasswordDialog*>(this->dialogPtr_);
+
+            auto text = passwordDialogPtr->getEditText();
+
+            if(text.size() == 0)
+            {
+                showErrorDialogAndLogError(this->getDialogPtr(), "Empty password is invalid");
+                return;
+            }
+
+            this->passwordPtr_ = &text;
+            getGraphicManagerPtr()->sendExistingPasswordDataToManager(this);
+
+            break;
+        }
     }
 }
 
@@ -1133,7 +1138,53 @@ void Manager::createUserPassword(PasswordAction* actionPtr)
     }
 
     // show dialog
-    showInfoDialogAndLogInfo(actionPtr->getDialogPtr(), newPasswordCreatedLabel);
+    showInfoDialogAndLogInfo(
+        actionPtr->getDialogPtr(),
+        newPasswordCreatedLabel,
+        &TextDialog::unsetMainWindowBlurAndCloseDialogs);
+
+    // delete action object
+    delete actionPtr;
+}
+
+void Manager::authenticateUser(PasswordAction* actionPtr)
+{
+    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+
+    // do we have password in db?
+    std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
+        true,
+        "getPasswordDBResult",
+        &getPasswordDBResult,
+        std::vector<std::string> { std::string("id"), std::string("password") });
+
+    if(!passwordDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error getting password from db");
+        return;
+    }
+
+    if(passwordDataPtr->isEmpty())
+    {
+        showErrorDialogAndLogError(nullptr, "Db password data is empty");
+        return;
+    }
+    else
+    {
+        if(passwordDataPtr->getValue(0, "password") == actionPtr->getPassword())
+        {
+            logArgsInfo("user successfully authenticated");
+            graphicManagerPtr->disableMainWindowBlurEffect();
+
+            // dialog is closed in action dtor
+            delete actionPtr;
+        }
+        else
+        {
+            showErrorDialogAndLogError(nullptr, "Password is not correct");
+            return;
+        }
+    }
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -1161,12 +1212,15 @@ bool Manager::isSelectedCompanionNullptr()
 
 void Manager::startUserAuthentication()
 {
+    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+
+    graphicManagerPtr->enableMainWindowBlurEffect();
     // do we have password in db?
     std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
         true,
         "getPasswordDBResult",
         &getPasswordDBResult,
-        std::vector<std::string> { std::string("id") });
+        std::vector<std::string> { std::string("id"), std::string("password") });
 
     if(!passwordDataPtr)
     {
@@ -1176,12 +1230,11 @@ void Manager::startUserAuthentication()
 
     if(passwordDataPtr->isEmpty())
     {
-        getGraphicManagerPtr()->createEntrancePassword();
-
+        graphicManagerPtr->createEntrancePassword();
     }
     else
     {
-        getGraphicManagerPtr()->getEntrancePassword();
+        graphicManagerPtr->getEntrancePassword();
     }
 }
 
@@ -1437,6 +1490,7 @@ void GraphicManager::createTextDialogAndShow(
     TextDialog* dialogPtr = new TextDialog(
         parentPtr, dialogType, text, std::move(buttonInfo));
 
+    dialogPtr->set();
     dialogPtr->show();
 }
 
@@ -1498,7 +1552,6 @@ void GraphicManager::showCompanionInfoDialog(
     QWidget* parentPtr = nullptr;
     void (TextDialog::*functionPtr)() = nullptr;
 
-    // auto formDialogPtr = companionActionPtr->getFormDialogPtr();
     auto formDialogPtr = companionActionPtr->getDialogPtr();
 
     if(formDialogPtr)
@@ -1529,9 +1582,14 @@ void GraphicManager::showCompanionInfoDialog(
     delete companionActionPtr;
 }
 
-void GraphicManager::sendNewPasswordDataToManager(PasswordAction* aciotnPtr)
+void GraphicManager::sendNewPasswordDataToManager(PasswordAction* actionPtr)
 {
-    getManagerPtr()->createUserPassword(aciotnPtr);
+    getManagerPtr()->createUserPassword(actionPtr);
+}
+
+void GraphicManager::sendExistingPasswordDataToManager(PasswordAction* actionPtr)
+{
+    getManagerPtr()->authenticateUser(actionPtr);
 }
 
 void GraphicManager::hideCompanionPanelStub()
@@ -1549,33 +1607,43 @@ void GraphicManager::showCentralPanelStub()
     this->stubWidgetsPtr_->showCentralPanel();
 }
 
-void GraphicManager::hideInfo()
+void GraphicManager::hideInfoViaBlur()
 {
-    // show-hide using blur
     this->enableMainWindowBlurEffect();
+}
 
-    // show-hide using stubs
-    // this->stubWidgetsPtr_->setLeftPanelWidth(
-    //     this->mainWindowPtr_->getLeftPanelWidgetWidth());
+void GraphicManager::showInfoViaBlur()
+{
+    this->disableMainWindowBlurEffect();
+}
 
-    // this->mainWindowPtr_->hideLeftAndRightPanels();
+void GraphicManager::hideInfoViaStubs()
+{
+    this->stubWidgetsPtr_->setLeftPanelWidth(
+        this->mainWindowPtr_->getLeftPanelWidgetWidth());
 
-    // getManagerPtr()->hideSelectedCompanionCentralPanel();
+    this->mainWindowPtr_->hideLeftAndRightPanels();
+    getManagerPtr()->hideSelectedCompanionCentralPanel();
+    this->stubWidgetsPtr_->showStubPanels();
+}
 
-    // this->stubWidgetsPtr_->showStubPanels();
+void GraphicManager::showInfoViaStubs()
+{
+    this->mainWindowPtr_->showLeftAndRightPanels();
+    getManagerPtr()->showSelectedCompanionCentralPanel();
+    this->stubWidgetsPtr_->hideStubPanels();
+}
+
+void GraphicManager::hideInfo()
+{    
+    this->hideInfoViaBlur();
+    // this->hideInfoViaStubs();
 }
 
 void GraphicManager::showInfo()
 {
-    // show-hide using blur
-    this->disableMainWindowBlurEffect();
-
-    // show-hide using stubs
-    // this->mainWindowPtr_->showLeftAndRightPanels();
-
-    // getManagerPtr()->showSelectedCompanionCentralPanel();
-
-    // this->stubWidgetsPtr_->hideStubPanels();
+    this->showInfoViaBlur();
+    // this->showInfoViaStubs();
 }
 
 MainWindow* GraphicManager::getMainWindowPtr()
@@ -1585,9 +1653,7 @@ MainWindow* GraphicManager::getMainWindowPtr()
 
 void GraphicManager::createEntrancePassword()
 {
-    this->enableMainWindowBlurEffect();
-
-    PasswordAction* actionPtr = new PasswordAction;
+    PasswordAction* actionPtr = new PasswordAction(PasswordActionType::CREATE);
     actionPtr->set();
 }
 
@@ -1603,8 +1669,8 @@ void GraphicManager::disableMainWindowBlurEffect()
 
 void GraphicManager::getEntrancePassword()
 {
-
-
+    PasswordAction* actionPtr = new PasswordAction(PasswordActionType::GET);
+    actionPtr->set();
 }
 
 GraphicManager* getGraphicManagerPtr()

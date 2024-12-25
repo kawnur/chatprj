@@ -235,7 +235,7 @@ PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
 
 PGresult* getPasswordDBResult(const PGconn* dbConnection)
 {
-    const char* command = "SELECT password FROM password WHERE id = 1";
+    const char* command = "SELECT password FROM passwords";
 
     return sendDBRequestAndReturnResult(dbConnection, command);
 }

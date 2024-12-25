@@ -22,6 +22,12 @@ enum class CompanionActionType
     CLEAR_HISTORY
 };
 
+enum class PasswordActionType
+{
+    CREATE,
+    GET
+};
+
 enum class MainWindowContainerPosition
 {
     LEFT,
@@ -56,6 +62,10 @@ const std::string socketInfoStubWidget { "No companion info from DB..." };
 const std::string newPasswordDialogTitle { "New password creation" };
 const std::string newPasswordDialogFirstLabel { "Enter password:" };
 const std::string newPasswordDialogSecondLabel { "Reenter password:" };
+
+// get password dialog
+const std::string getPasswordDialogTitle { "Authentication" };
+const std::string getPasswordDialogLabel { "Enter password:" };
 
 // authentication dialog
 const std::string authenticationDialogTitle { "Authentication" };
