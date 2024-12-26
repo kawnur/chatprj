@@ -47,7 +47,7 @@ private:
     void keyPressEvent(QKeyEvent*);
 
 signals:
-    void send();
+    void send(const QString&);
 };
 
 class IndicatorWidget : public QWidget
@@ -236,7 +236,6 @@ private:
 
     QLabel* companionNameLabelPtr_;
     QPalette* companionNameLabelPalettePtr_;
-    // QPlainTextEdit* chatHistoryWidgetPtr_;
     QTextEdit* chatHistoryWidgetPtr_;
     QPalette* chatHistoryWidgetPalettePtr_;
 
@@ -244,7 +243,7 @@ private:
     QPalette* textEditPalettePtr_;
     //    QPushButton* button_;
 
-    void sendMessage();
+    void sendMessage(const QString&);
 };
 
 class RightPanelWidget : public QWidget
@@ -257,6 +256,12 @@ public:
 
     void set();
     void addTextToAppLogWidget(const QString&);
+
+private slots:
+    void addTextToAppLogWidgetSlot(const QString&);
+
+signals:
+    void addTextToAppLogWidgetSignal(const QString&);
 
 private:
     QVBoxLayout* layoutPtr_;

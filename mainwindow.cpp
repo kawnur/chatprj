@@ -181,12 +181,12 @@ void MainWindow::createMenu()
     QMenu* fileMenu = menuBar()->addMenu("File");
     QAction* exitAction = new QAction("Exit", this);
     fileMenu->addAction(exitAction);
-    connect(exitAction, &QAction::triggered, this, &QCoreApplication::quit);
+    connect(exitAction, &QAction::triggered, this, &QCoreApplication::quit, Qt::QueuedConnection);
 
     QMenu* companionMenu = menuBar()->addMenu("Companion");
     QAction* addCompanionAction = new QAction("Add new companion", this);
     companionMenu->addAction(addCompanionAction);
-    connect(addCompanionAction, &QAction::triggered, this, &MainWindow::createCompanion);
+    connect(addCompanionAction, &QAction::triggered, this, &MainWindow::createCompanion, Qt::QueuedConnection);
 }
 
 void MainWindow::setBlurEffect()

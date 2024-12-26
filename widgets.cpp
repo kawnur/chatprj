@@ -73,7 +73,7 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event)
     {
         if(event->modifiers() == Qt::NoModifier)
         {
-            this->send();
+            this->send(this->toPlainText());
             this->setText("");
         }
         else if(event->modifiers() == Qt::ControlModifier)
@@ -229,8 +229,8 @@ void SocketInfoWidget::initializeFields()
     editButtonPtr_ = new QPushButton("Edit");
     connectButtonPtr_ = new QPushButton(getInitialConnectButtonLabel());
 
-    connect(this->editButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::updateCompanionAction);
-    connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction);
+    connect(this->editButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::updateCompanionAction, Qt::QueuedConnection);
+    connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
 
     if(name_ == "me")  // TODO ???
     {
@@ -256,7 +256,7 @@ void SocketInfoWidget::initializeFields()
     }
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QWidget::customContextMenuRequested, this, &SocketInfoWidget::slotCustomMenuRequested);
+    connect(this, &QWidget::customContextMenuRequested, this, &SocketInfoWidget::slotCustomMenuRequested, Qt::QueuedConnection);
 
     // connect
 }
@@ -267,11 +267,11 @@ void SocketInfoWidget::slotCustomMenuRequested(QPoint pos)
 
     QAction* clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
-    connect(clearHistoryAction, &QAction::triggered, this, &SocketInfoWidget::clearHistoryAction);
+    connect(clearHistoryAction, &QAction::triggered, this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
 
     QAction* deleteCompanionAction = new QAction("Delete companion", this);
     menu->addAction(deleteCompanionAction);
-    connect(deleteCompanionAction, &QAction::triggered, this, &SocketInfoWidget::deleteCompanionAction);
+    connect(deleteCompanionAction, &QAction::triggered, this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
 
     menu->popup(this->mapToGlobal(pos));
 }
@@ -508,7 +508,6 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
 
     layoutPtr_->addWidget(companionNameLabelPtr_);
 
-    // chatHistoryWidgetPtr_ = new QPlainTextEdit;
     chatHistoryWidgetPtr_ = new QTextEdit;
     chatHistoryWidgetPtr_->setTextColor(QColorConstants::Green);
     chatHistoryWidgetPtr_->setReadOnly(true);
@@ -538,7 +537,7 @@ CentralPanelWidget::~CentralPanelWidget()
 void CentralPanelWidget::set(Companion* companionPtr)
 {
     this->companionPtr_ = companionPtr;
-    connect(this->textEditPtr_, &TextEditWidget::send, this, &CentralPanelWidget::sendMessage);
+    connect(this->textEditPtr_, &TextEditWidget::send, this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
 }
 
 void CentralPanelWidget::addMessageToChatHistory(const QString& message)
@@ -546,6 +545,7 @@ void CentralPanelWidget::addMessageToChatHistory(const QString& message)
     // this->chatHistoryWidgetPtr_->appendPlainText(message);
     // this->chatHistoryWidgetPtr_->append(message);
     this->chatHistoryWidgetPtr_->insertHtml(message);
+    this->chatHistoryWidgetPtr_->ensureCursorVisible();
 }
 
 void CentralPanelWidget::clearChatHistory()
@@ -553,10 +553,11 @@ void CentralPanelWidget::clearChatHistory()
     this->chatHistoryWidgetPtr_->clear();
 }
 
-void CentralPanelWidget::sendMessage()
+void CentralPanelWidget::sendMessage(const QString& text)
 {
-    auto text = this->textEditPtr_->toPlainText().toStdString();
-    getGraphicManagerPtr()->sendMessage(this->companionPtr_, text);
+    // auto plainText = this->textEditPtr_->toPlainText();
+    // auto text = plainText.toStdString();
+    getGraphicManagerPtr()->sendMessage(this->companionPtr_, text.toStdString());
 }
 
 RightPanelWidget::RightPanelWidget(QWidget* parent)
@@ -603,11 +604,22 @@ RightPanelWidget::~RightPanelWidget()
 void RightPanelWidget::set()
 {
     this->appLogWidgetPtr_->setParent(this);
+
+    connect(
+        this, SIGNAL(addTextToAppLogWidgetSignal(const QString&)),
+        this, SLOT(addTextToAppLogWidgetSlot(const QString&)),
+        Qt::QueuedConnection);
+}
+
+void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
+{
+    this->appLogWidgetPtr_->appendPlainText(text);
+    this->appLogWidgetPtr_->ensureCursorVisible();
 }
 
 void RightPanelWidget::addTextToAppLogWidget(const QString& text)
 {
-    this->appLogWidgetPtr_->appendPlainText(text);
+    emit addTextToAppLogWidgetSignal(text);
 }
 
 WidgetGroup::WidgetGroup(const Companion* companionPtr)
@@ -642,27 +654,27 @@ WidgetGroup::~WidgetGroup()
     delete this->centralPanelPtr_;
 }
 
-QString WidgetGroup::formatMessage(const Companion* companion, const Message* message)  // TODO move to utils
+QString WidgetGroup::formatMessage(const Companion* companionPtr, const Message* messagePtr)  // TODO move to utils
 {
-    auto companionId = message->getCompanionId();
-    auto authorId = message->getAuthorId();
-    auto time = QString::fromStdString(message->getTime());
-    auto text = QString::fromStdString(message->getText());
-    auto isSent = message->getIsSent();
+    auto companionId = messagePtr->getCompanionId();
+    auto authorId = messagePtr->getAuthorId();
+    auto time = QString::fromStdString(messagePtr->getTime());
+    auto text = QString::fromStdString(messagePtr->getText());
+    auto isSent = messagePtr->getIsSent();
 
     QString color, sender, receiver;
 
     if(companionId == authorId)
     {
         color = "#00115e";
-        sender = QString::fromStdString(companion->getName());
+        sender = QString::fromStdString(companionPtr->getName());
         receiver = "Me";
     }
     else
     {
         color = "#115e00";
         sender = "Me";
-        receiver = QString::fromStdString(companion->getName());
+        receiver = QString::fromStdString(companionPtr->getName());
     }
 
     QString prefix = QString("<font color=\"%1\"><br><b><i>From %2 to %3 at %4:</i></b><br>")
@@ -888,9 +900,9 @@ CompanionDataDialog::~CompanionDataDialog()
 void CompanionDataDialog::set()
 {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
 
-    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject, Qt::QueuedConnection);
 }
 
 std::string CompanionDataDialog::getNameString()
@@ -949,7 +961,7 @@ CreatePasswordDialog::~CreatePasswordDialog()
 void CreatePasswordDialog::set()
 {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string CreatePasswordDialog::getFirstEditText()
@@ -994,7 +1006,7 @@ GetPasswordDialog::~GetPasswordDialog()
 void GetPasswordDialog::set()
 {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText()
@@ -1058,11 +1070,11 @@ void TextDialog::set()
 
         if(info.buttonRole_ == QDialogButtonBox::AcceptRole)
         {
-            connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, info.functionPtr_);
+            connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, info.functionPtr_, Qt::QueuedConnection);
         }
         else if(info.buttonRole_ == QDialogButtonBox::RejectRole)
         {
-            connect(buttonBoxPtr_, &QDialogButtonBox::rejected, this, info.functionPtr_);
+            connect(buttonBoxPtr_, &QDialogButtonBox::rejected, this, info.functionPtr_, Qt::QueuedConnection);
         }
         else
         {

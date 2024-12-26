@@ -219,12 +219,15 @@ const std::vector<Message>* Companion::getMessagesPtr() const
 
 void Companion::sendLastMessage()
 {
-    auto text = this->messages_.back().getText();
-    auto sendResult = this->clientPtr_->send(text);
-
-    if(!sendResult)
+    if(this->clientPtr_)
     {
-        logArgsError("client message sending error");
+        auto text = this->messages_.back().getText();
+        auto sendResult = this->clientPtr_->send(text);
+
+        if(!sendResult)
+        {
+            logArgsError("client message sending error");
+        }
     }
 }
 
@@ -533,6 +536,12 @@ std::pair<int, std::string> Manager::pushMessageToDB(
             std::string("companion_id"), std::string("timestamp_tz")
         },
         companionName, authorName, std::string("companion_id"), text);
+
+    if(!messageDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        return std::pair<int, std::string>(0, "");
+    }
 
     if(messageDataPtr->isEmpty())
     {
