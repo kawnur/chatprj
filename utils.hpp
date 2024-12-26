@@ -5,6 +5,7 @@
 
 #include "logging.hpp"
 
+class ButtonInfo;
 class CompanionAction;
 class TextDialog;
 
@@ -33,12 +34,14 @@ bool validateCompanionData(std::vector<std::string>&, const CompanionAction*);
 
 bool validatePassword(std::vector<std::string>&, const std::string&);
 
-std::string buildDialogText(std::string&&, const std::vector<std::string>&);
+QString buildDialogText(std::string&&, const std::vector<std::string>&);
 
-void showInfoDialogAndLogInfo(QWidget*, const std::string&, void (TextDialog::*)());
-void showInfoDialogAndLogInfo(QWidget*, std::string&&);
-void showWarningDialogAndLogWarning(QWidget*, const std::string&);
-void showErrorDialogAndLogError(QWidget*, const std::string&);
-void showErrorDialogAndLogError(QWidget*, std::string&&);
+std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
+
+void showInfoDialogAndLogInfo(QWidget*, const QString&, void (TextDialog::*)());
+void showInfoDialogAndLogInfo(QWidget*, QString&&);
+void showWarningDialogAndLogWarning(QWidget*, const QString&);
+void showErrorDialogAndLogError(QWidget*, const QString&);
+void showErrorDialogAndLogError(QWidget*, QString&&);
 
 #endif // UTILS_HPP

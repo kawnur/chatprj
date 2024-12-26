@@ -34,7 +34,7 @@ class WidgetGroup;
 
 int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
 template<typename... Ts> void logArgs(Ts&&... args);
-void showErrorDialogAndLogError(QWidget*, const std::string&);
+void showErrorDialogAndLogError(QWidget*, const QString&);
 
 class SocketInfo
 {
@@ -275,7 +275,9 @@ private:
 
         if(!dbResultPtr)
         {
-            showErrorDialogAndLogError(nullptr, "Database request error, dbResultPtr is nullptr");
+            showErrorDialogAndLogError(
+                nullptr, QString("Database request error, dbResultPtr is nullptr"));
+
             return nullptr;
         }
 
@@ -327,9 +329,7 @@ public:
 
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
-    void createTextDialogAndShow(
-        QWidget*, DialogType, const std::string&,
-        std::vector<ButtonInfo>&&);
+    void createTextDialogAndShow(QWidget*, DialogType, const QString&, std::vector<ButtonInfo>*);
 
     void createCompanion();
     void updateCompanion(Companion*);
@@ -360,7 +360,6 @@ public:
     MainWindow* getMainWindowPtr();
 
     void createEntrancePassword();
-    // void
 
     void enableMainWindowBlurEffect();
     void disableMainWindowBlurEffect();

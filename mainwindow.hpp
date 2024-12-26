@@ -62,8 +62,6 @@ private slots:
     void createCompanion();
 
 private:
-    // TODO rename panel child widgets according its functionality
-
     QPalette* menuBarPalettePtr_;
 
     QWidget* centralWidgetPtr_;

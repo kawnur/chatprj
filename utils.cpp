@@ -94,91 +94,79 @@ bool validatePassword(std::vector<std::string>& validationErrors, const std::str
     return result;
 }
 
-std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages)
+QString buildDialogText(std::string&& header, const std::vector<std::string>& messages)
 {
     if(messages.empty())
     {
-        return std::string("");
+        return QString("");
     }
     else
     {
         std::string text(header);
 
         logArgs("messages.size():", messages.size());
-        // std::string text { "Error messages:\n\n" };
 
         for(auto& message : messages)
         {
             text += (std::string("- ") + message + std::string("\n"));
         }
 
-        return text;
+        return QString::fromStdString(text);
     }
 }
 
+std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr)())
+{
+    std::vector<ButtonInfo>* vectorPtr = new std::vector<ButtonInfo>;
+
+    vectorPtr->emplace_back(
+        okButtonText, QDialogButtonBox::AcceptRole, functionPtr);
+
+    return vectorPtr;
+}
+
 void showInfoDialogAndLogInfo(
-    QWidget* parentPtr, const std::string& message, void (TextDialog::*functionPtr)())
+    QWidget* parentPtr, const QString& message, void (TextDialog::*functionPtr)())
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, message,
-        std::vector<ButtonInfo>( {
-            ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                // &QDialog::accept) }));
-                functionPtr) }));
+        createOkButtonInfoVector(functionPtr));
 
     logArgsInfo(message);
 }
 
-void showInfoDialogAndLogInfo(QWidget* parentPtr, std::string&& message)
+void showInfoDialogAndLogInfo(QWidget* parentPtr, QString&& message)
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, std::move(message),
-        std::vector<ButtonInfo>( {
-            ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                &QDialog::accept) }));
+        createOkButtonInfoVector(&QDialog::accept));
 
     logArgsInfo(message);
 }
 
-void showWarningDialogAndLogWarning(QWidget* parentPtr, const std::string& message)
+void showWarningDialogAndLogWarning(QWidget* parentPtr, const QString& message)
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::WARNING, message,
-        std::vector<ButtonInfo>( {
-            ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                &QDialog::accept) }));
+        createOkButtonInfoVector(&QDialog::accept));
 
     logArgsWarning(message);
 }
 
-void showErrorDialogAndLogError(QWidget* parentPtr, const std::string& message)
+void showErrorDialogAndLogError(QWidget* parentPtr, const QString& message)
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, message,
-        std::vector<ButtonInfo>( {
-            ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                &QDialog::accept) }));
+        createOkButtonInfoVector(&QDialog::accept));
 
     logArgsError(message);
 }
 
-void showErrorDialogAndLogError(QWidget* parentPtr, std::string&& message)
+void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
 {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, std::move(message),
-        std::vector<ButtonInfo>( {
-            ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                &QDialog::accept) }));
+        createOkButtonInfoVector(&QDialog::accept));
 
     logArgsError(message);
 }

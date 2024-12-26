@@ -3,7 +3,8 @@
 using boost::asio::ip::tcp;
 
 ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
-    ipAddress_(ipAddress), port_(port), io_context_(), socket_(io_context_), resolver_(io_context_) {}
+    ipAddress_(ipAddress), port_(port), io_context_(),
+    socket_(io_context_), resolver_(io_context_) {}
 
 bool ChatClient::connect()
 {

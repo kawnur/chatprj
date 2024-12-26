@@ -102,7 +102,7 @@ IndicatorWidget::IndicatorWidget()
     offColor_ = QColor(QColorConstants::DarkRed);
     meColor_ = QColor(indicatorMeColor);
 
-    palettePtr_ = new QPalette;  // TODO set parent or delete
+    palettePtr_ = new QPalette;
     palettePtr_->setColor(QPalette::Window, offColor_);
 
     setAutoFillBackground(true);
@@ -115,6 +115,11 @@ IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator)
     onColor_ = indicator->onColor_;
     offColor_ = indicator->offColor_;
     palettePtr_ = indicator->palettePtr_;
+}
+
+IndicatorWidget::~IndicatorWidget()
+{
+    delete this->palettePtr_;
 }
 
 void IndicatorWidget::setOn()
@@ -229,8 +234,13 @@ void SocketInfoWidget::initializeFields()
     editButtonPtr_ = new QPushButton("Edit");
     connectButtonPtr_ = new QPushButton(getInitialConnectButtonLabel());
 
-    connect(this->editButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::updateCompanionAction, Qt::QueuedConnection);
-    connect(this->connectButtonPtr_, &QPushButton::clicked, this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
+    connect(
+        this->editButtonPtr_, &QPushButton::clicked,
+        this, &SocketInfoWidget::updateCompanionAction, Qt::QueuedConnection);
+
+    connect(
+        this->connectButtonPtr_, &QPushButton::clicked,
+        this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
 
     if(name_ == "me")  // TODO ???
     {
@@ -256,7 +266,9 @@ void SocketInfoWidget::initializeFields()
     }
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QWidget::customContextMenuRequested, this, &SocketInfoWidget::slotCustomMenuRequested, Qt::QueuedConnection);
+    connect(
+        this, &QWidget::customContextMenuRequested,
+        this, &SocketInfoWidget::slotCustomMenuRequested, Qt::QueuedConnection);
 
     // connect
 }
@@ -267,11 +279,17 @@ void SocketInfoWidget::slotCustomMenuRequested(QPoint pos)
 
     QAction* clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
-    connect(clearHistoryAction, &QAction::triggered, this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
+
+    connect(
+        clearHistoryAction, &QAction::triggered,
+        this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
 
     QAction* deleteCompanionAction = new QAction("Delete companion", this);
     menu->addAction(deleteCompanionAction);
-    connect(deleteCompanionAction, &QAction::triggered, this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
+
+    connect(
+        deleteCompanionAction, &QAction::triggered,
+        this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
 
     menu->popup(this->mapToGlobal(pos));
 }
@@ -301,11 +319,11 @@ void SocketInfoWidget::clientAction()
     // TODO change to states
     QString currentText = this->connectButtonPtr_->text();
 
-    if(currentText == CONNECT_BUTTON_CONNECT_LABEL)
+    if(currentText == connectButtonConnectLabel)
     {
         result = const_cast<Companion*>(companion)->connectClient();
     }
-    else if(currentText == CONNECT_BUTTON_DISCONNECT_LABEL)
+    else if(currentText == connectButtonDisconnectLabel)
     {
         result = const_cast<Companion*>(companion)->disconnectClient();
     }
@@ -323,7 +341,7 @@ void SocketInfoWidget::clientAction()
 
 void SocketInfoWidget::changeColor(QColor& color)
 {
-    this->palettePtr_ = new QPalette;  // TODO set parent or delete
+    this->palettePtr_ = new QPalette;
     this->palettePtr_->setColor(QPalette::Window, color);
 
     this->setAutoFillBackground(true);
@@ -366,7 +384,7 @@ void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
 
 SocketInfoStubWidget::SocketInfoStubWidget()
 {
-    mark_ = QString::fromStdString(socketInfoStubWidget);
+    mark_ = socketInfoStubWidget;
 
     layoutPtr_ = new QHBoxLayout;
     setLayout(layoutPtr_);
@@ -440,7 +458,7 @@ size_t LeftPanelWidget::getCompanionPanelChildrenSize()
     return companionPanelChildren.size();
 }
 
-void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)  // TODO do we nedd remove?
+void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)
 {
     QList<SocketInfoBaseWidget*> companionPanelChildren =
         this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
@@ -900,9 +918,12 @@ CompanionDataDialog::~CompanionDataDialog()
 void CompanionDataDialog::set()
 {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
+        this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
 
-    connect(this->buttonBoxPtr_, &QDialogButtonBox::rejected, this, &QDialog::reject, Qt::QueuedConnection);
+    connect(
+        this->buttonBoxPtr_, &QDialogButtonBox::rejected,
+        this, &QDialog::reject, Qt::QueuedConnection);
 }
 
 std::string CompanionDataDialog::getNameString()
@@ -925,7 +946,7 @@ std::string CompanionDataDialog::getPortString()
 
 CreatePasswordDialog::CreatePasswordDialog()
 {
-    setWindowTitle(QString::fromStdString(newPasswordDialogTitle));
+    setWindowTitle(newPasswordDialogTitle);
 
     setParent(getGraphicManagerPtr()->getMainWindowPtr());
 
@@ -935,10 +956,10 @@ CreatePasswordDialog::CreatePasswordDialog()
     layoutPtr_ = new QFormLayout;
     setLayout(layoutPtr_);
 
-    firstLabelPtr_ = new QLabel(QString::fromStdString(newPasswordDialogFirstLabel));
+    firstLabelPtr_ = new QLabel(newPasswordDialogFirstLabel);
     firstEditPtr_ = new QLineEdit;
 
-    secondLabelPtr_ = new QLabel(QString::fromStdString(newPasswordDialogSecondLabel));
+    secondLabelPtr_ = new QLabel(newPasswordDialogSecondLabel);
     secondEditPtr_ = new QLineEdit;
 
     layoutPtr_->addRow(firstLabelPtr_, firstEditPtr_);
@@ -961,7 +982,8 @@ CreatePasswordDialog::~CreatePasswordDialog()
 void CreatePasswordDialog::set()
 {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
+        this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string CreatePasswordDialog::getFirstEditText()
@@ -976,7 +998,7 @@ std::string CreatePasswordDialog::getSecondEditText()
 
 GetPasswordDialog::GetPasswordDialog()
 {
-    setWindowTitle(QString::fromStdString(getPasswordDialogTitle));
+    setWindowTitle(getPasswordDialogTitle);
 
     setParent(getGraphicManagerPtr()->getMainWindowPtr());
 
@@ -986,7 +1008,7 @@ GetPasswordDialog::GetPasswordDialog()
     layoutPtr_ = new QFormLayout;
     setLayout(layoutPtr_);
 
-    labelPtr_ = new QLabel(QString::fromStdString(getPasswordDialogLabel));
+    labelPtr_ = new QLabel(getPasswordDialogLabel);
     editPtr_ = new QLineEdit;
 
     layoutPtr_->addRow(labelPtr_, editPtr_);
@@ -1006,7 +1028,8 @@ GetPasswordDialog::~GetPasswordDialog()
 void GetPasswordDialog::set()
 {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted, this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
+        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
+        this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText()
@@ -1015,13 +1038,13 @@ std::string GetPasswordDialog::getEditText()
 }
 
 ButtonInfo::ButtonInfo(
-    const std::string& buttonText, QDialogButtonBox::ButtonRole buttonRole,
+    const QString& buttonText, QDialogButtonBox::ButtonRole buttonRole,
     void (TextDialog::*functionPtr)()) :
     buttonText_(buttonText), buttonRole_(buttonRole), functionPtr_(functionPtr) {}
 
 TextDialog::TextDialog(
-    QWidget* parentPtr, DialogType dialogType, const std::string& text,
-    std::vector<ButtonInfo>&& buttonsInfo)
+    QWidget* parentPtr, DialogType dialogType, const QString& text,
+    std::vector<ButtonInfo>* buttonsInfoPtr)
 {
     if(parentPtr)
     {
@@ -1043,14 +1066,14 @@ TextDialog::TextDialog(
 
     textEditPtr_ = new QPlainTextEdit;
     textEditPtr_->setReadOnly(true);
-    textEditPtr_->setPlainText(QString::fromStdString(text));
+    textEditPtr_->setPlainText(text);
     layoutPtr_->addWidget(textEditPtr_);
 
     // set button box
     buttonBoxPtr_ = new QDialogButtonBox;
     layoutPtr_->addWidget(buttonBoxPtr_);
 
-    buttonsInfo_ = std::move(buttonsInfo);
+    buttonsInfoPtr_ = buttonsInfoPtr;
 }
 
 TextDialog::~TextDialog()
@@ -1058,23 +1081,28 @@ TextDialog::~TextDialog()
     delete this->layoutPtr_;
     delete this->textEditPtr_;
     delete this->buttonBoxPtr_;
+    delete this->buttonsInfoPtr_;
 }
 
 void TextDialog::set()
 {
-    for(auto& info : this->buttonsInfo_)
+    for(auto& info : *this->buttonsInfoPtr_)
     {
         QPushButton* buttonPtr = this->buttonBoxPtr_->addButton(
-            QString::fromStdString(info.buttonText_),
+            info.buttonText_,
             info.buttonRole_);
 
         if(info.buttonRole_ == QDialogButtonBox::AcceptRole)
         {
-            connect(buttonBoxPtr_, &QDialogButtonBox::accepted, this, info.functionPtr_, Qt::QueuedConnection);
+            connect(
+                buttonBoxPtr_, &QDialogButtonBox::accepted,
+                this, info.functionPtr_, Qt::QueuedConnection);
         }
         else if(info.buttonRole_ == QDialogButtonBox::RejectRole)
         {
-            connect(buttonBoxPtr_, &QDialogButtonBox::rejected, this, info.functionPtr_, Qt::QueuedConnection);
+            connect(
+                buttonBoxPtr_, &QDialogButtonBox::rejected,
+                this, info.functionPtr_, Qt::QueuedConnection);
         }
         else
         {

@@ -110,7 +110,7 @@ size_t MainWindow::getCompanionPanelChildrenSize()
     return this->leftPanelPtr_->getCompanionPanelChildrenSize();
 }
 
-void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)  // TODO do we nedd remove?
+void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)
 {
     this->leftPanelPtr_->removeWidgetFromCompanionPanel(widgetPtr);
 }
@@ -181,12 +181,18 @@ void MainWindow::createMenu()
     QMenu* fileMenu = menuBar()->addMenu("File");
     QAction* exitAction = new QAction("Exit", this);
     fileMenu->addAction(exitAction);
-    connect(exitAction, &QAction::triggered, this, &QCoreApplication::quit, Qt::QueuedConnection);
+
+    connect(
+        exitAction, &QAction::triggered,
+        this, &QCoreApplication::quit, Qt::QueuedConnection);
 
     QMenu* companionMenu = menuBar()->addMenu("Companion");
     QAction* addCompanionAction = new QAction("Add new companion", this);
     companionMenu->addAction(addCompanionAction);
-    connect(addCompanionAction, &QAction::triggered, this, &MainWindow::createCompanion, Qt::QueuedConnection);
+
+    connect(
+        addCompanionAction, &QAction::triggered,
+        this, &MainWindow::createCompanion, Qt::QueuedConnection);
 }
 
 void MainWindow::setBlurEffect()

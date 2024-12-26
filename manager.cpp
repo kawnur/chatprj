@@ -296,7 +296,7 @@ CompanionAction::CompanionAction(
             nullptr,
             DialogType::WARNING,
             deleteCompanionDialogText,
-            std::vector<ButtonInfo> {
+            new std::vector<ButtonInfo> {
                 ButtonInfo(
                     cancelButtonText, QDialogButtonBox::RejectRole, &TextDialog::reject),
                 ButtonInfo(
@@ -309,7 +309,7 @@ CompanionAction::CompanionAction(
             nullptr,
             DialogType::WARNING,
             clearCompanionHistoryDialogText,
-            std::vector<ButtonInfo> {
+            new std::vector<ButtonInfo> {
                 ButtonInfo(
                     cancelButtonText, QDialogButtonBox::RejectRole, &TextDialog::reject),
                 ButtonInfo(
@@ -815,8 +815,8 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
         std::to_string(companionActionPtr->getCompanionId()));
 
     bool socketExistsAtOtherCompanion =
-        (findSocketResult && companionIdDataPtr->size() > 1) ||
-        (!findSocketResult && companionIdDataPtr->size() > 0);
+        (findSocketResult && socketIdDataPtr->size() > 1) ||
+        (!findSocketResult && socketIdDataPtr->size() > 0);
 
     if(socketExistsAtOtherCompanion)
     {
@@ -1501,12 +1501,11 @@ void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 }
 
 void GraphicManager::createTextDialogAndShow(
-    QWidget* parentPtr, DialogType dialogType, const std::string& text,
-    std::vector<ButtonInfo>&& buttonInfo)
+    QWidget* parentPtr, DialogType dialogType, const QString& text,
+    std::vector<ButtonInfo>* buttonInfoPtr)
 {
     // TODO delete objects for closed dialoges?
-    TextDialog* dialogPtr = new TextDialog(
-        parentPtr, dialogType, text, std::move(buttonInfo));
+    TextDialog* dialogPtr = new TextDialog(parentPtr, dialogType, text, buttonInfoPtr);
 
     dialogPtr->set();
     dialogPtr->show();
@@ -1591,11 +1590,7 @@ void GraphicManager::showCompanionInfoDialog(
                 std::string("name: ") + companionActionPtr->getName(),
                 std::string("ipAddress: ") + companionActionPtr->getIpAddress(),
                 std::string("port: ") + companionActionPtr->getClientPort() }),
-        std::vector<ButtonInfo>( {
-            ButtonInfo(
-                okButtonText,
-                QDialogButtonBox::AcceptRole,
-                functionPtr) }));
+        createOkButtonInfoVector(functionPtr));
 
     delete companionActionPtr;
 }

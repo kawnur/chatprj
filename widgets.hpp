@@ -22,13 +22,10 @@ class CompanionAction;
 class Message;
 class MainWindow;
 
-const QString CONNECT_BUTTON_CONNECT_LABEL { "Connect" };  // TODO move to constants
-const QString CONNECT_BUTTON_DISCONNECT_LABEL { "Disconnect" };
-
 const std::vector<QString> connectButtonLabels
 {
-    CONNECT_BUTTON_CONNECT_LABEL,
-    CONNECT_BUTTON_DISCONNECT_LABEL
+    connectButtonConnectLabel,
+    connectButtonDisconnectLabel
 };
 
 QString getInitialConnectButtonLabel();
@@ -57,7 +54,7 @@ class IndicatorWidget : public QWidget
 public:
     IndicatorWidget();
     IndicatorWidget(const IndicatorWidget*);
-    ~IndicatorWidget() = default;
+    ~IndicatorWidget();
 
     void setOn();
     void setOff();
@@ -196,7 +193,7 @@ public:
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
     size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);  // TODO do we nedd remove?
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
     int getLastCompanionPanelChildWidth();
 
@@ -433,11 +430,11 @@ class ButtonInfo
 {
 public:
     ButtonInfo(
-        const std::string&, QDialogButtonBox::ButtonRole, void (TextDialog::*)());
+        const QString&, QDialogButtonBox::ButtonRole, void (TextDialog::*)());
 
     ~ButtonInfo() = default;
 
-    std::string buttonText_;
+    QString buttonText_;
     QDialogButtonBox::ButtonRole buttonRole_;
     void (TextDialog::*functionPtr_)();
 
@@ -449,7 +446,7 @@ class TextDialog : public Dialog
     Q_OBJECT
 
 public:
-    TextDialog(QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>&&);
+    TextDialog(QWidget*, DialogType, const QString&, std::vector<ButtonInfo>*);
     ~TextDialog();
 
     void set() override;
@@ -468,7 +465,7 @@ private:
     QVBoxLayout* layoutPtr_;
     QDialogButtonBox* buttonBoxPtr_;
 
-    std::vector<ButtonInfo> buttonsInfo_;
+    std::vector<ButtonInfo>* buttonsInfoPtr_;
 };
 
 #endif // WIDGETS_HPP

@@ -2,6 +2,7 @@
 #define CONSTANTS_HPP
 
 #include <map>
+#include <QString>
 #include <string>
 
 const std::string logDelimiter { "############################" };
@@ -54,30 +55,33 @@ const std::map<DialogType, std::string> dialogTypeStringRepresentation
     { DialogType::ERROR, std::string("ERROR") }
 };
 
-const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
-const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
-const std::string socketInfoStubWidget { "No companion info from DB..." };
+const QString connectButtonConnectLabel { "Connect" };
+const QString connectButtonDisconnectLabel { "Disconnect" };
+
+const QString deleteCompanionDialogText { "Companion will be deleted with chat history." };
+const QString clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
+const QString socketInfoStubWidget { "No companion info from DB..." };
 
 // new password dialog
-const std::string newPasswordDialogTitle { "New password creation" };
-const std::string newPasswordDialogFirstLabel { "Enter password:" };
-const std::string newPasswordDialogSecondLabel { "Reenter password:" };
+const QString newPasswordDialogTitle { "New password creation" };
+const QString newPasswordDialogFirstLabel { "Enter password:" };
+const QString newPasswordDialogSecondLabel { "Reenter password:" };
 
 // get password dialog
-const std::string getPasswordDialogTitle { "Authentication" };
-const std::string getPasswordDialogLabel { "Enter password:" };
+const QString getPasswordDialogTitle { "Authentication" };
+const QString getPasswordDialogLabel { "Enter password:" };
 
 // authentication dialog
-const std::string authenticationDialogTitle { "Authentication" };
-const std::string authenticationDialogLabel { "Enter password:" };
+const QString authenticationDialogTitle { "Authentication" };
+const QString authenticationDialogLabel { "Enter password:" };
 
 // info dialogs
-const std::string newPasswordCreatedLabel { "New password created" };
+const QString newPasswordCreatedLabel { "New password created" };
 
-const std::string okButtonText { "OK" };
-const std::string cancelButtonText { "Cancel" };
-const std::string clearHistoryButtonText { "Clear history" };
-const std::string deleteCompanionButtonText { "Delete companion" };
+const QString okButtonText { "OK" };
+const QString cancelButtonText { "Cancel" };
+const QString clearHistoryButtonText { "Clear history" };
+const QString deleteCompanionButtonText { "Delete companion" };
 
 
 // colors
