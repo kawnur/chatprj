@@ -275,7 +275,7 @@ public:
     WidgetGroup(const Companion*);
     ~WidgetGroup();
 
-    QString formatMessage(const Companion*, const Message*);  // TODO move to widget
+    void addMessageToChatHistory(const Message*);
     void addMessageToChatHistory(const QString&);
     void clearChatHistory();
 
@@ -285,10 +285,11 @@ public:
     SocketInfoBaseWidget* getSocketInfoBasePtr();
 
 private:
+    const Companion* companionPtr_;
     SocketInfoBaseWidget* socketInfoBasePtr_;
     CentralPanelWidget* centralPanelPtr_;
 
-    QString buildChatHistory(const Companion*);
+    void buildChatHistory();
 };
 
 class StubWidgetGroup

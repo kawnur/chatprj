@@ -640,24 +640,25 @@ void RightPanelWidget::addTextToAppLogWidget(const QString& text)
     emit addTextToAppLogWidgetSignal(text);
 }
 
-WidgetGroup::WidgetGroup(const Companion* companionPtr)
+WidgetGroup::WidgetGroup(const Companion* companionPtr) : companionPtr_(companionPtr)
 {
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
-    const SocketInfo* socketInfoPtr = companionPtr->getSocketInfoPtr();
+    const SocketInfo* socketInfoPtr = companionPtr_->getSocketInfoPtr();
 
     SocketInfoWidget* widget = new SocketInfoWidget(
-        const_cast<Companion*>(companionPtr));
+        const_cast<Companion*>(companionPtr_));
 
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
     graphicManagerPtr->addWidgetToCompanionPanel(socketInfoBasePtr_);
 
     centralPanelPtr_ = new CentralPanelWidget(
-        getGraphicManagerPtr()->getMainWindowPtr(), companionPtr->getName());
+        getGraphicManagerPtr()->getMainWindowPtr(), companionPtr_->getName());
 
-    centralPanelPtr_->set(const_cast<Companion*>(companionPtr));
+    centralPanelPtr_->set(const_cast<Companion*>(companionPtr_));
 
-    buildChatHistory(companionPtr);
+    // buildChatHistory(companionPtr_);
+    buildChatHistory();
 
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::CENTRAL, centralPanelPtr_);
@@ -672,35 +673,10 @@ WidgetGroup::~WidgetGroup()
     delete this->centralPanelPtr_;
 }
 
-QString WidgetGroup::formatMessage(const Companion* companionPtr, const Message* messagePtr)  // TODO move to utils
+void WidgetGroup::addMessageToChatHistory(const Message* messagePtr)
 {
-    auto companionId = messagePtr->getCompanionId();
-    auto authorId = messagePtr->getAuthorId();
-    auto time = QString::fromStdString(messagePtr->getTime());
-    auto text = QString::fromStdString(messagePtr->getText());
-    auto isSent = messagePtr->getIsSent();
-
-    QString color, sender, receiver;
-
-    if(companionId == authorId)
-    {
-        color = "#00115e";
-        sender = QString::fromStdString(companionPtr->getName());
-        receiver = "Me";
-    }
-    else
-    {
-        color = "#115e00";
-        sender = "Me";
-        receiver = QString::fromStdString(companionPtr->getName());
-    }
-
-    QString prefix = QString("<font color=\"%1\"><br><b><i>From %2 to %3 at %4:</i></b><br>")
-        .arg(color, sender, receiver, time);
-
-    QString msg = prefix + text + QString("</font><br>");
-
-    return msg;
+    auto textFormatted = formatMessage(this->companionPtr_->getName(), messagePtr);
+    this->addMessageToChatHistory(textFormatted);
 }
 
 void WidgetGroup::addMessageToChatHistory(const QString& message)
@@ -728,18 +704,17 @@ SocketInfoBaseWidget* WidgetGroup::getSocketInfoBasePtr()
     return this->socketInfoBasePtr_;
 }
 
-QString WidgetGroup::buildChatHistory(const Companion* companion)
+void WidgetGroup::buildChatHistory()
 {
-    const std::vector<Message>* messages = companion->getMessagesPtr();
-    QString result { "" };
+    auto messagePointersPtr = this->companionPtr_->getMessagesPtr();
 
-    for(auto& message : *messages)
+    for(auto& messagePtr : *messagePointersPtr)
     {
         this->addMessageToChatHistory(
-            this->formatMessage(companion, &message));
+            formatMessage(
+                this->companionPtr_->getName(),
+                messagePtr));
     }
-
-    return result;
 }
 
 StubWidgetGroup::StubWidgetGroup()

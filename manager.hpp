@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <memory>
+#include <mutex>
 #include <QDialogButtonBox>
 #include <string>
 
@@ -108,14 +109,16 @@ public:
 
     SocketInfo* getSocketInfoPtr() const;
     void setSocketInfo(SocketInfo*);
-//    void addMessage(int, int, std::tm, const std::string&, bool);
-    void addMessage(int, int, const std::string&, const std::string&, bool);
-    const std::vector<Message>* getMessagesPtr() const;
-    void sendLastMessage();
+    void addMessage(Message*);
+
+    const std::vector<Message*>* getMessagesPtr() const;
+    void sendMessage(const Message*);
 
     void updateData(const CompanionData*);
 
 private:
+    std::mutex messagesMutex_;
+
     int id_;  // TODO change type
     std::string name_;
     SocketInfo* socketInfoPtr_;
@@ -125,7 +128,8 @@ private:
     // boost::asio::io_context* io_contextPtr_;
     ChatServer* serverPtr_;
 
-    std::vector<Message> messages_;
+    // std::vector<Message> messages_;
+    std::vector<Message*>* messagePointersPtr_;
 };
 
 class Action : public QObject

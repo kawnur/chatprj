@@ -7,6 +7,7 @@
 
 class ButtonInfo;
 class CompanionAction;
+class Message;
 class TextDialog;
 
 template<typename... Ts> void logArgsException(Ts&&... args);
@@ -43,5 +44,7 @@ void showInfoDialogAndLogInfo(QWidget*, QString&&);
 void showWarningDialogAndLogWarning(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
+
+QString formatMessage(const std::string&, const Message*);
 
 #endif // UTILS_HPP

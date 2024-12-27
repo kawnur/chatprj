@@ -170,3 +170,35 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
 
     logArgsError(message);
 }
+
+QString formatMessage(const std::string& companionName, const Message* messagePtr)
+{
+    auto companionNameQString = QString::fromStdString(companionName);
+    auto companionId = messagePtr->getCompanionId();
+    auto authorId = messagePtr->getAuthorId();
+    auto time = QString::fromStdString(messagePtr->getTime());
+    auto text = QString::fromStdString(messagePtr->getText());
+    auto isSent = messagePtr->getIsSent();
+
+    QString color, sender, receiver;
+
+    if(companionId == authorId)
+    {
+        color = "#00115e";
+        sender = companionNameQString;
+        receiver = "Me";
+    }
+    else
+    {
+        color = "#115e00";
+        sender = "Me";
+        receiver = companionNameQString;
+    }
+
+    QString prefix = QString("<font color=\"%1\"><br><b><i>From %2 to %3 at %4:</i></b><br>")
+                         .arg(color, sender, receiver, time);
+
+    QString msg = prefix + text + QString("</font><br>");
+
+    return msg;
+}

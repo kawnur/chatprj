@@ -77,13 +77,15 @@ bool Message::getIsSent() const
 }
 
 Companion::Companion(int id, const std::string& name) :
-    id_(id), name_(name), socketInfoPtr_(nullptr),
-    clientPtr_(nullptr), serverPtr_(nullptr), messages_(std::vector<Message>())
+    messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
+    clientPtr_(nullptr), serverPtr_(nullptr),
+    messagePointersPtr_(new std::vector<Message*>)
 {}
 
 Companion::Companion(int id, std::string&& name) :
-    id_(id), name_(name), socketInfoPtr_(nullptr),
-    clientPtr_(nullptr), serverPtr_(nullptr), messages_(std::vector<Message>())
+    messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
+    clientPtr_(nullptr), serverPtr_(nullptr),
+    messagePointersPtr_(new std::vector<Message*>)
 {}
 
 Companion::~Companion()
@@ -91,6 +93,13 @@ Companion::~Companion()
     delete socketInfoPtr_;
     delete clientPtr_;
     delete serverPtr_;
+
+    for(auto& messagePtr : *this->messagePointersPtr_)
+    {
+        delete messagePtr;
+    }
+
+    delete this->messagePointersPtr_;
 }
 
 bool Companion::startServer()
@@ -205,26 +214,24 @@ void Companion::setSocketInfo(SocketInfo* socketInfo)
     socketInfoPtr_ = socketInfo;
 }
 
-void Companion::addMessage(
-        int companion_id, int author_id, const std::string& time,
-        const std::string& text, bool isSent)
+void Companion::addMessage(Message* messagePtr)
 {
-    this->messages_.emplace_back(companion_id, author_id, time, text, isSent);
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+    this->messagePointersPtr_->push_back(messagePtr);
 }
 
-const std::vector<Message>* Companion::getMessagesPtr() const
+const std::vector<Message*>* Companion::getMessagesPtr() const
 {
-    return &this->messages_;
+    return this->messagePointersPtr_;
 }
 
-void Companion::sendLastMessage()
+void Companion::sendMessage(const Message* messagePtr)
 {
     if(this->clientPtr_)
     {
-        auto text = this->messages_.back().getText();
-        auto sendResult = this->clientPtr_->send(text);
+        auto result = this->clientPtr_->send(messagePtr->getText());
 
-        if(!sendResult)
+        if(!result)
         {
             logArgsError("client message sending error");
         }
@@ -565,7 +572,6 @@ void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
     // encrypt message
 
     // add to DB and get timestamp
-
     auto pair = this->pushMessageToDB(companionPtr->getName(), std::string("me"), text);
 
     if(pair.first == 0 || pair.second == "")
@@ -575,19 +581,14 @@ void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
     }
 
     // add to companion's messages
-
-    companionPtr->addMessage(pair.first, 1, pair.second, text, false);
+    Message* messagePtr = new Message(pair.first, 1, pair.second, text, false);
+    companionPtr->addMessage(messagePtr);
 
     // add to widget
-
-    auto textFormatted = groupPtr->formatMessage(
-        companionPtr, &companionPtr->getMessagesPtr()->back());
-
-    groupPtr->addMessageToChatHistory(textFormatted);
+    groupPtr->addMessageToChatHistory(messagePtr);
 
     // send over network
-
-    companionPtr->sendLastMessage();
+    companionPtr->sendMessage(messagePtr);
 }
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
@@ -597,7 +598,6 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     // encrypt message
 
     // add to DB and get timestamp
-
     auto pair = this->pushMessageToDB(companionPtr->getName(), std::string("me"), text);
 
     if(pair.first == 0 || pair.second == "")
@@ -607,25 +607,19 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     }
 
     // add to companion's messages
-
-    companionPtr->addMessage(pair.first, 1, pair.second, text, false);
+    Message* messagePtr = new Message(pair.first, 1, pair.second, text, false);
+    companionPtr->addMessage(messagePtr);
 
     // add to widget
-
-    auto textFormatted = groupPtr->formatMessage(
-                companionPtr, &companionPtr->getMessagesPtr()->back());
-
-    groupPtr->addMessageToChatHistory(textFormatted);
+    groupPtr->addMessageToChatHistory(messagePtr);
 
     // send over network
-
-    companionPtr->sendLastMessage();
+    companionPtr->sendMessage(messagePtr);
 }
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
 {
     // add to DB and get timestamp
-
     auto pair = this->pushMessageToDB(companionPtr->getName(), companionPtr->getName(), text);
 
     if(pair.first == 0 || pair.second == "")
@@ -635,19 +629,14 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
     }
 
     // add to companion's messages
-
-    companionPtr->addMessage(pair.first, pair.first, pair.second, text, false);
+    Message* messagePtr = new Message(pair.first, pair.first, pair.second, text, false);
+    companionPtr->addMessage(messagePtr);
 
     // decrypt message
 
     // add to widget
-
     WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-
-    auto textFormatted = groupPtr->formatMessage(
-        companionPtr, &companionPtr->getMessagesPtr()->back());
-
-    groupPtr->addMessageToChatHistory(textFormatted);
+    groupPtr->addMessageToChatHistory(messagePtr);
 }
 
 bool Manager::getUserIsAuthenticated()
@@ -1323,12 +1312,14 @@ bool Manager::buildCompanions()
 
             for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
             {
-                companionPtr->addMessage(
+                Message* messagePtr = new Message(
                     id,
                     std::atoi(messagesDataPtr->getValue(i, "author_id")),
                     messagesDataPtr->getValue(i, "timestamp_tz"),
                     messagesDataPtr->getValue(i, "message"),
                     messagesDataPtr->getValue(i, "issent"));
+
+                companionPtr->addMessage(messagePtr);
             }
 
             if(!companionPtr->startServer())

@@ -54,6 +54,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Widgets)
 #find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql)
 #find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
 #qt6_wrap_cpp(PROJECT_SOURCES mainwindow.hpp)
 
 add_executable(chatapp ${PROJECT_SOURCES})
@@ -64,6 +66,7 @@ target_link_libraries(chatapp PRIVATE gpgme Boost::thread)
 target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets)
 #target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql)
 target_link_libraries(chatapp PRIVATE pq)
+target_link_libraries(chatapp PRIVATE nlohmann_json::nlohmann_json)
 
 # copy sql scripts
 
