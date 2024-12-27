@@ -242,7 +242,8 @@ private:
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
-    std::pair<int, std::string> pushMessageToDB(const std::string&, const std::string&, const std::string&);
+    std::pair<int, std::string> pushMessageToDB(
+        const std::string&, const std::string&, const std::string&, const std::string&);
 
     bool connectToDb();
     bool buildCompanions();

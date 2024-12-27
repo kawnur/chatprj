@@ -307,8 +307,8 @@ PGresult* pushSocketToDBAndReturn(
 
 PGresult* pushMessageToDBAndReturn(
     const PGconn* dbConnection, const std::string& companionName,
-    const std::string& authorName, const std::string& returningFieldName,
-    const std::string& message)
+    const std::string& authorName, const std::string& timestamp,
+    const std::string& returningFieldName, const std::string& message)
 {
     std::string command = std::string(
         "INSERT INTO messages "
@@ -317,7 +317,9 @@ PGresult* pushMessageToDBAndReturn(
         + companionName
         + std::string("'), (SELECT id FROM companions WHERE name = '")
         + authorName
-        + std::string("'), now(), '")
+        + std::string("'), '")
+        + timestamp
+        + std::string("', '")
         + message
         + std::string("', false) RETURNING ")
         + returningFieldName

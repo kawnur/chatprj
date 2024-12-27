@@ -36,12 +36,6 @@ enum class MainWindowContainerPosition
     RIGHT
 };
 
-// enum class TextDialogAction
-// {
-//     CLOSE_PARENT_AND_SELF,
-//     ACCEPT
-// };
-
 const std::map<CompanionActionType, std::string> actionTypeStringRepresentation
 {
     { CompanionActionType::CREATE, std::string("Add new companion") },

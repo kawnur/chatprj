@@ -60,7 +60,7 @@ PGresult* pushSocketToDBAndReturn(
     const std::string&, const std::string&);
 
 PGresult* pushMessageToDBAndReturn(
-    const PGconn*, const std::string&, const std::string&,
+    const PGconn*, const std::string&, const std::string&, const std::string&,
     const std::string&, const std::string&);
 
 PGresult* pushPasswordToDBAndReturn(const PGconn*, const std::string&);

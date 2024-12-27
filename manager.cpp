@@ -229,7 +229,12 @@ void Companion::sendMessage(const Message* messagePtr)
 {
     if(this->clientPtr_)
     {
-        auto result = this->clientPtr_->send(messagePtr->getText());
+        // build json
+        std::string jsonData = buildMessageJSONString(messagePtr);
+
+        // send json over network
+        // auto result = this->clientPtr_->send(messagePtr->getText());
+        auto result = this->clientPtr_->send(jsonData);
 
         if(!result)
         {
@@ -489,8 +494,7 @@ void PasswordAction::sendData()
 
 
 Manager::Manager() :
-    dbConnectionPtr_(nullptr),
-    userIsAuthenticated_(false),
+    dbConnectionPtr_(nullptr), userIsAuthenticated_(false),
     companionPtrs_(std::vector<Companion*>())
 {
     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
@@ -533,7 +537,8 @@ void Manager::set()
 }
 
 std::pair<int, std::string> Manager::pushMessageToDB(
-    const std::string& companionName, const std::string& authorName, const std::string& text)
+    const std::string& companionName, const std::string& authorName,
+    const std::string& timestamp, const std::string& text)
 {
     std::shared_ptr<DBReplyData> messageDataPtr = this->getDBDataPtr(
         true,
@@ -542,7 +547,7 @@ std::pair<int, std::string> Manager::pushMessageToDB(
         std::vector<std::string> {
             std::string("companion_id"), std::string("timestamp_tz")
         },
-        companionName, authorName, std::string("companion_id"), text);
+        companionName, authorName, timestamp, std::string("companion_id"), text);
 
     if(!messageDataPtr)
     {
@@ -572,7 +577,8 @@ void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
     // encrypt message
 
     // add to DB and get timestamp
-    auto pair = this->pushMessageToDB(companionPtr->getName(), std::string("me"), text);
+    auto pair = this->pushMessageToDB(
+        companionPtr->getName(), std::string("me"), std::string("now()"), text);
 
     if(pair.first == 0 || pair.second == "")
     {
@@ -598,7 +604,8 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     // encrypt message
 
     // add to DB and get timestamp
-    auto pair = this->pushMessageToDB(companionPtr->getName(), std::string("me"), text);
+    auto pair = this->pushMessageToDB(
+        companionPtr->getName(), std::string("me"), std::string("now()"), text);
 
     if(pair.first == 0 || pair.second == "")
     {
@@ -617,10 +624,15 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     companionPtr->sendMessage(messagePtr);
 }
 
-void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
+void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
 {
+    nlohmann::json jsonData = buildMessageJsonObject(jsonString);
+    auto timestamp = jsonData.at("time");
+    auto text = jsonData.at("text");
+
     // add to DB and get timestamp
-    auto pair = this->pushMessageToDB(companionPtr->getName(), companionPtr->getName(), text);
+    auto pair = this->pushMessageToDB(
+        companionPtr->getName(), companionPtr->getName(), timestamp, text);
 
     if(pair.first == 0 || pair.second == "")
     {
@@ -629,7 +641,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& text)
     }
 
     // add to companion's messages
-    Message* messagePtr = new Message(pair.first, pair.first, pair.second, text, false);
+    Message* messagePtr = new Message(pair.first, pair.first, timestamp, text, false);
     companionPtr->addMessage(messagePtr);
 
     // decrypt message

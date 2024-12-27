@@ -202,3 +202,22 @@ QString formatMessage(const std::string& companionName, const Message* messagePt
 
     return msg;
 }
+
+std::string buildMessageJSONString(const Message* messagePtr)
+{
+    using json = nlohmann::json;
+
+    json jsonData;
+
+    jsonData["time"] = messagePtr->getTime();
+    jsonData["text"] = messagePtr->getText();
+
+    return jsonData.dump();
+}
+
+nlohmann::json buildMessageJsonObject(const std::string& jsonString)
+{
+    nlohmann::json jsonData = nlohmann::json::parse(jsonString);
+
+    return jsonData;
+}

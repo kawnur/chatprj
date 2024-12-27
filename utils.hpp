@@ -1,6 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <nlohmann/json.hpp>
 #include <QHostAddress>
 
 #include "logging.hpp"
@@ -46,5 +47,8 @@ void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
 QString formatMessage(const std::string&, const Message*);
+
+std::string buildMessageJSONString(const Message*);
+nlohmann::json buildMessageJsonObject(const std::string&);
 
 #endif // UTILS_HPP
