@@ -183,6 +183,22 @@ private:
     void showInfo();
 };
 
+class MessageWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MessageWidget(const QString&, const Message*);
+    ~MessageWidget();
+
+private:
+    QPalette* palettePtr_;
+    QVBoxLayout* layoutPtr_;
+    QLabel* headerLabelPtr_;
+    QLabel* messageLabelPtr_;
+    QWidget* indicatorPanelPtr_;
+};
+
 class LeftPanelWidget : public QWidget
 {
     Q_OBJECT
@@ -217,7 +233,8 @@ public:
 
     void set(Companion*);
 
-    void addMessageToChatHistory(const QString&);
+    // void addMessageToChatHistory(const QString&);
+    void addMessageWidgetToChatHistory(const QString&, const Message*);
     void clearChatHistory();
 
 private:
@@ -233,8 +250,10 @@ private:
 
     QLabel* companionNameLabelPtr_;
     QPalette* companionNameLabelPalettePtr_;
-    QTextEdit* chatHistoryWidgetPtr_;
-    QPalette* chatHistoryWidgetPalettePtr_;
+    // QTextEdit* chatHistoryWidgetPtr_;
+    // QPalette* chatHistoryWidgetPalettePtr_;
+    QWidget* chatHistoryWidgetPtr_;
+    QVBoxLayout* chatHistoryLayoutPtr_;
 
     TextEditWidget* textEditPtr_;
     QPalette* textEditPalettePtr_;
@@ -276,7 +295,8 @@ public:
     ~WidgetGroup();
 
     void addMessageToChatHistory(const Message*);
-    void addMessageToChatHistory(const QString&);
+    // void addMessageToChatHistory(const QString&);
+    void addMessageWidgetToChatHistory(const QString&, const Message*);
     void clearChatHistory();
 
     void hideCentralPanel();

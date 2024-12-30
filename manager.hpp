@@ -205,7 +205,7 @@ public:
     ~Manager();
 
     void set();
-    void sendMessage(WidgetGroup*, const std::string&);
+    // void sendMessage(WidgetGroup*, const std::string&);
     void sendMessage(Companion*, const std::string&);
     void receiveMessage(Companion*, const std::string&);
 
@@ -318,7 +318,7 @@ public:
     void setParentsForStubs(QWidget*, QWidget*);
     void setStubWidgets();
 
-    void sendMessage(WidgetGroup*, const std::string&);
+    // void sendMessage(WidgetGroup*, const std::string&);
     void sendMessage(Companion*, const std::string&);
 
     void addTextToAppLogWidget(const QString&);

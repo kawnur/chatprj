@@ -569,33 +569,33 @@ std::pair<int, std::string> Manager::pushMessageToDB(
     return std::pair<int, std::string>(companionId, timestampTz);
 }
 
-void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
-{
-    Companion* companionPtr =
-        const_cast<Companion*>(this->getMappedCompanionByWidgetGroup(groupPtr));
+// void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
+// {
+//     Companion* companionPtr =
+//         const_cast<Companion*>(this->getMappedCompanionByWidgetGroup(groupPtr));
 
-    // encrypt message
+//     // encrypt message
 
-    // add to DB and get timestamp
-    auto pair = this->pushMessageToDB(
-        companionPtr->getName(), std::string("me"), std::string("now()"), text);
+//     // add to DB and get timestamp
+//     auto pair = this->pushMessageToDB(
+//         companionPtr->getName(), std::string("me"), std::string("now()"), text);
 
-    if(pair.first == 0 || pair.second == "")
-    {
-        logArgsError("error adding message to db");
-        return;
-    }
+//     if(pair.first == 0 || pair.second == "")
+//     {
+//         logArgsError("error adding message to db");
+//         return;
+//     }
 
-    // add to companion's messages
-    Message* messagePtr = new Message(pair.first, 1, pair.second, text, false);
-    companionPtr->addMessage(messagePtr);
+//     // add to companion's messages
+//     Message* messagePtr = new Message(pair.first, 1, pair.second, text, false);
+//     companionPtr->addMessage(messagePtr);
 
-    // add to widget
-    groupPtr->addMessageToChatHistory(messagePtr);
+//     // add to widget
+//     groupPtr->addMessageToChatHistory(messagePtr);
 
-    // send over network
-    companionPtr->sendMessage(messagePtr);
-}
+//     // send over network
+//     companionPtr->sendMessage(messagePtr);
+// }
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
@@ -1456,10 +1456,10 @@ void GraphicManager::setStubWidgets()
     this->stubWidgetsPtr_->set();
 }
 
-void GraphicManager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
-{
-    getManagerPtr()->sendMessage(groupPtr, text);
-}
+// void GraphicManager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
+// {
+//     getManagerPtr()->sendMessage(groupPtr, text);
+// }
 
 void GraphicManager::sendMessage(Companion* companionPtr, const std::string& text)
 {

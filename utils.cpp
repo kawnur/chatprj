@@ -203,6 +203,31 @@ QString formatMessage(const std::string& companionName, const Message* messagePt
     return msg;
 }
 
+QString formatMessageHeader(const std::string& companionName, const Message* messagePtr)
+{
+    auto companionNameQString = QString::fromStdString(companionName);
+    auto companionId = messagePtr->getCompanionId();
+    auto authorId = messagePtr->getAuthorId();
+    auto time = QString::fromStdString(messagePtr->getTime());
+
+    QString sender, receiver;
+
+    if(companionId == authorId)
+    {
+        sender = companionNameQString;
+        receiver = "Me";
+    }
+    else
+    {
+        sender = "Me";
+        receiver = companionNameQString;
+    }
+
+    QString header = QString("From %1 to %2 at %3:").arg(sender, receiver, time);
+
+    return header;
+}
+
 std::string buildMessageJSONString(const Message* messagePtr)
 {
     using json = nlohmann::json;
