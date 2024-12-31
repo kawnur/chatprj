@@ -46,8 +46,8 @@ void showWarningDialogAndLogWarning(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
-QString formatMessage(const std::string&, const Message*);
-QString formatMessageHeader(const std::string&, const Message*);
+std::pair<QString, QString> formatMessageHeaderAndBody(const std::string&, const Message*);
+// QString formatMessageHeader(const std::string&, const Message*);
 
 std::string buildMessageJSONString(const Message*);
 nlohmann::json buildMessageJsonObject(const std::string&);

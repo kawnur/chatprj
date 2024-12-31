@@ -399,12 +399,17 @@ bool SocketInfoStubWidget::isStub()
 }
 
 MessageWidget::MessageWidget(
-    const QString& header, const Message* messagePtr)
+    QWidget* parentPtr, const std::string& companionName, const Message* messagePtr)
 {
     // set parent
+    if(parentPtr)
+    {
+        setParent(parentPtr);
+    }
 
     palettePtr_ = new QPalette;
-    palettePtr_->setColor(QPalette::Base, QColorConstants::Black);
+    palettePtr_->setColor(QPalette::Window, QColorConstants::LightGray);
+    setAutoFillBackground(true);
     setPalette(*palettePtr_);
 
     layoutPtr_ = new QVBoxLayout;
@@ -414,11 +419,12 @@ MessageWidget::MessageWidget(
 
     setLayout(layoutPtr_);
 
-    headerLabelPtr_ = new QLabel(header);
+    auto data = formatMessageHeaderAndBody(companionName, messagePtr);
+
+    headerLabelPtr_ = new QLabel(data.first);
     layoutPtr_->addWidget(headerLabelPtr_);
 
-    messageLabelPtr_ = new QLabel(
-        QString::fromStdString(messagePtr->getText() + std::string("\n")));
+    messageLabelPtr_ = new QLabel(data.second);
     layoutPtr_->addWidget(messageLabelPtr_);
 
     indicatorPanelPtr_ = new QWidget;
@@ -568,14 +574,24 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     // chatHistoryWidgetPtr_->setPlainText("");
 
     chatHistoryWidgetPtr_ = new QWidget;
+
     chatHistoryLayoutPtr_ = new QVBoxLayout;
+    chatHistoryLayoutPtr_->setSpacing(0);
+    chatHistoryLayoutPtr_->setContentsMargins(0, 0, 0, 0);
+    chatHistoryLayoutPtr_->setSizeConstraint(QLayout::SetDefaultConstraint);
     chatHistoryWidgetPtr_->setLayout(chatHistoryLayoutPtr_);
 
-    // chatHistoryWidgetPalettePtr_ = new QPalette;
-    // chatHistoryWidgetPalettePtr_->setColor(QPalette::Base, QColorConstants::LightGray);
-    // chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
+    chatHistoryScrollAreaPtr_ = new QScrollArea;
+    chatHistoryScrollAreaPtr_->setWidgetResizable(true);
+    chatHistoryScrollAreaPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    chatHistoryScrollAreaPtr_->setWidget(chatHistoryWidgetPtr_);
 
-    layoutPtr_->addWidget(chatHistoryWidgetPtr_);
+    chatHistoryWidgetPalettePtr_ = new QPalette;
+    chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::LightGray);
+    chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
+
+    // layoutPtr_->addWidget(chatHistoryWidgetPtr_);
+    layoutPtr_->addWidget(chatHistoryScrollAreaPtr_);
 
     textEditPtr_ = new TextEditWidget;    
     layoutPtr_->addWidget(textEditPtr_);
@@ -587,7 +603,8 @@ CentralPanelWidget::~CentralPanelWidget()
     delete this->companionNameLabelPtr_;
     delete this->companionNameLabelPalettePtr_;
     delete this->chatHistoryWidgetPtr_;
-    // delete this->chatHistoryWidgetPalettePtr_;
+    delete this->chatHistoryScrollAreaPtr_;
+    delete this->chatHistoryWidgetPalettePtr_;
     delete this->chatHistoryLayoutPtr_;
     delete this->textEditPtr_;
     delete this->textEditPalettePtr_;
@@ -610,10 +627,13 @@ void CentralPanelWidget::set(Companion* companionPtr)
 // }
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
-    const QString& header, const Message* messagePtr)
+    const std::string& companionName, const Message* messagePtr)
 {
-    MessageWidget* widgetPtr = new MessageWidget(header, messagePtr);
+    MessageWidget* widgetPtr = new MessageWidget(
+        this->chatHistoryWidgetPtr_, companionName, messagePtr);
+
     this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
+    this->chatHistoryScrollAreaPtr_->ensureWidgetVisible(widgetPtr);
 }
 
 void CentralPanelWidget::clearChatHistory()
@@ -723,23 +743,23 @@ WidgetGroup::~WidgetGroup()
     delete this->centralPanelPtr_;
 }
 
-void WidgetGroup::addMessageToChatHistory(const Message* messagePtr)
-{
-    // auto textFormatted = formatMessage(this->companionPtr_->getName(), messagePtr);
-    auto header = formatMessageHeader(this->companionPtr_->getName(), messagePtr);
-    // this->addMessageToChatHistory(textFormatted);
-    this->addMessageWidgetToChatHistory(header, messagePtr);
-}
+// void WidgetGroup::addMessageToChatHistory(const Message* messagePtr)
+// {
+//     // auto textFormatted = formatMessage(this->companionPtr_->getName(), messagePtr);
+//     // auto header = formatMessageHeader(this->companionPtr_->getName(), messagePtr);
+//     // this->addMessageToChatHistory(textFormatted);
+//     // this->addMessageWidgetToChatHistory(header, messagePtr);
+// }
 
 // void WidgetGroup::addMessageToChatHistory(const QString& message)
 // {
 //     this->centralPanelPtr_->addMessageToChatHistory(message);
 // }
 
-void WidgetGroup::addMessageWidgetToChatHistory(
-    const QString& header, const Message* messagePtr)
+void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 {
-    this->centralPanelPtr_->addMessageWidgetToChatHistory(header, messagePtr);
+    this->centralPanelPtr_->addMessageWidgetToChatHistory(
+        this->companionPtr_->getName(), messagePtr);
 }
 
 void WidgetGroup::clearChatHistory()
@@ -772,7 +792,7 @@ void WidgetGroup::buildChatHistory()
         //     formatMessage(
         //         this->companionPtr_->getName(),
         //         messagePtr));
-        this->addMessageToChatHistory(messagePtr);
+        this->addMessageWidgetToChatHistory(messagePtr);
     }
 }
 

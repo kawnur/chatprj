@@ -618,7 +618,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     companionPtr->addMessage(messagePtr);
 
     // add to widget
-    groupPtr->addMessageToChatHistory(messagePtr);
+    groupPtr->addMessageWidgetToChatHistory(messagePtr);
 
     // send over network
     companionPtr->sendMessage(messagePtr);
@@ -648,7 +648,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     // add to widget
     WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-    groupPtr->addMessageToChatHistory(messagePtr);
+    groupPtr->addMessageWidgetToChatHistory(messagePtr);
 }
 
 bool Manager::getUserIsAuthenticated()

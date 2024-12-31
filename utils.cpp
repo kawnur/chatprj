@@ -171,7 +171,9 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
     logArgsError(message);
 }
 
-QString formatMessage(const std::string& companionName, const Message* messagePtr)
+// QString formatMessageHeaderAndBody(const std::string& companionName, const Message* messagePtr)
+std::pair<QString, QString> formatMessageHeaderAndBody(
+    const std::string& companionName, const Message* messagePtr)
 {
     auto companionNameQString = QString::fromStdString(companionName);
     auto companionId = messagePtr->getCompanionId();
@@ -195,38 +197,40 @@ QString formatMessage(const std::string& companionName, const Message* messagePt
         receiver = companionNameQString;
     }
 
-    QString prefix = QString("<font color=\"%1\"><br><b><i>From %2 to %3 at %4:</i></b><br>")
+    QString header = QString("<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>")
                          .arg(color, sender, receiver, time);
 
-    QString msg = prefix + text + QString("</font><br>");
+    QString body = QString("<font color=\"%1\">").arg(color) + text + QString("</font>");
 
-    return msg;
+    std::pair<QString, QString> data (header, body);
+
+    return data;
 }
 
-QString formatMessageHeader(const std::string& companionName, const Message* messagePtr)
-{
-    auto companionNameQString = QString::fromStdString(companionName);
-    auto companionId = messagePtr->getCompanionId();
-    auto authorId = messagePtr->getAuthorId();
-    auto time = QString::fromStdString(messagePtr->getTime());
+// QString formatMessageHeader(const std::string& companionName, const Message* messagePtr)
+// {
+//     auto companionNameQString = QString::fromStdString(companionName);
+//     auto companionId = messagePtr->getCompanionId();
+//     auto authorId = messagePtr->getAuthorId();
+//     auto time = QString::fromStdString(messagePtr->getTime());
 
-    QString sender, receiver;
+//     QString sender, receiver;
 
-    if(companionId == authorId)
-    {
-        sender = companionNameQString;
-        receiver = "Me";
-    }
-    else
-    {
-        sender = "Me";
-        receiver = companionNameQString;
-    }
+//     if(companionId == authorId)
+//     {
+//         sender = companionNameQString;
+//         receiver = "Me";
+//     }
+//     else
+//     {
+//         sender = "Me";
+//         receiver = companionNameQString;
+//     }
 
-    QString header = QString("From %1 to %2 at %3:").arg(sender, receiver, time);
+//     QString header = QString("From %1 to %2 at %3:").arg(sender, receiver, time);
 
-    return header;
-}
+//     return header;
+// }
 
 std::string buildMessageJSONString(const Message* messagePtr)
 {
