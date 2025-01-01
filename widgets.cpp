@@ -615,7 +615,14 @@ CentralPanelWidget::~CentralPanelWidget()
 void CentralPanelWidget::set(Companion* companionPtr)
 {
     this->companionPtr_ = companionPtr;
-    connect(this->textEditPtr_, &TextEditWidget::send, this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
+    connect(
+        this->textEditPtr_, &TextEditWidget::send,
+        this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
+
+    connect(
+        this, SIGNAL(addMessageWidgetToChatHistorySignal(const QString&, const Message*)),
+        this, SLOT(addMessageWidgetToChatHistorySlot(const QString&, const Message*)),
+        Qt::QueuedConnection);
 }
 
 // void CentralPanelWidget::addMessageToChatHistory(const QString& message)
@@ -633,7 +640,29 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         this->chatHistoryWidgetPtr_, companionName, messagePtr);
 
     this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
-    this->chatHistoryScrollAreaPtr_->ensureWidgetVisible(widgetPtr);
+    // this->chatHistoryScrollAreaPtr_->ensureWidgetVisible(widgetPtr);
+    // this->chatHistoryScrollAreaPtr_->ensureVisible(
+    //     0,
+    //     this->chatHistoryWidgetPtr_->height() + widgetPtr->height(),
+    //     0, 0);
+
+    QTimer::singleShot(0, [](){});
+
+    this->chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
+        this->chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());
+}
+
+void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
+    const std::string& companionName, const Message* messagePtr)
+{
+    emit this->addMessageWidgetToChatHistorySignal(
+        QString::fromStdString(companionName), messagePtr);
+}
+
+void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
+    const QString& companionName, const Message* messagePtr)
+{
+    this->addMessageWidgetToChatHistory(companionName.toStdString(), messagePtr);
 }
 
 void CentralPanelWidget::clearChatHistory()
@@ -707,7 +736,7 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
 
 void RightPanelWidget::addTextToAppLogWidget(const QString& text)
 {
-    emit addTextToAppLogWidgetSignal(text);
+    emit this->addTextToAppLogWidgetSignal(text);
 }
 
 WidgetGroup::WidgetGroup(const Companion* companionPtr) : companionPtr_(companionPtr)
@@ -759,6 +788,14 @@ WidgetGroup::~WidgetGroup()
 void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
+        this->companionPtr_->getName(), messagePtr);
+}
+
+void WidgetGroup::addMessageWidgetToChatHistoryFromThread(const Message* messagePtr)
+{
+    // emit this->centralPanelPtr_->addMessageWidgetToChatHistorySignal(
+    //     this->companionPtr_->getName(), messagePtr);
+    this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
         this->companionPtr_->getName(), messagePtr);
 }
 

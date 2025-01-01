@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QTimer>
 
 #include "constants.hpp"
 #include "mainwindow.hpp"
@@ -236,7 +237,14 @@ public:
 
     // void addMessageToChatHistory(const QString&);
     void addMessageWidgetToChatHistory(const std::string&, const Message*);
+    void addMessageWidgetToChatHistoryFromThread(const std::string&, const Message*);
     void clearChatHistory();
+
+private slots:
+    void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
+
+signals:
+    void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
 
 private:
     Companion* companionPtr_;
@@ -299,6 +307,7 @@ public:
     // void addMessageToChatHistory(const Message*);
     // void addMessageToChatHistory(const QString&);
     void addMessageWidgetToChatHistory(const Message*);
+    void addMessageWidgetToChatHistoryFromThread(const Message*);
     void clearChatHistory();
 
     void hideCentralPanel();
