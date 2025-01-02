@@ -61,6 +61,11 @@ int Message::getAuthorId() const
     return this->author_id_;
 }
 
+bool Message::isMessageFromMe() const
+{
+    return !(this->author_id_ == this->companion_id_);
+}
+
 std::string Message::getTime() const
 {
     return this->time_;

@@ -1,6 +1,7 @@
 #ifndef WIDGETS_HPP
 #define WIDGETS_HPP
 
+#include <chrono>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFormLayout>
@@ -11,6 +12,7 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QTimer>
+#include <thread>
 
 #include "constants.hpp"
 #include "mainwindow.hpp"
@@ -53,7 +55,7 @@ class IndicatorWidget : public QWidget
     Q_OBJECT
 
 public:
-    IndicatorWidget();
+    IndicatorWidget(uint8_t);
     IndicatorWidget(const IndicatorWidget*);
     ~IndicatorWidget();
 
@@ -66,6 +68,7 @@ public slots:
 
 private:
     bool isOn_;
+    uint8_t size_;
     QColor onColor_;
     QColor offColor_;
     QColor meColor_;
@@ -137,7 +140,7 @@ private:
 
     void initializeFields();
 
-    void slotCustomMenuRequested(QPoint);
+    void customMenuRequestedSlot(QPoint);
 
     void changeColor(QColor&);
 
@@ -184,6 +187,23 @@ private:
     void showInfo();
 };
 
+class MessageIndicatorPanelWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MessageIndicatorPanelWidget(bool);
+    ~MessageIndicatorPanelWidget();
+
+private:
+    bool isMessageFromMe_;
+
+    QHBoxLayout* layoutPtr_;
+    IndicatorWidget* sentIndicatoPtr_;
+    IndicatorWidget* receivedIndicatoPtr_;
+    QLabel* newMessageLabelPtr_;
+};
+
 class MessageWidget : public QWidget
 {
     Q_OBJECT
@@ -195,10 +215,12 @@ public:
 private:
     bool isMessageFromMe_;
     QPalette* palettePtr_;
+    QSizePolicy* sizePolicyPtr_;
     QVBoxLayout* layoutPtr_;
     QLabel* headerLabelPtr_;
     QLabel* messageLabelPtr_;
-    QWidget* indicatorPanelPtr_;
+    // QWidget* indicatorPanelPtr_;
+    MessageIndicatorPanelWidget* indicatorPanelPtr_;
 };
 
 class LeftPanelWidget : public QWidget
@@ -235,9 +257,9 @@ public:
 
     void set(Companion*);
 
-    // void addMessageToChatHistory(const QString&);
     void addMessageWidgetToChatHistory(const std::string&, const Message*);
     void addMessageWidgetToChatHistoryFromThread(const std::string&, const Message*);
+    void scrollDownChatHistory();
     void clearChatHistory();
 
 private slots:
@@ -247,6 +269,7 @@ signals:
     void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
 
 private:
+    int scrollBarMax = 0;
     Companion* companionPtr_;
 
     QVBoxLayout* layoutPtr_;
@@ -304,8 +327,6 @@ public:
     WidgetGroup(const Companion*);
     ~WidgetGroup();
 
-    // void addMessageToChatHistory(const Message*);
-    // void addMessageToChatHistory(const QString&);
     void addMessageWidgetToChatHistory(const Message*);
     void addMessageWidgetToChatHistoryFromThread(const Message*);
     void clearChatHistory();

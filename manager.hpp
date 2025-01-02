@@ -76,6 +76,7 @@ public:
 
     int getCompanionId() const;
     int getAuthorId() const;
+    bool isMessageFromMe() const;
     std::string getTime() const;
     std::string getText() const;
     bool getIsSent() const;

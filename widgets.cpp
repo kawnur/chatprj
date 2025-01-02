@@ -92,10 +92,11 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event)
     }
 }
 
-IndicatorWidget::IndicatorWidget()
+IndicatorWidget::IndicatorWidget(uint8_t size)
 {
-    setFixedWidth(15);
-    setFixedHeight(15);
+    size_ = size;
+    setFixedWidth(size_);
+    setFixedHeight(size_);
 
     isOn_ = false;
     onColor_ = QColor(QColorConstants::DarkGreen);
@@ -111,6 +112,7 @@ IndicatorWidget::IndicatorWidget()
 
 IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator)
 {
+    size_ = indicator->size_;
     isOn_ = indicator->isOn_;
     onColor_ = indicator->onColor_;
     offColor_ = indicator->offColor_;
@@ -222,7 +224,7 @@ void SocketInfoWidget::initializeFields()
 
     layoutPtr_ = new QHBoxLayout;
     setLayout(layoutPtr_);
-    indicatorPtr_ = new IndicatorWidget;
+    indicatorPtr_ = new IndicatorWidget(15);
     nameLabelPtr_ = new QLabel(name_);
     ipAddressLabelPtr_ = new QLabel(ipAddress_);
 
@@ -266,14 +268,15 @@ void SocketInfoWidget::initializeFields()
     }
 
     setContextMenuPolicy(Qt::CustomContextMenu);
+
     connect(
         this, &QWidget::customContextMenuRequested,
-        this, &SocketInfoWidget::slotCustomMenuRequested, Qt::QueuedConnection);
+        this, &SocketInfoWidget::customMenuRequestedSlot, Qt::QueuedConnection);
 
     // connect
 }
 
-void SocketInfoWidget::slotCustomMenuRequested(QPoint pos)
+void SocketInfoWidget::customMenuRequestedSlot(QPoint pos)
 {
     QMenu* menu = new QMenu(this);
 
@@ -398,14 +401,64 @@ bool SocketInfoStubWidget::isStub()
     return true;
 }
 
+MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(bool isMessageFromMe)
+{
+    isMessageFromMe_ = isMessageFromMe;
+
+    layoutPtr_ = new QHBoxLayout;
+    layoutPtr_->setAlignment(Qt::AlignRight | Qt::AlignTop);
+    layoutPtr_->setSpacing(5);
+    layoutPtr_->setContentsMargins(0, 0, 0, 0);
+
+    setLayout(layoutPtr_);
+
+    if(isMessageFromMe_)
+    {
+        sentIndicatoPtr_ = new IndicatorWidget(10);
+        receivedIndicatoPtr_ = new IndicatorWidget(10);
+
+        newMessageLabelPtr_ = nullptr;
+
+        layoutPtr_->addWidget(sentIndicatoPtr_);
+        layoutPtr_->addWidget(receivedIndicatoPtr_);
+    }
+    else
+    {
+        sentIndicatoPtr_ = nullptr;
+        receivedIndicatoPtr_ = nullptr;
+
+        newMessageLabelPtr_ = new QLabel("TEST");
+
+        layoutPtr_->addWidget(newMessageLabelPtr_);
+    }
+}
+
+MessageIndicatorPanelWidget::~MessageIndicatorPanelWidget()
+{
+    delete this->layoutPtr_;
+
+    delete this->sentIndicatoPtr_;
+    delete this->receivedIndicatoPtr_;
+    delete this->newMessageLabelPtr_;
+}
+
 MessageWidget::MessageWidget(
     QWidget* parentPtr, const std::string& companionName, const Message* messagePtr)
 {
+    isMessageFromMe_ = messagePtr->isMessageFromMe();
+
     // set parent
     if(parentPtr)
     {
         setParent(parentPtr);
     }
+
+    // setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // sizePolicyPtr_ = new QSizePolicy;
+    // sizePolicyPtr_->setHorizontalPolicy(QSizePolicy::Preferred);
+    // sizePolicyPtr_->setVerticalPolicy(QSizePolicy::Preferred);
+    // setSizePolicy(sizePolicyPtr_);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     palettePtr_ = new QPalette;
     palettePtr_->setColor(QPalette::Window, QColorConstants::LightGray);
@@ -427,7 +480,8 @@ MessageWidget::MessageWidget(
     messageLabelPtr_ = new QLabel(data.second);
     layoutPtr_->addWidget(messageLabelPtr_);
 
-    indicatorPanelPtr_ = new QWidget;
+    // indicatorPanelPtr_ = new QWidget;
+    indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_);
     layoutPtr_->addWidget(indicatorPanelPtr_);
 }
 
@@ -578,7 +632,9 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     chatHistoryLayoutPtr_ = new QVBoxLayout;
     chatHistoryLayoutPtr_->setSpacing(0);
     chatHistoryLayoutPtr_->setContentsMargins(0, 0, 0, 0);
-    chatHistoryLayoutPtr_->setSizeConstraint(QLayout::SetDefaultConstraint);
+    chatHistoryLayoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    // chatHistoryLayoutPtr_->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    chatHistoryLayoutPtr_->setSizeConstraint(QLayout::SetMaximumSize);
     chatHistoryWidgetPtr_->setLayout(chatHistoryLayoutPtr_);
 
     chatHistoryScrollAreaPtr_ = new QScrollArea;
@@ -625,14 +681,6 @@ void CentralPanelWidget::set(Companion* companionPtr)
         Qt::QueuedConnection);
 }
 
-// void CentralPanelWidget::addMessageToChatHistory(const QString& message)
-// {
-//     // this->chatHistoryWidgetPtr_->appendPlainText(message);
-//     // this->chatHistoryWidgetPtr_->append(message);
-//     this->chatHistoryWidgetPtr_->insertHtml(message);
-//     this->chatHistoryWidgetPtr_->ensureCursorVisible();
-// }
-
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     const std::string& companionName, const Message* messagePtr)
 {
@@ -640,16 +688,8 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         this->chatHistoryWidgetPtr_, companionName, messagePtr);
 
     this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
-    // this->chatHistoryScrollAreaPtr_->ensureWidgetVisible(widgetPtr);
-    // this->chatHistoryScrollAreaPtr_->ensureVisible(
-    //     0,
-    //     this->chatHistoryWidgetPtr_->height() + widgetPtr->height(),
-    //     0, 0);
 
-    QTimer::singleShot(0, [](){});
-
-    this->chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
-        this->chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());
+    this->scrollDownChatHistory();
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
@@ -657,6 +697,14 @@ void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
 {
     emit this->addMessageWidgetToChatHistorySignal(
         QString::fromStdString(companionName), messagePtr);
+}
+
+void CentralPanelWidget::scrollDownChatHistory()
+{
+    QApplication::processEvents();
+
+    this->chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
+        this->chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
@@ -772,19 +820,6 @@ WidgetGroup::~WidgetGroup()
     delete this->centralPanelPtr_;
 }
 
-// void WidgetGroup::addMessageToChatHistory(const Message* messagePtr)
-// {
-//     // auto textFormatted = formatMessage(this->companionPtr_->getName(), messagePtr);
-//     // auto header = formatMessageHeader(this->companionPtr_->getName(), messagePtr);
-//     // this->addMessageToChatHistory(textFormatted);
-//     // this->addMessageWidgetToChatHistory(header, messagePtr);
-// }
-
-// void WidgetGroup::addMessageToChatHistory(const QString& message)
-// {
-//     this->centralPanelPtr_->addMessageToChatHistory(message);
-// }
-
 void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
@@ -793,8 +828,6 @@ void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 
 void WidgetGroup::addMessageWidgetToChatHistoryFromThread(const Message* messagePtr)
 {
-    // emit this->centralPanelPtr_->addMessageWidgetToChatHistorySignal(
-    //     this->companionPtr_->getName(), messagePtr);
     this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
         this->companionPtr_->getName(), messagePtr);
 }
@@ -812,6 +845,7 @@ void WidgetGroup::hideCentralPanel()
 void WidgetGroup::showCentralPanel()
 {
     this->centralPanelPtr_->show();
+    this->centralPanelPtr_->scrollDownChatHistory();
 }
 
 SocketInfoBaseWidget* WidgetGroup::getSocketInfoBasePtr()
@@ -825,10 +859,6 @@ void WidgetGroup::buildChatHistory()
 
     for(auto& messagePtr : *messagePointersPtr)
     {
-        // this->addMessageToChatHistory(
-        //     formatMessage(
-        //         this->companionPtr_->getName(),
-        //         messagePtr));
         this->addMessageWidgetToChatHistory(messagePtr);
     }
 }
