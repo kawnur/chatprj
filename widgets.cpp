@@ -405,10 +405,12 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(bool isMessageFromMe)
 {
     isMessageFromMe_ = isMessageFromMe;
 
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
     layoutPtr_ = new QHBoxLayout;
     layoutPtr_->setAlignment(Qt::AlignRight | Qt::AlignTop);
     layoutPtr_->setSpacing(5);
-    layoutPtr_->setContentsMargins(0, 0, 0, 0);
+    layoutPtr_->setContentsMargins(0, 0, 10, 10);
 
     setLayout(layoutPtr_);
 
@@ -436,7 +438,6 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(bool isMessageFromMe)
 MessageIndicatorPanelWidget::~MessageIndicatorPanelWidget()
 {
     delete this->layoutPtr_;
-
     delete this->sentIndicatoPtr_;
     delete this->receivedIndicatoPtr_;
     delete this->newMessageLabelPtr_;
@@ -453,11 +454,6 @@ MessageWidget::MessageWidget(
         setParent(parentPtr);
     }
 
-    // setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    // sizePolicyPtr_ = new QSizePolicy;
-    // sizePolicyPtr_->setHorizontalPolicy(QSizePolicy::Preferred);
-    // sizePolicyPtr_->setVerticalPolicy(QSizePolicy::Preferred);
-    // setSizePolicy(sizePolicyPtr_);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     palettePtr_ = new QPalette;
@@ -480,7 +476,6 @@ MessageWidget::MessageWidget(
     messageLabelPtr_ = new QLabel(data.second);
     layoutPtr_->addWidget(messageLabelPtr_);
 
-    // indicatorPanelPtr_ = new QWidget;
     indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_);
     layoutPtr_->addWidget(indicatorPanelPtr_);
 }
@@ -492,6 +487,11 @@ MessageWidget::~MessageWidget()
     delete this->headerLabelPtr_;
     delete this->messageLabelPtr_;
     delete this->indicatorPanelPtr_;
+}
+
+void MessageWidget::set()
+{
+    this->indicatorPanelPtr_->setParent(this);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -643,7 +643,7 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     chatHistoryScrollAreaPtr_->setWidget(chatHistoryWidgetPtr_);
 
     chatHistoryWidgetPalettePtr_ = new QPalette;
-    chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::LightGray);
+    chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::Gray);
     chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
 
     // layoutPtr_->addWidget(chatHistoryWidgetPtr_);
@@ -687,6 +687,8 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     MessageWidget* widgetPtr = new MessageWidget(
         this->chatHistoryWidgetPtr_, companionName, messagePtr);
 
+    widgetPtr->set();
+
     this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
 
     this->scrollDownChatHistory();
@@ -701,6 +703,9 @@ void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
 
 void CentralPanelWidget::scrollDownChatHistory()
 {
+    // double call workaround to scroll down fully
+    // TODO find out
+    QApplication::processEvents();
     QApplication::processEvents();
 
     this->chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
@@ -715,7 +720,18 @@ void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
 
 void CentralPanelWidget::clearChatHistory()
 {
-    // this->chatHistoryWidgetPtr_->clear();
+    auto children = this->chatHistoryWidgetPtr_->children();
+
+    for(auto& child : children)
+    {
+        MessageWidget* messageWidgetPtr = dynamic_cast<MessageWidget*>(child);
+
+        if(messageWidgetPtr)
+        {
+            messageWidgetPtr->hide();
+            delete messageWidgetPtr;
+        }
+    }
 }
 
 void CentralPanelWidget::sendMessage(const QString& text)

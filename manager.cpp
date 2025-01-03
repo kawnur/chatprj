@@ -399,10 +399,12 @@ void CompanionAction::sendData()
 
     case CompanionActionType::DELETE:
     case CompanionActionType::CLEAR_HISTORY:
+    {
         name = this->companionPtr_->getName();
         ipAddress = this->companionPtr_->getIpAddress();
         clientPort = std::to_string(this->companionPtr_->getClientPort());
         break;
+    }
     }
 
     logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);

@@ -212,14 +212,14 @@ public:
     MessageWidget(QWidget*, const std::string&, const Message*);
     ~MessageWidget();
 
+    void set();
+
 private:
     bool isMessageFromMe_;
     QPalette* palettePtr_;
-    QSizePolicy* sizePolicyPtr_;
     QVBoxLayout* layoutPtr_;
     QLabel* headerLabelPtr_;
     QLabel* messageLabelPtr_;
-    // QWidget* indicatorPanelPtr_;
     MessageIndicatorPanelWidget* indicatorPanelPtr_;
 };
 
