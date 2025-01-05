@@ -51,6 +51,8 @@ PGresult* getMessagesDBResult(const PGconn*, const int&);
 
 PGresult* getPasswordDBResult(const PGconn*);
 
+PGresult* setMessageInDbAndReturn(const PGconn*, const uint32_t&);
+
 PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
 PGresult* updateCompanionAndReturn(const PGconn*, const std::string&);
 PGresult* updateCompanionAndSocketAndReturn(const PGconn*, const CompanionAction&);

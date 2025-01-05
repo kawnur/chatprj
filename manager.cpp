@@ -46,17 +46,22 @@ void SocketInfo::updateData(const CompanionData* dataPtr)
 }
 
 Message::Message(
-        int companion_id, int author_id, const std::string& time,
-        const std::string& text, bool isSent) :
-    companion_id_(companion_id), author_id_(author_id), time_(time),
+        uint32_t id, uint8_t companion_id, uint8_t author_id,
+        const std::string& time, const std::string& text, bool isSent) :
+    id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
     text_(text), isSent_(isSent) {}
 
-int Message::getCompanionId() const
+uint32_t Message::getId() const
+{
+    return this->id_;
+}
+
+uint8_t Message::getCompanionId() const
 {
     return this->companion_id_;
 }
 
-int Message::getAuthorId() const
+uint8_t Message::getAuthorId() const
 {
     return this->author_id_;
 }
@@ -230,7 +235,7 @@ const std::vector<Message*>* Companion::getMessagesPtr() const
     return this->messagePointersPtr_;
 }
 
-void Companion::sendMessage(const Message* messagePtr)
+bool Companion::sendMessage(const Message* messagePtr)
 {
     if(this->clientPtr_)
     {
@@ -245,7 +250,11 @@ void Companion::sendMessage(const Message* messagePtr)
         {
             logArgsError("client message sending error");
         }
+
+        return result;
     }
+
+    return false;
 }
 
 void Companion::updateData(const CompanionData* dataPtr)
@@ -543,7 +552,7 @@ void Manager::set()
     }
 }
 
-std::pair<int, std::string> Manager::pushMessageToDB(
+std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     const std::string& companionName, const std::string& authorName,
     const std::string& timestamp, const std::string& text)
 {
@@ -552,28 +561,29 @@ std::pair<int, std::string> Manager::pushMessageToDB(
         "pushMessageToDBAndReturn",
         &pushMessageToDBAndReturn,
         std::vector<std::string> {
-            std::string("companion_id"), std::string("timestamp_tz")
+            std::string("id"), std::string("companion_id"), std::string("timestamp_tz")
         },
         companionName, authorName, timestamp, std::string("companion_id"), text);
 
     if(!messageDataPtr)
     {
         showErrorDialogAndLogError(nullptr, "Error getting data from db");
-        return std::pair<int, std::string>(0, "");
+        return std::tuple<uint32_t, uint8_t, std::string>(0, 0, "");
     }
 
     if(messageDataPtr->isEmpty())
     {
         logArgsError("messageDataPtr->isEmpty()");
-        return std::pair<int, std::string>(0, "");
+        return std::tuple<uint32_t, uint8_t, std::string>(0, 0, "");
     }
 
-    int companionId = std::atoi(messageDataPtr->getValue(0, "companion_id"));
+    uint32_t id = std::atoi(messageDataPtr->getValue(0, "id"));
+    uint8_t companionId = std::atoi(messageDataPtr->getValue(0, "companion_id"));
     std::string timestampTz { messageDataPtr->getValue(0, "timestamp_tz") };
 
     logArgs("companionId:", companionId, "timestampTz:", timestampTz);
 
-    return std::pair<int, std::string>(companionId, timestampTz);
+    return std::tuple<uint32_t, uint8_t, std::string>(id, companionId, timestampTz);
 }
 
 // void Manager::sendMessage(WidgetGroup* groupPtr, const std::string& text)
@@ -611,24 +621,34 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     // encrypt message
 
     // add to DB and get timestamp
-    auto pair = this->pushMessageToDB(
+    auto tuple = this->pushMessageToDB(
         companionPtr->getName(), std::string("me"), std::string("now()"), text);
 
-    if(pair.first == 0 || pair.second == "")
+    uint32_t id = std::get<0>(tuple);
+    uint8_t companion_id = std::get<1>(tuple);
+    std::string timestamp = std::get<2>(tuple);
+
+    if(companion_id == 0 || timestamp == "")
     {
         logArgsError("error adding message to db");
         return;
     }
 
     // add to companion's messages
-    Message* messagePtr = new Message(pair.first, 1, pair.second, text, false);
+    Message* messagePtr = new Message(id, companion_id, 1, timestamp, text, false);
     companionPtr->addMessage(messagePtr);
 
     // add to widget
     groupPtr->addMessageWidgetToChatHistory(messagePtr);
 
     // send over network
-    companionPtr->sendMessage(messagePtr);
+    bool result = companionPtr->sendMessage(messagePtr);
+
+    // mark message as sent
+    if(result)
+    {
+        this->markMessageAsSent(messagePtr);
+    }
 }
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
@@ -638,17 +658,20 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     auto text = jsonData.at("text");
 
     // add to DB and get timestamp
-    auto pair = this->pushMessageToDB(
+    auto tuple = this->pushMessageToDB(
         companionPtr->getName(), companionPtr->getName(), timestamp, text);
 
-    if(pair.first == 0 || pair.second == "")
+    uint32_t id = std::get<0>(tuple);
+    uint8_t companion_id = std::get<1>(tuple);
+
+    if(companion_id == 0 || timestamp == "")
     {
         logArgsError("error adding message to db");
         return;
     }
 
     // add to companion's messages
-    Message* messagePtr = new Message(pair.first, pair.first, timestamp, text, false);
+    Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text, false);
     companionPtr->addMessage(messagePtr);
 
     // decrypt message
@@ -832,6 +855,28 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
         showErrorDialogAndLogError(nullptr, "Companion with such socket already exists");
         return false;
     }
+
+    return true;
+}
+
+bool Manager::markMessageAsSent(const Message* messagePtr)
+{
+    // mark in db
+    std::shared_ptr<DBReplyData> messageIdDataPtr = this->getDBDataPtr(
+        true,
+        "setMessageInDbAndReturn",
+        &setMessageInDbAndReturn,
+        std::vector<std::string> { std::string("id") },
+        messagePtr->getId());
+
+    if(!messageIdDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error updating data in db");
+        return false;
+    }
+
+    // mark in widget
+    getGraphicManagerPtr()->markMessageWidgetAsSent(messagePtr);
 
     return true;
 }
@@ -1324,15 +1369,16 @@ bool Manager::buildCompanions()
                 "getMessagesDBResult",
                 &getMessagesDBResult,
                 std::vector<std::string> {
-                    std::string("companion_id"), std::string("author_id"),
-                    std::string("timestamp_tz"), std::string("message"),
-                    std::string("issent")
+                    std::string("id"), std::string("companion_id"),
+                    std::string("author_id"), std::string("timestamp_tz"),
+                    std::string("message"), std::string("issent")
                 },
                 id);
 
             for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
             {
                 Message* messagePtr = new Message(
+                    std::atoi(messagesDataPtr->getValue(i, "id")),
                     id,
                     std::atoi(messagesDataPtr->getValue(i, "author_id")),
                     messagesDataPtr->getValue(i, "timestamp_tz"),
@@ -1434,7 +1480,8 @@ Manager* getManagerPtr()
     return app->managerPtr_;
 }
 
-GraphicManager::GraphicManager()
+GraphicManager::GraphicManager() :
+    mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>())
 {
     // stubWidgetsPtr_ = new StubWidgetGroup;
     // mainWindowPtr_ = new MainWindow;
@@ -1697,6 +1744,23 @@ void GraphicManager::getEntrancePassword()
 {
     PasswordAction* actionPtr = new PasswordAction(PasswordActionType::GET);
     actionPtr->set();
+}
+
+void GraphicManager::addToMessageMapping(
+    const Message* messagePtr, const MessageWidget* messageWidgetPtr)
+{
+    this->mapMessageToMessageWidget_[messagePtr] = messageWidgetPtr;
+}
+
+void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
+{
+    auto setLambda = [&, this]()
+    {
+        const_cast<MessageWidget*>(
+            this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsSent();
+    };
+
+    runAndLogException(setLambda);
 }
 
 GraphicManager* getGraphicManagerPtr()

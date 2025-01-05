@@ -15,6 +15,7 @@
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "utils.hpp"
+#include "widgets.hpp"
 
 class ActionTextDialog;
 class ButtonInfo;
@@ -26,6 +27,7 @@ class DBReplyData;
 class Dialog;
 class LeftPanelWidget;
 class MainWindow;
+class MessageWidget;
 class QWidget;
 class RightPanelWidget;
 class SocketInfoBaseWidget;
@@ -71,19 +73,21 @@ class Message
 {
 public:
 //    Message(int, int, std::tm, const std::string&, bool);
-    Message(int, int, const std::string&, const std::string&, bool);
+    Message(uint32_t, uint8_t, uint8_t, const std::string&, const std::string&, bool);
     ~Message() = default;
 
-    int getCompanionId() const;
-    int getAuthorId() const;
+    uint32_t getId() const;
+    uint8_t getCompanionId() const;
+    uint8_t getAuthorId() const;
     bool isMessageFromMe() const;
     std::string getTime() const;
     std::string getText() const;
     bool getIsSent() const;
 
 private:
-    int companion_id_;
-    int author_id_;
+    uint32_t id_;
+    uint8_t companion_id_;
+    uint8_t author_id_;
 //    std::tm time_;  // TODO add timezone support
     std::string time_;  // TODO add timezone support
     std::string text_;
@@ -113,7 +117,7 @@ public:
     void addMessage(Message*);
 
     const std::vector<Message*>* getMessagesPtr() const;
-    void sendMessage(const Message*);
+    bool sendMessage(const Message*);
 
     void updateData(const CompanionData*);
 
@@ -243,7 +247,7 @@ private:
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
-    std::pair<int, std::string> pushMessageToDB(
+    std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
         const std::string&, const std::string&, const std::string&, const std::string&);
 
     bool connectToDb();
@@ -261,6 +265,8 @@ private:
 
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
+
+    bool markMessageAsSent(const Message*);
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
@@ -372,7 +378,12 @@ public:
 
     void getEntrancePassword();
 
+    void addToMessageMapping(const Message*, const MessageWidget*);
+    void markMessageWidgetAsSent(const Message*);
+
 private:
+    std::map<const Message*, const MessageWidget*> mapMessageToMessageWidget_;
+
     StubWidgetGroup* stubWidgetsPtr_;
     MainWindow* mainWindowPtr_;
 };

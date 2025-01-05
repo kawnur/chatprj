@@ -225,7 +225,7 @@ PGresult* getSocketByIpAddressAndPortDBResult(
 PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
 {
     std::string command = std::string(
-        "SELECT author_id, timestamp_tz, message, issent "
+        "SELECT id, author_id, timestamp_tz, message, issent "
         "FROM messages WHERE companion_id = ")
         + std::to_string(id)
         + std::string(" ORDER BY timestamp_tz LIMIT 50");
@@ -238,6 +238,17 @@ PGresult* getPasswordDBResult(const PGconn* dbConnection)
     const char* command = "SELECT password FROM passwords";
 
     return sendDBRequestAndReturnResult(dbConnection, command);
+}
+
+PGresult* setMessageInDbAndReturn(const PGconn* dbConnection, const uint32_t& messageId)
+{
+    std::string command = std::string(
+        "UPDATE messages set issent = 'true' "
+        "WHERE id = ")
+        + std::to_string(messageId)
+        + std::string(" RETURNING id");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
 PGresult* pushCompanionToDBAndReturn(
@@ -321,7 +332,7 @@ PGresult* pushMessageToDBAndReturn(
         + timestamp
         + std::string("', '")
         + message
-        + std::string("', false) RETURNING ")
+        + std::string("', false) RETURNING id, ")
         + returningFieldName
         + std::string(", timestamp_tz");
 

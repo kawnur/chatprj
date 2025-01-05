@@ -443,6 +443,11 @@ MessageIndicatorPanelWidget::~MessageIndicatorPanelWidget()
     delete this->newMessageLabelPtr_;
 }
 
+void MessageIndicatorPanelWidget::setSentIndicatorOn()
+{
+    this->sentIndicatoPtr_->setOn();
+}
+
 MessageWidget::MessageWidget(
     QWidget* parentPtr, const std::string& companionName, const Message* messagePtr)
 {
@@ -492,6 +497,11 @@ MessageWidget::~MessageWidget()
 void MessageWidget::set()
 {
     this->indicatorPanelPtr_->setParent(this);
+}
+
+void MessageWidget::setMessageAsSent()
+{
+    this->indicatorPanelPtr_->setSentIndicatorOn();
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -686,6 +696,8 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 {
     MessageWidget* widgetPtr = new MessageWidget(
         this->chatHistoryWidgetPtr_, companionName, messagePtr);
+
+    getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
 
     widgetPtr->set();
 
