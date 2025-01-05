@@ -232,12 +232,16 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 //     return header;
 // }
 
-std::string buildMessageJSONString(const Message* messagePtr)
+std::string buildMessageJSONString(
+    NetworkMessageType type, const std::string& networkId,
+    const Message* messagePtr)
 {
     using json = nlohmann::json;
 
     json jsonData;
 
+    jsonData["type"] = type;
+    jsonData["id"] = networkId;
     jsonData["time"] = messagePtr->getTime();
     jsonData["text"] = messagePtr->getText();
 
@@ -249,4 +253,17 @@ nlohmann::json buildMessageJsonObject(const std::string& jsonString)
     nlohmann::json jsonData = nlohmann::json::parse(jsonString);
 
     return jsonData;
+}
+
+std::string getRandomString(uint8_t length)
+{
+    std::string result(length, '_');
+    size_t baseSize = sizeof(alphanum);
+
+    for(int i = 0; i < length; i++)
+    {
+        result.at(i) = alphanum[rand() % (baseSize - 1)];
+    }
+
+    return result;
 }

@@ -4,11 +4,13 @@
 #include <nlohmann/json.hpp>
 #include <QHostAddress>
 
+#include "constants.hpp"
 #include "logging.hpp"
 
 class ButtonInfo;
 class CompanionAction;
 class Message;
+// class NetworkMessageType;
 class TextDialog;
 
 template<typename... Ts> void logArgsException(Ts&&... args);
@@ -49,7 +51,11 @@ void showErrorDialogAndLogError(QWidget*, QString&&);
 std::pair<QString, QString> formatMessageHeaderAndBody(const std::string&, const Message*);
 // QString formatMessageHeader(const std::string&, const Message*);
 
-std::string buildMessageJSONString(const Message*);
+std::string buildMessageJSONString(
+    NetworkMessageType, const std::string&, const Message*);
+
 nlohmann::json buildMessageJsonObject(const std::string&);
+
+std::string getRandomString(uint8_t);
 
 #endif // UTILS_HPP

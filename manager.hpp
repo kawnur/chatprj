@@ -117,7 +117,7 @@ public:
     void addMessage(Message*);
 
     const std::vector<Message*>* getMessagesPtr() const;
-    bool sendMessage(const Message*);
+    bool sendMessage(std::string, const Message*);
 
     void updateData(const CompanionData*);
 
@@ -210,7 +210,6 @@ public:
     ~Manager();
 
     void set();
-    // void sendMessage(WidgetGroup*, const std::string&);
     void sendMessage(Companion*, const std::string&);
     void receiveMessage(Companion*, const std::string&);
 
@@ -244,6 +243,7 @@ private:
 
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
+    std::map<const Message*, std::string> mapMessageToNetworkId_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
@@ -267,6 +267,8 @@ private:
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
 
     bool markMessageAsSent(const Message*);
+
+    std::string generateNewNetworkId();
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
@@ -325,7 +327,6 @@ public:
     void setParentsForStubs(QWidget*, QWidget*);
     void setStubWidgets();
 
-    // void sendMessage(WidgetGroup*, const std::string&);
     void sendMessage(Companion*, const std::string&);
 
     void addTextToAppLogWidget(const QString&);

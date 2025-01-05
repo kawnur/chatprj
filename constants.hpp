@@ -7,6 +7,17 @@
 
 const std::string logDelimiter { "############################" };
 
+static const char alphanum[] =
+    "0123456789"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz";
+
+enum class NetworkMessageType
+{
+    SEND_DATA,
+    RECEIVE_CONFIRMATION
+};
+
 enum class DialogType
 {
     INFO,
