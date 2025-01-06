@@ -235,17 +235,15 @@ const std::vector<Message*>* Companion::getMessagesPtr() const
     return this->messagePointersPtr_;
 }
 
-bool Companion::sendMessage(std::string networkId, const Message* messagePtr)
+bool Companion::sendMessage(
+    NetworkMessageType type, std::string networkId, const Message* messagePtr)
 {
     if(this->clientPtr_)
     {
         // build json
-        std::string jsonData = buildMessageJSONString(
-            NetworkMessageType::SEND_DATA,
-            networkId, messagePtr);
+        std::string jsonData = buildMessageJSONString(type, networkId, messagePtr);
 
         // send json over network
-        // auto result = this->clientPtr_->send(messagePtr->getText());
         auto result = this->clientPtr_->send(jsonData);
 
         if(!result)
@@ -511,13 +509,14 @@ void PasswordAction::sendData()
 }
 
 Manager::Manager() :
+    networkIdToMessageMapMutex_(std::mutex()),
     dbConnectionPtr_(nullptr), userIsAuthenticated_(false),
     companionPtrs_(std::vector<Companion*>())
 {
     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
     selectedCompanionPtr_ = nullptr;
 
-    mapMessageToNetworkId_ = std::map<const Message*, std::string>();
+    mapNetworkIdToMessage_ = std::map<std::string, const Message*>();
 }
 
 Manager::~Manager()
@@ -617,10 +616,15 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     groupPtr->addMessageWidgetToChatHistory(messagePtr);
 
     std::string networkId = getRandomString(5);
-    this->mapMessageToNetworkId_[messagePtr] = networkId;
+
+    while(!this->addToNetworkIdToMessageMapping(networkId, messagePtr))
+    {
+        networkId = getRandomString(5);
+    }
 
     // send over network
-    bool result = companionPtr->sendMessage(networkId, messagePtr);
+    bool result = companionPtr->sendMessage(
+        NetworkMessageType::SEND_DATA, networkId, messagePtr);
 
     // mark message as sent
     if(result)
@@ -633,37 +637,68 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 {
     nlohmann::json jsonData = buildMessageJsonObject(jsonString);
 
-    // message is confirmation
+    NetworkMessageType type = jsonData.at("type");
+    std::string networkId = jsonData.at("id");
 
-    // message is not confirmation
-    auto timestamp = jsonData.at("time");
-    auto text = jsonData.at("text");
-
-    // add to DB and get timestamp
-    auto tuple = this->pushMessageToDB(
-        companionPtr->getName(), companionPtr->getName(), timestamp, text);
-
-    uint32_t id = std::get<0>(tuple);
-    uint8_t companion_id = std::get<1>(tuple);
-
-    if(companion_id == 0 || timestamp == "")
+    switch(type)
     {
-        logArgsError("error adding message to db");
-        return;
+    // message is confirmation
+    case NetworkMessageType::RECEIVE_CONFIRMATION:
+    {
+        auto received = jsonData.at("received");
+        if(received == 1)
+        {
+            // successfully received
+            // mark message as received
+            std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
+
+            this->markMessageAsReceived(this->mapNetworkIdToMessage_.at(networkId));
+        }
+        else
+        {
+            // message was not received, resend message
+        }
+
+        break;
     }
 
-    // add to companion's messages
-    Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text, false);
-    companionPtr->addMessage(messagePtr);
+    // message is not confirmation
+    case NetworkMessageType::SEND_DATA:
+    {
+        auto timestamp = jsonData.at("time");
+        auto text = jsonData.at("text");
 
-    // decrypt message
+        // add to DB and get timestamp
+        auto tuple = this->pushMessageToDB(
+            companionPtr->getName(), companionPtr->getName(), timestamp, text);
 
-    // add to widget
-    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-    // groupPtr->addMessageWidgetToChatHistory(messagePtr);
-    groupPtr->addMessageWidgetToChatHistoryFromThread(messagePtr);
+        uint32_t id = std::get<0>(tuple);
+        uint8_t companion_id = std::get<1>(tuple);
 
-    // send reception confirmation to sender
+        if(companion_id == 0 || timestamp == "")
+        {
+            logArgsError("error adding message to db");
+            return;
+        }
+
+        // add to companion's messages
+        Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text, false);
+        companionPtr->addMessage(messagePtr);
+
+        // decrypt message
+
+        // add to widget
+        WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
+        // groupPtr->addMessageWidgetToChatHistory(messagePtr);
+        groupPtr->addMessageWidgetToChatHistoryFromThread(messagePtr);
+
+        // send reception confirmation to sender
+        bool result = companionPtr->sendMessage(
+            NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
+
+        break;
+    }
+    }
 }
 
 bool Manager::getUserIsAuthenticated()
@@ -685,6 +720,22 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
         findWidget);
 
     return result->first;
+}
+
+bool Manager::addToNetworkIdToMessageMapping(
+    std::string networkId, const Message* messagePtr)
+{
+    std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
+
+    if(this->mapNetworkIdToMessage_.count(networkId) == 0)
+    {
+        this->mapNetworkIdToMessage_[networkId] = messagePtr;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 const Companion* Manager::getMappedCompanionByWidgetGroup(
@@ -865,12 +916,12 @@ bool Manager::markMessageAsSent(const Message* messagePtr)
     return true;
 }
 
-std::string Manager::generateNewNetworkId()
+bool Manager::markMessageAsReceived(const Message* messagePtr)
 {
-    while(true)
-    {
+    // mark in widget
+    getGraphicManagerPtr()->markMessageWidgetAsReceived(messagePtr);
 
-    }
+    return true;
 }
 
 void Manager::deleteCompanionObject(Companion* companionPtr)
@@ -1473,6 +1524,7 @@ Manager* getManagerPtr()
 }
 
 GraphicManager::GraphicManager() :
+    messageToMessageWidgetMapMutex_(std::mutex()),
     mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>())
 {
     // stubWidgetsPtr_ = new StubWidgetGroup;
@@ -1736,6 +1788,8 @@ void GraphicManager::getEntrancePassword()
 void GraphicManager::addToMessageMapping(
     const Message* messagePtr, const MessageWidget* messageWidgetPtr)
 {
+    std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+
     this->mapMessageToMessageWidget_[messagePtr] = messageWidgetPtr;
 }
 
@@ -1743,8 +1797,23 @@ void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
 {
     auto setLambda = [&, this]()
     {
+        std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+
         const_cast<MessageWidget*>(
             this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsSent();
+    };
+
+    runAndLogException(setLambda);
+}
+
+void GraphicManager::markMessageWidgetAsReceived(const Message* messagePtr)
+{
+    auto setLambda = [&, this]()
+    {
+        std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+
+        const_cast<MessageWidget*>(
+            this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsReceived();
     };
 
     runAndLogException(setLambda);

@@ -448,6 +448,11 @@ void MessageIndicatorPanelWidget::setSentIndicatorOn()
     this->sentIndicatoPtr_->setOn();
 }
 
+void MessageIndicatorPanelWidget::setReceivedIndicatorOn()
+{
+    this->receivedIndicatoPtr_->setOn();
+}
+
 MessageWidget::MessageWidget(
     QWidget* parentPtr, const std::string& companionName, const Message* messagePtr)
 {
@@ -502,6 +507,11 @@ void MessageWidget::set()
 void MessageWidget::setMessageAsSent()
 {
     this->indicatorPanelPtr_->setSentIndicatorOn();
+}
+
+void MessageWidget::setMessageAsReceived()
+{
+    this->indicatorPanelPtr_->setReceivedIndicatorOn();
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)

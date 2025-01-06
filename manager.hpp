@@ -117,7 +117,7 @@ public:
     void addMessage(Message*);
 
     const std::vector<Message*>* getMessagesPtr() const;
-    bool sendMessage(std::string, const Message*);
+    bool sendMessage(NetworkMessageType, std::string, const Message*);
 
     void updateData(const CompanionData*);
 
@@ -236,6 +236,8 @@ public:
     void startUserAuthentication();
 
 private:
+    std::mutex networkIdToMessageMapMutex_;
+
     PGconn* dbConnectionPtr_;
 
     bool userIsAuthenticated_;
@@ -243,7 +245,9 @@ private:
 
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
-    std::map<const Message*, std::string> mapMessageToNetworkId_;
+    std::map<std::string, const Message*> mapNetworkIdToMessage_;
+
+    bool addToNetworkIdToMessageMapping(std::string, const Message*);
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
@@ -267,8 +271,7 @@ private:
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
 
     bool markMessageAsSent(const Message*);
-
-    std::string generateNewNetworkId();
+    bool markMessageAsReceived(const Message*);
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
@@ -381,8 +384,10 @@ public:
 
     void addToMessageMapping(const Message*, const MessageWidget*);
     void markMessageWidgetAsSent(const Message*);
+    void markMessageWidgetAsReceived(const Message*);
 
 private:
+    std::mutex messageToMessageWidgetMapMutex_;
     std::map<const Message*, const MessageWidget*> mapMessageToMessageWidget_;
 
     StubWidgetGroup* stubWidgetsPtr_;

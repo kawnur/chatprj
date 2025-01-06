@@ -196,6 +196,7 @@ public:
     ~MessageIndicatorPanelWidget();
 
     void setSentIndicatorOn();
+    void setReceivedIndicatorOn();
 
 private:
     bool isMessageFromMe_;
@@ -216,6 +217,7 @@ public:
 
     void set();
     void setMessageAsSent();
+    void setMessageAsReceived();
 
 private:
     bool isMessageFromMe_;

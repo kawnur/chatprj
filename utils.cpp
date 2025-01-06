@@ -242,8 +242,20 @@ std::string buildMessageJSONString(
 
     jsonData["type"] = type;
     jsonData["id"] = networkId;
-    jsonData["time"] = messagePtr->getTime();
-    jsonData["text"] = messagePtr->getText();
+
+    switch(type)
+    {
+    case NetworkMessageType::SEND_DATA:
+        jsonData["time"] = messagePtr->getTime();
+        jsonData["text"] = messagePtr->getText();
+
+        break;
+
+    case NetworkMessageType::RECEIVE_CONFIRMATION:
+        jsonData["received"] = 1;
+
+        break;
+    }
 
     return jsonData.dump();
 }
