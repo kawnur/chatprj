@@ -325,6 +325,7 @@ void SocketInfoWidget::clientAction()
     if(currentText == connectButtonConnectLabel)
     {
         result = const_cast<Companion*>(companion)->connectClient();
+        getManagerPtr()->sendUnsentMessages(companion);
     }
     else if(currentText == connectButtonDisconnectLabel)
     {

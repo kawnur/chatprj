@@ -121,6 +121,8 @@ public:
 
     void updateData(const CompanionData*);
 
+    Message* findMessage(uint32_t);
+
 private:
     std::mutex messagesMutex_;
 
@@ -234,6 +236,8 @@ public:
     bool isSelectedCompanionNullptr();
 
     void startUserAuthentication();
+
+    void sendUnsentMessages(const Companion*);
 
 private:
     std::mutex networkIdToMessageMapMutex_;

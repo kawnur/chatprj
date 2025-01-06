@@ -48,6 +48,7 @@ PGresult* getSocketByIpAddressAndPortDBResult(
     const PGconn*, const std::string&, const std::string&);
 
 PGresult* getMessagesDBResult(const PGconn*, const int&);
+PGresult* getUnsentMessagesByCompanionNameDBResult(const PGconn*, const std::string&);
 
 PGresult* getPasswordDBResult(const PGconn*);
 

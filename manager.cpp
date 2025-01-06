@@ -263,6 +263,22 @@ void Companion::updateData(const CompanionData* dataPtr)
     this->socketInfoPtr_->updateData(dataPtr);
 }
 
+Message* Companion::findMessage(uint32_t messageId)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    auto result = std::find_if(
+        this->messagePointersPtr_->begin(),
+        this->messagePointersPtr_->end(),
+        // [&](std::iterator<std::vector<Message*>> iter)
+        [&](auto iter)
+        {
+            return iter->getId() == messageId;
+        });
+
+    return (result == this->messagePointersPtr_->end()) ? nullptr : *result;
+}
+
 int Companion::getId()
 {
     return this->id_;
@@ -653,6 +669,9 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
 
             this->markMessageAsReceived(this->mapNetworkIdToMessage_.at(networkId));
+
+            this->mapNetworkIdToMessage_.erase(
+                this->mapNetworkIdToMessage_.find(networkId));
         }
         else
         {
@@ -1353,6 +1372,65 @@ void Manager::startUserAuthentication()
     }
 }
 
+void Manager::sendUnsentMessages(const Companion* companionPtr)
+{
+    Companion* companionCastPtr = const_cast<Companion*>(companionPtr);
+
+    // get unsent messages from db
+    std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
+        true,
+        "getUnsentMessagesByCompanionNameDBResult",
+        &getUnsentMessagesByCompanionNameDBResult,
+        std::vector<std::string> {
+            std::string("id"), std::string("author_id"), std::string("companion_id"),
+            std::string("timestamp_tz"), std::string("message") },
+        companionPtr->getName());
+
+    if(!messagesDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        return;
+    }
+
+    if(messagesDataPtr->isEmpty())
+    {
+        showErrorDialogAndLogError(nullptr, "Empty db reply to unsent messages selection");
+        return;
+    }
+
+    // add to companion's messages if needed
+    for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
+    {
+        uint32_t messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
+        Message* messagePtr = companionCastPtr->findMessage(messageId);
+
+        if(!messagePtr)
+        {
+            uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
+
+            messagePtr = new Message(
+                messageId,
+                companion_id,
+                1,
+                messagesDataPtr->getValue(i, "timestamp_tz"),
+                messagesDataPtr->getValue(i, "message"),
+                false);
+
+            companionCastPtr->addMessage(messagePtr);
+        }
+
+        // send over network
+        bool result = companionCastPtr->sendMessage(
+            NetworkMessageType::SEND_DATA, getRandomString(5), messagePtr);
+
+        // mark message as sent
+        if(result)
+        {
+            this->markMessageAsSent(messagePtr);
+        }
+    }
+}
+
 bool Manager::buildCompanions()
 {
     bool companionsDataIsOk = true;
@@ -1799,8 +1877,15 @@ void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
     {
         std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
-        const_cast<MessageWidget*>(
-            this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsSent();
+        try
+        {
+            const_cast<MessageWidget*>(
+                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsSent();
+        }
+        catch(std::out_of_range)
+        {
+            return;
+        }
     };
 
     runAndLogException(setLambda);
@@ -1812,8 +1897,15 @@ void GraphicManager::markMessageWidgetAsReceived(const Message* messagePtr)
     {
         std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
-        const_cast<MessageWidget*>(
-            this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsReceived();
+        try
+        {
+            const_cast<MessageWidget*>(
+                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsReceived();
+        }
+        catch(std::out_of_range)
+        {
+            return;
+        }
     };
 
     runAndLogException(setLambda);

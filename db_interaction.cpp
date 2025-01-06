@@ -233,6 +233,21 @@ PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
     return sendDBRequestAndReturnResult(dbConnection, command.data());
 }
 
+PGresult* getUnsentMessagesByCompanionNameDBResult(
+    const PGconn* dbConnection, const std::string& companionName)
+{
+    std::string command = std::string(
+        "SELECT id, author_id, companion_id, timestamp_tz, message "
+        "FROM messages WHERE companion_id = "
+        "(SELECT id FROM companions WHERE name = '")
+        + companionName
+        + std::string(
+        "') AND author_id = (SELECT id FROM companions WHERE name = 'me') "
+        "AND issent IS false");
+
+    return sendDBRequestAndReturnResult(dbConnection, command.data());
+}
+
 PGresult* getPasswordDBResult(const PGconn* dbConnection)
 {
     const char* command = "SELECT password FROM passwords";
