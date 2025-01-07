@@ -1,39 +1,39 @@
 services:
 
-    client1:
-        # command: "sleep infinity"
-#        command: ["/my/app/chatapp", "--app"]
-        command: /my/app/chatapp --app
-        depends_on:
-            - client1_db
-        environment:
-            XDG_SESSION_TYPE: wayland
-            XDG_RUNTIME_DIR: /tmp
-            WAYLAND_DISPLAY: $WAYLAND_DISPLAY
-            QT_QPA_PLATFORM: wayland
-            CHATAPP_DB_ADDRESS: $CHATAPP_CLIENT1_DB_IPV4_ADDRESS
-            CHATAPP_DB_PORT: $CHATAPP_CLIENT1_DB_PORT_INNER
-            CHATAPP_DB_USER: $CHATAPP_DB_POSTGRES_USER
-            CHATAPP_DB_PASSWORD: $CHATAPP_DB_POSTGRES_PASSWORD
-            CLIENT_NAME: client1
-        image: chatprj
-        networks:
-            my-bridge-network:
-#                ipv4_address: 172.21.0.2
-                ipv4_address: $CHATAPP_CLIENT1_IPV4_ADDRESS
-        expose:
-#            - "5002"
-            - $CHATAPP_CLIENT_PORT
-        volumes:
-            - type: bind
-              source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
-              target: /my/app
-            - type: bind
-              source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
-              target: /my/cmake
-            - type: bind
-              source: $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
-              target: /tmp/$WAYLAND_DISPLAY
+#     client1:
+#         # command: "sleep infinity"
+# #        command: ["/my/app/chatapp", "--app"]
+#         command: /my/app/chatapp --app
+#         depends_on:
+#             - client1_db
+#         environment:
+#             XDG_SESSION_TYPE: wayland
+#             XDG_RUNTIME_DIR: /tmp
+#             WAYLAND_DISPLAY: $WAYLAND_DISPLAY
+#             QT_QPA_PLATFORM: wayland
+#             CHATAPP_DB_ADDRESS: $CHATAPP_CLIENT1_DB_IPV4_ADDRESS
+#             CHATAPP_DB_PORT: $CHATAPP_CLIENT1_DB_PORT_INNER
+#             CHATAPP_DB_USER: $CHATAPP_DB_POSTGRES_USER
+#             CHATAPP_DB_PASSWORD: $CHATAPP_DB_POSTGRES_PASSWORD
+#             CLIENT_NAME: client1
+#         image: chatprj
+#         networks:
+#             my-bridge-network:
+# #                ipv4_address: 172.21.0.2
+#                 ipv4_address: $CHATAPP_CLIENT1_IPV4_ADDRESS
+#         expose:
+# #            - "5002"
+#             - $CHATAPP_CLIENT_PORT
+#         volumes:
+#             - type: bind
+#               source: /home/user/my/qt_projects/build-chatprj-Desktop-Debug
+#               target: /my/app
+#             - type: bind
+#               source: /home/user/sources/cmake/cmake-3.24.0-linux-x86_64
+#               target: /my/cmake
+#             - type: bind
+#               source: $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+#               target: /tmp/$WAYLAND_DISPLAY
 
     client2:
     #    command: "sleep infinity"

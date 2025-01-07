@@ -714,6 +714,10 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
     this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
 
+    logArgsWithCustomMark(
+        "this->chatHistoryWidgetPtr_->children().size():",
+        this->chatHistoryWidgetPtr_->children().size());
+
     this->scrollDownChatHistory();
 }
 
@@ -757,11 +761,55 @@ void CentralPanelWidget::clearChatHistory()
     }
 }
 
+void CentralPanelWidget::sortChatHistoryElements()
+{
+    QApplication::processEvents();
+    QApplication::processEvents();
+
+    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+    auto list = this->chatHistoryWidgetPtr_->children();
+
+    logArgs("list.size():", list.size());
+
+    auto lambda = [&](auto item)
+    {
+        auto result = graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
+            dynamic_cast<MessageWidget*>(item));
+
+        logArgs(result);
+
+        return result;
+    };
+
+    std::sort(
+        list.begin(),
+        list.end(),
+        [&](auto element1, auto element2)
+        {
+            return lambda(element1) < lambda(element2);
+        });
+
+    for(auto& element : list)
+    {
+        lambda(element);
+    }
+
+    // for(auto& element : list)
+    // {
+    //     auto elementCast = dynamic_cast<MessageWidget*>(element);
+    //     this->chatHistoryLayoutPtr_->removeWidget(elementCast);
+    //     this->chatHistoryLayoutPtr_->addWidget(elementCast);
+    // }
+}
+
 void CentralPanelWidget::sendMessage(const QString& text)
 {
     // auto plainText = this->textEditPtr_->toPlainText();
     // auto text = plainText.toStdString();
-    getGraphicManagerPtr()->sendMessage(this->companionPtr_, text.toStdString());
+    if(!text.isEmpty())
+    {
+        getGraphicManagerPtr()->sendMessage(this->companionPtr_, text.toStdString());
+    }
 }
 
 RightPanelWidget::RightPanelWidget(QWidget* parent)
@@ -890,6 +938,11 @@ void WidgetGroup::showCentralPanel()
 SocketInfoBaseWidget* WidgetGroup::getSocketInfoBasePtr()
 {
     return this->socketInfoBasePtr_;
+}
+
+void WidgetGroup::sortChatHistoryElements()
+{
+    this->centralPanelPtr_->sortChatHistoryElements();
 }
 
 void WidgetGroup::buildChatHistory()

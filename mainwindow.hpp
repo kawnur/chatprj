@@ -88,6 +88,7 @@ private:
 
     void closeEvent(QCloseEvent*) override;
     void keyPressEvent(QKeyEvent*) override;
+    void mouseDoubleClickEvent(QMouseEvent*) override;
 
     void createMenu();
 

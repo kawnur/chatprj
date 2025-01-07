@@ -267,6 +267,8 @@ public:
     void scrollDownChatHistory();
     void clearChatHistory();
 
+    void sortChatHistoryElements();
+
 private slots:
     void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
 
@@ -340,6 +342,8 @@ public:
     void showCentralPanel();
 
     SocketInfoBaseWidget* getSocketInfoBasePtr();
+
+    void sortChatHistoryElements();
 
 private:
     const Companion* companionPtr_;

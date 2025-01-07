@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 
+#include "constants.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "utils_cout.hpp"
@@ -78,5 +79,9 @@ template<typename T> void logLine(const T& string)
 void logLine(const QString&);
 void logLine(const std::string&string);
 
+template<typename... Ts> void logArgsWithCustomMark(Ts&&... args)
+{
+    logArgs(logCustomDelimiter, args...);
+}
 
 #endif // LOGGING_HPP

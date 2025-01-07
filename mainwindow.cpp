@@ -176,6 +176,11 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     }
 }
 
+void MainWindow::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    // this->showFullScreen();
+}
+
 void MainWindow::createMenu()
 {
     QMenu* fileMenu = menuBar()->addMenu("File");

@@ -412,24 +412,25 @@ void CompanionAction::sendData()
     {
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
-    {
-        CompanionDataDialog* dataDialogPtr =
-            dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
+        {
+            CompanionDataDialog* dataDialogPtr =
+                dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
 
-        name = dataDialogPtr->getNameString();
-        ipAddress = dataDialogPtr->getIpAddressString();
-        clientPort = dataDialogPtr->getPortString();
+            name = dataDialogPtr->getNameString();
+            ipAddress = dataDialogPtr->getIpAddressString();
+            clientPort = dataDialogPtr->getPortString();
+        }
         break;
-    }
 
     case CompanionActionType::DELETE:
     case CompanionActionType::CLEAR_HISTORY:
-    {
-        name = this->companionPtr_->getName();
-        ipAddress = this->companionPtr_->getIpAddress();
-        clientPort = std::to_string(this->companionPtr_->getClientPort());
+        {
+            name = this->companionPtr_->getName();
+            ipAddress = this->companionPtr_->getIpAddress();
+            clientPort = std::to_string(this->companionPtr_->getClientPort());
+        }
         break;
-    }
+
     }
 
     logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);
@@ -500,9 +501,10 @@ void PasswordAction::sendData()
             {
                 showErrorDialogAndLogError(this->getDialogPtr(), "Entered passwords are not equal");
             }
-
-            break;
         }
+
+        break;
+
     case PasswordActionType::GET:
         {
             GetPasswordDialog* passwordDialogPtr =
@@ -518,9 +520,9 @@ void PasswordAction::sendData()
 
             this->passwordPtr_ = &text;
             getGraphicManagerPtr()->sendExistingPasswordDataToManager(this);
-
-            break;
         }
+
+        break;
     }
 }
 
@@ -631,12 +633,10 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     // add to widget
     groupPtr->addMessageWidgetToChatHistory(messagePtr);
 
-    std::string networkId = getRandomString(5);
+    // add to mapping
+    std::string networkId = addToNetworkIdToMessageMapping(messagePtr);
 
-    while(!this->addToNetworkIdToMessageMapping(networkId, messagePtr))
-    {
-        networkId = getRandomString(5);
-    }
+    logArgsWithCustomMark("send:", networkId);
 
     // send over network
     bool result = companionPtr->sendMessage(
@@ -656,67 +656,82 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     NetworkMessageType type = jsonData.at("type");
     std::string networkId = jsonData.at("id");
 
+    logArgsWithCustomMark("received:", networkId);
+
     switch(type)
     {
     // message is confirmation
     case NetworkMessageType::RECEIVE_CONFIRMATION:
-    {
-        auto received = jsonData.at("received");
-        if(received == 1)
         {
-            // successfully received
-            // mark message as received
-            std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
+            auto received = jsonData.at("received");
+            if(received == 1)
+            {
+                // successfully received
+                // mark message as received
+                std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
 
-            this->markMessageAsReceived(this->mapNetworkIdToMessage_.at(networkId));
+                runAndLogException(
+                    [&]()
+                    {
+                        this->markMessageAsReceived(this->mapNetworkIdToMessage_.at(networkId));
+                    });
 
-            this->mapNetworkIdToMessage_.erase(
-                this->mapNetworkIdToMessage_.find(networkId));
-        }
-        else
-        {
-            // message was not received, resend message
+                auto iter = this->mapNetworkIdToMessage_.find(networkId);
+
+                if(iter != this->mapNetworkIdToMessage_.end())
+                {
+                    this->mapNetworkIdToMessage_.erase(iter);
+                }
+            }
+            else
+            {
+                // message was not received, resend message
+            }
         }
 
         break;
-    }
 
     // message is not confirmation
     case NetworkMessageType::SEND_DATA:
-    {
-        auto timestamp = jsonData.at("time");
-        auto text = jsonData.at("text");
-
-        // add to DB and get timestamp
-        auto tuple = this->pushMessageToDB(
-            companionPtr->getName(), companionPtr->getName(), timestamp, text);
-
-        uint32_t id = std::get<0>(tuple);
-        uint8_t companion_id = std::get<1>(tuple);
-
-        if(companion_id == 0 || timestamp == "")
         {
-            logArgsError("error adding message to db");
-            return;
+            auto timestamp = jsonData.at("time");
+            auto text = jsonData.at("text");
+
+            // add to DB and get timestamp
+            auto tuple = this->pushMessageToDB(
+                companionPtr->getName(), companionPtr->getName(), timestamp, text);
+
+            uint32_t id = std::get<0>(tuple);
+            uint8_t companion_id = std::get<1>(tuple);
+
+            if(companion_id == 0 || timestamp == "")
+            {
+                logArgsError("error adding message to db");
+                return;
+            }
+
+            // add to companion's messages
+            Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text, false);
+            companionPtr->addMessage(messagePtr);
+
+            // decrypt message
+
+            // add to widget
+            WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
+            // groupPtr->addMessageWidgetToChatHistory(messagePtr);
+            groupPtr->addMessageWidgetToChatHistoryFromThread(messagePtr);
+
+            // sort elements
+            getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
+
+            logArgsWithCustomMark("send:", networkId);
+
+            // send reception confirmation to sender
+            bool result = companionPtr->sendMessage(
+                NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
         }
 
-        // add to companion's messages
-        Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text, false);
-        companionPtr->addMessage(messagePtr);
-
-        // decrypt message
-
-        // add to widget
-        WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-        // groupPtr->addMessageWidgetToChatHistory(messagePtr);
-        groupPtr->addMessageWidgetToChatHistoryFromThread(messagePtr);
-
-        // send reception confirmation to sender
-        bool result = companionPtr->sendMessage(
-            NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
-
         break;
-    }
     }
 }
 
@@ -741,20 +756,31 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     return result->first;
 }
 
-bool Manager::addToNetworkIdToMessageMapping(
-    std::string networkId, const Message* messagePtr)
+std::string Manager::addToNetworkIdToMessageMapping(const Message* messagePtr)
 {
     std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
 
-    if(this->mapNetworkIdToMessage_.count(networkId) == 0)
+    std::string networkId = getRandomString(5);
+
+    auto lambda = [&]()
     {
-        this->mapNetworkIdToMessage_[networkId] = messagePtr;
-        return true;
-    }
-    else
+        if(this->mapNetworkIdToMessage_.count(networkId) == 0)
+        {
+            this->mapNetworkIdToMessage_[networkId] = messagePtr;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    };
+
+    while(!lambda())
     {
-        return false;
+        networkId = getRandomString(5);
     }
+
+    return networkId;
 }
 
 const Companion* Manager::getMappedCompanionByWidgetGroup(
@@ -770,6 +796,22 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
         findWidget);
 
     return result->first;
+}
+
+std::string Manager::getMappedNetworkIdByMessagePtr(Message* messagePtr)
+{
+    std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
+
+    auto result = std::find_if(
+        this->mapNetworkIdToMessage_.begin(),
+        this->mapNetworkIdToMessage_.end(),
+        [&](auto iter)
+        {
+            return iter.second == messagePtr;
+        });
+
+    return (result == this->mapNetworkIdToMessage_.end()) ?
+               std::string("") : result->first;
 }
 
 void Manager::resetSelectedCompanion(const Companion* newSelected)
@@ -1394,7 +1436,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
     if(messagesDataPtr->isEmpty())
     {
-        showErrorDialogAndLogError(nullptr, "Empty db reply to unsent messages selection");
+        logArgsWarning("Empty db reply to unsent messages selection");
         return;
     }
 
@@ -1403,8 +1445,21 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
     {
         uint32_t messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
         Message* messagePtr = companionCastPtr->findMessage(messageId);
+        std::string networkId;
 
-        if(!messagePtr)
+        if(messagePtr)
+        {
+            networkId = this->getMappedNetworkIdByMessagePtr(messagePtr);
+
+            if(networkId.empty())
+            {
+                showErrorDialogAndLogError(
+                    nullptr,
+                    "strange case: unsent message found in companions messages, "
+                    "but not found in manager's mapNetworkIdToMessage_");
+            }
+        }
+        else
         {
             uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
 
@@ -1417,11 +1472,13 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
                 false);
 
             companionCastPtr->addMessage(messagePtr);
+
+            networkId = getRandomString(5);
         }
 
         // send over network
         bool result = companionCastPtr->sendMessage(
-            NetworkMessageType::SEND_DATA, getRandomString(5), messagePtr);
+            NetworkMessageType::SEND_DATA, networkId, messagePtr);
 
         // mark message as sent
         if(result)
@@ -1429,6 +1486,10 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
             this->markMessageAsSent(messagePtr);
         }
     }
+
+    // sort elements
+    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
 }
 
 bool Manager::buildCompanions()
@@ -1909,6 +1970,28 @@ void GraphicManager::markMessageWidgetAsReceived(const Message* messagePtr)
     };
 
     runAndLogException(setLambda);
+}
+
+void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr)
+{
+    groupPtr->sortChatHistoryElements();
+}
+
+std::string GraphicManager::getMappedMessageTimeByMessageWidgetPtr(
+    MessageWidget* widgetPtr)
+{
+    std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+
+    auto result = std::find_if(
+        this->mapMessageToMessageWidget_.begin(),
+        this->mapMessageToMessageWidget_.end(),
+        [&](auto iter)
+        {
+            return iter.second == widgetPtr;
+        });
+
+    return (result == this->mapMessageToMessageWidget_.end()) ?
+               std::string("") : result->first->getTime();
 }
 
 GraphicManager* getGraphicManagerPtr()

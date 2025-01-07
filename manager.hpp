@@ -251,9 +251,10 @@ private:
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
     std::map<std::string, const Message*> mapNetworkIdToMessage_;
 
-    bool addToNetworkIdToMessageMapping(std::string, const Message*);
+    std::string addToNetworkIdToMessageMapping(const Message*);
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
+    std::string getMappedNetworkIdByMessagePtr(Message*);
 
     std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
         const std::string&, const std::string&, const std::string&, const std::string&);
@@ -389,6 +390,10 @@ public:
     void addToMessageMapping(const Message*, const MessageWidget*);
     void markMessageWidgetAsSent(const Message*);
     void markMessageWidgetAsReceived(const Message*);
+
+    void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
+
+    std::string getMappedMessageTimeByMessageWidgetPtr(MessageWidget*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;
