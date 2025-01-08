@@ -280,13 +280,13 @@ private:
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
-        bool logging,
+        const bool logging,
         const char* mark,
-        PGresult*(*func)(const PGconn*, const Ts&...),
+        PGresult*(*func)(const PGconn*, const bool, const Ts&...),
         std::vector<std::string>&& keys,
         const Ts&... args)
     {
-        PGresult* dbResultPtr = func(this->dbConnectionPtr_, args...);
+        PGresult* dbResultPtr = func(this->dbConnectionPtr_, logging, args...);
 
         if(logging)
         {

@@ -28,6 +28,16 @@ void runAndLogException(F func, Ts&&... args)
     }
 }
 
+template<typename... Ts>
+std::vector<std::string> buildStringVector(Ts... args)
+{
+    std::vector<std::string> result;
+
+    (result.emplace_back(args), ...);
+
+    return result;
+}
+
 // data validation
 
 bool validateCompanionName(std::vector<std::string>&, const std::string&);

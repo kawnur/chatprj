@@ -163,31 +163,36 @@ PGconn* getDBConnection()
 }
 
 PGresult* sendDBRequestAndReturnResult(
-    const PGconn* dbConnection, const char* command)
+    const PGconn* dbConnection, const bool logging, const char* command)
 {
-    logArgs(command);
+    if(logging)
+    {
+        logArgs(command);
+    }
 
     PGresult* result = PQexec(const_cast<PGconn*>(dbConnection), command);
     return result;
 }
 
-PGresult* getCompanionsDBResult(const PGconn* dbConnection)
+PGresult* getCompanionsDBResult(const PGconn* dbConnection, const bool logging)
 {
     const char* command = "SELECT id, name FROM companions";
 
-    return sendDBRequestAndReturnResult(dbConnection, command);
+    return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
-PGresult* getCompanionByNameDBResult(const PGconn* dbConnection, const std::string& name)
+PGresult* getCompanionByNameDBResult(
+    const PGconn* dbConnection, const bool logging, const std::string& name)
 {
     std::string command = std::string(
         "SELECT id FROM companions WHERE name = '")
         + name + std::string("'");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getCompanionAndSocketDBResult(const PGconn* dbConnection, const int& id)
+PGresult* getCompanionAndSocketDBResult(
+    const PGconn* dbConnection, const bool logging, const int& id)
 {
     std::string command = std::string(
         "SELECT companions.name, sockets.ipaddress, sockets.client_port "
@@ -195,20 +200,22 @@ PGresult* getCompanionAndSocketDBResult(const PGconn* dbConnection, const int& i
         "WHERE companions.id = ")
         + std::to_string(id);
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getSocketInfoDBResult(const PGconn* dbConnection, const int& id)
+PGresult* getSocketInfoDBResult(
+    const PGconn* dbConnection, const bool logging, const int& id)
 {
     std::string command = std::string(
         "SELECT ipaddress, server_port, client_port "
         "FROM sockets WHERE id = ") + std::to_string(id);
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* getSocketByIpAddressAndPortDBResult(
-    const PGconn* dbConnection, const std::string& ipAddress, const std::string& port)
+    const PGconn* dbConnection, const bool logging,
+    const std::string& ipAddress, const std::string& port)
 {
     std::string command = std::string(
         "SELECT id FROM sockets "
@@ -218,11 +225,11 @@ PGresult* getSocketByIpAddressAndPortDBResult(
         + port
         + std::string("'");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 // TODO test sorting by timestamp with different timezones
-PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
+PGresult* getMessagesDBResult(const PGconn* dbConnection, const bool logging, const int& id)
 {
     std::string command = std::string(
         "SELECT id, author_id, timestamp_tz, message, issent "
@@ -230,11 +237,11 @@ PGresult* getMessagesDBResult(const PGconn* dbConnection, const int& id)
         + std::to_string(id)
         + std::string(" ORDER BY timestamp_tz LIMIT 50");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* getUnsentMessagesByCompanionNameDBResult(
-    const PGconn* dbConnection, const std::string& companionName)
+    const PGconn* dbConnection, const bool logging, const std::string& companionName)
 {
     std::string command = std::string(
         "SELECT id, author_id, companion_id, timestamp_tz, message "
@@ -245,17 +252,18 @@ PGresult* getUnsentMessagesByCompanionNameDBResult(
         "') AND author_id = (SELECT id FROM companions WHERE name = 'me') "
         "AND issent IS false");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getPasswordDBResult(const PGconn* dbConnection)
+PGresult* getPasswordDBResult(const PGconn* dbConnection, const bool logging)
 {
     const char* command = "SELECT password FROM passwords";
 
-    return sendDBRequestAndReturnResult(dbConnection, command);
+    return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
-PGresult* setMessageInDbAndReturn(const PGconn* dbConnection, const uint32_t& messageId)
+PGresult* setMessageInDbAndReturn(
+    const PGconn* dbConnection, const bool logging, const uint32_t& messageId)
 {
     std::string command = std::string(
         "UPDATE messages set issent = 'true' "
@@ -263,11 +271,11 @@ PGresult* setMessageInDbAndReturn(const PGconn* dbConnection, const uint32_t& me
         + std::to_string(messageId)
         + std::string(" RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* pushCompanionToDBAndReturn(
-    const PGconn* dbConnection, const std::string& companionName)
+    const PGconn* dbConnection, const bool logging, const std::string& companionName)
 {
     std::string command = std::string(
         "INSERT INTO companions "
@@ -276,11 +284,11 @@ PGresult* pushCompanionToDBAndReturn(
         + companionName
         + std::string("') RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* updateCompanionAndReturn(  // TODO change function names
-    const PGconn* dbConnection, const std::string& companionName)
+    const PGconn* dbConnection, const bool logging, const std::string& companionName)
 {
     std::string command = std::string(
         "INSERT INTO companions "
@@ -289,11 +297,11 @@ PGresult* updateCompanionAndReturn(  // TODO change function names
         + companionName
         + std::string("') RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* updateCompanionAndSocketAndReturn(
-    const PGconn* dbConnection, const CompanionAction& companionAction)
+    const PGconn* dbConnection, const bool logging, const CompanionAction& companionAction)
 {
     std::string command = std::string(
         "WITH update_name AS (UPDATE companions set name = '")
@@ -307,11 +315,11 @@ PGresult* updateCompanionAndSocketAndReturn(
         + companionAction.getClientPort()
         + std::string("' WHERE id IN (SELECT id FROM update_name) RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* pushSocketToDBAndReturn(
-    const PGconn* dbConnection, const std::string& companionName,
+    const PGconn* dbConnection, const bool logging, const std::string& companionName,
     const std::string& ipAddress, const std::string& serverPort,
     const std::string& clientPort)
 {
@@ -328,11 +336,11 @@ PGresult* pushSocketToDBAndReturn(
         + clientPort
         + std::string(") RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* pushMessageToDBAndReturn(
-    const PGconn* dbConnection, const std::string& companionName,
+    const PGconn* dbConnection, const bool logging, const std::string& companionName,
     const std::string& authorName, const std::string& timestamp,
     const std::string& returningFieldName, const std::string& message)
 {
@@ -351,10 +359,11 @@ PGresult* pushMessageToDBAndReturn(
         + returningFieldName
         + std::string(", timestamp_tz");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* pushPasswordToDBAndReturn(const PGconn* dbConnection, const std::string& password)
+PGresult* pushPasswordToDBAndReturn(
+    const PGconn* dbConnection, const bool logging, const std::string& password)
 {
     std::string command = std::string(
         "INSERT INTO passwords (password) "
@@ -362,22 +371,22 @@ PGresult* pushPasswordToDBAndReturn(const PGconn* dbConnection, const std::strin
         + password
         + std::string("') RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* deleteMessagesFromDBAndReturn(
-    const PGconn* dbConnection, const CompanionAction& companionAction)
+    const PGconn* dbConnection, const bool logging, const CompanionAction& companionAction)
 {
     std::string command = std::string(
         "DELETE FROM messages WHERE companion_id = ")
         + std::to_string(companionAction.getCompanionId())
         + std::string(" RETURNING companion_id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 PGresult* deleteCompanionAndSocketAndReturn(
-    const PGconn* dbConnection, const CompanionAction& companionAction)
+    const PGconn* dbConnection, const bool logging, const CompanionAction& companionAction)
 {
     std::string command = std::string(
         "WITH delete_socket AS (DELETE FROM sockets WHERE id = ")
@@ -385,7 +394,7 @@ PGresult* deleteCompanionAndSocketAndReturn(
         + std::string(" RETURNING id) DELETE FROM companions WHERE id IN "
         "(SELECT id FROM delete_socket) RETURNING id");
 
-    return sendDBRequestAndReturnResult(dbConnection, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
 void logUnknownField(const PGresult* result, int row, int column)

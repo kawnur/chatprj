@@ -36,40 +36,44 @@ private:
 
 const char* getValueFromEnvironmentVariable(const char*);
 PGconn* getDBConnection();
-PGresult* sendDBRequestAndReturnResult(const PGconn*, const char*);
+PGresult* sendDBRequestAndReturnResult(const PGconn*, const bool, const char*);
 
-PGresult* getCompanionsDBResult(const PGconn*);
-PGresult* getCompanionByNameDBResult(const PGconn*, const std::string&);
-PGresult* getCompanionAndSocketDBResult(const PGconn*, const int&);
+PGresult* getCompanionsDBResult(const PGconn*, const bool);
+PGresult* getCompanionByNameDBResult(const PGconn*, const bool, const std::string&);
+PGresult* getCompanionAndSocketDBResult(const PGconn*, const bool, const int&);
 
-PGresult* getSocketInfoDBResult(const PGconn*, const int&);
+PGresult* getSocketInfoDBResult(const PGconn*, const bool, const int&);
 
 PGresult* getSocketByIpAddressAndPortDBResult(
-    const PGconn*, const std::string&, const std::string&);
+    const PGconn*, const bool, const std::string&, const std::string&);
 
-PGresult* getMessagesDBResult(const PGconn*, const int&);
-PGresult* getUnsentMessagesByCompanionNameDBResult(const PGconn*, const std::string&);
+PGresult* getMessagesDBResult(const PGconn*, const bool, const int&);
+PGresult* getUnsentMessagesByCompanionNameDBResult(
+    const PGconn*, const bool, const std::string&);
 
-PGresult* getPasswordDBResult(const PGconn*);
+PGresult* getPasswordDBResult(const PGconn*, const bool);
 
-PGresult* setMessageInDbAndReturn(const PGconn*, const uint32_t&);
+PGresult* setMessageInDbAndReturn(const PGconn*, const bool, const uint32_t&);
 
-PGresult* pushCompanionToDBAndReturn(const PGconn*, const std::string&);
-PGresult* updateCompanionAndReturn(const PGconn*, const std::string&);
-PGresult* updateCompanionAndSocketAndReturn(const PGconn*, const CompanionAction&);
+PGresult* pushCompanionToDBAndReturn(const PGconn*, const bool, const std::string&);
+PGresult* updateCompanionAndReturn(const PGconn*, const bool, const std::string&);
+PGresult* updateCompanionAndSocketAndReturn(
+    const PGconn*, const bool, const CompanionAction&);
 
 PGresult* pushSocketToDBAndReturn(
-    const PGconn*, const std::string&, const std::string&,
+    const PGconn*, const bool, const std::string&, const std::string&,
     const std::string&, const std::string&);
 
 PGresult* pushMessageToDBAndReturn(
-    const PGconn*, const std::string&, const std::string&, const std::string&,
+    const PGconn*, const bool, const std::string&, const std::string&, const std::string&,
     const std::string&, const std::string&);
 
-PGresult* pushPasswordToDBAndReturn(const PGconn*, const std::string&);
+PGresult* pushPasswordToDBAndReturn(const PGconn*, const bool, const std::string&);
 
-PGresult* deleteMessagesFromDBAndReturn(const PGconn*, const CompanionAction&);
-PGresult* deleteCompanionAndSocketAndReturn(const PGconn*, const CompanionAction&);
+PGresult* deleteMessagesFromDBAndReturn(const PGconn*, const bool, const CompanionAction&);
+
+PGresult* deleteCompanionAndSocketAndReturn(
+    const PGconn*, const bool, const CompanionAction&);
 
 void logUnknownField(const PGresult*, int, int);
 

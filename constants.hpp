@@ -8,6 +8,8 @@
 const std::string logDelimiter { "############################" };
 const std::string logCustomDelimiter { "?????????????????????????" };
 
+const bool logDBInteraction = false;
+
 static const char alphanum[] =
     "0123456789"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

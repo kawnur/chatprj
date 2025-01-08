@@ -577,12 +577,10 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     const std::string& timestamp, const std::string& text)
 {
     std::shared_ptr<DBReplyData> messageDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "pushMessageToDBAndReturn",
         &pushMessageToDBAndReturn,
-        std::vector<std::string> {
-            std::string("id"), std::string("companion_id"), std::string("timestamp_tz")
-        },
+        buildStringVector("id", "companion_id", "timestamp_tz"),
         companionName, authorName, timestamp, std::string("companion_id"), text);
 
     if(!messageDataPtr)
@@ -634,7 +632,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     groupPtr->addMessageWidgetToChatHistory(messagePtr);
 
     // add to mapping
-    std::string networkId = addToNetworkIdToMessageMapping(messagePtr);
+    std::string networkId = this->addToNetworkIdToMessageMapping(messagePtr);
 
     logArgsWithCustomMark("send:", networkId);
 
@@ -851,10 +849,10 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
 {
     // check if companion with such name already exists
     std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getCompanionByNameDBResult",
         &getCompanionByNameDBResult,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         companionActionPtr->getName());
 
     if(!companionIdDataPtr)
@@ -871,10 +869,10 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
 
     // check if such socket already exists
     std::shared_ptr<DBReplyData> socketIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getSocketByIpAddressAndPortDBResult",
         &getSocketByIpAddressAndPortDBResult,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         companionActionPtr->getIpAddress(),
         companionActionPtr->getClientPort());
 
@@ -897,10 +895,10 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 {
     // check if companion with such name already exists
     std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getCompanionByNameDBResult",
         &getCompanionByNameDBResult,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         companionActionPtr->getName());
 
     if(!companionIdDataPtr)
@@ -925,10 +923,10 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 
     // check if such socket already exists
     std::shared_ptr<DBReplyData> socketIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getSocketByIpAddressAndPortDBResult",
         &getSocketByIpAddressAndPortDBResult,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         companionActionPtr->getIpAddress(),
         companionActionPtr->getClientPort());
 
@@ -959,10 +957,10 @@ bool Manager::markMessageAsSent(const Message* messagePtr)
 {
     // mark in db
     std::shared_ptr<DBReplyData> messageIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "setMessageInDbAndReturn",
         &setMessageInDbAndReturn,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         messagePtr->getId());
 
     if(!messageIdDataPtr)
@@ -1093,10 +1091,10 @@ void Manager::createCompanion(CompanionAction* companionActionPtr)
 
     // push companion data to db
     std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "pushCompanionToDBAndReturn",
         &pushCompanionToDBAndReturn,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         name);
 
     if(!companionIdDataPtr)
@@ -1117,10 +1115,10 @@ void Manager::createCompanion(CompanionAction* companionActionPtr)
     uint16_t serverPort = 5000 + id + 1;  // TODO change
 
     std::shared_ptr<DBReplyData> socketDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "pushSocketToDB",
         &pushSocketToDBAndReturn,
-        std::vector<std::string>{ std::string("id") },
+        buildStringVector("id"),
         name, ipAddress, std::to_string(serverPort), clientPortStr);
 
     if(!socketDataPtr)
@@ -1168,10 +1166,10 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
 
     // update companion data at db
     std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "updateCompanionAndSocketAndReturn",
         &updateCompanionAndSocketAndReturn,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         *companionActionPtr);
 
     if(!companionIdDataPtr)
@@ -1204,10 +1202,10 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 {
     // delete companion chat messages from db
     std::shared_ptr<DBReplyData> companionIdMessagesDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "deleteMessagesFromDBAndReturn",
         &deleteMessagesFromDBAndReturn,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         *companionActionPtr);
 
     if(!companionIdMessagesDataPtr)
@@ -1224,10 +1222,10 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 
     // delete companion and socket from db
     std::shared_ptr<DBReplyData> companionIdCompanionDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "deleteCompanionAndSocketAndReturn",
         &deleteCompanionAndSocketAndReturn,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         *companionActionPtr);
 
     if(!companionIdCompanionDataPtr)
@@ -1254,10 +1252,10 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
 {
     // delete companion chat messages from db
     std::shared_ptr<DBReplyData> companionIdMessagesDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "deleteMessagesFromDBAndReturn",
         &deleteMessagesFromDBAndReturn,
-        std::vector<std::string> { std::string("companion_id") },
+        buildStringVector("companion_id"),
         *companionActionPtr);
 
     if(!companionIdMessagesDataPtr)
@@ -1293,10 +1291,10 @@ void Manager::createUserPassword(PasswordAction* actionPtr)
 
     // push password data to db
     std::shared_ptr<DBReplyData> passwordIdDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "pushPasswordToDBAndReturn",
         &pushPasswordToDBAndReturn,
-        std::vector<std::string> { std::string("id") },
+        buildStringVector("id"),
         actionPtr->getPassword());
 
     if(!passwordIdDataPtr)
@@ -1327,10 +1325,10 @@ void Manager::authenticateUser(PasswordAction* actionPtr)
 
     // do we have password in db?
     std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getPasswordDBResult",
         &getPasswordDBResult,
-        std::vector<std::string> { std::string("id"), std::string("password") });
+        buildStringVector("id", "password"));
 
     if(!passwordDataPtr)
     {
@@ -1393,10 +1391,10 @@ void Manager::startUserAuthentication()
     graphicManagerPtr->enableMainWindowBlurEffect();
     // do we have password in db?
     std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getPasswordDBResult",
         &getPasswordDBResult,
-        std::vector<std::string> { std::string("id"), std::string("password") });
+        buildStringVector("id", "password"));
 
     if(!passwordDataPtr)
     {
@@ -1420,12 +1418,10 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
     // get unsent messages from db
     std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getUnsentMessagesByCompanionNameDBResult",
         &getUnsentMessagesByCompanionNameDBResult,
-        std::vector<std::string> {
-            std::string("id"), std::string("author_id"), std::string("companion_id"),
-            std::string("timestamp_tz"), std::string("message") },
+        buildStringVector("id", "author_id", "companion_id", "timestamp_tz", "message"),
         companionPtr->getName());
 
     if(!messagesDataPtr)
@@ -1498,10 +1494,10 @@ bool Manager::buildCompanions()
 
     // get companion data
     std::shared_ptr<DBReplyData> companionsDataPtr = this->getDBDataPtr(
-        true,
+        logDBInteraction,
         "getCompanionsDBResult",
         &getCompanionsDBResult,
-        std::vector<std::string> { std::string("id"), std::string("name") });
+        buildStringVector("id", "name"));
 
     if(!companionsDataPtr)
     {
@@ -1524,12 +1520,10 @@ bool Manager::buildCompanions()
 
         // get socket data object
         std::shared_ptr<DBReplyData> socketsDataPtr = this->getDBDataPtr(
-            true,
+            logDBInteraction,
             "getSocketInfoDBResult",
             &getSocketInfoDBResult,
-            std::vector<std::string> {
-                std::string("ipaddress"), std::string("server_port"), std::string("client_port")
-            },
+            buildStringVector("ipaddress", "server_port", "client_port"),
             id);
 
         if(socketsDataPtr->size() > 0)
@@ -1547,14 +1541,12 @@ bool Manager::buildCompanions()
         {
             // get messages data
             std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
-                false,
+                logDBInteraction,
                 "getMessagesDBResult",
                 &getMessagesDBResult,
-                std::vector<std::string> {
-                    std::string("id"), std::string("companion_id"),
-                    std::string("author_id"), std::string("timestamp_tz"),
-                    std::string("message"), std::string("issent")
-                },
+                buildStringVector(
+                    "id", "companion_id", "author_id",
+                    "timestamp_tz", "message", "issent"),
                 id);
 
             for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
