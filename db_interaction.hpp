@@ -77,6 +77,6 @@ PGresult* deleteCompanionAndSocketAndReturn(
 
 void logUnknownField(const PGresult*, int, int);
 
-int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
+int getDataFromDBResult(const bool, std::shared_ptr<DBReplyData>&, const PGresult*, int);
 
 #endif // DB_INTERACTION_HPP

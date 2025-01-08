@@ -622,7 +622,8 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
     }
 }
 
-CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
+CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name) :
+    chatHistoryMutex_(std::mutex())
 {
     if(parent)
     {
@@ -705,6 +706,8 @@ void CentralPanelWidget::set(Companion* companionPtr)
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     const std::string& companionName, const Message* messagePtr)
 {
+    std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
+
     MessageWidget* widgetPtr = new MessageWidget(
         this->chatHistoryWidgetPtr_, companionName, messagePtr);
 
@@ -718,7 +721,9 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         "this->chatHistoryWidgetPtr_->children().size():",
         this->chatHistoryWidgetPtr_->children().size());
 
-    this->scrollDownChatHistory();
+    this->sortChatHistoryElements();
+
+    this->scrollDownChatHistory();    
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
@@ -763,8 +768,12 @@ void CentralPanelWidget::clearChatHistory()
 
 void CentralPanelWidget::sortChatHistoryElements()
 {
-    QApplication::processEvents();
-    QApplication::processEvents();
+    // std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
+
+    logArgs("CentralPanelWidget::sortChatHistoryElements");
+
+    // QApplication::processEvents();
+    // QApplication::processEvents();
 
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
     auto list = this->chatHistoryWidgetPtr_->children();
@@ -776,7 +785,7 @@ void CentralPanelWidget::sortChatHistoryElements()
         auto result = graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
             dynamic_cast<MessageWidget*>(item));
 
-        logArgs(result);
+        // logArgs(result);
 
         return result;
     };
@@ -786,20 +795,26 @@ void CentralPanelWidget::sortChatHistoryElements()
         list.end(),
         [&](auto element1, auto element2)
         {
-            return lambda(element1) < lambda(element2);
+            // logArgs(logDelimiter);
+            return lambda(element1) < lambda(element2);            
         });
+
+    logArgs(logDelimiter);
 
     for(auto& element : list)
     {
-        lambda(element);
+        logArgs(graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
+            dynamic_cast<MessageWidget*>(element)));
     }
 
-    // for(auto& element : list)
-    // {
-    //     auto elementCast = dynamic_cast<MessageWidget*>(element);
-    //     this->chatHistoryLayoutPtr_->removeWidget(elementCast);
-    //     this->chatHistoryLayoutPtr_->addWidget(elementCast);
-    // }
+    logArgs(logDelimiter);
+
+    for(auto& element : list)
+    {
+        auto elementCast = dynamic_cast<MessageWidget*>(element);
+        this->chatHistoryLayoutPtr_->removeWidget(elementCast);
+        this->chatHistoryLayoutPtr_->addWidget(elementCast);
+    }
 }
 
 void CentralPanelWidget::sendMessage(const QString& text)

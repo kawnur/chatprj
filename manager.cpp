@@ -599,7 +599,10 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     uint8_t companionId = std::atoi(messageDataPtr->getValue(0, "companion_id"));
     std::string timestampTz { messageDataPtr->getValue(0, "timestamp_tz") };
 
-    logArgs("companionId:", companionId, "timestampTz:", timestampTz);
+    if(logDBInteraction)
+    {
+        logArgs("companionId:", companionId, "timestampTz:", timestampTz);
+    }
 
     return std::tuple<uint32_t, uint8_t, std::string>(id, companionId, timestampTz);
 }
@@ -1484,8 +1487,8 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
     }
 
     // sort elements
-    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
-    getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
+    // WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    // getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
 }
 
 bool Manager::buildCompanions()

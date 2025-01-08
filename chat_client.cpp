@@ -4,7 +4,11 @@ using boost::asio::ip::tcp;
 
 ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
     ipAddress_(ipAddress), port_(port), io_context_(),
-    socket_(io_context_), resolver_(io_context_) {}
+    socket_(io_context_), resolver_(io_context_)
+{
+    // tcp::no_delay option(true);
+    // socket_.set_option(option);
+}
 
 bool ChatClient::connect()
 {
@@ -73,9 +77,17 @@ bool ChatClient::send(std::string text)
         // std::strcpy(request, textStdString.data());
         // std::strcpy(request, text.data());
 
+        // auto completionConditionLambda =
+        //     [&](boost::system::error_code& ec, size_t size){ return text.size(); };
+
         // boost::asio::write(s, boost::asio::buffer(request, request_length));
         // boost::asio::write(this->socket_, boost::asio::buffer(request, text.size()));
+
         boost::asio::write(this->socket_, boost::asio::buffer(text.data(), text.size()));
+        // boost::asio::write(
+        //     this->socket_,
+        //     boost::asio::buffer(text.data(), text.size()),
+        //     completionConditionLambda);
 
         // char reply[max_length] = { 0 };
         // // size_t reply_length = boost::asio::read(s,

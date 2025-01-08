@@ -276,6 +276,7 @@ signals:
     void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
 
 private:
+    std::mutex chatHistoryMutex_;
     int scrollBarMax = 0;
     Companion* companionPtr_;
 

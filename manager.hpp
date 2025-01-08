@@ -35,7 +35,7 @@ class StubWidgetGroup;
 class TextDialog;
 class WidgetGroup;
 
-int getDataFromDBResult(std::shared_ptr<DBReplyData>&, const PGresult*, int);
+int getDataFromDBResult(const bool, std::shared_ptr<DBReplyData>&, const PGresult*, int);
 template<typename... Ts> void logArgs(Ts&&... args);
 void showErrorDialogAndLogError(QWidget*, const QString&);
 
@@ -305,7 +305,7 @@ private:
 
         std::shared_ptr<DBReplyData> dbDataPtr = std::make_shared<DBReplyData>(keys);
 
-        if(getDataFromDBResult(dbDataPtr, dbResultPtr, 0) == -1)
+        if(getDataFromDBResult(logging, dbDataPtr, dbResultPtr, 0) == -1)
         {
             showErrorDialogAndLogError(nullptr, "Error getting data from dbResultPtr");
             return nullptr;

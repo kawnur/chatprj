@@ -24,9 +24,34 @@ void ServerSession::do_read()
                 {
                     logArgs("server got message:", str);
 
-                    // Manager* managerPtr = getManagerPtr();
-                    // managerPtr->receiveMessage(this->companionPtr_, str);
-                    getManagerPtr()->receiveMessage(this->companionPtr_, str);
+                    // getManagerPtr()->receiveMessage(this->companionPtr_, str);
+
+                    // split messages
+                    int openCounter = 0;
+                    int closeCounter = 0;
+                    auto currentIterator = str.begin();
+
+                    for(auto iterator = str.begin(); iterator != str.end(); iterator++)
+                    {
+                        if(*iterator == '{')
+                        {
+                            openCounter++;
+                        }
+                        if(*iterator == '}')
+                        {
+                            closeCounter++;
+
+                            if(openCounter == closeCounter)
+                            {
+                                std::string message(currentIterator, iterator + 1);
+                                currentIterator = iterator + 1;
+                                openCounter = 0;
+                                closeCounter = 0;
+
+                                getManagerPtr()->receiveMessage(this->companionPtr_, message);
+                            }
+                        }
+                    }
                 }                
 
                 do_write(length);

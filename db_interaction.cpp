@@ -406,6 +406,7 @@ void logUnknownField(const PGresult* result, int row, int column)
 }
 
 int getDataFromDBResult(
+    const bool logging,
     std::shared_ptr<DBReplyData>& dataPtr,
     const PGresult* result,
     int maxTuples)
@@ -414,7 +415,11 @@ int getDataFromDBResult(
 
     int ntuples = PQntuples(result);
     int nfields = PQnfields(result);
-    logArgs("ntuples:", ntuples, "nfields:", nfields);
+
+    if(logging)
+    {
+        logArgs("ntuples:", ntuples, "nfields:", nfields);
+    }
 
     if(ntuples == 0)
     {
