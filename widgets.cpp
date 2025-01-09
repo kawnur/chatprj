@@ -706,22 +706,25 @@ void CentralPanelWidget::set(Companion* companionPtr)
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     const std::string& companionName, const Message* messagePtr)
 {
-    std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
+    {
+        std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
-    MessageWidget* widgetPtr = new MessageWidget(
-        this->chatHistoryWidgetPtr_, companionName, messagePtr);
+        MessageWidget* widgetPtr = new MessageWidget(
+            this->chatHistoryWidgetPtr_, companionName, messagePtr);
 
-    getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
+        getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
 
-    widgetPtr->set();
+        widgetPtr->set();
 
-    this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
+        this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
 
-    logArgsWithCustomMark(
-        "this->chatHistoryWidgetPtr_->children().size():",
-        this->chatHistoryWidgetPtr_->children().size());
+        this->sortChatHistoryElements();
+    }
 
-    this->sortChatHistoryElements();
+    // logArgsWithCustomMark(
+    //     "this->chatHistoryWidgetPtr_->children().size():",
+    //     this->chatHistoryWidgetPtr_->children().size());
+
 
     this->scrollDownChatHistory();    
 }
@@ -770,22 +773,13 @@ void CentralPanelWidget::sortChatHistoryElements()
 {
     // std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
-    logArgs("CentralPanelWidget::sortChatHistoryElements");
-
-    // QApplication::processEvents();
-    // QApplication::processEvents();
-
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
     auto list = this->chatHistoryWidgetPtr_->children();
-
-    logArgs("list.size():", list.size());
 
     auto lambda = [&](auto item)
     {
         auto result = graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
             dynamic_cast<MessageWidget*>(item));
-
-        // logArgs(result);
 
         return result;
     };
@@ -795,19 +789,8 @@ void CentralPanelWidget::sortChatHistoryElements()
         list.end(),
         [&](auto element1, auto element2)
         {
-            // logArgs(logDelimiter);
             return lambda(element1) < lambda(element2);            
         });
-
-    logArgs(logDelimiter);
-
-    for(auto& element : list)
-    {
-        logArgs(graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
-            dynamic_cast<MessageWidget*>(element)));
-    }
-
-    logArgs(logDelimiter);
 
     for(auto& element : list)
     {

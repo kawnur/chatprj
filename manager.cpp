@@ -722,10 +722,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             // groupPtr->addMessageWidgetToChatHistory(messagePtr);
             groupPtr->addMessageWidgetToChatHistoryFromThread(messagePtr);
 
-            // sort elements
-            getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
+            // // sort elements
+            // getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
 
-            logArgsWithCustomMark("send:", networkId);
+            // logArgsWithCustomMark("send:", networkId);
 
             // send reception confirmation to sender
             bool result = companionPtr->sendMessage(
