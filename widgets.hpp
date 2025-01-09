@@ -192,7 +192,7 @@ class MessageIndicatorPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageIndicatorPanelWidget(bool);
+    MessageIndicatorPanelWidget(bool, uint8_t);
     ~MessageIndicatorPanelWidget();
 
     void setSentIndicatorOn();
@@ -204,7 +204,8 @@ private:
     QHBoxLayout* layoutPtr_;
     IndicatorWidget* sentIndicatoPtr_;
     IndicatorWidget* receivedIndicatoPtr_;
-    QLabel* newMessageLabelPtr_;
+    // QLabel* newMessageLabelPtr_;
+    QTextEdit* newMessageEditPtr_;
 };
 
 class MessageWidget : public QWidget
@@ -212,7 +213,7 @@ class MessageWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageWidget(QWidget*, const std::string&, const Message*);
+    MessageWidget(QWidget*, uint8_t, const std::string&, const Message*);
     ~MessageWidget();
 
     void set();
@@ -262,18 +263,21 @@ public:
 
     void set(Companion*);
 
-    void addMessageWidgetToChatHistory(const std::string&, const Message*);
-    void addMessageWidgetToChatHistoryFromThread(const std::string&, const Message*);
+    void addMessageWidgetToChatHistory(bool, const std::string&, const Message*);
+
+    void addMessageWidgetToChatHistoryFromThread(
+        bool, const std::string&, const Message*);
+
     void scrollDownChatHistory();
     void clearChatHistory();
 
-    void sortChatHistoryElements();
+    void sortChatHistoryElements(bool);
 
 private slots:
-    void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
+    void addMessageWidgetToChatHistorySlot(bool, const QString&, const Message*);
 
 signals:
-    void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
+    void addMessageWidgetToChatHistorySignal(bool, const QString&, const Message*);
 
 private:
     std::mutex chatHistoryMutex_;
@@ -336,7 +340,7 @@ public:
     ~WidgetGroup();
 
     void addMessageWidgetToChatHistory(const Message*);
-    void addMessageWidgetToChatHistoryFromThread(const Message*);
+    void addMessageWidgetToChatHistoryFromThread(bool, const Message*);
     void clearChatHistory();
 
     void hideCentralPanel();

@@ -233,8 +233,8 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 // }
 
 std::string buildMessageJSONString(
-    NetworkMessageType type, const std::string& networkId,
-    const Message* messagePtr)
+    bool isAntecedent, NetworkMessageType type,
+    const std::string& networkId, const Message* messagePtr)
 {
     using json = nlohmann::json;
 
@@ -242,6 +242,7 @@ std::string buildMessageJSONString(
 
     jsonData["type"] = type;
     jsonData["id"] = networkId;
+    jsonData["antecedent"] = isAntecedent;
 
     switch(type)
     {

@@ -59,10 +59,9 @@ void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
 std::pair<QString, QString> formatMessageHeaderAndBody(const std::string&, const Message*);
-// QString formatMessageHeader(const std::string&, const Message*);
 
 std::string buildMessageJSONString(
-    NetworkMessageType, const std::string&, const Message*);
+    bool, NetworkMessageType, const std::string&, const Message*);
 
 nlohmann::json buildMessageJsonObject(const std::string&);
 

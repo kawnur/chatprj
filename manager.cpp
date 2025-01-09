@@ -236,12 +236,14 @@ const std::vector<Message*>* Companion::getMessagesPtr() const
 }
 
 bool Companion::sendMessage(
-    NetworkMessageType type, std::string networkId, const Message* messagePtr)
+    bool isAntecedent, NetworkMessageType type,
+    std::string networkId, const Message* messagePtr)
 {
     if(this->clientPtr_)
     {
         // build json
-        std::string jsonData = buildMessageJSONString(type, networkId, messagePtr);
+        std::string jsonData = buildMessageJSONString(
+            isAntecedent, type, networkId, messagePtr);
 
         // send json over network
         auto result = this->clientPtr_->send(jsonData);
@@ -270,7 +272,6 @@ Message* Companion::findMessage(uint32_t messageId)
     auto result = std::find_if(
         this->messagePointersPtr_->begin(),
         this->messagePointersPtr_->end(),
-        // [&](std::iterator<std::vector<Message*>> iter)
         [&](auto iter)
         {
             return iter->getId() == messageId;
@@ -641,7 +642,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
     // send over network
     bool result = companionPtr->sendMessage(
-        NetworkMessageType::SEND_DATA, networkId, messagePtr);
+        false, NetworkMessageType::SEND_DATA, networkId, messagePtr);
 
     // mark message as sent
     if(result)
@@ -656,6 +657,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     NetworkMessageType type = jsonData.at("type");
     std::string networkId = jsonData.at("id");
+    bool isAntecedent = jsonData.at("antecedent");
 
     logArgsWithCustomMark("received:", networkId);
 
@@ -720,16 +722,12 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             // add to widget
             WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
             // groupPtr->addMessageWidgetToChatHistory(messagePtr);
-            groupPtr->addMessageWidgetToChatHistoryFromThread(messagePtr);
-
-            // // sort elements
-            // getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
-
-            // logArgsWithCustomMark("send:", networkId);
+            groupPtr->addMessageWidgetToChatHistoryFromThread(
+                isAntecedent, messagePtr);
 
             // send reception confirmation to sender
             bool result = companionPtr->sendMessage(
-                NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
+                false, NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
         }
 
         break;
@@ -1477,7 +1475,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
         // send over network
         bool result = companionCastPtr->sendMessage(
-            NetworkMessageType::SEND_DATA, networkId, messagePtr);
+            true, NetworkMessageType::SEND_DATA, networkId, messagePtr);
 
         // mark message as sent
         if(result)
@@ -1485,10 +1483,6 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
             this->markMessageAsSent(messagePtr);
         }
     }
-
-    // sort elements
-    // WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
-    // getGraphicManagerPtr()->sortChatHistoryElementsForWidgetGroup(groupPtr);
 }
 
 bool Manager::buildCompanions()

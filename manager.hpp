@@ -117,7 +117,7 @@ public:
     void addMessage(Message*);
 
     const std::vector<Message*>* getMessagesPtr() const;
-    bool sendMessage(NetworkMessageType, std::string, const Message*);
+    bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
 
     void updateData(const CompanionData*);
 
