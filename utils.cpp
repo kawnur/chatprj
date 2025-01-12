@@ -186,13 +186,13 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 
     if(companionId == authorId)
     {
-        color = "#00115e";
+        color = receivedMessageColor;
         sender = companionNameQString;
         receiver = "Me";
     }
     else
     {
-        color = "#115e00";
+        color = sentMessageColor;
         sender = "Me";
         receiver = companionNameQString;
     }

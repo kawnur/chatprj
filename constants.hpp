@@ -101,5 +101,8 @@ const uint32_t showHideBackGroundColor = 0x7a7a7a;
 const uint32_t textEditBackgroundColor = 0xdadada;
 const uint32_t appLogBackgroundColor = 0xcccaca;
 const uint32_t newMessageEditColor = 0xdcdc07;
+const QString sentMessageColor = "#115e00";
+const QString receivedMessageColor = "#00115e";
+
 
 #endif // CONSTANTS_HPP

@@ -421,7 +421,7 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sentIndicatoPtr_ = new IndicatorWidget(10);
         receivedIndicatoPtr_ = new IndicatorWidget(10);
 
-        newMessageEditPtr_ = nullptr;
+        newMessageLabelPtr_ = nullptr;
 
         layoutPtr_->addWidget(sentIndicatoPtr_);
         layoutPtr_->addWidget(receivedIndicatoPtr_);
@@ -431,15 +431,18 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sentIndicatoPtr_ = nullptr;
         receivedIndicatoPtr_ = nullptr;
 
-        QString color = QString::fromStdString(std::to_string(newMessageEditColor));
-        QString text = (isAntecedent == 1) ? "NEW" : "";
-        QString textHtml = QString("<color=%1><b>%2</b>").arg(color, text);
+        QString text = (isAntecedent) ? "NEW" : "";
 
-        newMessageEditPtr_ = new QTextEdit;
-        newMessageEditPtr_->setReadOnly(true);
-        newMessageEditPtr_->insertHtml(textHtml);
+        QString textHtml = QString("<font color=\"%1\"><b>%2</b></font>")
+            .arg(receivedMessageColor, text);
 
-        layoutPtr_->addWidget(newMessageEditPtr_);
+        // newMessageEditPtr_ = new QTextEdit;
+        newMessageLabelPtr_ = new QLabel(textHtml);
+        newMessageLabelPtr_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
+        // newMessageEditPtr_->setReadOnly(true);
+        // newMessageEditPtr_->insertHtml(textHtml);
+
+        layoutPtr_->addWidget(newMessageLabelPtr_);
     }
 }
 
@@ -448,7 +451,7 @@ MessageIndicatorPanelWidget::~MessageIndicatorPanelWidget()
     delete this->layoutPtr_;
     delete this->sentIndicatoPtr_;
     delete this->receivedIndicatoPtr_;
-    delete this->newMessageEditPtr_;
+    delete this->newMessageLabelPtr_;
 }
 
 void MessageIndicatorPanelWidget::setSentIndicatorOn()
@@ -459,6 +462,14 @@ void MessageIndicatorPanelWidget::setSentIndicatorOn()
 void MessageIndicatorPanelWidget::setReceivedIndicatorOn()
 {
     this->receivedIndicatoPtr_->setOn();
+}
+
+void MessageIndicatorPanelWidget::unsetNewMessageLabel()
+{
+    if(this->newMessageLabelPtr_)
+    {
+        this->newMessageLabelPtr_->setText("");
+    }
 }
 
 MessageWidget::MessageWidget(
@@ -521,6 +532,11 @@ void MessageWidget::setMessageAsSent()
 void MessageWidget::setMessageAsReceived()
 {
     this->indicatorPanelPtr_->setReceivedIndicatorOn();
+}
+
+void MessageWidget::mousePressEvent(QMouseEvent* event)
+{
+    this->indicatorPanelPtr_->unsetNewMessageLabel();
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)

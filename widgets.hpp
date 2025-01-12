@@ -197,6 +197,7 @@ public:
 
     void setSentIndicatorOn();
     void setReceivedIndicatorOn();
+    void unsetNewMessageLabel();
 
 private:
     bool isMessageFromMe_;
@@ -204,8 +205,8 @@ private:
     QHBoxLayout* layoutPtr_;
     IndicatorWidget* sentIndicatoPtr_;
     IndicatorWidget* receivedIndicatoPtr_;
-    // QLabel* newMessageLabelPtr_;
-    QTextEdit* newMessageEditPtr_;
+    QLabel* newMessageLabelPtr_;
+    // QTextEdit* newMessageEditPtr_;
 };
 
 class MessageWidget : public QWidget
@@ -227,6 +228,8 @@ private:
     QLabel* headerLabelPtr_;
     QLabel* messageLabelPtr_;
     MessageIndicatorPanelWidget* indicatorPanelPtr_;
+
+    void mousePressEvent(QMouseEvent*) override;
 };
 
 class LeftPanelWidget : public QWidget
