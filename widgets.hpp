@@ -104,10 +104,14 @@ public:
     void print();
     bool isStub() override;
 
+    bool isSelected();
     void select();
     void unselect();
 
     void update();
+
+    void setNewMessagesIndicatorOn();
+    void setNewMessagesIndicatorOff();
 
 public slots:
     void updateCompanionAction();
@@ -116,6 +120,8 @@ public slots:
     void clientAction();
 
 private:
+    bool isSelected_;
+
     Companion* companionPtr_;
 
     QString name_;
@@ -129,7 +135,7 @@ private:
 
     QHBoxLayout* layoutPtr_;
 
-    IndicatorWidget* indicatorPtr_;
+    IndicatorWidget* connectionStateIndicatorPtr_;
     QLabel* nameLabelPtr_;
     QLabel* ipAddressLabelPtr_;
     QLabel* serverPortLabelPtr_;
@@ -137,6 +143,7 @@ private:
     QPushButton* editButtonPtr_;
     QPushButton* connectButtonPtr_;
 //    QPushButton* toggleIndicatorButton_;
+    IndicatorWidget* newMessagesIndicatorPtr_;
 
     void initializeFields();
 
@@ -209,19 +216,25 @@ private:
     // QTextEdit* newMessageEditPtr_;
 };
 
+class WidgetGroup;
+
 class MessageWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    MessageWidget(QWidget*, uint8_t, const std::string&, const Message*);
+    MessageWidget(QWidget*, bool, const std::string&, const Message*);
     ~MessageWidget();
 
-    void set();
+    void set(WidgetGroup*);
     void setMessageAsSent();
     void setMessageAsReceived();
 
+signals:
+    void widgetSelectedSignal(bool);
+
 private:
+    bool createdAsAntacedent_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -353,10 +366,19 @@ public:
 
     void sortChatHistoryElements();
 
+    // bool isSocketInfoWidgetSelected();
+    void messageAdded();
+
+public slots:
+    void messageWidgetSelected(bool);
+
 private:
     const Companion* companionPtr_;
     SocketInfoBaseWidget* socketInfoBasePtr_;
     CentralPanelWidget* centralPanelPtr_;
+
+    uint32_t antacedentMessagesCounter_;
+    std::mutex antacedentMessagesCounterMutex_;
 
     void buildChatHistory();
 };

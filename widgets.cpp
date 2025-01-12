@@ -215,6 +215,8 @@ bool SocketInfoWidget::isStub()
 
 void SocketInfoWidget::initializeFields()
 {
+    isSelected_ = false;
+
     selectedColor_ = QColor(QColorConstants::DarkGray);
     unselectedColor_ = QColor(QColorConstants::Gray);
     palettePtr_ = new QPalette;
@@ -224,7 +226,7 @@ void SocketInfoWidget::initializeFields()
 
     layoutPtr_ = new QHBoxLayout;
     setLayout(layoutPtr_);
-    indicatorPtr_ = new IndicatorWidget(15);
+    connectionStateIndicatorPtr_ = new IndicatorWidget(15);
     nameLabelPtr_ = new QLabel(name_);
     ipAddressLabelPtr_ = new QLabel(ipAddress_);
 
@@ -246,10 +248,12 @@ void SocketInfoWidget::initializeFields()
 
     if(name_ == "me")  // TODO ???
     {
-        indicatorPtr_->setMe();
+        connectionStateIndicatorPtr_->setMe();
         editButtonPtr_->hide();
         connectButtonPtr_->hide();
     }
+
+    newMessagesIndicatorPtr_ = new IndicatorWidget(7);
 
 //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
 //    connect(
@@ -258,8 +262,9 @@ void SocketInfoWidget::initializeFields()
 
     std::initializer_list<QWidget*> widgets
     {
-        indicatorPtr_, nameLabelPtr_, ipAddressLabelPtr_, serverPortLabelPtr_,
-        clientPortLabelPtr_, editButtonPtr_, connectButtonPtr_
+        connectionStateIndicatorPtr_, nameLabelPtr_, ipAddressLabelPtr_,
+        serverPortLabelPtr_, clientPortLabelPtr_, editButtonPtr_,
+        connectButtonPtr_, newMessagesIndicatorPtr_
     };
 
     for(auto& widget : widgets)
@@ -339,7 +344,7 @@ void SocketInfoWidget::clientAction()
         this->connectButtonPtr_->setText(nextText);
 
         // change indicator color
-        this->indicatorPtr_->toggle();
+        this->connectionStateIndicatorPtr_->toggle();
     }
 }
 
@@ -352,13 +357,20 @@ void SocketInfoWidget::changeColor(QColor& color)
     this->setPalette(*this->palettePtr_);
 }
 
+bool SocketInfoWidget::isSelected()
+{
+    return this->isSelected_;
+}
+
 void SocketInfoWidget::select()
 {
+    this->isSelected_ = true;
     this->changeColor(this->selectedColor_);
 }
 
 void SocketInfoWidget::unselect()
 {
+    this->isSelected_ = false;
     this->changeColor(this->unselectedColor_);
 }
 
@@ -370,6 +382,16 @@ void SocketInfoWidget::update()
     this->ipAddressLabelPtr_->setText(this->ipAddress_);
     this->clientPort_ = this->companionPtr_->getClientPort();
     this->clientPortLabelPtr_->setText(QString::fromStdString(std::to_string(this->clientPort_)));
+}
+
+void SocketInfoWidget::setNewMessagesIndicatorOn()
+{
+    this->newMessagesIndicatorPtr_->setOn();
+}
+
+void SocketInfoWidget::setNewMessagesIndicatorOff()
+{
+    this->newMessagesIndicatorPtr_->setOff();
 }
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
@@ -473,9 +495,10 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
 }
 
 MessageWidget::MessageWidget(
-    QWidget* parentPtr, uint8_t isAntecedent,
-    const std::string& companionName, const Message* messagePtr)
+    QWidget* parentPtr, bool isAntecedent, const std::string& companionName,
+    const Message* messagePtr)
 {
+    createdAsAntacedent_ = isAntecedent;
     isMessageFromMe_ = messagePtr->isMessageFromMe();
 
     // set parent
@@ -519,9 +542,13 @@ MessageWidget::~MessageWidget()
     delete this->indicatorPanelPtr_;
 }
 
-void MessageWidget::set()
+void MessageWidget::set(WidgetGroup* groupPtr)
 {
     this->indicatorPanelPtr_->setParent(this);
+
+    connect(
+        this, &MessageWidget::widgetSelectedSignal,
+        groupPtr, &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
 }
 
 void MessageWidget::setMessageAsSent()
@@ -537,6 +564,8 @@ void MessageWidget::setMessageAsReceived()
 void MessageWidget::mousePressEvent(QMouseEvent* event)
 {
     this->indicatorPanelPtr_->unsetNewMessageLabel();
+
+    emit this->widgetSelectedSignal(this->createdAsAntacedent_);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -731,6 +760,15 @@ void CentralPanelWidget::set(Companion* companionPtr)
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     bool isAntecedent, const std::string& companionName, const Message* messagePtr)
 {
+    WidgetGroup* groupPtr = nullptr;
+
+    try
+    {
+        groupPtr =
+            getManagerPtr()->getMappedWidgetGroupByCompanion(this->companionPtr_);
+    }
+    catch(std::out_of_range) {}
+
     {
         std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
@@ -739,7 +777,10 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
         getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
 
-        widgetPtr->set();
+        if(groupPtr)
+        {
+            widgetPtr->set(groupPtr);
+        }
 
         this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
 
@@ -749,11 +790,17 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         }
     }
 
+    // widget group action
+    if(groupPtr)
+    {
+        groupPtr->messageAdded();
+    }
+
     // logArgsWithCustomMark(
     //     "this->chatHistoryWidgetPtr_->children().size():",
     //     this->chatHistoryWidgetPtr_->children().size());
 
-    this->scrollDownChatHistory();    
+    this->scrollDownChatHistory();
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
@@ -809,10 +856,13 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
 
     auto lambda = [&](auto item)
     {
-        auto result = graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
+        // auto result = graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
+        //     dynamic_cast<MessageWidget*>(item));
+        const Message* messagePtr = graphicManagerPtr->getMappedMessageByMessageWidgetPtr(
             dynamic_cast<MessageWidget*>(item));
 
-        return result;
+        // return result;
+        return (messagePtr) ? messagePtr->getTime() : std::string("");
     };
 
     std::sort(
@@ -905,8 +955,12 @@ void RightPanelWidget::addTextToAppLogWidget(const QString& text)
     emit this->addTextToAppLogWidgetSignal(text);
 }
 
-WidgetGroup::WidgetGroup(const Companion* companionPtr) : companionPtr_(companionPtr)
+WidgetGroup::WidgetGroup(const Companion* companionPtr) :
+    companionPtr_(companionPtr),
+    antacedentMessagesCounterMutex_(std::mutex())
 {
+    antacedentMessagesCounter_ = 0;
+
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     const SocketInfo* socketInfoPtr = companionPtr_->getSocketInfoPtr();
@@ -947,6 +1001,15 @@ void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 void WidgetGroup::addMessageWidgetToChatHistoryFromThread(
     bool isAntecedent, const Message* messagePtr)
 {
+    {
+        std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
+
+        if(isAntecedent)
+        {
+            ++this->antacedentMessagesCounter_;
+        }
+    }
+
     this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
         isAntecedent, this->companionPtr_->getName(), messagePtr);
 }
@@ -976,6 +1039,39 @@ void WidgetGroup::sortChatHistoryElements()
 {
     this->centralPanelPtr_->sortChatHistoryElements(true);
 }
+
+void WidgetGroup::messageAdded()
+{
+    // set new message indicator on if socket info widget is not selected
+    SocketInfoWidget* castPtr =
+        dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_);
+
+    if(castPtr && !castPtr->isSelected())
+    {
+        castPtr->setNewMessagesIndicatorOn();
+    }
+}
+
+void WidgetGroup::messageWidgetSelected(bool isAntacedent)
+{
+    std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
+
+    if(isAntacedent)
+    {
+        --this->antacedentMessagesCounter_;
+
+        if(this->antacedentMessagesCounter_ == 0)
+        {
+            dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->
+                setNewMessagesIndicatorOff();
+        }
+    }
+}
+
+// bool WidgetGroup::isSocketInfoWidgetSelected()
+// {
+//     return dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->isSelected();
+// }
 
 void WidgetGroup::buildChatHistory()
 {

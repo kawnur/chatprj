@@ -694,7 +694,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
         break;
 
-    // message is not confirmation
+    // message is data message
     case NetworkMessageType::SEND_DATA:
         {
             auto timestamp = jsonData.at("time");
@@ -755,6 +755,19 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     return result->first;
 }
 
+WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companionPtr) const
+{
+    WidgetGroup* groupPtr = nullptr;
+
+    try
+    {
+        groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    }
+    catch(std::out_of_range) {}
+
+    return groupPtr;
+}
+
 std::string Manager::addToNetworkIdToMessageMapping(const Message* messagePtr)
 {
     std::lock_guard<std::mutex> lock(this->networkIdToMessageMapMutex_);
@@ -811,6 +824,11 @@ std::string Manager::getMappedNetworkIdByMessagePtr(Message* messagePtr)
 
     return (result == this->mapNetworkIdToMessage_.end()) ?
                std::string("") : result->first;
+}
+
+WidgetGroup* Manager::getMappedWidgetGroupByCompanion(Companion* companionPtr) const
+{
+    return this->mapCompanionToWidgetGroup_.at(companionPtr);
 }
 
 void Manager::resetSelectedCompanion(const Companion* newSelected)
@@ -1966,7 +1984,24 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr
     groupPtr->sortChatHistoryElements();
 }
 
-std::string GraphicManager::getMappedMessageTimeByMessageWidgetPtr(
+// std::string GraphicManager::getMappedMessageTimeByMessageWidgetPtr(
+//     MessageWidget* widgetPtr)
+// {
+//     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+
+//     auto result = std::find_if(
+//         this->mapMessageToMessageWidget_.begin(),
+//         this->mapMessageToMessageWidget_.end(),
+//         [&](auto iter)
+//         {
+//             return iter.second == widgetPtr;
+//         });
+
+//     return (result == this->mapMessageToMessageWidget_.end()) ?
+//                std::string("") : result->first->getTime();
+// }
+
+const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
     MessageWidget* widgetPtr)
 {
     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
@@ -1980,7 +2015,7 @@ std::string GraphicManager::getMappedMessageTimeByMessageWidgetPtr(
         });
 
     return (result == this->mapMessageToMessageWidget_.end()) ?
-               std::string("") : result->first->getTime();
+               nullptr : result->first;
 }
 
 GraphicManager* getGraphicManagerPtr()

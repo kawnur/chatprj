@@ -218,7 +218,8 @@ public:
     bool getUserIsAuthenticated();
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
-    // const WidgetGroup* getWidgetGroupByCompanion(Companion*) const;
+    WidgetGroup* getMappedWidgetGroupByCompanion(const Companion*) const;
+    WidgetGroup* getMappedWidgetGroupByCompanion(Companion*) const;
 
     void resetSelectedCompanion(const Companion*);
 
@@ -393,7 +394,8 @@ public:
 
     void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
 
-    std::string getMappedMessageTimeByMessageWidgetPtr(MessageWidget*);
+    // std::string getMappedMessageTimeByMessageWidgetPtr(MessageWidget*);
+    const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;

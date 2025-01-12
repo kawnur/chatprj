@@ -15,6 +15,8 @@ class GraphicManager;
 // MainWindow* getMainWindowPtr();
 GraphicManager* getGraphicManagerPtr();
 
+const bool logDBInteraction = false;
+
 template<typename T> QString argForLogging(T* const& value)
 {
     std::stringstream ss;

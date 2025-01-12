@@ -229,13 +229,18 @@ PGresult* getSocketByIpAddressAndPortDBResult(
 }
 
 // TODO test sorting by timestamp with different timezones
-PGresult* getMessagesDBResult(const PGconn* dbConnection, const bool logging, const int& id)
+PGresult* getMessagesDBResult(
+    const PGconn* dbConnection, const bool logging, const int& id)
 {
     std::string command = std::string(
-        "SELECT id, author_id, timestamp_tz, message, issent "
-        "FROM messages WHERE companion_id = ")
+        "WITH select_id AS "
+        "(SELECT id FROM messages WHERE companion_id = ")
         + std::to_string(id)
-        + std::string(" ORDER BY timestamp_tz LIMIT 50");
+        + std::string(
+        " ORDER BY timestamp_tz DESC LIMIT 50) "
+        "SELECT id, author_id, timestamp_tz, message, issent "
+        "FROM messages WHERE id IN "
+        "(SELECT id FROM select_id) ORDER BY timestamp_tz ASC");
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
