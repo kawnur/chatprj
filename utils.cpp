@@ -180,7 +180,8 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
     auto authorId = messagePtr->getAuthorId();
     auto time = QString::fromStdString(messagePtr->getTime());
     auto text = QString::fromStdString(messagePtr->getText());
-    auto isSent = messagePtr->getIsSent();
+    auto isSent =
+        getManagerPtr()->getMappedMessageStateByMessagePtr(messagePtr)->getIsSent();
 
     QString color, sender, receiver;
 
@@ -256,6 +257,10 @@ std::string buildMessageJSONString(
         jsonData["received"] = 1;
 
         break;
+
+    case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
+
+        break;
     }
 
     return jsonData.dump();
@@ -280,3 +285,15 @@ std::string getRandomString(uint8_t length)
 
     return result;
 }
+
+void sleepForMilliseconds(uint32_t duration)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+}
+
+std::string generateNetworkIdUnderscoreCompanionId(
+    std::string& networkId, uint8_t companionId)
+{
+    return networkId + std::string("_") + std::to_string(companionId);
+}
+

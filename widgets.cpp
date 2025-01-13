@@ -999,8 +999,11 @@ void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 }
 
 void WidgetGroup::addMessageWidgetToChatHistoryFromThread(
-    bool isAntecedent, const Message* messagePtr)
+    // bool isAntecedent, const Message* messagePtr)
+    const MessageState* messageStatePtr, const Message* messagePtr)
 {
+    bool isAntecedent = messageStatePtr->getIsAntecedent();
+
     {
         std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
 
@@ -1042,11 +1045,14 @@ void WidgetGroup::sortChatHistoryElements()
 
 void WidgetGroup::messageAdded()
 {
+    std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
+
     // set new message indicator on if socket info widget is not selected
     SocketInfoWidget* castPtr =
         dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_);
 
-    if(castPtr && !castPtr->isSelected())
+    // if(castPtr && !castPtr->isSelected())
+    if(castPtr && this->antacedentMessagesCounter_ > 0)
     {
         castPtr->setNewMessagesIndicatorOn();
     }

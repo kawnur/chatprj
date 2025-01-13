@@ -16,7 +16,8 @@ static const char alphanum[] =
 enum class NetworkMessageType
 {
     SEND_DATA,
-    RECEIVE_CONFIRMATION
+    RECEIVE_CONFIRMATION,
+    RECEIVE_CONFIRMATION_REQUEST
 };
 
 enum class DialogType

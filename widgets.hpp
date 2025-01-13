@@ -22,8 +22,9 @@
 class Action;
 class Companion;
 class CompanionAction;
-class Message;
 class MainWindow;
+class Message;
+class MessageState;
 
 const std::vector<QString> connectButtonLabels
 {
@@ -356,7 +357,10 @@ public:
     ~WidgetGroup();
 
     void addMessageWidgetToChatHistory(const Message*);
-    void addMessageWidgetToChatHistoryFromThread(bool, const Message*);
+
+    // void addMessageWidgetToChatHistoryFromThread(bool, const Message*);
+    void addMessageWidgetToChatHistoryFromThread(const MessageState*, const Message*);
+
     void clearChatHistory();
 
     void hideCentralPanel();

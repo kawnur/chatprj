@@ -67,4 +67,8 @@ nlohmann::json buildMessageJsonObject(const std::string&);
 
 std::string getRandomString(uint8_t);
 
+void sleepForMilliseconds(uint32_t);
+
+std::string generateNetworkIdUnderscoreCompanionId(std::string&, uint8_t);
+
 #endif // UTILS_HPP

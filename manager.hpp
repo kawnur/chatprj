@@ -73,7 +73,7 @@ class Message
 {
 public:
 //    Message(int, int, std::tm, const std::string&, bool);
-    Message(uint32_t, uint8_t, uint8_t, const std::string&, const std::string&, bool);
+    Message(uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
     ~Message() = default;
 
     uint32_t getId() const;
@@ -82,7 +82,7 @@ public:
     bool isMessageFromMe() const;
     std::string getTime() const;
     std::string getText() const;
-    bool getIsSent() const;
+    // bool getIsSent() const;
 
 private:
     uint32_t id_;
@@ -91,7 +91,32 @@ private:
 //    std::tm time_;  // TODO add timezone support
     std::string time_;  // TODO add timezone support
     std::string text_;
+    // bool isSent_;
+};
+
+class MessageState
+{
+public:
+    MessageState(uint8_t, bool, bool, std::string);
+    ~MessageState() = default;
+
+    bool getIsAntecedent() const;
+    bool getIsSent() const;
+    bool getIsReceived() const;
+    std::string getNetworkId() const;
+    std::string getNetworkIdUnderscoreCompanionId() const;
+
+    void setIsReceived(bool);
+    void setNetworkId(const std::string&);
+    void setNetworkIdUnderscoreCompanionId(const std::string&);
+
+private:    
+    bool isAntecedent_;
     bool isSent_;
+    bool isReceived_;
+    std::string networkId_;
+    std::string networkIdUnderscoreCompanionId_;
+
 };
 
 class Companion
@@ -219,7 +244,8 @@ public:
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     WidgetGroup* getMappedWidgetGroupByCompanion(const Companion*) const;
-    WidgetGroup* getMappedWidgetGroupByCompanion(Companion*) const;
+    // WidgetGroup* getMappedWidgetGroupByCompanion(Companion*) const;
+    const MessageState* getMappedMessageStateByMessagePtr(const Message*);
 
     void resetSelectedCompanion(const Companion*);
 
@@ -241,7 +267,8 @@ public:
     void sendUnsentMessages(const Companion*);
 
 private:
-    std::mutex networkIdToMessageMapMutex_;
+    // std::mutex networkIdToMessageMapMutex_;
+    std::mutex messageStateToMessageMapMutex_;
 
     PGconn* dbConnectionPtr_;
 
@@ -250,12 +277,14 @@ private:
 
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
-    std::map<std::string, const Message*> mapNetworkIdToMessage_;
+    // std::map<std::string, const Message*> mapNetworkIdToMessage_;
+    std::map<const MessageState*, const Message*> mapMessageStateToMessage_;
 
-    std::string addToNetworkIdToMessageMapping(const Message*);
+    // std::string addToNetworkIdToMessageMapping(const Message*);
+    bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
-    std::string getMappedNetworkIdByMessagePtr(Message*);
+    // std::string getMappedNetworkIdByMessagePtr(Message*);
 
     std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
         const std::string&, const std::string&, const std::string&, const std::string&);
@@ -275,6 +304,8 @@ private:
 
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
+
+    void waitForMessageReceptionConfirmation(Companion*, MessageState*, Message*);
 
     bool markMessageAsSent(const Message*);
     bool markMessageAsReceived(const Message*);
