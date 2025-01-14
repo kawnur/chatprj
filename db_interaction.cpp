@@ -239,7 +239,7 @@ PGresult* getMessagesDBResult(
         + std::to_string(id)
         + std::string(
         " ORDER BY timestamp_tz DESC LIMIT 50) "
-        "SELECT id, author_id, timestamp_tz, message, issent "
+        "SELECT id, author_id, timestamp_tz, message, is_sent, is_received "
         "FROM messages WHERE id IN "
         "(SELECT id FROM select_id) ORDER BY timestamp_tz ASC");
 
@@ -250,13 +250,13 @@ PGresult* getUnsentMessagesByCompanionNameDBResult(
     const PGconn* dbConnection, const bool logging, const std::string& companionName)
 {
     std::string command = std::string(
-        "SELECT id, author_id, companion_id, timestamp_tz, message "
+        "SELECT id, author_id, companion_id, timestamp_tz, message, is_received "
         "FROM messages WHERE companion_id = "
         "(SELECT id FROM companions WHERE name = '")
         + companionName
         + std::string(
         "') AND author_id = (SELECT id FROM companions WHERE name = 'me') "
-        "AND issent IS false");
+        "AND is_sent IS false");
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
@@ -272,7 +272,7 @@ PGresult* setMessageInDbAndReturn(
     const PGconn* dbConnection, const bool logging, const uint32_t& messageId)
 {
     std::string command = std::string(
-        "UPDATE messages set issent = 'true' "
+        "UPDATE messages set is_sent = 'true' "
         "WHERE id = ")
         + std::to_string(messageId)
         + std::string(" RETURNING id");
@@ -352,7 +352,7 @@ PGresult* pushMessageToDBAndReturn(
 {
     std::string command = std::string(
         "INSERT INTO messages "
-        "(companion_id, author_id, timestamp_tz, message, issent) "
+        "(companion_id, author_id, timestamp_tz, message, is_sent) "
         "VALUES ((SELECT id FROM companions WHERE name = '")
         + companionName
         + std::string("'), (SELECT id FROM companions WHERE name = '")

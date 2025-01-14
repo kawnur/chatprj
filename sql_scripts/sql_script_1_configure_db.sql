@@ -23,5 +23,6 @@ create table public.messages (
     author_id int not null references public.companions (id),
     timestamp_tz timestamp with time zone not null,
     message text,
-    isSent boolean not null
+    is_sent boolean not null,
+    is_received boolean not null
 );

@@ -97,7 +97,7 @@ private:
 class MessageState
 {
 public:
-    MessageState(uint8_t, bool, bool, std::string);
+    MessageState(uint8_t, bool, bool, bool, std::string);
     ~MessageState() = default;
 
     bool getIsAntecedent() const;

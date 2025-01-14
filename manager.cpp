@@ -87,8 +87,10 @@ std::string Message::getText() const
 // }
 
 MessageState::MessageState(
-    uint8_t companionId, bool isAntecedent, bool isSent, std::string networkId) :
-    isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(false), networkId_(networkId)
+    uint8_t companionId, bool isAntecedent, bool isSent,
+    bool isReceived, std::string networkId) :
+    isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived),
+    networkId_(networkId)
 {
     networkIdUnderscoreCompanionId_ =
         generateNetworkIdUnderscoreCompanionId(networkId_, companionId);
@@ -681,7 +683,9 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     companionPtr->addMessage(messagePtr);
 
     // create message state object and add to mapping
-    MessageState* messageStatePtr = new MessageState(companion_id, false, false, "");
+    MessageState* messageStatePtr = new MessageState(
+        companion_id, false, false, false, "");
+
     bool addResult = this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
     // add to widget
@@ -694,7 +698,8 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
     // send over network
     bool result = companionPtr->sendMessage(
-        false, NetworkMessageType::SEND_DATA, messageStatePtr->getNetworkId(), messagePtr);
+        false, NetworkMessageType::SEND_DATA, messageStatePtr->getNetworkId(),
+        messagePtr);
 
     // mark message as sent
     if(result)
@@ -748,7 +753,9 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             companionPtr->addMessage(messagePtr);
 
             // create message state object and add to mapping
-            MessageState* messageStatePtr = new MessageState(companion_id, isAntecedent, false, networkId);
+            MessageState* messageStatePtr = new MessageState(
+                companion_id, isAntecedent, false, false, networkId);
+
             this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
             // decrypt message
@@ -821,6 +828,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
         {
+            // search for message in managers's
+            // send reception confirmation to sender
+            bool result = companionPtr->sendMessage(
+                false, NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
 
 
         }
@@ -1656,7 +1667,9 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
         logDBInteraction,
         "getUnsentMessagesByCompanionNameDBResult",
         &getUnsentMessagesByCompanionNameDBResult,
-        buildStringVector("id", "author_id", "companion_id", "timestamp_tz", "message"),
+        buildStringVector(
+            "id", "author_id", "companion_id", "timestamp_tz",
+            "message", "is_received"),
         companionPtr->getName());
 
     if(!messagesDataPtr)
@@ -1709,7 +1722,8 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
             companionCastPtr->addMessage(messagePtr);
 
             MessageState* messageStatePtr = new MessageState(
-                companion_id, false, false, networkId);
+                companion_id, false, false,
+                messagesDataPtr->getValue(i, "is_received"), networkId);
 
             this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
         }
@@ -1784,7 +1798,7 @@ bool Manager::buildCompanions()
                 &getMessagesDBResult,
                 buildStringVector(
                     "id", "companion_id", "author_id",
-                    "timestamp_tz", "message", "issent"),
+                    "timestamp_tz", "message", "is_sent", "is_received"),
                 id);
 
             for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
@@ -1799,7 +1813,9 @@ bool Manager::buildCompanions()
                 companionPtr->addMessage(messagePtr);
 
                 MessageState* messageStatePtr = new MessageState(
-                    id, false, messagesDataPtr->getValue(i, "issent"), "");
+                    id, false,
+                    messagesDataPtr->getValue(i, "is_sent"),
+                    messagesDataPtr->getValue(i, "is_received"), "");
 
                 this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
             }
