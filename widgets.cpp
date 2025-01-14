@@ -4,7 +4,7 @@ QString getInitialConnectButtonLabel()
 {
     try
     {
-        return connectButtonLabels.empty() ? QString("") : connectButtonLabels.at(0);
+        return connectButtonLabels.empty() ? QString("_") : connectButtonLabels.at(0);
     }
     catch(...)
     {
@@ -216,6 +216,7 @@ bool SocketInfoWidget::isStub()
 void SocketInfoWidget::initializeFields()
 {
     isSelected_ = false;
+    isConnected_ = false;
 
     selectedColor_ = QColor(QColorConstants::DarkGray);
     unselectedColor_ = QColor(QColorConstants::Gray);
@@ -327,18 +328,23 @@ void SocketInfoWidget::clientAction()
     // TODO change to states
     QString currentText = this->connectButtonPtr_->text();
 
-    if(currentText == connectButtonConnectLabel)
+    // if(currentText == connectButtonDisconnectLabel)
+    if(this->isConnected_)
+    {
+        result = const_cast<Companion*>(companion)->disconnectClient();
+    }
+    // else if(currentText == connectButtonConnectLabel)
+    else
     {
         result = const_cast<Companion*>(companion)->connectClient();
         getManagerPtr()->sendUnsentMessages(companion);
     }
-    else if(currentText == connectButtonDisconnectLabel)
-    {
-        result = const_cast<Companion*>(companion)->disconnectClient();
-    }
 
     if(result)
     {
+        // change value
+        this->isConnected_ = !(this->isConnected_);
+
         // change connect button text
         QString nextText = getNextConnectButtonLabel(currentText);
         this->connectButtonPtr_->setText(nextText);

@@ -28,7 +28,7 @@ class MessageState;
 
 const std::vector<QString> connectButtonLabels
 {
-    connectButtonConnectLabel,
+    connectButtonConnectLabel,  // initial
     connectButtonDisconnectLabel
 };
 
@@ -122,6 +122,7 @@ public slots:
 
 private:
     bool isSelected_;
+    bool isConnected_;
 
     Companion* companionPtr_;
 

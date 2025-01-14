@@ -677,7 +677,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     }
 
     // add to companion's messages
-    Message* messagePtr = new Message(id, companion_id, 1, timestamp, text, false);
+    Message* messagePtr = new Message(id, companion_id, 1, timestamp, text);
     companionPtr->addMessage(messagePtr);
 
     // create message state object and add to mapping
@@ -704,6 +704,10 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
     // wait for message reception confirmation
     sleepForMilliseconds(1000);
+
+    logArgs("companionPtr:", companionPtr);
+    logArgs("messageStatePtr:", messageStatePtr);
+    logArgs("messagePtr:", messagePtr);
 
     this->waitForMessageReceptionConfirmation(companionPtr, messageStatePtr, messagePtr);
 }
@@ -740,7 +744,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
 
             // add to companion's messages
-            Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text, false);
+            Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text);
             companionPtr->addMessage(messagePtr);
 
             // create message state object and add to mapping
@@ -915,7 +919,7 @@ bool Manager::addToMessageStateToMessageMapping(
         };
 
         // run in loop while generated key is not unique
-        while(!lambda())
+        while(lambda())
         {
             networkId = getRandomString(5);
 
@@ -1155,8 +1159,12 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 void Manager::waitForMessageReceptionConfirmation(
     Companion* companionPtr, MessageState* messageStatePtr, Message* messagePtr)
 {
-    auto lambda = [&]()
+    auto lambda = [=]()
     {
+        logArgs("companionPtr from thread:", companionPtr);
+        logArgs("messageStatePtr from thread:", messageStatePtr);
+        logArgs("messagePtr from thread:", messagePtr);
+
         while(true)
         {
             // if(this->getMappedNetworkIdByMessagePtr(messagePtr).empty())
@@ -1689,18 +1697,21 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
         else
         {
             uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
+            networkId = getRandomString(5);
 
             messagePtr = new Message(
                 messageId,
                 companion_id,
                 1,
                 messagesDataPtr->getValue(i, "timestamp_tz"),
-                messagesDataPtr->getValue(i, "message"),
-                false);
+                messagesDataPtr->getValue(i, "message"));
 
             companionCastPtr->addMessage(messagePtr);
 
-            networkId = getRandomString(5);
+            MessageState* messageStatePtr = new MessageState(
+                companion_id, false, false, networkId);
+
+            this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
         }
 
         // send over network
@@ -1786,12 +1797,18 @@ bool Manager::buildCompanions()
                     messagesDataPtr->getValue(i, "message"));
 
                 companionPtr->addMessage(messagePtr);
+
+                MessageState* messageStatePtr = new MessageState(
+                    id, false, messagesDataPtr->getValue(i, "issent"), "");
+
+                this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
             }
 
             if(!companionPtr->startServer())
             {
                 logArgsError("problem with server start for companion id", id);
             }
+
             if(!companionPtr->createClient())
             {
                 logArgsError("problem with client creation for companion id", id);

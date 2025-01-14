@@ -149,7 +149,8 @@ PGconn* getDBConnection()
                     dbPassword);
 
         ConnStatusType status = PQstatus(dbConnection);
-        logArgs("DB connection status: ", std::to_string(status));
+        std::string mark = (status == 0) ? "OK" : "";
+        logArgs("DB connection status: ", std::to_string(status), mark);
 
         if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
         {
