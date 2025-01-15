@@ -822,8 +822,8 @@ void CentralPanelWidget::scrollDownChatHistory()
 {
     // double call workaround to scroll down fully
     // TODO find out
-    QApplication::processEvents();
-    QApplication::processEvents();
+    // QApplication::processEvents();
+    // QApplication::processEvents();
 
     this->chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
         this->chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());

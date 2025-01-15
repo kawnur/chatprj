@@ -104,18 +104,18 @@ public:
     bool getIsSent() const;
     bool getIsReceived() const;
     std::string getNetworkId() const;
-    std::string getNetworkIdUnderscoreCompanionId() const;
+    std::string getMessageMappingKey() const;
 
     void setIsReceived(bool);
     void setNetworkId(const std::string&);
-    void setNetworkIdUnderscoreCompanionId(const std::string&);
+    void setgetMessageMappingKey(const std::string&);
 
 private:    
     bool isAntecedent_;
     bool isSent_;
     bool isReceived_;
     std::string networkId_;
-    std::string networkIdUnderscoreCompanionId_;
+    std::string messageMappingKey_;
 
 };
 
@@ -285,6 +285,9 @@ private:
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
     // std::string getMappedNetworkIdByMessagePtr(Message*);
+
+    std::pair<const MessageState*, const Message*>
+        getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
     std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
         const std::string&, const std::string&, const std::string&, const std::string&);

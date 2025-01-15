@@ -3,6 +3,7 @@
 
 #include <libpq-events.h>
 #include <libpq-fe.h>
+#include <mutex>
 #include <string>
 
 #include "logging.hpp"
@@ -48,13 +49,15 @@ PGresult* getSocketByIpAddressAndPortDBResult(
     const PGconn*, const bool, const std::string&, const std::string&);
 
 PGresult* getMessagesDBResult(const PGconn*, const bool, const int&);
+PGresult* getMessageByDBResult(const PGconn*, const bool, const int&);
 
 PGresult* getUnsentMessagesByCompanionNameDBResult(
     const PGconn*, const bool, const std::string&);
 
 PGresult* getPasswordDBResult(const PGconn*, const bool);
 
-PGresult* setMessageInDbAndReturn(const PGconn*, const bool, const uint32_t&);
+PGresult* setMessageIsSentInDbAndReturn(const PGconn*, const bool, const uint32_t&);
+PGresult* setMessageIsReceivedInDbAndReturn(const PGconn*, const bool, const uint32_t&);
 
 PGresult* pushCompanionToDBAndReturn(const PGconn*, const bool, const std::string&);
 PGresult* updateCompanionAndReturn(const PGconn*, const bool, const std::string&);

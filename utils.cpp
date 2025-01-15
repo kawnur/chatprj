@@ -291,7 +291,7 @@ void sleepForMilliseconds(uint32_t duration)
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-std::string generateNetworkIdUnderscoreCompanionId(
+std::string generateMessageMappingKey(
     std::string& networkId, uint8_t companionId)
 {
     return networkId + std::string("_") + std::to_string(companionId);

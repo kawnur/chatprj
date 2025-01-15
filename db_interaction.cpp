@@ -1,5 +1,7 @@
 #include "db_interaction.hpp"
 
+std::mutex dbMutex;
+
 DBReplyData::DBReplyData(int count, ...)
     : data_(std::vector<std::map<std::string, const char*>>(1))
 {
@@ -171,6 +173,8 @@ PGresult* sendDBRequestAndReturnResult(
         logArgs(command);
     }
 
+    std::lock_guard<std::mutex> lock(dbMutex);
+
     PGresult* result = PQexec(const_cast<PGconn*>(dbConnection), command);
     return result;
 }
@@ -268,11 +272,23 @@ PGresult* getPasswordDBResult(const PGconn* dbConnection, const bool logging)
     return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
-PGresult* setMessageInDbAndReturn(
+PGresult* setMessageIsSentInDbAndReturn(
     const PGconn* dbConnection, const bool logging, const uint32_t& messageId)
 {
     std::string command = std::string(
-        "UPDATE messages set is_sent = 'true' "
+                              "UPDATE messages set is_sent = 'true' "
+                              "WHERE id = ")
+                          + std::to_string(messageId)
+                          + std::string(" RETURNING id");
+
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+}
+
+PGresult* setMessageIsReceivedInDbAndReturn(
+    const PGconn* dbConnection, const bool logging, const uint32_t& messageId)
+{
+    std::string command = std::string(
+        "UPDATE messages set is_received = 'true' "
         "WHERE id = ")
         + std::to_string(messageId)
         + std::string(" RETURNING id");
@@ -352,7 +368,7 @@ PGresult* pushMessageToDBAndReturn(
 {
     std::string command = std::string(
         "INSERT INTO messages "
-        "(companion_id, author_id, timestamp_tz, message, is_sent) "
+        "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
         "VALUES ((SELECT id FROM companions WHERE name = '")
         + companionName
         + std::string("'), (SELECT id FROM companions WHERE name = '")
@@ -361,7 +377,7 @@ PGresult* pushMessageToDBAndReturn(
         + timestamp
         + std::string("', '")
         + message
-        + std::string("', false) RETURNING id, ")
+        + std::string("', false, false) RETURNING id, ")
         + returningFieldName
         + std::string(", timestamp_tz");
 
