@@ -96,7 +96,7 @@ class SocketInfoWidget : public SocketInfoBaseWidget
 public:
     SocketInfoWidget();
     SocketInfoWidget(const SocketInfoWidget&);
-    SocketInfoWidget(SocketInfoWidget&&) {};
+    SocketInfoWidget(SocketInfoWidget&&) {}
     SocketInfoWidget(std::string&, std::string&, uint16_t&, uint16_t&);
     SocketInfoWidget(std::string&&, std::string&&, uint16_t&&, uint16_t&&);
     SocketInfoWidget(Companion*);

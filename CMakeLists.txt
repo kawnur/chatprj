@@ -5,45 +5,46 @@ project(chatprj LANGUAGES CXX)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(PROJECT_SOURCES
-    action.cpp
-    action.hpp
-    application.cpp
-    application.hpp
-    chat_client.cpp
-    chat_client.hpp
-    chat_server.cpp
-    chat_server.hpp
-    companion.cpp
-    companion.hpp
-    constants.hpp
-    data.cpp
-    data.hpp
-    db_interaction.cpp
-    db_interaction.hpp
-    graphic_manager.cpp
-    graphic_manager.hpp
-    logging.cpp
-    logging.hpp
-    main.cpp
-    mainwindow.cpp
-    mainwindow.hpp
-    manager.cpp
-    manager.hpp
-    message.cpp
-    message.hpp
-    utils.cpp
-    utils.hpp
-    utils_cout.cpp
-    utils_cout.hpp
-    utils_gpgme.cpp
-    utils_gpgme.hpp
-    utils_widgets.cpp
-    utils_widgets.hpp
-    widgets.cpp
-    widgets.hpp
-)
+# set(PROJECT_SOURCES
+#     action.cpp
+#     action.hpp
+#     application.cpp
+#     application.hpp
+#     chat_client.cpp
+#     chat_client.hpp
+#     chat_server.cpp
+#     chat_server.hpp
+#     companion.cpp
+#     companion.hpp
+#     constants.hpp
+#     data.cpp
+#     data.hpp
+#     db_interaction.cpp
+#     db_interaction.hpp
+#     graphic_manager.cpp
+#     graphic_manager.hpp
+#     logging.cpp
+#     logging.hpp
+#     main.cpp
+#     mainwindow.cpp
+#     mainwindow.hpp
+#     manager.cpp
+#     manager.hpp
+#     message.cpp
+#     message.hpp
+#     utils.cpp
+#     utils.hpp
+#     utils_cout.cpp
+#     utils_cout.hpp
+#     utils_gpgme.cpp
+#     utils_gpgme.hpp
+#     utils_widgets.cpp
+#     utils_widgets.hpp
+#     widgets.cpp
+#     widgets.hpp
+# )
 
 include(FindPostgreSQL)
 
@@ -66,15 +67,22 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 
 #qt6_wrap_cpp(PROJECT_SOURCES mainwindow.hpp)
 
-add_executable(chatapp ${PROJECT_SOURCES})
+# add_executable(chatapp ${PROJECT_SOURCES})
 
-target_link_libraries(chatapp PRIVATE gpgme Boost::thread)
-#target_link_libraries(chatapp PRIVATE gpgme Boost)
-#target_link_libraries(chatapp PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets)
-#target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql)
-target_link_libraries(chatapp PRIVATE pq)
-target_link_libraries(chatapp PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(chatapp PRIVATE gpgme Boost::thread)
+# target_link_libraries(chatapp PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets)
+# target_link_libraries(chatapp PRIVATE pq)
+# target_link_libraries(chatapp PRIVATE nlohmann_json::nlohmann_json)
+
+link_libraries(
+    gpgme Boost::thread Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets
+    pq nlohmann_json::nlohmann_json)
+
+add_subdirectory(app)
+add_subdirectory(src)
+# add_subdirectory(test)
+
+# enable_testing()
 
 # copy sql scripts
 

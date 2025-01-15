@@ -3,6 +3,7 @@ import shutil
 import sys
 
 projectName = 'chatprj'
+scriptsDirectoryName = 'scripts'
 sqlScriptsDirectoryName = 'sql_scripts'
 
 
@@ -20,12 +21,13 @@ currentPath = pathlib.Path.cwd()
 print(f'currentPath: {currentPath}')
 
 if currentPath.name != projectName:
-    print(f'current working directory {currentPath} looks not like \'{projectName}\'')
+    print_header_with_closing_newline(f'current working directory {currentPath} looks not like \'{projectName}\'')
 
-sqlScriptsPath = currentPath / sqlScriptsDirectoryName
+sqlScriptsPath = currentPath / scriptsDirectoryName / sqlScriptsDirectoryName
 
 if not sqlScriptsPath.is_dir():
-    print(f'current working directory {currentPath} does not contain \'{sqlScriptsDirectoryName}\' folder. Exit...')
+    print_header_with_closing_newline(
+        f'current working directory {currentPath} does not contain \'{sqlScriptsDirectoryName}\' folder. Exit...')
     sys.exit()
 
 clientPaths = []
