@@ -6,13 +6,14 @@
 #include <type_traits>
 
 #include "constants.hpp"
+#include "graphic_manager.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "utils_cout.hpp"
 
 class MainWindow;
 class GraphicManager;
-// MainWindow* getMainWindowPtr();
+
 GraphicManager* getGraphicManagerPtr();
 
 const bool logDBInteraction = false;
@@ -42,10 +43,7 @@ QString argForLogging(const bool&);
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {
-    // MainWindow* mainWindowPtr = getMainWindowPtr();
-    QString text;
-
-    text += QString("- ");
+    QString text("- ");
 
     ((text += (argForLogging(args) + QString(" "))), ...);
 

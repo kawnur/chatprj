@@ -20,8 +20,10 @@
 #include "utils_cout.hpp"
 #include "widgets.hpp"
 
+class CentralPanelWidget;
 class LeftPanelWidget;
 class MainWindowContainerWidget;
+class RightPanelWidget;
 class ShowHideWidget;
 class SocketInfoBaseWidget;
 class SocketInfoWidget;

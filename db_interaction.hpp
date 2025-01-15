@@ -6,6 +6,7 @@
 #include <mutex>
 #include <string>
 
+#include "action.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"

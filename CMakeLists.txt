@@ -7,17 +7,23 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
+    action.cpp
+    action.hpp
     application.cpp
     application.hpp
     chat_client.cpp
     chat_client.hpp
     chat_server.cpp
     chat_server.hpp
+    companion.cpp
+    companion.hpp
     constants.hpp
     data.cpp
     data.hpp
     db_interaction.cpp
     db_interaction.hpp
+    graphic_manager.cpp
+    graphic_manager.hpp
     logging.cpp
     logging.hpp
     main.cpp
@@ -25,6 +31,8 @@ set(PROJECT_SOURCES
     mainwindow.hpp
     manager.cpp
     manager.hpp
+    message.cpp
+    message.hpp
     utils.cpp
     utils.hpp
     utils_cout.cpp
