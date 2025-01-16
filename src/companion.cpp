@@ -195,22 +195,29 @@ const std::vector<Message*>* Companion::getMessagesPtr() const
 bool Companion::sendMessage(
     bool isAntecedent, NetworkMessageType type,
     std::string networkId, const Message* messagePtr)
-{
+{    
     if(this->clientPtr_)
     {
-        // build json
-        std::string jsonData = buildMessageJSONString(
-            isAntecedent, type, networkId, messagePtr);
+        bool isConnected = this->clientPtr_->getIsConnected();
 
-        // send json over network
-        auto result = this->clientPtr_->send(jsonData);
+        logArgs("clientPtr_->getIsConnected():", isConnected);
 
-        if(!result)
+        if(isConnected)
         {
-            logArgsError("client message sending error");
-        }
+            // build json
+            std::string jsonData = buildMessageJSONString(
+                isAntecedent, type, networkId, messagePtr);
 
-        return result;
+            // send json over network
+            auto result = this->clientPtr_->send(jsonData);
+
+            if(!result)
+            {
+                logArgsError("client message sending error");
+            }
+
+            return result;
+        }
     }
 
     return false;

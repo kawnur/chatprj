@@ -1,7 +1,9 @@
 #ifndef LOGGING_HPP
 #define LOGGING_HPP
 
+// #include <QDateTime>
 #include <QString>
+#include <QTime>
 #include <string>
 #include <type_traits>
 
@@ -45,10 +47,14 @@ template<typename... Ts> void logArgs(Ts&&... args)
 {
     QString text("- ");
 
+    QTime time;
+
+    text += time.currentTime().toString() + QString(" - ");
+
     ((text += (argForLogging(args) + QString(" "))), ...);
 
     getGraphicManagerPtr()->addTextToAppLogWidget(text);
-    coutArgsWithSpaceSeparator(args...);
+    coutArgsWithSpaceSeparator(text);
 }
 
 template<typename... Ts> void logArgsInfo(Ts&&... args)

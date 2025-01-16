@@ -71,4 +71,6 @@ void sleepForMilliseconds(uint32_t);
 
 std::string generateMessageMappingKey(std::string&, uint8_t);
 
+std::string getBoolString(bool);
+
 #endif // UTILS_HPP

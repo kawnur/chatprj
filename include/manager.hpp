@@ -80,7 +80,8 @@ private:
         getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
     std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
-        const std::string&, const std::string&, const std::string&, const std::string&);
+        const std::string&, const std::string&, const std::string&,
+        const std::string&, const bool&, const bool&);
 
     bool connectToDb();
     bool buildCompanions();

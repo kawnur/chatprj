@@ -364,7 +364,8 @@ PGresult* pushSocketToDBAndReturn(
 PGresult* pushMessageToDBAndReturn(
     const PGconn* dbConnection, const bool logging, const std::string& companionName,
     const std::string& authorName, const std::string& timestamp,
-    const std::string& returningFieldName, const std::string& message)
+    const std::string& returningFieldName, const std::string& message,
+    const bool& isSent, const bool& isReceived)
 {
     std::string command = std::string(
         "INSERT INTO messages "
@@ -377,7 +378,11 @@ PGresult* pushMessageToDBAndReturn(
         + timestamp
         + std::string("', '")
         + message
-        + std::string("', false, false) RETURNING id, ")
+        + std::string("', ")
+        + getBoolString(isSent)
+        + std::string(", ")
+        + getBoolString(isReceived)
+        + std::string(") RETURNING id, ")
         + returningFieldName
         + std::string(", timestamp_tz");
 

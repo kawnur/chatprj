@@ -50,14 +50,18 @@ void Manager::set()
 
 std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     const std::string& companionName, const std::string& authorName,
-    const std::string& timestamp, const std::string& text)
+    const std::string& timestamp, const std::string& text,
+    const bool& isSent, const bool& isReceived)
 {
+    const std::string companionIdString("companion_id");
+
     std::shared_ptr<DBReplyData> messageDataPtr = this->getDBDataPtr(
         logDBInteraction,
         "pushMessageToDBAndReturn",
         &pushMessageToDBAndReturn,
         buildStringVector("id", "companion_id", "timestamp_tz"),
-        companionName, authorName, timestamp, std::string("companion_id"), text);
+        companionName, authorName, timestamp, companionIdString, text,
+        isSent, isReceived);
 
     if(!messageDataPtr)
     {
@@ -91,7 +95,8 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
     // add to DB and get timestamp
     auto tuple = this->pushMessageToDB(
-        companionPtr->getName(), std::string("me"), std::string("now()"), text);
+        companionPtr->getName(), std::string("me"), std::string("now()"),
+        text, false, false);
 
     uint32_t id = std::get<0>(tuple);
     uint8_t companion_id = std::get<1>(tuple);
@@ -112,6 +117,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
         companion_id, false, false, false, "");
 
     bool addResult = this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+    logArgs("addResult:", addResult);
 
     // add to widget
     groupPtr->addMessageWidgetToChatHistory(messagePtr);
@@ -144,7 +150,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     std::string networkId = jsonData.at("id");
     bool isAntecedent = jsonData.at("antecedent");
 
-    logArgsWithCustomMark("received:", networkId);
+    // logArgsWithCustomMark("received:", networkId);
 
     switch(type)
     {
@@ -156,7 +162,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             // add to DB and get timestamp
             auto tuple = this->pushMessageToDB(
-                companionPtr->getName(), companionPtr->getName(), timestamp, text);
+                companionPtr->getName(), companionPtr->getName(),
+                timestamp, text, false, true);
 
             uint32_t id = std::get<0>(tuple);
             uint8_t companion_id = std::get<1>(tuple);
@@ -173,7 +180,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             // create message state object and add to mapping
             MessageState* messageStatePtr = new MessageState(
-                companion_id, isAntecedent, false, false, networkId);
+                companion_id, isAntecedent, false, true, networkId);
 
             this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
@@ -234,6 +241,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
 
+            logArgs("pair.first:", pair.first, "pair.second:", pair.second);
+
             if(pair.first && pair.second)
             {
                 // message found in managers's mapping
@@ -254,6 +263,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             else
             {
                 // probably old message from previous sessions, search for it in db
+                logArgsInfo("probably old message from previous sessions, search for it in db");
             }
         }
 
@@ -1137,11 +1147,10 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
     if(messagesDataPtr->isEmpty())
     {
-        logArgsWarning("Empty db reply to unsent messages selection");
+        logArgsInfo("Empty db reply to unsent messages selection");
         return;
     }
 
-    // add to companion's messages if needed
     for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
     {
         uint32_t messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
@@ -1155,7 +1164,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
                 this->getMappedMessageStateByMessagePtr(messagePtr);
 
             // if(networkId.empty())
-            if(messageStatePtr)
+            if(!messageStatePtr)
             {
                 // showErrorDialogAndLogError(
                 logArgsError(
@@ -1164,9 +1173,14 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
                     // "but not found in manager's mapNetworkIdToMessage_");
                     "but not found in manager's mapMessageStateToMessage_");
             }
+            else
+            {
+                networkId = messageStatePtr->getNetworkId();
+            }
         }
         else
         {
+            // add to companion's messages if needed
             uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
             networkId = getRandomString(5);
 

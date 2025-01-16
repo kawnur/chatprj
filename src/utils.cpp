@@ -297,3 +297,7 @@ std::string generateMessageMappingKey(
     return networkId + std::string("_") + std::to_string(companionId);
 }
 
+std::string getBoolString(bool value)
+{
+    return (value) ? std::string("true") : std::string("false");
+}
