@@ -149,13 +149,13 @@ private:
 
     void initializeFields();
 
-    void customMenuRequestedSlot(QPoint);
-
     void changeColor(QColor&);
 
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
 
+private slots:
+    void customMenuRequestedSlot(QPoint);
 };
 
 class SocketInfoStubWidget : public SocketInfoBaseWidget
@@ -336,8 +336,8 @@ public:
     void set();
     void addTextToAppLogWidget(const QString&);
 
-private slots:
-    void addTextToAppLogWidgetSlot(const QString&);
+public slots:
+    void clearLogAction();
 
 signals:
     void addTextToAppLogWidgetSignal(const QString&);
@@ -346,6 +346,10 @@ private:
     QVBoxLayout* layoutPtr_;
     QPlainTextEdit* appLogWidgetPtr_;
     QPalette* appLogWidgetPalettePtr_;
+
+private slots:
+    void addTextToAppLogWidgetSlot(const QString&);
+    void customMenuRequestedSlot(QPoint);
 };
 
 class WidgetGroup : public QObject

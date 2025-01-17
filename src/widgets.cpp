@@ -282,7 +282,7 @@ void SocketInfoWidget::initializeFields()
     // connect
 }
 
-void SocketInfoWidget::customMenuRequestedSlot(QPoint pos)
+void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
     QMenu* menu = new QMenu(this);
 
@@ -300,7 +300,7 @@ void SocketInfoWidget::customMenuRequestedSlot(QPoint pos)
         deleteCompanionAction, &QAction::triggered,
         this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
 
-    menu->popup(this->mapToGlobal(pos));
+    menu->popup(this->mapToGlobal(position));
 }
 
 void SocketInfoWidget::updateCompanionAction()
@@ -404,10 +404,10 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
 {
     Manager* managerPtr = getManagerPtr();
 
-    auto base = dynamic_cast<SocketInfoBaseWidget*>(this);
+    auto baseObjectPtr = dynamic_cast<SocketInfoBaseWidget*>(this);
 
     auto newCompanion =
-        managerPtr->getMappedCompanionBySocketInfoBaseWidget(base);
+        managerPtr->getMappedCompanionBySocketInfoBaseWidget(baseObjectPtr);
 
     managerPtr->resetSelectedCompanion(newCompanion);
 }
@@ -948,6 +948,12 @@ void RightPanelWidget::set()
         this, SIGNAL(addTextToAppLogWidgetSignal(const QString&)),
         this, SLOT(addTextToAppLogWidgetSlot(const QString&)),
         Qt::QueuedConnection);
+
+    this->appLogWidgetPtr_->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(
+        this->appLogWidgetPtr_, &QWidget::customContextMenuRequested,
+        this, &RightPanelWidget::customMenuRequestedSlot, Qt::QueuedConnection);
 }
 
 void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
@@ -956,9 +962,28 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
     this->appLogWidgetPtr_->ensureCursorVisible();
 }
 
+void RightPanelWidget::customMenuRequestedSlot(QPoint position)
+{
+    QMenu* menu = new QMenu(this);
+
+    QAction* clearLogAction = new QAction("Clear log", this);
+    menu->addAction(clearLogAction);
+
+    connect(
+        clearLogAction, &QAction::triggered,
+        this, &RightPanelWidget::clearLogAction, Qt::QueuedConnection);
+
+    menu->popup(this->mapToGlobal(position));
+}
+
 void RightPanelWidget::addTextToAppLogWidget(const QString& text)
 {
     emit this->addTextToAppLogWidgetSignal(text);
+}
+
+void RightPanelWidget::clearLogAction()
+{
+    this->appLogWidgetPtr_->clear();
 }
 
 WidgetGroup::WidgetGroup(const Companion* companionPtr) :
