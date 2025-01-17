@@ -278,6 +278,11 @@ void SocketInfoWidget::initializeFields()
 
     requestHistoryAction_->setDisabled(true);
 
+    connect(
+        this->requestHistoryAction_, &QAction::triggered,
+        this, &SocketInfoWidget::requestHistoryFromCompanionAction,
+        Qt::QueuedConnection);
+
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(
@@ -293,10 +298,10 @@ void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 
     menu->addAction(this->requestHistoryAction_);
 
-    connect(
-        this->requestHistoryAction_, &QAction::triggered,
-        this, &SocketInfoWidget::requestHistoryFromCompanionAction,
-        Qt::QueuedConnection);
+    // connect(
+    //     this->requestHistoryAction_, &QAction::triggered,
+    //     this, &SocketInfoWidget::requestHistoryFromCompanionAction,
+    //     Qt::QueuedConnection);
 
     QAction* clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
@@ -1488,19 +1493,18 @@ void TextDialog::set()
     for(auto& info : *this->buttonsInfoPtr_)
     {
         QPushButton* buttonPtr = this->buttonBoxPtr_->addButton(
-            info.buttonText_,
-            info.buttonRole_);
+            info.buttonText_, info.buttonRole_);
 
         if(info.buttonRole_ == QDialogButtonBox::AcceptRole)
         {
             connect(
-                buttonBoxPtr_, &QDialogButtonBox::accepted,
+                this->buttonBoxPtr_, &QDialogButtonBox::accepted,
                 this, info.functionPtr_, Qt::QueuedConnection);
         }
         else if(info.buttonRole_ == QDialogButtonBox::RejectRole)
         {
             connect(
-                buttonBoxPtr_, &QDialogButtonBox::rejected,
+                this->buttonBoxPtr_, &QDialogButtonBox::rejected,
                 this, info.functionPtr_, Qt::QueuedConnection);
         }
         else

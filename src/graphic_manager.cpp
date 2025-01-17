@@ -89,6 +89,7 @@ void GraphicManager::createCompanion()
 {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::CREATE, this->mainWindowPtr_, nullptr);
+
     actionPtr->set();
 }
 
@@ -96,6 +97,7 @@ void GraphicManager::updateCompanion(Companion* companionPtr)
 {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::UPDATE, this->mainWindowPtr_, companionPtr);
+
     actionPtr->set();
 }
 
@@ -103,6 +105,7 @@ void GraphicManager::clearCompanionHistory(Companion* companionPtr)
 {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::CLEAR_HISTORY, this->mainWindowPtr_, companionPtr);
+
     actionPtr->set();
 }
 
@@ -115,6 +118,7 @@ void GraphicManager::deleteCompanion(Companion* companionPtr)
 {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::DELETE, this->mainWindowPtr_, companionPtr);
+
     actionPtr->set();
 }
 
@@ -347,6 +351,14 @@ const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
 
     return (result == this->mapMessageToMessageWidget_.end()) ?
                nullptr : result->first;
+}
+
+void GraphicManager::askUserForHistorySendingConfirmation(Companion* companionPtr)
+{
+    CompanionAction* actionPtr = new CompanionAction(
+        CompanionActionType::SEND_HISTORY, this->mainWindowPtr_, companionPtr);
+
+    actionPtr->set();
 }
 
 GraphicManager* getGraphicManagerPtr()

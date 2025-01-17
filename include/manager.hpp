@@ -58,6 +58,7 @@ public:
     void sendUnsentMessages(const Companion*);
 
     void requestHistoryFromCompanion(const Companion*);
+    void sendChatHistoryToCompanion(const Companion*);
 
 private:
     // std::mutex networkIdToMessageMapMutex_;

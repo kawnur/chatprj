@@ -37,7 +37,8 @@ enum class CompanionActionType
     // READ,
     UPDATE,
     DELETE,
-    CLEAR_HISTORY
+    CLEAR_HISTORY,
+    SEND_HISTORY
 };
 
 enum class PasswordActionType
@@ -71,6 +72,7 @@ const QString connectButtonDisconnectLabel { "Disconnect" };
 
 const QString deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const QString clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
+const QString sendChatHistoryToCompanionDialogText { "Companion %1 requested chat history sending." };
 const QString socketInfoStubWidget { "No companion info from DB..." };
 
 // new password dialog
@@ -93,6 +95,7 @@ const QString okButtonText { "OK" };
 const QString cancelButtonText { "Cancel" };
 const QString clearHistoryButtonText { "Clear history" };
 const QString deleteCompanionButtonText { "Delete companion" };
+const QString sendChatHistoryButtonText { "Send chat history" };
 
 // colors
 const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;

@@ -94,6 +94,8 @@ public:
     // std::string getMappedMessageTimeByMessageWidgetPtr(MessageWidget*);
     const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
 
+    void askUserForHistorySendingConfirmation(Companion*);
+
 private:
     std::mutex messageToMessageWidgetMapMutex_;
     std::map<const Message*, const MessageWidget*> mapMessageToMessageWidget_;

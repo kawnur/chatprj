@@ -272,6 +272,12 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     case NetworkMessageType::HISTORY_REQUEST:
         {
             logArgsInfo("got history request");
+
+            // ask user for confirmation
+            getGraphicManagerPtr()->
+                askUserForHistorySendingConfirmation(companionPtr);
+
+            // get messages from db
         }
 
         break;
@@ -1227,6 +1233,11 @@ void Manager::requestHistoryFromCompanion(const Companion* companionPtr)
 
     bool result = companionCastPtr->sendMessage(
         true, NetworkMessageType::HISTORY_REQUEST, "", nullptr);
+}
+
+void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
+{
+    logArgs("Manager::sendChatHistoryToCompanion");
 }
 
 bool Manager::buildCompanions()

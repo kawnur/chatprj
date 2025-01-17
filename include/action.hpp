@@ -6,6 +6,7 @@
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
+#include "utils_widgets.hpp"
 #include "widgets.hpp"
 
 class Dialog;

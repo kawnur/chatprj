@@ -26,29 +26,35 @@ CompanionAction::CompanionAction(
 
     case CompanionActionType::DELETE:
         dialogPtr_ = new TextDialog(
-            nullptr,
+            // nullptr,
+            mainWindowPtr_,
             DialogType::WARNING,
             deleteCompanionDialogText,
-            new std::vector<ButtonInfo> {
-                                        ButtonInfo(
-                                            cancelButtonText, QDialogButtonBox::RejectRole, &TextDialog::reject),
-                                        ButtonInfo(
-                                            deleteCompanionButtonText, QDialogButtonBox::AcceptRole,
-                                            &TextDialog::acceptAction) });
+            getButtonInfoVectorPtr(deleteCompanionButtonText));
+
         break;
 
     case CompanionActionType::CLEAR_HISTORY:
         dialogPtr_ = new TextDialog(
-            nullptr,
+            // nullptr,
+            mainWindowPtr_,
             DialogType::WARNING,
             clearCompanionHistoryDialogText,
-            new std::vector<ButtonInfo> {
-                                        ButtonInfo(
-                                            cancelButtonText, QDialogButtonBox::RejectRole, &TextDialog::reject),
-                                        ButtonInfo(
-                                            clearHistoryButtonText, QDialogButtonBox::AcceptRole,
-                                            &TextDialog::acceptAction) });
+            getButtonInfoVectorPtr(clearHistoryButtonText));
+
         break;
+
+    case CompanionActionType::SEND_HISTORY:
+        dialogPtr_ = new TextDialog(
+            // nullptr,
+            mainWindowPtr_,
+            DialogType::WARNING,
+            sendChatHistoryToCompanionDialogText.arg(
+                QString::fromStdString(companionPtr->getName())),
+            getButtonInfoVectorPtr(sendChatHistoryButtonText));
+
+        break;
+
     }
 }
 
@@ -94,6 +100,12 @@ Companion* CompanionAction::getCompanionPtr() const
 
 void CompanionAction::sendData()
 {
+    if(this->actionType_ == CompanionActionType::SEND_HISTORY)
+    {
+        getManagerPtr()->sendChatHistoryToCompanion(this->companionPtr_);
+        return;
+    }
+
     std::string name;
     std::string ipAddress;
     std::string serverPort { "" };
@@ -103,24 +115,26 @@ void CompanionAction::sendData()
     {
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
-    {
-        CompanionDataDialog* dataDialogPtr =
-            dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
+        {
+            CompanionDataDialog* dataDialogPtr =
+                dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
 
-        name = dataDialogPtr->getNameString();
-        ipAddress = dataDialogPtr->getIpAddressString();
-        clientPort = dataDialogPtr->getPortString();
-    }
-    break;
+            name = dataDialogPtr->getNameString();
+            ipAddress = dataDialogPtr->getIpAddressString();
+            clientPort = dataDialogPtr->getPortString();
+        }
+
+        break;
 
     case CompanionActionType::DELETE:
     case CompanionActionType::CLEAR_HISTORY:
-    {
-        name = this->companionPtr_->getName();
-        ipAddress = this->companionPtr_->getIpAddress();
-        clientPort = std::to_string(this->companionPtr_->getClientPort());
-    }
-    break;
+        {
+            name = this->companionPtr_->getName();
+            ipAddress = this->companionPtr_->getIpAddress();
+            clientPort = std::to_string(this->companionPtr_->getClientPort());
+        }
+
+        break;
 
     }
 
