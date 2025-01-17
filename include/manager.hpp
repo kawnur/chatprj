@@ -6,6 +6,7 @@
 
 #include "companion.hpp"
 #include "db_interaction.hpp"
+#include "utils.hpp"
 
 class Companion;
 class CompanionAction;
@@ -55,6 +56,8 @@ public:
     void startUserAuthentication();
 
     void sendUnsentMessages(const Companion*);
+
+    void requestHistoryFromCompanion(const Companion*);
 
 private:
     // std::mutex networkIdToMessageMapMutex_;

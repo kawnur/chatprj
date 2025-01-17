@@ -273,6 +273,11 @@ void SocketInfoWidget::initializeFields()
         layoutPtr_->addWidget(widget);
     }
 
+    requestHistoryAction_ = new QAction(
+        "Request chat history from companion", this);
+
+    requestHistoryAction_->setDisabled(true);
+
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(
@@ -285,6 +290,13 @@ void SocketInfoWidget::initializeFields()
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
     QMenu* menu = new QMenu(this);
+
+    menu->addAction(this->requestHistoryAction_);
+
+    connect(
+        this->requestHistoryAction_, &QAction::triggered,
+        this, &SocketInfoWidget::requestHistoryFromCompanionAction,
+        Qt::QueuedConnection);
 
     QAction* clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
@@ -301,6 +313,11 @@ void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
         this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
 
     menu->popup(this->mapToGlobal(position));
+}
+
+void SocketInfoWidget::requestHistoryFromCompanionAction()
+{
+    getManagerPtr()->requestHistoryFromCompanion(this->companionPtr_);
 }
 
 void SocketInfoWidget::updateCompanionAction()
@@ -351,6 +368,10 @@ void SocketInfoWidget::clientAction()
 
         // change indicator color
         this->connectionStateIndicatorPtr_->toggle();
+
+        // set context menu action enabled
+        this->requestHistoryAction_->setDisabled(
+            this->requestHistoryAction_->isEnabled());
     }
 }
 

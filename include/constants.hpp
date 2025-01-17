@@ -13,11 +13,15 @@ static const char alphanum[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz";
 
+const uint32_t sleepDurationInitial = 1000;
+const float sleepDurationIncreaseRate = 1.2f;
+
 enum class NetworkMessageType
 {
     SEND_DATA,
     RECEIVE_CONFIRMATION,
-    RECEIVE_CONFIRMATION_REQUEST
+    RECEIVE_CONFIRMATION_REQUEST,
+    HISTORY_REQUEST
 };
 
 enum class DialogType
@@ -89,7 +93,6 @@ const QString okButtonText { "OK" };
 const QString cancelButtonText { "Cancel" };
 const QString clearHistoryButtonText { "Clear history" };
 const QString deleteCompanionButtonText { "Delete companion" };
-
 
 // colors
 const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;

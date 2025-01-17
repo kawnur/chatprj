@@ -269,6 +269,12 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
         break;
 
+    case NetworkMessageType::HISTORY_REQUEST:
+        {
+            logArgsInfo("got history request");
+        }
+
+        break;
     }
 }
 
@@ -621,7 +627,9 @@ void Manager::waitForMessageReceptionConfirmation(
 {
     auto lambda = [=]()
     {
-        sleepForMilliseconds(1000);
+        uint32_t sleepDuration = sleepDurationInitial;
+
+        sleepForMilliseconds(sleepDuration);
 
         while(true)
         {
@@ -638,7 +646,8 @@ void Manager::waitForMessageReceptionConfirmation(
                     messageStatePtr->getNetworkId(), messagePtr);
 
                 // sleep
-                sleepForMilliseconds(1000);
+                sleepForMilliseconds(sleepDuration);
+                sleepDuration *= sleepDurationIncreaseRate;
             }
         }
     };
@@ -1210,6 +1219,14 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
             this->markMessageAsSent(messagePtr);
         }
     }
+}
+
+void Manager::requestHistoryFromCompanion(const Companion* companionPtr)
+{
+    Companion* companionCastPtr = const_cast<Companion*>(companionPtr);
+
+    bool result = companionCastPtr->sendMessage(
+        true, NetworkMessageType::HISTORY_REQUEST, "", nullptr);
 }
 
 bool Manager::buildCompanions()

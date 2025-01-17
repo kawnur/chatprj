@@ -259,6 +259,7 @@ std::string buildMessageJSONString(
         break;
 
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
+    case NetworkMessageType::HISTORY_REQUEST:
 
         break;
     }

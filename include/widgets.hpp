@@ -115,6 +115,7 @@ public:
     void setNewMessagesIndicatorOff();
 
 public slots:
+    void requestHistoryFromCompanionAction();
     void updateCompanionAction();
     void clearHistoryAction();
     void deleteCompanionAction();
@@ -146,6 +147,8 @@ private:
     QPushButton* connectButtonPtr_;
 //    QPushButton* toggleIndicatorButton_;
     IndicatorWidget* newMessagesIndicatorPtr_;
+
+    QAction* requestHistoryAction_;
 
     void initializeFields();
 
