@@ -38,25 +38,16 @@ public:
     ~MainWindow();
 
     void set();
-
     void addTextToAppLogWidget(const QString&);
-
     void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, QWidget*);
-
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
-
     size_t getCompanionPanelChildrenSize();
-
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
-
     void hideLeftAndRightPanels();
     void showLeftAndRightPanels();
-
     int getLeftPanelWidgetWidth();
-
     void enableWidgetsForShowHide();
     void disableWidgetsForShowHide();
-
     void enableBlurEffect();
     void disableBlurEffect();
 
@@ -65,7 +56,6 @@ private slots:
 
 private:
     QPalette* menuBarPalettePtr_;
-
     QWidget* centralWidgetPtr_;
     QHBoxLayout* centralWidgetLayoutPtr_;
 
@@ -91,9 +81,7 @@ private:
     void closeEvent(QCloseEvent*) override;
     void keyPressEvent(QKeyEvent*) override;
     void mouseDoubleClickEvent(QMouseEvent*) override;
-
     void createMenu();
-
     void setBlurEffect();
 };
 

@@ -33,7 +33,6 @@ public:
     SocketInfo(SocketInfo&&) {}
     ~SocketInfo() = default;
 
-    void print();
     std::string getIpAddress() const;
     uint16_t getServerPort() const;
     uint16_t getClientPort() const;
@@ -53,41 +52,32 @@ public:
     Companion(int, std::string&&);
     ~Companion();
 
+    int getId();
+    std::string getName() const;
+    SocketInfo* getSocketInfoPtr() const;
+    std::string getSocketIpAddress() const;
+    uint16_t getSocketServerPort() const;
+    uint16_t getSocketClientPort() const;
+    const std::vector<Message*>* getMessagePointersPtr() const;
+
+    void setSocketInfo(SocketInfo*);
+
     bool startServer();
     bool createClient();
     bool connectClient();
     bool disconnectClient();
-
-    int getId();
-    std::string getName() const;
-    std::string getIpAddress() const;
-    uint16_t getServerPort() const;
-    uint16_t getClientPort() const;
-
-    SocketInfo* getSocketInfoPtr() const;
-    void setSocketInfo(SocketInfo*);
     void addMessage(Message*);
-
-    const std::vector<Message*>* getMessagesPtr() const;
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
-
     void updateData(const CompanionData*);
-
     Message* findMessage(uint32_t);
 
 private:
     std::mutex messagesMutex_;
-
     int id_;  // TODO change type
     std::string name_;
     SocketInfo* socketInfoPtr_;
-
     ChatClient* clientPtr_;
-
-    // boost::asio::io_context* io_contextPtr_;
     ChatServer* serverPtr_;
-
-    // std::vector<Message> messages_;
     std::vector<Message*>* messagePointersPtr_;
 };
 

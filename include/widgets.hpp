@@ -26,12 +26,6 @@ class MainWindow;
 class Message;
 class MessageState;
 
-const std::vector<QString> connectButtonLabels
-{
-    connectButtonConnectLabel,  // initial
-    connectButtonDisconnectLabel
-};
-
 QString getInitialConnectButtonLabel();
 QString getNextConnectButtonLabel();
 
@@ -45,6 +39,7 @@ public:
 
 private:
     QPalette* palettePtr_;
+
     void keyPressEvent(QKeyEvent*);
 
 signals:
@@ -102,15 +97,16 @@ public:
     SocketInfoWidget(Companion*);
     ~SocketInfoWidget();
 
-    void print();
-    bool isStub() override;
+    QString getName() const;
+    QString getIpAddress() const;
+    uint16_t getServerPort() const;
+    uint16_t getClientPort() const;
 
+    bool isStub() override;
     bool isSelected();
     void select();
     void unselect();
-
     void update();
-
     void setNewMessagesIndicatorOn();
     void setNewMessagesIndicatorOff();
 
@@ -124,20 +120,15 @@ public slots:
 private:
     bool isSelected_;
     bool isConnected_;
-
     Companion* companionPtr_;
-
     QString name_;
     QString ipAddress_;
     uint16_t serverPort_;
     uint16_t clientPort_;
-
     QColor selectedColor_;
     QColor unselectedColor_;
     QPalette* palettePtr_;
-
     QHBoxLayout* layoutPtr_;
-
     IndicatorWidget* connectionStateIndicatorPtr_;
     QLabel* nameLabelPtr_;
     QLabel* ipAddressLabelPtr_;
@@ -145,15 +136,11 @@ private:
     QLabel* clientPortLabelPtr_;
     QPushButton* editButtonPtr_;
     QPushButton* connectButtonPtr_;
-//    QPushButton* toggleIndicatorButton_;
     IndicatorWidget* newMessagesIndicatorPtr_;
-
     QAction* requestHistoryAction_;
 
     void initializeFields();
-
     void changeColor(QColor&);
-
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
 
@@ -189,14 +176,13 @@ public:
 
 private:
     bool show_;
-
     QVBoxLayout* layoutPtr_;
     QLabel* labelPtr_;
     QPalette* palettePtr_;
 
-    void mousePressEvent(QMouseEvent*) override;
     void hideInfo();
     void showInfo();
+    void mousePressEvent(QMouseEvent*) override;
 };
 
 class MessageIndicatorPanelWidget : public QWidget
@@ -213,12 +199,10 @@ public:
 
 private:
     bool isMessageFromMe_;
-
     QHBoxLayout* layoutPtr_;
     IndicatorWidget* sentIndicatoPtr_;
     IndicatorWidget* receivedIndicatoPtr_;
     QLabel* newMessageLabelPtr_;
-    // QTextEdit* newMessageEditPtr_;
 };
 
 class WidgetGroup;
@@ -261,16 +245,13 @@ public:
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
     size_t getCompanionPanelChildrenSize();
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
-
     int getLastCompanionPanelChildWidth();
 
 private:
     QVBoxLayout* layoutPtr_;
     QPalette* palettePtr_;
-
     QWidget* companionPanelPtr_;
     QVBoxLayout* companionPanelLayoutPtr_;
-
     QSpacerItem* spacerPtr_;
 };
 
@@ -283,7 +264,6 @@ public:
     ~CentralPanelWidget();
 
     void set(Companion*);
-
     void addMessageWidgetToChatHistory(bool, const std::string&, const Message*);
 
     void addMessageWidgetToChatHistoryFromThread(
@@ -291,7 +271,6 @@ public:
 
     void scrollDownChatHistory();
     void clearChatHistory();
-
     void sortChatHistoryElements(bool);
 
 private slots:
@@ -304,8 +283,8 @@ private:
     std::mutex chatHistoryMutex_;
     int scrollBarMax = 0;
     Companion* companionPtr_;
-
     QVBoxLayout* layoutPtr_;
+
     //    QGraphicsScene* graphicsScene_;
     //    QGraphicsView* graphicsView_;
     //    QRectF* rect_;
@@ -315,15 +294,12 @@ private:
 
     QLabel* companionNameLabelPtr_;
     QPalette* companionNameLabelPalettePtr_;
-    // QTextEdit* chatHistoryWidgetPtr_;
     QPalette* chatHistoryWidgetPalettePtr_;
     QScrollArea* chatHistoryScrollAreaPtr_;
     QWidget* chatHistoryWidgetPtr_;
     QVBoxLayout* chatHistoryLayoutPtr_;
-
     TextEditWidget* textEditPtr_;
     QPalette* textEditPalettePtr_;
-    //    QPushButton* button_;
 
     void sendMessage(const QString&);
 };
@@ -365,20 +341,12 @@ public:
     ~WidgetGroup();
 
     void addMessageWidgetToChatHistory(const Message*);
-
-    // void addMessageWidgetToChatHistoryFromThread(bool, const Message*);
     void addMessageWidgetToChatHistoryFromThread(const MessageState*, const Message*);
-
     void clearChatHistory();
-
     void hideCentralPanel();
     void showCentralPanel();
-
     SocketInfoBaseWidget* getSocketInfoBasePtr();
-
     void sortChatHistoryElements();
-
-    // bool isSocketInfoWidgetSelected();
     void messageAdded();
 
 public slots:
@@ -388,10 +356,8 @@ private:
     const Companion* companionPtr_;
     SocketInfoBaseWidget* socketInfoBasePtr_;
     CentralPanelWidget* centralPanelPtr_;
-
     uint32_t antacedentMessagesCounter_;
     std::mutex antacedentMessagesCounterMutex_;
-
     void buildChatHistory();
 };
 
@@ -403,15 +369,11 @@ public:
 
     void set();
     void setParents(QWidget*, QWidget*);
-
     void hideSocketInfoStubWidget();
-
     void hideCentralPanel();
     void showCentralPanel();
-
     void hideStubPanels();
     void showStubPanels();
-
     void setLeftPanelWidth(int);
 
 private:
@@ -460,25 +422,19 @@ public:
     ~CompanionDataDialog();
 
     void set() override;
-
     std::string getNameString();
     std::string getIpAddressString();
     std::string getPortString();
 
 private:
     CompanionActionType actionType_;
-
     QFormLayout* layoutPtr_;
-
     QLabel* nameLabelPtr_;
     QLineEdit* nameEditPtr_;
-
     QLabel* ipAddressLabelPtr_;
     QLineEdit* ipAddressEditPtr_;
-
     QLabel* portLabelPtr_;
     QLineEdit* portEditPtr_;
-
     QDialogButtonBox* buttonBoxPtr_;
 };
 
@@ -491,19 +447,15 @@ public:
     ~CreatePasswordDialog();
 
     void set() override;
-
     std::string getFirstEditText();
     std::string getSecondEditText();
 
 private:
     QFormLayout* layoutPtr_;
-
     QLabel* firstLabelPtr_;
     QLineEdit* firstEditPtr_;
-
     QLabel* secondLabelPtr_;
     QLineEdit* secondEditPtr_;
-
     QDialogButtonBox* buttonBoxPtr_;
 };
 
@@ -516,15 +468,12 @@ public:
     ~GetPasswordDialog();
 
     void set() override;
-
     std::string getEditText();
 
 private:
     QFormLayout* layoutPtr_;
-
     QLabel* labelPtr_;
     QLineEdit* editPtr_;
-
     QDialogButtonBox* buttonBoxPtr_;
 };
 
@@ -541,8 +490,6 @@ public:
     QString buttonText_;
     QDialogButtonBox::ButtonRole buttonRole_;
     void (TextDialog::*functionPtr_)();
-
-private:
 };
 
 class TextDialog : public Dialog
@@ -554,10 +501,8 @@ public:
     ~TextDialog();
 
     void set() override;
-
     void closeSelf();
     void closeSelfAndParentDialog();
-
     void acceptAction();
 
 public slots:
@@ -568,7 +513,6 @@ private:
     QPlainTextEdit* textEditPtr_;
     QVBoxLayout* layoutPtr_;
     QDialogButtonBox* buttonBoxPtr_;
-
     std::vector<ButtonInfo>* buttonsInfoPtr_;
 };
 

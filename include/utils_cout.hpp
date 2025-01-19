@@ -14,22 +14,19 @@
 
 void endline(int);
 
-//void coutWithManipulators(auto&& s, int width) {
-template<typename T> void coutWithManipulators(T&& s, int width)
+template<typename T> void coutWithManipulators(T&& value, int width)
 {
-	std::cout << std::left << std::setw(width) << std::setfill(' ') << s;
+    std::cout << std::left << std::setw(width) << std::setfill(' ') << value;
 }
 
-//void coutWithManipulatorsLeft(auto&& s, int width) {
-template<typename T> void coutWithManipulatorsLeft(T&& s, int width)
+template<typename T> void coutWithManipulatorsLeft(T&& value, int width)
 {
-	std::cout << std::left << std::setw(width) << std::setfill(' ') << s;
+    std::cout << std::left << std::setw(width) << std::setfill(' ') << value;
 }
 
-//void coutWithManipulatorsRight(auto&& s, int width) {
-template<typename T> void coutWithManipulatorsRight(T&& s, int width)
+template<typename T> void coutWithManipulatorsRight(T&& value, int width)
 {
-	std::cout << std::right << std::setw(width) << std::setfill(' ') << s;
+    std::cout << std::right << std::setw(width) << std::setfill(' ') << value;
 }
 
 template<typename... Ts> void coutArgsWithManipulators(int width, Ts&&... args)
@@ -38,23 +35,24 @@ template<typename... Ts> void coutArgsWithManipulators(int width, Ts&&... args)
 	endline(1);
 }
 
-template<typename U> int getSizeAsInt(U& u)
+template<typename T> int getSizeAsInt(T& parameter)
 {
-	return (int)std::to_string(u).size();
+    return (int)std::to_string(parameter).size();
 }
 
-
-// TODO doesnot work with multiple function pointers as params
-//template<typename U, typename... Ts> void coutContainerWithManupulators(std::vector<U>& container, Ts&&... args)
-template<typename U, typename... Ts> void coutContainerArgsResultWithManupulators(std::vector<U>& container, Ts&& ... args...)
-//template<typename U> void coutContainerArgsResultWithManupulators(std::vector<U>& container, U(*)(U)...args)
+// TODO does not work with multiple function pointers as params
+template<typename T, typename... Ts>
+void coutContainerArgsResultWithManupulators(
+    std::vector<T>& container, Ts&&... args)
 {
-    auto check = [&](U& u1, U& u2)
+    auto check = [&](T& u1, T& u2)
     {
 		return getSizeAsInt(u1) < getSizeAsInt(u2);
 	};
 
-	auto maxLengthElement = std::max_element(container.begin(), container.end(), check);
+    auto maxLengthElement = std::max_element(
+        container.begin(), container.end(), check);
+
 	int width = (int)(maxLengthElement->size());
 
     for(auto& element : container)
@@ -63,46 +61,28 @@ template<typename U, typename... Ts> void coutContainerArgsResultWithManupulator
 	}
 }
 
-//	template<typename T, std::ios_base& (*alignment)(), int width, char separator> void coutWithManipulators(T& t)
-//	template<typename T, std::function<std::ios_base&(std::ios_base&)> alignment(std::ios_base&), int width, char separator> void coutWithManipulators(T& t)
-//	template<typename T, decltype(std::left) alignment, int width, char separator> void coutWithManipulators(T&& t)
-template<typename T, std::ios_base& (*alignment)(std::ios_base&), int width, char separator>
-void coutWithManipulators(T&& t)
+template<
+    typename T, std::ios_base& (*alignment)(std::ios_base&),
+    int width, char separator>
+void coutWithManipulators(T&& value)
 {
-	std::cout << alignment << std::setw(width) << std::setfill(separator) << t;
+    std::cout << alignment << std::setw(width)
+              << std::setfill(separator) << std::forward<T>(value);
 }
 
-template<typename T, std::ios_base& (*alignment)(std::ios_base&), int width, char separator>
-void coutWithManipulators(T& t)
+template<typename T> void coutWithEndl(T&& value)
 {
-	std::cout << alignment << std::setw(width) << std::setfill(separator) << t;
+    std::cout << value << std::endl;
 }
 
-template<typename T> void coutWithEndl(T&& t)
+template<typename T> void coutWithTab(T&& value)
 {
-	std::cout << t << std::endl;
+    std::cout << value << '\t';
 }
 
-template<typename T> void coutStringWithEndl(T&& t)
+template<typename T> void coutWithoutInterval(T&& value)
 {
-    if(t == nullptr)
-    {
-		coutWithEndl("nullptr");
-	}
-    else
-    {
-		coutWithEndl(std::string(t));
-	}
-}
-
-template<typename T> void coutWithTab(T&& t)
-{
-	std::cout << t << '\t';
-}
-
-template<typename T> void coutWithoutInterval(T&& t)
-{
-	std::cout << t;
+    std::cout << value;
 }
 
 template<typename T> std::string argForCout(T* const& value)
@@ -123,17 +103,7 @@ std::string argForCout(const char*);
 
 template<typename... Ts> void coutArgsWithSeparator(char separator, Ts&&... args)
 {
-//	(std::cout << ... << args) << std::endl;
-//	auto l = [](auto& i){ std::cout << i << separator; }
-//	(l << ... << args) << std::endl;
-//	((std::cout << '\t')... << args) << std::endl;
-//	(l(args), ...);
-
-//    ((std::cout << args << separator), ...);
     ((std::cout << argForCout(args) << separator), ...);
-
-//	([&]{ std::cout << '\t' << i; }(), ...);
-//	(std::cout (<< '\t' <<) ... (<< '\t' <<) args) << std::endl;
 	endline(1);
 }
 
@@ -147,38 +117,38 @@ template<typename... Ts> void coutArgsWithTabSeparator(Ts&&... args)
 	coutArgsWithSeparator('\t', args...);
 }
 
-
 // cout vector
-template<typename T> void coutVectorInLine(const std::vector<T>& v)
+template<typename T> void coutVectorInLine(const std::vector<T>& vector)
 {
-    for(auto& i : v)
+    for(auto& item : vector)
     {
-		std::cout << i << ' ';
+        std::cout << item << ' ';
 	}
 }
 
-template<typename T> void printVector(T& v, bool showSize = false, bool showCapacity = false)
+template<typename T>
+void printVector(T& vector, bool showSize = false, bool showCapacity = false)
 {
 	std::cout << std::endl << "printVector" << std::endl;
 
-    for(std::size_t i = 0; i < v.size(); i++)
+    for(std::size_t i = 0; i < vector.size(); i++)
     {
-		std::cout << v.at(i) << " ";
+        std::cout << vector.at(i) << " ";
 	}
 	endline(1);
 
     if(showSize)
     {
-		std::cout << "v.size(): " << v.size() << std::endl;
+        std::cout << "v.size(): " << vector.size() << std::endl;
 	}
     if(showCapacity)
     {
-		std::cout << "v.capacity(): " << v.capacity() << std::endl;
+        std::cout << "v.capacity(): " << vector.capacity() << std::endl;
 	}
 	endline(1);
 }
 
-template<typename T> void coutVectorState(T& v)
+template<typename T> void coutVectorState(T& vector)
 {
 	endline(1);
 	coutWithEndl("coutVectorState");
@@ -188,34 +158,34 @@ template<typename T> void coutVectorState(T& v)
 
 	coutArgsWithManipulators(width, "ADDRESS", "INDEX", "VALUE");
 
-    for(std::size_t i = 0; i < v.size(); i++)
+    for(std::size_t i = 0; i < vector.size(); i++)
     {
-		coutArgsWithManipulators(width, &(v.at(i)), i, v.at(i));
+        coutArgsWithManipulators(width, &(vector.at(i)), i, vector.at(i));
 	}
 
-	coutArgsWithManipulators(width1, "SIZE:", v.size());
-	coutArgsWithManipulators(width1, "CAPACITY:", v.capacity());
+    coutArgsWithManipulators(width1, "SIZE:", vector.size());
+    coutArgsWithManipulators(width1, "CAPACITY:", vector.capacity());
 	endline(1);
 }
 
-template<typename T> void coutVectorOfVectorsState(T& v)
+template<typename T> void coutVectorOfVectorsState(T& vector)
 {
 	endline(1);
 	coutWithEndl("coutVectorState");
 
-    for(auto iter = v.begin(); iter != v.end(); iter++)
+    for(auto iter = vector.begin(); iter != vector.end(); iter++)
     {
 		coutWithTab(&*iter);
 		coutVectorInLine(*iter);
 		endline(1);
 	}
-	coutWithTab(&*(v.end()));
+    coutWithTab(&*(vector.end()));
 	coutWithEndl("end");
 
 	endline(1);
 
-	coutArgsWithSeparator(' ', "v.size():", v.size());
-	coutArgsWithSeparator(' ', "v.capacity():", v.capacity());
+    coutArgsWithSeparator(' ', "v.size():", vector.size());
+    coutArgsWithSeparator(' ', "v.capacity():", vector.capacity());
 	endline(2);
 }
 
@@ -223,43 +193,37 @@ void coutVector1(const std::vector<int>&);
 void coutVectorAndSum(const std::vector<int>&);
 void coutVectorWithIndexesHorizontally(const std::vector<int>&);
 
-
 // array
 void printArray(std::array<int, 10>&);
 
-
 // tuple
-template<typename T, std::size_t... I> void printTuple(T&& a)
+template<typename T, std::size_t... I> void printTuple(T&& container)
 {
-//		std::cout << "a.get<1>(a): " << std::get<0>(a) << '\t';
-//		std::cout << "a.get<2>(a): " << std::get<1>(a) << std::endl;
-
-//    	for(int i = 0; i < s; i++) {
-//    		std::cout << "a.get<" << s << ">(a): " << std::get<s>(a) << std::endl;
-//    	}
-	([](auto a){ std::cout << "a.get<" << I << ">(a): " << std::get<I>(a) << std::endl; }, ...);
+    (
+        [](auto container)
+        {
+            std::cout << "a.get<" << I << ">(a): "
+                      << std::get<I>(container) << std::endl;
+        },
+        ...);
 }
-
 
 // set
 void printSet(std::set<int>&);
 
-
 // map
-template<typename T, typename U> void coutMap(std::map<T, U>& m)
+template<typename T, typename U> void coutMap(std::map<T, U>& map)
 {
-    for(auto it = m.begin(); it != m.end(); it++)
+    for(auto it = map.begin(); it != map.end(); it++)
     {
 		coutArgsWithManipulators(15, it->first, it->second);
 	}
 	endline(1);
 }
 
-
 // string
 void coutString(std::string::const_iterator, std::string::const_iterator);
 void coutStringFull(std::string&);
 void coutHeader(const std::string&);
-
 
 #endif

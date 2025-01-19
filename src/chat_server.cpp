@@ -13,7 +13,7 @@ void ServerSession::do_read()
 
     auto self(shared_from_this());
 
-    socket_.async_read_some(boost::asio::buffer(data_, max_length),
+    socket_.async_read_some(boost::asio::buffer(data_, maxBufferSize),
         [this, self](boost::system::error_code ec, std::size_t length)
         {
             if (!ec)
@@ -23,8 +23,6 @@ void ServerSession::do_read()
                 if(length > 0)
                 {
                     logArgs("server got message:", str);
-
-                    // getManagerPtr()->receiveMessage(this->companionPtr_, str);
 
                     // split messages
                     int openCounter = 0;
@@ -77,16 +75,8 @@ void ServerSession::do_write(std::size_t length)
     );
 }
 
-//ChatServer::ChatServer(short port) {
-//    boost::asio::io_context io_context_;
-//    tcp::acceptor acceptor_(io_context_, tcp::endpoint(tcp::v4(), port));
-
-//    do_accept();
-//}
-
 void ChatServer::run()
 {
-    // this->io_context_.run();
     std::thread([this](){ this->io_context_.run(); }).detach();
 }
 
@@ -99,32 +89,11 @@ void ChatServer::do_accept()
         {
             if(!ec)
             {
-//                std::make_shared<class session>(std::move(socket))->start();
-                std::make_shared<ServerSession>(this->companionPtr_, std::move(socket))->start();
+                std::make_shared<ServerSession>(
+                    this->companionPtr_, std::move(socket))->start();
             }
 
             do_accept();
         }
     );
 }
-
-//int async_tcp_echo_server()
-//{
-//  try
-//  {
-
-//    coutWithEndl("Echo server started");
-
-//    boost::asio::io_context io_context;
-
-//    class server s(io_context, std::atoi("5002"));
-
-//    io_context.run();
-//  }
-//  catch (std::exception& e)
-//  {
-//    coutArgsWithSpaceSeparator("Exception:", e.what());
-//  }
-
-//  return 0;
-//}

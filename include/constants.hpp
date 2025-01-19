@@ -8,6 +8,10 @@
 const std::string logDelimiter { "############################" };
 const std::string logCustomDelimiter { "?????????????????????????" };
 
+const size_t maxBufferSize = 1024;
+
+const bool logDBInteraction = false;
+
 static const char alphanum[] =
     "0123456789"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -70,6 +74,12 @@ const std::map<DialogType, std::string> dialogTypeStringRepresentation
 const QString connectButtonConnectLabel { "Connect" };
 const QString connectButtonDisconnectLabel { "Disconnect" };
 
+const std::vector<QString> connectButtonLabels
+{
+    connectButtonConnectLabel,  // initial
+    connectButtonDisconnectLabel
+};
+
 const QString deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const QString clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const QString sendChatHistoryToCompanionDialogText { "Companion %1 requested chat history sending." };
@@ -91,6 +101,7 @@ const QString authenticationDialogLabel { "Enter password:" };
 // info dialogs
 const QString newPasswordCreatedLabel { "New password created" };
 
+// button text
 const QString okButtonText { "OK" };
 const QString cancelButtonText { "Cancel" };
 const QString clearHistoryButtonText { "Clear history" };
@@ -108,6 +119,5 @@ const uint32_t appLogBackgroundColor = 0xcccaca;
 const uint32_t newMessageEditColor = 0xdcdc07;
 const QString sentMessageColor = "#115e00";
 const QString receivedMessageColor = "#00115e";
-
 
 #endif // CONSTANTS_HPP

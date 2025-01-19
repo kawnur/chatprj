@@ -11,6 +11,11 @@ GraphicManager::GraphicManager() :
     // mainWindowPtr_ = nullptr;
 }
 
+MainWindow* GraphicManager::getMainWindowPtr()
+{
+    return this->mainWindowPtr_;
+}
+
 void GraphicManager::set()
 {
     stubWidgetsPtr_ = new StubWidgetGroup;
@@ -64,14 +69,14 @@ void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
         position, widgetPtr);
 }
 
-void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget)
-{
-    this->mainWindowPtr_->removeWidgetFromCompanionPanel(widget);
-}
-
 void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
 {
     this->mainWindowPtr_->addWidgetToCompanionPanel(widget);
+}
+
+void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget)
+{
+    this->mainWindowPtr_->removeWidgetFromCompanionPanel(widget);
 }
 
 void GraphicManager::createTextDialogAndShow(
@@ -239,11 +244,6 @@ void GraphicManager::showInfo()
     // this->showInfoViaStubs();
 }
 
-MainWindow* GraphicManager::getMainWindowPtr()
-{
-    return this->mainWindowPtr_;
-}
-
 void GraphicManager::createEntrancePassword()
 {
     PasswordAction* actionPtr = new PasswordAction(PasswordActionType::CREATE);
@@ -318,23 +318,6 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr
 {
     groupPtr->sortChatHistoryElements();
 }
-
-// std::string GraphicManager::getMappedMessageTimeByMessageWidgetPtr(
-//     MessageWidget* widgetPtr)
-// {
-//     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
-
-//     auto result = std::find_if(
-//         this->mapMessageToMessageWidget_.begin(),
-//         this->mapMessageToMessageWidget_.end(),
-//         [&](auto iter)
-//         {
-//             return iter.second == widgetPtr;
-//         });
-
-//     return (result == this->mapMessageToMessageWidget_.end()) ?
-//                std::string("") : result->first->getTime();
-// }
 
 const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
     MessageWidget* widgetPtr)

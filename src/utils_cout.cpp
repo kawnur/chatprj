@@ -89,9 +89,7 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& v)
     std::cout << std::endl;
 }
 
-
 // array
-
 void printArray(std::array<int, 10>& a)
 {
     std::cout << "&a: " << &a << std::endl;
@@ -104,12 +102,9 @@ void printArray(std::array<int, 10>& a)
     std::cout << "a.data(): " << a.data() << std::endl;
 }
 
-
 // tuple
 
-
 // set
-
 void printSet(std::set<int>& s)
 {
     std::cout << std::endl << "&s: " << &s << std::endl;
@@ -122,9 +117,7 @@ void printSet(std::set<int>& s)
     std::cout << "s.size(): " << s.size() << std::endl;
 }
 
-
 // map
-
 
 // string
 void coutString(std::string::const_iterator it1, std::string::const_iterator it2)

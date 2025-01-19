@@ -10,7 +10,6 @@
 class ButtonInfo;
 class CompanionAction;
 class Message;
-// class NetworkMessageType;
 class TextDialog;
 
 template<typename... Ts> void logArgsException(Ts&&... args);
@@ -43,34 +42,26 @@ std::vector<std::string> buildStringVector(Ts... args)
 bool validateCompanionName(std::vector<std::string>&, const std::string&);
 bool validateIpAddress(std::vector<std::string>&, const std::string&);
 bool validatePort(std::vector<std::string>&, const std::string&);
-
 bool validateCompanionData(std::vector<std::string>&, const CompanionAction*);
-
 bool validatePassword(std::vector<std::string>&, const std::string&);
-
 QString buildDialogText(std::string&&, const std::vector<std::string>&);
-
 std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
-
 void showInfoDialogAndLogInfo(QWidget*, const QString&, void (TextDialog::*)());
 void showInfoDialogAndLogInfo(QWidget*, QString&&);
 void showWarningDialogAndLogWarning(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
-std::pair<QString, QString> formatMessageHeaderAndBody(const std::string&, const Message*);
+std::pair<QString, QString> formatMessageHeaderAndBody(
+    const std::string&, const Message*);
 
 std::string buildMessageJSONString(
     bool, NetworkMessageType, const std::string&, const Message*);
 
 nlohmann::json buildMessageJsonObject(const std::string&);
-
 std::string getRandomString(uint8_t);
-
 void sleepForMilliseconds(uint32_t);
-
 std::string generateMessageMappingKey(std::string&, uint8_t);
-
 std::string getBoolString(bool);
 
 #endif // UTILS_HPP

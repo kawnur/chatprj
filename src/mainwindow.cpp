@@ -6,8 +6,10 @@ MainWindow::MainWindow()
 
     // menu bar
     menuBarPalettePtr_ = new QPalette;
+
     menuBarPalettePtr_->setColor(
         QPalette::Window, QColor(mainWindowMenuBarBackgroundColor));
+
     menuBar()->setAutoFillBackground(true);
     menuBar()->setPalette(*menuBarPalettePtr_);
 
@@ -80,11 +82,6 @@ void MainWindow::set()
         MainWindowContainerPosition::LEFT, this->showHideWidgetPtr_);
 
     this->setBlurEffect();
-}
-
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    std::exit(0);
 }
 
 void MainWindow::addTextToAppLogWidget(const QString& text)
@@ -166,6 +163,11 @@ void MainWindow::disableBlurEffect()
 void MainWindow::createCompanion()
 {
     getGraphicManagerPtr()->createCompanion();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    std::exit(0);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)

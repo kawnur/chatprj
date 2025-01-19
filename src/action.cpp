@@ -26,7 +26,6 @@ CompanionAction::CompanionAction(
 
     case CompanionActionType::DELETE:
         dialogPtr_ = new TextDialog(
-            // nullptr,
             mainWindowPtr_,
             DialogType::WARNING,
             deleteCompanionDialogText,
@@ -36,7 +35,6 @@ CompanionAction::CompanionAction(
 
     case CompanionActionType::CLEAR_HISTORY:
         dialogPtr_ = new TextDialog(
-            // nullptr,
             mainWindowPtr_,
             DialogType::WARNING,
             clearCompanionHistoryDialogText,
@@ -46,7 +44,6 @@ CompanionAction::CompanionAction(
 
     case CompanionActionType::SEND_HISTORY:
         dialogPtr_ = new TextDialog(
-            // nullptr,
             mainWindowPtr_,
             DialogType::WARNING,
             sendChatHistoryToCompanionDialogText.arg(
@@ -98,6 +95,11 @@ Companion* CompanionAction::getCompanionPtr() const
     return this->companionPtr_;
 }
 
+void CompanionAction::updateCompanionObjectData()
+{
+    this->companionPtr_->updateData(this->dataPtr_);
+}
+
 void CompanionAction::sendData()
 {
     if(this->actionType_ == CompanionActionType::SEND_HISTORY)
@@ -130,8 +132,8 @@ void CompanionAction::sendData()
     case CompanionActionType::CLEAR_HISTORY:
         {
             name = this->companionPtr_->getName();
-            ipAddress = this->companionPtr_->getIpAddress();
-            clientPort = std::to_string(this->companionPtr_->getClientPort());
+            ipAddress = this->companionPtr_->getSocketIpAddress();
+            clientPort = std::to_string(this->companionPtr_->getSocketClientPort());
         }
 
         break;
@@ -143,11 +145,6 @@ void CompanionAction::sendData()
     this->dataPtr_ = new CompanionData(name, ipAddress, serverPort, clientPort);
 
     getGraphicManagerPtr()->sendCompanionDataToManager(this);
-}
-
-void CompanionAction::updateCompanionObjectData()
-{
-    this->companionPtr_->updateData(this->dataPtr_);
 }
 
 PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)

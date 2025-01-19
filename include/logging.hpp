@@ -1,7 +1,6 @@
 #ifndef LOGGING_HPP
 #define LOGGING_HPP
 
-// #include <QDateTime>
 #include <QString>
 #include <QTime>
 #include <string>
@@ -13,12 +12,13 @@
 #include "manager.hpp"
 #include "utils_cout.hpp"
 
+class DBReplyData;
 class MainWindow;
 class GraphicManager;
+class SocketInfo;
+class SocketInfoWidget;
 
 GraphicManager* getGraphicManagerPtr();
-
-const bool logDBInteraction = false;
 
 template<typename T> QString argForLogging(T* const& value)
 {
@@ -27,13 +27,17 @@ template<typename T> QString argForLogging(T* const& value)
     return QString::fromStdString(ss.str());
 }
 
-template<typename T, typename std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+template<
+    typename T,
+    typename std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
 QString argForLogging(const T& value)
 {
     return QString::fromStdString(std::to_string(value));
 }
 
-template<typename T, typename std::enable_if_t<!std::is_arithmetic_v<T>, bool> = true>
+template<
+    typename T,
+    typename std::enable_if_t<!std::is_arithmetic_v<T>, bool> = true>
 QString argForLogging(const T& value)
 {
     return QString(value);
@@ -45,9 +49,8 @@ QString argForLogging(const bool&);
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {
-    QString text("- ");
-
     QTime time;
+    QString text("- ");
 
     text += time.currentTime().toString() + QString(" - ");
 
@@ -89,5 +92,10 @@ template<typename... Ts> void logArgsWithCustomMark(Ts&&... args)
 {
     logArgs(logCustomDelimiter, args...);
 }
+
+void logSocketInfoData(const SocketInfo*);
+void logDBResultUnknownField(const PGresult*, int, int);
+void logDBReplyData(std::shared_ptr<DBReplyData>&);
+void logSocketInfoWidget(const SocketInfoWidget*);
 
 #endif // LOGGING_HPP

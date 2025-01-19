@@ -201,11 +201,24 @@ SocketInfoWidget::~SocketInfoWidget()
     delete this->palettePtr_;
 }
 
-void SocketInfoWidget::print()
+QString SocketInfoWidget::getName() const
 {
-    logArgs(
-        "name:", this->name_, "ipAddress:", this->ipAddress_,
-        "serverPort_:", this->serverPort_, "clientPort_:", this->clientPort_);
+    return this->name_;
+}
+
+QString SocketInfoWidget::getIpAddress() const
+{
+    return this->ipAddress_;
+}
+
+uint16_t SocketInfoWidget::getServerPort() const
+{
+    return this->serverPort_;
+}
+
+uint16_t SocketInfoWidget::getClientPort() const
+{
+    return this->clientPort_;
 }
 
 bool SocketInfoWidget::isStub()
@@ -410,9 +423,9 @@ void SocketInfoWidget::update()
 {
     this->name_ = QString::fromStdString(this->companionPtr_->getName());
     this->nameLabelPtr_->setText(this->name_);
-    this->ipAddress_ = QString::fromStdString(this->companionPtr_->getIpAddress());
+    this->ipAddress_ = QString::fromStdString(this->companionPtr_->getSocketIpAddress());
     this->ipAddressLabelPtr_->setText(this->ipAddress_);
-    this->clientPort_ = this->companionPtr_->getClientPort();
+    this->clientPort_ = this->companionPtr_->getSocketClientPort();
     this->clientPortLabelPtr_->setText(QString::fromStdString(std::to_string(this->clientPort_)));
 }
 
@@ -1138,7 +1151,7 @@ void WidgetGroup::messageWidgetSelected(bool isAntacedent)
 
 void WidgetGroup::buildChatHistory()
 {
-    auto messagePointersPtr = this->companionPtr_->getMessagesPtr();
+    auto messagePointersPtr = this->companionPtr_->getMessagePointersPtr();
 
     for(auto& messagePtr : *messagePointersPtr)
     {
@@ -1212,7 +1225,7 @@ void StubWidgetGroup::hideStubPanels()
 {
     this->leftPanelPtr_->hide();
 
-    if(!getManagerPtr()->isSelectedCompanionNullptr())
+    if(getManagerPtr()->getSelectedCompanionPtr())
     {
         this->centralPanelPtr_->hide();
     }

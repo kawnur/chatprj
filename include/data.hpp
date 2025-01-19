@@ -6,7 +6,10 @@
 class CompanionData
 {
 public:
-    CompanionData(const std::string&, const std::string&, const std::string&, const std::string&);
+    CompanionData(
+        const std::string&, const std::string&,
+        const std::string&, const std::string&);
+
     ~CompanionData() = default;
 
     std::string getName() const;

@@ -27,16 +27,14 @@ public:
     GraphicManager();
     ~GraphicManager() = default;
 
-    void set();
+    MainWindow* getMainWindowPtr();
 
+    void set();
     void setParentsForStubs(QWidget*, QWidget*);
     void setStubWidgets();
-
     void sendMessage(Companion*, const std::string&);
-
     void addTextToAppLogWidget(const QString&);
     size_t getCompanionPanelChildrenSize();
-
     void hideWidgetGroupCentralPanel(WidgetGroup*);
     void showWidgetGroupCentralPanel(WidgetGroup*);
 
@@ -44,7 +42,6 @@ public:
         MainWindowContainerPosition, QWidget*);
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
-
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
     void createTextDialogAndShow(
@@ -55,51 +52,33 @@ public:
     void clearCompanionHistory(Companion*);
     void clearChatHistory(WidgetGroup*);
     void deleteCompanion(Companion*);
-
     void sendCompanionDataToManager(CompanionAction*);
     void showCompanionInfoDialog(CompanionAction*, std::string&&);
-
     void sendNewPasswordDataToManager(PasswordAction*);
     void sendExistingPasswordDataToManager(PasswordAction*);
-
     void hideCompanionPanelStub();
-
     void hideCentralPanelStub();
     void showCentralPanelStub();
-
     void hideInfoViaBlur();
     void showInfoViaBlur();
-
     void hideInfoViaStubs();
     void showInfoViaStubs();
-
     void hideInfo();
     void showInfo();
-
-    MainWindow* getMainWindowPtr();
-
     void createEntrancePassword();
-
     void enableMainWindowBlurEffect();
     void disableMainWindowBlurEffect();
-
     void getEntrancePassword();
-
     void addToMessageMapping(const Message*, const MessageWidget*);
     void markMessageWidgetAsSent(const Message*);
     void markMessageWidgetAsReceived(const Message*);
-
     void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
-
-    // std::string getMappedMessageTimeByMessageWidgetPtr(MessageWidget*);
     const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
-
     void askUserForHistorySendingConfirmation(Companion*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;
     std::map<const Message*, const MessageWidget*> mapMessageToMessageWidget_;
-
     StubWidgetGroup* stubWidgetsPtr_;
     MainWindow* mainWindowPtr_;
 };

@@ -1,13 +1,12 @@
 #ifndef CHAT_SERVER_HPP
 #define CHAT_SERVER_HPP
 
+#include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <utility>
-#include <boost/asio.hpp>
 
-//#include "application.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
@@ -26,21 +25,17 @@ public:
     void start();
 
 private:
-    void do_read();
-    void do_write(std::size_t);
-
     Companion* companionPtr_;
     tcp::socket socket_;
-    enum { max_length = 1024 };
-    char data_[max_length];
+    char data_[maxBufferSize];
+
+    void do_read();
+    void do_write(std::size_t);
 };
 
 class ChatServer
 {
 public:
-    // ChatServer(boost::asio::io_context& io_context, short port)
-    //     : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
-
     // TODO what if port is blocked?
     ChatServer(Companion* companionPtr, uint16_t port)
         : companionPtr_(companionPtr), port_(port), io_context_(),
@@ -48,7 +43,6 @@ public:
     {
         do_accept();
     }
-//    ChatServer(short);
     ~ChatServer() = default;
 
     void run();
@@ -57,12 +51,9 @@ private:
     boost::asio::io_context io_context_;
     uint16_t port_;
     Companion* companionPtr_;
-
-    void do_accept();
-
-//    boost::asio::io_context io_context_;
     tcp::acceptor acceptor_;
 
+    void do_accept();
 };
 
 int async_tcp_echo_server();

@@ -15,6 +15,4 @@ void ChatApp::set()
     managerPtr_->set();
 
     // managerPtr_->startUserAuthentication();
-
-
 }

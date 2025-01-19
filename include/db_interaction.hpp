@@ -22,6 +22,8 @@ public:
     DBReplyData(const std::vector<std::string>&);
     ~DBReplyData();
 
+    std::vector<std::map<std::string, const char*>>* getDataPtr();
+
     void clear();
     bool isEmpty();
     void fill(size_t);
@@ -29,8 +31,7 @@ public:
     void push(size_t, std::string, const char*);
     size_t size();
     const char* getValue(size_t, std::string);
-    bool findValue(const std::string&, const std::string&);
-    void logData();
+    bool findValue(const std::string&, const std::string&);    
 
 private:
     std::vector<std::map<std::string, const char*>> data_;
@@ -80,8 +81,6 @@ PGresult* deleteMessagesFromDBAndReturn(const PGconn*, const bool, const Compani
 
 PGresult* deleteCompanionAndSocketAndReturn(
     const PGconn*, const bool, const CompanionAction&);
-
-void logUnknownField(const PGresult*, int, int);
 
 int getDataFromDBResult(const bool, std::shared_ptr<DBReplyData>&, const PGresult*, int);
 

@@ -19,6 +19,7 @@ class WidgetGroup;
 
 int getDataFromDBResult(const bool, std::shared_ptr<DBReplyData>&, const PGresult*, int);
 template<typename... Ts> void logArgs(Ts&&... args);
+void logDBReplyData(std::shared_ptr<DBReplyData>&);
 void showErrorDialogAndLogError(QWidget*, const QString&);
 
 class Manager : public QObject  // TODO do we need inheritance?
@@ -27,86 +28,63 @@ public:
     Manager();
     ~Manager();
 
-    void set();
-    void sendMessage(Companion*, const std::string&);
-    void receiveMessage(Companion*, const std::string&);
-
+    const Companion* getSelectedCompanionPtr();
     bool getUserIsAuthenticated();
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     WidgetGroup* getMappedWidgetGroupByCompanion(const Companion*) const;
-    // WidgetGroup* getMappedWidgetGroupByCompanion(Companion*) const;
     const MessageState* getMappedMessageStateByMessagePtr(const Message*);
 
+    void set();
+    void sendMessage(Companion*, const std::string&);
+    void receiveMessage(Companion*, const std::string&);
     void resetSelectedCompanion(const Companion*);
-
     void createCompanion(CompanionAction*);
     void updateCompanion(CompanionAction*);
     void deleteCompanion(CompanionAction*);
     void clearCompanionHistory(CompanionAction*);
-
     void createUserPassword(PasswordAction*);
     void authenticateUser(PasswordAction*);
-
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
-
-    bool isSelectedCompanionNullptr();
-
     void startUserAuthentication();
-
     void sendUnsentMessages(const Companion*);
-
     void requestHistoryFromCompanion(const Companion*);
     void sendChatHistoryToCompanion(const Companion*);
 
 private:
-    // std::mutex networkIdToMessageMapMutex_;
     std::mutex messageStateToMessageMapMutex_;
-
     PGconn* dbConnectionPtr_;
-
     bool userIsAuthenticated_;
     const Companion* selectedCompanionPtr_;
-
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
-    // std::map<std::string, const Message*> mapNetworkIdToMessage_;
     std::map<const MessageState*, const Message*> mapMessageStateToMessage_;
 
-    // std::string addToNetworkIdToMessageMapping(const Message*);
-    bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
-
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
-    // std::string getMappedNetworkIdByMessagePtr(Message*);
 
     std::pair<const MessageState*, const Message*>
         getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
-    std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
-        const std::string&, const std::string&, const std::string&,
-        const std::string&, const bool&, const bool&);
-
+    bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
     bool connectToDb();
     bool buildCompanions();
     void buildWidgetGroups();
-
     Companion* addCompanionObject(int, const std::string&);
     void createWidgetGroupAndAddToMapping(Companion*);
-
     void deleteCompanionObject(Companion*);
     void deleteWidgetGroupAndDeleteFromMapping(Companion*);
-
     bool companionDataValidation(CompanionAction*);
     bool passwordDataValidation(PasswordAction*);
-
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
-
     void waitForMessageReceptionConfirmation(Companion*, MessageState*, Message*);
-
     bool markMessageAsSent(const Message*);
     bool markMessageAsReceived(const Message*);
+
+    std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
+        const std::string&, const std::string&, const std::string&,
+        const std::string&, const bool&, const bool&);
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
@@ -144,7 +122,7 @@ private:
         if(logging)
         {
             logArgs("dbDataPtr->size():", dbDataPtr->size());
-            dbDataPtr->logData();
+            logDBReplyData(dbDataPtr);
             logArgs(logDelimiter);
         }
 

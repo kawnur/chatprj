@@ -12,8 +12,6 @@ DBReplyData::DBReplyData(int count, ...)
     {
         auto key = std::string(va_arg(args, char*));
 
-        // coutWithEndl(key);
-
         data_.at(0).insert({key, nullptr});
     }
 
@@ -29,9 +27,11 @@ DBReplyData::DBReplyData(const std::vector<std::string>& keys)
     }
 }
 
-DBReplyData::~DBReplyData()
+DBReplyData::~DBReplyData() {}
+
+std::vector<std::map<std::string, const char*>>* DBReplyData::getDataPtr()
 {
-    // delete[] &(this->data_);
+    return &this->data_;
 }
 
 void DBReplyData::clear()
@@ -76,9 +76,7 @@ const char* DBReplyData::getValue(size_t position, std::string key)
 
 bool DBReplyData::findValue(const std::string& key, const std::string& value)
 {
-    auto findLambda = [&](
-        // std::iterator<std::vector<std::map<std::string, const char*>>>& iterator)
-        auto& iterator)
+    auto findLambda = [&](auto& iterator)
     {
         return std::string(iterator.at(key)) == value;
     };
@@ -86,21 +84,6 @@ bool DBReplyData::findValue(const std::string& key, const std::string& value)
     auto findMapResult = std::find_if(this->data_.begin(), this->data_.end(), findLambda);
 
     return (findMapResult == this->data_.end()) ? false : true;
-}
-
-void DBReplyData::logData()
-{
-    logArgs("############################");
-
-    for(auto& elem : this->data_)
-    {
-        for(auto& item : elem)
-        {
-            logArgs(item.first, item.second);
-        }
-    }
-
-    logArgs("############################");
 }
 
 const char* getValueFromEnvironmentVariable(const char* variableName)
@@ -424,14 +407,6 @@ PGresult* deleteCompanionAndSocketAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-void logUnknownField(const PGresult* result, int row, int column)
-{
-    char* value = PQgetvalue(result, row, column);
-    auto logMark = (value) ? std::string(value) : "nullptr";
-
-    logArgsError("unknown field name:", logMark);
-}
-
 int getDataFromDBResult(
     const bool logging,
     std::shared_ptr<DBReplyData>& dataPtr,
@@ -485,7 +460,7 @@ int getDataFromDBResult(
             else
             {
                 dataIsOk = -1;  // TODO return ?
-                logUnknownField(result, i, j);
+                logDBResultUnknownField(result, i, j);
             }
         }
 

@@ -21,11 +21,6 @@ uint8_t Message::getAuthorId() const
     return this->author_id_;
 }
 
-bool Message::isMessageFromMe() const
-{
-    return !(this->author_id_ == this->companion_id_);
-}
-
 std::string Message::getTime() const
 {
     return this->time_;
@@ -36,10 +31,10 @@ std::string Message::getText() const
     return this->text_;
 }
 
-// bool Message::getIsSent() const
-// {
-//     return this->isSent_;
-// }
+bool Message::isMessageFromMe() const
+{
+    return !(this->author_id_ == this->companion_id_);
+}
 
 MessageState::MessageState(
     uint8_t companionId, bool isAntecedent, bool isSent,
@@ -71,6 +66,11 @@ std::string MessageState::getNetworkId() const
     return this->networkId_;
 }
 
+std::string MessageState::getMessageMappingKey() const
+{
+    return this->messageMappingKey_;
+}
+
 void MessageState::setIsReceived(bool value)
 {
     this->isReceived_ = value;
@@ -85,9 +85,4 @@ void MessageState::setgetMessageMappingKey(
     const std::string& messageMappingKey)
 {
     this->messageMappingKey_ = messageMappingKey;
-}
-
-std::string MessageState::getMessageMappingKey() const
-{
-    return this->messageMappingKey_;
 }

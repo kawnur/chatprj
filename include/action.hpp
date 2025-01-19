@@ -3,9 +3,9 @@
 
 #include <QObject>
 
+#include "data.hpp"
 #include "companion.hpp"
 #include "constants.hpp"
-#include "data.hpp"
 #include "utils_widgets.hpp"
 #include "widgets.hpp"
 
@@ -23,7 +23,6 @@ public:
     ~Action() = default;
 
     void set();
-
     Dialog* getDialogPtr();
 
     virtual void sendData() {}
@@ -41,15 +40,12 @@ public:
     ~CompanionAction();
 
     CompanionActionType getActionType();
-
     std::string getName() const;
     std::string getIpAddress() const;
     std::string getServerPort() const;
     std::string getClientPort() const;
-
     int getCompanionId() const;
     Companion* getCompanionPtr() const;
-
     void updateCompanionObjectData();
 
 public slots:
@@ -58,8 +54,7 @@ public slots:
 private:
     CompanionActionType actionType_;
     CompanionData* dataPtr_;
-
-    MainWindow* mainWindowPtr_;
+    MainWindow* mainWindowPtr_;  // TODO do we need it here?
     Companion* companionPtr_;
 };
 
@@ -72,7 +67,6 @@ public:
     ~PasswordAction();
 
     std::string getPassword();
-
     void sendData() override;
 
 private:

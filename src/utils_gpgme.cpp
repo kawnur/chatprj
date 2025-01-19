@@ -2,18 +2,6 @@
 
 void checkProtocols() {}
 
-void coutEngineInfo(gpgme_engine_info_t* info)
-{
-    endline(1);
-    coutWithEndl((*info)->next);
-    coutWithEndl((*info)->protocol);
-    coutStringWithEndl((*info)->file_name);
-    coutStringWithEndl((*info)->home_dir);
-    coutStringWithEndl((*info)->version);
-    coutStringWithEndl((*info)->req_version);
-    endline(1);
-}
-
 std::string getStringFromCharPtr(const char* value)
 {
     return (value) ? std::string(value) : std::string("nullptr");

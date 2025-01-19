@@ -17,13 +17,6 @@ SocketInfo::SocketInfo(const SocketInfo& si)
     clientPort_ = si.clientPort_;
 }
 
-void SocketInfo::print()
-{
-    logArgs("ipAddress:", this->ipAddress_);
-    logArgs("serverPort_:", this->serverPort_);
-    logArgs("clientPort_:", this->clientPort_);
-}
-
 std::string SocketInfo::getIpAddress() const
 {
     return this->ipAddress_;
@@ -69,18 +62,52 @@ Companion::~Companion()
     delete this->messagePointersPtr_;
 }
 
+int Companion::getId()
+{
+    return this->id_;
+}
+
+std::string Companion::getName() const
+{
+    return this->name_;
+}
+
+SocketInfo* Companion::getSocketInfoPtr() const
+{
+    return this->socketInfoPtr_;
+}
+
+std::string Companion::getSocketIpAddress() const
+{
+    return this->socketInfoPtr_->getIpAddress();
+}
+
+uint16_t Companion::getSocketServerPort() const
+{
+    return this->socketInfoPtr_->getServerPort();
+}
+
+uint16_t Companion::getSocketClientPort() const
+{
+    return this->socketInfoPtr_->getClientPort();
+}
+
+const std::vector<Message*>* Companion::getMessagePointersPtr() const
+{
+    return this->messagePointersPtr_;
+}
+
+void Companion::setSocketInfo(SocketInfo* socketInfo)
+{
+    socketInfoPtr_ = socketInfo;
+}
+
 bool Companion::startServer()
 {
     bool started = false;
 
     auto startLambda = [this](bool& value)
     {
-        // io_contextPtr_ = new boost::asio::io_context;
-
-        // serverPtr_ = new ChatServer(
-        //     *io_contextPtr_,
-        //     this->socketInfoPtr_->getPortInt());
-
         this->serverPtr_ = new ChatServer(this, this->socketInfoPtr_->getServerPort());
 
         this->serverPtr_->run();
@@ -99,17 +126,10 @@ bool Companion::createClient()
 
     auto createLambda = [this](bool& value)
     {
-        // io_contextPtr_ = new boost::asio::io_context;
-
-        // serverPtr_ = new ChatServer(
-        //     *io_contextPtr_,
-        //     this->socketInfoPtr_->getPortInt());
-
         this->clientPtr_ = new ChatClient(
             this->socketInfoPtr_->getIpAddress(),
             this->socketInfoPtr_->getClientPort());
 
-        // created = this->clientPtr_->connect();
         value = true;
     };
 
@@ -117,54 +137,6 @@ bool Companion::createClient()
 
     return created;
 }
-
-// bool Companion::connectClient()
-// {
-//     bool connected = false;
-
-//     auto connectLambda = [this](bool& value)
-//     {
-//         // io_contextPtr_ = new boost::asio::io_context;
-
-//         // serverPtr_ = new ChatServer(
-//         //     *io_contextPtr_,
-//         //     this->socketInfoPtr_->getPortInt());
-
-//         // this->clientPtr_ = new ChatClient(
-//         //     this->socketInfoPtr_->getIpAddress(),
-//         //     this->socketInfoPtr_->getClientPort());
-
-//         value = this->clientPtr_->connect();
-//     };
-
-//     runAndLogException(connectLambda, connected);
-
-//     return connected;
-// }
-
-// bool Companion::disconnectClient()
-// {
-//     bool disconnected = false;
-
-//     auto disconnectLambda = [this](bool& value)
-//     {
-//         // io_contextPtr_ = new boost::asio::io_context;
-
-//         // serverPtr_ = new ChatServer(
-//         //     *io_contextPtr_,
-//         //     this->socketInfoPtr_->getPortInt());
-
-//         // this->clientPtr_ = new ChatClient(
-//         //     this->socketInfoPtr_->getIpAddress(),
-//         //     this->socketInfoPtr_->getClientPort());
-
-//         value = this->clientPtr_->disconnect();
-//     };
-
-//     runAndLogException(disconnectLambda, disconnected);
-
-//     return disconnected;
-// }
 
 bool Companion::connectClient()
 {
@@ -176,20 +148,10 @@ bool Companion::disconnectClient()
     return this->clientPtr_->disconnect();
 }
 
-void Companion::setSocketInfo(SocketInfo* socketInfo)
-{
-    socketInfoPtr_ = socketInfo;
-}
-
 void Companion::addMessage(Message* messagePtr)
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
     this->messagePointersPtr_->push_back(messagePtr);
-}
-
-const std::vector<Message*>* Companion::getMessagesPtr() const
-{
-    return this->messagePointersPtr_;
 }
 
 bool Companion::sendMessage(
@@ -242,34 +204,4 @@ Message* Companion::findMessage(uint32_t messageId)
         });
 
     return (result == this->messagePointersPtr_->end()) ? nullptr : *result;
-}
-
-int Companion::getId()
-{
-    return this->id_;
-}
-
-std::string Companion::getName() const
-{
-    return this->name_;
-}
-
-std::string Companion::getIpAddress() const
-{
-    return this->socketInfoPtr_->getIpAddress();
-}
-
-uint16_t Companion::getServerPort() const
-{
-    return this->socketInfoPtr_->getServerPort();
-}
-
-uint16_t Companion::getClientPort() const
-{
-    return this->socketInfoPtr_->getClientPort();
-}
-
-SocketInfo* Companion::getSocketInfoPtr() const
-{
-    return this->socketInfoPtr_;
 }
