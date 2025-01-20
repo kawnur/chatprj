@@ -382,9 +382,7 @@ void SocketInfoWidget::initializeFields()
         layoutPtr_->addWidget(widget);
     }
 
-    requestHistoryAction_ = new QAction(
-        "Request chat history from companion", this);
-
+    requestHistoryAction_ = new QAction("Request chat history from companion", this);
     requestHistoryAction_->setDisabled(true);
 
     connect(
@@ -1080,6 +1078,14 @@ WidgetGroup::~WidgetGroup()
     delete this->centralPanelPtr_;
 }
 
+void WidgetGroup::set()
+{
+    connect(
+        this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
+        this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
+        Qt::QueuedConnection);
+}
+
 void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
@@ -1144,6 +1150,21 @@ void WidgetGroup::messageAdded()
     }
 }
 
+void WidgetGroup::askUserForHistorySendingConfirmation()
+{
+    CompanionAction* actionPtr = new CompanionAction(
+        CompanionActionType::SEND_HISTORY,
+        getGraphicManagerPtr()->getMainWindowPtr(),
+        const_cast<Companion*>(this->companionPtr_));
+
+    actionPtr->set();
+}
+
+void WidgetGroup::askUserForHistorySendingConfirmationFromThread()
+{
+    emit this->askUserForHistorySendingConfirmationSignal();
+}
+
 void WidgetGroup::messageWidgetSelected(bool isAntacedent)
 {
     std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
@@ -1158,6 +1179,11 @@ void WidgetGroup::messageWidgetSelected(bool isAntacedent)
                 setNewMessagesIndicatorOff();
         }
     }
+}
+
+void WidgetGroup::askUserForHistorySendingConfirmationSlot()
+{
+    this->askUserForHistorySendingConfirmation();
 }
 
 void WidgetGroup::buildChatHistory()

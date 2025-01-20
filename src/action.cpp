@@ -60,7 +60,7 @@ CompanionAction::~CompanionAction()
     delete this->dataPtr_;
 }
 
-CompanionActionType CompanionAction::getActionType()
+CompanionActionType CompanionAction::getActionType() const
 {
     return this->actionType_;
 }

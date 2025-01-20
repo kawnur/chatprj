@@ -289,8 +289,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             logArgsInfo("got history request");
 
             // ask user for confirmation
-            getGraphicManagerPtr()->
-                askUserForHistorySendingConfirmation(companionPtr);
+            this->getMappedWidgetGroupByCompanion(companionPtr)->
+                askUserForHistorySendingConfirmationFromThread();
 
             // get messages from db
         }
@@ -1027,6 +1027,7 @@ Companion* Manager::addCompanionObject(int id, const std::string& name)
 void Manager::createWidgetGroupAndAddToMapping(Companion* companionPtr)
 {
     WidgetGroup* widgetGroupPtr = new WidgetGroup(companionPtr);
+    widgetGroupPtr->set();
     this->mapCompanionToWidgetGroup_[companionPtr] = widgetGroupPtr;
 }
 

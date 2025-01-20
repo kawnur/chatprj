@@ -345,14 +345,6 @@ const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
                nullptr : result->first;
 }
 
-void GraphicManager::askUserForHistorySendingConfirmation(Companion* companionPtr)
-{
-    CompanionAction* actionPtr = new CompanionAction(
-        CompanionActionType::SEND_HISTORY, this->mainWindowPtr_, companionPtr);
-
-    actionPtr->set();
-}
-
 GraphicManager* getGraphicManagerPtr()
 {
     QCoreApplication* coreApp = QCoreApplication::instance();

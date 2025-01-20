@@ -39,7 +39,7 @@ public:
     CompanionAction(CompanionActionType, MainWindow*, Companion*);
     ~CompanionAction();
 
-    CompanionActionType getActionType();
+    CompanionActionType getActionType() const;
     std::string getName() const;
     std::string getIpAddress() const;
     std::string getServerPort() const;

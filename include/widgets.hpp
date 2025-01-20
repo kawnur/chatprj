@@ -341,6 +341,8 @@ public:
     WidgetGroup(const Companion*);
     ~WidgetGroup();
 
+    void set();
+
     void addMessageWidgetToChatHistory(const Message*);
     void addMessageWidgetToChatHistoryFromThread(const MessageState*, const Message*);
     void clearChatHistory();
@@ -349,9 +351,17 @@ public:
     SocketInfoBaseWidget* getSocketInfoBasePtr();
     void sortChatHistoryElements();
     void messageAdded();
+    void askUserForHistorySendingConfirmation();
+    void askUserForHistorySendingConfirmationFromThread();
+
+signals:
+    void askUserForHistorySendingConfirmationSignal();
 
 public slots:
     void messageWidgetSelected(bool);
+
+private slots:
+    void askUserForHistorySendingConfirmationSlot();
 
 private:
     const Companion* companionPtr_;
