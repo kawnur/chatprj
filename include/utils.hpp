@@ -5,10 +5,12 @@
 #include <QHostAddress>
 
 #include "constants.hpp"
+#include "db_interaction.hpp"
 #include "logging.hpp"
 
 class ButtonInfo;
 class CompanionAction;
+class DBReplyData;
 class Message;
 class TextDialog;
 
@@ -63,7 +65,10 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 std::string buildMessageJSONString(
     bool, NetworkMessageType, const std::string&, const Message*);
 
-nlohmann::json buildMessageJsonObject(const std::string&);
+std::string buildChatHistoryJSONString(
+    std::shared_ptr<DBReplyData>&, std::vector<std::string>&);
+
+nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
 std::string generateMessageMappingKey(std::string&, uint8_t);

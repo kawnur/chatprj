@@ -25,7 +25,8 @@ enum class NetworkMessageType
     SEND_DATA,
     RECEIVE_CONFIRMATION,
     RECEIVE_CONFIRMATION_REQUEST,
-    HISTORY_REQUEST
+    HISTORY_REQUEST,
+    CHAT_HISTORY_DATA
 };
 
 enum class DialogType

@@ -8,12 +8,14 @@
 
 #include "constants.hpp"
 #include "data.hpp"
+#include "db_interaction.hpp"
 #include "logging.hpp"
 #include "message.hpp"
 
 class ChatClient;
 class ChatServer;
 class CompanionData;
+class DBReplyData;
 class Message;
 
 class SocketInfo
@@ -52,7 +54,7 @@ public:
     Companion(int, std::string&&);
     ~Companion();
 
-    int getId();
+    int getId() const;
     std::string getName() const;
     SocketInfo* getSocketInfoPtr() const;
     std::string getSocketIpAddress() const;
@@ -68,6 +70,7 @@ public:
     bool disconnectClient();
     void addMessage(Message*);
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
+    bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
 

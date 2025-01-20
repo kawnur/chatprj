@@ -62,7 +62,7 @@ Companion::~Companion()
     delete this->messagePointersPtr_;
 }
 
-int Companion::getId()
+int Companion::getId() const
 {
     return this->id_;
 }
@@ -174,6 +174,35 @@ bool Companion::sendMessage(
             if(!result)
             {
                 logArgsError("client message sending error");
+            }
+
+            return result;
+        }
+    }
+
+    return false;
+}
+
+bool Companion::sendChatHistory(
+    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys) const
+{
+    if(this->clientPtr_)
+    {
+        bool isConnected = this->clientPtr_->getIsConnected();
+
+        logArgs("clientPtr_->getIsConnected():", isConnected);
+
+        if(isConnected)
+        {
+            // build json
+            std::string jsonData = buildChatHistoryJSONString(dataPtr, keys);
+
+            // send json over network
+            auto result = this->clientPtr_->send(jsonData);
+
+            if(!result)
+            {
+                logArgsError("client chat history sending error");
             }
 
             return result;

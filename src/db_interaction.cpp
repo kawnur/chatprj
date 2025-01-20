@@ -234,6 +234,17 @@ PGresult* getMessagesDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
+PGresult* getAllMessagesByCompanionIdDBResult(
+    const PGconn* dbConnection, const bool logging, const int& companion_id)
+{
+    std::string command = std::string(
+        "SELECT id, author_id, timestamp_tz, message "
+        "FROM messages WHERE companion_id = ")
+        + std::to_string(companion_id);
+
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+}
+
 PGresult* getUnsentMessagesByCompanionNameDBResult(
     const PGconn* dbConnection, const bool logging, const std::string& companionName)
 {

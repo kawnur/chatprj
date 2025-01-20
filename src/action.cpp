@@ -104,6 +104,8 @@ void CompanionAction::sendData()
 {
     if(this->actionType_ == CompanionActionType::SEND_HISTORY)
     {
+        // TODO if client is disconnected show error dialog
+
         getManagerPtr()->sendChatHistoryToCompanion(this->companionPtr_);
         return;
     }

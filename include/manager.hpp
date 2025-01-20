@@ -86,12 +86,14 @@ private:
         const std::string&, const std::string&, const std::string&,
         const std::string&, const bool&, const bool&);
 
-    template<typename... Ts>
+    // template<typename... Ts>
+    template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
         const bool logging,
         const char* mark,
         PGresult*(*func)(const PGconn*, const bool, const Ts&...),
-        std::vector<std::string>&& keys,
+        // std::vector<std::string>&& keys,
+        T&& keys,
         const Ts&... args)
     {
         PGresult* dbResultPtr = func(this->dbConnectionPtr_, logging, args...);
@@ -111,7 +113,9 @@ private:
             return nullptr;
         }
 
-        std::shared_ptr<DBReplyData> dbDataPtr = std::make_shared<DBReplyData>(keys);
+        // std::shared_ptr<DBReplyData> dbDataPtr = std::make_shared<DBReplyData>(keys);
+        std::shared_ptr<DBReplyData> dbDataPtr =
+            std::make_shared<DBReplyData>(std::forward<T>(keys));
 
         if(getDataFromDBResult(logging, dbDataPtr, dbResultPtr, 0) == -1)
         {

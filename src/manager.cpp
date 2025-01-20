@@ -158,11 +158,19 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
 {
-    nlohmann::json jsonData = buildMessageJsonObject(jsonString);
+    nlohmann::json jsonData = buildJsonObject(jsonString);
 
-    NetworkMessageType type = jsonData.at("type");
-    std::string networkId = jsonData.at("id");
-    bool isAntecedent = jsonData.at("antecedent");
+    NetworkMessageType type;
+    std::string networkId;
+    bool isAntecedent;
+
+    runAndLogException(
+        [&]()
+        {
+            type = jsonData.at("type");
+            networkId = jsonData.at("id");
+            isAntecedent = jsonData.at("antecedent");
+        });
 
     // logArgsWithCustomMark("received:", networkId);
 
@@ -286,13 +294,18 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     case NetworkMessageType::HISTORY_REQUEST:
         {
-            logArgsInfo("got history request");
+            logArgsInfo("got history request from " + companionPtr->getName());
 
-            // ask user for confirmation
             this->getMappedWidgetGroupByCompanion(companionPtr)->
                 askUserForHistorySendingConfirmationFromThread();
+        }
 
-            // get messages from db
+        break;
+
+    case NetworkMessageType::CHAT_HISTORY_DATA:
+        {
+            logArgsInfo("got chat history from " + companionPtr->getName());
+            logArgs("jsonString:", jsonString);
         }
 
         break;
@@ -757,6 +770,31 @@ void Manager::requestHistoryFromCompanion(const Companion* companionPtr)
 void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
 {
     logArgs("Manager::sendChatHistoryToCompanion");
+
+    std::vector<std::string> keys =
+        buildStringVector("id", "author_id", "timestamp_tz", "message");
+
+    // get messages from db
+    std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
+        logDBInteraction,
+        "getAllMessagesByCompanionIdDBResult",
+        &getAllMessagesByCompanionIdDBResult,
+        keys,
+        companionPtr->getId());
+
+    if(!messagesDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        return;
+    }
+
+    if(messagesDataPtr->isEmpty())
+    {
+        logArgsInfo("Empty db reply to messages selection");
+        return;
+    }
+
+    bool result = companionPtr->sendChatHistory(messagesDataPtr, keys);
 }
 
 const Companion* Manager::getMappedCompanionByWidgetGroup(

@@ -247,7 +247,30 @@ std::string buildMessageJSONString(
     return jsonData.dump();
 }
 
-nlohmann::json buildMessageJsonObject(const std::string& jsonString)
+std::string buildChatHistoryJSONString(
+    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys)
+{
+    using json = nlohmann::json;
+
+    json jsonData;
+
+    jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
+    jsonData["messages"] = {};
+
+    for(size_t i = 0; i < dataPtr->size(); i++)  // TODO switch to iterators
+    {
+        for(auto& key : keys)
+        {
+            jsonData["messages"][i][key] = dataPtr->getValue(i, key);
+        }
+    }
+
+    std::string result = jsonData.dump();
+
+    return result;
+}
+
+nlohmann::json buildJsonObject(const std::string& jsonString)
 {
     nlohmann::json jsonData = nlohmann::json::parse(jsonString);
 
