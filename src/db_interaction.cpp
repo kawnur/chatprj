@@ -81,7 +81,8 @@ bool DBReplyData::findValue(const std::string& key, const std::string& value)
         return std::string(iterator.at(key)) == value;
     };
 
-    auto findMapResult = std::find_if(this->data_.begin(), this->data_.end(), findLambda);
+    auto findMapResult = std::find_if(
+        this->data_.begin(), this->data_.end(), findLambda);
 
     return (findMapResult == this->data_.end()) ? false : true;
 }
@@ -119,10 +120,8 @@ PGconn* getDBConnection()
             }
         }
 
-        logArgs("DB connection; address:", dbAddress,
-                "port:", dbPort,
-                "login:", dbLogin,
-                "password:", dbPassword);
+        logArgs("DB connection; address:", dbAddress, "port:", dbPort,
+                "login:", dbLogin, "password:", dbPassword);
 
         dbConnection = PQsetdbLogin(
                     dbAddress,
@@ -135,6 +134,7 @@ PGconn* getDBConnection()
 
         ConnStatusType status = PQstatus(dbConnection);
         std::string mark = (status == 0) ? "OK" : "";
+
         logArgs("DB connection status: ", std::to_string(status), mark);
 
         if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
@@ -159,6 +159,7 @@ PGresult* sendDBRequestAndReturnResult(
     std::lock_guard<std::mutex> lock(dbMutex);
 
     PGresult* result = PQexec(const_cast<PGconn*>(dbConnection), command);
+
     return result;
 }
 
@@ -259,10 +260,10 @@ PGresult* setMessageIsSentInDbAndReturn(
     const PGconn* dbConnection, const bool logging, const uint32_t& messageId)
 {
     std::string command = std::string(
-                              "UPDATE messages set is_sent = 'true' "
-                              "WHERE id = ")
-                          + std::to_string(messageId)
-                          + std::string(" RETURNING id");
+        "UPDATE messages set is_sent = 'true' "
+        "WHERE id = ")
+        + std::to_string(messageId)
+        + std::string(" RETURNING id");
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }

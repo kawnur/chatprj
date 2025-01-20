@@ -109,9 +109,7 @@ bool Companion::startServer()
     auto startLambda = [this](bool& value)
     {
         this->serverPtr_ = new ChatServer(this, this->socketInfoPtr_->getServerPort());
-
         this->serverPtr_->run();
-
         value = true;
     };
 

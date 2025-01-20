@@ -133,15 +133,22 @@ void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
     {
     case CompanionActionType::CREATE:
         getManagerPtr()->createCompanion(actionPtr);
+
         break;
+
     case CompanionActionType::UPDATE:
         getManagerPtr()->updateCompanion(actionPtr);
+
         break;
+
     case CompanionActionType::DELETE:
         getManagerPtr()->deleteCompanion(actionPtr);
+
         break;
+
     case CompanionActionType::CLEAR_HISTORY:
         getManagerPtr()->clearCompanionHistory(actionPtr);
+
         break;
     }
 }
@@ -169,10 +176,12 @@ void GraphicManager::showCompanionInfoDialog(
         DialogType::INFO,
         buildDialogText(
             std::move(header),
-            std::vector<std::string> {
-                                     std::string("name: ") + companionActionPtr->getName(),
-                                     std::string("ipAddress: ") + companionActionPtr->getIpAddress(),
-                                     std::string("port: ") + companionActionPtr->getClientPort() }),
+            std::vector<std::string>
+            {
+                std::string("name: ") + companionActionPtr->getName(),
+                std::string("ipAddress: ") + companionActionPtr->getIpAddress(),
+                std::string("port: ") + companionActionPtr->getClientPort()
+            }),
         createOkButtonInfoVector(functionPtr));
 
     delete companionActionPtr;

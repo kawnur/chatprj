@@ -35,6 +35,7 @@ void ServerSession::do_read()
                         {
                             openCounter++;
                         }
+
                         if(*iterator == '}')
                         {
                             closeCounter++;

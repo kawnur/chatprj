@@ -2,7 +2,8 @@
 
 // TODO move all constants to constants.hpp
 
-bool validateCompanionName(std::vector<std::string>& validationErrors, const std::string& name)
+bool validateCompanionName(
+    std::vector<std::string>& validationErrors, const std::string& name)
 {
     bool result = (name.size() <= 30);
 
@@ -16,9 +17,10 @@ bool validateCompanionName(std::vector<std::string>& validationErrors, const std
     return result;
 }
 
-bool validateIpAddress(std::vector<std::string>& validationErrors, const std::string& ipAddress)
+bool validateIpAddress(
+    std::vector<std::string>& validationErrors, const std::string& ipAddress)
 {
-    QHostAddress address { QString::fromStdString(ipAddress) };
+    QHostAddress address { getQString(ipAddress) };
 
     bool result = !(address.isNull());
 
@@ -66,21 +68,23 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
 }
 
 bool validateCompanionData(
-    std::vector<std::string>& validationErrors,
-    const CompanionAction* companionActionPtr)
+    std::vector<std::string>& errors,
+    const CompanionAction* actionPtr)
 {
-    bool nameValidationResult = validateCompanionName(validationErrors, companionActionPtr->getName());
-    bool ipAddressValidationResult = validateIpAddress(validationErrors, companionActionPtr->getIpAddress());
-    bool portValidationResult = validatePort(validationErrors, companionActionPtr->getClientPort());
+    bool nameValidationResult = validateCompanionName(errors, actionPtr->getName());
+    bool ipAddressValidationResult = validateIpAddress(errors, actionPtr->getIpAddress());
+    bool portValidationResult = validatePort(errors, actionPtr->getClientPort());
 
-    bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
+    bool result =
+        nameValidationResult && ipAddressValidationResult && portValidationResult;
 
     logArgs("validateCompanionData result:", result);
 
     return result;
 }
 
-bool validatePassword(std::vector<std::string>& validationErrors, const std::string& password)
+bool validatePassword(
+    std::vector<std::string>& validationErrors, const std::string& password)
 {
     bool result = (password.size() <= 30);
 
@@ -111,7 +115,7 @@ QString buildDialogText(std::string&& header, const std::vector<std::string>& me
             text += (std::string("- ") + message + std::string("\n"));
         }
 
-        return QString::fromStdString(text);
+        return getQString(text);
     }
 }
 
@@ -174,11 +178,11 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
 std::pair<QString, QString> formatMessageHeaderAndBody(
     const std::string& companionName, const Message* messagePtr)
 {
-    auto companionNameQString = QString::fromStdString(companionName);
+    auto companionNameQString = getQString(companionName);
     auto companionId = messagePtr->getCompanionId();
     auto authorId = messagePtr->getAuthorId();
-    auto time = QString::fromStdString(messagePtr->getTime());
-    auto text = QString::fromStdString(messagePtr->getText());
+    auto time = getQString(messagePtr->getTime());
+    auto text = getQString(messagePtr->getText());
     auto isSent =
         getManagerPtr()->getMappedMessageStateByMessagePtr(messagePtr)->getIsSent();
 
@@ -197,10 +201,12 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
         receiver = companionNameQString;
     }
 
-    QString header = QString("<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>")
-                         .arg(color, sender, receiver, time);
+    QString header =
+        QString("<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>")
+        .arg(color, sender, receiver, time);
 
-    QString body = QString("<font color=\"%1\"><br>").arg(color) + text + QString("</font>");
+    QString body =
+        QString("<font color=\"%1\"><br>").arg(color) + text + QString("</font>");
 
     std::pair<QString, QString> data (header, body);
 

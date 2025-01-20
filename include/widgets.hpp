@@ -18,6 +18,7 @@
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "logging.hpp"
+#include "utils.hpp"
 
 class Action;
 class Companion;
@@ -358,6 +359,7 @@ private:
     CentralPanelWidget* centralPanelPtr_;
     uint32_t antacedentMessagesCounter_;
     std::mutex antacedentMessagesCounterMutex_;
+
     void buildChatHistory();
 };
 

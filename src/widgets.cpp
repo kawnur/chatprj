@@ -4,7 +4,8 @@ QString getInitialConnectButtonLabel()
 {
     try
     {
-        return connectButtonLabels.empty() ? QString("_") : connectButtonLabels.at(0);
+        return connectButtonLabels.empty() ?
+            QString("_") : connectButtonLabels.at(0);
     }
     catch(...)
     {
@@ -167,28 +168,24 @@ SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
 
 SocketInfoWidget::SocketInfoWidget(
     std::string& name, std::string& ipAddress, uint16_t& serverPort, uint16_t& clientPort) :
-    name_(QString::fromStdString(name)),
-    ipAddress_(QString::fromStdString(ipAddress)),
-    serverPort_(serverPort),
-    clientPort_(clientPort)
+    name_(getQString(name)), ipAddress_(getQString(ipAddress)),
+    serverPort_(serverPort), clientPort_(clientPort)
 {
     initializeFields();
 }
 
 SocketInfoWidget::SocketInfoWidget(
     std::string&& name, std::string&& ipAddress, uint16_t&& serverPort, uint16_t&& clientPort) :
-    name_(QString::fromStdString(name)),
-    ipAddress_(QString::fromStdString(ipAddress)),
-    serverPort_(serverPort),
-    clientPort_(clientPort)
+    name_(getQString(name)), ipAddress_(getQString(ipAddress)),
+    serverPort_(serverPort), clientPort_(clientPort)
 {
     initializeFields();
 }
 
 SocketInfoWidget::SocketInfoWidget(Companion* companionPtr) :
     companionPtr_(companionPtr),
-    name_(QString::fromStdString(companionPtr->getName())),
-    ipAddress_(QString::fromStdString(companionPtr->getSocketInfoPtr()->getIpAddress())),
+    name_(getQString(companionPtr->getName())),
+    ipAddress_(getQString(companionPtr->getSocketInfoPtr()->getIpAddress())),
     serverPort_(companionPtr->getSocketInfoPtr()->getServerPort()),
     clientPort_(companionPtr->getSocketInfoPtr()->getClientPort())
 {
@@ -226,6 +223,105 @@ bool SocketInfoWidget::isStub()
     return false;
 }
 
+bool SocketInfoWidget::isSelected()
+{
+    return this->isSelected_;
+}
+
+void SocketInfoWidget::select()
+{
+    this->isSelected_ = true;
+    this->changeColor(this->selectedColor_);
+}
+
+void SocketInfoWidget::unselect()
+{
+    this->isSelected_ = false;
+    this->changeColor(this->unselectedColor_);
+}
+
+void SocketInfoWidget::update()
+{
+    this->name_ = getQString(this->companionPtr_->getName());
+    this->nameLabelPtr_->setText(this->name_);
+
+    this->ipAddress_ = getQString(this->companionPtr_->getSocketIpAddress());
+
+    this->ipAddressLabelPtr_->setText(this->ipAddress_);
+    this->clientPort_ = this->companionPtr_->getSocketClientPort();
+
+    this->clientPortLabelPtr_->setText(
+        getQString(std::to_string(this->clientPort_)));
+}
+
+void SocketInfoWidget::setNewMessagesIndicatorOn()
+{
+    this->newMessagesIndicatorPtr_->setOn();
+}
+
+void SocketInfoWidget::setNewMessagesIndicatorOff()
+{
+    this->newMessagesIndicatorPtr_->setOff();
+}
+
+void SocketInfoWidget::requestHistoryFromCompanionAction()
+{
+    getManagerPtr()->requestHistoryFromCompanion(this->companionPtr_);
+}
+
+void SocketInfoWidget::updateCompanionAction()
+{
+    getGraphicManagerPtr()->updateCompanion(this->companionPtr_);
+}
+
+void SocketInfoWidget::clearHistoryAction()
+{
+    getGraphicManagerPtr()->clearCompanionHistory(this->companionPtr_);
+}
+
+void SocketInfoWidget::deleteCompanionAction()
+{
+    getGraphicManagerPtr()->deleteCompanion(this->companionPtr_);
+}
+
+void SocketInfoWidget::clientAction()
+{
+    bool result = false;
+
+    const Companion* companion =
+        getManagerPtr()->getMappedCompanionBySocketInfoBaseWidget(this);
+
+    // TODO change to states
+    QString currentText = this->connectButtonPtr_->text();
+
+    if(this->isConnected_)
+    {
+        result = const_cast<Companion*>(companion)->disconnectClient();
+    }
+    else
+    {
+        result = const_cast<Companion*>(companion)->connectClient();
+        getManagerPtr()->sendUnsentMessages(companion);
+    }
+
+    if(result)
+    {
+        // change value
+        this->isConnected_ = !(this->isConnected_);
+
+        // change connect button text
+        QString nextText = getNextConnectButtonLabel(currentText);
+        this->connectButtonPtr_->setText(nextText);
+
+        // change indicator color
+        this->connectionStateIndicatorPtr_->toggle();
+
+        // set context menu action enabled
+        this->requestHistoryAction_->setDisabled(
+            this->requestHistoryAction_->isEnabled());
+    }
+}
+
 void SocketInfoWidget::initializeFields()
 {
     isSelected_ = false;
@@ -244,8 +340,8 @@ void SocketInfoWidget::initializeFields()
     nameLabelPtr_ = new QLabel(name_);
     ipAddressLabelPtr_ = new QLabel(ipAddress_);
 
-    QString serverPortQString = QString::fromStdString(std::to_string(serverPort_));
-    QString clientPortQString = QString::fromStdString(std::to_string(clientPort_));
+    QString serverPortQString = getQString(std::to_string(serverPort_));
+    QString clientPortQString = getQString(std::to_string(clientPort_));
 
     serverPortLabelPtr_ = new QLabel(serverPortQString);
     clientPortLabelPtr_ = new QLabel(clientPortQString);
@@ -305,16 +401,34 @@ void SocketInfoWidget::initializeFields()
     // connect
 }
 
+void SocketInfoWidget::changeColor(QColor& color)
+{
+    this->palettePtr_ = new QPalette;
+    this->palettePtr_->setColor(QPalette::Window, color);
+
+    this->setAutoFillBackground(true);
+    this->setPalette(*this->palettePtr_);
+}
+
+void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
+{
+    Manager* managerPtr = getManagerPtr();
+
+    auto baseObjectPtr = dynamic_cast<SocketInfoBaseWidget*>(this);
+
+    auto newCompanion =
+        managerPtr->getMappedCompanionBySocketInfoBaseWidget(baseObjectPtr);
+
+    managerPtr->resetSelectedCompanion(newCompanion);
+}
+
+void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
+
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
     QMenu* menu = new QMenu(this);
 
     menu->addAction(this->requestHistoryAction_);
-
-    // connect(
-    //     this->requestHistoryAction_, &QAction::triggered,
-    //     this, &SocketInfoWidget::requestHistoryFromCompanionAction,
-    //     Qt::QueuedConnection);
 
     QAction* clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
@@ -333,126 +447,6 @@ void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
     menu->popup(this->mapToGlobal(position));
 }
 
-void SocketInfoWidget::requestHistoryFromCompanionAction()
-{
-    getManagerPtr()->requestHistoryFromCompanion(this->companionPtr_);
-}
-
-void SocketInfoWidget::updateCompanionAction()
-{
-    getGraphicManagerPtr()->updateCompanion(this->companionPtr_);
-}
-
-void SocketInfoWidget::clearHistoryAction()
-{
-    getGraphicManagerPtr()->clearCompanionHistory(this->companionPtr_);
-}
-
-void SocketInfoWidget::deleteCompanionAction()
-{
-    getGraphicManagerPtr()->deleteCompanion(this->companionPtr_);
-}
-
-void SocketInfoWidget::clientAction()
-{
-    bool result = false;
-
-    const Companion* companion =
-        getManagerPtr()->getMappedCompanionBySocketInfoBaseWidget(this);
-
-    // TODO change to states
-    QString currentText = this->connectButtonPtr_->text();
-
-    // if(currentText == connectButtonDisconnectLabel)
-    if(this->isConnected_)
-    {
-        result = const_cast<Companion*>(companion)->disconnectClient();
-    }
-    // else if(currentText == connectButtonConnectLabel)
-    else
-    {
-        result = const_cast<Companion*>(companion)->connectClient();
-        getManagerPtr()->sendUnsentMessages(companion);
-    }
-
-    if(result)
-    {
-        // change value
-        this->isConnected_ = !(this->isConnected_);
-
-        // change connect button text
-        QString nextText = getNextConnectButtonLabel(currentText);
-        this->connectButtonPtr_->setText(nextText);
-
-        // change indicator color
-        this->connectionStateIndicatorPtr_->toggle();
-
-        // set context menu action enabled
-        this->requestHistoryAction_->setDisabled(
-            this->requestHistoryAction_->isEnabled());
-    }
-}
-
-void SocketInfoWidget::changeColor(QColor& color)
-{
-    this->palettePtr_ = new QPalette;
-    this->palettePtr_->setColor(QPalette::Window, color);
-
-    this->setAutoFillBackground(true);
-    this->setPalette(*this->palettePtr_);
-}
-
-bool SocketInfoWidget::isSelected()
-{
-    return this->isSelected_;
-}
-
-void SocketInfoWidget::select()
-{
-    this->isSelected_ = true;
-    this->changeColor(this->selectedColor_);
-}
-
-void SocketInfoWidget::unselect()
-{
-    this->isSelected_ = false;
-    this->changeColor(this->unselectedColor_);
-}
-
-void SocketInfoWidget::update()
-{
-    this->name_ = QString::fromStdString(this->companionPtr_->getName());
-    this->nameLabelPtr_->setText(this->name_);
-    this->ipAddress_ = QString::fromStdString(this->companionPtr_->getSocketIpAddress());
-    this->ipAddressLabelPtr_->setText(this->ipAddress_);
-    this->clientPort_ = this->companionPtr_->getSocketClientPort();
-    this->clientPortLabelPtr_->setText(QString::fromStdString(std::to_string(this->clientPort_)));
-}
-
-void SocketInfoWidget::setNewMessagesIndicatorOn()
-{
-    this->newMessagesIndicatorPtr_->setOn();
-}
-
-void SocketInfoWidget::setNewMessagesIndicatorOff()
-{
-    this->newMessagesIndicatorPtr_->setOff();
-}
-
-void SocketInfoWidget::mousePressEvent(QMouseEvent* event)
-{
-    Manager* managerPtr = getManagerPtr();
-
-    auto baseObjectPtr = dynamic_cast<SocketInfoBaseWidget*>(this);
-
-    auto newCompanion =
-        managerPtr->getMappedCompanionBySocketInfoBaseWidget(baseObjectPtr);
-
-    managerPtr->resetSelectedCompanion(newCompanion);
-}
-
-void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
-
 SocketInfoStubWidget::SocketInfoStubWidget()
 {
     mark_ = socketInfoStubWidget;
@@ -467,6 +461,46 @@ SocketInfoStubWidget::SocketInfoStubWidget()
 bool SocketInfoStubWidget::isStub()
 {
     return true;
+}
+
+ShowHideWidget::ShowHideWidget()
+{
+    show_ = true;
+    layoutPtr_ = new QVBoxLayout;
+    layoutPtr_->setAlignment(Qt::AlignCenter);
+    setLayout(layoutPtr_);
+
+    labelPtr_ = new QLabel;
+    labelPtr_->setText("Show / Hide");
+
+    palettePtr_ = new QPalette;
+    palettePtr_->setColor(QPalette::Window, QColor(showHideBackGroundColor));
+    setAutoFillBackground(true);
+    setPalette(*palettePtr_);
+
+    layoutPtr_->addWidget(labelPtr_);
+}
+
+ShowHideWidget::~ShowHideWidget()
+{
+    delete this->layoutPtr_;
+    delete this->labelPtr_;
+}
+
+void ShowHideWidget::hideInfo()
+{
+    getGraphicManagerPtr()->hideInfo();
+}
+
+void ShowHideWidget::showInfo()
+{
+    getGraphicManagerPtr()->showInfo();
+}
+
+void ShowHideWidget::mousePressEvent(QMouseEvent* event)
+{
+    (this->show_) ? this->hideInfo() : this->showInfo();
+    this->show_ = !(this->show_);
 }
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
@@ -503,11 +537,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         QString textHtml = QString("<font color=\"%1\"><b>%2</b></font>")
             .arg(receivedMessageColor, text);
 
-        // newMessageEditPtr_ = new QTextEdit;
         newMessageLabelPtr_ = new QLabel(textHtml);
         newMessageLabelPtr_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
-        // newMessageEditPtr_->setReadOnly(true);
-        // newMessageEditPtr_->insertHtml(textHtml);
 
         layoutPtr_->addWidget(newMessageLabelPtr_);
     }
@@ -683,7 +714,8 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widge
 
     if(index == -1)
     {
-        showErrorDialogAndLogError(nullptr, "SocketInfoBaseWidget was not found in companion panel");
+        showErrorDialogAndLogError(
+            nullptr, "SocketInfoBaseWidget was not found in companion panel");
     }
     else if(index == 0)
     {
@@ -695,8 +727,8 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widge
 
         auto previousWidget = companionPanelChildren.at(index - 1);
 
-        auto previousCompanionPtr = managerPtr->
-                                    getMappedCompanionBySocketInfoBaseWidget(previousWidget);
+        auto previousCompanionPtr =
+            managerPtr->getMappedCompanionBySocketInfoBaseWidget(previousWidget);
 
         managerPtr->resetSelectedCompanion(previousCompanionPtr);
 
@@ -733,7 +765,7 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     layoutPtr_->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutPtr_);
 
-    companionNameLabelPtr_ = new QLabel(QString::fromStdString(name));
+    companionNameLabelPtr_ = new QLabel(getQString(name));
     // companionNameLabelPtr_->setStyleSheet("border-bottom: 1px solid black");
     companionNameLabelPalettePtr_ = new QPalette;
     companionNameLabelPalettePtr_->setColor(QPalette::Window, QColor(companionNameLabelBackgroundColor));
@@ -741,11 +773,6 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     companionNameLabelPtr_->setPalette(*companionNameLabelPalettePtr_);
 
     layoutPtr_->addWidget(companionNameLabelPtr_);
-
-    // chatHistoryWidgetPtr_ = new QTextEdit;
-    // chatHistoryWidgetPtr_->setTextColor(QColorConstants::Green);
-    // chatHistoryWidgetPtr_->setReadOnly(true);
-    // chatHistoryWidgetPtr_->setPlainText("");
 
     chatHistoryWidgetPtr_ = new QWidget;
 
@@ -766,7 +793,6 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::Gray);
     chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
 
-    // layoutPtr_->addWidget(chatHistoryWidgetPtr_);
     layoutPtr_->addWidget(chatHistoryScrollAreaPtr_);
 
     textEditPtr_ = new TextEditWidget;    
@@ -841,17 +867,13 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         groupPtr->messageAdded();
     }
 
-    // logArgsWithCustomMark(
-    //     "this->chatHistoryWidgetPtr_->children().size():",
-    //     this->chatHistoryWidgetPtr_->children().size());
-
     this->scrollDownChatHistory();
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
     bool isAntecedent, const std::string& companionName, const Message* messagePtr)
 {
-    QString companionNameQString = QString::fromStdString(companionName);
+    QString companionNameQString = getQString(companionName);
 
     emit this->addMessageWidgetToChatHistorySignal(
         isAntecedent, companionNameQString, messagePtr);
@@ -866,13 +888,6 @@ void CentralPanelWidget::scrollDownChatHistory()
 
     this->chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
         this->chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());
-}
-
-void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
-    bool isAntecedent, const QString& companionName, const Message* messagePtr)
-{
-    this->addMessageWidgetToChatHistory(
-        isAntecedent, companionName.toStdString(), messagePtr);
 }
 
 void CentralPanelWidget::clearChatHistory()
@@ -901,9 +916,8 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
 
     auto lambda = [&](auto item)
     {
-        // auto result = graphicManagerPtr->getMappedMessageTimeByMessageWidgetPtr(
-        //     dynamic_cast<MessageWidget*>(item));
-        const Message* messagePtr = graphicManagerPtr->getMappedMessageByMessageWidgetPtr(
+        const Message* messagePtr =
+            graphicManagerPtr->getMappedMessageByMessageWidgetPtr(
             dynamic_cast<MessageWidget*>(item));
 
         // return result;
@@ -928,10 +942,15 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
     // this->chatHistoryLayoutPtr_->update();
 }
 
+void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
+    bool isAntecedent, const QString& companionName, const Message* messagePtr)
+{
+    this->addMessageWidgetToChatHistory(
+        isAntecedent, companionName.toStdString(), messagePtr);
+}
+
 void CentralPanelWidget::sendMessage(const QString& text)
 {
-    // auto plainText = this->textEditPtr_->toPlainText();
-    // auto text = plainText.toStdString();
     if(!text.isEmpty())
     {
         getGraphicManagerPtr()->sendMessage(this->companionPtr_, text.toStdString());
@@ -995,6 +1014,16 @@ void RightPanelWidget::set()
         this, &RightPanelWidget::customMenuRequestedSlot, Qt::QueuedConnection);
 }
 
+void RightPanelWidget::addTextToAppLogWidget(const QString& text)
+{
+    emit this->addTextToAppLogWidgetSignal(text);
+}
+
+void RightPanelWidget::clearLogAction()
+{
+    this->appLogWidgetPtr_->clear();
+}
+
 void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
 {
     this->appLogWidgetPtr_->appendPlainText(text);
@@ -1013,16 +1042,6 @@ void RightPanelWidget::customMenuRequestedSlot(QPoint position)
         this, &RightPanelWidget::clearLogAction, Qt::QueuedConnection);
 
     menu->popup(this->mapToGlobal(position));
-}
-
-void RightPanelWidget::addTextToAppLogWidget(const QString& text)
-{
-    emit this->addTextToAppLogWidgetSignal(text);
-}
-
-void RightPanelWidget::clearLogAction()
-{
-    this->appLogWidgetPtr_->clear();
 }
 
 WidgetGroup::WidgetGroup(const Companion* companionPtr) :
@@ -1046,7 +1065,6 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr) :
 
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr_));
 
-    // buildChatHistory(companionPtr_);
     buildChatHistory();
 
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
@@ -1069,7 +1087,6 @@ void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
 }
 
 void WidgetGroup::addMessageWidgetToChatHistoryFromThread(
-    // bool isAntecedent, const Message* messagePtr)
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
     bool isAntecedent = messageStatePtr->getIsAntecedent();
@@ -1121,7 +1138,6 @@ void WidgetGroup::messageAdded()
     SocketInfoWidget* castPtr =
         dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_);
 
-    // if(castPtr && !castPtr->isSelected())
     if(castPtr && this->antacedentMessagesCounter_ > 0)
     {
         castPtr->setNewMessagesIndicatorOn();
@@ -1143,11 +1159,6 @@ void WidgetGroup::messageWidgetSelected(bool isAntacedent)
         }
     }
 }
-
-// bool WidgetGroup::isSocketInfoWidgetSelected()
-// {
-//     return dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->isSelected();
-// }
 
 void WidgetGroup::buildChatHistory()
 {
@@ -1285,8 +1296,7 @@ CompanionDataDialog::CompanionDataDialog(
 {
     setParent(parentPtr);
 
-    setWindowTitle(
-        QString::fromStdString(actionTypeStringRepresentation.at(actionType)));
+    setWindowTitle(getQString(actionTypeStringRepresentation.at(actionType)));
 
     setModal(true);
     setWindowFlag(Qt::Window);
@@ -1307,9 +1317,14 @@ CompanionDataDialog::CompanionDataDialog(
 
     if(actionType_ == CompanionActionType::UPDATE && companionPtr)
     {
-        nameEditPtr_->setText(QString::fromStdString(companionPtr->getName()));
-        ipAddressEditPtr_->setText(QString::fromStdString(companionPtr->getSocketInfoPtr()->getIpAddress()));
-        portEditPtr_->setText(QString::fromStdString(std::to_string(companionPtr->getSocketInfoPtr()->getClientPort())));
+        nameEditPtr_->setText(getQString(companionPtr->getName()));
+
+        ipAddressEditPtr_->setText(
+            getQString(companionPtr->getSocketInfoPtr()->getIpAddress()));
+
+        portEditPtr_->setText(
+            getQString(std::to_string(
+                companionPtr->getSocketInfoPtr()->getClientPort())));
     }
 
     layoutPtr_->addRow(nameLabelPtr_, nameEditPtr_);
@@ -1351,7 +1366,7 @@ std::string CompanionDataDialog::getNameString()
 std::string CompanionDataDialog::getIpAddressString()
 {
     auto ipAddressFromWidget = this->ipAddressEditPtr_->text().toStdString();  // TODO change
-    QHostAddress hostAddress { QString::fromStdString(ipAddressFromWidget) };
+    QHostAddress hostAddress { getQString(ipAddressFromWidget) };
 
     return hostAddress.toString().toStdString();
 }
@@ -1475,8 +1490,7 @@ TextDialog::TextDialog(
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    setWindowTitle(
-        QString::fromStdString(dialogTypeStringRepresentation.at(dialogType)));
+    setWindowTitle(getQString(dialogTypeStringRepresentation.at(dialogType)));
 
     layoutPtr_ = new QVBoxLayout;
     setLayout(layoutPtr_);
@@ -1527,23 +1541,6 @@ void TextDialog::set()
     }
 }
 
-void TextDialog::unsetMainWindowBlurAndCloseDialogs()
-{
-    getGraphicManagerPtr()->disableMainWindowBlurEffect();
-    this->closeSelfAndParentDialog();
-}
-
-void TextDialog::reject()
-{
-    QDialog::reject();
-}
-
-void TextDialog::acceptAction()
-{
-    this->close();
-    this->actionPtr_->sendData();
-}
-
 void TextDialog::closeSelf()
 {
     this->close();
@@ -1561,42 +1558,19 @@ void TextDialog::closeSelfAndParentDialog()
     }
 }
 
-ShowHideWidget::ShowHideWidget()
+void TextDialog::acceptAction()
 {
-    show_ = true;
-    layoutPtr_ = new QVBoxLayout;
-    layoutPtr_->setAlignment(Qt::AlignCenter);
-    setLayout(layoutPtr_);
-
-    labelPtr_ = new QLabel;
-    labelPtr_->setText("Show / Hide");
-
-    palettePtr_ = new QPalette;
-    palettePtr_->setColor(QPalette::Window, QColor(showHideBackGroundColor));
-    setAutoFillBackground(true);
-    setPalette(*palettePtr_);
-
-    layoutPtr_->addWidget(labelPtr_);
+    this->close();
+    this->actionPtr_->sendData();
 }
 
-ShowHideWidget::~ShowHideWidget()
+void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 {
-    delete this->layoutPtr_;
-    delete this->labelPtr_;
+    getGraphicManagerPtr()->disableMainWindowBlurEffect();
+    this->closeSelfAndParentDialog();
 }
 
-void ShowHideWidget::mousePressEvent(QMouseEvent* event)
+void TextDialog::reject()
 {
-    (this->show_) ? this->hideInfo() : this->showInfo();
-    this->show_ = !(this->show_);
-}
-
-void ShowHideWidget::hideInfo()
-{
-    getGraphicManagerPtr()->hideInfo();
-}
-
-void ShowHideWidget::showInfo()
-{
-    getGraphicManagerPtr()->showInfo();
+    QDialog::reject();
 }

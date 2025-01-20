@@ -1,16 +1,16 @@
 #include "utils_cout.hpp"
 
-void endline(int n)
+void endline(int number)
 {
-    for(int i = 0; i < n; i++)
+    for(int i = 0; i < number; i++)
     {
         std::cout << std::endl;
     }
 }
 
-template<> int getSizeAsInt<std::string>(std::string& s)
+template<> int getSizeAsInt<std::string>(std::string& string)
 {
-    return (int)s.size();
+    return (int)string.size();
 }
 
 std::string argForCout(const QString& value)
@@ -28,11 +28,11 @@ std::string argForCout(const char* value)
     return (value) ? std::string(value) : std::string("0x0");
 }
 
-void coutVector1(const std::vector<int>& v)
+void coutVector1(const std::vector<int>& vector)
 {
     std::cout << std::endl;
 
-    for(auto& i : v)
+    for(auto& i : vector)
     {
         std::cout << i << '\t';
     }
@@ -40,13 +40,13 @@ void coutVector1(const std::vector<int>& v)
     std::cout << std::endl;
 }
 
-void coutVectorAndSum(const std::vector<int>& v)
+void coutVectorAndSum(const std::vector<int>& vector)
 {
     int sum = 0;
 
     std::cout << std::endl;
 
-    for(auto& i : v)
+    for(auto& i : vector)
     {
         std::cout << i << '\t';
         sum += i;
@@ -56,7 +56,7 @@ void coutVectorAndSum(const std::vector<int>& v)
     std::cout << std::endl;
 }
 
-void coutVectorWithIndexesHorizontally(const std::vector<int>& v)
+void coutVectorWithIndexesHorizontally(const std::vector<int>& vector)
 {
     std::cout << std::endl;
 
@@ -64,15 +64,15 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& v)
         return std::to_string(i).size() < std::to_string(j).size();
     };
 
-    auto maxElement = std::max_element(v.begin(), v.end(), compareStringLengths);
-//		std::cout << "maxElement: " << *maxElement << std::endl;
+    auto maxElement =
+        std::max_element(vector.begin(), vector.end(), compareStringLengths);
 
     int margin = 2;
     auto width = (int)std::to_string(*maxElement).size() + margin;
 
     coutWithManipulators("Index: ", width);
 
-    for(int i = 0; i < (int)v.size(); i++)
+    for(int i = 0; i < (int)vector.size(); i++)
     {
         coutWithManipulators(std::to_string(i), width);
     }
@@ -81,57 +81,58 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& v)
 
     coutWithManipulators("Value: ", width);
 
-    for(int i = 0; i < (int)v.size(); i++)
+    for(int i = 0; i < (int)vector.size(); i++)
     {
-        coutWithManipulators(std::to_string(v.at(i)), width);
+        coutWithManipulators(std::to_string(vector.at(i)), width);
     }
 
     std::cout << std::endl;
 }
 
 // array
-void printArray(std::array<int, 10>& a)
+void printArray(std::array<int, 10>& array)
 {
-    std::cout << "&a: " << &a << std::endl;
+    std::cout << "&a: " << &array << std::endl;
 
-    for(size_t i = 0; i < a.size(); i++)
+    for(size_t i = 0; i < array.size(); i++)
     {
-        std::cout << "&a[" << i << "]: " << &a[i] << '\t';
-        std::cout << "a[" << i << "]: " << a[i] << std::endl;
+        std::cout << "&a[" << i << "]: " << &array[i] << '\t';
+        std::cout << "a[" << i << "]: " << array[i] << std::endl;
     }
-    std::cout << "a.data(): " << a.data() << std::endl;
+    std::cout << "a.data(): " << array.data() << std::endl;
 }
 
 // tuple
 
 // set
-void printSet(std::set<int>& s)
+void printSet(std::set<int>& set)
 {
-    std::cout << std::endl << "&s: " << &s << std::endl;
+    std::cout << std::endl << "&s: " << &set << std::endl;
 
-    for(std::set<int>::iterator i = s.cbegin(); i != s.cend(); i++)
+    for(std::set<int>::iterator i = set.cbegin(); i != set.cend(); i++)
     {
         std::cout << "&(*i): " << &(*i) << '\t';
         std::cout << " *i: " << *i << std::endl;
     }
-    std::cout << "s.size(): " << s.size() << std::endl;
+    std::cout << "s.size(): " << set.size() << std::endl;
 }
 
 // map
 
 // string
-void coutString(std::string::const_iterator it1, std::string::const_iterator it2)
+void coutString(
+    std::string::const_iterator iterator1, std::string::const_iterator iterator2)
 {
-    for(auto it = it1; it != it2; it++)
+    for(auto it = iterator1; it != iterator2; it++)
     {
         std::cout << *it;
     }
     endline(1);
 }
 
-void coutStringFull(std::string& s)
+void coutStringFull(std::string& string)
 {
-    coutString(s.begin(), s.end());
+    coutString(string.begin(), string.end());
 }
 
 void coutHeader(const std::string& header)
@@ -143,8 +144,12 @@ void coutHeader(const std::string& header)
     auto headerSize = marginSize + spaceSize + header.size() + spaceSize + marginSize;
 
     std::string symbolString(headerSize, marginSymbol);
-    std::string preHeader = std::string(marginSize, marginSymbol) + std::string(spaceSize, spaceSymbol);
-    std::string postHeader = std::string(spaceSize, spaceSymbol) + std::string(marginSize, marginSymbol);
+
+    std::string preHeader =
+        std::string(marginSize, marginSymbol) + std::string(spaceSize, spaceSymbol);
+
+    std::string postHeader =
+        std::string(spaceSize, spaceSymbol) + std::string(marginSize, marginSymbol);
 
     endline(1);
     coutWithEndl(symbolString);

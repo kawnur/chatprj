@@ -19,12 +19,13 @@ class SocketInfo;
 class SocketInfoWidget;
 
 GraphicManager* getGraphicManagerPtr();
+template<typename T> QString getQString(T&&);
 
 template<typename T> QString argForLogging(T* const& value)
 {
     std::stringstream ss;
     ss << (void*)value;
-    return QString::fromStdString(ss.str());
+    return getQString(ss.str());
 }
 
 template<
@@ -32,7 +33,7 @@ template<
     typename std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
 QString argForLogging(const T& value)
 {
-    return QString::fromStdString(std::to_string(value));
+    return getQString(std::to_string(value));
 }
 
 template<

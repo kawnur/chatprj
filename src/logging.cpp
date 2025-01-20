@@ -2,12 +2,12 @@
 
 template<> QString argForLogging<const std::string&>(const std::string& value)
 {
-    return QString::fromStdString(value);
+    return getQString(value);
 }
 
 QString argForLogging(const std::string& value)
 {
-    return QString::fromStdString(value);
+    return getQString(value);
 }
 
 QString argForLogging(const char* value)
@@ -27,7 +27,7 @@ void logLine(const QString& string)
 
 void logLine(const std::string& string)
 {
-    getGraphicManagerPtr()->addTextToAppLogWidget(QString::fromStdString(string));
+    getGraphicManagerPtr()->addTextToAppLogWidget(getQString(string));
 }
 
 void logSocketInfoData(const SocketInfo* objectPtr)

@@ -7,7 +7,6 @@ Manager::Manager() :
 {
     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
     selectedCompanionPtr_ = nullptr;
-
     mapMessageStateToMessage_ = std::map<const MessageState*, const Message*>();
 }
 
@@ -72,8 +71,7 @@ const MessageState* Manager::getMappedMessageStateByMessagePtr(const Message* me
             return iter.second == messagePtr;
         });
 
-    return (result == this->mapMessageStateToMessage_.end()) ?
-               nullptr : result->first;
+    return (result == this->mapMessageStateToMessage_.end()) ? nullptr : result->first;
 }
 
 void Manager::set()
@@ -130,7 +128,9 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     MessageState* messageStatePtr = new MessageState(
         companion_id, false, false, false, "");
 
-    bool addResult = this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+    bool addResult = this->addToMessageStateToMessageMapping(
+        messageStatePtr, messagePtr);
+
     logArgs("addResult:", addResult);
 
     // add to widget
@@ -143,8 +143,8 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
     // send over network
     bool result = companionPtr->sendMessage(
-        false, NetworkMessageType::SEND_DATA, messageStatePtr->getNetworkId(),
-        messagePtr);
+        false, NetworkMessageType::SEND_DATA,
+        messageStatePtr->getNetworkId(), messagePtr);
 
     // mark message as sent
     if(result)
@@ -189,7 +189,9 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
 
             // add to companion's messages
-            Message* messagePtr = new Message(id, companion_id, companion_id, timestamp, text);
+            Message* messagePtr = new Message(
+                id, companion_id, companion_id, timestamp, text);
+
             companionPtr->addMessage(messagePtr);
 
             // create message state object and add to mapping
@@ -202,9 +204,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             // add to widget
             WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-            // groupPtr->addMessageWidgetToChatHistory(messagePtr);
-            // groupPtr->addMessageWidgetToChatHistoryFromThread(isAntecedent, messagePtr);
-            groupPtr->addMessageWidgetToChatHistoryFromThread(messageStatePtr, messagePtr);
+            groupPtr->addMessageWidgetToChatHistoryFromThread(
+                messageStatePtr, messagePtr);
 
             // send reception confirmation to sender
             bool result = companionPtr->sendMessage(
@@ -218,11 +219,11 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             auto received = jsonData.at("received");
 
-            if(received == 1)
-            {
-                // successfully received
+            if(received == 1)  // successfully received
+            {                
                 // mark message as received
-                std::string key = generateMessageMappingKey(networkId, companionPtr->getId());
+                std::string key = generateMessageMappingKey(
+                    networkId, companionPtr->getId());
 
                 auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
 
@@ -639,6 +640,7 @@ void Manager::startUserAuthentication()
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     graphicManagerPtr->enableMainWindowBlurEffect();
+
     // do we have password in db?
     std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
         logDBInteraction,
@@ -696,18 +698,13 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
         if(messagePtr)
         {
-            // networkId = this->getMappedNetworkIdByMessagePtr(messagePtr);
             const MessageState* messageStatePtr =
                 this->getMappedMessageStateByMessagePtr(messagePtr);
 
-            // if(networkId.empty())
             if(!messageStatePtr)
             {
-                // showErrorDialogAndLogError(
                 logArgsError(
-                    // nullptr,
                     "strange case: unsent message found in companions messages, "
-                    // "but not found in manager's mapNetworkIdToMessage_");
                     "but not found in manager's mapMessageStateToMessage_");
             }
             else
@@ -781,6 +778,8 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
 std::pair<const MessageState*, const Message*>
 Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string& key)
 {
+    using pair = std::pair<const MessageState*, const Message*>;
+
     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
 
     auto iterator = std::find_if(
@@ -792,8 +791,7 @@ Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::stri
         });
 
     return (iterator == this->mapMessageStateToMessage_.end()) ?
-               std::pair<const MessageState*, const Message*>(nullptr, nullptr) :
-               std::pair<const MessageState*, const Message*>(iterator->first, iterator->second);
+        pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
 }
 
 bool Manager::addToMessageStateToMessageMapping(
@@ -854,8 +852,7 @@ bool Manager::addToMessageStateToMessageMapping(
         }
         else
         {
-            QString key = QString::fromStdString(
-                messageStatePtr->getMessageMappingKey());
+            QString key = getQString(messageStatePtr->getMessageMappingKey());
 
             logArgsError(
                 QString("mapMessageStateToMessage_ already contains"
@@ -1052,7 +1049,8 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
 
     if(findMapResult == this->mapCompanionToWidgetGroup_.end())
     {
-        showErrorDialogAndLogError(nullptr, "Companion was not found in mapping at deletion");
+        showErrorDialogAndLogError(
+            nullptr, "Companion was not found in mapping at deletion");
     }
     else
     {
@@ -1068,7 +1066,8 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
 
         if(findVectorResult == this->companionPtrs_.end())
         {
-            showErrorDialogAndLogError(nullptr, "Companion was not found in vector at deletion");
+            showErrorDialogAndLogError(
+                nullptr, "Companion was not found in vector at deletion");
         }
         else
         {
@@ -1112,7 +1111,8 @@ bool Manager::passwordDataValidation(PasswordAction* passwordActionPtr)
 {
     std::vector<std::string> validationErrors {};
 
-    bool validationResult = validatePassword(validationErrors, passwordActionPtr->getPassword());
+    bool validationResult = validatePassword(
+        validationErrors, passwordActionPtr->getPassword());
 
     if(!validationResult)
     {
@@ -1245,7 +1245,6 @@ void Manager::waitForMessageReceptionConfirmation(
 
         while(true)
         {
-            // if(this->getMappedNetworkIdByMessagePtr(messagePtr).empty())
             if(messageStatePtr->getIsReceived())
             {
                 return;

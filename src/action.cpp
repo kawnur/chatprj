@@ -22,6 +22,7 @@ CompanionAction::CompanionAction(
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
         dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
+
         break;
 
     case CompanionActionType::DELETE:
@@ -47,11 +48,10 @@ CompanionAction::CompanionAction(
             mainWindowPtr_,
             DialogType::WARNING,
             sendChatHistoryToCompanionDialogText.arg(
-                QString::fromStdString(companionPtr->getName())),
+                getQString(companionPtr->getName())),
             getButtonInfoVectorPtr(sendChatHistoryButtonText));
 
         break;
-
     }
 }
 
@@ -137,7 +137,6 @@ void CompanionAction::sendData()
         }
 
         break;
-
     }
 
     logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);
@@ -155,10 +154,12 @@ PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)
     {
     case PasswordActionType::CREATE:
         dialogPtr_ = new CreatePasswordDialog;
+
         break;
 
     case PasswordActionType::GET:
         dialogPtr_ = new GetPasswordDialog;
+
         break;
     }
 }
@@ -181,49 +182,54 @@ void PasswordAction::sendData()
     switch(this->actionType_)
     {
     case PasswordActionType::CREATE:
-    {
-        CreatePasswordDialog* passwordDialogPtr =
-            dynamic_cast<CreatePasswordDialog*>(this->dialogPtr_);
-
-        auto text1 = passwordDialogPtr->getFirstEditText();
-        auto text2 = passwordDialogPtr->getSecondEditText();
-
-        if(text1 == text2)
         {
-            if(text1.size() == 0)
+            CreatePasswordDialog* passwordDialogPtr =
+                dynamic_cast<CreatePasswordDialog*>(this->dialogPtr_);
+
+            auto text1 = passwordDialogPtr->getFirstEditText();
+            auto text2 = passwordDialogPtr->getSecondEditText();
+
+            if(text1 == text2)
             {
-                showErrorDialogAndLogError(this->getDialogPtr(), "Empty password is invalid");
+                if(text1.size() == 0)
+                {
+                    showErrorDialogAndLogError(
+                        this->getDialogPtr(), "Empty password is invalid");
+
+                    return;
+                }
+
+                this->passwordPtr_ = &text1;
+                getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
+            }
+            else
+            {
+                showErrorDialogAndLogError(
+                    this->getDialogPtr(), "Entered passwords are not equal");
+            }
+        }
+
+        break;
+
+    case PasswordActionType::GET:
+        {
+            GetPasswordDialog* passwordDialogPtr =
+                dynamic_cast<GetPasswordDialog*>(this->dialogPtr_);
+
+            auto text = passwordDialogPtr->getEditText();
+
+            if(text.size() == 0)
+            {
+                showErrorDialogAndLogError(
+                    this->getDialogPtr(), "Empty password is invalid");
+
                 return;
             }
 
-            this->passwordPtr_ = &text1;
-            getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
-        }
-        else
-        {
-            showErrorDialogAndLogError(this->getDialogPtr(), "Entered passwords are not equal");
-        }
-    }
-
-    break;
-
-    case PasswordActionType::GET:
-    {
-        GetPasswordDialog* passwordDialogPtr =
-            dynamic_cast<GetPasswordDialog*>(this->dialogPtr_);
-
-        auto text = passwordDialogPtr->getEditText();
-
-        if(text.size() == 0)
-        {
-            showErrorDialogAndLogError(this->getDialogPtr(), "Empty password is invalid");
-            return;
+            this->passwordPtr_ = &text;
+            getGraphicManagerPtr()->sendExistingPasswordDataToManager(this);
         }
 
-        this->passwordPtr_ = &text;
-        getGraphicManagerPtr()->sendExistingPasswordDataToManager(this);
-    }
-
-    break;
+        break;
     }
 }

@@ -37,6 +37,11 @@ std::vector<std::string> buildStringVector(Ts... args)
     return result;
 }
 
+template<typename T> QString getQString(T&& string)
+{
+    return QString::fromStdString(std::forward<T>(string));
+}
+
 // data validation
 
 bool validateCompanionName(std::vector<std::string>&, const std::string&);
