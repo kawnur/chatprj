@@ -203,10 +203,9 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 
     QString header =
         QString("<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>")
-        .arg(color, sender, receiver, time);
+            .arg(color, sender, receiver, time);
 
-    QString body =
-        QString("<font color=\"%1\"><br>").arg(color) + text + QString("</font>");
+    QString body = QString("<font color=\"%1\"><br>%2</font>").arg(color, text);
 
     std::pair<QString, QString> data (header, body);
 

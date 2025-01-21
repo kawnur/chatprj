@@ -317,7 +317,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 std::string timestamp = json["messages"][i]["timestamp_tz"];
                 std::string message = json["messages"][i]["message"];
 
-                int companionId = companionPtr->getId();
+                uint8_t companionId = companionPtr->getId();
 
                 // check if message from this companion with such timestamp
                 // already exists
@@ -331,7 +331,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 if(!messageGetDataPtr)
                 {
                     showErrorDialogAndLogError(nullptr, "Error getting data from db");
-                    return false;
+                    return;
                 }
 
                 if(!messageGetDataPtr->isEmpty())
@@ -340,7 +340,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                         nullptr,
                         QString(
                             "Message with timestamp %1 from companion "
-                            "with id %2 already exists").arg(timestamp, companionId));
+                            "with id %2 already exists")
+                            .arg(
+                                getQString(timestamp),
+                                getQString(std::to_string(companionId))));
 
                     continue;
                 }
@@ -353,8 +356,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                     "pushMessageToDBAndReturn",
                     &pushMessageToDBWithAuthorIdAndReturn,
                     buildStringVector("id", "companion_id", "timestamp_tz"),
-                    companionPtr->getName(), authorId, timestamp, idString, message,
-                    true, true);
+                    companionPtr->getName(), std::to_string(authorId), timestamp,
+                    idString, message, true, true);
 
                 if(!messageAddDataPtr)
                 {
@@ -899,7 +902,52 @@ Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::stri
 
 void Manager::fillWithMessages(Companion* companionPtr)
 {
+    uint8_t id = companionPtr->getId();
 
+    // get messages data
+    std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
+        logDBInteraction,
+        "getMessagesDBResult",
+        &getMessagesDBResult,
+        buildStringVector(
+            "id", "companion_id", "author_id",
+            "timestamp_tz", "message", "is_sent", "is_received"),
+        id);
+
+    if(!messagesDataPtr)
+    {
+        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        // return false;
+    }
+
+    if(messagesDataPtr->isEmpty())
+    {
+        showWarningDialogAndLogWarning(
+            nullptr,
+            QString("no messages in db with companion %1")
+                .arg(getQString(companionPtr->getName())));
+
+        // return false;
+    }
+
+    for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
+    {
+        Message* messagePtr = new Message(
+            std::atoi(messagesDataPtr->getValue(i, "id")),
+            id,
+            std::atoi(messagesDataPtr->getValue(i, "author_id")),
+            messagesDataPtr->getValue(i, "timestamp_tz"),
+            messagesDataPtr->getValue(i, "message"));
+
+        companionPtr->addMessage(messagePtr);
+
+        MessageState* messageStatePtr = new MessageState(
+            id, false,
+            messagesDataPtr->getValue(i, "is_sent"),
+            messagesDataPtr->getValue(i, "is_received"), "");
+
+        this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+    }
 }
 
 bool Manager::addToMessageStateToMessageMapping(
@@ -943,7 +991,7 @@ bool Manager::addToMessageStateToMessageMapping(
 
         messageStateCastPtr->setNetworkId(networkId);
 
-        messageStateCastPtr->setgetMessageMappingKey(
+        messageStateCastPtr->setMessageMappingKey(
             messageMappingKey);
 
         this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
@@ -960,12 +1008,10 @@ bool Manager::addToMessageStateToMessageMapping(
         }
         else
         {
-            QString key = getQString(messageStatePtr->getMessageMappingKey());
-
             logArgsError(
                 QString("mapMessageStateToMessage_ already contains"
                         "entry with key object having messageMappingKey_: %1")
-                    .arg(key));
+                    .arg(getQString(messageStatePtr->getMessageMappingKey())));
 
             return false;
         }
@@ -1044,50 +1090,52 @@ bool Manager::buildCompanions()
 
         if(companionPtr->getId() > 1)  // TODO change condition
         {
-            // get messages data
-            std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
-                logDBInteraction,
-                "getMessagesDBResult",
-                &getMessagesDBResult,
-                buildStringVector(
-                    "id", "companion_id", "author_id",
-                    "timestamp_tz", "message", "is_sent", "is_received"),
-                id);
+            // // get messages data
+            // std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
+            //     logDBInteraction,
+            //     "getMessagesDBResult",
+            //     &getMessagesDBResult,
+            //     buildStringVector(
+            //         "id", "companion_id", "author_id",
+            //         "timestamp_tz", "message", "is_sent", "is_received"),
+            //     id);
 
-            if(!messagesDataPtr)
-            {
-                showErrorDialogAndLogError(nullptr, "Error getting data from db");
-                // return false;
-            }
+            // if(!messagesDataPtr)
+            // {
+            //     showErrorDialogAndLogError(nullptr, "Error getting data from db");
+            //     // return false;
+            // }
 
-            if(messagesDataPtr->isEmpty())
-            {
-                showWarningDialogAndLogWarning(
-                    nullptr,
-                    QString("no messages in db with companion %1").arg(
-                        companionPtr->getName()));
+            // if(messagesDataPtr->isEmpty())
+            // {
+            //     showWarningDialogAndLogWarning(
+            //         nullptr,
+            //         QString("no messages in db with companion %1").arg(
+            //             companionPtr->getName()));
 
-                // return false;
-            }
+            //     // return false;
+            // }
 
-            for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
-            {
-                Message* messagePtr = new Message(
-                    std::atoi(messagesDataPtr->getValue(i, "id")),
-                    id,
-                    std::atoi(messagesDataPtr->getValue(i, "author_id")),
-                    messagesDataPtr->getValue(i, "timestamp_tz"),
-                    messagesDataPtr->getValue(i, "message"));
+            // for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
+            // {
+            //     Message* messagePtr = new Message(
+            //         std::atoi(messagesDataPtr->getValue(i, "id")),
+            //         id,
+            //         std::atoi(messagesDataPtr->getValue(i, "author_id")),
+            //         messagesDataPtr->getValue(i, "timestamp_tz"),
+            //         messagesDataPtr->getValue(i, "message"));
 
-                companionPtr->addMessage(messagePtr);
+            //     companionPtr->addMessage(messagePtr);
 
-                MessageState* messageStatePtr = new MessageState(
-                    id, false,
-                    messagesDataPtr->getValue(i, "is_sent"),
-                    messagesDataPtr->getValue(i, "is_received"), "");
+            //     MessageState* messageStatePtr = new MessageState(
+            //         id, false,
+            //         messagesDataPtr->getValue(i, "is_sent"),
+            //         messagesDataPtr->getValue(i, "is_received"), "");
 
-                this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
-            }
+            //     this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+            // }
+
+            this->fillWithMessages(companionPtr);
 
             if(!companionPtr->startServer())
             {

@@ -17,7 +17,9 @@ class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
 
-int getDataFromDBResult(const bool, std::shared_ptr<DBReplyData>&, const PGresult*, int);
+int getDataFromDBResult(
+    const bool&, std::shared_ptr<DBReplyData>&, const PGresult*&, int);
+
 template<typename... Ts> void logArgs(Ts&&... args);
 void logDBReplyData(std::shared_ptr<DBReplyData>&);
 void showErrorDialogAndLogError(QWidget*, const QString&);
@@ -66,7 +68,7 @@ private:
     std::pair<const MessageState*, const Message*>
         getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
-    void fillWithMessages();
+    void fillWithMessages(Companion*);
     bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
     bool connectToDb();
     bool buildCompanions();
@@ -90,14 +92,14 @@ private:
     // template<typename... Ts>
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
-        const bool logging,
+        const bool& logging,
         const char* mark,
-        PGresult*(*func)(const PGconn*, const bool, const Ts&...),
+        PGresult*(*func)(const PGconn*, const bool&, const Ts&...),
         // std::vector<std::string>&& keys,
         T&& keys,
         const Ts&... args)
     {
-        PGresult* dbResultPtr = func(this->dbConnectionPtr_, logging, args...);
+        const PGresult* dbResultPtr = func(this->dbConnectionPtr_, logging, args...);
 
         if(logging)
         {

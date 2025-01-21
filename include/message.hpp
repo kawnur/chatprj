@@ -41,7 +41,7 @@ public:
 
     void setIsReceived(bool);
     void setNetworkId(const std::string&);
-    void setgetMessageMappingKey(const std::string&);
+    void setMessageMappingKey(const std::string&);
 
 private:
     bool isAntecedent_;

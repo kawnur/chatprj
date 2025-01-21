@@ -47,8 +47,8 @@ CompanionAction::CompanionAction(
         dialogPtr_ = new TextDialog(
             mainWindowPtr_,
             DialogType::WARNING,
-            sendChatHistoryToCompanionDialogText.arg(
-                getQString(companionPtr->getName())),
+            sendChatHistoryToCompanionDialogText
+                .arg(getQString(companionPtr->getName())),
             getButtonInfoVectorPtr(sendChatHistoryButtonText));
 
         break;

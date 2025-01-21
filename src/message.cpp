@@ -81,7 +81,7 @@ void MessageState::setNetworkId(const std::string& networkId)
     this->networkId_ = networkId;
 }
 
-void MessageState::setgetMessageMappingKey(
+void MessageState::setMessageMappingKey(
     const std::string& messageMappingKey)
 {
     this->messageMappingKey_ = messageMappingKey;
