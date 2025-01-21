@@ -306,6 +306,71 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgsInfo("got chat history from " + companionPtr->getName());
             logArgs("jsonString:", jsonString);
+
+            auto json = buildJsonObject(jsonString);
+
+            for(size_t i = 0; i < json["messages"].size(); i++)
+            {
+                uint8_t authorId = json["messages"][i]["author_id"];
+                authorId = (authorId == 1) ? companionPtr->getId() : 1;
+
+                std::string timestamp = json["messages"][i]["timestamp_tz"];
+                std::string message = json["messages"][i]["message"];
+
+                int companionId = companionPtr->getId();
+
+                // check if message from this companion with such timestamp
+                // already exists
+                std::shared_ptr<DBReplyData> messageGetDataPtr = this->getDBDataPtr(
+                    logDBInteraction,
+                    "getMessageByCompanionIdAndTimestampDBResult",
+                    &getMessageByCompanionIdAndTimestampDBResult,
+                    buildStringVector("id"),
+                    companionId, timestamp);
+
+                if(!messageGetDataPtr)
+                {
+                    showErrorDialogAndLogError(nullptr, "Error getting data from db");
+                    return false;
+                }
+
+                if(!messageGetDataPtr->isEmpty())
+                {
+                    showInfoDialogAndLogInfo(
+                        nullptr,
+                        QString(
+                            "Message with timestamp %1 from companion "
+                            "with id %2 already exists").arg(timestamp, companionId));
+
+                    continue;
+                }
+
+                std::string idString { "id" };
+
+                // push message to db
+                std::shared_ptr<DBReplyData> messageAddDataPtr = this->getDBDataPtr(
+                    logDBInteraction,
+                    "pushMessageToDBAndReturn",
+                    &pushMessageToDBWithAuthorIdAndReturn,
+                    buildStringVector("id", "companion_id", "timestamp_tz"),
+                    companionPtr->getName(), authorId, timestamp, idString, message,
+                    true, true);
+
+                if(!messageAddDataPtr)
+                {
+                    showErrorDialogAndLogError(nullptr, "Error getting data from db");
+                    return;
+                }
+
+                if(messageAddDataPtr->isEmpty())
+                {
+                    showErrorDialogAndLogError(nullptr, "Error pushing chat history to db");
+                    return;
+                }
+            }
+
+            // refresh chat history widget
+            getGraphicManagerPtr()->refreshChatHistoryWidget(companionPtr);
         }
 
         break;
@@ -772,7 +837,7 @@ void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
     logArgs("Manager::sendChatHistoryToCompanion");
 
     std::vector<std::string> keys =
-        buildStringVector("id", "author_id", "timestamp_tz", "message");
+        buildStringVector("author_id", "timestamp_tz", "message");
 
     // get messages from db
     std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
@@ -830,6 +895,11 @@ Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::stri
 
     return (iterator == this->mapMessageStateToMessage_.end()) ?
         pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
+}
+
+void Manager::fillWithMessages(Companion* companionPtr)
+{
+
 }
 
 bool Manager::addToMessageStateToMessageMapping(
@@ -983,6 +1053,22 @@ bool Manager::buildCompanions()
                     "id", "companion_id", "author_id",
                     "timestamp_tz", "message", "is_sent", "is_received"),
                 id);
+
+            if(!messagesDataPtr)
+            {
+                showErrorDialogAndLogError(nullptr, "Error getting data from db");
+                // return false;
+            }
+
+            if(messagesDataPtr->isEmpty())
+            {
+                showWarningDialogAndLogWarning(
+                    nullptr,
+                    QString("no messages in db with companion %1").arg(
+                        companionPtr->getName()));
+
+                // return false;
+            }
 
             for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
             {

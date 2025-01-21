@@ -345,6 +345,11 @@ const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
                nullptr : result->first;
 }
 
+void GraphicManager::refreshChatHistoryWidget(const Companion* companionPtr)
+{
+
+}
+
 GraphicManager* getGraphicManagerPtr()
 {
     QCoreApplication* coreApp = QCoreApplication::instance();

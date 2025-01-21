@@ -66,6 +66,7 @@ private:
     std::pair<const MessageState*, const Message*>
         getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
+    void fillWithMessages();
     bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
     bool connectToDb();
     bool buildCompanions();

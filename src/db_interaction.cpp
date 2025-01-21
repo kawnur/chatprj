@@ -170,6 +170,8 @@ PGresult* getCompanionsDBResult(const PGconn* dbConnection, const bool logging)
     return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
+// TODO move to QString with args at command building
+
 PGresult* getCompanionByNameDBResult(
     const PGconn* dbConnection, const bool logging, const std::string& name)
 {
@@ -235,12 +237,27 @@ PGresult* getMessagesDBResult(
 }
 
 PGresult* getAllMessagesByCompanionIdDBResult(
-    const PGconn* dbConnection, const bool logging, const int& companion_id)
+    const PGconn* dbConnection, const bool logging, const int& companionId)
 {
     std::string command = std::string(
-        "SELECT id, author_id, timestamp_tz, message "
+        "SELECT author_id, timestamp_tz, message "
         "FROM messages WHERE companion_id = ")
-        + std::to_string(companion_id);
+        + std::to_string(companionId);
+
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+}
+
+PGresult* getMessageByCompanionIdAndTimestampDBResult(
+    const PGconn* dbConnection, const bool logging,
+    const uint8_t companionId, const std::string& timestamp)
+{
+    std::string command = std::string(
+        "SELECT id FROM messages "
+        "WHERE companion_id = ")
+        + std::to_string(companionId)
+        + std::string(" AND timestamp = '")
+        + timestamp
+        + std::string("'");
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
@@ -370,6 +387,34 @@ PGresult* pushMessageToDBAndReturn(
         + std::string("'), (SELECT id FROM companions WHERE name = '")
         + authorName
         + std::string("'), '")
+        + timestamp
+        + std::string("', '")
+        + message
+        + std::string("', ")
+        + getBoolString(isSent)
+        + std::string(", ")
+        + getBoolString(isReceived)
+        + std::string(") RETURNING id, ")
+        + returningFieldName
+        + std::string(", timestamp_tz");
+
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+}
+
+PGresult* pushMessageToDBWithAuthorIdAndReturn(
+    const PGconn* dbConnection, const bool logging, const std::string& companionName,
+    const uint8_t& authorId, const std::string& timestamp,
+    const std::string& returningFieldName, const std::string& message,
+    const bool& isSent, const bool& isReceived)
+{
+    std::string command = std::string(
+        "INSERT INTO messages "
+        "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
+        "VALUES ((SELECT id FROM companions WHERE name = '")
+        + companionName
+        + std::string("'), ")
+        + std::to_string(authorId)
+        + std::string(", '")
         + timestamp
         + std::string("', '")
         + message

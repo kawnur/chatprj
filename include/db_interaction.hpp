@@ -53,6 +53,9 @@ PGresult* getSocketByIpAddressAndPortDBResult(
 PGresult* getMessagesDBResult(const PGconn*, const bool, const int&);
 PGresult* getAllMessagesByCompanionIdDBResult(const PGconn*, const bool, const int&);
 
+PGresult* getMessageByCompanionIdAndTimestampDBResult(
+    const PGconn*, const bool, const uint8_t, const std::string&);
+
 PGresult* getUnsentMessagesByCompanionNameDBResult(
     const PGconn*, const bool, const std::string&);
 
@@ -72,6 +75,11 @@ PGresult* pushSocketToDBAndReturn(
     const std::string&, const std::string&);
 
 PGresult* pushMessageToDBAndReturn(
+    const PGconn*, const bool, const std::string&, const std::string&,
+    const std::string&, const std::string&, const std::string&,
+    const bool&, const bool&);
+
+PGresult* pushMessageToDBWithAuthorIdAndReturn(
     const PGconn*, const bool, const std::string&, const std::string&,
     const std::string&, const std::string&, const std::string&,
     const bool&, const bool&);
