@@ -72,6 +72,6 @@ nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
 std::string generateMessageMappingKey(std::string&, uint8_t);
-std::string getBoolString(bool);
+QString getBoolQString(bool);
 
 #endif // UTILS_HPP

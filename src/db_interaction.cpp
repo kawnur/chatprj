@@ -170,111 +170,93 @@ PGresult* getCompanionsDBResult(const PGconn* dbConnection, const bool& logging)
     return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
-// TODO move to QString with args at command building
-
 PGresult* getCompanionByNameDBResult(
     const PGconn* dbConnection, const bool& logging, const std::string& name)
 {
-    std::string command = std::string(
-        "SELECT id FROM companions WHERE name = '")
-        + name + std::string("'");
+    QString command = QString("SELECT id FROM companions WHERE name = '%1'")
+        .arg(getQString(name));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getCompanionAndSocketDBResult(
     const PGconn* dbConnection, const bool& logging, const int& id)
 {
-    std::string command = std::string(
+    QString command = QString(
         "SELECT companions.name, sockets.ipaddress, sockets.client_port "
         "FROM companions JOIN sockets ON companions.id = sockets.id "
-        "WHERE companions.id = ")
-        + std::to_string(id);
+        "WHERE companions.id = %1").arg(getQString(std::to_string(id)));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getSocketInfoDBResult(
     const PGconn* dbConnection, const bool& logging, const int& id)
 {
-    std::string command = std::string(
-        "SELECT ipaddress, server_port, client_port "
-        "FROM sockets WHERE id = ") + std::to_string(id);
+    QString command = QString(
+        "SELECT ipaddress, server_port, client_port FROM sockets WHERE id = %1")
+            .arg(getQString(std::to_string(id)));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getSocketByIpAddressAndPortDBResult(
     const PGconn* dbConnection, const bool& logging,
     const std::string& ipAddress, const std::string& port)
 {
-    std::string command = std::string(
-        "SELECT id FROM sockets "
-        "WHERE ipaddress = '")
-        + ipAddress
-        + std::string("' AND client_port = '")
-        + port
-        + std::string("'");
+    QString command = QString(
+        "SELECT id FROM sockets WHERE ipaddress = '%1' AND client_port = '%2'")
+            .arg(getQString(ipAddress), getQString(port));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 // TODO test sorting by timestamp with different timezones
 PGresult* getMessagesDBResult(
     const PGconn* dbConnection, const bool& logging, const uint8_t& companionId)
 {
-    std::string command = std::string(
+    QString command = QString(
         "WITH select_id AS "
-        "(SELECT id FROM messages WHERE companion_id = ")
-        + std::to_string(companionId)
-        + std::string(
-        " ORDER BY timestamp_tz DESC LIMIT 50) "
+        "(SELECT id FROM messages WHERE companion_id = %1 "
+        "ORDER BY timestamp_tz DESC LIMIT 50) "
         "SELECT id, author_id, timestamp_tz, message, is_sent, is_received "
-        "FROM messages WHERE id IN "
-        "(SELECT id FROM select_id) ORDER BY timestamp_tz ASC");
+        "FROM messages WHERE id IN (SELECT id FROM select_id) "
+        "ORDER BY timestamp_tz ASC").arg(getQString(std::to_string(companionId)));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getAllMessagesByCompanionIdDBResult(
     const PGconn* dbConnection, const bool& logging, const int& companionId)
 {
-    std::string command = std::string(
-        "SELECT author_id, timestamp_tz, message "
-        "FROM messages WHERE companion_id = ")
-        + std::to_string(companionId);
+    QString command = QString(
+        "SELECT author_id, timestamp_tz, message FROM messages WHERE companion_id = %1")
+            .arg(getQString(std::to_string(companionId)));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getMessageByCompanionIdAndTimestampDBResult(
     const PGconn* dbConnection, const bool& logging,
     const uint8_t& companionId, const std::string& timestamp)
 {
-    std::string command = std::string(
-        "SELECT id FROM messages "
-        "WHERE companion_id = ")
-        + std::to_string(companionId)
-        + std::string(" AND timestamp = '")
-        + timestamp
-        + std::string("'");
+    QString command = QString(
+        "SELECT id FROM messages WHERE companion_id = %1 AND timestamp = '%2'")
+            .arg(getQString(std::to_string(companionId)), getQString(timestamp));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getUnsentMessagesByCompanionNameDBResult(
     const PGconn* dbConnection, const bool& logging, const std::string& companionName)
 {
-    std::string command = std::string(
+    QString command = QString(
         "SELECT id, author_id, companion_id, timestamp_tz, message, is_received "
-        "FROM messages WHERE companion_id = "
-        "(SELECT id FROM companions WHERE name = '")
-        + companionName
-        + std::string(
-        "') AND author_id = (SELECT id FROM companions WHERE name = 'me') "
-        "AND is_sent IS false");
+        "FROM messages WHERE companion_id = (SELECT id FROM companions WHERE name = '%1') "
+        "AND author_id = (SELECT id FROM companions WHERE name = 'me') "
+        "AND is_sent IS false").arg(getQString(companionName));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* getPasswordDBResult(const PGconn* dbConnection, const bool& logging)
@@ -287,69 +269,57 @@ PGresult* getPasswordDBResult(const PGconn* dbConnection, const bool& logging)
 PGresult* setMessageIsSentInDbAndReturn(
     const PGconn* dbConnection, const bool& logging, const uint32_t& messageId)
 {
-    std::string command = std::string(
-        "UPDATE messages set is_sent = 'true' "
-        "WHERE id = ")
-        + std::to_string(messageId)
-        + std::string(" RETURNING id");
+    QString command = QString(
+        "UPDATE messages set is_sent = 'true' WHERE id = %1 RETURNING id")
+            .arg(getQString(std::to_string(messageId)));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* setMessageIsReceivedInDbAndReturn(
     const PGconn* dbConnection, const bool& logging, const uint32_t& messageId)
 {
-    std::string command = std::string(
-        "UPDATE messages set is_received = 'true' "
-        "WHERE id = ")
-        + std::to_string(messageId)
-        + std::string(" RETURNING id");
+    QString command = QString(
+        "UPDATE messages set is_received = 'true' WHERE id = %1 RETURNING id")
+            .arg(getQString(std::to_string(messageId)));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* pushCompanionToDBAndReturn(
     const PGconn* dbConnection, const bool& logging, const std::string& companionName)
 {
-    std::string command = std::string(
-        "INSERT INTO companions "
-        "(name) "
-        "VALUES ('")
-        + companionName
-        + std::string("') RETURNING id");
+    QString command = QString(
+        "INSERT INTO companions (name) VALUES ('%1') RETURNING id")
+            .arg(getQString(companionName));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* updateCompanionAndReturn(  // TODO change function names
     const PGconn* dbConnection, const bool& logging, const std::string& companionName)
 {
-    std::string command = std::string(
-        "INSERT INTO companions "
-        "(name) "
-        "VALUES ('")
-        + companionName
-        + std::string("') RETURNING id");
+    QString command = QString(
+        "INSERT INTO companions (name) VALUES ('%1') RETURNING id")
+            .arg(getQString(companionName));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* updateCompanionAndSocketAndReturn(
     const PGconn* dbConnection, const bool& logging, const CompanionAction& companionAction)
 {
-    std::string command = std::string(
-        "WITH update_name AS (UPDATE companions set name = '")
-        + companionAction.getName()
-        + std::string("' WHERE id = ")
-        + std::to_string(companionAction.getCompanionId())
-        + std::string(" RETURNING id) UPDATE sockets "
-        "set ipaddress = '")
-        + companionAction.getIpAddress()
-        + std::string("', client_port = '")
-        + companionAction.getClientPort()
-        + std::string("' WHERE id IN (SELECT id FROM update_name) RETURNING id");
+    QString command = QString(
+        "WITH update_name AS (UPDATE companions set name = '%1' WHERE id = %2 "
+        "RETURNING id) UPDATE sockets SET ipaddress = '%3', client_port = '%4' "
+        "WHERE id IN (SELECT id FROM update_name) RETURNING id")
+            .arg(
+                getQString(companionAction.getName()),
+                getQString(std::to_string(companionAction.getCompanionId())),
+                getQString(companionAction.getIpAddress()),
+                getQString(companionAction.getClientPort()));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* pushSocketToDBAndReturn(
@@ -357,20 +327,14 @@ PGresult* pushSocketToDBAndReturn(
     const std::string& ipAddress, const std::string& serverPort,
     const std::string& clientPort)
 {
-    std::string command = std::string(
-        "INSERT INTO sockets "
-        "(id, ipaddress, server_port, client_port) "
-        "VALUES ((SELECT id FROM companions WHERE name = '")
-        + companionName
-        + std::string("'), '")
-        + ipAddress
-        + std::string("', ")
-        + serverPort
-        + std::string(", ")
-        + clientPort
-        + std::string(") RETURNING id");
+    QString command = QString(
+        "INSERT INTO sockets (id, ipaddress, server_port, client_port) "
+        "VALUES ((SELECT id FROM companions WHERE name = '%1'), '%2', %3, %4) RETURNING id")
+            .arg(
+                getQString(companionName), getQString(ipAddress),
+                getQString(serverPort), getQString(clientPort));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* pushMessageToDBAndReturn(
@@ -379,26 +343,18 @@ PGresult* pushMessageToDBAndReturn(
     const std::string& returningFieldName, const std::string& message,
     const bool& isSent, const bool& isReceived)
 {
-    std::string command = std::string(
+    QString command = QString(
         "INSERT INTO messages "
         "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
-        "VALUES ((SELECT id FROM companions WHERE name = '")
-        + companionName
-        + std::string("'), (SELECT id FROM companions WHERE name = '")
-        + authorName
-        + std::string("'), '")
-        + timestamp
-        + std::string("', '")
-        + message
-        + std::string("', ")
-        + getBoolString(isSent)
-        + std::string(", ")
-        + getBoolString(isReceived)
-        + std::string(") RETURNING id, ")
-        + returningFieldName
-        + std::string(", timestamp_tz");
+        "VALUES ((SELECT id FROM companions WHERE name = '%1'), "
+        "(SELECT id FROM companions WHERE name = '%2'), '%3', '%4', %5, %6) "
+        "RETURNING id, %7, timestamp_tz")
+            .arg(
+                getQString(companionName), getQString(authorName), getQString(timestamp),
+                getQString(message), getBoolQString(isSent), getBoolQString(isReceived),
+                getQString(returningFieldName));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* pushMessageToDBWithAuthorIdAndReturn(
@@ -407,61 +363,48 @@ PGresult* pushMessageToDBWithAuthorIdAndReturn(
     const std::string& returningFieldName, const std::string& message,
     const bool& isSent, const bool& isReceived)
 {
-    std::string command = std::string(
+    QString command = QString(
         "INSERT INTO messages "
         "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
-        "VALUES ((SELECT id FROM companions WHERE name = '")
-        + companionName
-        + std::string("'), ")
-        + authorIdString
-        + std::string(", '")
-        + timestamp
-        + std::string("', '")
-        + message
-        + std::string("', ")
-        + getBoolString(isSent)
-        + std::string(", ")
-        + getBoolString(isReceived)
-        + std::string(") RETURNING id, ")
-        + returningFieldName
-        + std::string(", timestamp_tz");
+        "VALUES ((SELECT id FROM companions WHERE name = '%1'), %2, '%3', '%4', %5, %6) "
+        "RETURNING id, %7, timestamp_tz")
+            .arg(
+                getQString(companionName), getQString(authorIdString), getQString(timestamp),
+                getQString(message), getBoolQString(isSent), getBoolQString(isReceived),
+                getQString(returningFieldName));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* pushPasswordToDBAndReturn(
     const PGconn* dbConnection, const bool& logging, const std::string& password)
 {
-    std::string command = std::string(
-        "INSERT INTO passwords (password) "
-        "VALUES ('")
-        + password
-        + std::string("') RETURNING id");
+    QString command = QString(
+        "INSERT INTO passwords (password) VALUES ('%1') RETURNING id")
+            .arg(getQString(password));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* deleteMessagesFromDBAndReturn(
     const PGconn* dbConnection, const bool& logging, const CompanionAction& companionAction)
 {
-    std::string command = std::string(
-        "DELETE FROM messages WHERE companion_id = ")
-        + std::to_string(companionAction.getCompanionId())
-        + std::string(" RETURNING companion_id");
+    QString command = QString(
+        "DELETE FROM messages WHERE companion_id = %1 RETURNING companion_id")
+            .arg(getQString(std::to_string(companionAction.getCompanionId())));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 PGresult* deleteCompanionAndSocketAndReturn(
     const PGconn* dbConnection, const bool& logging, const CompanionAction& companionAction)
 {
-    std::string command = std::string(
-        "WITH delete_socket AS (DELETE FROM sockets WHERE id = ")
-        + std::to_string(companionAction.getCompanionId())
-        + std::string(" RETURNING id) DELETE FROM companions WHERE id IN "
-        "(SELECT id FROM delete_socket) RETURNING id");
+    QString command = QString(
+        "WITH delete_socket AS (DELETE FROM sockets WHERE id = %1 RETURNING id) "
+        "DELETE FROM companions WHERE id IN (SELECT id FROM delete_socket) RETURNING id")
+            .arg(getQString(std::to_string(companionAction.getCompanionId())));
 
-    return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
+    return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
 
 int getDataFromDBResult(
