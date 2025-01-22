@@ -68,6 +68,7 @@ public:
     bool createClient();
     bool connectClient();
     bool disconnectClient();
+    void clearMessages();
     void addMessage(Message*);
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;

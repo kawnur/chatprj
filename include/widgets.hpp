@@ -52,7 +52,7 @@ class IndicatorWidget : public QWidget
     Q_OBJECT
 
 public:
-    IndicatorWidget(uint8_t);
+    IndicatorWidget(uint8_t, bool);
     IndicatorWidget(const IndicatorWidget*);
     ~IndicatorWidget();
 
@@ -191,7 +191,7 @@ class MessageIndicatorPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageIndicatorPanelWidget(bool, uint8_t);
+    MessageIndicatorPanelWidget(bool, const MessageState*);
     ~MessageIndicatorPanelWidget();
 
     void setSentIndicatorOn();
@@ -213,18 +213,18 @@ class MessageWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageWidget(QWidget*, bool, const std::string&, const Message*);
+    MessageWidget(QWidget*, const std::string&, const MessageState*, const Message*);
     ~MessageWidget();
 
     void set(WidgetGroup*);
-    void setMessageAsSent();
-    void setMessageAsReceived();
+    void setMessageWidgetAsSent();
+    void setMessageWidgetAsReceived();
 
 signals:
     void widgetSelectedSignal(bool);
 
 private:
-    bool createdAsAntacedent_;
+    bool createdAsAntecedent_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -265,8 +265,9 @@ public:
     ~CentralPanelWidget();
 
     void set(Companion*);
-    void addMessageWidgetToChatHistory(bool, const std::string&, const Message*);
+    void addMessageWidgetToChatHistory(const std::string&, const Message*);
 
+    // TODO delete 'FromThread' methods, emit signal by caller
     void addMessageWidgetToChatHistoryFromThread(
         bool, const std::string&, const Message*);
 
@@ -275,10 +276,10 @@ public:
     void sortChatHistoryElements(bool);
 
 private slots:
-    void addMessageWidgetToChatHistorySlot(bool, const QString&, const Message*);
+    void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
 
 signals:
-    void addMessageWidgetToChatHistorySignal(bool, const QString&, const Message*);
+    void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
 
 private:
     std::mutex chatHistoryMutex_;
@@ -342,9 +343,12 @@ public:
     ~WidgetGroup();
 
     void set();
+    void buildChatHistory();
+    void addMessageWidgetToCentralPanelChatHistory(const Message*);
 
-    void addMessageWidgetToChatHistory(const Message*);
-    void addMessageWidgetToChatHistoryFromThread(const MessageState*, const Message*);
+    // TODO delete 'FromThread' methods, emit signal by caller
+    void addMessageWidgetToCentralPanelChatHistoryFromThread(const MessageState*, const Message*);
+
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
@@ -352,13 +356,17 @@ public:
     void sortChatHistoryElements();
     void messageAdded();
     void askUserForHistorySendingConfirmation();
+
+    // TODO delete 'FromThread' methods, emit signal by caller
     void askUserForHistorySendingConfirmationFromThread();
 
 signals:
     void askUserForHistorySendingConfirmationSignal();
+    void buildChatHistorySignal();
 
 public slots:
     void messageWidgetSelected(bool);
+    void buildChatHistorySlot();
 
 private slots:
     void askUserForHistorySendingConfirmationSlot();
@@ -368,9 +376,7 @@ private:
     SocketInfoBaseWidget* socketInfoBasePtr_;
     CentralPanelWidget* centralPanelPtr_;
     uint32_t antacedentMessagesCounter_;
-    std::mutex antacedentMessagesCounterMutex_;
-
-    void buildChatHistory();
+    std::mutex antacedentMessagesCounterMutex_;    
 };
 
 class StubWidgetGroup

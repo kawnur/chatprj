@@ -134,7 +134,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     logArgs("addResult:", addResult);
 
     // add to widget
-    groupPtr->addMessageWidgetToChatHistory(messagePtr);
+    groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr);
 
     // add to mapping
     // std::string networkId = this->addToNetworkIdToMessageMapping(messagePtr);
@@ -212,7 +212,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             // add to widget
             WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-            groupPtr->addMessageWidgetToChatHistoryFromThread(
+            groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
                 messageStatePtr, messagePtr);
 
             // send reception confirmation to sender
@@ -311,7 +311,9 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             for(size_t i = 0; i < json["messages"].size(); i++)
             {
-                uint8_t authorId = json["messages"][i]["author_id"];
+                uint8_t authorId = std::stoi(
+                    json["messages"][i]["author_id"].get<std::string>());
+
                 authorId = (authorId == 1) ? companionPtr->getId() : 1;
 
                 std::string timestamp = json["messages"][i]["timestamp_tz"];
@@ -372,8 +374,15 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 }
             }
 
-            // refresh chat history widget
-            getGraphicManagerPtr()->refreshChatHistoryWidget(companionPtr);
+            // clear chat history widget
+            this->clearChatHistory(companionPtr);
+
+            // fill continers with messages
+            this->fillWithMessages(companionPtr, true);
+
+            // build chat history
+            emit this->getMappedWidgetGroupByCompanion(companionPtr)->
+                buildChatHistorySignal();
         }
 
         break;
@@ -585,6 +594,12 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
         companionActionPtr, std::string { "Companion deleted:\n\n" });
 }
 
+void Manager::clearChatHistory(Companion* companionPtr)
+{
+    WidgetGroup* widgetGroupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
+}
+
 void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
 {
     // delete companion chat messages from db
@@ -608,10 +623,11 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
     }
 
     // clear chat history widget
-    WidgetGroup* widgetGroupPtr =
-        this->mapCompanionToWidgetGroup_.at(companionActionPtr->getCompanionPtr());
+    // WidgetGroup* widgetGroupPtr =
+    //     this->mapCompanionToWidgetGroup_.at(companionActionPtr->getCompanionPtr());
 
-    getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
+    // getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
+    this->clearChatHistory(companionActionPtr->getCompanionPtr());
 
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
@@ -696,6 +712,28 @@ void Manager::authenticateUser(PasswordAction* actionPtr)
             return;
         }
     }
+}
+
+void Manager::createMessageAndAddToContainers(
+    Companion* companionPtr, std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
+{
+    auto companionId = companionPtr->getId();
+
+    Message* messagePtr = new Message(
+        std::atoi(messagesDataPtr->getValue(index, "id")),
+        companionId,
+        std::atoi(messagesDataPtr->getValue(index, "author_id")),
+        messagesDataPtr->getValue(index, "timestamp_tz"),
+        messagesDataPtr->getValue(index, "message"));
+
+    companionPtr->addMessage(messagePtr);
+
+    MessageState* messageStatePtr = new MessageState(
+        companionId, false,
+        messagesDataPtr->getValue(index, "is_sent"),
+        messagesDataPtr->getValue(index, "is_received"), "");
+
+    this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -900,9 +938,28 @@ Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::stri
         pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
 }
 
-void Manager::fillWithMessages(Companion* companionPtr)
+std::pair<const MessageState*, const Message*>
+Manager::getMessageStateAndMessageMappingPairByMessageId(uint32_t messageId)
 {
-    uint8_t id = companionPtr->getId();
+    using pair = std::pair<const MessageState*, const Message*>;
+
+    std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
+
+    auto iterator = std::find_if(
+        this->mapMessageStateToMessage_.begin(),
+        this->mapMessageStateToMessage_.end(),
+        [&](auto iter)
+        {
+            return iter.second->getId() == messageId;
+        });
+
+    return (iterator == this->mapMessageStateToMessage_.end()) ?
+        pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
+}
+
+void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHaveMessages)
+{
+    uint8_t companionId = companionPtr->getId();
 
     // get messages data
     std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
@@ -912,7 +969,7 @@ void Manager::fillWithMessages(Companion* companionPtr)
         buildStringVector(
             "id", "companion_id", "author_id",
             "timestamp_tz", "message", "is_sent", "is_received"),
-        id);
+        companionId);
 
     if(!messagesDataPtr)
     {
@@ -922,7 +979,7 @@ void Manager::fillWithMessages(Companion* companionPtr)
 
     if(messagesDataPtr->isEmpty())
     {
-        showWarningDialogAndLogWarning(
+        logArgsWarning(
             nullptr,
             QString("no messages in db with companion %1")
                 .arg(getQString(companionPtr->getName())));
@@ -930,23 +987,32 @@ void Manager::fillWithMessages(Companion* companionPtr)
         // return false;
     }
 
+    if(containersAlreadyHaveMessages)
+    {
+        companionPtr->clearMessages();
+    }
+
     for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
     {
-        Message* messagePtr = new Message(
-            std::atoi(messagesDataPtr->getValue(i, "id")),
-            id,
-            std::atoi(messagesDataPtr->getValue(i, "author_id")),
-            messagesDataPtr->getValue(i, "timestamp_tz"),
-            messagesDataPtr->getValue(i, "message"));
+        auto messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
 
-        companionPtr->addMessage(messagePtr);
+        if(containersAlreadyHaveMessages)
+        {
+            auto pair = this->getMessageStateAndMessageMappingPairByMessageId(messageId);
 
-        MessageState* messageStatePtr = new MessageState(
-            id, false,
-            messagesDataPtr->getValue(i, "is_sent"),
-            messagesDataPtr->getValue(i, "is_received"), "");
-
-        this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+            if(pair.first && pair.second)
+            {
+                companionPtr->addMessage(const_cast<Message*>(pair.second));
+            }
+            else
+            {
+                this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
+            }
+        }
+        else
+        {
+            this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
+        }
     }
 }
 
@@ -1090,52 +1156,7 @@ bool Manager::buildCompanions()
 
         if(companionPtr->getId() > 1)  // TODO change condition
         {
-            // // get messages data
-            // std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
-            //     logDBInteraction,
-            //     "getMessagesDBResult",
-            //     &getMessagesDBResult,
-            //     buildStringVector(
-            //         "id", "companion_id", "author_id",
-            //         "timestamp_tz", "message", "is_sent", "is_received"),
-            //     id);
-
-            // if(!messagesDataPtr)
-            // {
-            //     showErrorDialogAndLogError(nullptr, "Error getting data from db");
-            //     // return false;
-            // }
-
-            // if(messagesDataPtr->isEmpty())
-            // {
-            //     showWarningDialogAndLogWarning(
-            //         nullptr,
-            //         QString("no messages in db with companion %1").arg(
-            //             companionPtr->getName()));
-
-            //     // return false;
-            // }
-
-            // for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
-            // {
-            //     Message* messagePtr = new Message(
-            //         std::atoi(messagesDataPtr->getValue(i, "id")),
-            //         id,
-            //         std::atoi(messagesDataPtr->getValue(i, "author_id")),
-            //         messagesDataPtr->getValue(i, "timestamp_tz"),
-            //         messagesDataPtr->getValue(i, "message"));
-
-            //     companionPtr->addMessage(messagePtr);
-
-            //     MessageState* messageStatePtr = new MessageState(
-            //         id, false,
-            //         messagesDataPtr->getValue(i, "is_sent"),
-            //         messagesDataPtr->getValue(i, "is_received"), "");
-
-            //     this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
-            // }
-
-            this->fillWithMessages(companionPtr);
+            this->fillWithMessages(companionPtr, false);
 
             if(!companionPtr->startServer())
             {

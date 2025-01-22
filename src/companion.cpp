@@ -146,6 +146,12 @@ bool Companion::disconnectClient()
     return this->clientPtr_->disconnect();
 }
 
+void Companion::clearMessages()
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+    this->messagePointersPtr_->clear();
+}
+
 void Companion::addMessage(Message* messagePtr)
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);

@@ -93,19 +93,19 @@ void TextEditWidget::keyPressEvent(QKeyEvent* event)
     }
 }
 
-IndicatorWidget::IndicatorWidget(uint8_t size)
+IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
 {
     size_ = size;
     setFixedWidth(size_);
     setFixedHeight(size_);
 
-    isOn_ = false;
+    isOn_ = isOn;
     onColor_ = QColor(QColorConstants::DarkGreen);
     offColor_ = QColor(QColorConstants::DarkRed);
     meColor_ = QColor(indicatorMeColor);
 
     palettePtr_ = new QPalette;
-    palettePtr_->setColor(QPalette::Window, offColor_);
+    palettePtr_->setColor(QPalette::Window, (isOn_) ? onColor_ : offColor_);
 
     setAutoFillBackground(true);
     setPalette(*palettePtr_);
@@ -336,7 +336,7 @@ void SocketInfoWidget::initializeFields()
 
     layoutPtr_ = new QHBoxLayout;
     setLayout(layoutPtr_);
-    connectionStateIndicatorPtr_ = new IndicatorWidget(15);
+    connectionStateIndicatorPtr_ = new IndicatorWidget(15, false);
     nameLabelPtr_ = new QLabel(name_);
     ipAddressLabelPtr_ = new QLabel(ipAddress_);
 
@@ -363,7 +363,7 @@ void SocketInfoWidget::initializeFields()
         connectButtonPtr_->hide();
     }
 
-    newMessagesIndicatorPtr_ = new IndicatorWidget(7);
+    newMessagesIndicatorPtr_ = new IndicatorWidget(7, false);
 
 //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
 //    connect(
@@ -502,7 +502,7 @@ void ShowHideWidget::mousePressEvent(QMouseEvent* event)
 }
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
-    bool isMessageFromMe, uint8_t isAntecedent)
+    bool isMessageFromMe, const MessageState* messageStatePtr)
 {
     isMessageFromMe_ = isMessageFromMe;
 
@@ -517,8 +517,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
 
     if(isMessageFromMe_)
     {
-        sentIndicatoPtr_ = new IndicatorWidget(10);
-        receivedIndicatoPtr_ = new IndicatorWidget(10);
+        sentIndicatoPtr_ = new IndicatorWidget(10, messageStatePtr->getIsSent());
+        receivedIndicatoPtr_ = new IndicatorWidget(10, messageStatePtr->getIsReceived());
 
         newMessageLabelPtr_ = nullptr;
 
@@ -530,7 +530,7 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sentIndicatoPtr_ = nullptr;
         receivedIndicatoPtr_ = nullptr;
 
-        QString text = (isAntecedent) ? "NEW" : "";
+        QString text = (messageStatePtr->getIsAntecedent()) ? "NEW" : "";
 
         QString textHtml = QString("<font color=\"%1\"><b>%2</b></font>")
             .arg(receivedMessageColor, text);
@@ -569,10 +569,10 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
 }
 
 MessageWidget::MessageWidget(
-    QWidget* parentPtr, bool isAntecedent, const std::string& companionName,
-    const Message* messagePtr)
+    QWidget* parentPtr, const std::string& companionName,
+    const MessageState* messageStatePtr, const Message* messagePtr)
 {
-    createdAsAntacedent_ = isAntecedent;
+    createdAsAntecedent_ = messageStatePtr->getIsAntecedent();
     isMessageFromMe_ = messagePtr->isMessageFromMe();
 
     // set parent
@@ -603,7 +603,8 @@ MessageWidget::MessageWidget(
     messageLabelPtr_ = new QLabel(data.second);
     layoutPtr_->addWidget(messageLabelPtr_);
 
-    indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_, isAntecedent);
+    indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_, messageStatePtr);
+
     layoutPtr_->addWidget(indicatorPanelPtr_);
 }
 
@@ -625,12 +626,12 @@ void MessageWidget::set(WidgetGroup* groupPtr)
         groupPtr, &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
 }
 
-void MessageWidget::setMessageAsSent()
+void MessageWidget::setMessageWidgetAsSent()
 {
     this->indicatorPanelPtr_->setSentIndicatorOn();
 }
 
-void MessageWidget::setMessageAsReceived()
+void MessageWidget::setMessageWidgetAsReceived()
 {
     this->indicatorPanelPtr_->setReceivedIndicatorOn();
 }
@@ -639,7 +640,7 @@ void MessageWidget::mousePressEvent(QMouseEvent* event)
 {
     this->indicatorPanelPtr_->unsetNewMessageLabel();
 
-    emit this->widgetSelectedSignal(this->createdAsAntacedent_);
+    emit this->widgetSelectedSignal(this->createdAsAntecedent_);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -827,8 +828,11 @@ void CentralPanelWidget::set(Companion* companionPtr)
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
-    bool isAntecedent, const std::string& companionName, const Message* messagePtr)
+    const std::string& companionName, const Message* messagePtr)
 {
+    const MessageState* messageStatePtr =
+        getManagerPtr()->getMappedMessageStateByMessagePtr(messagePtr);
+
     WidgetGroup* groupPtr = nullptr;
 
     try
@@ -842,7 +846,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
         MessageWidget* widgetPtr = new MessageWidget(
-            this->chatHistoryWidgetPtr_, isAntecedent, companionName, messagePtr);
+            this->chatHistoryWidgetPtr_, companionName, messageStatePtr, messagePtr);
 
         getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
 
@@ -853,7 +857,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
         this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
 
-        if(isAntecedent)
+        if(messageStatePtr->getIsAntecedent())
         {
             this->sortChatHistoryElements(false);
         }
@@ -873,8 +877,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
 {
     QString companionNameQString = getQString(companionName);
 
-    emit this->addMessageWidgetToChatHistorySignal(
-        isAntecedent, companionNameQString, messagePtr);
+    emit this->addMessageWidgetToChatHistorySignal(companionNameQString, messagePtr);
 }
 
 void CentralPanelWidget::scrollDownChatHistory()
@@ -941,10 +944,9 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
-    bool isAntecedent, const QString& companionName, const Message* messagePtr)
+    const QString& companionName, const Message* messagePtr)
 {
-    this->addMessageWidgetToChatHistory(
-        isAntecedent, companionName.toStdString(), messagePtr);
+    this->addMessageWidgetToChatHistory(companionName.toStdString(), messagePtr);
 }
 
 void CentralPanelWidget::sendMessage(const QString& text)
@@ -1084,26 +1086,38 @@ void WidgetGroup::set()
         this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
         this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
         Qt::QueuedConnection);
+
+    connect(
+        this, &WidgetGroup::buildChatHistorySignal,
+        this, &WidgetGroup::buildChatHistorySlot,
+        Qt::QueuedConnection);
 }
 
-void WidgetGroup::addMessageWidgetToChatHistory(const Message* messagePtr)
+void WidgetGroup::buildChatHistory()
+{
+    auto messagePointersPtr = this->companionPtr_->getMessagePointersPtr();
+
+    for(auto& messagePtr : *messagePointersPtr)
+    {
+        this->addMessageWidgetToCentralPanelChatHistory(messagePtr);
+    }
+}
+
+void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(const Message* messagePtr)
 {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
-        false, this->companionPtr_->getName(), messagePtr);
+        this->companionPtr_->getName(), messagePtr);
 }
 
-void WidgetGroup::addMessageWidgetToChatHistoryFromThread(
+void WidgetGroup::addMessageWidgetToCentralPanelChatHistoryFromThread(
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
     bool isAntecedent = messageStatePtr->getIsAntecedent();
 
+    if(isAntecedent)
     {
         std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
-
-        if(isAntecedent)
-        {
-            ++this->antacedentMessagesCounter_;
-        }
+        ++this->antacedentMessagesCounter_;
     }
 
     this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
@@ -1181,19 +1195,14 @@ void WidgetGroup::messageWidgetSelected(bool isAntacedent)
     }
 }
 
+void WidgetGroup::buildChatHistorySlot()
+{
+    this->buildChatHistory();
+}
+
 void WidgetGroup::askUserForHistorySendingConfirmationSlot()
 {
     this->askUserForHistorySendingConfirmation();
-}
-
-void WidgetGroup::buildChatHistory()
-{
-    auto messagePointersPtr = this->companionPtr_->getMessagePointersPtr();
-
-    for(auto& messagePtr : *messagePointersPtr)
-    {
-        this->addMessageWidgetToChatHistory(messagePtr);
-    }
 }
 
 StubWidgetGroup::StubWidgetGroup()

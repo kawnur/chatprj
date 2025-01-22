@@ -47,6 +47,7 @@ QString argForLogging(const T& value)
 QString argForLogging(const std::string&);
 QString argForLogging(const char*);
 QString argForLogging(const bool&);
+QString argForLogging(std::nullptr_t);
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {

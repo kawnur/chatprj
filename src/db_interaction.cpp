@@ -84,7 +84,7 @@ bool DBReplyData::findValue(const std::string& key, const std::string& value)
     auto findMapResult = std::find_if(
         this->data_.begin(), this->data_.end(), findLambda);
 
-    return (findMapResult == this->data_.end()) ? false : true;
+    return !(findMapResult == this->data_.end());
 }
 
 const char* getValueFromEnvironmentVariable(const char* variableName)

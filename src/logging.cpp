@@ -20,6 +20,11 @@ QString argForLogging(const bool& value)
     return (value) ? QString("true") : QString("false");
 }
 
+QString argForLogging(std::nullptr_t value)
+{
+    return QString("nullptr_t");
+}
+
 void logLine(const QString& string)
 {
     getGraphicManagerPtr()->addTextToAppLogWidget(string);

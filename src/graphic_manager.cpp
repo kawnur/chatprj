@@ -292,7 +292,7 @@ void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
         try
         {
             const_cast<MessageWidget*>(
-                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsSent();
+                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsSent();
         }
         catch(std::out_of_range)
         {
@@ -312,7 +312,7 @@ void GraphicManager::markMessageWidgetAsReceived(const Message* messagePtr)
         try
         {
             const_cast<MessageWidget*>(
-                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageAsReceived();
+                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsReceived();
         }
         catch(std::out_of_range)
         {
@@ -345,10 +345,10 @@ const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
                nullptr : result->first;
 }
 
-void GraphicManager::refreshChatHistoryWidget(const Companion* companionPtr)
-{
+// void GraphicManager::refreshChatHistoryWidget(const Companion* companionPtr)
+// {
 
-}
+// }
 
 GraphicManager* getGraphicManagerPtr()
 {

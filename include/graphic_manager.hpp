@@ -74,7 +74,7 @@ public:
     void markMessageWidgetAsReceived(const Message*);
     void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
     const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
-    void refreshChatHistoryWidget(const Companion*);
+    // void refreshChatHistoryWidget(const Companion*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;

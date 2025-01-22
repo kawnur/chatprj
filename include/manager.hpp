@@ -44,9 +44,11 @@ public:
     void createCompanion(CompanionAction*);
     void updateCompanion(CompanionAction*);
     void deleteCompanion(CompanionAction*);
+    void clearChatHistory(Companion*);
     void clearCompanionHistory(CompanionAction*);
     void createUserPassword(PasswordAction*);
     void authenticateUser(PasswordAction*);
+    void createMessageAndAddToContainers(Companion*, std::shared_ptr<DBReplyData>&, size_t);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
@@ -68,7 +70,10 @@ private:
     std::pair<const MessageState*, const Message*>
         getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
-    void fillWithMessages(Companion*);
+    std::pair<const MessageState*, const Message*>
+        getMessageStateAndMessageMappingPairByMessageId(uint32_t);
+
+    void fillWithMessages(Companion*, bool);
     bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
     bool connectToDb();
     bool buildCompanions();
