@@ -12,11 +12,14 @@
 #include "logging.hpp"
 #include "message.hpp"
 
+class CentralPanelWidget;
 class ChatClient;
 class ChatServer;
 class CompanionData;
 class DBReplyData;
 class Message;
+class MessageInfo;
+class WidgetGroup;
 
 class SocketInfo
 {
@@ -51,7 +54,7 @@ class Companion
 {
 public:
     Companion(int, const std::string&);
-    Companion(int, std::string&&);
+    // Companion(int, std::string&&);
     ~Companion();
 
     int getId() const;
@@ -60,7 +63,7 @@ public:
     std::string getSocketIpAddress() const;
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
-    const std::vector<Message*>* getMessagePointersPtr() const;
+    // const std::vector<Message*>* getMessagePointersPtr() const;
 
     void setSocketInfo(SocketInfo*);
 
@@ -68,12 +71,13 @@ public:
     bool createClient();
     bool connectClient();
     bool disconnectClient();
-    void clearMessages();
-    void addMessage(Message*);
+    // void clearMessages();
+    // void addMessage(Message*);
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
+    void addMessageWidgetsToChatHistory(const WidgetGroup*, CentralPanelWidget*);
 
 private:
     std::mutex messagesMutex_;
@@ -82,7 +86,8 @@ private:
     SocketInfo* socketInfoPtr_;
     ChatClient* clientPtr_;
     ChatServer* serverPtr_;
-    std::vector<Message*>* messagePointersPtr_;
+    // std::vector<Message*>* messagePointersPtr_;
+    std::map<Message, MessageInfo> messageMapping_;
 };
 
 #endif // COMPANION_HPP

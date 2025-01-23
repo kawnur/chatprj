@@ -213,10 +213,11 @@ class MessageWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageWidget(QWidget*, const std::string&, const MessageState*, const Message*);
+    // MessageWidget(QWidget*, const std::string&, const MessageState*, const Message*);
+    MessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
     ~MessageWidget();
 
-    void set(WidgetGroup*);
+    void set(const WidgetGroup*);
     void setMessageWidgetAsSent();
     void setMessageWidgetAsReceived();
 
@@ -265,21 +266,30 @@ public:
     ~CentralPanelWidget();
 
     void set(Companion*);
-    void addMessageWidgetToChatHistory(const std::string&, const Message*);
+
+    // void addMessageWidgetToChatHistory(const std::string&, const Message*);
+    void addMessageWidgetToChatHistory(
+        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
     // TODO delete 'FromThread' methods, emit signal by caller
     void addMessageWidgetToChatHistoryFromThread(
-        bool, const std::string&, const Message*);
+        // bool, const std::string&, const Message*);
+        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
     void scrollDownChatHistory();
     void clearChatHistory();
     void sortChatHistoryElements(bool);
 
 private slots:
-    void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
+    // void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
+    void addMessageWidgetToChatHistorySlot(
+        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
 signals:
-    void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
+    // void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
+
+    void addMessageWidgetToChatHistorySignal(
+        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
 private:
     std::mutex chatHistoryMutex_;
@@ -344,10 +354,14 @@ public:
 
     void set();
     void buildChatHistory();
-    void addMessageWidgetToCentralPanelChatHistory(const Message*);
+
+    // void addMessageWidgetToCentralPanelChatHistory(const Message*);
+    void addMessageWidgetToCentralPanelChatHistory(
+        const WidgetGroup*, const Message*, const MessageState*);
 
     // TODO delete 'FromThread' methods, emit signal by caller
-    void addMessageWidgetToCentralPanelChatHistoryFromThread(const MessageState*, const Message*);
+    void addMessageWidgetToCentralPanelChatHistoryFromThread(
+        const MessageState*, const Message*);
 
     void clearChatHistory();
     void hideCentralPanel();

@@ -122,7 +122,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
     // add to companion's messages
     Message* messagePtr = new Message(id, companion_id, 1, timestamp, text);
-    companionPtr->addMessage(messagePtr);
+    // companionPtr->addMessage(messagePtr);
 
     // create message state object and add to mapping
     MessageState* messageStatePtr = new MessageState(
@@ -134,7 +134,9 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     logArgs("addResult:", addResult);
 
     // add to widget
-    groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr);
+    // groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr);
+    groupPtr->addMessageWidgetToCentralPanelChatHistory(
+        groupPtr, messagePtr, messageStatePtr);
 
     // add to mapping
     // std::string networkId = this->addToNetworkIdToMessageMapping(messagePtr);
@@ -200,7 +202,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             Message* messagePtr = new Message(
                 id, companion_id, companion_id, timestamp, text);
 
-            companionPtr->addMessage(messagePtr);
+            // companionPtr->addMessage(messagePtr);
 
             // create message state object and add to mapping
             MessageState* messageStatePtr = new MessageState(
@@ -726,7 +728,7 @@ void Manager::createMessageAndAddToContainers(
         messagesDataPtr->getValue(index, "timestamp_tz"),
         messagesDataPtr->getValue(index, "message"));
 
-    companionPtr->addMessage(messagePtr);
+    // companionPtr->addMessage(messagePtr);
 
     MessageState* messageStatePtr = new MessageState(
         companionId, false,
@@ -844,7 +846,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
                 messagesDataPtr->getValue(i, "timestamp_tz"),
                 messagesDataPtr->getValue(i, "message"));
 
-            companionCastPtr->addMessage(messagePtr);
+            // companionCastPtr->addMessage(messagePtr);
 
             MessageState* messageStatePtr = new MessageState(
                 companion_id, false, false,
@@ -987,10 +989,10 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
         // return false;
     }
 
-    if(containersAlreadyHaveMessages)
-    {
-        companionPtr->clearMessages();
-    }
+    // if(containersAlreadyHaveMessages)
+    // {
+    //     companionPtr->clearMessages();
+    // }
 
     for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
     {
@@ -1002,7 +1004,7 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
 
             if(pair.first && pair.second)
             {
-                companionPtr->addMessage(const_cast<Message*>(pair.second));
+                // companionPtr->addMessage(const_cast<Message*>(pair.second));
             }
             else
             {

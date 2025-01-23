@@ -6,6 +6,8 @@
 
 #include "utils.hpp"
 
+class MessageWidget;
+
 class Message
 {
 public:
@@ -49,6 +51,20 @@ private:
     bool isReceived_;
     std::string networkId_;
     std::string messageMappingKey_;
+};
+
+class MessageInfo
+{
+public:
+    MessageInfo(MessageState*, MessageWidget*);
+    ~MessageInfo() = default;
+
+    MessageState* getStatePtr() const;
+    MessageWidget* getWidgetPtr() const;
+
+private:
+    MessageState* statePtr_;
+    MessageWidget* widgetPtr_;
 };
 
 #endif // MESSAGE_HPP

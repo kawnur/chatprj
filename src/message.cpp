@@ -86,3 +86,16 @@ void MessageState::setMessageMappingKey(
 {
     this->messageMappingKey_ = messageMappingKey;
 }
+
+MessageInfo::MessageInfo(MessageState* statePtr, MessageWidget* widgetPtr) :
+    statePtr_(statePtr), widgetPtr_(widgetPtr) {}
+
+MessageState* MessageInfo::getStatePtr() const
+{
+    return this->statePtr_;
+}
+
+MessageWidget* MessageInfo::getWidgetPtr() const
+{
+    return this->widgetPtr_;
+}

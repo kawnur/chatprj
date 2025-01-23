@@ -41,12 +41,14 @@ void SocketInfo::updateData(const CompanionData* dataPtr)
 Companion::Companion(int id, const std::string& name) :
     messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
     clientPtr_(nullptr), serverPtr_(nullptr),
-    messagePointersPtr_(new std::vector<Message*>) {}
+    // messagePointersPtr_(new std::vector<Message*>) {}
+    messageMapping_(std::map<Message, MessageInfo>()) {}
 
-Companion::Companion(int id, std::string&& name) :
-    messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
-    clientPtr_(nullptr), serverPtr_(nullptr),
-    messagePointersPtr_(new std::vector<Message*>) {}
+// Companion::Companion(int id, std::string&& name) :
+//     messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
+//     clientPtr_(nullptr), serverPtr_(nullptr),
+//     // messagePointersPtr_(new std::vector<Message*>) {}
+//     messageMapping_(std::map<Message, MessageInfo>()) {}
 
 Companion::~Companion()
 {
@@ -54,12 +56,12 @@ Companion::~Companion()
     delete clientPtr_;
     delete serverPtr_;
 
-    for(auto& messagePtr : *this->messagePointersPtr_)
-    {
-        delete messagePtr;
-    }
+    // for(auto& messagePtr : *this->messagePointersPtr_)
+    // {
+    //     delete messagePtr;
+    // }
 
-    delete this->messagePointersPtr_;
+    // delete this->messagePointersPtr_;
 }
 
 int Companion::getId() const
@@ -92,10 +94,10 @@ uint16_t Companion::getSocketClientPort() const
     return this->socketInfoPtr_->getClientPort();
 }
 
-const std::vector<Message*>* Companion::getMessagePointersPtr() const
-{
-    return this->messagePointersPtr_;
-}
+// const std::vector<Message*>* Companion::getMessagePointersPtr() const
+// {
+//     return this->messagePointersPtr_;
+// }
 
 void Companion::setSocketInfo(SocketInfo* socketInfo)
 {
@@ -146,17 +148,17 @@ bool Companion::disconnectClient()
     return this->clientPtr_->disconnect();
 }
 
-void Companion::clearMessages()
-{
-    std::lock_guard<std::mutex> lock(this->messagesMutex_);
-    this->messagePointersPtr_->clear();
-}
+// void Companion::clearMessages()
+// {
+//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
+//     this->messagePointersPtr_->clear();
+// }
 
-void Companion::addMessage(Message* messagePtr)
-{
-    std::lock_guard<std::mutex> lock(this->messagesMutex_);
-    this->messagePointersPtr_->push_back(messagePtr);
-}
+// void Companion::addMessage(Message* messagePtr)
+// {
+//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
+//     this->messagePointersPtr_->push_back(messagePtr);
+// }
 
 bool Companion::sendMessage(
     bool isAntecedent, NetworkMessageType type,
@@ -228,13 +230,35 @@ Message* Companion::findMessage(uint32_t messageId)
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
+    // auto result = std::find_if(
+    //     this->messagePointersPtr_->begin(),
+    //     this->messagePointersPtr_->end(),
+    //     [&](auto iter)
+    //     {
+    //         return iter->getId() == messageId;
+    //     });
+
     auto result = std::find_if(
-        this->messagePointersPtr_->begin(),
-        this->messagePointersPtr_->end(),
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
         [&](auto iter)
         {
-            return iter->getId() == messageId;
+            return iter.first.getId() == messageId;
         });
 
-    return (result == this->messagePointersPtr_->end()) ? nullptr : *result;
+    // return (result == this->messagePointersPtr_->end()) ? nullptr : *result;
+    return (result == this->messageMapping_.end()) ?
+               nullptr : const_cast<Message*>(&(result->first));
+}
+
+void Companion::addMessageWidgetsToChatHistory(
+    const WidgetGroup* widgetGroupPtr, CentralPanelWidget* centralPanelWidgetPtr)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    for(auto& iterator : this->messageMapping_)
+    {
+        centralPanelWidgetPtr->addMessageWidgetToChatHistory(
+            widgetGroupPtr, this, &(iterator.first), iterator.second.getStatePtr());
+    }
 }

@@ -1,6 +1,10 @@
 #ifndef UTILS_MEASUREMENT_HPP
 #define UTILS_MEASUREMENT_HPP
 
+#include <chrono>
+
+#include "utils_cout.hpp"
+
 template<typename T, typename F, typename... Ts>
 T runMeasureDurationAndReturnResult(F&& func, Ts... params)
 {
