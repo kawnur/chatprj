@@ -67,6 +67,8 @@ public:
     MessageState* getStatePtr() const;
     MessageWidget* getWidgetPtr() const;
 
+    void setWidgetPtr(MessageWidget*);
+
 private:
     MessageState* statePtr_;
     MessageWidget* widgetPtr_;

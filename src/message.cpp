@@ -99,3 +99,8 @@ MessageWidget* MessageInfo::getWidgetPtr() const
 {
     return this->widgetPtr_;
 }
+
+void MessageInfo::setWidgetPtr(MessageWidget* widgetPtr)
+{
+    this->widgetPtr_ = widgetPtr;
+}

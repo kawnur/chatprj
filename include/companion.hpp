@@ -19,7 +19,12 @@ class CompanionData;
 class DBReplyData;
 class Message;
 class MessageInfo;
+class MessageState;
 class WidgetGroup;
+
+// Message(uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
+// MessageInfo(MessageState*, MessageWidget*);
+// MessageState(uint8_t, bool, bool, bool, std::string);
 
 class SocketInfo
 {
@@ -66,15 +71,27 @@ public:
     // const std::vector<Message*>* getMessagePointersPtr() const;
 
     const MessageState* getMappedMessageStateByMessagePtr(const Message*);
+    MessageWidget* getMappedMessageWidgetByMessagePtr(const Message*);
+    const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
 
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageMappingKey(
         const std::string&);
 
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
-    void createMessageAndAddToContainers(std::shared_ptr<DBReplyData>&, size_t);
+
+    // std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
+    std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+    createMessageAndAddToMapping(
+        uint32_t, uint8_t, const std::string&, const std::string&,
+        bool, bool, bool, std::string);
+
+    // std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
+    std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+    createMessageAndAddToMapping(
+        std::shared_ptr<DBReplyData>&, size_t);
 
     void setSocketInfo(SocketInfo*);
-
+    void setMappedMessageWidget(const Message*, MessageWidget*);
     bool startServer();
     bool createClient();
     bool connectClient();

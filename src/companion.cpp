@@ -104,6 +104,8 @@ const MessageState* Companion::getMappedMessageStateByMessagePtr(
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
+    // TODO switch to map find method
+
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
@@ -113,6 +115,40 @@ const MessageState* Companion::getMappedMessageStateByMessagePtr(
         });
 
     return (result == this->messageMapping_.end()) ? nullptr : result->second.getStatePtr();
+}
+
+MessageWidget* Companion::getMappedMessageWidgetByMessagePtr(const Message* messagePtr)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    // TODO switch to map find method
+
+    auto result = std::find_if(
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
+        [&](auto& iter)
+        {
+            return &(iter.first) == messagePtr;
+        });
+
+    return (result == this->messageMapping_.end()) ? nullptr : result->second.getWidgetPtr();
+}
+
+const Message* Companion::getMappedMessageByMessageWidgetPtr(MessageWidget* widgetPtr)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    // TODO switch to map find method
+
+    auto result = std::find_if(
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
+        [&](auto& iter)
+        {
+            return iter.second.getWidgetPtr() == widgetPtr;
+        });
+
+    return (result == this->messageMapping_.end()) ? nullptr : &(result->first);
 }
 
 std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageMappingKey(
@@ -147,7 +183,31 @@ std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMess
     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
 }
 
-void Companion::createMessageAndAddToContainers(
+// std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
+std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+Companion::createMessageAndAddToMapping(
+    uint32_t messageId, uint8_t authorId,
+    const std::string& messageTime, const std::string& messageText,
+    bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
+{
+    auto companionId = this->getId();
+
+    MessageState* messageStatePtr = new MessageState(
+        companionId, isAntecedent, isSent, isReceived, networkId);
+
+    auto result = this->messageMapping_.emplace(
+        std::make_pair(
+            Message(messageId, companionId, authorId, messageTime, messageText),
+            MessageInfo(messageStatePtr, nullptr)
+            )
+        );
+
+    return result;
+}
+
+// std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
+std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+Companion::createMessageAndAddToMapping(
     std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
 {
     auto id = this->getId();
@@ -168,7 +228,7 @@ void Companion::createMessageAndAddToContainers(
 
     // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
-    this->messageMapping_.emplace(
+    auto result = this->messageMapping_.emplace(
         std::make_pair(
             Message(
                 std::atoi(messagesDataPtr->getValue(index, "id")),
@@ -180,11 +240,39 @@ void Companion::createMessageAndAddToContainers(
             MessageInfo(messageStatePtr, nullptr)
         )
     );
+
+    return result;
 }
 
 void Companion::setSocketInfo(SocketInfo* socketInfo)
 {
     socketInfoPtr_ = socketInfo;
+}
+
+void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget* widgetPtr)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    // std::find_if(
+    //     this->messageMapping_.begin(),
+    //     this->messageMapping_.end(),
+    //     [&](auto& iter)
+    //     {
+    //         return iter.first.getId() == messageId;
+    //     });
+    auto result = this->messageMapping_.find(*messagePtr);
+
+    if(result == this->messageMapping_.end())
+    {
+        logArgsError(
+            nullptr,
+            QString("message with id %1 was not found in messageMapping_")
+                .arg(messagePtr->getId()));
+    }
+    else
+    {
+        result->second.setWidgetPtr(widgetPtr);
+    }
 }
 
 bool Companion::startServer()

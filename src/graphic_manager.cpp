@@ -1,8 +1,8 @@
 #include "graphic_manager.hpp"
 
 GraphicManager::GraphicManager() :
-    messageToMessageWidgetMapMutex_(std::mutex()),
-    mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>())
+    messageToMessageWidgetMapMutex_(std::mutex())
+    // mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>())
 {
     // stubWidgetsPtr_ = new StubWidgetGroup;
     // mainWindowPtr_ = new MainWindow;
@@ -275,15 +275,16 @@ void GraphicManager::getEntrancePassword()
     actionPtr->set();
 }
 
-void GraphicManager::addToMessageMapping(
-    const Message* messagePtr, const MessageWidget* messageWidgetPtr)
-{
-    std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+// void GraphicManager::addToMessageMapping(
+//     const Message* messagePtr, const MessageWidget* messageWidgetPtr)
+// {
+//     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
-    this->mapMessageToMessageWidget_[messagePtr] = messageWidgetPtr;
-}
+//     this->mapMessageToMessageWidget_[messagePtr] = messageWidgetPtr;
+// }
 
-void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
+void GraphicManager::markMessageWidgetAsSent(
+    Companion* companionPtr, const Message* messagePtr)
 {
     auto setLambda = [&, this]()
     {
@@ -291,8 +292,10 @@ void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
 
         try
         {
-            const_cast<MessageWidget*>(
-                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsSent();
+            // const_cast<MessageWidget*>(
+            //     this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsSent();
+            companionPtr->getMappedMessageWidgetByMessagePtr(messagePtr)->
+                setMessageWidgetAsSent();
         }
         catch(std::out_of_range)
         {
@@ -303,7 +306,8 @@ void GraphicManager::markMessageWidgetAsSent(const Message* messagePtr)
     runAndLogException(setLambda);
 }
 
-void GraphicManager::markMessageWidgetAsReceived(const Message* messagePtr)
+void GraphicManager::markMessageWidgetAsReceived(
+    Companion* companionPtr, const Message* messagePtr)
 {
     auto setLambda = [&, this]()
     {
@@ -311,8 +315,10 @@ void GraphicManager::markMessageWidgetAsReceived(const Message* messagePtr)
 
         try
         {
-            const_cast<MessageWidget*>(
-                this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsReceived();
+            // const_cast<MessageWidget*>(
+            //     this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsReceived();
+            companionPtr->getMappedMessageWidgetByMessagePtr(messagePtr)->
+                setMessageWidgetAsReceived();
         }
         catch(std::out_of_range)
         {
@@ -328,22 +334,22 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr
     groupPtr->sortChatHistoryElements();
 }
 
-const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
-    MessageWidget* widgetPtr)
-{
-    std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
+// const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
+//     MessageWidget* widgetPtr)
+// {
+//     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
-    auto result = std::find_if(
-        this->mapMessageToMessageWidget_.begin(),
-        this->mapMessageToMessageWidget_.end(),
-        [&](auto iter)
-        {
-            return iter.second == widgetPtr;
-        });
+//     auto result = std::find_if(
+//         this->mapMessageToMessageWidget_.begin(),
+//         this->mapMessageToMessageWidget_.end(),
+//         [&](auto iter)
+//         {
+//             return iter.second == widgetPtr;
+//         });
 
-    return (result == this->mapMessageToMessageWidget_.end()) ?
-               nullptr : result->first;
-}
+//     return (result == this->mapMessageToMessageWidget_.end()) ?
+//                nullptr : result->first;
+// }
 
 // void GraphicManager::refreshChatHistoryWidget(const Companion* companionPtr)
 // {

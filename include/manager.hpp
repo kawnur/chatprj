@@ -48,7 +48,7 @@ public:
     void clearCompanionHistory(CompanionAction*);
     void createUserPassword(PasswordAction*);
     void authenticateUser(PasswordAction*);
-    void createMessageAndAddToContainers(Companion*, std::shared_ptr<DBReplyData>&, size_t);
+    // void createMessageAndAddToContainers(Companion*, std::shared_ptr<DBReplyData>&, size_t);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
@@ -63,7 +63,7 @@ private:
     const Companion* selectedCompanionPtr_;
     std::vector<Companion*> companionPtrs_;  // TODO modify containers
     std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
-    std::map<const MessageState*, const Message*> mapMessageStateToMessage_;
+    // std::map<const MessageState*, const Message*> mapMessageStateToMessage_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
@@ -74,7 +74,7 @@ private:
     //     getMessageStateAndMessageMappingPairByMessageId(uint32_t);
 
     void fillWithMessages(Companion*, bool);
-    bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
+    // bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
     bool connectToDb();
     bool buildCompanions();
     void buildWidgetGroups();
@@ -86,9 +86,9 @@ private:
     bool passwordDataValidation(PasswordAction*);
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);
     bool checkCompanionDataForExistanceAtUpdate(CompanionAction*);
-    void waitForMessageReceptionConfirmation(Companion*, MessageState*, Message*);
-    bool markMessageAsSent(const Message*);
-    bool markMessageAsReceived(const Message*);
+    void waitForMessageReceptionConfirmation(Companion*, MessageState*, const Message*);
+    bool markMessageAsSent(Companion*, const Message*);
+    bool markMessageAsReceived(Companion*, const Message*);
 
     std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
         const std::string&, const std::string&, const std::string&,

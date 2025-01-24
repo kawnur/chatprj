@@ -7,7 +7,7 @@ Manager::Manager() :
 {
     mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
     selectedCompanionPtr_ = nullptr;
-    mapMessageStateToMessage_ = std::map<const MessageState*, const Message*>();
+    // mapMessageStateToMessage_ = std::map<const MessageState*, const Message*>();
 }
 
 Manager::~Manager()
@@ -120,42 +120,52 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
         return;
     }
 
-    // add to companion's messages
-    Message* messagePtr = new Message(id, companion_id, 1, timestamp, text);
-    // companionPtr->addMessage(messagePtr);
+    // // add to companion's messages
+    // Message* messagePtr = new Message(id, companion_id, 1, timestamp, text);
+    // // companionPtr->addMessage(messagePtr);
 
-    // create message state object and add to mapping
-    MessageState* messageStatePtr = new MessageState(
-        companion_id, false, false, false, "");
+    // // create message state object and add to mapping
+    // MessageState* messageStatePtr = new MessageState(
+    //     companion_id, false, false, false, "");
 
-    bool addResult = this->addToMessageStateToMessageMapping(
-        messageStatePtr, messagePtr);
+    // bool addResult = this->addToMessageStateToMessageMapping(
+    //     messageStatePtr, messagePtr);
 
-    logArgs("addResult:", addResult);
+    // logArgs("addResult:", addResult);
 
-    // add to widget
-    // groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr);
-    groupPtr->addMessageWidgetToCentralPanelChatHistory(
-        groupPtr, messagePtr, messageStatePtr);
+    auto pair = companionPtr->createMessageAndAddToMapping(
+        id, 1, timestamp, text, false, false, false, "");
 
-    // add to mapping
-    // std::string networkId = this->addToNetworkIdToMessageMapping(messagePtr);
-
-    // logArgsWithCustomMark("send:", networkId);
-
-    // send over network
-    bool result = companionPtr->sendMessage(
-        false, NetworkMessageType::SEND_DATA,
-        messageStatePtr->getNetworkId(), messagePtr);
-
-    // mark message as sent
-    if(result)
+    if(pair.second)
     {
-        this->markMessageAsSent(messagePtr);
-    }
+        // add to widget
+        // groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr);
 
-    // wait for message reception confirmation
-    this->waitForMessageReceptionConfirmation(companionPtr, messageStatePtr, messagePtr);
+        const Message* messagePtr = &(pair.first->first);
+        MessageState* messageStatePtr = pair.first->second.getStatePtr();
+
+        groupPtr->addMessageWidgetToCentralPanelChatHistory(
+            groupPtr, messagePtr, messageStatePtr);
+
+        // add to mapping
+        // std::string networkId = this->addToNetworkIdToMessageMapping(messagePtr);
+
+        // logArgsWithCustomMark("send:", networkId);
+
+        // send over network
+        bool result = companionPtr->sendMessage(
+            false, NetworkMessageType::SEND_DATA,
+            messageStatePtr->getNetworkId(), messagePtr);
+
+        // mark message as sent
+        if(result)
+        {
+            this->markMessageAsSent(companionPtr, messagePtr);
+        }
+
+        // wait for message reception confirmation
+        this->waitForMessageReceptionConfirmation(companionPtr, messageStatePtr, messagePtr);
+    }
 }
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
@@ -198,28 +208,38 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 return;
             }
 
-            // add to companion's messages
-            Message* messagePtr = new Message(
-                id, companion_id, companion_id, timestamp, text);
+            // // add to companion's messages
+            // Message* messagePtr = new Message(
+            //     id, companion_id, companion_id, timestamp, text);
 
-            // companionPtr->addMessage(messagePtr);
+            // // companionPtr->addMessage(messagePtr);
 
-            // create message state object and add to mapping
-            MessageState* messageStatePtr = new MessageState(
-                companion_id, isAntecedent, false, true, networkId);
+            // // create message state object and add to mapping
+            // MessageState* messageStatePtr = new MessageState(
+            //     companion_id, isAntecedent, false, true, networkId);
 
-            this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+            // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
-            // decrypt message
+            auto pair = companionPtr->createMessageAndAddToMapping(
+                id, companion_id, timestamp, text, isAntecedent, false, true, networkId);
 
-            // add to widget
-            WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-            groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
-                messageStatePtr, messagePtr);
+            if(pair.second)
+            {
+                const Message* messagePtr = &(pair.first->first);
+                MessageState* messageStatePtr = pair.first->second.getStatePtr();
 
-            // send reception confirmation to sender
-            bool result = companionPtr->sendMessage(
-                false, NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
+                // decrypt message
+
+                // add to widget
+                WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
+
+                groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
+                    messageStatePtr, messagePtr);
+
+                // send reception confirmation to sender
+                bool result = companionPtr->sendMessage(
+                    false, NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
+            }
         }
 
         break;
@@ -246,7 +266,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                     // const_cast<MessageState*>(pair.first)->setIsReceived(true);
                     pairPtr->second.getStatePtr()->setIsReceived(true);
                     // this->markMessageAsReceived(pair.second);
-                    this->markMessageAsReceived(&(pairPtr->first));
+                    this->markMessageAsReceived(companionPtr, &(pairPtr->first));
                 }
                 else
                 {
@@ -726,27 +746,27 @@ void Manager::authenticateUser(PasswordAction* actionPtr)
     }
 }
 
-void Manager::createMessageAndAddToContainers(
-    Companion* companionPtr, std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
-{
-    auto companionId = companionPtr->getId();
+// void Manager::createMessageAndAddToContainers(
+//     Companion* companionPtr, std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
+// {
+//     auto companionId = companionPtr->getId();
 
-    Message* messagePtr = new Message(
-        std::atoi(messagesDataPtr->getValue(index, "id")),
-        companionId,
-        std::atoi(messagesDataPtr->getValue(index, "author_id")),
-        messagesDataPtr->getValue(index, "timestamp_tz"),
-        messagesDataPtr->getValue(index, "message"));
+//     Message* messagePtr = new Message(
+//         std::atoi(messagesDataPtr->getValue(index, "id")),
+//         companionId,
+//         std::atoi(messagesDataPtr->getValue(index, "author_id")),
+//         messagesDataPtr->getValue(index, "timestamp_tz"),
+//         messagesDataPtr->getValue(index, "message"));
 
-    // companionPtr->addMessage(messagePtr);
+//     // companionPtr->addMessage(messagePtr);
 
-    MessageState* messageStatePtr = new MessageState(
-        companionId, false,
-        messagesDataPtr->getValue(index, "is_sent"),
-        messagesDataPtr->getValue(index, "is_received"), "");
+//     MessageState* messageStatePtr = new MessageState(
+//         companionId, false,
+//         messagesDataPtr->getValue(index, "is_sent"),
+//         messagesDataPtr->getValue(index, "is_received"), "");
 
-    this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
-}
+//     this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+// }
 
 void Manager::hideSelectedCompanionCentralPanel()
 {
@@ -850,23 +870,33 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
         else
         {
             // add to companion's messages if needed
-            uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
+            // uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
             networkId = getRandomString(5);
 
-            messagePtr = new Message(
+            // messagePtr = new Message(
+            //     messageId,
+            //     companion_id,
+            //     1,
+            //     messagesDataPtr->getValue(i, "timestamp_tz"),
+            //     messagesDataPtr->getValue(i, "message"));
+
+            // // companionCastPtr->addMessage(messagePtr);
+
+            // MessageState* messageStatePtr = new MessageState(
+            //     companion_id, false, false,
+            //     messagesDataPtr->getValue(i, "is_received"), networkId);
+
+            // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+
+            const_cast<Companion*>(companionPtr)->createMessageAndAddToMapping(
                 messageId,
-                companion_id,
                 1,
                 messagesDataPtr->getValue(i, "timestamp_tz"),
-                messagesDataPtr->getValue(i, "message"));
-
-            // companionCastPtr->addMessage(messagePtr);
-
-            MessageState* messageStatePtr = new MessageState(
-                companion_id, false, false,
-                messagesDataPtr->getValue(i, "is_received"), networkId);
-
-            this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+                messagesDataPtr->getValue(i, "message"),
+                false,
+                false,
+                messagesDataPtr->getValue(i, "is_received"),
+                networkId);
         }
 
         // send over network
@@ -876,7 +906,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
         // mark message as sent
         if(result)
         {
-            this->markMessageAsSent(messagePtr);
+            this->markMessageAsSent(const_cast<Companion*>(companionPtr), messagePtr);
         }
     }
 }
@@ -1024,83 +1054,85 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
             }
             else
             {
-                this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
+                // this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
+                companionPtr->createMessageAndAddToMapping(messagesDataPtr, i);
             }
         }
         else
         {
-            this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
+            // this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
+            companionPtr->createMessageAndAddToMapping(messagesDataPtr, i);
         }
     }
 }
 
-bool Manager::addToMessageStateToMessageMapping(
-    const MessageState* messageStatePtr, const Message* messagePtr)
-{
-    std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
+// bool Manager::addToMessageStateToMessageMapping(
+//     const MessageState* messageStatePtr, const Message* messagePtr)
+// {
+//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
 
-    if(messagePtr->isMessageFromMe())
-    {
-        std::string networkId = getRandomString(5);
+//     if(messagePtr->isMessageFromMe())
+//     {
+//         std::string networkId = getRandomString(5);
 
-        std::string messageMappingKey =
-            generateMessageMappingKey(
-            networkId, messagePtr->getCompanionId());
+//         std::string messageMappingKey =
+//             generateMessageMappingKey(
+//             networkId, messagePtr->getCompanionId());
 
-        auto lambda = [&]()
-        {
-            auto iterator = std::find_if(
-                this->mapMessageStateToMessage_.begin(),
-                this->mapMessageStateToMessage_.end(),
-                [&](auto iter)
-                {
-                    return iter.first->getMessageMappingKey() ==
-                        messageMappingKey;
-                });
+//         auto lambda = [&]()
+//         {
+//             auto iterator = std::find_if(
+//                 this->mapMessageStateToMessage_.begin(),
+//                 this->mapMessageStateToMessage_.end(),
+//                 [&](auto iter)
+//                 {
+//                     return iter.first->getMessageMappingKey() ==
+//                         messageMappingKey;
+//                 });
 
-            return !(iterator == this->mapMessageStateToMessage_.end());
-        };
+//             return !(iterator == this->mapMessageStateToMessage_.end());
+//         };
 
-        // run in loop while generated key is not unique
-        while(lambda())
-        {
-            networkId = getRandomString(5);
+//         // run in loop while generated key is not unique
+//         while(lambda())
+//         {
+//             networkId = getRandomString(5);
 
-            messageMappingKey =
-                generateMessageMappingKey(
-                networkId, messagePtr->getCompanionId());
-        }
+//             messageMappingKey =
+//                 generateMessageMappingKey(
+//                 networkId, messagePtr->getCompanionId());
+//         }
 
-        MessageState* messageStateCastPtr = const_cast<MessageState*>(messageStatePtr);
+//         MessageState* messageStateCastPtr = const_cast<MessageState*>(messageStatePtr);
 
-        messageStateCastPtr->setNetworkId(networkId);
+//         messageStateCastPtr->setNetworkId(networkId);
 
-        messageStateCastPtr->setMessageMappingKey(
-            messageMappingKey);
+//         messageStateCastPtr->setMessageMappingKey(
+//             messageMappingKey);
 
-        this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
+//         this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
 
-        return true;
-    }
-    else
-    {
-        if(this->mapMessageStateToMessage_.count(messageStatePtr) == 0)
-        {
-            this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
+//         return true;
+//     }
+//     else
+//     {
+//         if(this->mapMessageStateToMessage_.count(messageStatePtr) == 0)
+//         {
+//             this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
 
-            return true;
-        }
-        else
-        {
-            logArgsError(
-                QString("mapMessageStateToMessage_ already contains"
-                        "entry with key object having messageMappingKey_: %1")
-                    .arg(getQString(messageStatePtr->getMessageMappingKey())));
+//             return true;
+//         }
+//         else
+//         {
+//             logArgsError(
+//                 QString("mapMessageStateToMessage_ already contains"
+//                         "entry with key object having messageMappingKey_: %1")
+//                     .arg(getQString(messageStatePtr->getMessageMappingKey())));
 
-            return false;
-        }
-    }
-}
+//             return false;
+//         }
+//     }
+// }
 
 bool Manager::connectToDb()
 {
@@ -1447,7 +1479,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 }
 
 void Manager::waitForMessageReceptionConfirmation(
-    Companion* companionPtr, MessageState* messageStatePtr, Message* messagePtr)
+    Companion* companionPtr, MessageState* messageStatePtr, const Message* messagePtr)
 {
     auto lambda = [=]()
     {
@@ -1478,7 +1510,7 @@ void Manager::waitForMessageReceptionConfirmation(
     std::thread(lambda).detach();
 }
 
-bool Manager::markMessageAsSent(const Message* messagePtr)
+bool Manager::markMessageAsSent(Companion* companionPtr, const Message* messagePtr)
 {
     // mark in db
     std::shared_ptr<DBReplyData> messageIdDataPtr = this->getDBDataPtr(
@@ -1495,15 +1527,15 @@ bool Manager::markMessageAsSent(const Message* messagePtr)
     }
 
     // mark in widget
-    getGraphicManagerPtr()->markMessageWidgetAsSent(messagePtr);
+    getGraphicManagerPtr()->markMessageWidgetAsSent(companionPtr, messagePtr);
 
     return true;
 }
 
-bool Manager::markMessageAsReceived(const Message* messagePtr)
+bool Manager::markMessageAsReceived(Companion* companionPtr, const Message* messagePtr)
 {
     // mark in widget
-    getGraphicManagerPtr()->markMessageWidgetAsReceived(messagePtr);
+    getGraphicManagerPtr()->markMessageWidgetAsReceived(companionPtr, messagePtr);
 
     // mark in db
     std::shared_ptr<DBReplyData> messageIdDataPtr = this->getDBDataPtr(

@@ -853,7 +853,9 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
             // this->chatHistoryWidgetPtr_, companionName, messageStatePtr, messagePtr);
             this->chatHistoryWidgetPtr_, companionPtr, messageStatePtr, messagePtr);
 
-        getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
+        // getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
+        const_cast<Companion*>(companionPtr)->
+            setMappedMessageWidget(messagePtr, widgetPtr);
 
         // if(groupPtr)
         if(widgetGroupPtr)
@@ -930,9 +932,12 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
 
     auto lambda = [&](auto item)
     {
+        // const Message* messagePtr =
+        //     graphicManagerPtr->getMappedMessageByMessageWidgetPtr(
+        //     dynamic_cast<MessageWidget*>(item));
         const Message* messagePtr =
-            graphicManagerPtr->getMappedMessageByMessageWidgetPtr(
-            dynamic_cast<MessageWidget*>(item));
+            companionPtr_->getMappedMessageByMessageWidgetPtr(
+                dynamic_cast<MessageWidget*>(item));
 
         // return result;
         return (messagePtr) ? messagePtr->getTime() : std::string("");
