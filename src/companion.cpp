@@ -99,6 +99,89 @@ uint16_t Companion::getSocketClientPort() const
 //     return this->messagePointersPtr_;
 // }
 
+const MessageState* Companion::getMappedMessageStateByMessagePtr(
+    const Message* messagePtr)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    auto result = std::find_if(
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
+        [&](auto& iter)
+        {
+            return &(iter.first) == messagePtr;
+        });
+
+    return (result == this->messageMapping_.end()) ? nullptr : result->second.getStatePtr();
+}
+
+std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageMappingKey(
+    const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    auto result = std::find_if(
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
+        [&](auto& iter)
+        {
+            return iter.second.getStatePtr()->getMessageMappingKey() == key;
+        });
+
+    return (result == this->messageMapping_.end()) ? nullptr : &(*result);
+}
+
+std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageId(
+    uint32_t messageId)
+{
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    auto result = std::find_if(
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
+        [&](auto& iter)
+        {
+            return iter.first.getId() == messageId;
+        });
+
+    return (result == this->messageMapping_.end()) ? nullptr : &(*result);
+}
+
+void Companion::createMessageAndAddToContainers(
+    std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
+{
+    auto id = this->getId();
+
+    // Message* messagePtr = new Message(
+    //     std::atoi(messagesDataPtr->getValue(index, "id")),
+    //     id,
+    //     std::atoi(messagesDataPtr->getValue(index, "author_id")),
+    //     messagesDataPtr->getValue(index, "timestamp_tz"),
+    //     messagesDataPtr->getValue(index, "message"));
+
+    // companionPtr->addMessage(messagePtr);
+
+    MessageState* messageStatePtr = new MessageState(
+        id, false,
+        messagesDataPtr->getValue(index, "is_sent"),
+        messagesDataPtr->getValue(index, "is_received"), "");
+
+    // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
+
+    this->messageMapping_.emplace(
+        std::make_pair(
+            Message(
+                std::atoi(messagesDataPtr->getValue(index, "id")),
+                id,
+                std::atoi(messagesDataPtr->getValue(index, "author_id")),
+                messagesDataPtr->getValue(index, "timestamp_tz"),
+                messagesDataPtr->getValue(index, "message")
+            ),
+            MessageInfo(messageStatePtr, nullptr)
+        )
+    );
+}
+
 void Companion::setSocketInfo(SocketInfo* socketInfo)
 {
     socketInfoPtr_ = socketInfo;

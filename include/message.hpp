@@ -21,6 +21,11 @@ public:
     std::string getText() const;
     bool isMessageFromMe() const;
 
+    friend bool operator<(const Message& message1, const Message& message2)
+    {
+        return message1.getId() < message2.getId();
+    }
+
 private:
     uint32_t id_;
     uint8_t companion_id_;

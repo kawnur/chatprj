@@ -9,6 +9,7 @@
 #include "logging.hpp"
 
 class ButtonInfo;
+class Companion;
 class CompanionAction;
 class DBReplyData;
 class Message;
@@ -60,7 +61,8 @@ void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
 std::pair<QString, QString> formatMessageHeaderAndBody(
-    const std::string&, const Message*);
+    // const std::string&, const Message*);
+    const Companion*, const Message*);
 
 std::string buildMessageJSONString(
     bool, NetworkMessageType, const std::string&, const Message*);

@@ -65,6 +65,14 @@ public:
     uint16_t getSocketClientPort() const;
     // const std::vector<Message*>* getMessagePointersPtr() const;
 
+    const MessageState* getMappedMessageStateByMessagePtr(const Message*);
+
+    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageMappingKey(
+        const std::string&);
+
+    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
+    void createMessageAndAddToContainers(std::shared_ptr<DBReplyData>&, size_t);
+
     void setSocketInfo(SocketInfo*);
 
     bool startServer();

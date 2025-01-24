@@ -597,7 +597,7 @@ MessageWidget::MessageWidget(
     setLayout(layoutPtr_);
 
     // auto data = formatMessageHeaderAndBody(companionName, messagePtr);
-    auto data = formatMessageHeaderAndBody(companionPtr->getName(), messagePtr);
+    auto data = formatMessageHeaderAndBody(companionPtr, messagePtr);
 
     headerLabelPtr_ = new QLabel(data.first);
     layoutPtr_->addWidget(headerLabelPtr_);

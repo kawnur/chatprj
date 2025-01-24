@@ -59,20 +59,20 @@ WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companion
     return groupPtr;
 }
 
-const MessageState* Manager::getMappedMessageStateByMessagePtr(const Message* messagePtr)
-{
-    std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
+// const MessageState* Manager::getMappedMessageStateByMessagePtr(const Message* messagePtr)
+// {
+//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
 
-    auto result = std::find_if(
-        this->mapMessageStateToMessage_.begin(),
-        this->mapMessageStateToMessage_.end(),
-        [&](auto iter)
-        {
-            return iter.second == messagePtr;
-        });
+//     auto result = std::find_if(
+//         this->mapMessageStateToMessage_.begin(),
+//         this->mapMessageStateToMessage_.end(),
+//         [&](auto iter)
+//         {
+//             return iter.second == messagePtr;
+//         });
 
-    return (result == this->mapMessageStateToMessage_.end()) ? nullptr : result->first;
-}
+//     return (result == this->mapMessageStateToMessage_.end()) ? nullptr : result->first;
+// }
 
 void Manager::set()
 {
@@ -235,20 +235,25 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 std::string key = generateMessageMappingKey(
                     networkId, companionPtr->getId());
 
-                auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
+                // auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
+                auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageMappingKey(key);
 
                 // TODO rewrite
-                if(pair.first && pair.second)
+                // if(pair.first && pair.second)
+                if(pairPtr && pairPtr->second.getStatePtr())
                 {
                     // found message in mapping
-                    const_cast<MessageState*>(pair.first)->setIsReceived(true);
-                    this->markMessageAsReceived(pair.second);
+                    // const_cast<MessageState*>(pair.first)->setIsReceived(true);
+                    pairPtr->second.getStatePtr()->setIsReceived(true);
+                    // this->markMessageAsReceived(pair.second);
+                    this->markMessageAsReceived(&(pairPtr->first));
                 }
                 else
                 {
                     // strange situation
                     logArgsError(
-                        "received confirmation for message not in mapMessageStateToMessage_");
+                        // "received confirmation for message not in mapMessageStateToMessage_");
+                        "received confirmation for message which is not in messageMapping_");
                 }
             }
             else
@@ -264,25 +269,30 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             // search for message in managers's mapping
             std::string key = generateMessageMappingKey(networkId, companionPtr->getId());
 
-            auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
+            // auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
+            auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageMappingKey(key);
 
-            logArgs("pair.first:", pair.first, "pair.second:", pair.second);
+            logArgs("pair:", pairPtr, "pair.second.getStatePtr():", pairPtr->second.getStatePtr());
 
-            if(pair.first && pair.second)
+            // if(pair.first && pair.second)
+            if(pairPtr && pairPtr->second.getStatePtr())
             {
                 // message found in managers's mapping
-                if(pair.first->getIsReceived())
+                // if(pair.first->getIsReceived())
+                if(pairPtr->second.getStatePtr()->getIsReceived())
                 {
                     bool result = companionPtr->sendMessage(
                         false, NetworkMessageType::RECEIVE_CONFIRMATION,
-                        pair.first->getNetworkId(), pair.second);
+                        // pair.first->getNetworkId(), pair.second);
+                        pairPtr->second.getStatePtr()->getNetworkId(), &(pairPtr->first));
                 }
                 else
                 {
                     // strange situation
                     logArgsError(
                         "received reception confirmation request "
-                        "for message in mapMessageStateToMessage_ with isReceived = false");
+                        // "for message in mapMessageStateToMessage_ with isReceived = false");
+                        "for message in messageMapping_ with isReceived = false");
                 }
             }
             else
@@ -819,14 +829,18 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
         if(messagePtr)
         {
+            // const MessageState* messageStatePtr =
+            //     this->getMappedMessageStateByMessagePtr(messagePtr);
             const MessageState* messageStatePtr =
-                this->getMappedMessageStateByMessagePtr(messagePtr);
+                const_cast<Companion*>(companionPtr)->
+                    getMappedMessageStateByMessagePtr(messagePtr);
 
             if(!messageStatePtr)
             {
                 logArgsError(
                     "strange case: unsent message found in companions messages, "
-                    "but not found in manager's mapMessageStateToMessage_");
+                    // "but not found in manager's mapMessageStateToMessage_");
+                    "but not found in companion's messageMapping_");
             }
             else
             {
@@ -921,43 +935,43 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
     return result->first;
 }
 
-std::pair<const MessageState*, const Message*>
-Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string& key)
-{
-    using pair = std::pair<const MessageState*, const Message*>;
+// std::pair<const MessageState*, const Message*>
+// Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string& key)
+// {
+//     using pair = std::pair<const MessageState*, const Message*>;
 
-    std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
+//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
 
-    auto iterator = std::find_if(
-        this->mapMessageStateToMessage_.begin(),
-        this->mapMessageStateToMessage_.end(),
-        [&](auto iter)
-        {
-            return iter.first->getMessageMappingKey() == key;
-        });
+//     auto iterator = std::find_if(
+//         this->mapMessageStateToMessage_.begin(),
+//         this->mapMessageStateToMessage_.end(),
+//         [&](auto iter)
+//         {
+//             return iter.first->getMessageMappingKey() == key;
+//         });
 
-    return (iterator == this->mapMessageStateToMessage_.end()) ?
-        pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
-}
+//     return (iterator == this->mapMessageStateToMessage_.end()) ?
+//         pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
+// }
 
-std::pair<const MessageState*, const Message*>
-Manager::getMessageStateAndMessageMappingPairByMessageId(uint32_t messageId)
-{
-    using pair = std::pair<const MessageState*, const Message*>;
+// std::pair<const MessageState*, const Message*>
+// Manager::getMessageStateAndMessageMappingPairByMessageId(uint32_t messageId)
+// {
+//     using pair = std::pair<const MessageState*, const Message*>;
 
-    std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
+//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
 
-    auto iterator = std::find_if(
-        this->mapMessageStateToMessage_.begin(),
-        this->mapMessageStateToMessage_.end(),
-        [&](auto iter)
-        {
-            return iter.second->getId() == messageId;
-        });
+//     auto iterator = std::find_if(
+//         this->mapMessageStateToMessage_.begin(),
+//         this->mapMessageStateToMessage_.end(),
+//         [&](auto iter)
+//         {
+//             return iter.second->getId() == messageId;
+//         });
 
-    return (iterator == this->mapMessageStateToMessage_.end()) ?
-        pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
-}
+//     return (iterator == this->mapMessageStateToMessage_.end()) ?
+//         pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
+// }
 
 void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHaveMessages)
 {
@@ -1000,9 +1014,11 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
 
         if(containersAlreadyHaveMessages)
         {
-            auto pair = this->getMessageStateAndMessageMappingPairByMessageId(messageId);
+            // auto pair = this->getMessageStateAndMessageMappingPairByMessageId(messageId);
+            auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageId(messageId);
 
-            if(pair.first && pair.second)
+            // if(pair.first && pair.second)
+            if(pairPtr && pairPtr->second.getStatePtr())
             {
                 // companionPtr->addMessage(const_cast<Message*>(pair.second));
             }

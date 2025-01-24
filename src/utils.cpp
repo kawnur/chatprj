@@ -176,15 +176,16 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
 }
 
 std::pair<QString, QString> formatMessageHeaderAndBody(
-    const std::string& companionName, const Message* messagePtr)
+    // const std::string& companionName, const Message* messagePtr)
+    const Companion* companionPtr, const Message* messagePtr)
 {
-    auto companionNameQString = getQString(companionName);
+    auto companionNameQString = getQString(companionPtr->getName());
     auto companionId = messagePtr->getCompanionId();
     auto authorId = messagePtr->getAuthorId();
     auto time = getQString(messagePtr->getTime());
     auto text = getQString(messagePtr->getText());
-    auto isSent =
-        getManagerPtr()->getMappedMessageStateByMessagePtr(messagePtr)->getIsSent();
+    // auto isSent =
+    //     getManagerPtr()->getMappedMessageStateByMessagePtr(messagePtr)->getIsSent();
 
     QString color, sender, receiver;
 

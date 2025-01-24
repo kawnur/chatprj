@@ -35,7 +35,7 @@ public:
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     WidgetGroup* getMappedWidgetGroupByCompanion(const Companion*) const;
-    const MessageState* getMappedMessageStateByMessagePtr(const Message*);
+    // const MessageState* getMappedMessageStateByMessagePtr(const Message*);
 
     void set();
     void sendMessage(Companion*, const std::string&);
@@ -67,11 +67,11 @@ private:
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
-    std::pair<const MessageState*, const Message*>
-        getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
+    // std::pair<const MessageState*, const Message*>
+    //     getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
 
-    std::pair<const MessageState*, const Message*>
-        getMessageStateAndMessageMappingPairByMessageId(uint32_t);
+    // std::pair<const MessageState*, const Message*>
+    //     getMessageStateAndMessageMappingPairByMessageId(uint32_t);
 
     void fillWithMessages(Companion*, bool);
     bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
