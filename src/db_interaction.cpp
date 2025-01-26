@@ -34,6 +34,25 @@ std::vector<std::map<std::string, const char*>>* DBReplyData::getDataPtr()
     return &this->data_;
 }
 
+std::vector<QString> DBReplyData::buildDataQStringVector()
+{
+    std::vector<QString> result {};
+
+    for(auto& element : this->data_)
+    {
+        QString representation { "" };
+
+        for(auto& pair : element)
+        {
+            representation += QString("%1: %2 ").arg(getQString(pair.first), pair.second);
+        }
+
+        result.push_back(representation);
+    }
+
+    return result;
+}
+
 void DBReplyData::clear()
 {
     this->data_.clear();
@@ -219,7 +238,7 @@ PGresult* getMessagesDBResult(
         "WITH select_id AS "
         "(SELECT id FROM messages WHERE companion_id = %1 "
         "ORDER BY timestamp_tz DESC LIMIT 50) "
-        "SELECT id, author_id, timestamp_tz, message, is_sent, is_received "
+        "SELECT id, companion_id, author_id, timestamp_tz, message, is_sent, is_received "
         "FROM messages WHERE id IN (SELECT id FROM select_id) "
         "ORDER BY timestamp_tz ASC").arg(getQString(std::to_string(companionId)));
 

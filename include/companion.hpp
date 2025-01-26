@@ -62,6 +62,11 @@ public:
     // Companion(int, std::string&&);
     ~Companion();
 
+    friend bool operator<(const Companion& object1, const Companion& object2)
+    {
+        return object1.getId() < object2.getId();
+    }
+
     int getId() const;
     std::string getName() const;
     SocketInfo* getSocketInfoPtr() const;

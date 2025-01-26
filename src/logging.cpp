@@ -53,17 +53,14 @@ void logDBResultUnknownField(const PGresult* result, int row, int column)
 
 void logDBReplyData(std::shared_ptr<DBReplyData>& objectPtr)
 {
-    logArgs("############################");
+    logArgs(logDelimiter);
 
-    for(auto& elem : *objectPtr->getDataPtr())
+    for(auto& element : objectPtr->buildDataQStringVector())
     {
-        for(auto& item : elem)
-        {
-            logArgs(item.first, item.second);
-        }
+        logArgs(element);
     }
 
-    logArgs("############################");
+    logArgs(logDelimiter);
 }
 
 void logSocketInfoWidget(const SocketInfoWidget* objectPtr)

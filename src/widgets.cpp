@@ -679,6 +679,7 @@ LeftPanelWidget::LeftPanelWidget(QWidget* parent)
 
     spacerPtr_ = new QSpacerItem(
         0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
     layoutPtr_->addSpacerItem(spacerPtr_);
 }
 
@@ -854,8 +855,13 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
             this->chatHistoryWidgetPtr_, companionPtr, messageStatePtr, messagePtr);
 
         // getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
-        const_cast<Companion*>(companionPtr)->
-            setMappedMessageWidget(messagePtr, widgetPtr);
+        std::thread(
+            [=]()
+            {
+                const_cast<Companion*>(companionPtr)->
+                setMappedMessageWidget(messagePtr, widgetPtr);
+            }
+        ).detach();
 
         // if(groupPtr)
         if(widgetGroupPtr)
@@ -1082,8 +1088,10 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr) :
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
     graphicManagerPtr->addWidgetToCompanionPanel(socketInfoBasePtr_);
 
-    centralPanelPtr_ = new CentralPanelWidget(
-        getGraphicManagerPtr()->getMainWindowPtr(), companionPtr_->getName());
+    // centralPanelPtr_ = new CentralPanelWidget(
+    //     getGraphicManagerPtr()->getMainWindowPtr(), companionPtr_->getName());
+
+    centralPanelPtr_ = new CentralPanelWidget(nullptr, companionPtr_->getName());
 
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr_));
 

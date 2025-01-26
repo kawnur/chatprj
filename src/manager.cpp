@@ -2,10 +2,11 @@
 
 Manager::Manager() :
     messageStateToMessageMapMutex_(std::mutex()),
-    dbConnectionPtr_(nullptr), userIsAuthenticated_(false),
-    companionPtrs_(std::vector<Companion*>())
+    dbConnectionPtr_(nullptr), userIsAuthenticated_(false)
+    // companionPtrs_(std::vector<Companion*>())
 {
-    mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
+    // mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
+    mapCompanionToWidgetGroup_ = std::map<Companion, WidgetGroup*>();
     selectedCompanionPtr_ = nullptr;
     // mapMessageStateToMessage_ = std::map<const MessageState*, const Message*>();
 }
@@ -14,9 +15,12 @@ Manager::~Manager()
 {
     free(dbConnectionPtr_);
 
-    for(auto& companion : this->companionPtrs_)
+    // for(auto& companion : this->companionPtrs_)
+    for(auto& pair : this->mapCompanionToWidgetGroup_)
     {
-        delete companion;
+        // delete companion;        
+        delete &(pair.first);
+        delete pair.second;
     }
 }
 
@@ -33,7 +37,7 @@ bool Manager::getUserIsAuthenticated()
 const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     SocketInfoBaseWidget* widget) const
 {
-    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair)
+    auto findWidget = [&](auto& pair)
     {
         return pair.second->getSocketInfoBasePtr() == widget;
     };
@@ -43,7 +47,8 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
         this->mapCompanionToWidgetGroup_.cend(),
         findWidget);
 
-    return result->first;
+    // return result->first;
+    return &(result->first);
 }
 
 WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companionPtr) const
@@ -52,7 +57,8 @@ WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companion
 
     try
     {
-        groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+        // groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+        groupPtr = this->mapCompanionToWidgetGroup_.at(*companionPtr);
     }
     catch(std::out_of_range) {}
 
@@ -101,7 +107,8 @@ void Manager::set()
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
-    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    // WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(*companionPtr);
 
     // encrypt message
 
@@ -231,7 +238,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 // decrypt message
 
                 // add to widget
-                WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
+                // WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
+                WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(*companionPtr);  // TODO try catch
 
                 groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
                     messageStatePtr, messagePtr);
@@ -427,7 +435,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
 
     if(this->selectedCompanionPtr_)
     {
-        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);  // TODO try catch
+        // auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);  // TODO try catch
+        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));  // TODO try catch
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->unselect();
 
@@ -442,7 +451,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
 
     if(this->selectedCompanionPtr_)
     {
-        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        // auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->select();
 
@@ -516,6 +526,7 @@ void Manager::createCompanion(CompanionAction* companionActionPtr)
 
     if(!companionPtr)
     {
+        logArgsError("companionPtr is nullptr");
         return;
     }
 
@@ -566,8 +577,10 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
     companionActionPtr->updateCompanionObjectData();
 
     // update SocketInfoWidget
+    // auto widgetGroup = this->mapCompanionToWidgetGroup_.at(
+    //     companionActionPtr->getCompanionPtr());  // TODO try catch
     auto widgetGroup = this->mapCompanionToWidgetGroup_.at(
-        companionActionPtr->getCompanionPtr());  // TODO try catch
+        *(companionActionPtr->getCompanionPtr()));  // TODO try catch
 
     dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->update();
 
@@ -628,7 +641,8 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 
 void Manager::clearChatHistory(Companion* companionPtr)
 {
-    WidgetGroup* widgetGroupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    // WidgetGroup* widgetGroupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
+    WidgetGroup* widgetGroupPtr = this->mapCompanionToWidgetGroup_.at(*(companionPtr));
     getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
 }
 
@@ -772,7 +786,8 @@ void Manager::hideSelectedCompanionCentralPanel()
 {
     if(this->selectedCompanionPtr_)
     {
-        auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        // auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        auto groupPtr = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));
         getGraphicManagerPtr()->hideWidgetGroupCentralPanel(groupPtr);
     }
 }
@@ -781,7 +796,8 @@ void Manager::showSelectedCompanionCentralPanel()
 {
     if(this->selectedCompanionPtr_)
     {
-        auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        // auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
+        auto groupPtr = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));
         getGraphicManagerPtr()->showWidgetGroupCentralPanel(groupPtr);
     }
 }
@@ -952,7 +968,7 @@ void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
 const Companion* Manager::getMappedCompanionByWidgetGroup(
     WidgetGroup* groupPtr) const
 {
-    auto findWidget = [&](const std::pair<const Companion*, WidgetGroup*> pair)
+    auto findWidget = [&](auto& pair)
     {
         return pair.second == groupPtr;
     };
@@ -962,7 +978,7 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
         this->mapCompanionToWidgetGroup_.cend(),
         findWidget);
 
-    return result->first;
+    return &(result->first);
 }
 
 // std::pair<const MessageState*, const Message*>
@@ -1171,6 +1187,15 @@ bool Manager::buildCompanions()
         return false;
     }
 
+    std::sort(
+        companionsDataPtr->getDataPtr()->begin(),
+        companionsDataPtr->getDataPtr()->end(),
+        [&](auto& iterator1, auto& iterator2)
+        {
+            return iterator1.at("id") < iterator2.at("id");
+        }
+    );
+
     for(size_t index = 0; index < companionsDataPtr->size(); index++)  // TODO switch to iterators
     {
         int id = std::atoi(companionsDataPtr->getValue(index, "id"));
@@ -1182,6 +1207,7 @@ bool Manager::buildCompanions()
 
         if(!companionPtr)
         {
+            logArgsError("companionPtr is nullptr");
             continue;
         }
 
@@ -1227,12 +1253,15 @@ void Manager::buildWidgetGroups()
 {
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
-    auto companionsSize = this->companionPtrs_.size();
+    // auto companionsSize = this->companionPtrs_.size();
+    auto companionsNumber = this->mapCompanionToWidgetGroup_.size();
     auto childrenSize = graphicManagerPtr->getCompanionPanelChildrenSize();
 
-    logArgs("companionsSize:", companionsSize, "childrenSize:", childrenSize);
+    // logArgs("companionsSize:", companionsSize, "childrenSize:", childrenSize);
+    logArgs("companionsNumber:", companionsNumber, "childrenSize:", childrenSize);
 
-    if(companionsSize == 0 && childrenSize == 0)
+    // if(companionsSize == 0 && childrenSize == 0)
+    if(companionsNumber == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
     }
@@ -1245,9 +1274,12 @@ void Manager::buildWidgetGroups()
             // hide companion panel stub widget
             graphicManagerPtr->hideCompanionPanelStub();
 
-            for(auto& companion : this->companionPtrs_)
+            // for(auto& companion : this->companionPtrs_)
+            for(auto& pair : this->mapCompanionToWidgetGroup_)
             {
-                this->createWidgetGroupAndAddToMapping(companion);
+                // this->createWidgetGroupAndAddToMapping(companion);
+                // this->createWidgetGroupAndAddToMapping(pair.first);
+                this->createWidgetGroupAndAddToMapping(&(pair.first));
             }
         }
     }
@@ -1261,17 +1293,25 @@ Companion* Manager::addCompanionObject(int id, const std::string& name)
         return nullptr;
     }
 
-    Companion* companionPtr = new Companion(id, name);
-    this->companionPtrs_.push_back(companionPtr);
+    // Companion* companionPtr = new Companion(id, name);
+    // this->companionPtrs_.push_back(companionPtr);
+    // this->mapCompanionToWidgetGroup_[companionPtr] = nullptr;
+    // this->mapCompanionToWidgetGroup_[*companionPtr] = nullptr;
 
-    return companionPtr;
+    auto result = this->mapCompanionToWidgetGroup_.emplace(
+        // std::make_pair(Companion(id, name), nullptr));
+        Companion(id, name), nullptr);
+
+    // return companionPtr;
+    return (result.second) ? const_cast<Companion*>(&(result.first->first)) : nullptr;
 }
 
-void Manager::createWidgetGroupAndAddToMapping(Companion* companionPtr)
+void Manager::createWidgetGroupAndAddToMapping(const Companion* companionPtr)
 {
     WidgetGroup* widgetGroupPtr = new WidgetGroup(companionPtr);
     widgetGroupPtr->set();
-    this->mapCompanionToWidgetGroup_[companionPtr] = widgetGroupPtr;
+    // this->mapCompanionToWidgetGroup_[companionPtr] = widgetGroupPtr;
+    this->mapCompanionToWidgetGroup_[*companionPtr] = widgetGroupPtr;
 }
 
 void Manager::deleteCompanionObject(Companion* companionPtr)
@@ -1279,11 +1319,12 @@ void Manager::deleteCompanionObject(Companion* companionPtr)
     this->deleteWidgetGroupAndDeleteFromMapping(companionPtr);
 }
 
-void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
+void Manager::deleteWidgetGroupAndDeleteFromMapping(const Companion* companionPtr)
 {
-    auto findMapLambda = [&](auto iterator)
+    auto findMapLambda = [&](auto& iterator)
     {
-        return iterator.first == companionPtr;
+        // return iterator.first == companionPtr;
+        return &(iterator.first) == companionPtr;
     };
 
     auto findMapResult = std::find_if(
@@ -1298,25 +1339,25 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
     }
     else
     {
-        auto findVectorLambda = [&](auto iterator)
-        {
-            return iterator == companionPtr;
-        };
+        // auto findVectorLambda = [&](auto iterator)
+        // {
+        //     return iterator == companionPtr;
+        // };
 
-        auto findVectorResult = std::find_if(
-            this->companionPtrs_.begin(),
-            this->companionPtrs_.end(),
-            findVectorLambda);
+        // auto findVectorResult = std::find_if(
+        //     this->companionPtrs_.begin(),
+        //     this->companionPtrs_.end(),
+        //     findVectorLambda);
 
-        if(findVectorResult == this->companionPtrs_.end())
-        {
-            showErrorDialogAndLogError(
-                nullptr, "Companion was not found in vector at deletion");
-        }
-        else
-        {
-            this->companionPtrs_.erase(findVectorResult);
-        }
+        // if(findVectorResult == this->companionPtrs_.end())
+        // {
+        //     showErrorDialogAndLogError(
+        //         nullptr, "Companion was not found in vector at deletion");
+        // }
+        // else
+        // {
+        //     this->companionPtrs_.erase(findVectorResult);
+        // }
 
         if(this->selectedCompanionPtr_ == companionPtr)
         {
@@ -1324,7 +1365,8 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(Companion* companionPtr)
         }
 
         // delete companion
-        delete findMapResult->first;
+        // delete findMapResult->first;
+        delete &(findMapResult->first);
 
         // delete widget group
         delete findMapResult->second;

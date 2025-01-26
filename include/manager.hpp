@@ -61,8 +61,9 @@ private:
     PGconn* dbConnectionPtr_;
     bool userIsAuthenticated_;
     const Companion* selectedCompanionPtr_;
-    std::vector<Companion*> companionPtrs_;  // TODO modify containers
-    std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
+    // std::vector<Companion*> companionPtrs_;  // TODO modify containers
+    // std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
+    std::map<Companion, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
     // std::map<const MessageState*, const Message*> mapMessageStateToMessage_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
@@ -79,9 +80,9 @@ private:
     bool buildCompanions();
     void buildWidgetGroups();
     Companion* addCompanionObject(int, const std::string&);
-    void createWidgetGroupAndAddToMapping(Companion*);
+    void createWidgetGroupAndAddToMapping(const Companion*);
     void deleteCompanionObject(Companion*);
-    void deleteWidgetGroupAndDeleteFromMapping(Companion*);
+    void deleteWidgetGroupAndDeleteFromMapping(const Companion*);
     bool companionDataValidation(CompanionAction*);
     bool passwordDataValidation(PasswordAction*);
     bool checkCompanionDataForExistanceAtCreation(CompanionAction*);

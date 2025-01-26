@@ -4,6 +4,7 @@
 #include <libpq-events.h>
 #include <libpq-fe.h>
 #include <mutex>
+#include <QString>
 #include <string>
 
 #include "action.hpp"
@@ -23,6 +24,7 @@ public:
     ~DBReplyData();
 
     std::vector<std::map<std::string, const char*>>* getDataPtr();
+    std::vector<QString> buildDataQStringVector();
 
     void clear();
     bool isEmpty();
