@@ -275,14 +275,6 @@ void GraphicManager::getEntrancePassword()
     actionPtr->set();
 }
 
-// void GraphicManager::addToMessageMapping(
-//     const Message* messagePtr, const MessageWidget* messageWidgetPtr)
-// {
-//     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
-
-//     this->mapMessageToMessageWidget_[messagePtr] = messageWidgetPtr;
-// }
-
 void GraphicManager::markMessageWidgetAsSent(
     Companion* companionPtr, const Message* messagePtr)
 {
@@ -292,8 +284,6 @@ void GraphicManager::markMessageWidgetAsSent(
 
         try
         {
-            // const_cast<MessageWidget*>(
-            //     this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsSent();
             companionPtr->getMappedMessageWidgetByMessagePtr(messagePtr)->
                 setMessageWidgetAsSent();
         }
@@ -315,8 +305,6 @@ void GraphicManager::markMessageWidgetAsReceived(
 
         try
         {
-            // const_cast<MessageWidget*>(
-            //     this->mapMessageToMessageWidget_.at(messagePtr))->setMessageWidgetAsReceived();
             companionPtr->getMappedMessageWidgetByMessagePtr(messagePtr)->
                 setMessageWidgetAsReceived();
         }
@@ -333,28 +321,6 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr
 {
     groupPtr->sortChatHistoryElements();
 }
-
-// const Message* GraphicManager::getMappedMessageByMessageWidgetPtr(
-//     MessageWidget* widgetPtr)
-// {
-//     std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
-
-//     auto result = std::find_if(
-//         this->mapMessageToMessageWidget_.begin(),
-//         this->mapMessageToMessageWidget_.end(),
-//         [&](auto iter)
-//         {
-//             return iter.second == widgetPtr;
-//         });
-
-//     return (result == this->mapMessageToMessageWidget_.end()) ?
-//                nullptr : result->first;
-// }
-
-// void GraphicManager::refreshChatHistoryWidget(const Companion* companionPtr)
-// {
-
-// }
 
 GraphicManager* getGraphicManagerPtr()
 {

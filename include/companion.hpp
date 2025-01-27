@@ -22,10 +22,6 @@ class MessageInfo;
 class MessageState;
 class WidgetGroup;
 
-// Message(uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
-// MessageInfo(MessageState*, MessageWidget*);
-// MessageState(uint8_t, bool, bool, bool, std::string);
-
 class SocketInfo
 {
 public:
@@ -59,7 +55,6 @@ class Companion
 {
 public:
     Companion(int, const std::string&);
-    // Companion(int, std::string&&);
     ~Companion();
 
     friend bool operator<(const Companion& object1, const Companion& object2)
@@ -73,7 +68,6 @@ public:
     std::string getSocketIpAddress() const;
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
-    // const std::vector<Message*>* getMessagePointersPtr() const;
 
     const MessageState* getMappedMessageStateByMessagePtr(const Message*);
     MessageWidget* getMappedMessageWidgetByMessagePtr(const Message*);
@@ -84,13 +78,11 @@ public:
 
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
 
-    // std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
     createMessageAndAddToMapping(
         uint32_t, uint8_t, const std::string&, const std::string&,
         bool, bool, bool, std::string);
 
-    // std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
     createMessageAndAddToMapping(
         std::shared_ptr<DBReplyData>&, size_t);
@@ -101,8 +93,6 @@ public:
     bool createClient();
     bool connectClient();
     bool disconnectClient();
-    // void clearMessages();
-    // void addMessage(Message*);
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     void updateData(const CompanionData*);
@@ -116,7 +106,6 @@ private:
     SocketInfo* socketInfoPtr_;
     ChatClient* clientPtr_;
     ChatServer* serverPtr_;
-    // std::vector<Message*>* messagePointersPtr_;
     std::map<Message, MessageInfo> messageMapping_;
 };
 

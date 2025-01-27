@@ -213,7 +213,6 @@ class MessageWidget : public QWidget
     Q_OBJECT
 
 public:
-    // MessageWidget(QWidget*, const std::string&, const MessageState*, const Message*);
     MessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
     ~MessageWidget();
 
@@ -267,13 +266,11 @@ public:
 
     void set(Companion*);
 
-    // void addMessageWidgetToChatHistory(const std::string&, const Message*);
     void addMessageWidgetToChatHistory(
         const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
     // TODO delete 'FromThread' methods, emit signal by caller
     void addMessageWidgetToChatHistoryFromThread(
-        // bool, const std::string&, const Message*);
         const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
     void scrollDownChatHistory();
@@ -281,13 +278,10 @@ public:
     void sortChatHistoryElements(bool);
 
 private slots:
-    // void addMessageWidgetToChatHistorySlot(const QString&, const Message*);
     void addMessageWidgetToChatHistorySlot(
         const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
 signals:
-    // void addMessageWidgetToChatHistorySignal(const QString&, const Message*);
-
     void addMessageWidgetToChatHistorySignal(
         const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
@@ -348,14 +342,12 @@ class WidgetGroup : public QObject
     Q_OBJECT
 
 public:
-    WidgetGroup() = default;
     WidgetGroup(const Companion*);
     ~WidgetGroup();
 
     void set();
     void buildChatHistory();
 
-    // void addMessageWidgetToCentralPanelChatHistory(const Message*);
     void addMessageWidgetToCentralPanelChatHistory(
         const WidgetGroup*, const Message*, const MessageState*);
 

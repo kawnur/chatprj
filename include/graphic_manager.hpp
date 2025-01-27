@@ -69,16 +69,12 @@ public:
     void enableMainWindowBlurEffect();
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
-    // void addToMessageMapping(const Message*, const MessageWidget*);
     void markMessageWidgetAsSent(Companion*, const Message*);
     void markMessageWidgetAsReceived(Companion*, const Message*);
     void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
-    // const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
-    // void refreshChatHistoryWidget(const Companion*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;
-    // std::map<const Message*, const MessageWidget*> mapMessageToMessageWidget_;
     StubWidgetGroup* stubWidgetsPtr_;
     MainWindow* mainWindowPtr_;
 };

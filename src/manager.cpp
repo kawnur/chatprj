@@ -3,24 +3,19 @@
 Manager::Manager() :
     messageStateToMessageMapMutex_(std::mutex()),
     dbConnectionPtr_(nullptr), userIsAuthenticated_(false)
-    // companionPtrs_(std::vector<Companion*>())
 {
-    // mapCompanionToWidgetGroup_ = std::map<const Companion*, WidgetGroup*>();
-    mapCompanionToWidgetGroup_ = std::map<Companion, WidgetGroup*>();
+    mapCompanionIdToCompanionInfo_ = std::map<int, std::pair<Companion*, WidgetGroup*>>();
     selectedCompanionPtr_ = nullptr;
-    // mapMessageStateToMessage_ = std::map<const MessageState*, const Message*>();
 }
 
 Manager::~Manager()
 {
     free(dbConnectionPtr_);
 
-    // for(auto& companion : this->companionPtrs_)
-    for(auto& pair : this->mapCompanionToWidgetGroup_)
+    for(auto& pair : this->mapCompanionIdToCompanionInfo_)
     {
-        // delete companion;        
-        delete &(pair.first);
-        delete pair.second;
+        delete pair.second.first;
+        delete pair.second.second;
     }
 }
 
@@ -39,16 +34,15 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
 {
     auto findWidget = [&](auto& pair)
     {
-        return pair.second->getSocketInfoBasePtr() == widget;
+        return pair.second.second->getSocketInfoBasePtr() == widget;
     };
 
     auto result = std::find_if(
-        this->mapCompanionToWidgetGroup_.cbegin(),
-        this->mapCompanionToWidgetGroup_.cend(),
+        this->mapCompanionIdToCompanionInfo_.cbegin(),
+        this->mapCompanionIdToCompanionInfo_.cend(),
         findWidget);
 
-    // return result->first;
-    return &(result->first);
+    return result->second.first;
 }
 
 WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companionPtr) const
@@ -57,28 +51,12 @@ WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companion
 
     try
     {
-        // groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
-        groupPtr = this->mapCompanionToWidgetGroup_.at(*companionPtr);
+        groupPtr = this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;
     }
     catch(std::out_of_range) {}
 
     return groupPtr;
 }
-
-// const MessageState* Manager::getMappedMessageStateByMessagePtr(const Message* messagePtr)
-// {
-//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
-
-//     auto result = std::find_if(
-//         this->mapMessageStateToMessage_.begin(),
-//         this->mapMessageStateToMessage_.end(),
-//         [&](auto iter)
-//         {
-//             return iter.second == messagePtr;
-//         });
-
-//     return (result == this->mapMessageStateToMessage_.end()) ? nullptr : result->first;
-// }
 
 void Manager::set()
 {
@@ -107,8 +85,8 @@ void Manager::set()
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
-    // WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
-    WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(*companionPtr);
+    WidgetGroup* groupPtr =
+        this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;
 
     // encrypt message
 
@@ -127,37 +105,17 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
         return;
     }
 
-    // // add to companion's messages
-    // Message* messagePtr = new Message(id, companion_id, 1, timestamp, text);
-    // // companionPtr->addMessage(messagePtr);
-
-    // // create message state object and add to mapping
-    // MessageState* messageStatePtr = new MessageState(
-    //     companion_id, false, false, false, "");
-
-    // bool addResult = this->addToMessageStateToMessageMapping(
-    //     messageStatePtr, messagePtr);
-
-    // logArgs("addResult:", addResult);
-
     auto pair = companionPtr->createMessageAndAddToMapping(
         id, 1, timestamp, text, false, false, false, "");
 
     if(pair.second)
     {
         // add to widget
-        // groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr);
-
         const Message* messagePtr = &(pair.first->first);
         MessageState* messageStatePtr = pair.first->second.getStatePtr();
 
         groupPtr->addMessageWidgetToCentralPanelChatHistory(
             groupPtr, messagePtr, messageStatePtr);
-
-        // add to mapping
-        // std::string networkId = this->addToNetworkIdToMessageMapping(messagePtr);
-
-        // logArgsWithCustomMark("send:", networkId);
 
         // send over network
         bool result = companionPtr->sendMessage(
@@ -215,18 +173,6 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 return;
             }
 
-            // // add to companion's messages
-            // Message* messagePtr = new Message(
-            //     id, companion_id, companion_id, timestamp, text);
-
-            // // companionPtr->addMessage(messagePtr);
-
-            // // create message state object and add to mapping
-            // MessageState* messageStatePtr = new MessageState(
-            //     companion_id, isAntecedent, false, true, networkId);
-
-            // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
-
             auto pair = companionPtr->createMessageAndAddToMapping(
                 id, companion_id, timestamp, text, isAntecedent, false, true, networkId);
 
@@ -238,8 +184,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 // decrypt message
 
                 // add to widget
-                // WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);  // TODO try catch
-                WidgetGroup* groupPtr = this->mapCompanionToWidgetGroup_.at(*companionPtr);  // TODO try catch
+                WidgetGroup* groupPtr =
+                    this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;  // TODO try catch
 
                 groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
                     messageStatePtr, messagePtr);
@@ -267,20 +213,16 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageMappingKey(key);
 
                 // TODO rewrite
-                // if(pair.first && pair.second)
                 if(pairPtr && pairPtr->second.getStatePtr())
                 {
                     // found message in mapping
-                    // const_cast<MessageState*>(pair.first)->setIsReceived(true);
                     pairPtr->second.getStatePtr()->setIsReceived(true);
-                    // this->markMessageAsReceived(pair.second);
                     this->markMessageAsReceived(companionPtr, &(pairPtr->first));
                 }
                 else
                 {
                     // strange situation
                     logArgsError(
-                        // "received confirmation for message not in mapMessageStateToMessage_");
                         "received confirmation for message which is not in messageMapping_");
                 }
             }
@@ -297,21 +239,17 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             // search for message in managers's mapping
             std::string key = generateMessageMappingKey(networkId, companionPtr->getId());
 
-            // auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
             auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageMappingKey(key);
 
             logArgs("pair:", pairPtr, "pair.second.getStatePtr():", pairPtr->second.getStatePtr());
 
-            // if(pair.first && pair.second)
             if(pairPtr && pairPtr->second.getStatePtr())
             {
                 // message found in managers's mapping
-                // if(pair.first->getIsReceived())
                 if(pairPtr->second.getStatePtr()->getIsReceived())
                 {
                     bool result = companionPtr->sendMessage(
                         false, NetworkMessageType::RECEIVE_CONFIRMATION,
-                        // pair.first->getNetworkId(), pair.second);
                         pairPtr->second.getStatePtr()->getNetworkId(), &(pairPtr->first));
                 }
                 else
@@ -319,7 +257,6 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                     // strange situation
                     logArgsError(
                         "received reception confirmation request "
-                        // "for message in mapMessageStateToMessage_ with isReceived = false");
                         "for message in messageMapping_ with isReceived = false");
                 }
             }
@@ -429,14 +366,15 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     }
 }
 
-void Manager::resetSelectedCompanion(const Companion* newSelected)
+void Manager::resetSelectedCompanion(const Companion* newSelected)  // TODO rewrite
 {
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
     if(this->selectedCompanionPtr_)
     {
-        // auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);  // TODO try catch
-        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));  // TODO try catch
+        auto widgetGroup =
+            this->mapCompanionIdToCompanionInfo_
+                .at(this->selectedCompanionPtr_->getId()).second;  // TODO try catch
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->unselect();
 
@@ -451,8 +389,8 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)
 
     if(this->selectedCompanionPtr_)
     {
-        // auto widgetGroup = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
-        auto widgetGroup = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));
+        auto widgetGroup =
+            this->mapCompanionIdToCompanionInfo_.at(this->selectedCompanionPtr_->getId()).second;
 
         dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->select();
 
@@ -577,10 +515,8 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
     companionActionPtr->updateCompanionObjectData();
 
     // update SocketInfoWidget
-    // auto widgetGroup = this->mapCompanionToWidgetGroup_.at(
-    //     companionActionPtr->getCompanionPtr());  // TODO try catch
-    auto widgetGroup = this->mapCompanionToWidgetGroup_.at(
-        *(companionActionPtr->getCompanionPtr()));  // TODO try catch
+    auto widgetGroup = this->mapCompanionIdToCompanionInfo_.at(
+        companionActionPtr->getCompanionPtr()->getId()).second;  // TODO try catch
 
     dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->update();
 
@@ -641,8 +577,9 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 
 void Manager::clearChatHistory(Companion* companionPtr)
 {
-    // WidgetGroup* widgetGroupPtr = this->mapCompanionToWidgetGroup_.at(companionPtr);
-    WidgetGroup* widgetGroupPtr = this->mapCompanionToWidgetGroup_.at(*(companionPtr));
+    WidgetGroup* widgetGroupPtr =
+        this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;
+
     getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
 }
 
@@ -669,10 +606,6 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
     }
 
     // clear chat history widget
-    // WidgetGroup* widgetGroupPtr =
-    //     this->mapCompanionToWidgetGroup_.at(companionActionPtr->getCompanionPtr());
-
-    // getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
     this->clearChatHistory(companionActionPtr->getCompanionPtr());
 
     // show info dialog
@@ -760,34 +693,12 @@ void Manager::authenticateUser(PasswordAction* actionPtr)
     }
 }
 
-// void Manager::createMessageAndAddToContainers(
-//     Companion* companionPtr, std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
-// {
-//     auto companionId = companionPtr->getId();
-
-//     Message* messagePtr = new Message(
-//         std::atoi(messagesDataPtr->getValue(index, "id")),
-//         companionId,
-//         std::atoi(messagesDataPtr->getValue(index, "author_id")),
-//         messagesDataPtr->getValue(index, "timestamp_tz"),
-//         messagesDataPtr->getValue(index, "message"));
-
-//     // companionPtr->addMessage(messagePtr);
-
-//     MessageState* messageStatePtr = new MessageState(
-//         companionId, false,
-//         messagesDataPtr->getValue(index, "is_sent"),
-//         messagesDataPtr->getValue(index, "is_received"), "");
-
-//     this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
-// }
-
 void Manager::hideSelectedCompanionCentralPanel()
 {
     if(this->selectedCompanionPtr_)
     {
-        // auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
-        auto groupPtr = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));
+        auto groupPtr =
+            this->mapCompanionIdToCompanionInfo_.at(this->selectedCompanionPtr_->getId()).second;
         getGraphicManagerPtr()->hideWidgetGroupCentralPanel(groupPtr);
     }
 }
@@ -796,8 +707,8 @@ void Manager::showSelectedCompanionCentralPanel()
 {
     if(this->selectedCompanionPtr_)
     {
-        // auto groupPtr = this->mapCompanionToWidgetGroup_.at(this->selectedCompanionPtr_);
-        auto groupPtr = this->mapCompanionToWidgetGroup_.at(*(this->selectedCompanionPtr_));
+        auto groupPtr =
+            this->mapCompanionIdToCompanionInfo_.at(this->selectedCompanionPtr_->getId()).second;
         getGraphicManagerPtr()->showWidgetGroupCentralPanel(groupPtr);
     }
 }
@@ -865,8 +776,6 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
         if(messagePtr)
         {
-            // const MessageState* messageStatePtr =
-            //     this->getMappedMessageStateByMessagePtr(messagePtr);
             const MessageState* messageStatePtr =
                 const_cast<Companion*>(companionPtr)->
                     getMappedMessageStateByMessagePtr(messagePtr);
@@ -875,7 +784,6 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
             {
                 logArgsError(
                     "strange case: unsent message found in companions messages, "
-                    // "but not found in manager's mapMessageStateToMessage_");
                     "but not found in companion's messageMapping_");
             }
             else
@@ -886,23 +794,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
         else
         {
             // add to companion's messages if needed
-            // uint8_t companion_id = std::atoi(messagesDataPtr->getValue(i, "companion_id"));
             networkId = getRandomString(5);
-
-            // messagePtr = new Message(
-            //     messageId,
-            //     companion_id,
-            //     1,
-            //     messagesDataPtr->getValue(i, "timestamp_tz"),
-            //     messagesDataPtr->getValue(i, "message"));
-
-            // // companionCastPtr->addMessage(messagePtr);
-
-            // MessageState* messageStatePtr = new MessageState(
-            //     companion_id, false, false,
-            //     messagesDataPtr->getValue(i, "is_received"), networkId);
-
-            // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
             const_cast<Companion*>(companionPtr)->createMessageAndAddToMapping(
                 messageId,
@@ -970,54 +862,16 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
 {
     auto findWidget = [&](auto& pair)
     {
-        return pair.second == groupPtr;
+        return pair.second.second == groupPtr;
     };
 
     auto result = std::find_if(
-        this->mapCompanionToWidgetGroup_.cbegin(),
-        this->mapCompanionToWidgetGroup_.cend(),
+        this->mapCompanionIdToCompanionInfo_.cbegin(),
+        this->mapCompanionIdToCompanionInfo_.cend(),
         findWidget);
 
-    return &(result->first);
+    return result->second.first;
 }
-
-// std::pair<const MessageState*, const Message*>
-// Manager::getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string& key)
-// {
-//     using pair = std::pair<const MessageState*, const Message*>;
-
-//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
-
-//     auto iterator = std::find_if(
-//         this->mapMessageStateToMessage_.begin(),
-//         this->mapMessageStateToMessage_.end(),
-//         [&](auto iter)
-//         {
-//             return iter.first->getMessageMappingKey() == key;
-//         });
-
-//     return (iterator == this->mapMessageStateToMessage_.end()) ?
-//         pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
-// }
-
-// std::pair<const MessageState*, const Message*>
-// Manager::getMessageStateAndMessageMappingPairByMessageId(uint32_t messageId)
-// {
-//     using pair = std::pair<const MessageState*, const Message*>;
-
-//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
-
-//     auto iterator = std::find_if(
-//         this->mapMessageStateToMessage_.begin(),
-//         this->mapMessageStateToMessage_.end(),
-//         [&](auto iter)
-//         {
-//             return iter.second->getId() == messageId;
-//         });
-
-//     return (iterator == this->mapMessageStateToMessage_.end()) ?
-//         pair(nullptr, nullptr) : pair(iterator->first, iterator->second);
-// }
 
 void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHaveMessages)
 {
@@ -1049,106 +903,29 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
         // return false;
     }
 
-    // if(containersAlreadyHaveMessages)
-    // {
-    //     companionPtr->clearMessages();
-    // }
-
     for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
     {
         auto messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
 
         if(containersAlreadyHaveMessages)
         {
-            // auto pair = this->getMessageStateAndMessageMappingPairByMessageId(messageId);
             auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageId(messageId);
 
-            // if(pair.first && pair.second)
             if(pairPtr && pairPtr->second.getStatePtr())
             {
                 // companionPtr->addMessage(const_cast<Message*>(pair.second));
             }
             else
             {
-                // this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
                 companionPtr->createMessageAndAddToMapping(messagesDataPtr, i);
             }
         }
         else
         {
-            // this->createMessageAndAddToContainers(companionPtr, messagesDataPtr, i);
             companionPtr->createMessageAndAddToMapping(messagesDataPtr, i);
         }
     }
 }
-
-// bool Manager::addToMessageStateToMessageMapping(
-//     const MessageState* messageStatePtr, const Message* messagePtr)
-// {
-//     std::lock_guard<std::mutex> lock(this->messageStateToMessageMapMutex_);
-
-//     if(messagePtr->isMessageFromMe())
-//     {
-//         std::string networkId = getRandomString(5);
-
-//         std::string messageMappingKey =
-//             generateMessageMappingKey(
-//             networkId, messagePtr->getCompanionId());
-
-//         auto lambda = [&]()
-//         {
-//             auto iterator = std::find_if(
-//                 this->mapMessageStateToMessage_.begin(),
-//                 this->mapMessageStateToMessage_.end(),
-//                 [&](auto iter)
-//                 {
-//                     return iter.first->getMessageMappingKey() ==
-//                         messageMappingKey;
-//                 });
-
-//             return !(iterator == this->mapMessageStateToMessage_.end());
-//         };
-
-//         // run in loop while generated key is not unique
-//         while(lambda())
-//         {
-//             networkId = getRandomString(5);
-
-//             messageMappingKey =
-//                 generateMessageMappingKey(
-//                 networkId, messagePtr->getCompanionId());
-//         }
-
-//         MessageState* messageStateCastPtr = const_cast<MessageState*>(messageStatePtr);
-
-//         messageStateCastPtr->setNetworkId(networkId);
-
-//         messageStateCastPtr->setMessageMappingKey(
-//             messageMappingKey);
-
-//         this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
-
-//         return true;
-//     }
-//     else
-//     {
-//         if(this->mapMessageStateToMessage_.count(messageStatePtr) == 0)
-//         {
-//             this->mapMessageStateToMessage_[messageStatePtr] = messagePtr;
-
-//             return true;
-//         }
-//         else
-//         {
-//             logArgsError(
-//                 QString("mapMessageStateToMessage_ already contains"
-//                         "entry with key object having messageMappingKey_: %1")
-//                     .arg(getQString(messageStatePtr->getMessageMappingKey())));
-
-//             return false;
-//         }
-//     }
-// }
 
 bool Manager::connectToDb()
 {
@@ -1253,14 +1030,11 @@ void Manager::buildWidgetGroups()
 {
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
-    // auto companionsSize = this->companionPtrs_.size();
-    auto companionsNumber = this->mapCompanionToWidgetGroup_.size();
+    auto companionsNumber = this->mapCompanionIdToCompanionInfo_.size();
     auto childrenSize = graphicManagerPtr->getCompanionPanelChildrenSize();
 
-    // logArgs("companionsSize:", companionsSize, "childrenSize:", childrenSize);
     logArgs("companionsNumber:", companionsNumber, "childrenSize:", childrenSize);
 
-    // if(companionsSize == 0 && childrenSize == 0)
     if(companionsNumber == 0 && childrenSize == 0)
     {
         logArgsWarning("strange case, empty sockets panel");
@@ -1274,12 +1048,9 @@ void Manager::buildWidgetGroups()
             // hide companion panel stub widget
             graphicManagerPtr->hideCompanionPanelStub();
 
-            // for(auto& companion : this->companionPtrs_)
-            for(auto& pair : this->mapCompanionToWidgetGroup_)
+            for(auto& pair : this->mapCompanionIdToCompanionInfo_)
             {
-                // this->createWidgetGroupAndAddToMapping(companion);
-                // this->createWidgetGroupAndAddToMapping(pair.first);
-                this->createWidgetGroupAndAddToMapping(&(pair.first));
+                this->createWidgetGroupAndAddToMapping(pair.second.first);
             }
         }
     }
@@ -1293,25 +1064,21 @@ Companion* Manager::addCompanionObject(int id, const std::string& name)
         return nullptr;
     }
 
-    // Companion* companionPtr = new Companion(id, name);
-    // this->companionPtrs_.push_back(companionPtr);
-    // this->mapCompanionToWidgetGroup_[companionPtr] = nullptr;
-    // this->mapCompanionToWidgetGroup_[*companionPtr] = nullptr;
+    auto result = this->mapCompanionIdToCompanionInfo_.emplace(
+        std::make_pair(
+            id,
+            std::pair<Companion*, WidgetGroup*>(new Companion(id, name), nullptr)));
 
-    auto result = this->mapCompanionToWidgetGroup_.emplace(
-        // std::make_pair(Companion(id, name), nullptr));
-        Companion(id, name), nullptr);
-
-    // return companionPtr;
-    return (result.second) ? const_cast<Companion*>(&(result.first->first)) : nullptr;
+    return (result.second) ? result.first->second.first : nullptr;
 }
 
 void Manager::createWidgetGroupAndAddToMapping(const Companion* companionPtr)
 {
     WidgetGroup* widgetGroupPtr = new WidgetGroup(companionPtr);
     widgetGroupPtr->set();
-    // this->mapCompanionToWidgetGroup_[companionPtr] = widgetGroupPtr;
-    this->mapCompanionToWidgetGroup_[*companionPtr] = widgetGroupPtr;
+
+    this->mapCompanionIdToCompanionInfo_[companionPtr->getId()].second =
+        widgetGroupPtr;
 }
 
 void Manager::deleteCompanionObject(Companion* companionPtr)
@@ -1323,55 +1090,33 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(const Companion* companionPt
 {
     auto findMapLambda = [&](auto& iterator)
     {
-        // return iterator.first == companionPtr;
-        return &(iterator.first) == companionPtr;
+        return iterator.second.first == companionPtr;
     };
 
     auto findMapResult = std::find_if(
-        this->mapCompanionToWidgetGroup_.begin(),
-        this->mapCompanionToWidgetGroup_.end(),
+        this->mapCompanionIdToCompanionInfo_.begin(),
+        this->mapCompanionIdToCompanionInfo_.end(),
         findMapLambda);
 
-    if(findMapResult == this->mapCompanionToWidgetGroup_.end())
+    if(findMapResult == this->mapCompanionIdToCompanionInfo_.end())
     {
         showErrorDialogAndLogError(
             nullptr, "Companion was not found in mapping at deletion");
     }
     else
     {
-        // auto findVectorLambda = [&](auto iterator)
-        // {
-        //     return iterator == companionPtr;
-        // };
-
-        // auto findVectorResult = std::find_if(
-        //     this->companionPtrs_.begin(),
-        //     this->companionPtrs_.end(),
-        //     findVectorLambda);
-
-        // if(findVectorResult == this->companionPtrs_.end())
-        // {
-        //     showErrorDialogAndLogError(
-        //         nullptr, "Companion was not found in vector at deletion");
-        // }
-        // else
-        // {
-        //     this->companionPtrs_.erase(findVectorResult);
-        // }
-
         if(this->selectedCompanionPtr_ == companionPtr)
         {
             this->selectedCompanionPtr_ = nullptr;
         }
 
         // delete companion
-        // delete findMapResult->first;
-        delete &(findMapResult->first);
+        delete findMapResult->second.first;
 
         // delete widget group
-        delete findMapResult->second;
+        delete findMapResult->second.second;
 
-        this->mapCompanionToWidgetGroup_.erase(findMapResult);
+        this->mapCompanionIdToCompanionInfo_.erase(findMapResult);
     }
 }
 

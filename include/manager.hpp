@@ -35,7 +35,6 @@ public:
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
     WidgetGroup* getMappedWidgetGroupByCompanion(const Companion*) const;
-    // const MessageState* getMappedMessageStateByMessagePtr(const Message*);
 
     void set();
     void sendMessage(Companion*, const std::string&);
@@ -48,7 +47,6 @@ public:
     void clearCompanionHistory(CompanionAction*);
     void createUserPassword(PasswordAction*);
     void authenticateUser(PasswordAction*);
-    // void createMessageAndAddToContainers(Companion*, std::shared_ptr<DBReplyData>&, size_t);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
@@ -61,21 +59,11 @@ private:
     PGconn* dbConnectionPtr_;
     bool userIsAuthenticated_;
     const Companion* selectedCompanionPtr_;
-    // std::vector<Companion*> companionPtrs_;  // TODO modify containers
-    // std::map<const Companion*, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
-    std::map<Companion, WidgetGroup*> mapCompanionToWidgetGroup_;  // TODO use ref to ptr as value
-    // std::map<const MessageState*, const Message*> mapMessageStateToMessage_;
+    std::map<int, std::pair<Companion*, WidgetGroup*>> mapCompanionIdToCompanionInfo_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
 
-    // std::pair<const MessageState*, const Message*>
-    //     getMessageStateAndMessageMappingPairByMessageMappingKey(const std::string&);
-
-    // std::pair<const MessageState*, const Message*>
-    //     getMessageStateAndMessageMappingPairByMessageId(uint32_t);
-
     void fillWithMessages(Companion*, bool);
-    // bool addToMessageStateToMessageMapping(const MessageState*, const Message*);
     bool connectToDb();
     bool buildCompanions();
     void buildWidgetGroups();
@@ -95,13 +83,11 @@ private:
         const std::string&, const std::string&, const std::string&,
         const std::string&, const bool&, const bool&);
 
-    // template<typename... Ts>
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
         const bool& logging,
         const char* mark,
         PGresult*(*func)(const PGconn*, const bool&, const Ts&...),
-        // std::vector<std::string>&& keys,
         T&& keys,
         const Ts&... args)
     {
@@ -122,7 +108,6 @@ private:
             return nullptr;
         }
 
-        // std::shared_ptr<DBReplyData> dbDataPtr = std::make_shared<DBReplyData>(keys);
         std::shared_ptr<DBReplyData> dbDataPtr =
             std::make_shared<DBReplyData>(std::forward<T>(keys));
 

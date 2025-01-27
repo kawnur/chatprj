@@ -41,27 +41,13 @@ void SocketInfo::updateData(const CompanionData* dataPtr)
 Companion::Companion(int id, const std::string& name) :
     messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
     clientPtr_(nullptr), serverPtr_(nullptr),
-    // messagePointersPtr_(new std::vector<Message*>) {}
     messageMapping_(std::map<Message, MessageInfo>()) {}
-
-// Companion::Companion(int id, std::string&& name) :
-//     messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
-//     clientPtr_(nullptr), serverPtr_(nullptr),
-//     // messagePointersPtr_(new std::vector<Message*>) {}
-//     messageMapping_(std::map<Message, MessageInfo>()) {}
 
 Companion::~Companion()
 {
     delete socketInfoPtr_;
     delete clientPtr_;
     delete serverPtr_;
-
-    // for(auto& messagePtr : *this->messagePointersPtr_)
-    // {
-    //     delete messagePtr;
-    // }
-
-    // delete this->messagePointersPtr_;
 }
 
 int Companion::getId() const
@@ -93,11 +79,6 @@ uint16_t Companion::getSocketClientPort() const
 {
     return this->socketInfoPtr_->getClientPort();
 }
-
-// const std::vector<Message*>* Companion::getMessagePointersPtr() const
-// {
-//     return this->messagePointersPtr_;
-// }
 
 const MessageState* Companion::getMappedMessageStateByMessagePtr(
     const Message* messagePtr)
@@ -183,7 +164,6 @@ std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMess
     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
 }
 
-// std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
 std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
     uint32_t messageId, uint8_t authorId,
@@ -205,28 +185,16 @@ Companion::createMessageAndAddToMapping(
     return result;
 }
 
-// std::pair<std::iterator<std::contiguous_iterator_tag, std::pair<Message, MessageInfo>>, bool>
 std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
     std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
 {
     auto id = this->getId();
 
-    // Message* messagePtr = new Message(
-    //     std::atoi(messagesDataPtr->getValue(index, "id")),
-    //     id,
-    //     std::atoi(messagesDataPtr->getValue(index, "author_id")),
-    //     messagesDataPtr->getValue(index, "timestamp_tz"),
-    //     messagesDataPtr->getValue(index, "message"));
-
-    // companionPtr->addMessage(messagePtr);
-
     MessageState* messageStatePtr = new MessageState(
         id, false,
         messagesDataPtr->getValue(index, "is_sent"),
         messagesDataPtr->getValue(index, "is_received"), "");
-
-    // this->addToMessageStateToMessageMapping(messageStatePtr, messagePtr);
 
     auto result = this->messageMapping_.emplace(
         std::make_pair(
@@ -253,13 +221,6 @@ void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget*
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    // std::find_if(
-    //     this->messageMapping_.begin(),
-    //     this->messageMapping_.end(),
-    //     [&](auto& iter)
-    //     {
-    //         return iter.first.getId() == messageId;
-    //     });
     auto result = this->messageMapping_.find(*messagePtr);
 
     if(result == this->messageMapping_.end())
@@ -318,18 +279,6 @@ bool Companion::disconnectClient()
 {
     return this->clientPtr_->disconnect();
 }
-
-// void Companion::clearMessages()
-// {
-//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
-//     this->messagePointersPtr_->clear();
-// }
-
-// void Companion::addMessage(Message* messagePtr)
-// {
-//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
-//     this->messagePointersPtr_->push_back(messagePtr);
-// }
 
 bool Companion::sendMessage(
     bool isAntecedent, NetworkMessageType type,
@@ -401,14 +350,6 @@ Message* Companion::findMessage(uint32_t messageId)
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    // auto result = std::find_if(
-    //     this->messagePointersPtr_->begin(),
-    //     this->messagePointersPtr_->end(),
-    //     [&](auto iter)
-    //     {
-    //         return iter->getId() == messageId;
-    //     });
-
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
@@ -417,7 +358,6 @@ Message* Companion::findMessage(uint32_t messageId)
             return iter.first.getId() == messageId;
         });
 
-    // return (result == this->messagePointersPtr_->end()) ? nullptr : *result;
     return (result == this->messageMapping_.end()) ?
                nullptr : const_cast<Message*>(&(result->first));
 }

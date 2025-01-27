@@ -569,7 +569,6 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
 }
 
 MessageWidget::MessageWidget(
-    // QWidget* parentPtr, const std::string& companionName,
     QWidget* parentPtr, const Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
@@ -596,7 +595,6 @@ MessageWidget::MessageWidget(
 
     setLayout(layoutPtr_);
 
-    // auto data = formatMessageHeaderAndBody(companionName, messagePtr);
     auto data = formatMessageHeaderAndBody(companionPtr, messagePtr);
 
     headerLabelPtr_ = new QLabel(data.first);
@@ -831,30 +829,15 @@ void CentralPanelWidget::set(Companion* companionPtr)
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
-    // const std::string& companionName, const Message* messagePtr)
     const WidgetGroup* widgetGroupPtr, const Companion* companionPtr,
     const Message* messagePtr, const MessageState* messageStatePtr)
 {
-    // const MessageState* messageStatePtr =
-    //     getManagerPtr()->getMappedMessageStateByMessagePtr(messagePtr);
-
-    // WidgetGroup* groupPtr = nullptr;
-
-    // try
-    // {
-    //     groupPtr =
-    //         getManagerPtr()->getMappedWidgetGroupByCompanion(this->companionPtr_);
-    // }
-    // catch(std::out_of_range) {}
-
     {
         std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
         MessageWidget* widgetPtr = new MessageWidget(
-            // this->chatHistoryWidgetPtr_, companionName, messageStatePtr, messagePtr);
             this->chatHistoryWidgetPtr_, companionPtr, messageStatePtr, messagePtr);
 
-        // getGraphicManagerPtr()->addToMessageMapping(messagePtr, widgetPtr);
         std::thread(
             [=]()
             {
@@ -863,10 +846,8 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
             }
         ).detach();
 
-        // if(groupPtr)
         if(widgetGroupPtr)
         {
-            // widgetPtr->set(groupPtr);
             widgetPtr->set(widgetGroupPtr);
         }
 
@@ -879,10 +860,8 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     }
 
     // widget group action
-    // if(groupPtr)
     if(widgetGroupPtr)
     {
-        // groupPtr->messageAdded();
         const_cast<WidgetGroup*>(widgetGroupPtr)->messageAdded();
     }
 
@@ -890,13 +869,9 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
-    // bool isAntecedent, const std::string& companionName, const Message* messagePtr)
     const WidgetGroup* widgetGroupPtr, const Companion* companionPtr,
     const Message* messagePtr, const MessageState* messageStatePtr)
 {
-    // QString companionNameQString = getQString(companionName);
-
-    // emit this->addMessageWidgetToChatHistorySignal(companionNameQString, messagePtr);
     emit this->addMessageWidgetToChatHistorySignal(
         widgetGroupPtr, companionPtr, messagePtr, messageStatePtr);
 }
@@ -933,19 +908,14 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
     if(lock)
         std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
     auto list = this->chatHistoryWidgetPtr_->children();
 
     auto lambda = [&](auto item)
     {
-        // const Message* messagePtr =
-        //     graphicManagerPtr->getMappedMessageByMessageWidgetPtr(
-        //     dynamic_cast<MessageWidget*>(item));
         const Message* messagePtr =
             companionPtr_->getMappedMessageByMessageWidgetPtr(
                 dynamic_cast<MessageWidget*>(item));
 
-        // return result;
         return (messagePtr) ? messagePtr->getTime() : std::string("");
     };
 
@@ -963,16 +933,12 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
         this->chatHistoryLayoutPtr_->removeWidget(elementCast);
         this->chatHistoryLayoutPtr_->addWidget(elementCast);
     }
-
-    // this->chatHistoryLayoutPtr_->update();
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
-    // const QString& companionName, const Message* messagePtr)
     const WidgetGroup* widgetGroupPtr, const Companion* companionPtr,
     const Message* messagePtr, const MessageState* messageStatePtr)
 {
-    // this->addMessageWidgetToChatHistory(companionName.toStdString(), messagePtr);
     this->addMessageWidgetToChatHistory(
         widgetGroupPtr, companionPtr, messagePtr, messageStatePtr);
 }
@@ -1088,10 +1054,10 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr) :
     socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
     graphicManagerPtr->addWidgetToCompanionPanel(socketInfoBasePtr_);
 
-    // centralPanelPtr_ = new CentralPanelWidget(
-    //     getGraphicManagerPtr()->getMainWindowPtr(), companionPtr_->getName());
+    centralPanelPtr_ = new CentralPanelWidget(
+        getGraphicManagerPtr()->getMainWindowPtr(), companionPtr_->getName());
 
-    centralPanelPtr_ = new CentralPanelWidget(nullptr, companionPtr_->getName());
+    // centralPanelPtr_ = new CentralPanelWidget(nullptr, companionPtr_->getName());
 
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr_));
 
@@ -1107,7 +1073,11 @@ WidgetGroup::~WidgetGroup()
 {
     getGraphicManagerPtr()->removeWidgetFromCompanionPanel(this->socketInfoBasePtr_);
     delete this->socketInfoBasePtr_;
-    delete this->centralPanelPtr_;
+
+    if(this->centralPanelPtr_)  // TODO double destructor call
+    {
+        delete this->centralPanelPtr_;
+    }
 }
 
 void WidgetGroup::set()
@@ -1125,24 +1095,15 @@ void WidgetGroup::set()
 
 void WidgetGroup::buildChatHistory()
 {
-    // auto messagePointersPtr = this->companionPtr_->getMessagePointersPtr();
-
-    // for(auto& messagePtr : *messagePointersPtr)
-    // {
-    //     this->addMessageWidgetToCentralPanelChatHistory(messagePtr);
-    // }
-
     const_cast<Companion*>(this->companionPtr_)->
         addMessageWidgetsToChatHistory(this, this->centralPanelPtr_);
 }
 
-// void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(const Message* messagePtr)
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
     const WidgetGroup* widgetGroupPtr, const Message* messagePtr,
     const MessageState* messageStatePtr)
 {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
-        // this->companionPtr_->getName(), messagePtr);
         widgetGroupPtr, this->companionPtr_, messagePtr, messageStatePtr);
 }
 
@@ -1158,7 +1119,6 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistoryFromThread(
     }
 
     this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
-        // isAntecedent, this->companionPtr_->getName(), messagePtr);
         this, this->companionPtr_, messagePtr, messageStatePtr);
 }
 

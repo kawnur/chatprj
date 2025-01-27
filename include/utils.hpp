@@ -61,7 +61,6 @@ void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
 std::pair<QString, QString> formatMessageHeaderAndBody(
-    // const std::string&, const Message*);
     const Companion*, const Message*);
 
 std::string buildMessageJSONString(
