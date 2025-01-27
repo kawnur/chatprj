@@ -45,7 +45,7 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     return result->second.first;
 }
 
-WidgetGroup* Manager::getMappedWidgetGroupByCompanion(const Companion* companionPtr) const
+WidgetGroup* Manager::getMappedWidgetGroupByCompanionPtr(const Companion* companionPtr) const
 {
     WidgetGroup* groupPtr = nullptr;
 
@@ -85,8 +85,7 @@ void Manager::set()
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
-    WidgetGroup* groupPtr =
-        this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;
+    WidgetGroup* groupPtr = this->getMappedWidgetGroupByCompanionPtr(companionPtr);
 
     // encrypt message
 
@@ -185,7 +184,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
                 // add to widget
                 WidgetGroup* groupPtr =
-                    this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;  // TODO try catch
+                    this->getMappedWidgetGroupByCompanionPtr(companionPtr);
 
                 groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
                     messageStatePtr, messagePtr);
@@ -206,11 +205,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             if(received == 1)  // successfully received
             {                
                 // mark message as received
-                std::string key = generateMessageMappingKey(
-                    networkId, companionPtr->getId());
+                std::string key = generateMessageKey(networkId, companionPtr->getId());
 
                 // auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
-                auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageMappingKey(key);
+                auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageKey(key);
 
                 // TODO rewrite
                 if(pairPtr && pairPtr->second.getStatePtr())
@@ -237,9 +235,9 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
         {
             // search for message in managers's mapping
-            std::string key = generateMessageMappingKey(networkId, companionPtr->getId());
+            std::string key = generateMessageKey(networkId, companionPtr->getId());
 
-            auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageMappingKey(key);
+            auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageKey(key);
 
             logArgs("pair:", pairPtr, "pair.second.getStatePtr():", pairPtr->second.getStatePtr());
 
@@ -273,7 +271,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgsInfo("got history request from " + companionPtr->getName());
 
-            this->getMappedWidgetGroupByCompanion(companionPtr)->
+            this->getMappedWidgetGroupByCompanionPtr(companionPtr)->
                 askUserForHistorySendingConfirmationFromThread();
         }
 
@@ -358,7 +356,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             this->fillWithMessages(companionPtr, true);
 
             // build chat history
-            emit this->getMappedWidgetGroupByCompanion(companionPtr)->
+            emit this->getMappedWidgetGroupByCompanionPtr(companionPtr)->
                 buildChatHistorySignal();
         }
 
@@ -372,13 +370,12 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)  // TODO rewr
 
     if(this->selectedCompanionPtr_)
     {
-        auto widgetGroup =
-            this->mapCompanionIdToCompanionInfo_
-                .at(this->selectedCompanionPtr_->getId()).second;  // TODO try catch
+        auto widgetGroupPtr =
+            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
 
-        dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->unselect();
+        dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->unselect();
 
-        widgetGroup->hideCentralPanel();
+        widgetGroupPtr->hideCentralPanel();
     }
     else
     {
@@ -389,12 +386,13 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)  // TODO rewr
 
     if(this->selectedCompanionPtr_)
     {
-        auto widgetGroup =
-            this->mapCompanionIdToCompanionInfo_.at(this->selectedCompanionPtr_->getId()).second;
+        auto widgetGroupPtr =
+            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
 
-        dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->select();
+        dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->
+            select();
 
-        widgetGroup->showCentralPanel();
+        widgetGroupPtr->showCentralPanel();
     }
     else
     {
@@ -515,10 +513,10 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
     companionActionPtr->updateCompanionObjectData();
 
     // update SocketInfoWidget
-    auto widgetGroup = this->mapCompanionIdToCompanionInfo_.at(
-        companionActionPtr->getCompanionPtr()->getId()).second;  // TODO try catch
+    auto widgetGroupPtr = this->getMappedWidgetGroupByCompanionPtr(
+        companionActionPtr->getCompanionPtr());
 
-    dynamic_cast<SocketInfoWidget*>(widgetGroup->getSocketInfoBasePtr())->update();
+    dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->update();
 
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
@@ -578,7 +576,7 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 void Manager::clearChatHistory(Companion* companionPtr)
 {
     WidgetGroup* widgetGroupPtr =
-        this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;
+        this->getMappedWidgetGroupByCompanionPtr(companionPtr);
 
     getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
 }
@@ -698,7 +696,8 @@ void Manager::hideSelectedCompanionCentralPanel()
     if(this->selectedCompanionPtr_)
     {
         auto groupPtr =
-            this->mapCompanionIdToCompanionInfo_.at(this->selectedCompanionPtr_->getId()).second;
+            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
+
         getGraphicManagerPtr()->hideWidgetGroupCentralPanel(groupPtr);
     }
 }
@@ -708,7 +707,8 @@ void Manager::showSelectedCompanionCentralPanel()
     if(this->selectedCompanionPtr_)
     {
         auto groupPtr =
-            this->mapCompanionIdToCompanionInfo_.at(this->selectedCompanionPtr_->getId()).second;
+            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
+
         getGraphicManagerPtr()->showWidgetGroupCentralPanel(groupPtr);
     }
 }
@@ -803,7 +803,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
                 messagesDataPtr->getValue(i, "message"),
                 false,
                 false,
-                messagesDataPtr->getValue(i, "is_received"),
+                getBoolFromDBValue(messagesDataPtr->getValue(i, "is_received")),
                 networkId);
         }
 
@@ -891,6 +891,7 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
     {
         showErrorDialogAndLogError(nullptr, "Error getting data from db");
         // return false;
+        return;
     }
 
     if(messagesDataPtr->isEmpty())
@@ -901,6 +902,7 @@ void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHa
                 .arg(getQString(companionPtr->getName())));
 
         // return false;
+        return;
     }
 
     for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators

@@ -64,7 +64,8 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
     const Companion*, const Message*);
 
 std::string buildMessageJSONString(
-    bool, NetworkMessageType, const std::string&, const Message*);
+    // bool, NetworkMessageType, const std::string&, const Message*);
+    NetworkMessageType, const Companion*, const MessageState*, const Message*);
 
 std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData>&, std::vector<std::string>&);
@@ -72,7 +73,8 @@ std::string buildChatHistoryJSONString(
 nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
-std::string generateMessageMappingKey(std::string&, uint8_t);
+// std::string generateMessageKey(std::string&, uint8_t);
 QString getBoolQString(bool);
+bool getBoolFromDBValue(const char*);
 
 #endif // UTILS_HPP

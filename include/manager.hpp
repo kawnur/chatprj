@@ -34,7 +34,7 @@ public:
     bool getUserIsAuthenticated();
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
-    WidgetGroup* getMappedWidgetGroupByCompanion(const Companion*) const;
+    WidgetGroup* getMappedWidgetGroupByCompanionPtr(const Companion*) const;
 
     void set();
     void sendMessage(Companion*, const std::string&);
@@ -62,7 +62,6 @@ private:
     std::map<int, std::pair<Companion*, WidgetGroup*>> mapCompanionIdToCompanionInfo_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
-
     void fillWithMessages(Companion*, bool);
     bool connectToDb();
     bool buildCompanions();

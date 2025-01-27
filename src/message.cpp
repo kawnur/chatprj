@@ -42,8 +42,7 @@ MessageState::MessageState(
     isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived),
     networkId_(networkId)
 {
-    messageMappingKey_ =
-        generateMessageMappingKey(networkId_, companionId);
+    // messageKey_ = generateMessageKey(networkId_, companionId);
 }
 
 bool MessageState::getIsAntecedent() const
@@ -66,9 +65,9 @@ std::string MessageState::getNetworkId() const
     return this->networkId_;
 }
 
-std::string MessageState::getMessageMappingKey() const
+std::string MessageState::getMessageKey() const
 {
-    return this->messageMappingKey_;
+    return this->messageKey_;
 }
 
 void MessageState::setIsReceived(bool value)
@@ -81,10 +80,9 @@ void MessageState::setNetworkId(const std::string& networkId)
     this->networkId_ = networkId;
 }
 
-void MessageState::setMessageMappingKey(
-    const std::string& messageMappingKey)
+void MessageState::setMessageKey(const std::string& key)
 {
-    this->messageMappingKey_ = messageMappingKey;
+    this->messageKey_ = key;
 }
 
 MessageInfo::MessageInfo(MessageState* statePtr, MessageWidget* widgetPtr) :

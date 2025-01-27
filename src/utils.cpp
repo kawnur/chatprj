@@ -211,16 +211,19 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 }
 
 std::string buildMessageJSONString(
-    bool isAntecedent, NetworkMessageType type,
-    const std::string& networkId, const Message* messagePtr)
+    // bool isAntecedent, NetworkMessageType type,
+    // const std::string& networkId, const Message* messagePtr)
+    NetworkMessageType type, const Companion* companionPtr,
+    const MessageState* messageStatePtr, const Message* messagePtr)
 {
     using json = nlohmann::json;
 
     json jsonData;
 
     jsonData["type"] = type;
-    jsonData["id"] = networkId;
-    jsonData["antecedent"] = isAntecedent;
+    jsonData["id"] = messageStatePtr->getNetworkId();
+    jsonData["companion_id"] = companionPtr->getId();
+    jsonData["antecedent"] = messageStatePtr->getIsAntecedent();
 
     switch(type)
     {
@@ -292,13 +295,31 @@ void sleepForMilliseconds(uint32_t duration)
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-std::string generateMessageMappingKey(
-    std::string& networkId, uint8_t companionId)
-{
-    return networkId + std::string("_") + std::to_string(companionId);
-}
+// std::string generateMessageKey(
+//     std::string& networkId, uint8_t companionId)
+// {
+//     return networkId + std::string("_") + std::to_string(companionId);
+// }
 
 QString getBoolQString(bool value)
 {
     return (value) ? QString("true") : QString("false");
+}
+
+bool getBoolFromDBValue(const char* valuePtr)
+{
+    if(*valuePtr == 't')
+    {
+        return true;
+    }
+    else if(*valuePtr == 'f')
+    {
+        return false;
+    }
+    else
+    {
+        logArgsError(QString("unknown bool value from DB: %1").arg(valuePtr));
+    }
+
+    return false;
 }

@@ -44,18 +44,18 @@ public:
     bool getIsSent() const;
     bool getIsReceived() const;
     std::string getNetworkId() const;
-    std::string getMessageMappingKey() const;
+    // std::string getMessageKey() const;
 
     void setIsReceived(bool);
     void setNetworkId(const std::string&);
-    void setMessageMappingKey(const std::string&);
+    // void setMessageKey(const std::string&);
 
 private:
     bool isAntecedent_;
     bool isSent_;
     bool isReceived_;
     std::string networkId_;
-    std::string messageMappingKey_;
+    // std::string messageKey_;
 };
 
 class MessageInfo

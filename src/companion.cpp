@@ -132,7 +132,7 @@ const Message* Companion::getMappedMessageByMessageWidgetPtr(MessageWidget* widg
     return (result == this->messageMapping_.end()) ? nullptr : &(result->first);
 }
 
-std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageMappingKey(
+std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageKey(
     const std::string& key)
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
@@ -142,7 +142,7 @@ std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMess
         this->messageMapping_.end(),
         [&](auto& iter)
         {
-            return iter.second.getStatePtr()->getMessageMappingKey() == key;
+            return iter.second.getStatePtr()->getMessageKey() == key;
         });
 
     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
@@ -170,6 +170,13 @@ Companion::createMessageAndAddToMapping(
     const std::string& messageTime, const std::string& messageText,
     bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
 {
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    if(networkId.size() == 0)
+    {
+        networkId = this->generateNewNetworkId();
+    }
+
     auto companionId = this->getId();
 
     MessageState* messageStatePtr = new MessageState(
@@ -178,9 +185,7 @@ Companion::createMessageAndAddToMapping(
     auto result = this->messageMapping_.emplace(
         std::make_pair(
             Message(messageId, companionId, authorId, messageTime, messageText),
-            MessageInfo(messageStatePtr, nullptr)
-            )
-        );
+            MessageInfo(messageStatePtr, nullptr)));
 
     return result;
 }
@@ -189,12 +194,15 @@ std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
     std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
 {
+    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
     auto id = this->getId();
 
     MessageState* messageStatePtr = new MessageState(
         id, false,
-        messagesDataPtr->getValue(index, "is_sent"),
-        messagesDataPtr->getValue(index, "is_received"), "");
+        getBoolFromDBValue(messagesDataPtr->getValue(index, "is_sent")),
+        getBoolFromDBValue(messagesDataPtr->getValue(index, "is_received")),
+        this->generateNewNetworkId());
 
     auto result = this->messageMapping_.emplace(
         std::make_pair(
@@ -281,8 +289,10 @@ bool Companion::disconnectClient()
 }
 
 bool Companion::sendMessage(
-    bool isAntecedent, NetworkMessageType type,
-    std::string networkId, const Message* messagePtr)
+    // bool isAntecedent, NetworkMessageType type,
+    // std::string networkId, const Message* messagePtr)
+    NetworkMessageType type, const MessageState* messageStatePtr,
+    const Message* messagePtr)
 {    
     if(this->clientPtr_)
     {
@@ -293,8 +303,10 @@ bool Companion::sendMessage(
         if(isConnected)
         {
             // build json
+            // std::string jsonData = buildMessageJSONString(
+            //     isAntecedent, type, networkId, messagePtr);
             std::string jsonData = buildMessageJSONString(
-                isAntecedent, type, networkId, messagePtr);
+                type, this, messageStatePtr, messagePtr);
 
             // send json over network
             auto result = this->clientPtr_->send(jsonData);
@@ -372,4 +384,38 @@ void Companion::addMessageWidgetsToChatHistory(
         centralPanelWidgetPtr->addMessageWidgetToChatHistory(
             widgetGroupPtr, this, &(iterator.first), iterator.second.getStatePtr());
     }
+}
+
+std::string Companion::generateNetworkId()
+{
+    // WARNING: method must be called from the same mutex lock act
+    // where state object will be created and added to mapping
+
+    std::string networkId { "" };
+
+    if(networkId.size() == 0)
+    {
+        networkId = getRandomString(5);
+
+        auto lambda = [&]()
+        {
+            auto iterator = std::find_if(
+                this->messageMapping_.begin(),
+                this->messageMapping_.end(),
+                [&](auto iter)
+                {
+                    return iter.second->getNetworkId() == networkId;
+                });
+
+            return !(iterator == this->messageMapping_.end());
+        };
+
+        // loop while generated key is not unique
+        while(lambda())
+        {
+            networkId = getRandomString(5);
+        }
+    }
+
+    return networkId;
 }

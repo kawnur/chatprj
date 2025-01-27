@@ -73,7 +73,7 @@ public:
     MessageWidget* getMappedMessageWidgetByMessagePtr(const Message*);
     const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
 
-    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageMappingKey(
+    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageKey(
         const std::string&);
 
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
@@ -93,7 +93,8 @@ public:
     bool createClient();
     bool connectClient();
     bool disconnectClient();
-    bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
+    // bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
+    bool sendMessage(NetworkMessageType, const MessageState*, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
@@ -107,6 +108,8 @@ private:
     ChatClient* clientPtr_;
     ChatServer* serverPtr_;
     std::map<Message, MessageInfo> messageMapping_;
+
+    std::string generateNewNetworkId();
 };
 
 #endif // COMPANION_HPP
