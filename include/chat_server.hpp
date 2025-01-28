@@ -28,6 +28,7 @@ private:
     Companion* companionPtr_;
     tcp::socket socket_;
     char data_[maxBufferSize];
+    std::string previous_;
 
     void do_read();
     void do_write(std::size_t);

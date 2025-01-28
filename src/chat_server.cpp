@@ -24,6 +24,15 @@ void ServerSession::do_read()
                 {
                     logArgs("server got message:", str);
 
+                    if(this->previous_.size() > 0)
+                    {
+                        logArgs("previous:", this->previous_);
+
+                        str = previous_ + str;
+
+                        logArgs("new str:", str);
+                    }
+
                     // split messages
                     int openCounter = 0;
                     int closeCounter = 0;
@@ -46,10 +55,16 @@ void ServerSession::do_read()
                                 currentIterator = iterator + 1;
                                 openCounter = 0;
                                 closeCounter = 0;
+                                this->previous_ = "";
 
                                 getManagerPtr()->receiveMessage(this->companionPtr_, message);
                             }
                         }
+                    }
+
+                    if(currentIterator != str.end())
+                    {
+                        this->previous_ = std::string(currentIterator, str.end());
                     }
                 }                
 

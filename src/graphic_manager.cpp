@@ -284,7 +284,7 @@ void GraphicManager::markMessageWidgetAsSent(
 
         try
         {
-            companionPtr->getMappedMessageWidgetByMessagePtr(messagePtr)->
+            companionPtr->getMappedMessageWidgetPtrByMessagePtr(messagePtr)->
                 setMessageWidgetAsSent();
         }
         catch(std::out_of_range)
@@ -305,7 +305,7 @@ void GraphicManager::markMessageWidgetAsReceived(
 
         try
         {
-            companionPtr->getMappedMessageWidgetByMessagePtr(messagePtr)->
+            companionPtr->getMappedMessageWidgetPtrByMessagePtr(messagePtr)->
                 setMessageWidgetAsReceived();
         }
         catch(std::out_of_range)

@@ -69,14 +69,18 @@ public:
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
 
-    const MessageState* getMappedMessageStateByMessagePtr(const Message*);
-    MessageWidget* getMappedMessageWidgetByMessagePtr(const Message*);
-    const Message* getMappedMessageByMessageWidgetPtr(MessageWidget*);
+    const MessageState* getMappedMessageStatePtrByMessagePtr(const Message*);
+    MessageWidget* getMappedMessageWidgetPtrByMessagePtr(const Message*);
+    const Message* getMappedMessagePtrByMessageWidgetPtr(bool, MessageWidget*);
+    MessageState* getMappedMessageStatePtrByMessageWidgetPtr(bool, MessageWidget*);
 
-    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageKey(
-        const std::string&);
+    // std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageKey(
+    //     const std::string&);
 
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
+
+    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByNetworkId(
+        const std::string&);
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
     createMessageAndAddToMapping(
@@ -93,12 +97,12 @@ public:
     bool createClient();
     bool connectClient();
     bool disconnectClient();
-    // bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
-    bool sendMessage(NetworkMessageType, const MessageState*, const Message*);
+    bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
     void addMessageWidgetsToChatHistory(const WidgetGroup*, CentralPanelWidget*);
+    void clearMessageMapping();
 
 private:
     std::mutex messagesMutex_;
@@ -109,7 +113,7 @@ private:
     ChatServer* serverPtr_;
     std::map<Message, MessageInfo> messageMapping_;
 
-    std::string generateNewNetworkId();
+    std::string generateNewNetworkId(bool);
 };
 
 #endif // COMPANION_HPP

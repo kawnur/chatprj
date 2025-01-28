@@ -1,6 +1,6 @@
 #include "db_interaction.hpp"
 
-// std::mutex dbMutex;
+std::mutex dbMutex;
 
 DBReplyData::DBReplyData(int count, ...)
     : data_(std::vector<std::map<std::string, const char*>>(1))
@@ -175,7 +175,7 @@ PGresult* sendDBRequestAndReturnResult(
         logArgs(command);
     }
 
-    // std::lock_guard<std::mutex> lock(dbMutex);
+    std::lock_guard<std::mutex> lock(dbMutex);
 
     PGresult* result = PQexec(const_cast<PGconn*>(dbConnection), command);
 
@@ -249,8 +249,9 @@ PGresult* getAllMessagesByCompanionIdDBResult(
     const PGconn* dbConnection, const bool& logging, const int& companionId)
 {
     QString command = QString(
-        "SELECT author_id, timestamp_tz, message FROM messages WHERE companion_id = %1")
-            .arg(getQString(std::to_string(companionId)));
+        "SELECT author_id, timestamp_tz, message "
+        "FROM messages WHERE companion_id = %1 "
+        "ORDER BY timestamp_tz ASC").arg(getQString(std::to_string(companionId)));
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
@@ -260,7 +261,7 @@ PGresult* getMessageByCompanionIdAndTimestampDBResult(
     const uint8_t& companionId, const std::string& timestamp)
 {
     QString command = QString(
-        "SELECT id FROM messages WHERE companion_id = %1 AND timestamp = '%2'")
+        "SELECT id FROM messages WHERE companion_id = %1 AND timestamp_tz = '%2'")
             .arg(getQString(std::to_string(companionId)), getQString(timestamp));
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
@@ -289,7 +290,7 @@ PGresult* setMessageIsSentInDbAndReturn(
     const PGconn* dbConnection, const bool& logging, const uint32_t& messageId)
 {
     QString command = QString(
-        "UPDATE messages set is_sent = 'true' WHERE id = %1 RETURNING id")
+        "UPDATE messages SET is_sent = 'true' WHERE id = %1 RETURNING id")
             .arg(getQString(std::to_string(messageId)));
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
@@ -299,7 +300,7 @@ PGresult* setMessageIsReceivedInDbAndReturn(
     const PGconn* dbConnection, const bool& logging, const uint32_t& messageId)
 {
     QString command = QString(
-        "UPDATE messages set is_received = 'true' WHERE id = %1 RETURNING id")
+        "UPDATE messages SET is_received = 'true' WHERE id = %1 RETURNING id")
             .arg(getQString(std::to_string(messageId)));
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
@@ -329,7 +330,7 @@ PGresult* updateCompanionAndSocketAndReturn(
     const PGconn* dbConnection, const bool& logging, const CompanionAction& companionAction)
 {
     QString command = QString(
-        "WITH update_name AS (UPDATE companions set name = '%1' WHERE id = %2 "
+        "WITH update_name AS (UPDATE companions SET name = '%1' WHERE id = %2 "
         "RETURNING id) UPDATE sockets SET ipaddress = '%3', client_port = '%4' "
         "WHERE id IN (SELECT id FROM update_name) RETURNING id")
             .arg(

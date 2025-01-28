@@ -137,6 +137,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
     NetworkMessageType type;
+    int companionId;
     std::string networkId;
     bool isAntecedent;
 
@@ -144,6 +145,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         [&]()
         {
             type = jsonData.at("type");
+            companionId = jsonData.at("companion_id");
             networkId = jsonData.at("id");
             isAntecedent = jsonData.at("antecedent");
         });
@@ -205,10 +207,11 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             if(received == 1)  // successfully received
             {                
                 // mark message as received
-                std::string key = generateMessageKey(networkId, companionPtr->getId());
+                // std::string key = generateMessageKey(networkId, companionPtr->getId());
 
                 // auto pair = this->getMessageStateAndMessageMappingPairByMessageMappingKey(key);
-                auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageKey(key);
+                // auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageKey(key);
+                auto pairPtr = companionPtr->getMessageMappingPairPtrByNetworkId(networkId);
 
                 // TODO rewrite
                 if(pairPtr && pairPtr->second.getStatePtr())
@@ -235,14 +238,17 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
         {
             // search for message in managers's mapping
-            std::string key = generateMessageKey(networkId, companionPtr->getId());
+            // std::string key = generateMessageKey(networkId, companionPtr->getId());
 
-            auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageKey(key);
+            // auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageKey(key);
+            auto pairPtr = companionPtr->getMessageMappingPairPtrByNetworkId(networkId);
 
-            logArgs("pair:", pairPtr, "pair.second.getStatePtr():", pairPtr->second.getStatePtr());
+            logArgs("pairPtr:", pairPtr);
 
             if(pairPtr && pairPtr->second.getStatePtr())
             {
+                logArgs("pairPtr->second.getStatePtr():", pairPtr->second.getStatePtr());
+
                 // message found in managers's mapping
                 if(pairPtr->second.getStatePtr()->getIsReceived())
                 {
@@ -352,7 +358,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             // clear chat history widget
             this->clearChatHistory(companionPtr);
 
-            // fill continers with messages
+            // fill container with messages
             this->fillWithMessages(companionPtr, true);
 
             // build chat history
@@ -603,6 +609,9 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr)
         // showWarningDialogAndLogWarning("Empty db reply to companion messages deletion");
     }
 
+    // clear companion's message mapping
+    companionActionPtr->getCompanionPtr()->clearMessageMapping();
+
     // clear chat history widget
     this->clearChatHistory(companionActionPtr->getCompanionPtr());
 
@@ -778,7 +787,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
         {
             const MessageState* messageStatePtr =
                 const_cast<Companion*>(companionPtr)->
-                    getMappedMessageStateByMessagePtr(messagePtr);
+                    getMappedMessageStatePtrByMessagePtr(messagePtr);
 
             if(!messageStatePtr)
             {

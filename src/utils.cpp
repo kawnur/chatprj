@@ -211,19 +211,17 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 }
 
 std::string buildMessageJSONString(
-    // bool isAntecedent, NetworkMessageType type,
-    // const std::string& networkId, const Message* messagePtr)
-    NetworkMessageType type, const Companion* companionPtr,
-    const MessageState* messageStatePtr, const Message* messagePtr)
+    bool isAntecedent, NetworkMessageType type, const Companion* companionPtr,
+    const std::string& networkId, const Message* messagePtr)
 {
     using json = nlohmann::json;
 
     json jsonData;
 
     jsonData["type"] = type;
-    jsonData["id"] = messageStatePtr->getNetworkId();
+    jsonData["id"] = networkId;
     jsonData["companion_id"] = companionPtr->getId();
-    jsonData["antecedent"] = messageStatePtr->getIsAntecedent();
+    jsonData["antecedent"] = isAntecedent;
 
     switch(type)
     {
@@ -251,7 +249,6 @@ std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys)
 {
     using json = nlohmann::json;
-
     json jsonData;
 
     jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;

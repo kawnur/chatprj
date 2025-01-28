@@ -221,10 +221,10 @@ public:
     void setMessageWidgetAsReceived();
 
 signals:
-    void widgetSelectedSignal(bool);
+    void widgetSelectedSignal(MessageWidget*);
 
 private:
-    bool createdAsAntecedent_;
+    // bool createdAsAntecedent_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -371,7 +371,7 @@ signals:
     void buildChatHistorySignal();
 
 public slots:
-    void messageWidgetSelected(bool);
+    void messageWidgetSelected(MessageWidget*);
     void buildChatHistorySlot();
 
 private slots:
@@ -381,8 +381,8 @@ private:
     const Companion* companionPtr_;
     SocketInfoBaseWidget* socketInfoBasePtr_;
     CentralPanelWidget* centralPanelPtr_;
-    uint32_t antacedentMessagesCounter_;
-    std::mutex antacedentMessagesCounterMutex_;    
+    uint32_t antecedentMessagesCounter_;
+    std::mutex antecedentMessagesCounterMutex_;
 };
 
 class StubWidgetGroup

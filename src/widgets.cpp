@@ -572,7 +572,7 @@ MessageWidget::MessageWidget(
     QWidget* parentPtr, const Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
-    createdAsAntecedent_ = messageStatePtr->getIsAntecedent();
+    // createdAsAntecedent_ = messageStatePtr->getIsAntecedent();
     isMessageFromMe_ = messagePtr->isMessageFromMe();
 
     // set parent
@@ -640,7 +640,7 @@ void MessageWidget::mousePressEvent(QMouseEvent* event)
 {
     this->indicatorPanelPtr_->unsetNewMessageLabel();
 
-    emit this->widgetSelectedSignal(this->createdAsAntecedent_);
+    emit this->widgetSelectedSignal(this);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -842,7 +842,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
             [=]()
             {
                 const_cast<Companion*>(companionPtr)->
-                setMappedMessageWidget(messagePtr, widgetPtr);
+                    setMappedMessageWidget(messagePtr, widgetPtr);
             }
         ).detach();
 
@@ -906,15 +906,15 @@ void CentralPanelWidget::clearChatHistory()
 void CentralPanelWidget::sortChatHistoryElements(bool lock)
 {
     if(lock)
-        std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
+        std::lock_guard<std::mutex> lockObject(this->chatHistoryMutex_);
 
     auto list = this->chatHistoryWidgetPtr_->children();
 
     auto lambda = [&](auto item)
     {
         const Message* messagePtr =
-            companionPtr_->getMappedMessageByMessageWidgetPtr(
-                dynamic_cast<MessageWidget*>(item));
+            companionPtr_->getMappedMessagePtrByMessageWidgetPtr(
+                false, dynamic_cast<MessageWidget*>(item));
 
         return (messagePtr) ? messagePtr->getTime() : std::string("");
     };
@@ -924,12 +924,31 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
         list.end(),
         [&](auto element1, auto element2)
         {
-            return lambda(element1) < lambda(element2);            
+            auto res1 = lambda(element1);
+            auto res2 = lambda(element2);
+            bool res = (res1 < res2);
+
+            coutArgsWithSpaceSeparator("res1:", res1, "res2:", res2, "res:", res);
+
+            return res;
         });
+
+    coutArgsWithSpaceSeparator("AFTER SORTING");
 
     for(auto& element : list)
     {
         auto elementCast = dynamic_cast<MessageWidget*>(element);
+
+        const Message* messagePtr =
+            companionPtr_->getMappedMessagePtrByMessageWidgetPtr(false, elementCast);
+
+        coutArgsWithSpaceSeparator("messagePtr:", messagePtr);
+
+        if(messagePtr)
+        {
+            coutArgsWithSpaceSeparator("element message:", messagePtr->getText());
+        }
+
         this->chatHistoryLayoutPtr_->removeWidget(elementCast);
         this->chatHistoryLayoutPtr_->addWidget(elementCast);
     }
@@ -1040,9 +1059,9 @@ void RightPanelWidget::customMenuRequestedSlot(QPoint position)
 
 WidgetGroup::WidgetGroup(const Companion* companionPtr) :
     companionPtr_(companionPtr),
-    antacedentMessagesCounterMutex_(std::mutex())
+    antecedentMessagesCounterMutex_(std::mutex())
 {
-    antacedentMessagesCounter_ = 0;
+    antecedentMessagesCounter_ = 0;
 
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
 
@@ -1114,8 +1133,9 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistoryFromThread(
 
     if(isAntecedent)
     {
-        std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
-        ++this->antacedentMessagesCounter_;
+        std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
+        ++this->antecedentMessagesCounter_;
+        logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
     }
 
     this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
@@ -1125,6 +1145,13 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistoryFromThread(
 void WidgetGroup::clearChatHistory()
 {
     this->centralPanelPtr_->clearChatHistory();
+
+    dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->
+        setNewMessagesIndicatorOff();
+
+    std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
+
+    this->antecedentMessagesCounter_ = 0;
 }
 
 void WidgetGroup::hideCentralPanel()
@@ -1150,13 +1177,13 @@ void WidgetGroup::sortChatHistoryElements()
 
 void WidgetGroup::messageAdded()
 {
-    std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
+    std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
 
     // set new message indicator on if socket info widget is not selected
     SocketInfoWidget* castPtr =
         dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_);
 
-    if(castPtr && this->antacedentMessagesCounter_ > 0)
+    if(castPtr && this->antecedentMessagesCounter_ > 0)
     {
         castPtr->setNewMessagesIndicatorOn();
     }
@@ -1177,15 +1204,31 @@ void WidgetGroup::askUserForHistorySendingConfirmationFromThread()
     emit this->askUserForHistorySendingConfirmationSignal();
 }
 
-void WidgetGroup::messageWidgetSelected(bool isAntacedent)
+void WidgetGroup::messageWidgetSelected(MessageWidget* messageWidgetPtr)
 {
-    std::lock_guard<std::mutex> lock(this->antacedentMessagesCounterMutex_);
+    std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
 
-    if(isAntacedent)
+    MessageState* messageStatePtr =
+        const_cast<Companion*>(this->companionPtr_)->
+        getMappedMessageStatePtrByMessageWidgetPtr(
+            true, messageWidgetPtr);
+
+    bool isAntecedent = messageStatePtr->getIsAntecedent();
+
+    logArgs("isAntecedent:", isAntecedent);
+
+    if(isAntecedent)
     {
-        --this->antacedentMessagesCounter_;
+        if(this->antecedentMessagesCounter_ != 0)
+        {
+            --this->antecedentMessagesCounter_;
+        }
 
-        if(this->antacedentMessagesCounter_ == 0)
+        logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
+
+        messageStatePtr->setIsAntecedent(false);
+
+        if(this->antecedentMessagesCounter_ == 0)
         {
             dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->
                 setNewMessagesIndicatorOff();

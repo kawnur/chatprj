@@ -46,6 +46,7 @@ public:
     std::string getNetworkId() const;
     // std::string getMessageKey() const;
 
+    void setIsAntecedent(bool);
     void setIsReceived(bool);
     void setNetworkId(const std::string&);
     // void setMessageKey(const std::string&);
