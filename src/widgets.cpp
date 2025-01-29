@@ -1040,6 +1040,9 @@ void RightPanelWidget::clearLogAction()
 void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
 {
     this->appLogWidgetPtr_->appendPlainText(text);
+
+    QApplication::processEvents();
+
     this->appLogWidgetPtr_->ensureCursorVisible();
 }
 
@@ -1093,10 +1096,11 @@ WidgetGroup::~WidgetGroup()
     getGraphicManagerPtr()->removeWidgetFromCompanionPanel(this->socketInfoBasePtr_);
     delete this->socketInfoBasePtr_;
 
-    if(this->centralPanelPtr_)  // TODO double destructor call
-    {
-        delete this->centralPanelPtr_;
-    }
+    // if(this->centralPanelPtr_)  // TODO double destructor call
+    // {
+    //     delete this->centralPanelPtr_;
+    // }
+    this->hideCentralPanel();
 }
 
 void WidgetGroup::set()
