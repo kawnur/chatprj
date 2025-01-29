@@ -370,6 +370,55 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     }
 }
 
+void Manager::addEarlyMessages(const Companion* companionPtr)
+{
+    if(companionPtr)
+    {
+        // get earliest message in current messages
+        const Message* earliestMessagePtr = companionPtr->getEarliestMessagePtr();
+
+        auto messageId = earliestMessagePtr->getId();
+        auto companionId = companionPtr->getId();
+
+        // get messages data
+        std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
+            logDBInteraction,
+            "getEarlyMessagesByMessageIdDBResult",
+            &getEarlyMessagesByMessageIdDBResult,
+            buildStringVector(
+                "id", "companion_id", "author_id",
+                "timestamp_tz", "message", "is_sent", "is_received"),
+            companionId, messageId);
+
+        if(!messagesDataPtr)
+        {
+            showErrorDialogAndLogError(nullptr, "Error getting data from db");
+            return;
+        }
+
+        if(messagesDataPtr->isEmpty())
+        {
+            logArgsWarning(
+                nullptr,
+                QString("no messages earlier than id = %1 in db with companion %2")
+                    .arg(
+                        getQString(std::to_string(messageId)),
+                        getQString(std::to_string(companionId))));
+
+            return;
+        }
+
+        for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
+        {
+            logArgs("adding message with id", messagesDataPtr->getValue(i, "id"));
+            const_cast<Companion*>(companionPtr)->
+                createMessageAndAddToMapping(messagesDataPtr, i);
+        }
+
+        // add message widgets to chat history
+    }
+}
+
 void Manager::resetSelectedCompanion(const Companion* newSelected)  // TODO rewrite
 {
     GraphicManager* graphicManagerPtr = getGraphicManagerPtr();

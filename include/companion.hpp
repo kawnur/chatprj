@@ -74,13 +74,12 @@ public:
     const Message* getMappedMessagePtrByMessageWidgetPtr(bool, MessageWidget*);
     MessageState* getMappedMessageStatePtrByMessageWidgetPtr(bool, MessageWidget*);
 
-    // std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageKey(
-    //     const std::string&);
-
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
 
     std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByNetworkId(
         const std::string&);
+
+    const Message* getEarliestMessagePtr() const;
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
     createMessageAndAddToMapping(

@@ -40,10 +40,7 @@ MessageState::MessageState(
     uint8_t companionId, bool isAntecedent, bool isSent,
     bool isReceived, std::string networkId) :
     isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived),
-    networkId_(networkId)
-{
-    // messageKey_ = generateMessageKey(networkId_, companionId);
-}
+    networkId_(networkId) {}
 
 bool MessageState::getIsAntecedent() const
 {
@@ -65,11 +62,6 @@ std::string MessageState::getNetworkId() const
     return this->networkId_;
 }
 
-// std::string MessageState::getMessageKey() const
-// {
-//     return this->messageKey_;
-// }
-
 void MessageState::setIsAntecedent(bool value)
 {
     this->isAntecedent_ = value;
@@ -84,11 +76,6 @@ void MessageState::setNetworkId(const std::string& networkId)
 {
     this->networkId_ = networkId;
 }
-
-// void MessageState::setMessageKey(const std::string& key)
-// {
-//     this->messageKey_ = key;
-// }
 
 MessageInfo::MessageInfo(MessageState* statePtr, MessageWidget* widgetPtr) :
     statePtr_(statePtr), widgetPtr_(widgetPtr) {}

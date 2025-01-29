@@ -55,6 +55,9 @@ PGresult* getSocketByIpAddressAndPortDBResult(
 PGresult* getMessagesDBResult(const PGconn*, const bool&, const uint8_t&);
 PGresult* getAllMessagesByCompanionIdDBResult(const PGconn*, const bool&, const int&);
 
+PGresult* getEarlyMessagesByMessageIdDBResult(
+    const PGconn*, const bool&, const int&, const uint32_t&);
+
 PGresult* getMessageByCompanionIdAndTimestampDBResult(
     const PGconn*, const bool&, const uint8_t&, const std::string&);
 

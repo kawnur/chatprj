@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QTextEdit>
 #include <QTimer>
 #include <thread>
@@ -224,7 +225,6 @@ signals:
     void widgetSelectedSignal(MessageWidget*);
 
 private:
-    // bool createdAsAntecedent_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -255,6 +255,17 @@ private:
     QVBoxLayout* companionPanelLayoutPtr_;
     QSpacerItem* spacerPtr_;
 };
+
+// class ScrollArea : public QScrollArea
+// {
+// public:
+//     ScrollArea() = default;
+//     ~ScrollArea() = default;
+
+// private:
+
+//     // void wheelEvent(QWheelEvent*) override;
+// };
 
 class CentralPanelWidget : public QWidget
 {
@@ -287,7 +298,7 @@ signals:
 
 private:
     std::mutex chatHistoryMutex_;
-    int scrollBarMax = 0;
+    // int scrollBarMax = 0;
     Companion* companionPtr_;
     QVBoxLayout* layoutPtr_;
 
@@ -301,11 +312,16 @@ private:
     QLabel* companionNameLabelPtr_;
     QPalette* companionNameLabelPalettePtr_;
     QPalette* chatHistoryWidgetPalettePtr_;
+
     QScrollArea* chatHistoryScrollAreaPtr_;
+    // ScrollArea* chatHistoryScrollAreaPtr_;
+
     QWidget* chatHistoryWidgetPtr_;
     QVBoxLayout* chatHistoryLayoutPtr_;
     TextEditWidget* textEditPtr_;
     QPalette* textEditPalettePtr_;
+
+    bool eventFilter(QObject*, QEvent*) override;
 
     void sendMessage(const QString&);
 };

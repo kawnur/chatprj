@@ -292,12 +292,6 @@ void sleepForMilliseconds(uint32_t duration)
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-// std::string generateMessageKey(
-//     std::string& networkId, uint8_t companionId)
-// {
-//     return networkId + std::string("_") + std::to_string(companionId);
-// }
-
 QString getBoolQString(bool value)
 {
     return (value) ? QString("true") : QString("false");

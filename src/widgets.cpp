@@ -752,9 +752,17 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
     }
 }
 
+// void ScrollArea::wheelEvent(QWheelEvent* event)
+// {
+//     logArgs("ScrollArea::wheelEvent");
+// }
+
 CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name) :
     chatHistoryMutex_(std::mutex())
 {
+    chatHistoryScrollAreaPtr_ = nullptr;
+    chatHistoryWidgetPalettePtr_ = nullptr;
+
     if(parent)
     {
         setParent(parent);
@@ -784,16 +792,20 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
     chatHistoryLayoutPtr_->setSizeConstraint(QLayout::SetMaximumSize);
     chatHistoryWidgetPtr_->setLayout(chatHistoryLayoutPtr_);
 
-    chatHistoryScrollAreaPtr_ = new QScrollArea;
-    chatHistoryScrollAreaPtr_->setWidgetResizable(true);
-    chatHistoryScrollAreaPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    chatHistoryScrollAreaPtr_->setWidget(chatHistoryWidgetPtr_);
+    if(name.size() != 0)
+    {
+        chatHistoryScrollAreaPtr_ = new QScrollArea;
+        // chatHistoryScrollAreaPtr_ = new ScrollArea;
+        chatHistoryScrollAreaPtr_->setWidgetResizable(true);
+        chatHistoryScrollAreaPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        chatHistoryScrollAreaPtr_->setWidget(chatHistoryWidgetPtr_);
 
-    chatHistoryWidgetPalettePtr_ = new QPalette;
-    chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::Gray);
-    chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
+        chatHistoryWidgetPalettePtr_ = new QPalette;
+        chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::Gray);
+        chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
 
-    layoutPtr_->addWidget(chatHistoryScrollAreaPtr_);
+        layoutPtr_->addWidget(chatHistoryScrollAreaPtr_);
+    }
 
     textEditPtr_ = new TextEditWidget;    
     layoutPtr_->addWidget(textEditPtr_);
@@ -826,6 +838,8 @@ void CentralPanelWidget::set(Companion* companionPtr)
         this, &CentralPanelWidget::addMessageWidgetToChatHistorySignal,
         this, &CentralPanelWidget::addMessageWidgetToChatHistorySlot,
         Qt::QueuedConnection);
+
+    this->chatHistoryScrollAreaPtr_->installEventFilter(this);
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
@@ -962,6 +976,25 @@ void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
         widgetGroupPtr, companionPtr, messagePtr, messageStatePtr);
 }
 
+bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
+{
+    if(objectPtr == this->chatHistoryScrollAreaPtr_)
+    {
+        auto verticalScrollBarPtr =
+            this->chatHistoryScrollAreaPtr_->verticalScrollBar();
+
+        if(verticalScrollBarPtr &&
+            verticalScrollBarPtr->value() == verticalScrollBarPtr->minimum())
+        {
+            logArgs("scroll bar minimum");
+
+            getManagerPtr()->addEarlyMessages(this->companionPtr_);
+        }
+    }
+
+    return QWidget::eventFilter(objectPtr, eventPtr);
+}
+
 void CentralPanelWidget::sendMessage(const QString& text)
 {
     if(!text.isEmpty())
@@ -1041,7 +1074,7 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
 {
     this->appLogWidgetPtr_->appendPlainText(text);
 
-    QApplication::processEvents();
+    // QApplication::processEvents();
 
     this->appLogWidgetPtr_->ensureCursorVisible();
 }

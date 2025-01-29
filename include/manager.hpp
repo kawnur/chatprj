@@ -39,6 +39,7 @@ public:
     void set();
     void sendMessage(Companion*, const std::string&);
     void receiveMessage(Companion*, const std::string&);
+    void addEarlyMessages(const Companion*);
     void resetSelectedCompanion(const Companion*);
     void createCompanion(CompanionAction*);
     void updateCompanion(CompanionAction*);

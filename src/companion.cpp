@@ -154,22 +154,6 @@ MessageState* Companion::getMappedMessageStatePtrByMessageWidgetPtr(
         nullptr : result->second.getStatePtr();
 }
 
-// std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageKey(
-//     const std::string& key)
-// {
-//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
-
-//     auto result = std::find_if(
-//         this->messageMapping_.begin(),
-//         this->messageMapping_.end(),
-//         [&](auto& iter)
-//         {
-//             return iter.second.getStatePtr()->getMessageKey() == key;
-//         });
-
-//     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
-// }
-
 std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageId(
     uint32_t messageId)
 {
@@ -200,6 +184,19 @@ std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByNetw
         });
 
     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
+}
+
+const Message* Companion::getEarliestMessagePtr() const
+{
+    auto minPair = std::min_element(
+        this->messageMapping_.begin(),
+        this->messageMapping_.end(),
+        [&](auto& iterator1, auto& iterator2)
+        {
+            return iterator1.first.getId() < iterator2.first.getId();
+        });
+
+    return &(minPair->first);
 }
 
 std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
@@ -340,7 +337,6 @@ bool Companion::sendMessage(
         {
             // build json
             std::string jsonData = buildMessageJSONString(
-                // isAntecedent, type, networkId, messagePtr);
                 isAntecedent, type, this, networkId, messagePtr);
 
             // send json over network
@@ -369,15 +365,6 @@ bool Companion::sendChatHistory(
 
         if(isConnected)
         {
-            // sort DB reply data by timestamp
-            // std::sort(
-            //     dataPtr->getDataPtr()->begin(),
-            //     dataPtr->getDataPtr()->end(),
-            //     [&](auto& iterator1, auto& iterator2)
-            //     {
-            //         return iterator1.at("timestamp_tz") < iterator2.at("timestamp_tz");
-            //     });
-
             // build json
             std::string jsonData = buildChatHistoryJSONString(dataPtr, keys);
 

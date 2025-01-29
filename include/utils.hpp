@@ -72,7 +72,6 @@ std::string buildChatHistoryJSONString(
 nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
-// std::string generateMessageKey(std::string&, uint8_t);
 QString getBoolQString(bool);
 bool getBoolFromDBValue(const char*);
 

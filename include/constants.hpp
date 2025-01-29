@@ -10,7 +10,7 @@ const std::string logCustomDelimiter { "?????????????????????????" };
 
 const size_t maxBufferSize = 1024;
 
-const bool logDBInteraction = true;
+const bool logDBInteraction = false;
 
 static const char alphanum[] =
     "0123456789"
