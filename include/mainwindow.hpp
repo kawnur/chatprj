@@ -12,6 +12,7 @@
 #include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QSpacerItem>
+#include <QSplitter>
 #include <QVBoxLayout>
 
 #include "application.hpp"
@@ -58,6 +59,7 @@ private:
     QPalette* menuBarPalettePtr_;
     QWidget* centralWidgetPtr_;
     QHBoxLayout* centralWidgetLayoutPtr_;
+    QSplitter* splitterPtr_;
 
     // left panel
     MainWindowContainerWidget* leftContainerWidgetPtr_;

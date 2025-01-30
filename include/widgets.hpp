@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QSplitter>
 #include <QTextEdit>
 #include <QTimer>
 #include <thread>
@@ -305,8 +306,13 @@ private:
 
     QWidget* chatHistoryWidgetPtr_;
     QVBoxLayout* chatHistoryLayoutPtr_;
+
+    // QWidget* borderWidgetPtr_;
+
     TextEditWidget* textEditPtr_;
-    QPalette* textEditPalettePtr_;
+    QPalette* textEditPalettePtr_;    
+
+    // QSplitter* splitterPtr_;
 
     bool eventFilter(QObject*, QEvent*) override;
 

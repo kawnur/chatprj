@@ -55,6 +55,13 @@ MainWindow::MainWindow()
         rightContainerWidgetPtr_;
     
     // blur effect moved to set
+
+    // splitter
+    splitterPtr_ = new QSplitter(centralWidgetPtr_);
+    // splitterPtr_->addWidget(leftContainerWidgetPtr_);
+    splitterPtr_->addWidget(centralContainerWidgetPtr_);
+    splitterPtr_->addWidget(rightContainerWidgetPtr_);
+    centralWidgetLayoutPtr_->addWidget(splitterPtr_);
 }
 
 MainWindow::~MainWindow()

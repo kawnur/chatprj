@@ -799,14 +799,6 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
         chatHistoryScrollAreaPtr_->setWidgetResizable(true);
         chatHistoryScrollAreaPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         chatHistoryScrollAreaPtr_->setWidget(chatHistoryWidgetPtr_);
-
-        logArgsWithCustomMark("start set value");
-
-        chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
-            chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());
-
-        logArgsWithCustomMark("end set value");
-
         chatHistoryWidgetPalettePtr_ = new QPalette;
         chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::Gray);
         chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
@@ -814,8 +806,16 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
         layoutPtr_->addWidget(chatHistoryScrollAreaPtr_);
     }
 
-    textEditPtr_ = new TextEditWidget;    
+    // borderWidgetPtr_ = new QWidget;
+    // layoutPtr_->addWidget(borderWidgetPtr_);
+
+    textEditPtr_ = new TextEditWidget;
     layoutPtr_->addWidget(textEditPtr_);
+
+    // splitterPtr_ = new QSplitter;
+    // layoutPtr_->addWidget(splitterPtr_);
+    // splitterPtr_->addWidget(borderWidgetPtr_);
+    // splitterPtr_->addWidget(textEditPtr_);
 }
 
 CentralPanelWidget::~CentralPanelWidget()
@@ -829,6 +829,7 @@ CentralPanelWidget::~CentralPanelWidget()
     delete this->chatHistoryLayoutPtr_;
     delete this->textEditPtr_;
     delete this->textEditPalettePtr_;
+    delete this->splitterPtr_;
 
     // TODO delete message widgets
 }
@@ -978,7 +979,9 @@ bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
 
             if(eventPtr->type() == QEvent::Wheel ||
                 (eventPtr->type() == QEvent::KeyPress &&
-                eventCastPtr && eventCastPtr->key() == Qt::Key_Up))
+                eventCastPtr &&
+                (eventCastPtr->key() &
+                (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home))))
             {
                 logArgs("scroll bar minimum", "event type", std::to_string(eventPtr->type()));
 
