@@ -284,17 +284,8 @@ public:
     void clearChatHistory();
     void sortChatHistoryElements(bool);
 
-private slots:
-    void addMessageWidgetToChatHistorySlot(
-        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
-
-signals:
-    void addMessageWidgetToChatHistorySignal(
-        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
-
 private:
     std::mutex chatHistoryMutex_;
-    // int scrollBarMax = 0;
     Companion* companionPtr_;
     QVBoxLayout* layoutPtr_;
 
@@ -358,7 +349,6 @@ public:
     ~WidgetGroup();
 
     void set();
-    void buildChatHistory();
     void addMessageWidgetToCentralPanelChatHistory(const Message*, const MessageState*);
     void clearChatHistory();
     void hideCentralPanel();

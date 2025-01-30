@@ -100,7 +100,7 @@ public:
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
-    void addMessageWidgetsToChatHistory(const WidgetGroup*, CentralPanelWidget*);
+    void addMessageWidgetsToChatHistory();
     void clearMessageMapping();
 
 private:

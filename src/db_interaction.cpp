@@ -236,10 +236,13 @@ PGresult* getMessagesDBResult(
     QString command = QString(
         "WITH select_id AS "
         "(SELECT id FROM messages WHERE companion_id = %1 "
-        "ORDER BY timestamp_tz DESC LIMIT 50) "
+        "ORDER BY timestamp_tz DESC LIMIT %2) "
         "SELECT id, companion_id, author_id, timestamp_tz, message, is_sent, is_received "
         "FROM messages WHERE id IN (SELECT id FROM select_id) "
-        "ORDER BY timestamp_tz ASC").arg(getQString(std::to_string(companionId)));
+        "ORDER BY timestamp_tz ASC")
+            .arg(
+                getQString(std::to_string(companionId)),
+                getQString(std::to_string(numberOfMessagesToGetFromDB)));
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
@@ -262,13 +265,14 @@ PGresult* getEarlyMessagesByMessageIdDBResult(
     QString command = QString(
         "WITH select_id AS "
         "(SELECT id FROM messages WHERE companion_id = %1 AND id < %2 "
-        "ORDER BY timestamp_tz DESC LIMIT 50) "
+        "ORDER BY timestamp_tz DESC LIMIT %3) "
         "SELECT id, companion_id, author_id, timestamp_tz, message, is_sent, is_received "
         "FROM messages WHERE id IN (SELECT id FROM select_id) "
         "ORDER BY timestamp_tz ASC")
             .arg(
                 getQString(std::to_string(companionId)),
-                getQString(std::to_string(messageId)));
+                getQString(std::to_string(messageId)),
+                getQString(std::to_string(numberOfMessagesToGetFromDB)));
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }

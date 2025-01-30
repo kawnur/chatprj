@@ -800,6 +800,13 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
         chatHistoryScrollAreaPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         chatHistoryScrollAreaPtr_->setWidget(chatHistoryWidgetPtr_);
 
+        logArgsWithCustomMark("start set value");
+
+        chatHistoryScrollAreaPtr_->verticalScrollBar()->setValue(
+            chatHistoryScrollAreaPtr_->verticalScrollBar()->maximum());
+
+        logArgsWithCustomMark("end set value");
+
         chatHistoryWidgetPalettePtr_ = new QPalette;
         chatHistoryWidgetPalettePtr_->setColor(QPalette::Window, QColorConstants::Gray);
         chatHistoryWidgetPtr_->setPalette(*chatHistoryWidgetPalettePtr_);
@@ -833,11 +840,6 @@ void CentralPanelWidget::set(Companion* companionPtr)
     connect(
         this->textEditPtr_, &TextEditWidget::send,
         this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
-
-    connect(
-        this, &CentralPanelWidget::addMessageWidgetToChatHistorySignal,
-        this, &CentralPanelWidget::addMessageWidgetToChatHistorySlot,
-        Qt::QueuedConnection);
 
     this->chatHistoryScrollAreaPtr_->installEventFilter(this);
 }
@@ -960,16 +962,10 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
     }
 }
 
-void CentralPanelWidget::addMessageWidgetToChatHistorySlot(
-    const WidgetGroup* widgetGroupPtr, const Companion* companionPtr,
-    const Message* messagePtr, const MessageState* messageStatePtr)
-{
-    this->addMessageWidgetToChatHistory(
-        widgetGroupPtr, companionPtr, messagePtr, messageStatePtr);
-}
-
 bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
 {
+    auto result = QWidget::eventFilter(objectPtr, eventPtr);
+
     if(objectPtr == this->chatHistoryScrollAreaPtr_)
     {
         auto verticalScrollBarPtr =
@@ -978,13 +974,20 @@ bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
         if(verticalScrollBarPtr &&
             verticalScrollBarPtr->value() == verticalScrollBarPtr->minimum())
         {
-            logArgs("scroll bar minimum");
+            QKeyEvent* eventCastPtr = dynamic_cast<QKeyEvent*>(eventPtr);
 
-            getManagerPtr()->addEarlyMessages(this->companionPtr_);
+            if(eventPtr->type() == QEvent::Wheel ||
+                (eventPtr->type() == QEvent::KeyPress &&
+                eventCastPtr && eventCastPtr->key() == Qt::Key_Up))
+            {
+                logArgs("scroll bar minimum", "event type", std::to_string(eventPtr->type()));
+
+                getManagerPtr()->addEarlyMessages(this->companionPtr_);
+            }
         }
     }
 
-    return QWidget::eventFilter(objectPtr, eventPtr);
+    return result;
 }
 
 void CentralPanelWidget::sendMessage(const QString& text)
@@ -1066,7 +1069,7 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
 {
     this->appLogWidgetPtr_->appendPlainText(text);
 
-    // QApplication::processEvents();
+    QApplication::processEvents();
 
     this->appLogWidgetPtr_->ensureCursorVisible();
 }
@@ -1108,8 +1111,6 @@ WidgetGroup::WidgetGroup(const Companion* companionPtr) :
 
     centralPanelPtr_->set(const_cast<Companion*>(companionPtr_));
 
-    buildChatHistory();
-
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::CENTRAL, centralPanelPtr_);
 
@@ -1146,16 +1147,10 @@ void WidgetGroup::set()
         Qt::QueuedConnection);
 }
 
-void WidgetGroup::buildChatHistory()
-{
-    const_cast<Companion*>(this->companionPtr_)->
-        addMessageWidgetsToChatHistory(this, this->centralPanelPtr_);
-}
-
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
     const Message* messagePtr, const MessageState* messageStatePtr)
 {
-    this->centralPanelPtr_->addMessageWidgetToChatHistory(
+    this->centralPanelPtr_-> addMessageWidgetToChatHistory(
         this, this->companionPtr_, messagePtr, messageStatePtr);
 }
 
@@ -1250,7 +1245,7 @@ void WidgetGroup::messageWidgetSelected(MessageWidget* messageWidgetPtr)
 
 void WidgetGroup::buildChatHistorySlot()
 {
-    this->buildChatHistory();
+    const_cast<Companion*>(this->companionPtr_)->addMessageWidgetsToChatHistory();
 }
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
@@ -1265,7 +1260,7 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
     }
 
-    emit this->centralPanelPtr_->addMessageWidgetToChatHistorySignal(
+    this->centralPanelPtr_->addMessageWidgetToChatHistory(
         this, this->companionPtr_, messagePtr, messageStatePtr);
 }
 

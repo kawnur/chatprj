@@ -405,15 +405,20 @@ Message* Companion::findMessage(uint32_t messageId)
                nullptr : const_cast<Message*>(&(result->first));
 }
 
-void Companion::addMessageWidgetsToChatHistory(
-    const WidgetGroup* widgetGroupPtr, CentralPanelWidget* centralPanelWidgetPtr)
+void Companion::addMessageWidgetsToChatHistory()
 {
+    WidgetGroup* widgetGroupPtr =
+        getManagerPtr()->getMappedWidgetGroupPtrByCompanionPtr(this);
+
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+    logArgsWithCustomMark(
+        "this->messageMapping_.size():", this->messageMapping_.size());
 
     for(auto& iterator : this->messageMapping_)
     {
-        centralPanelWidgetPtr->addMessageWidgetToChatHistory(
-            widgetGroupPtr, this, &(iterator.first), iterator.second.getStatePtr());
+        widgetGroupPtr->addMessageWidgetToCentralPanelChatHistory(
+            &(iterator.first), iterator.second.getStatePtr());
     }
 }
 

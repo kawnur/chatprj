@@ -1,6 +1,7 @@
 #include "manager.hpp"
 
 Manager::Manager() :
+    initialized_(false),
     messageStateToMessageMapMutex_(std::mutex()),
     dbConnectionPtr_(nullptr), userIsAuthenticated_(false)
 {
@@ -45,7 +46,7 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     return result->second.first;
 }
 
-WidgetGroup* Manager::getMappedWidgetGroupByCompanionPtr(const Companion* companionPtr) const
+WidgetGroup* Manager::getMappedWidgetGroupPtrByCompanionPtr(const Companion* companionPtr) const
 {
     WidgetGroup* groupPtr = nullptr;
 
@@ -81,11 +82,13 @@ void Manager::set()
     {
         showErrorDialogAndLogError(nullptr, "problem with DB connection");
     }
+
+    this->initialized_ = true;
 }
 
 void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 {
-    WidgetGroup* groupPtr = this->getMappedWidgetGroupByCompanionPtr(companionPtr);
+    WidgetGroup* groupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
     // encrypt message
 
@@ -185,7 +188,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
                 // add to widget
                 WidgetGroup* groupPtr =
-                    this->getMappedWidgetGroupByCompanionPtr(companionPtr);
+                    this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
                 emit groupPtr->addMessageWidgetToCentralPanelChatHistorySignal(
                     messageStatePtr, messagePtr);
@@ -276,7 +279,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgsInfo("got history request from " + companionPtr->getName());
 
-            emit this->getMappedWidgetGroupByCompanionPtr(companionPtr)->
+            emit this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr)->
                 askUserForHistorySendingConfirmationSignal();
         }
 
@@ -358,10 +361,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             this->clearChatHistory(companionPtr);
 
             // fill container with messages
-            this->fillWithMessages(companionPtr, true);
+            this->fillCompanionMessageMapping(companionPtr, true);
 
             // build chat history
-            emit this->getMappedWidgetGroupByCompanionPtr(companionPtr)->
+            emit this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr)->
                 buildChatHistorySignal();
         }
 
@@ -406,14 +409,29 @@ void Manager::addEarlyMessages(const Companion* companionPtr)
             return;
         }
 
+        WidgetGroup* widgetGroupPtr =
+            this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
+
         for(size_t i = 0; i < messagesDataPtr->size(); i++)  // TODO switch to iterators
         {
             logArgs("adding message with id", messagesDataPtr->getValue(i, "id"));
-            const_cast<Companion*>(companionPtr)->
+            auto pair = const_cast<Companion*>(companionPtr)->
                 createMessageAndAddToMapping(messagesDataPtr, i);
+
+            if(pair.second)
+            {
+                widgetGroupPtr->
+                    addMessageWidgetToCentralPanelChatHistory(
+                        &(pair.first->first),
+                        pair.first->second.getStatePtr());
+            }
+            else
+            {
+                logArgsError("could not add message to messageMapping_");
+            }
         }
 
-        // add message widgets to chat history
+        widgetGroupPtr->sortChatHistoryElements();
     }
 }
 
@@ -424,7 +442,7 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)  // TODO rewr
     if(this->selectedCompanionPtr_)
     {
         auto widgetGroupPtr =
-            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
+            this->getMappedWidgetGroupPtrByCompanionPtr(this->selectedCompanionPtr_);
 
         dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->unselect();
 
@@ -440,7 +458,7 @@ void Manager::resetSelectedCompanion(const Companion* newSelected)  // TODO rewr
     if(this->selectedCompanionPtr_)
     {
         auto widgetGroupPtr =
-            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
+            this->getMappedWidgetGroupPtrByCompanionPtr(this->selectedCompanionPtr_);
 
         dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->
             select();
@@ -566,7 +584,7 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr)
     companionActionPtr->updateCompanionObjectData();
 
     // update SocketInfoWidget
-    auto widgetGroupPtr = this->getMappedWidgetGroupByCompanionPtr(
+    auto widgetGroupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(
         companionActionPtr->getCompanionPtr());
 
     dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->update();
@@ -629,7 +647,7 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr)
 void Manager::clearChatHistory(Companion* companionPtr)
 {
     WidgetGroup* widgetGroupPtr =
-        this->getMappedWidgetGroupByCompanionPtr(companionPtr);
+        this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
     getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
 }
@@ -752,7 +770,7 @@ void Manager::hideSelectedCompanionCentralPanel()
     if(this->selectedCompanionPtr_)
     {
         auto groupPtr =
-            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
+            this->getMappedWidgetGroupPtrByCompanionPtr(this->selectedCompanionPtr_);
 
         getGraphicManagerPtr()->hideWidgetGroupCentralPanel(groupPtr);
     }
@@ -763,7 +781,7 @@ void Manager::showSelectedCompanionCentralPanel()
     if(this->selectedCompanionPtr_)
     {
         auto groupPtr =
-            this->getMappedWidgetGroupByCompanionPtr(this->selectedCompanionPtr_);
+            this->getMappedWidgetGroupPtrByCompanionPtr(this->selectedCompanionPtr_);
 
         getGraphicManagerPtr()->showWidgetGroupCentralPanel(groupPtr);
     }
@@ -913,6 +931,11 @@ void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
     bool result = companionPtr->sendChatHistory(messagesDataPtr, keys);
 }
 
+bool Manager::isInitialised()
+{
+    return this->initialized_;
+}
+
 const Companion* Manager::getMappedCompanionByWidgetGroup(
     WidgetGroup* groupPtr) const
 {
@@ -929,7 +952,8 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
     return result->second.first;
 }
 
-void Manager::fillWithMessages(Companion* companionPtr, bool containersAlreadyHaveMessages)
+void Manager::fillCompanionMessageMapping(
+    Companion* companionPtr, bool containersAlreadyHaveMessages)
 {
     uint8_t companionId = companionPtr->getId();
 
@@ -1022,14 +1046,14 @@ bool Manager::buildCompanions()
         return false;
     }
 
-    std::sort(
-        companionsDataPtr->getDataPtr()->begin(),
-        companionsDataPtr->getDataPtr()->end(),
-        [&](auto& iterator1, auto& iterator2)
-        {
-            return iterator1.at("id") < iterator2.at("id");
-        }
-    );
+    // std::sort(
+    //     companionsDataPtr->getDataPtr()->begin(),
+    //     companionsDataPtr->getDataPtr()->end(),
+    //     [&](auto& iterator1, auto& iterator2)
+    //     {
+    //         return iterator1.at("id") < iterator2.at("id");
+    //     }
+    // );
 
     for(size_t index = 0; index < companionsDataPtr->size(); index++)  // TODO switch to iterators
     {
@@ -1067,7 +1091,7 @@ bool Manager::buildCompanions()
 
         if(companionPtr->getId() > 1)  // TODO change condition
         {
-            this->fillWithMessages(companionPtr, false);
+            this->fillCompanionMessageMapping(companionPtr, false);
 
             if(!companionPtr->startServer())
             {
@@ -1099,17 +1123,14 @@ void Manager::buildWidgetGroups()
     }
     else
     {
-        if(childrenSize != 0)
+        // TODO check if sockets already are children
+
+        // hide companion panel stub widget
+        graphicManagerPtr->hideCompanionPanelStub();
+
+        for(auto& pair : this->mapCompanionIdToCompanionInfo_)
         {
-            // TODO check if sockets already are children
-
-            // hide companion panel stub widget
-            graphicManagerPtr->hideCompanionPanelStub();
-
-            for(auto& pair : this->mapCompanionIdToCompanionInfo_)
-            {
-                this->createWidgetGroupAndAddToMapping(pair.second.first);
-            }
+            this->createWidgetGroupAndAddToMapping(pair.second.first);
         }
     }
 }
@@ -1137,6 +1158,8 @@ void Manager::createWidgetGroupAndAddToMapping(const Companion* companionPtr)
 
     this->mapCompanionIdToCompanionInfo_[companionPtr->getId()].second =
         widgetGroupPtr;
+
+    const_cast<Companion*>(companionPtr)->addMessageWidgetsToChatHistory();
 }
 
 void Manager::deleteCompanionObject(Companion* companionPtr)

@@ -34,7 +34,7 @@ public:
     bool getUserIsAuthenticated();
 
     const Companion* getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget*) const;
-    WidgetGroup* getMappedWidgetGroupByCompanionPtr(const Companion*) const;
+    WidgetGroup* getMappedWidgetGroupPtrByCompanionPtr(const Companion*) const;
 
     void set();
     void sendMessage(Companion*, const std::string&);
@@ -54,8 +54,10 @@ public:
     void sendUnsentMessages(const Companion*);
     void requestHistoryFromCompanion(const Companion*);
     void sendChatHistoryToCompanion(const Companion*);
+    bool isInitialised();
 
 private:
+    bool initialized_;
     std::mutex messageStateToMessageMapMutex_;
     PGconn* dbConnectionPtr_;
     bool userIsAuthenticated_;
@@ -63,7 +65,7 @@ private:
     std::map<int, std::pair<Companion*, WidgetGroup*>> mapCompanionIdToCompanionInfo_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
-    void fillWithMessages(Companion*, bool);
+    void fillCompanionMessageMapping(Companion*, bool);
     bool connectToDb();
     bool buildCompanions();
     void buildWidgetGroups();

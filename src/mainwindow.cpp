@@ -86,8 +86,7 @@ void MainWindow::set()
 
 void MainWindow::addTextToAppLogWidget(const QString& text)
 {
-    this->rightPanelPtr_->addTextToAppLogWidget(text);
-    // QApplication::processEvents();
+    this->rightPanelPtr_->addTextToAppLogWidget(text);    
 }
 
 void MainWindow::addWidgetToContainerAndSetParentTo(
