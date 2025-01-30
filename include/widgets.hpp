@@ -280,10 +280,6 @@ public:
     void addMessageWidgetToChatHistory(
         const WidgetGroup*, const Companion*, const Message*, const MessageState*);
 
-    // TODO delete 'FromThread' methods, emit signal by caller
-    void addMessageWidgetToChatHistoryFromThread(
-        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
-
     void scrollDownChatHistory();
     void clearChatHistory();
     void sortChatHistoryElements(bool);
@@ -363,14 +359,7 @@ public:
 
     void set();
     void buildChatHistory();
-
-    void addMessageWidgetToCentralPanelChatHistory(
-        const WidgetGroup*, const Message*, const MessageState*);
-
-    // TODO delete 'FromThread' methods, emit signal by caller
-    void addMessageWidgetToCentralPanelChatHistoryFromThread(
-        const MessageState*, const Message*);
-
+    void addMessageWidgetToCentralPanelChatHistory(const Message*, const MessageState*);
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
@@ -379,10 +368,10 @@ public:
     void messageAdded();
     void askUserForHistorySendingConfirmation();
 
-    // TODO delete 'FromThread' methods, emit signal by caller
-    void askUserForHistorySendingConfirmationFromThread();
-
 signals:
+    void addMessageWidgetToCentralPanelChatHistorySignal(
+        const MessageState*, const Message*);
+
     void askUserForHistorySendingConfirmationSignal();
     void buildChatHistorySignal();
 
@@ -391,6 +380,9 @@ public slots:
     void buildChatHistorySlot();
 
 private slots:
+    void addMessageWidgetToCentralPanelChatHistorySlot(
+        const MessageState*, const Message*);
+
     void askUserForHistorySendingConfirmationSlot();
 
 private:

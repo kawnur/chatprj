@@ -882,14 +882,6 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     this->scrollDownChatHistory();
 }
 
-void CentralPanelWidget::addMessageWidgetToChatHistoryFromThread(
-    const WidgetGroup* widgetGroupPtr, const Companion* companionPtr,
-    const Message* messagePtr, const MessageState* messageStatePtr)
-{
-    emit this->addMessageWidgetToChatHistorySignal(
-        widgetGroupPtr, companionPtr, messagePtr, messageStatePtr);
-}
-
 void CentralPanelWidget::scrollDownChatHistory()
 {
     // double call workaround to scroll down fully
@@ -1139,6 +1131,11 @@ WidgetGroup::~WidgetGroup()
 void WidgetGroup::set()
 {
     connect(
+        this, &WidgetGroup::addMessageWidgetToCentralPanelChatHistorySignal,
+        this, &WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot,
+        Qt::QueuedConnection);
+
+    connect(
         this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
         this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
         Qt::QueuedConnection);
@@ -1156,26 +1153,9 @@ void WidgetGroup::buildChatHistory()
 }
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
-    const WidgetGroup* widgetGroupPtr, const Message* messagePtr,
-    const MessageState* messageStatePtr)
+    const Message* messagePtr, const MessageState* messageStatePtr)
 {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
-        widgetGroupPtr, this->companionPtr_, messagePtr, messageStatePtr);
-}
-
-void WidgetGroup::addMessageWidgetToCentralPanelChatHistoryFromThread(
-    const MessageState* messageStatePtr, const Message* messagePtr)
-{
-    bool isAntecedent = messageStatePtr->getIsAntecedent();
-
-    if(isAntecedent)
-    {
-        std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
-        ++this->antecedentMessagesCounter_;
-        logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
-    }
-
-    this->centralPanelPtr_->addMessageWidgetToChatHistoryFromThread(
         this, this->companionPtr_, messagePtr, messageStatePtr);
 }
 
@@ -1236,11 +1216,6 @@ void WidgetGroup::askUserForHistorySendingConfirmation()
     actionPtr->set();
 }
 
-void WidgetGroup::askUserForHistorySendingConfirmationFromThread()
-{
-    emit this->askUserForHistorySendingConfirmationSignal();
-}
-
 void WidgetGroup::messageWidgetSelected(MessageWidget* messageWidgetPtr)
 {
     std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
@@ -1276,6 +1251,22 @@ void WidgetGroup::messageWidgetSelected(MessageWidget* messageWidgetPtr)
 void WidgetGroup::buildChatHistorySlot()
 {
     this->buildChatHistory();
+}
+
+void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
+    const MessageState* messageStatePtr, const Message* messagePtr)
+{
+    bool isAntecedent = messageStatePtr->getIsAntecedent();
+
+    if(isAntecedent)
+    {
+        std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
+        ++this->antecedentMessagesCounter_;
+        logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
+    }
+
+    emit this->centralPanelPtr_->addMessageWidgetToChatHistorySignal(
+        this, this->companionPtr_, messagePtr, messageStatePtr);
 }
 
 void WidgetGroup::askUserForHistorySendingConfirmationSlot()

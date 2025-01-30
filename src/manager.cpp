@@ -113,8 +113,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
         const Message* messagePtr = &(pair.first->first);
         MessageState* messageStatePtr = pair.first->second.getStatePtr();
 
-        groupPtr->addMessageWidgetToCentralPanelChatHistory(
-            groupPtr, messagePtr, messageStatePtr);
+        groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr, messageStatePtr);
 
         // send over network
         bool result = companionPtr->sendMessage(
@@ -188,7 +187,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 WidgetGroup* groupPtr =
                     this->getMappedWidgetGroupByCompanionPtr(companionPtr);
 
-                groupPtr->addMessageWidgetToCentralPanelChatHistoryFromThread(
+                emit groupPtr->addMessageWidgetToCentralPanelChatHistorySignal(
                     messageStatePtr, messagePtr);
 
                 // send reception confirmation to sender
@@ -277,8 +276,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgsInfo("got history request from " + companionPtr->getName());
 
-            this->getMappedWidgetGroupByCompanionPtr(companionPtr)->
-                askUserForHistorySendingConfirmationFromThread();
+            emit this->getMappedWidgetGroupByCompanionPtr(companionPtr)->
+                askUserForHistorySendingConfirmationSignal();
         }
 
         break;
@@ -399,7 +398,6 @@ void Manager::addEarlyMessages(const Companion* companionPtr)
         if(messagesDataPtr->isEmpty())
         {
             logArgsWarning(
-                nullptr,
                 QString("no messages earlier than id = %1 in db with companion %2")
                     .arg(
                         getQString(std::to_string(messageId)),
