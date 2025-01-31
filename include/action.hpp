@@ -1,6 +1,7 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 
+#include <filesystem>
 #include <QObject>
 
 #include "data.hpp"
@@ -72,6 +73,23 @@ public:
 private:
     PasswordActionType actionType_;
     const std::string* passwordPtr_;
+};
+
+class FileAction : public Action
+{
+    Q_OBJECT
+
+public:
+    FileAction(FileActionType, Companion*);
+    ~FileAction() = default;
+
+    std::filesystem::path getPath();
+    void sendData() override;
+
+private:
+    FileActionType actionType_;
+    Companion* companionPtr_;
+    std::filesystem::path filePath_;
 };
 
 #endif // ACTION_HPP

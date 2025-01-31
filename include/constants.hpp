@@ -22,9 +22,15 @@ static const char alphanum[] =
 const uint32_t sleepDurationInitial = 1000;
 const float sleepDurationIncreaseRate = 1.2f;
 
+enum class MessageType
+{
+    TEXT,
+    FILE
+};
+
 enum class NetworkMessageType
 {
-    SEND_DATA,
+    SEND_TEXT,
     RECEIVE_CONFIRMATION,
     RECEIVE_CONFIRMATION_REQUEST,
     HISTORY_REQUEST,
@@ -52,6 +58,12 @@ enum class PasswordActionType
 {
     CREATE,
     GET
+};
+
+enum class FileActionType
+{
+    SEND,
+    RECEIVE
 };
 
 enum class MainWindowContainerPosition
@@ -113,13 +125,15 @@ const QString sendChatHistoryButtonText { "Send chat history" };
 
 // colors
 const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;
-const uint32_t leftPanelBackgroundColor = 0xd1d1d1;
-const uint32_t companionNameLabelBackgroundColor = 0xa9a9a9;
+const uint32_t leftPanelBackgroundColor = 0xc9c9c9;
+const uint32_t companionNameLabelBackgroundColor = 0xa4a4a4;
 const uint32_t indicatorMeColor = 0x6a6a6a;
-const uint32_t showHideBackGroundColor = 0x7a7a7a;
-const uint32_t textEditBackgroundColor = 0xdadada;
-const uint32_t appLogBackgroundColor = 0xcccaca;
+const uint32_t showHideWidgetBackGroundColor = 0x7a7a7a;
+const uint32_t messageWidgetBackGroundColor = 0xd1d1d1;
+const uint32_t buttonPanelBackGroundColor = 0x898989;
+const uint32_t textEditBackgroundColor = 0xe1e1e1;
 const uint32_t newMessageEditColor = 0xdcdc07;
+const uint32_t appLogBackgroundColor = 0xcccaca;
 const QString sentMessageColor = "#115e00";
 const QString receivedMessageColor = "#00115e";
 

@@ -225,7 +225,7 @@ std::string buildMessageJSONString(
 
     switch(type)
     {
-    case NetworkMessageType::SEND_DATA:
+    case NetworkMessageType::SEND_TEXT:
         jsonData["time"] = messagePtr->getTime();
         jsonData["text"] = messagePtr->getText();
 

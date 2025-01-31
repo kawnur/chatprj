@@ -201,7 +201,7 @@ const Message* Companion::getEarliestMessagePtr() const
 
 std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
-    uint32_t messageId, uint8_t authorId,
+    MessageType type, uint32_t messageId, uint8_t authorId,
     const std::string& messageTime, const std::string& messageText,
     bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
 {
@@ -219,7 +219,7 @@ Companion::createMessageAndAddToMapping(
 
     auto result = this->messageMapping_.emplace(
         std::make_pair(
-            Message(messageId, companionId, authorId, messageTime, messageText),
+            Message(type, messageId, companionId, authorId, messageTime, messageText),
             MessageInfo(messageStatePtr, nullptr)));
 
     return result;
@@ -242,6 +242,7 @@ Companion::createMessageAndAddToMapping(
     auto result = this->messageMapping_.emplace(
         std::make_pair(
             Message(
+                MessageType::TEXT,
                 std::atoi(messagesDataPtr->getValue(index, "id")),
                 id,
                 std::atoi(messagesDataPtr->getValue(index, "author_id")),

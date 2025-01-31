@@ -11,9 +11,10 @@ class MessageWidget;
 class Message
 {
 public:
-    Message(uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
+    Message(MessageType, uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
     ~Message() = default;
 
+    MessageType getType() const;
     uint32_t getId() const;
     uint8_t getCompanionId() const;
     uint8_t getAuthorId() const;
@@ -27,6 +28,7 @@ public:
     }
 
 private:
+    MessageType type_;
     uint32_t id_;
     uint8_t companion_id_;
     uint8_t author_id_;

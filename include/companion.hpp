@@ -83,7 +83,7 @@ public:
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
     createMessageAndAddToMapping(
-        uint32_t, uint8_t, const std::string&, const std::string&,
+        MessageType, uint32_t, uint8_t, const std::string&, const std::string&,
         bool, bool, bool, std::string);
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>

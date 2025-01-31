@@ -1,10 +1,15 @@
 #include "message.hpp"
 
 Message::Message(
-    uint32_t id, uint8_t companion_id, uint8_t author_id,
+    MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
     const std::string& time, const std::string& text) :
-    id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
-    text_(text) {}
+    type_(type), id_(id), companion_id_(companion_id), author_id_(author_id),
+    time_(time), text_(text) {}
+
+MessageType Message::getType() const
+{
+    return this->type_;
+}
 
 uint32_t Message::getId() const
 {

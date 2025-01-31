@@ -86,7 +86,8 @@ void Manager::set()
     this->initialized_ = true;
 }
 
-void Manager::sendMessage(Companion* companionPtr, const std::string& text)
+void Manager::sendMessage(
+    MessageType type, Companion* companionPtr, const std::string& text)
 {
     WidgetGroup* groupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
@@ -108,7 +109,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
     }
 
     auto pair = companionPtr->createMessageAndAddToMapping(
-        id, 1, timestamp, text, false, false, false, "");
+        type, id, 1, timestamp, text, false, false, false, "");
 
     if(pair.second)
     {
@@ -120,7 +121,7 @@ void Manager::sendMessage(Companion* companionPtr, const std::string& text)
 
         // send over network
         bool result = companionPtr->sendMessage(
-            false, NetworkMessageType::SEND_DATA,
+            false, NetworkMessageType::SEND_TEXT,
             messageStatePtr->getNetworkId(), messagePtr);
 
         // mark message as sent
@@ -157,7 +158,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     switch(type)
     {
     // message is data message
-    case NetworkMessageType::SEND_DATA:
+    case NetworkMessageType::SEND_TEXT:
         {
             auto timestamp = jsonData.at("time");
             auto text = jsonData.at("text");
@@ -177,7 +178,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
 
             auto pair = companionPtr->createMessageAndAddToMapping(
-                id, companion_id, timestamp, text, isAntecedent, false, true, networkId);
+                MessageType::TEXT, id, companion_id, timestamp, text,
+                isAntecedent, false, true, networkId);
 
             if(pair.second)
             {
@@ -871,6 +873,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
             networkId = getRandomString(5);
 
             const_cast<Companion*>(companionPtr)->createMessageAndAddToMapping(
+                MessageType::TEXT,
                 messageId,
                 1,
                 messagesDataPtr->getValue(i, "timestamp_tz"),
@@ -883,7 +886,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
         // send over network
         bool result = companionCastPtr->sendMessage(
-            true, NetworkMessageType::SEND_DATA, networkId, messagePtr);
+            true, NetworkMessageType::SEND_TEXT, networkId, messagePtr);
 
         // mark message as sent
         if(result)
@@ -934,6 +937,11 @@ void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
 bool Manager::isInitialised()
 {
     return this->initialized_;
+}
+
+void Manager::sendFile(FileAction* actionPtr)
+{
+    // getGraphicManagerPtr()->
 }
 
 const Companion* Manager::getMappedCompanionByWidgetGroup(

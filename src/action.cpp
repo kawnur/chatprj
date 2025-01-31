@@ -4,7 +4,15 @@ void Action::set()
 {
     this->dialogPtr_->setAction(this);
     this->dialogPtr_->set();
-    this->dialogPtr_->show();
+
+    if(this->dialogPtr_->getContainsDialogPtr())
+    {
+        this->dialogPtr_->showDialog();
+    }
+    else
+    {
+        this->dialogPtr_->show();
+    }
 }
 
 Dialog* Action::getDialogPtr()
@@ -233,5 +241,40 @@ void PasswordAction::sendData()
         }
 
         break;
+    }
+}
+
+FileAction::FileAction(FileActionType actionType, Companion* companionPtr) :
+    Action(nullptr)
+{
+    actionType_ = actionType;
+    companionPtr_ = companionPtr;
+
+    switch(actionType)
+    {
+    case FileActionType::SEND:
+        dialogPtr_ = new FileDialog;
+
+        break;
+
+    case FileActionType::RECEIVE:
+        dialogPtr_ = new FileDialog;
+
+        break;
+    }
+}
+
+void FileAction::sendData()
+{
+    logArgs("FileAction::sendData");
+
+    auto dialogPtr = dynamic_cast<FileDialog*>(this->dialogPtr_)->getFileDialogPtr();
+
+    for(auto& file : dialogPtr->selectedFiles())  // one file
+    {
+        logArgs(file);
+        this->filePath_ = file.toStdString();
+
+        getManagerPtr()->sendFile(this);
     }
 }

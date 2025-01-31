@@ -37,9 +37,10 @@ void GraphicManager::setStubWidgets()
     this->stubWidgetsPtr_->set();
 }
 
-void GraphicManager::sendMessage(Companion* companionPtr, const std::string& text)
+void GraphicManager::sendMessage(
+    MessageType type, Companion* companionPtr, const std::string& text)
 {
-    getManagerPtr()->sendMessage(companionPtr, text);
+    getManagerPtr()->sendMessage(type, companionPtr, text);
 }
 
 void GraphicManager::addTextToAppLogWidget(const QString& text)
@@ -320,6 +321,12 @@ void GraphicManager::markMessageWidgetAsReceived(
 void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr)
 {
     groupPtr->sortChatHistoryElements();
+}
+
+void GraphicManager::sendFile(Companion* companionPtr)
+{
+    FileAction* actionPtr = new FileAction(FileActionType::SEND, companionPtr);
+    actionPtr->set();
 }
 
 GraphicManager* getGraphicManagerPtr()

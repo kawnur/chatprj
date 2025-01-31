@@ -4,6 +4,7 @@
 #include <chrono>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -222,10 +223,13 @@ public:
     void setMessageWidgetAsSent();
     void setMessageWidgetAsReceived();
 
+    virtual void addSelfToLayout(QVBoxLayout*) {}
+    virtual void showSelf() {}
+
 signals:
     void widgetSelectedSignal(MessageWidget*);
 
-private:
+protected:
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -233,7 +237,44 @@ private:
     QLabel* messageLabelPtr_;
     MessageIndicatorPanelWidget* indicatorPanelPtr_;
 
+    virtual void addMembersToLayout() {}
+
+private:
     void mousePressEvent(QMouseEvent*) override;
+};
+
+class TextMessageWidget : public MessageWidget
+{
+    Q_OBJECT
+
+public:
+    TextMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
+    ~TextMessageWidget() = default;
+
+    void addSelfToLayout(QVBoxLayout*) override;
+    void showSelf() override;
+
+private:
+    void addMembersToLayout() override;
+};
+
+class FileMessageWidget : public MessageWidget
+{
+    Q_OBJECT
+
+public:
+    FileMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
+    ~FileMessageWidget();
+
+    void addSelfToLayout(QVBoxLayout*) override;
+    void showSelf() override;
+
+private:
+    QWidget* fileWidgetPtr_;
+    QHBoxLayout* fileWidgetLayoutPtr_;
+    QPushButton* downloadButtonPtr_;
+
+    void addMembersToLayout() override;
 };
 
 class LeftPanelWidget : public QWidget
@@ -307,7 +348,10 @@ private:
     QWidget* chatHistoryWidgetPtr_;
     QVBoxLayout* chatHistoryLayoutPtr_;
 
-    // QWidget* borderWidgetPtr_;
+    QWidget* buttonPanelWidgetPtr_;
+    QHBoxLayout* buttonPanelLayoutPtr_;
+    QPalette* buttonPanelPalettePtr_;
+    QPushButton* sendFileButtonPtr_;
 
     TextEditWidget* textEditPtr_;
     QPalette* textEditPalettePtr_;    
@@ -316,7 +360,9 @@ private:
 
     bool eventFilter(QObject*, QEvent*) override;
 
+private slots:
     void sendMessage(const QString&);
+    void sendFileSlot();
 };
 
 class RightPanelWidget : public QWidget
@@ -437,7 +483,11 @@ public:
     void setAction(Action* actionPtr) { this->actionPtr_ = actionPtr; }
     virtual void set() {}
 
+    bool getContainsDialogPtr() const { return this->containsDialogPtr_; }
+    virtual void showDialog() {}
+
 protected:
+    bool containsDialogPtr_ = false;
     Action* actionPtr_;
 };
 
@@ -542,6 +592,23 @@ private:
     QVBoxLayout* layoutPtr_;
     QDialogButtonBox* buttonBoxPtr_;
     std::vector<ButtonInfo>* buttonsInfoPtr_;
+};
+
+class FileDialog : public Dialog
+{
+    Q_OBJECT
+
+public:
+    FileDialog();
+    ~FileDialog();
+
+    void set();
+    void showDialog() override;
+
+    QFileDialog* getFileDialogPtr();
+
+private:
+    QFileDialog* fileDialogPtr_;
 };
 
 #endif // WIDGETS_HPP

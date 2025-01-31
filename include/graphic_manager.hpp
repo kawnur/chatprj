@@ -32,7 +32,7 @@ public:
     void set();
     void setParentsForStubs(QWidget*, QWidget*);
     void setStubWidgets();
-    void sendMessage(Companion*, const std::string&);
+    void sendMessage(MessageType, Companion*, const std::string&);
     void addTextToAppLogWidget(const QString&);
     size_t getCompanionPanelChildrenSize();
     void hideWidgetGroupCentralPanel(WidgetGroup*);
@@ -72,6 +72,7 @@ public:
     void markMessageWidgetAsSent(Companion*, const Message*);
     void markMessageWidgetAsReceived(Companion*, const Message*);
     void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
+    void sendFile(Companion*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;

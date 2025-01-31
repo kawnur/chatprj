@@ -472,7 +472,7 @@ ShowHideWidget::ShowHideWidget()
     labelPtr_->setText("Show / Hide");
 
     palettePtr_ = new QPalette;
-    palettePtr_->setColor(QPalette::Window, QColor(showHideBackGroundColor));
+    palettePtr_->setColor(QPalette::Window, QColor(showHideWidgetBackGroundColor));
     setAutoFillBackground(true);
     setPalette(*palettePtr_);
 
@@ -584,7 +584,7 @@ MessageWidget::MessageWidget(
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     palettePtr_ = new QPalette;
-    palettePtr_->setColor(QPalette::Window, QColorConstants::LightGray);
+    palettePtr_->setColor(QPalette::Window, QColor(messageWidgetBackGroundColor));
     setAutoFillBackground(true);
     setPalette(*palettePtr_);
 
@@ -598,14 +598,14 @@ MessageWidget::MessageWidget(
     auto data = formatMessageHeaderAndBody(companionPtr, messagePtr);
 
     headerLabelPtr_ = new QLabel(data.first);
-    layoutPtr_->addWidget(headerLabelPtr_);
+    // layoutPtr_->addWidget(headerLabelPtr_);
 
     messageLabelPtr_ = new QLabel(data.second);
-    layoutPtr_->addWidget(messageLabelPtr_);
+    // layoutPtr_->addWidget(messageLabelPtr_);
 
     indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_, messageStatePtr);
 
-    layoutPtr_->addWidget(indicatorPanelPtr_);
+    // layoutPtr_->addWidget(indicatorPanelPtr_);
 }
 
 MessageWidget::~MessageWidget()
@@ -641,6 +641,67 @@ void MessageWidget::mousePressEvent(QMouseEvent* event)
     this->indicatorPanelPtr_->unsetNewMessageLabel();
 
     emit this->widgetSelectedSignal(this);
+}
+
+TextMessageWidget::TextMessageWidget(
+    QWidget* parentPtr, const Companion* companionPtr,
+    const MessageState* messageStatePtr, const Message* messagePtr) :
+    MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr) {}
+
+void TextMessageWidget::addSelfToLayout(QVBoxLayout* layoutPtr)
+{
+    layoutPtr->addWidget(this);
+}
+
+void TextMessageWidget::showSelf()
+{
+    this->show();
+}
+
+void TextMessageWidget::addMembersToLayout()
+{
+    layoutPtr_->addWidget(headerLabelPtr_);
+    layoutPtr_->addWidget(messageLabelPtr_);
+    layoutPtr_->addWidget(indicatorPanelPtr_);
+}
+
+FileMessageWidget::FileMessageWidget(
+    QWidget* parentPtr, const Companion* companionPtr,
+    const MessageState* messageStatePtr, const Message* messagePtr) :
+    MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr)
+{
+    fileWidgetPtr_ = new QWidget;
+    fileWidgetLayoutPtr_ = new QHBoxLayout;
+    fileWidgetPtr_->setLayout(fileWidgetLayoutPtr_);
+    downloadButtonPtr_ = new QPushButton("Download file");
+}
+
+FileMessageWidget::~FileMessageWidget()
+{
+    delete this->fileWidgetPtr_;
+    delete this->fileWidgetLayoutPtr_;
+    delete this->downloadButtonPtr_;
+}
+
+void FileMessageWidget::addSelfToLayout(QVBoxLayout* layoutPtr)
+{
+    layoutPtr->addWidget(this);
+}
+
+void FileMessageWidget::showSelf()
+{
+    this->show();
+}
+
+void FileMessageWidget::addMembersToLayout()
+{
+    layoutPtr_->addWidget(headerLabelPtr_);
+
+    fileWidgetLayoutPtr_->addWidget(messageLabelPtr_);
+    fileWidgetLayoutPtr_->addWidget(downloadButtonPtr_);
+    layoutPtr_->addWidget(fileWidgetPtr_);
+
+    layoutPtr_->addWidget(indicatorPanelPtr_);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -806,8 +867,19 @@ CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name)
         layoutPtr_->addWidget(chatHistoryScrollAreaPtr_);
     }
 
-    // borderWidgetPtr_ = new QWidget;
-    // layoutPtr_->addWidget(borderWidgetPtr_);
+    buttonPanelWidgetPtr_ = new QWidget;
+    buttonPanelLayoutPtr_ = new QHBoxLayout;
+    buttonPanelLayoutPtr_->setSpacing(10);
+    buttonPanelLayoutPtr_->setContentsMargins(10, 10, 10, 10);
+    buttonPanelLayoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    buttonPanelWidgetPtr_->setLayout(buttonPanelLayoutPtr_);
+    buttonPanelPalettePtr_ = new QPalette;
+    buttonPanelPalettePtr_->setColor(QPalette::Window, QColor(buttonPanelBackGroundColor));
+    chatHistoryWidgetPtr_->setPalette(*buttonPanelPalettePtr_);
+    sendFileButtonPtr_ = new QPushButton("Send file");
+    buttonPanelLayoutPtr_->addWidget(sendFileButtonPtr_);
+
+    layoutPtr_->addWidget(buttonPanelWidgetPtr_);
 
     textEditPtr_ = new TextEditWidget;
     layoutPtr_->addWidget(textEditPtr_);
@@ -829,7 +901,10 @@ CentralPanelWidget::~CentralPanelWidget()
     delete this->chatHistoryLayoutPtr_;
     delete this->textEditPtr_;
     delete this->textEditPalettePtr_;
-    delete this->splitterPtr_;
+    delete this->buttonPanelWidgetPtr_;
+    delete this->buttonPanelLayoutPtr_;
+    delete this->buttonPanelPalettePtr_;
+    delete this->sendFileButtonPtr_;
 
     // TODO delete message widgets
 }
@@ -842,6 +917,10 @@ void CentralPanelWidget::set(Companion* companionPtr)
         this->textEditPtr_, &TextEditWidget::send,
         this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
 
+    connect(
+        this->sendFileButtonPtr_, &QPushButton::clicked,
+        this, &CentralPanelWidget::sendFileSlot, Qt::QueuedConnection);
+
     this->chatHistoryScrollAreaPtr_->installEventFilter(this);
 }
 
@@ -852,8 +931,22 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     {
         std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
-        MessageWidget* widgetPtr = new MessageWidget(
-            this->chatHistoryWidgetPtr_, companionPtr, messageStatePtr, messagePtr);
+        MessageWidget* widgetPtr = nullptr;
+
+        switch(messagePtr->getType())
+        {
+        case MessageType::TEXT:
+            widgetPtr = new TextMessageWidget(
+                this->chatHistoryWidgetPtr_, companionPtr, messageStatePtr, messagePtr);
+
+            break;
+
+        case MessageType::FILE:
+            widgetPtr = new FileMessageWidget(
+                this->chatHistoryWidgetPtr_, companionPtr, messageStatePtr, messagePtr);
+
+            break;
+        }
 
         std::thread(
             [=]()
@@ -868,7 +961,9 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
             widgetPtr->set(widgetGroupPtr);
         }
 
-        this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
+        // this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
+        widgetPtr->addSelfToLayout(this->chatHistoryLayoutPtr_);
+        widgetPtr->showSelf();
 
         if(messageStatePtr->getIsAntecedent())
         {
@@ -883,6 +978,8 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     }
 
     this->scrollDownChatHistory();
+
+    logArgsWithCustomMark(this->chatHistoryWidgetPtr_->children().size());
 }
 
 void CentralPanelWidget::scrollDownChatHistory()
@@ -997,8 +1094,14 @@ void CentralPanelWidget::sendMessage(const QString& text)
 {
     if(!text.isEmpty())
     {
-        getGraphicManagerPtr()->sendMessage(this->companionPtr_, text.toStdString());
+        getGraphicManagerPtr()->sendMessage(
+            MessageType::TEXT, this->companionPtr_, text.toStdString());
     }
+}
+
+void CentralPanelWidget::sendFileSlot()
+{
+    getGraphicManagerPtr()->sendFile(this->companionPtr_);
 }
 
 RightPanelWidget::RightPanelWidget(QWidget* parent)
@@ -1675,4 +1778,33 @@ void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 void TextDialog::reject()
 {
     QDialog::reject();
+}
+
+FileDialog::FileDialog()
+{
+    containsDialogPtr_ = true;
+    fileDialogPtr_ = new QFileDialog;
+}
+
+FileDialog::~FileDialog()
+{
+    delete this->fileDialogPtr_;
+}
+
+void FileDialog::set()
+{
+    connect(
+        this->fileDialogPtr_, &QFileDialog::accepted,
+        this->actionPtr_, &Action::sendData,
+        Qt::QueuedConnection);
+}
+
+void FileDialog::showDialog()
+{
+    this->fileDialogPtr_->show();
+}
+
+QFileDialog* FileDialog::getFileDialogPtr()
+{
+    return this->fileDialogPtr_;
 }
