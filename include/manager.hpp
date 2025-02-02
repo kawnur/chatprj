@@ -41,7 +41,7 @@ public:
 
     void set();
     void sendMessage(MessageType, Companion*, Action*, const std::string&);
-    void sendFile(FileAction*);
+    void sendFile(Companion*, const std::filesystem::path&);
     void receiveMessage(Companion*, const std::string&);
     void addEarlyMessages(const Companion*);
     void resetSelectedCompanion(const Companion*);

@@ -31,6 +31,8 @@ enum class MessageType
 enum class NetworkMessageType
 {
     SEND_TEXT,
+    SEND_FILE_PROPOSAL,
+    SEND_FILE_REQUEST,
     RECEIVE_CONFIRMATION,
     RECEIVE_CONFIRMATION_REQUEST,
     HISTORY_REQUEST,

@@ -127,9 +127,24 @@ void Manager::sendMessage(
 
         groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr, messageStatePtr);
 
+        NetworkMessageType networkMessageType;
+
+        switch(type)
+        {
+        case MessageType::TEXT:
+            networkMessageType = NetworkMessageType::SEND_TEXT;
+
+            break;
+
+        case MessageType::FILE:
+            networkMessageType = NetworkMessageType::SEND_FILE_PROPOSAL;
+
+            break;
+        }
+
         // send over network
         bool result = companionPtr->sendMessage(
-            false, NetworkMessageType::SEND_TEXT,
+            false, networkMessageType,
             messageStatePtr->getNetworkId(), messagePtr);
 
         // mark message as sent
@@ -143,9 +158,9 @@ void Manager::sendMessage(
     }
 }
 
-void Manager::sendFile(FileAction* actionPtr)
+void Manager::sendFile(Companion* companionPtr, const std::filesystem::path& path)
 {
-
+    logArgs("Manager::sendFile");
 }
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
@@ -172,14 +187,32 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     {
     // message is data message
     case NetworkMessageType::SEND_TEXT:
+    case NetworkMessageType::SEND_FILE_PROPOSAL:
         {
+            MessageType messageType;
+            NetworkMessageType replyMessageType;
+
+            switch(type)
+            {
+            case NetworkMessageType::SEND_TEXT:
+                messageType = MessageType::TEXT;
+                replyMessageType = NetworkMessageType::RECEIVE_CONFIRMATION;
+
+                break;
+
+            case NetworkMessageType::SEND_FILE_PROPOSAL:
+                messageType = MessageType::FILE;
+                replyMessageType = NetworkMessageType::SEND_FILE_REQUEST;
+
+                break;
+            }
+
             auto timestamp = jsonData.at("time");
             auto text = jsonData.at("text");
+            auto name = companionPtr->getName();
 
             // add to DB and get timestamp
-            auto tuple = this->pushMessageToDB(
-                companionPtr->getName(), companionPtr->getName(),
-                timestamp, text, false, true);
+            auto tuple = this->pushMessageToDB(name, name, timestamp, text, false, true);
 
             uint32_t id = std::get<0>(tuple);
             uint8_t companion_id = std::get<1>(tuple);
@@ -191,7 +224,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
 
             auto pair = companionPtr->createMessageAndAddToMapping(
-                MessageType::TEXT, id, companion_id, timestamp, text,
+                messageType, id, companion_id, timestamp, text,
                 isAntecedent, false, true, networkId);
 
             if(pair.second)
@@ -208,9 +241,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 emit groupPtr->addMessageWidgetToCentralPanelChatHistorySignal(
                     messageStatePtr, messagePtr);
 
-                // send reception confirmation to sender
+                // TODO send by button push
+                // send message to sender
                 bool result = companionPtr->sendMessage(
-                    false, NetworkMessageType::RECEIVE_CONFIRMATION, networkId, messagePtr);
+                    false, replyMessageType, networkId, messagePtr);
             }
         }
 
@@ -381,6 +415,24 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             // build chat history
             emit this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr)->
                 buildChatHistorySignal();
+        }
+
+        break;
+
+    case NetworkMessageType::SEND_FILE_REQUEST:
+        {
+            auto path = companionPtr->getFileInfoStoragePtr()->get(networkId);
+
+            if(path.string().size() != 0)
+            {
+                this->sendFile(companionPtr, path);
+            }
+            else
+            {
+                logArgsError(
+                    QString("unknown file path for network id: %1")
+                        .arg(getQString(networkId)));
+            }
         }
 
         break;

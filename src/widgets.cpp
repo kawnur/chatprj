@@ -707,6 +707,8 @@ void FileMessageWidget::addMembersToLayout()
 
     fileWidgetLayoutPtr_->addWidget(messageLabelPtr_);
 
+    logArgs("this->showButton_:", this->showButton_);
+
     if(this->showButton_)
     {
         fileWidgetLayoutPtr_->addWidget(downloadButtonPtr_);
