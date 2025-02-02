@@ -9,6 +9,7 @@
 #include "constants.hpp"
 #include "data.hpp"
 #include "db_interaction.hpp"
+#include "file_info.hpp"
 #include "logging.hpp"
 #include "message.hpp"
 
@@ -17,6 +18,7 @@ class ChatClient;
 class ChatServer;
 class CompanionData;
 class DBReplyData;
+class FileInfoStorage;
 class Message;
 class MessageInfo;
 class MessageState;
@@ -68,6 +70,7 @@ public:
     std::string getSocketIpAddress() const;
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
+    FileInfoStorage* getFileInfoStoragePtr() const;
 
     const MessageState* getMappedMessageStatePtrByMessagePtr(const Message*);
     MessageWidget* getMappedMessageWidgetPtrByMessagePtr(const Message*);
@@ -110,6 +113,7 @@ private:
     SocketInfo* socketInfoPtr_;
     ChatClient* clientPtr_;
     ChatServer* serverPtr_;
+    FileInfoStorage* fileInfoStoragePtr_;
     std::map<Message, MessageInfo> messageMapping_;
 
     std::string generateNewNetworkId(bool);

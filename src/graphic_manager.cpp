@@ -40,7 +40,7 @@ void GraphicManager::setStubWidgets()
 void GraphicManager::sendMessage(
     MessageType type, Companion* companionPtr, const std::string& text)
 {
-    getManagerPtr()->sendMessage(type, companionPtr, text);
+    getManagerPtr()->sendMessage(type, companionPtr, nullptr, text);
 }
 
 void GraphicManager::addTextToAppLogWidget(const QString& text)

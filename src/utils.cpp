@@ -175,6 +175,11 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
     logArgsError(message);
 }
 
+QString getFormattedMessageBodyQString(const QString& color, const QString& text)
+{
+    return QString("<font color=\"%1\"><br>%2</font>").arg(color, text);
+}
+
 std::pair<QString, QString> formatMessageHeaderAndBody(
     const Companion* companionPtr, const Message* messagePtr)
 {
@@ -203,7 +208,7 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
         QString("<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>")
             .arg(color, sender, receiver, time);
 
-    QString body = QString("<font color=\"%1\"><br>%2</font>").arg(color, text);
+    QString body = getFormattedMessageBodyQString(color, text);
 
     std::pair<QString, QString> data (header, body);
 

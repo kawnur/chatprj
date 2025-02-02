@@ -223,9 +223,6 @@ public:
     void setMessageWidgetAsSent();
     void setMessageWidgetAsReceived();
 
-    virtual void addSelfToLayout(QVBoxLayout*) {}
-    virtual void showSelf() {}
-
 signals:
     void widgetSelectedSignal(MessageWidget*);
 
@@ -249,10 +246,7 @@ class TextMessageWidget : public MessageWidget
 
 public:
     TextMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
-    ~TextMessageWidget() = default;
-
-    void addSelfToLayout(QVBoxLayout*) override;
-    void showSelf() override;
+    ~TextMessageWidget();
 
 private:
     void addMembersToLayout() override;
@@ -266,10 +260,8 @@ public:
     FileMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
     ~FileMessageWidget();
 
-    void addSelfToLayout(QVBoxLayout*) override;
-    void showSelf() override;
-
 private:
+    bool showButton_;
     QWidget* fileWidgetPtr_;
     QHBoxLayout* fileWidgetLayoutPtr_;
     QPushButton* downloadButtonPtr_;

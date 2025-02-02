@@ -264,6 +264,16 @@ FileAction::FileAction(FileActionType actionType, Companion* companionPtr) :
     }
 }
 
+Companion* FileAction::getCompanionPtr() const
+{
+    return this->companionPtr_;
+}
+
+std::filesystem::path FileAction::getPath()
+{
+    return this->filePath_;
+}
+
 void FileAction::sendData()
 {
     logArgs("FileAction::sendData");
@@ -273,8 +283,12 @@ void FileAction::sendData()
     for(auto& file : dialogPtr->selectedFiles())  // one file
     {
         logArgs(file);
-        this->filePath_ = file.toStdString();
+        this->filePath_ = file.toStdString();  // TODO ???
 
-        getManagerPtr()->sendFile(this);
+        QString text = QString("SEND FILE: %1").arg(
+            getQString(this->filePath_.filename().string()));
+
+        getManagerPtr()->sendMessage(
+            MessageType::FILE, this->getCompanionPtr(), this, text.toStdString());
     }
 }

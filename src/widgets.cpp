@@ -598,14 +598,10 @@ MessageWidget::MessageWidget(
     auto data = formatMessageHeaderAndBody(companionPtr, messagePtr);
 
     headerLabelPtr_ = new QLabel(data.first);
-    // layoutPtr_->addWidget(headerLabelPtr_);
 
     messageLabelPtr_ = new QLabel(data.second);
-    // layoutPtr_->addWidget(messageLabelPtr_);
 
     indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_, messageStatePtr);
-
-    // layoutPtr_->addWidget(indicatorPanelPtr_);
 }
 
 MessageWidget::~MessageWidget()
@@ -619,6 +615,8 @@ MessageWidget::~MessageWidget()
 
 void MessageWidget::set(const WidgetGroup* groupPtr)
 {
+    this->addMembersToLayout();
+
     this->indicatorPanelPtr_->setParent(this);
 
     connect(
@@ -646,17 +644,15 @@ void MessageWidget::mousePressEvent(QMouseEvent* event)
 TextMessageWidget::TextMessageWidget(
     QWidget* parentPtr, const Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr) :
-    MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr) {}
-
-void TextMessageWidget::addSelfToLayout(QVBoxLayout* layoutPtr)
+    MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr)
 {
-    layoutPtr->addWidget(this);
+    if(parentPtr)
+    {
+        setParent(parentPtr);
+    }
 }
 
-void TextMessageWidget::showSelf()
-{
-    this->show();
-}
+TextMessageWidget::~TextMessageWidget() {}
 
 void TextMessageWidget::addMembersToLayout()
 {
@@ -670,10 +666,32 @@ FileMessageWidget::FileMessageWidget(
     const MessageState* messageStatePtr, const Message* messagePtr) :
     MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr)
 {
+    if(parentPtr)
+    {
+        setParent(parentPtr);
+    }
+
+    bool isMessageFromMe = messagePtr->isMessageFromMe();
+
+    showButton_ = !isMessageFromMe;
+
+    // rewrite widget body text for sender's widget
+    if(isMessageFromMe)
+    {
+        auto path = companionPtr->getFileInfoStoragePtr()->
+            get(messageStatePtr->getNetworkId());
+
+        messageLabelPtr_->setText(
+            getFormattedMessageBodyQString(
+                sentMessageColor,
+                QString("SEND FILE: %1").arg(getQString(path.string()))));
+    }
+
     fileWidgetPtr_ = new QWidget;
     fileWidgetLayoutPtr_ = new QHBoxLayout;
     fileWidgetPtr_->setLayout(fileWidgetLayoutPtr_);
-    downloadButtonPtr_ = new QPushButton("Download file");
+
+    downloadButtonPtr_ = (showButton_) ? new QPushButton("Download file") : nullptr;
 }
 
 FileMessageWidget::~FileMessageWidget()
@@ -683,22 +701,17 @@ FileMessageWidget::~FileMessageWidget()
     delete this->downloadButtonPtr_;
 }
 
-void FileMessageWidget::addSelfToLayout(QVBoxLayout* layoutPtr)
-{
-    layoutPtr->addWidget(this);
-}
-
-void FileMessageWidget::showSelf()
-{
-    this->show();
-}
-
 void FileMessageWidget::addMembersToLayout()
 {
     layoutPtr_->addWidget(headerLabelPtr_);
 
     fileWidgetLayoutPtr_->addWidget(messageLabelPtr_);
-    fileWidgetLayoutPtr_->addWidget(downloadButtonPtr_);
+
+    if(this->showButton_)
+    {
+        fileWidgetLayoutPtr_->addWidget(downloadButtonPtr_);
+    }
+
     layoutPtr_->addWidget(fileWidgetPtr_);
 
     layoutPtr_->addWidget(indicatorPanelPtr_);
@@ -961,9 +974,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
             widgetPtr->set(widgetGroupPtr);
         }
 
-        // this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
-        widgetPtr->addSelfToLayout(this->chatHistoryLayoutPtr_);
-        widgetPtr->showSelf();
+        this->chatHistoryLayoutPtr_->addWidget(widgetPtr);
 
         if(messageStatePtr->getIsAntecedent())
         {
@@ -978,8 +989,6 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     }
 
     this->scrollDownChatHistory();
-
-    logArgsWithCustomMark(this->chatHistoryWidgetPtr_->children().size());
 }
 
 void CentralPanelWidget::scrollDownChatHistory()
@@ -1080,7 +1089,7 @@ bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
                 (eventCastPtr->key() &
                 (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home))))
             {
-                logArgs("scroll bar minimum", "event type", std::to_string(eventPtr->type()));
+                logArgs("scroll bar minimum event type", std::to_string(eventPtr->type()));
 
                 getManagerPtr()->addEarlyMessages(this->companionPtr_);
             }

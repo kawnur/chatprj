@@ -87,7 +87,8 @@ void Manager::set()
 }
 
 void Manager::sendMessage(
-    MessageType type, Companion* companionPtr, const std::string& text)
+    MessageType type, Companion* companionPtr,
+    Action* actionPtr, const std::string& text)
 {
     WidgetGroup* groupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
@@ -117,6 +118,13 @@ void Manager::sendMessage(
         const Message* messagePtr = &(pair.first->first);
         MessageState* messageStatePtr = pair.first->second.getStatePtr();
 
+        if(type == MessageType::FILE)
+        {
+            companionPtr->getFileInfoStoragePtr()->add(
+                messageStatePtr->getNetworkId(),
+                dynamic_cast<FileAction*>(actionPtr)->getPath());
+        }
+
         groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr, messageStatePtr);
 
         // send over network
@@ -133,6 +141,11 @@ void Manager::sendMessage(
         // wait for message reception confirmation
         this->waitForMessageReceptionConfirmation(companionPtr, messageStatePtr, messagePtr);
     }
+}
+
+void Manager::sendFile(FileAction* actionPtr)
+{
+
 }
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
@@ -937,11 +950,6 @@ void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)
 bool Manager::isInitialised()
 {
     return this->initialized_;
-}
-
-void Manager::sendFile(FileAction* actionPtr)
-{
-    // getGraphicManagerPtr()->
 }
 
 const Companion* Manager::getMappedCompanionByWidgetGroup(

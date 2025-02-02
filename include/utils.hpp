@@ -60,6 +60,8 @@ void showWarningDialogAndLogWarning(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
+QString getFormattedMessageBodyQString(const QString&, const QString&);
+
 std::pair<QString, QString> formatMessageHeaderAndBody(
     const Companion*, const Message*);
 

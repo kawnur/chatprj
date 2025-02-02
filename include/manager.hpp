@@ -9,6 +9,7 @@
 #include "db_interaction.hpp"
 #include "utils.hpp"
 
+class Action;
 class Companion;
 class CompanionAction;
 class DBReplyData;
@@ -39,7 +40,8 @@ public:
     WidgetGroup* getMappedWidgetGroupPtrByCompanionPtr(const Companion*) const;
 
     void set();
-    void sendMessage(MessageType, Companion*, const std::string&);
+    void sendMessage(MessageType, Companion*, Action*, const std::string&);
+    void sendFile(FileAction*);
     void receiveMessage(Companion*, const std::string&);
     void addEarlyMessages(const Companion*);
     void resetSelectedCompanion(const Companion*);
@@ -57,7 +59,6 @@ public:
     void requestHistoryFromCompanion(const Companion*);
     void sendChatHistoryToCompanion(const Companion*);
     bool isInitialised();
-    void sendFile(FileAction*);
 
 private:
     bool initialized_;
