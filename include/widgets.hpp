@@ -26,6 +26,7 @@
 class Action;
 class Companion;
 class CompanionAction;
+class FileAction;
 class MainWindow;
 class Message;
 class MessageState;
@@ -216,7 +217,7 @@ class MessageWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
+    MessageWidget(QWidget*, Companion*, const MessageState*, const Message*);
     ~MessageWidget();
 
     void setBase(const WidgetGroup*);
@@ -229,7 +230,7 @@ signals:
     void widgetSelectedSignal(MessageWidget*);
 
 protected:
-    const Companion* companionPtr_;
+    Companion* companionPtr_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -248,7 +249,7 @@ class TextMessageWidget : public MessageWidget
     Q_OBJECT
 
 public:
-    TextMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
+    TextMessageWidget(QWidget*, Companion*, const MessageState*, const Message*);
     ~TextMessageWidget();
 
 private:
@@ -260,7 +261,8 @@ class FileMessageWidget : public MessageWidget
     Q_OBJECT
 
 public:
-    FileMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
+    FileMessageWidget(QWidget*, Companion*, const MessageState*, const Message*);
+
     ~FileMessageWidget();
 
     void set(const WidgetGroup*) override;
@@ -274,7 +276,8 @@ private:
     void addMembersToLayout() override;
 
 private slots:
-    void sendFileRequest(bool);
+    // void sendFileRequest(bool);
+    void saveFileSlot();
 };
 
 class LeftPanelWidget : public QWidget
@@ -320,7 +323,7 @@ public:
     void set(Companion*);
 
     void addMessageWidgetToChatHistory(
-        const WidgetGroup*, const Companion*, const Message*, const MessageState*);
+        const WidgetGroup*, Companion*, const Message*, const MessageState*);
 
     void scrollDownChatHistory();
     void clearChatHistory();
@@ -363,6 +366,7 @@ private:
 private slots:
     void sendMessage(const QString&);
     void sendFileSlot();
+    void saveFileSlot();
 };
 
 class RightPanelWidget : public QWidget
@@ -397,7 +401,7 @@ class WidgetGroup : public QObject
     Q_OBJECT
 
 public:
-    WidgetGroup(const Companion*);
+    WidgetGroup(Companion*);
     ~WidgetGroup();
 
     void set();
@@ -428,7 +432,7 @@ private slots:
     void askUserForHistorySendingConfirmationSlot();
 
 private:
-    const Companion* companionPtr_;
+    Companion* companionPtr_;
     SocketInfoBaseWidget* socketInfoBasePtr_;
     CentralPanelWidget* centralPanelPtr_;
     uint32_t antecedentMessagesCounter_;
@@ -599,7 +603,7 @@ class FileDialog : public Dialog
     Q_OBJECT
 
 public:
-    FileDialog();
+    FileDialog(FileAction*, const QString&);
     ~FileDialog();
 
     void set();
@@ -608,6 +612,7 @@ public:
     QFileDialog* getFileDialogPtr();
 
 private:
+    FileAction* actionPtr_;
     QFileDialog* fileDialogPtr_;
 };
 

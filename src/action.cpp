@@ -108,6 +108,7 @@ void CompanionAction::updateCompanionObjectData()
     this->companionPtr_->updateData(this->dataPtr_);
 }
 
+// TODO deletion of action objects
 void CompanionAction::sendData()
 {
     if(this->actionType_ == CompanionActionType::SEND_HISTORY)
@@ -250,18 +251,17 @@ FileAction::FileAction(FileActionType actionType, Companion* companionPtr) :
     actionType_ = actionType;
     companionPtr_ = companionPtr;
 
-    switch(actionType)
-    {
-    case FileActionType::SEND:
-        dialogPtr_ = new FileDialog;
+    QString windowTitle = getConstantMappingValue(
+        "fileDialogTypeQStringRepresentation",
+        &fileDialogTypeQStringRepresentation,
+        actionType);
 
-        break;
+    dialogPtr_ = new FileDialog(this, windowTitle);
+}
 
-    case FileActionType::RECEIVE:
-        dialogPtr_ = new FileDialog;
-
-        break;
-    }
+FileActionType FileAction::getType() const
+{
+    return this->actionType_;
 }
 
 Companion* FileAction::getCompanionPtr() const
@@ -269,7 +269,7 @@ Companion* FileAction::getCompanionPtr() const
     return this->companionPtr_;
 }
 
-std::filesystem::path FileAction::getPath()
+std::filesystem::path FileAction::getPath() const
 {
     return this->filePath_;
 }
@@ -280,15 +280,56 @@ void FileAction::sendData()
 
     auto dialogPtr = dynamic_cast<FileDialog*>(this->dialogPtr_)->getFileDialogPtr();
 
-    for(auto& file : dialogPtr->selectedFiles())  // one file
+    switch(this->actionType_)
     {
-        logArgs(file);
-        this->filePath_ = file.toStdString();  // TODO ???
+    case FileActionType::SEND:
+        {
+            for(auto& pathQString : dialogPtr->selectedFiles())  // one file
+            {
+                logArgs(pathQString);
 
-        QString text = QString("SEND FILE: %1").arg(
-            getQString(this->filePath_.filename().string()));
+                auto path = std::filesystem::path(pathQString.toStdString());
 
-        getManagerPtr()->sendMessage(
-            MessageType::FILE, this->getCompanionPtr(), this, text.toStdString());
+                this->filePath_ = path;  // TODO ???
+
+                QString text = QString("SEND FILE: %1").arg(
+                    getQString(this->filePath_.filename().string()));
+
+                getManagerPtr()->sendMessage(
+                    MessageType::FILE, this->getCompanionPtr(),
+                    this, text.toStdString());
+
+                getManagerPtr()->setLastOpenedPath(path.parent_path());
+            }
+        }
+
+        break;
+
+    case FileActionType::SAVE:
+        {
+            for(auto& file : dialogPtr->selectedFiles())  // one file
+            {
+                logArgs(file);
+
+                auto path = std::filesystem::path(pathQString.toStdString());
+
+                this->filePath_ = path;
+
+                getManagerPtr()->sendMessage(
+                    MessageType::FILE, this->getCompanionPtr(),
+                    this, "");
+
+                // send without saving to db
+                bool result = companionPtr->sendMessage(
+                    false, networkMessageType,
+                    messageStatePtr->getNetworkId(), messagePtr);
+
+
+                getManagerPtr()->setLastOpenedPath(path.parent_path());
+
+            }
+        }
+
+        break;
     }
 }

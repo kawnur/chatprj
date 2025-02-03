@@ -7,6 +7,7 @@ Manager::Manager() :
 {
     mapCompanionIdToCompanionInfo_ = std::map<int, std::pair<Companion*, WidgetGroup*>>();
     selectedCompanionPtr_ = nullptr;
+    lastOpenedPath_ = std::filesystem::path("~");
 }
 
 Manager::~Manager()
@@ -1004,6 +1005,16 @@ bool Manager::isInitialised()
     return this->initialized_;
 }
 
+std::filesystem::path Manager::getLastOpenedPath()
+{
+    return this->lastOpenedPath_;
+}
+
+void Manager::setLastOpenedPath(const std::filesystem::path& path)
+{
+    this->lastOpenedPath_ = path;
+}
+
 const Companion* Manager::getMappedCompanionByWidgetGroup(
     WidgetGroup* groupPtr) const
 {
@@ -1219,15 +1230,16 @@ Companion* Manager::addCompanionObject(int id, const std::string& name)
     return (result.second) ? result.first->second.first : nullptr;
 }
 
-void Manager::createWidgetGroupAndAddToMapping(const Companion* companionPtr)
+void Manager::createWidgetGroupAndAddToMapping(Companion* companionPtr)
 {
     WidgetGroup* widgetGroupPtr = new WidgetGroup(companionPtr);
+
     widgetGroupPtr->set();
 
     this->mapCompanionIdToCompanionInfo_[companionPtr->getId()].second =
         widgetGroupPtr;
 
-    const_cast<Companion*>(companionPtr)->addMessageWidgetsToChatHistory();
+    companionPtr->addMessageWidgetsToChatHistory();
 }
 
 void Manager::deleteCompanionObject(Companion* companionPtr)

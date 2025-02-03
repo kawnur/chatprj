@@ -83,8 +83,9 @@ public:
     FileAction(FileActionType, Companion*);
     ~FileAction() = default;
 
+    FileActionType getType() const;
     Companion* getCompanionPtr() const;
-    std::filesystem::path getPath();
+    std::filesystem::path getPath() const;
     void sendData() override;
 
 private:

@@ -569,7 +569,7 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
 }
 
 MessageWidget::MessageWidget(
-    QWidget* parentPtr, const Companion* companionPtr,
+    QWidget* parentPtr, Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
     companionPtr_ = companionPtr;
@@ -646,7 +646,7 @@ void MessageWidget::mousePressEvent(QMouseEvent* event)
 }
 
 TextMessageWidget::TextMessageWidget(
-    QWidget* parentPtr, const Companion* companionPtr,
+    QWidget* parentPtr, Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr) :
     MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr)
 {
@@ -666,7 +666,7 @@ void TextMessageWidget::addMembersToLayout()
 }
 
 FileMessageWidget::FileMessageWidget(
-    QWidget* parentPtr, const Companion* companionPtr,
+    QWidget* parentPtr, Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr) :
     MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr)
 {
@@ -709,7 +709,7 @@ void FileMessageWidget::set(const WidgetGroup* groupPtr)
 {
     connect(
         this->downloadButtonPtr_, &QPushButton::clicked,
-        this, &FileMessageWidget::sendFileRequest, Qt::QueuedConnection);
+        this, &FileMessageWidget::saveFileSlot, Qt::QueuedConnection);
 }
 
 void FileMessageWidget::addMembersToLayout()
@@ -730,9 +730,9 @@ void FileMessageWidget::addMembersToLayout()
     layoutPtr_->addWidget(indicatorPanelPtr_);
 }
 
-void FileMessageWidget::sendFileRequest(bool value)
+void FileMessageWidget::saveFileSlot()
 {
-    const_cast<Companion*>(this->companionPtr_)->sendFileRequest(this);
+    getGraphicManagerPtr()->saveFile(this->companionPtr_);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -956,7 +956,7 @@ void CentralPanelWidget::set(Companion* companionPtr)
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
-    const WidgetGroup* widgetGroupPtr, const Companion* companionPtr,
+    const WidgetGroup* widgetGroupPtr, Companion* companionPtr,
     const Message* messagePtr, const MessageState* messageStatePtr)
 {
     {
@@ -982,8 +982,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
         std::thread(
             [=]()
             {
-                const_cast<Companion*>(companionPtr)->
-                    setMappedMessageWidget(messagePtr, widgetPtr);
+                companionPtr->setMappedMessageWidget(messagePtr, widgetPtr);
             }
         ).detach();
 
@@ -1131,6 +1130,11 @@ void CentralPanelWidget::sendFileSlot()
     getGraphicManagerPtr()->sendFile(this->companionPtr_);
 }
 
+void CentralPanelWidget::saveFileSlot()
+{
+    getGraphicManagerPtr()->sendFile(this->companionPtr_);
+}
+
 RightPanelWidget::RightPanelWidget(QWidget* parent)
 {
     if(parent)
@@ -1221,7 +1225,7 @@ void RightPanelWidget::customMenuRequestedSlot(QPoint position)
     menu->popup(this->mapToGlobal(position));
 }
 
-WidgetGroup::WidgetGroup(const Companion* companionPtr) :
+WidgetGroup::WidgetGroup(Companion* companionPtr) :
     companionPtr_(companionPtr),
     antecedentMessagesCounterMutex_(std::mutex())
 {
@@ -1528,7 +1532,11 @@ CompanionDataDialog::CompanionDataDialog(
 {
     setParent(parentPtr);
 
-    setWindowTitle(getQString(actionTypeStringRepresentation.at(actionType)));
+    setWindowTitle(
+        getConstantMappingValue(
+            "actionTypeStringRepresentation",
+            &actionTypeStringRepresentation,
+            actionType));
 
     setModal(true);
     setWindowFlag(Qt::Window);
@@ -1722,7 +1730,11 @@ TextDialog::TextDialog(
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    setWindowTitle(getQString(dialogTypeStringRepresentation.at(dialogType)));
+    setWindowTitle(
+        getConstantMappingValue(
+            "dialogTypeStringRepresentation",
+            &dialogTypeStringRepresentation,
+            dialogType));
 
     layoutPtr_ = new QVBoxLayout;
     setLayout(layoutPtr_);
@@ -1807,10 +1819,17 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog()
+FileDialog::FileDialog(FileAction* actionPtr, const QString& windowTitle)
 {
+    actionPtr_ = actionPtr;
+
     containsDialogPtr_ = true;
     fileDialogPtr_ = new QFileDialog;
+
+    fileDialogPtr_->setDirectory(
+        getQString(getManagerPtr()->getLastOpenedPath().string()));
+
+    fileDialogPtr_->setWindowTitle(windowTitle);
 }
 
 FileDialog::~FileDialog()

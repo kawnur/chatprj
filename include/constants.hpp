@@ -66,7 +66,7 @@ enum class PasswordActionType
 enum class FileActionType
 {
     SEND,
-    RECEIVE
+    SAVE
 };
 
 enum class MainWindowContainerPosition
@@ -76,17 +76,23 @@ enum class MainWindowContainerPosition
     RIGHT
 };
 
-const std::map<CompanionActionType, std::string> actionTypeStringRepresentation
+const std::map<CompanionActionType, QString> actionTypeStringRepresentation
 {
-    { CompanionActionType::CREATE, std::string("Add new companion") },
-    { CompanionActionType::UPDATE, std::string("Edit companion") }
+    { CompanionActionType::CREATE, "Add new companion" },
+    { CompanionActionType::UPDATE, "Edit companion" }
 };
 
-const std::map<DialogType, std::string> dialogTypeStringRepresentation
+const std::map<DialogType, QString> dialogTypeStringRepresentation
 {
-    { DialogType::INFO, std::string("INFO") },
-    { DialogType::WARNING, std::string("WARNING") },
-    { DialogType::ERROR, std::string("ERROR") }
+    { DialogType::INFO, "INFO" },
+    { DialogType::WARNING, "WARNING" },
+    { DialogType::ERROR, "ERROR" }
+};
+
+const std::map<FileActionType, QString> fileDialogTypeQStringRepresentation
+{
+    { FileActionType::SEND, "Send file" },
+    { FileActionType::SAVE, "Save file" }
 };
 
 const QString connectButtonConnectLabel { "Connect" };

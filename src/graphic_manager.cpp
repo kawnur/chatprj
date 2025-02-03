@@ -329,6 +329,12 @@ void GraphicManager::sendFile(Companion* companionPtr)
     actionPtr->set();
 }
 
+void GraphicManager::saveFile(Companion* companionPtr)
+{
+    FileAction* actionPtr = new FileAction(FileActionType::SAVE, companionPtr);
+    actionPtr->set();
+}
+
 GraphicManager* getGraphicManagerPtr()
 {
     QCoreApplication* coreApp = QCoreApplication::instance();

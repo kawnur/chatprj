@@ -59,6 +59,8 @@ public:
     void requestHistoryFromCompanion(const Companion*);
     void sendChatHistoryToCompanion(const Companion*);
     bool isInitialised();
+    std::filesystem::path getLastOpenedPath();
+    void setLastOpenedPath(const std::filesystem::path&);
 
 private:
     bool initialized_;
@@ -67,6 +69,7 @@ private:
     bool userIsAuthenticated_;
     const Companion* selectedCompanionPtr_;
     std::map<int, std::pair<Companion*, WidgetGroup*>> mapCompanionIdToCompanionInfo_;
+    std::filesystem::path lastOpenedPath_;
 
     const Companion* getMappedCompanionByWidgetGroup(WidgetGroup*) const;
     void fillCompanionMessageMapping(Companion*, bool);
@@ -74,7 +77,7 @@ private:
     bool buildCompanions();
     void buildWidgetGroups();
     Companion* addCompanionObject(int, const std::string&);
-    void createWidgetGroupAndAddToMapping(const Companion*);
+    void createWidgetGroupAndAddToMapping(Companion*);
     void deleteCompanionObject(Companion*);
     void deleteWidgetGroupAndDeleteFromMapping(const Companion*);
     bool companionDataValidation(CompanionAction*);

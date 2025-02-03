@@ -15,7 +15,28 @@ class DBReplyData;
 class Message;
 class TextDialog;
 
+template<typename... Ts> void logArgsError(Ts&&... args);
 template<typename... Ts> void logArgsException(Ts&&... args);
+
+template<typename T, typename U>
+U getConstantMappingValue(
+    const char* mapName, const std::map<T, U>* mapPtr, const T& key)
+{
+    try
+    {
+        return mapPtr->at(key);
+    }
+    catch(std::out_of_range)
+    {
+        logArgsError(QString("mapping %1 key error").arg(mapName));
+    }
+    catch(std::exception& e)
+    {
+        logArgsException(e.what());
+    }
+
+    return U("");
+}
 
 template<typename F, typename... Ts>
 void runAndLogException(F func, Ts&&... args)
