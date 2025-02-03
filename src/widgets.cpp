@@ -572,6 +572,8 @@ MessageWidget::MessageWidget(
     QWidget* parentPtr, const Companion* companionPtr,
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
+    companionPtr_ = companionPtr;
+
     // createdAsAntecedent_ = messageStatePtr->getIsAntecedent();
     isMessageFromMe_ = messagePtr->isMessageFromMe();
 
@@ -613,7 +615,7 @@ MessageWidget::~MessageWidget()
     delete this->indicatorPanelPtr_;
 }
 
-void MessageWidget::set(const WidgetGroup* groupPtr)
+void MessageWidget::setBase(const WidgetGroup* groupPtr)
 {
     this->addMembersToLayout();
 
@@ -622,6 +624,8 @@ void MessageWidget::set(const WidgetGroup* groupPtr)
     connect(
         this, &MessageWidget::widgetSelectedSignal,
         groupPtr, &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
+
+    this->set(groupPtr);
 }
 
 void MessageWidget::setMessageWidgetAsSent()
@@ -701,6 +705,13 @@ FileMessageWidget::~FileMessageWidget()
     delete this->downloadButtonPtr_;
 }
 
+void FileMessageWidget::set(const WidgetGroup* groupPtr)
+{
+    connect(
+        this->downloadButtonPtr_, &QPushButton::clicked,
+        this, &FileMessageWidget::sendFileRequest, Qt::QueuedConnection);
+}
+
 void FileMessageWidget::addMembersToLayout()
 {
     layoutPtr_->addWidget(headerLabelPtr_);
@@ -717,6 +728,11 @@ void FileMessageWidget::addMembersToLayout()
     layoutPtr_->addWidget(fileWidgetPtr_);
 
     layoutPtr_->addWidget(indicatorPanelPtr_);
+}
+
+void FileMessageWidget::sendFileRequest(bool value)
+{
+    const_cast<Companion*>(this->companionPtr_)->sendFileRequest(this);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)
@@ -973,7 +989,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
         if(widgetGroupPtr)
         {
-            widgetPtr->set(widgetGroupPtr);
+            widgetPtr->setBase(widgetGroupPtr);
         }
 
         this->chatHistoryLayoutPtr_->addWidget(widgetPtr);

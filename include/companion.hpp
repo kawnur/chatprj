@@ -19,6 +19,7 @@ class ChatServer;
 class CompanionData;
 class DBReplyData;
 class FileInfoStorage;
+class FileMessageWidget;
 class Message;
 class MessageInfo;
 class MessageState;
@@ -101,6 +102,7 @@ public:
     bool disconnectClient();
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
+    bool sendFileRequest(FileMessageWidget*);
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
     void addMessageWidgetsToChatHistory();

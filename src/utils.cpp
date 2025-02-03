@@ -230,8 +230,8 @@ std::string buildMessageJSONString(
 
     switch(type)
     {
-    case NetworkMessageType::SEND_TEXT:
-    case NetworkMessageType::SEND_FILE_PROPOSAL:
+    case NetworkMessageType::TEXT:
+    case NetworkMessageType::FILE_PROPOSAL:
         jsonData["time"] = messagePtr->getTime();
         jsonData["text"] = messagePtr->getText();
 
@@ -243,8 +243,8 @@ std::string buildMessageJSONString(
         break;
 
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
-    case NetworkMessageType::HISTORY_REQUEST:
-    case NetworkMessageType::SEND_FILE_REQUEST:
+    case NetworkMessageType::CHAT_HISTORY_REQUEST:
+    case NetworkMessageType::FILE_REQUEST:
 
         break;
     }

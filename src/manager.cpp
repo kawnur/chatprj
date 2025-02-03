@@ -132,12 +132,12 @@ void Manager::sendMessage(
         switch(type)
         {
         case MessageType::TEXT:
-            networkMessageType = NetworkMessageType::SEND_TEXT;
+            networkMessageType = NetworkMessageType::TEXT;
 
             break;
 
         case MessageType::FILE:
-            networkMessageType = NetworkMessageType::SEND_FILE_PROPOSAL;
+            networkMessageType = NetworkMessageType::FILE_PROPOSAL;
 
             break;
         }
@@ -186,23 +186,23 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     switch(type)
     {
     // message is data message
-    case NetworkMessageType::SEND_TEXT:
-    case NetworkMessageType::SEND_FILE_PROPOSAL:
+    case NetworkMessageType::TEXT:
+    case NetworkMessageType::FILE_PROPOSAL:
         {
             MessageType messageType;
             NetworkMessageType replyMessageType;
 
             switch(type)
             {
-            case NetworkMessageType::SEND_TEXT:
+            case NetworkMessageType::TEXT:
                 messageType = MessageType::TEXT;
                 replyMessageType = NetworkMessageType::RECEIVE_CONFIRMATION;
 
                 break;
 
-            case NetworkMessageType::SEND_FILE_PROPOSAL:
+            case NetworkMessageType::FILE_PROPOSAL:
                 messageType = MessageType::FILE;
-                replyMessageType = NetworkMessageType::SEND_FILE_REQUEST;
+                replyMessageType = NetworkMessageType::NO_ACTION;
 
                 break;
             }
@@ -324,7 +324,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
         break;
 
-    case NetworkMessageType::HISTORY_REQUEST:
+    case NetworkMessageType::CHAT_HISTORY_REQUEST:
         {
             logArgsInfo("got history request from " + companionPtr->getName());
 
@@ -419,7 +419,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
         break;
 
-    case NetworkMessageType::SEND_FILE_REQUEST:
+    case NetworkMessageType::FILE_REQUEST:
         {
             auto path = companionPtr->getFileInfoStoragePtr()->get(networkId);
 
@@ -951,7 +951,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr)
 
         // send over network
         bool result = companionCastPtr->sendMessage(
-            true, NetworkMessageType::SEND_TEXT, networkId, messagePtr);
+            true, NetworkMessageType::TEXT, networkId, messagePtr);
 
         // mark message as sent
         if(result)
@@ -966,7 +966,7 @@ void Manager::requestHistoryFromCompanion(const Companion* companionPtr)
     Companion* companionCastPtr = const_cast<Companion*>(companionPtr);
 
     bool result = companionCastPtr->sendMessage(
-        true, NetworkMessageType::HISTORY_REQUEST, "", nullptr);
+        true, NetworkMessageType::CHAT_HISTORY_REQUEST, "", nullptr);
 }
 
 void Manager::sendChatHistoryToCompanion(const Companion* companionPtr)

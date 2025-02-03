@@ -334,7 +334,12 @@ bool Companion::disconnectClient()
 bool Companion::sendMessage(
     bool isAntecedent, NetworkMessageType type,
     std::string networkId, const Message* messagePtr)
-{    
+{
+    if(type == NetworkMessageType::NO_ACTION)
+    {
+        return true;
+    }
+
     if(this->clientPtr_)
     {
         bool isConnected = this->clientPtr_->getIsConnected();
@@ -389,6 +394,39 @@ bool Companion::sendChatHistory(
     }
 
     return false;
+}
+
+bool Companion::sendFileRequest(FileMessageWidget* widgetPtr)
+{
+    const Message* messagePtr =
+        this->getMappedMessagePtrByMessageWidgetPtr(true, widgetPtr);
+
+    if(!messagePtr)
+    {
+        return false;
+    }
+
+    MessageState* statePtr = nullptr;
+
+    {
+        std::lock_guard<std::mutex> lock(this->messagesMutex_);
+
+        try
+        {
+            statePtr = this->messageMapping_.at(*messagePtr).getStatePtr();
+        }
+        catch(std::out_of_range) {}
+    }
+
+    if(!statePtr)
+    {
+        return false;
+    }
+
+    bool result = this->sendMessage(
+        false, NetworkMessageType::FILE_REQUEST, statePtr->getNetworkId(), messagePtr);
+
+    return result;
 }
 
 void Companion::updateData(const CompanionData* dataPtr)

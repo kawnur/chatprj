@@ -219,14 +219,17 @@ public:
     MessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
     ~MessageWidget();
 
-    void set(const WidgetGroup*);
+    void setBase(const WidgetGroup*);
     void setMessageWidgetAsSent();
     void setMessageWidgetAsReceived();
+
+    virtual void set(const WidgetGroup*) {}
 
 signals:
     void widgetSelectedSignal(MessageWidget*);
 
 protected:
+    const Companion* companionPtr_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -260,6 +263,8 @@ public:
     FileMessageWidget(QWidget*, const Companion*, const MessageState*, const Message*);
     ~FileMessageWidget();
 
+    void set(const WidgetGroup*) override;
+
 private:
     bool showButton_;
     QWidget* fileWidgetPtr_;
@@ -267,6 +272,9 @@ private:
     QPushButton* downloadButtonPtr_;
 
     void addMembersToLayout() override;
+
+private slots:
+    void sendFileRequest(bool);
 };
 
 class LeftPanelWidget : public QWidget
@@ -407,7 +415,7 @@ signals:
         const MessageState*, const Message*);
 
     void askUserForHistorySendingConfirmationSignal();
-    void buildChatHistorySignal();
+    void buildChatHistorySignal();    
 
 public slots:
     void messageWidgetSelected(MessageWidget*);
