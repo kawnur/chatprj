@@ -73,7 +73,7 @@ public:
     void markMessageWidgetAsReceived(Companion*, const Message*);
     void sortChatHistoryElementsForWidgetGroup(WidgetGroup*);
     void sendFile(Companion*);
-    void saveFile(Companion*);
+    void saveFile(const std::string&, Companion*);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;

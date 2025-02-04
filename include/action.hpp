@@ -80,7 +80,7 @@ class FileAction : public Action
     Q_OBJECT
 
 public:
-    FileAction(FileActionType, Companion*);
+    FileAction(FileActionType, const std::string&, Companion*);
     ~FileAction() = default;
 
     FileActionType getType() const;
@@ -92,6 +92,7 @@ private:
     FileActionType actionType_;
     Companion* companionPtr_;
     std::filesystem::path filePath_;
+    std::string networkId_;
 };
 
 #endif // ACTION_HPP

@@ -573,6 +573,7 @@ MessageWidget::MessageWidget(
     const MessageState* messageStatePtr, const Message* messagePtr)
 {
     companionPtr_ = companionPtr;
+    messagePtr_ = messagePtr;
 
     // createdAsAntecedent_ = messageStatePtr->getIsAntecedent();
     isMessageFromMe_ = messagePtr->isMessageFromMe();
@@ -679,11 +680,13 @@ FileMessageWidget::FileMessageWidget(
 
     showButton_ = !isMessageFromMe;
 
+    messageStatePtr_ = messageStatePtr;
+
     // rewrite widget body text for sender's widget
     if(isMessageFromMe)
     {
-        auto path = companionPtr->getFileInfoStoragePtr()->
-            get(messageStatePtr->getNetworkId());
+        auto path = companionPtr->getFileOperatorStoragePtr()->
+            getOperator(messageStatePtr->getNetworkId())->getFilePath();
 
         messageLabelPtr_->setText(
             getFormattedMessageBodyQString(
@@ -732,7 +735,14 @@ void FileMessageWidget::addMembersToLayout()
 
 void FileMessageWidget::saveFileSlot()
 {
-    getGraphicManagerPtr()->saveFile(this->companionPtr_);
+    // create file operator for this networkId
+    auto networkId = this->companionPtr_->
+        getMappedMessageStatePtrByMessagePtr(this->messagePtr_)->getNetworkId();
+
+    this->companionPtr_->getFileOperatorStoragePtr()->
+        addOperator(networkId, false);
+
+    getGraphicManagerPtr()->saveFile(networkId, this->companionPtr_);
 }
 
 LeftPanelWidget::LeftPanelWidget(QWidget* parent)

@@ -245,11 +245,13 @@ void PasswordAction::sendData()
     }
 }
 
-FileAction::FileAction(FileActionType actionType, Companion* companionPtr) :
+FileAction::FileAction(
+    FileActionType actionType, const std::string& networkId, Companion* companionPtr) :
     Action(nullptr)
 {
     actionType_ = actionType;
     companionPtr_ = companionPtr;
+    networkId_ = networkId;
 
     QString windowTitle = getConstantMappingValue(
         "fileDialogTypeQStringRepresentation",
@@ -307,23 +309,22 @@ void FileAction::sendData()
 
     case FileActionType::SAVE:
         {
-            for(auto& file : dialogPtr->selectedFiles())  // one file
+            for(auto& pathQString : dialogPtr->selectedFiles())  // one file
             {
-                logArgs(file);
+                logArgs(pathQString);
 
                 auto path = std::filesystem::path(pathQString.toStdString());
 
                 this->filePath_ = path;
 
-                getManagerPtr()->sendMessage(
-                    MessageType::FILE, this->getCompanionPtr(),
-                    this, "");
+                // set file path for file operator
+                this->companionPtr_->getFileOperatorStoragePtr()->
+                    getOperator(this->networkId_)->setFilePath(path);
 
                 // send without saving to db
-                bool result = companionPtr->sendMessage(
-                    false, networkMessageType,
-                    messageStatePtr->getNetworkId(), messagePtr);
-
+                bool result = this->companionPtr_->sendMessage(
+                    false, NetworkMessageType::FILE_REQUEST,
+                    this->networkId_, nullptr);
 
                 getManagerPtr()->setLastOpenedPath(path.parent_path());
 

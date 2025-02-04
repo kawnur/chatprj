@@ -71,7 +71,7 @@ public:
 
 private:
     MessageState* statePtr_;
-    MessageWidget* widgetPtr_;
+    MessageWidget* widgetPtr_;    
 };
 
 #endif // MESSAGE_HPP

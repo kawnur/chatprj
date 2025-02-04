@@ -231,6 +231,7 @@ signals:
 
 protected:
     Companion* companionPtr_;
+    const Message* messagePtr_;
     bool isMessageFromMe_;
     QPalette* palettePtr_;
     QVBoxLayout* layoutPtr_;
@@ -269,6 +270,7 @@ public:
 
 private:
     bool showButton_;
+    const MessageState* messageStatePtr_;
     QWidget* fileWidgetPtr_;
     QHBoxLayout* fileWidgetLayoutPtr_;
     QPushButton* downloadButtonPtr_;

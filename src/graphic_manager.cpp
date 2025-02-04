@@ -325,13 +325,13 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr
 
 void GraphicManager::sendFile(Companion* companionPtr)
 {
-    FileAction* actionPtr = new FileAction(FileActionType::SEND, companionPtr);
+    FileAction* actionPtr = new FileAction(FileActionType::SEND, "", companionPtr);
     actionPtr->set();
 }
 
-void GraphicManager::saveFile(Companion* companionPtr)
+void GraphicManager::saveFile(const std::string& networkId, Companion* companionPtr)
 {
-    FileAction* actionPtr = new FileAction(FileActionType::SAVE, companionPtr);
+    FileAction* actionPtr = new FileAction(FileActionType::SAVE, networkId, companionPtr);
     actionPtr->set();
 }
 

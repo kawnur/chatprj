@@ -8,31 +8,36 @@
 
 #include "logging.hpp"
 
-class FileInfo
+class FileOperator
 {
 public:
-    FileInfo() = default;
-    FileInfo(const std::filesystem::path&);
-    ~FileInfo() = default;
+    FileOperator(bool, const std::filesystem::path&);
+    ~FileOperator() = default;
 
     std::filesystem::path getFilePath();
+    void setFilePath(const std::filesystem::path&);
+
+    void send();
+    void receive();
 
 private:
+    bool isSender_;
     std::filesystem::path filePath_;
 };
 
-class FileInfoStorage
+class FileOperatorStorage
 {
 public:
-    FileInfoStorage();
-    ~FileInfoStorage() = default;
+    FileOperatorStorage();
+    ~FileOperatorStorage();
 
-    void add(const std::string&, const std::filesystem::path&);
-    std::filesystem::path get(const std::string&);
+    void addOperator(const std::string&, bool);
+    void addOperator(const std::string&, bool, const std::filesystem::path&);
+    FileOperator* getOperator(const std::string&);
 
 private:
     std::mutex mappingMutex_;
-    std::map<std::string, FileInfo> mapping_;
+    std::map<std::string, FileOperator*> mapping_;
 };
 
 #endif // FILE_INFO_HPP

@@ -121,8 +121,8 @@ void Manager::sendMessage(
 
         if(type == MessageType::FILE)
         {
-            companionPtr->getFileInfoStoragePtr()->add(
-                messageStatePtr->getNetworkId(),
+            companionPtr->getFileOperatorStoragePtr()->addOperator(
+                messageStatePtr->getNetworkId(), true,
                 dynamic_cast<FileAction*>(actionPtr)->getPath());
         }
 
@@ -422,18 +422,18 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     case NetworkMessageType::FILE_REQUEST:
         {
-            auto path = companionPtr->getFileInfoStoragePtr()->get(networkId);
+            // auto path = companionPtr->getFileOperatorStoragePtr()->getOperator(networkId);
 
-            if(path.string().size() != 0)
-            {
-                this->sendFile(companionPtr, path);
-            }
-            else
-            {
-                logArgsError(
-                    QString("unknown file path for network id: %1")
-                        .arg(getQString(networkId)));
-            }
+            // if(path.string().size() != 0)
+            // {
+            //     this->sendFile(companionPtr, path);
+            // }
+            // else
+            // {
+            //     logArgsError(
+            //         QString("unknown file path for network id: %1")
+            //             .arg(getQString(networkId)));
+            // }
         }
 
         break;

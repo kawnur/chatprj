@@ -42,14 +42,14 @@ Companion::Companion(int id, const std::string& name) :
     messagesMutex_(std::mutex()), id_(id), name_(name), socketInfoPtr_(nullptr),
     clientPtr_(nullptr), serverPtr_(nullptr),
     messageMapping_(std::map<Message, MessageInfo>()),
-    fileInfoStoragePtr_(new FileInfoStorage) {}
+    fileOperatorStoragePtr_(new FileOperatorStorage) {}
 
 Companion::~Companion()
 {
     delete this->socketInfoPtr_;
     delete this->clientPtr_;
     delete this->serverPtr_;
-    delete this->fileInfoStoragePtr_;
+    delete this->fileOperatorStoragePtr_;
 }
 
 int Companion::getId() const
@@ -82,9 +82,9 @@ uint16_t Companion::getSocketClientPort() const
     return this->socketInfoPtr_->getClientPort();
 }
 
-FileInfoStorage* Companion::getFileInfoStoragePtr() const
+FileOperatorStorage* Companion::getFileOperatorStoragePtr() const
 {
-    return this->fileInfoStoragePtr_;
+    return this->fileOperatorStoragePtr_;
 }
 
 const MessageState* Companion::getMappedMessageStatePtrByMessagePtr(

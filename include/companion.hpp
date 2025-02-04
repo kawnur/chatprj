@@ -18,7 +18,7 @@ class ChatClient;
 class ChatServer;
 class CompanionData;
 class DBReplyData;
-class FileInfoStorage;
+class FileOperatorStorage;
 class FileMessageWidget;
 class Message;
 class MessageInfo;
@@ -71,7 +71,7 @@ public:
     std::string getSocketIpAddress() const;
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
-    FileInfoStorage* getFileInfoStoragePtr() const;
+    FileOperatorStorage* getFileOperatorStoragePtr() const;
 
     const MessageState* getMappedMessageStatePtrByMessagePtr(const Message*);
     MessageWidget* getMappedMessageWidgetPtrByMessagePtr(const Message*);
@@ -115,7 +115,7 @@ private:
     SocketInfo* socketInfoPtr_;
     ChatClient* clientPtr_;
     ChatServer* serverPtr_;
-    FileInfoStorage* fileInfoStoragePtr_;
+    FileOperatorStorage* fileOperatorStoragePtr_;
     std::map<Message, MessageInfo> messageMapping_;
 
     std::string generateNewNetworkId(bool);
