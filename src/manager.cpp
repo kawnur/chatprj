@@ -422,18 +422,22 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     case NetworkMessageType::FILE_REQUEST:
         {
-            // auto path = companionPtr->getFileOperatorStoragePtr()->getOperator(networkId);
+            logArgs("got NetworkMessageType::FILE_REQUEST");
 
-            // if(path.string().size() != 0)
-            // {
-            //     this->sendFile(companionPtr, path);
-            // }
-            // else
-            // {
-            //     logArgsError(
-            //         QString("unknown file path for network id: %1")
-            //             .arg(getQString(networkId)));
-            // }
+            FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
+
+            auto operatorPtr = storagePtr->getOperator(networkId);
+
+            if(operatorPtr)
+            {
+                operatorPtr->sendFile();
+            }
+            else
+            {
+                logArgsError(
+                    QString("companion has no operator for networkId = '%1'")
+                        .arg(getQString(networkId)));
+            }
         }
 
         break;

@@ -14,11 +14,14 @@ public:
     FileOperator(bool, const std::filesystem::path&);
     ~FileOperator() = default;
 
-    std::filesystem::path getFilePath();
+    bool getIsSender() const;
+    std::filesystem::path getFilePath() const;
     void setFilePath(const std::filesystem::path&);
 
     void send();
+    void sendFile();
     void receive();
+    void receiveFile();
 
 private:
     bool isSender_;

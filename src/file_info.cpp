@@ -3,6 +3,11 @@
 FileOperator::FileOperator(bool isSender, const std::filesystem::path& path) :
     isSender_(isSender), filePath_(path) {}
 
+bool FileOperator::getIsSender()
+{
+    return this->isSender_;
+}
+
 std::filesystem::path FileOperator::getFilePath()
 {
     return this->filePath_;
@@ -11,6 +16,26 @@ std::filesystem::path FileOperator::getFilePath()
 void FileOperator::setFilePath(const std::filesystem::path& filePath)
 {
     this->filePath_ = filePath;
+}
+
+void FileOperator::send()
+{
+
+}
+
+void FileOperator::sendFile()
+{
+
+}
+
+void FileOperator::receive()
+{
+
+}
+
+void FileOperator::receiveFile()
+{
+
 }
 
 FileOperatorStorage::FileOperatorStorage() :
