@@ -103,6 +103,7 @@ public:
     bool sendMessage(bool, NetworkMessageType, std::string, const Message*);
     bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
     bool sendFileRequest(FileMessageWidget*);
+    bool sendFileBlock(const std::string&, const std::string&);
     void updateData(const CompanionData*);
     Message* findMessage(uint32_t);
     void addMessageWidgetsToChatHistory();

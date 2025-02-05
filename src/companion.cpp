@@ -429,6 +429,29 @@ bool Companion::sendFileRequest(FileMessageWidget* widgetPtr)
     return result;
 }
 
+bool Companion::sendFileBlock(const std::string& networkId, const std::string& data)
+{
+    bool isConnected = this->clientPtr_->getIsConnected();
+
+    logArgs("clientPtr_->getIsConnected():", isConnected);
+
+    if(isConnected)
+    {
+        // build json
+        std::string jsonData = buildFileBlockJSONString(this, networkId, data);
+
+        // send json over network
+        auto result = this->clientPtr_->send(jsonData);
+
+        if(!result)
+        {
+            logArgsError("client message sending error");
+        }
+
+        return result;
+    }
+}
+
 void Companion::updateData(const CompanionData* dataPtr)
 {
     this->name_ = dataPtr->getName();

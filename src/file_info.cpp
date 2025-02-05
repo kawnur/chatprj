@@ -23,9 +23,45 @@ void FileOperator::send()
 
 }
 
-void FileOperator::sendFile()
+void FileOperator::sendFile(Companion* companionPtr, const std::string& networkId)
 {
+    auto sendFileLambda = [this, =]()
+    {
+        std::filebuf filebuf;
 
+        filebuf.open(this->filePath_, std::ios::binary | std::ios::in);
+
+        if(filebuf.is_open())
+        {
+            auto length = filebuf.in_avail();
+
+            if(length < maxBufferSize)  // TODO loop instead of if-clause
+            {
+                char buffer[length] = { 0 };
+
+                auto read = readFileBuf.sgetn(buffer, length);
+
+                std::string bufferString(buffer);
+
+                filebuf.close();
+
+                bool result = companionPtr->sendFileBlock(networkId, bufferString);
+            }
+            else
+            {
+                // read file block and send block iteratively
+
+            }
+        }
+        else
+        {
+            logArgsError(
+                QString("file opening error, path: %1")
+                    .arg(getQString(this->filePath_.string())));
+        }
+    };
+
+    std::thread(sendFileLambda).detach();
 }
 
 void FileOperator::receive()

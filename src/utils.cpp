@@ -252,6 +252,21 @@ std::string buildMessageJSONString(
     return jsonData.dump();
 }
 
+std::string buildFileBlockJSONString(
+    const Companion* companionPtr, const std::string& networkId, const std::string& data)
+{
+    using json = nlohmann::json;
+
+    json jsonData;
+
+    jsonData["type"] = NetworkMessageType::FILE_DATA;
+    jsonData["id"] = networkId;
+    jsonData["companion_id"] = companionPtr->getId();
+    jsonData["data"] = data;
+
+    return jsonData.dump();
+}
+
 std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys)
 {

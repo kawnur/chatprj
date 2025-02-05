@@ -430,7 +430,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             if(operatorPtr)
             {
-                operatorPtr->sendFile();
+                operatorPtr->sendFile(companionPtr, networkId);
             }
             else
             {
@@ -438,6 +438,13 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                     QString("companion has no operator for networkId = '%1'")
                         .arg(getQString(networkId)));
             }
+        }
+
+        break;
+
+    case NetworkMessageType::FILE_DATA:
+        {
+
         }
 
         break;

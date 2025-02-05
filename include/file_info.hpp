@@ -19,7 +19,7 @@ public:
     void setFilePath(const std::filesystem::path&);
 
     void send();
-    void sendFile();
+    void sendFile(Companion*, const std::string&);
     void receive();
     void receiveFile();
 
