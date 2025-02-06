@@ -2,6 +2,7 @@
 #define FILE_INFO_HPP
 
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <mutex>
 #include <string>
@@ -12,20 +13,22 @@ class FileOperator
 {
 public:
     FileOperator(bool, const std::filesystem::path&);
-    ~FileOperator() = default;
+    ~FileOperator();
 
     bool getIsSender() const;
     std::filesystem::path getFilePath() const;
     void setFilePath(const std::filesystem::path&);
 
-    void send();
+    void sendFilePart(Companion*, const std::string&);
     void sendFile(Companion*, const std::string&);
-    void receive();
+    void receiveFilePart(const std::string&);
     void receiveFile();
+    void closeFile();
 
 private:
     bool isSender_;
     std::filesystem::path filePath_;
+    std::filebuf filebuf_;
 };
 
 class FileOperatorStorage

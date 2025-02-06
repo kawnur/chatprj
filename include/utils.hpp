@@ -89,6 +89,9 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
 std::string buildMessageJSONString(
     bool, NetworkMessageType, const Companion*, const std::string&, const Message*);
 
+std::string buildFileBlockJSONString(
+    const Companion*, const std::string&, const std::string&);
+
 std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData>&, std::vector<std::string>&);
 

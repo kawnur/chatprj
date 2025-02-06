@@ -444,6 +444,42 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     case NetworkMessageType::FILE_DATA:
         {
+            logArgs("got NetworkMessageType::FILE_DATA");
+
+            FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
+
+            auto operatorPtr = storagePtr->getOperator(networkId);
+
+            if(operatorPtr)
+            {
+                operatorPtr->receiveFilePart(jsonData.at("text"));
+            }
+            else
+            {
+                logArgsError(
+                    QString("companion has no operator for networkId = '%1'")
+                        .arg(getQString(networkId)));
+            }
+        }
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
+        {
+
+        }
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
+        {
+
+        }
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS:
+        {
 
         }
 

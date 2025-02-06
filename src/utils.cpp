@@ -245,6 +245,7 @@ std::string buildMessageJSONString(
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
     case NetworkMessageType::CHAT_HISTORY_REQUEST:
     case NetworkMessageType::FILE_REQUEST:
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
 
         break;
     }
