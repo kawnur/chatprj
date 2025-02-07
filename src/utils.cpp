@@ -231,9 +231,17 @@ std::string buildMessageJSONString(
     switch(type)
     {
     case NetworkMessageType::TEXT:
+        jsonData["time"] = messagePtr->getTime();
+        jsonData["text"] = messagePtr->getText();
+
+        break;
+
     case NetworkMessageType::FILE_PROPOSAL:
         jsonData["time"] = messagePtr->getTime();
         jsonData["text"] = messagePtr->getText();
+        jsonData["hashMD5"] =
+            companionPtr->getFileOperatorStoragePtr()->
+                getOperator(networkId)->getFileMD5Hash();
 
         break;
 
@@ -246,6 +254,8 @@ std::string buildMessageJSONString(
     case NetworkMessageType::CHAT_HISTORY_REQUEST:
     case NetworkMessageType::FILE_REQUEST:
     case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS:
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
 
         break;
     }
@@ -336,4 +346,42 @@ bool getBoolFromDBValue(const char* valuePtr)
     }
 
     return false;
+}
+
+std::string hashFileMD5(const std::string& filename)
+{
+    std::ifstream file(filename, std::ios::binary);
+
+    if (!file)
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    EVP_MD_CTX* md5Context = EVP_MD_CTX_new();
+    EVP_MD_CTX_init(md5Context);
+    EVP_DigestInit_ex(md5Context, EVP_md5(), nullptr);
+
+    const size_t bufferSize = 4096;
+    char buffer[bufferSize];
+
+    while (!file.eof())
+    {
+        file.read(buffer, bufferSize);
+        EVP_DigestUpdate(md5Context, buffer, file.gcount());
+    }
+
+    std::array<uint8_t, 16> result;
+    EVP_DigestFinal_ex(md5Context, result.data(), nullptr);
+    file.close();
+
+    EVP_MD_CTX_free(md5Context);
+
+    std::stringstream stream;
+
+    for(auto& element : result)
+    {
+        stream << std::hex << (int)element;
+    }
+
+    return stream.str();
 }

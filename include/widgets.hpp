@@ -218,7 +218,7 @@ class MessageWidget : public QWidget
 
 public:
     MessageWidget(QWidget*, Companion*, const MessageState*, const Message*);
-    ~MessageWidget();
+    virtual ~MessageWidget();
 
     void setBase(const WidgetGroup*);
     void setMessageWidgetAsSent();

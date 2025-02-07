@@ -1,12 +1,7 @@
 #include "file_info.hpp"
 
-FileOperator::FileOperator(bool isSender, const std::filesystem::path& path) :
-    isSender_(isSender), filePath_(path), filebuf_(std::filebuf())
-{
-    std::ios_base::openmode mode = (isSender_) ? std::ios::in : std::ios::out;
-
-    filebuf_.open(path_, std::ios::binary | mode);
-}
+FileOperator::FileOperator(const std::filesystem::path& path) :
+    filePath_(path), filebuf_(std::filebuf()) {}
 
 FileOperator::~FileOperator()
 {
@@ -16,14 +11,14 @@ FileOperator::~FileOperator()
     }
 }
 
-bool FileOperator::getIsSender()
-{
-    return this->isSender_;
-}
-
-std::filesystem::path FileOperator::getFilePath()
+std::filesystem::path FileOperator::getFilePath() const
 {
     return this->filePath_;
+}
+
+std::string FileOperator::getFileMD5Hash() const
+{
+    return this->fileMD5Hash_;
 }
 
 void FileOperator::setFilePath(const std::filesystem::path& filePath)
@@ -31,7 +26,19 @@ void FileOperator::setFilePath(const std::filesystem::path& filePath)
     this->filePath_ = filePath;
 }
 
-void FileOperator::sendFilePart(Companion* companionPtr, const std::string& networkId)
+void FileOperator::closeFile()
+{
+    this->filebuf_.close();
+}
+
+SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
+    FileOperator(filePath)
+{
+    fileMD5Hash_ = hashFileMD5(filePath_.string());
+    filebuf_.open(filePath_, std::ios::binary | std::ios::in);
+}
+
+void SenderOperator::sendFilePart(Companion* companionPtr, const std::string& networkId)
 {
     char buffer[maxBufferSize] = { 0 };
 
@@ -44,13 +51,13 @@ void FileOperator::sendFilePart(Companion* companionPtr, const std::string& netw
     delete[] buffer;
 }
 
-void FileOperator::sendFile(Companion* companionPtr, const std::string& networkId)
+void SenderOperator::sendFile(Companion* companionPtr, const std::string& networkId)
 {
-    auto sendFileLambda = [this, =]()
+    auto sendFileLambda = [=, this]()
     {
         if(this->filebuf_.is_open())
         {
-            auto length = filebuf.in_avail();
+            auto length = this->filebuf_.in_avail();
 
             uint32_t iterationNumber = length / maxBufferSize + 1;
 
@@ -77,27 +84,51 @@ void FileOperator::sendFile(Companion* companionPtr, const std::string& networkI
     std::thread(sendFileLambda).detach();
 }
 
-void FileOperator::receiveFilePart(const std::string& filePart)
+ReceiverOperator::ReceiverOperator(
+    const std::filesystem::path& filePath, const std::string& fileMD5HashFromSender) :
+    FileOperator(filePath)
+{
+    fileMD5Hash_ = std::string("");
+    fileMD5HashFromSender_ = fileMD5HashFromSender;
+    filebuf_.open(filePath_, std::ios::binary | std::ios::out);
+}
+
+void ReceiverOperator::receiveFilePart(const std::string& filePart)
 {
     this->filebuf_.sputn(filePart.data(), filePart.size());
 }
 
-void FileOperator::receiveFile()
+bool ReceiverOperator::receiveFile()
 {
+    this->closeFile();
 
+    this->fileMD5Hash_ = hashFileMD5(filePath_.string());
+
+    return (this->fileMD5Hash_ == this->fileMD5HashFromSender_);
 }
 
 FileOperatorStorage::FileOperatorStorage() :
     mappingMutex_(std::mutex()), mapping_(std::map<std::string, FileOperator*>()) {}
 
-void FileOperatorStorage::addOperator(
-    const std::string& networkId, bool isSender)
+void FileOperatorStorage::addSenderOperator(
+    const std::string& networkId, const std::filesystem::path& filePath)
 {
-    this->addOperator(networkId, isSender, std::filesystem::path("~"));
+    std::lock_guard<std::mutex> lock(this->mappingMutex_);
+
+    if(this->mapping_.count(networkId) != 0)
+    {
+        logArgsError(
+            QString("file operator for key %1 already exists")
+                .arg(getQString(networkId)));
+
+        return;
+    }
+
+    this->mapping_[networkId] = new SenderOperator(filePath);
 }
 
-void FileOperatorStorage::addOperator(
-    const std::string& networkId, bool isSender,
+void FileOperatorStorage::addReceiverOperator(
+    const std::string& networkId, const std::string& fileMD5HashFromSender,
     const std::filesystem::path& filePath)
 {
     std::lock_guard<std::mutex> lock(this->mappingMutex_);
@@ -111,7 +142,7 @@ void FileOperatorStorage::addOperator(
         return;
     }
 
-    this->mapping_[networkId] = new FileOperator(isSender, filePath);
+    this->mapping_[networkId] = new ReceiverOperator(filePath, fileMD5HashFromSender);
 }
 
 FileOperatorStorage::~FileOperatorStorage()

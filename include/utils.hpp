@@ -1,8 +1,12 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <nlohmann/json.hpp>
+#include <fstream>
+#include <iostream>
 #include <QHostAddress>
+#include <nlohmann/json.hpp>
+#include <openssl/md5.h>
+#include <openssl/evp.h>
 
 #include "constants.hpp"
 #include "db_interaction.hpp"
@@ -100,5 +104,7 @@ std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
 QString getBoolQString(bool);
 bool getBoolFromDBValue(const char*);
+
+std::string hashFileMD5(const std::string&);
 
 #endif // UTILS_HPP

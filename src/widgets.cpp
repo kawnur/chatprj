@@ -739,9 +739,6 @@ void FileMessageWidget::saveFileSlot()
     auto networkId = this->companionPtr_->
         getMappedMessageStatePtrByMessagePtr(this->messagePtr_)->getNetworkId();
 
-    this->companionPtr_->getFileOperatorStoragePtr()->
-        addOperator(networkId, false);
-
     getGraphicManagerPtr()->saveFile(networkId, this->companionPtr_);
 }
 

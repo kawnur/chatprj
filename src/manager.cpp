@@ -121,8 +121,8 @@ void Manager::sendMessage(
 
         if(type == MessageType::FILE)
         {
-            companionPtr->getFileOperatorStoragePtr()->addOperator(
-                messageStatePtr->getNetworkId(), true,
+            companionPtr->getFileOperatorStoragePtr()->addSenderOperator(
+                messageStatePtr->getNetworkId(),
                 dynamic_cast<FileAction*>(actionPtr)->getPath());
         }
 
@@ -205,6 +205,14 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 messageType = MessageType::FILE;
                 replyMessageType = NetworkMessageType::NO_ACTION;
 
+                std::string hashMD5FromSender = jsonData.at("hashMD5");
+
+                // create receiver operator
+                companionPtr->getFileOperatorStoragePtr()->
+                    addReceiverOperator(
+                        networkId, hashMD5FromSender,
+                        std::filesystem::path("~"));
+
                 break;
             }
 
@@ -242,7 +250,6 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 emit groupPtr->addMessageWidgetToCentralPanelChatHistorySignal(
                     messageStatePtr, messagePtr);
 
-                // TODO send by button push
                 // send message to sender
                 bool result = companionPtr->sendMessage(
                     false, replyMessageType, networkId, messagePtr);
@@ -426,16 +433,17 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
 
-            auto operatorPtr = storagePtr->getOperator(networkId);
+            auto senderPtr =
+                dynamic_cast<SenderOperator*>(storagePtr->getOperator(networkId));
 
-            if(operatorPtr)
+            if(senderPtr)
             {
-                operatorPtr->sendFile(companionPtr, networkId);
+                senderPtr->sendFile(companionPtr, networkId);
             }
             else
             {
                 logArgsError(
-                    QString("companion has no operator for networkId = '%1'")
+                    QString("companion has no file operator for networkId = %1")
                         .arg(getQString(networkId)));
             }
         }
@@ -448,16 +456,17 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
 
-            auto operatorPtr = storagePtr->getOperator(networkId);
+            auto receiverPtr =
+                dynamic_cast<ReceiverOperator*>(storagePtr->getOperator(networkId));
 
-            if(operatorPtr)
+            if(receiverPtr)
             {
-                operatorPtr->receiveFilePart(jsonData.at("text"));
+                receiverPtr->receiveFilePart(jsonData.at("text"));
             }
             else
             {
                 logArgsError(
-                    QString("companion has no operator for networkId = '%1'")
+                    QString("companion has no file operator for networkId = %1")
                         .arg(getQString(networkId)));
             }
         }
@@ -466,21 +475,53 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
     case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
         {
+            logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_END");
 
+            FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
+
+            auto receiverPtr =
+                dynamic_cast<ReceiverOperator*>(storagePtr->getOperator(networkId));
+
+            if(receiverPtr)
+            {
+                auto resultType = (receiverPtr->receiveFile()) ?
+                    NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS :
+                    NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
+
+                if(resultType == NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS)
+                {
+                    logArgs("file received successfully");
+
+                    // delete operator
+                }
+
+                bool result =
+                    companionPtr->sendMessage(false, resultType, networkId, nullptr);
+            }
+            else
+            {
+                logArgsError(
+                    QString("companion has no file operator for networkId = %1")
+                        .arg(getQString(networkId)));
+            }
         }
 
         break;
 
     case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
         {
+            logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE");
 
+            // create resend action
         }
 
         break;
 
     case NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS:
         {
+            logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS");
 
+            // delete operator
         }
 
         break;
