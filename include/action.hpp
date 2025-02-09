@@ -87,11 +87,12 @@ public:
     Companion* getCompanionPtr() const;
     std::filesystem::path getPath() const;
     void sendData() override;
+    void defineFilePath();
 
 private:
     FileActionType actionType_;
-    Companion* companionPtr_;
     std::filesystem::path filePath_;
+    Companion* companionPtr_;
     std::string networkId_;
 };
 

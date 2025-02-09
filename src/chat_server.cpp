@@ -22,15 +22,15 @@ void ServerSession::do_read()
 
                 if(length > 0)
                 {
-                    logArgs("server got message:", str);
+                    // logArgs("server got message:", str);
 
                     if(this->previous_.size() > 0)
                     {
-                        logArgs("previous:", this->previous_);
+                        // logArgs("previous:", this->previous_);
 
                         str = previous_ + str;
 
-                        logArgs("new str:", str);
+                        // logArgs("new str:", str);
                     }
 
                     // split messages

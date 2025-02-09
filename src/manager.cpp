@@ -166,6 +166,8 @@ void Manager::sendFile(Companion* companionPtr, const std::filesystem::path& pat
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
 {
+    logArgs(QString("manager received message: %1").arg(getQString(jsonString)));
+
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
     NetworkMessageType type;
@@ -461,7 +463,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             if(receiverPtr)
             {
-                receiverPtr->receiveFilePart(jsonData.at("text"));
+                receiverPtr->receiveFilePart(jsonData.at("data"));
             }
             else
             {

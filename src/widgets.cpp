@@ -1832,9 +1832,11 @@ FileDialog::FileDialog(FileAction* actionPtr, const QString& windowTitle)
 
     containsDialogPtr_ = true;
     fileDialogPtr_ = new QFileDialog;
+    fileDialogPtr_->setFileMode(QFileDialog::AnyFile);
+    fileDialogPtr_->setViewMode(QFileDialog::Detail);
 
-    fileDialogPtr_->setDirectory(
-        getQString(getManagerPtr()->getLastOpenedPath().string()));
+    fileDialogPtr_->
+        setDirectory(getQString(getManagerPtr()->getLastOpenedPath().string()));
 
     fileDialogPtr_->setWindowTitle(windowTitle);
 }

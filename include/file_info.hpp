@@ -23,6 +23,8 @@ public:
     void setFilePath(const std::filesystem::path&);
     void closeFile();
 
+    virtual void createFileAndOpen() {}
+
 protected:
     std::filebuf filebuf_;
     std::filesystem::path filePath_;
@@ -53,6 +55,8 @@ public:
 
 private:
     std::string fileMD5HashFromSender_;
+
+    void createFileAndOpen() override;
 };
 
 class FileOperatorStorage

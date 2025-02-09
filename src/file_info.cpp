@@ -23,12 +23,20 @@ std::string FileOperator::getFileMD5Hash() const
 
 void FileOperator::setFilePath(const std::filesystem::path& filePath)
 {
+    if(this->filebuf_.is_open())
+    {
+        this->filebuf_.close();
+    }
+
     this->filePath_ = filePath;
+
+    createFileAndOpen();
 }
 
 void FileOperator::closeFile()
 {
-    this->filebuf_.close();
+    auto isOpen = this->filebuf_.is_open();
+    auto result = this->filebuf_.close();
 }
 
 SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
@@ -46,9 +54,12 @@ void SenderOperator::sendFilePart(Companion* companionPtr, const std::string& ne
 
     std::string bufferString(buffer);
 
-    bool result = companionPtr->sendFileBlock(networkId, bufferString);
+    if(*(bufferString.end() - 1) == 0x02)
+    {
+        bufferString.erase(bufferString.end() - 1);
+    }
 
-    delete[] buffer;
+    bool result = companionPtr->sendFileBlock(networkId, bufferString);    
 }
 
 void SenderOperator::sendFile(Companion* companionPtr, const std::string& networkId)
@@ -90,11 +101,13 @@ ReceiverOperator::ReceiverOperator(
 {
     fileMD5Hash_ = std::string("");
     fileMD5HashFromSender_ = fileMD5HashFromSender;
-    filebuf_.open(filePath_, std::ios::binary | std::ios::out);
+
+    createFileAndOpen();
 }
 
 void ReceiverOperator::receiveFilePart(const std::string& filePart)
 {
+    auto isOpen = this->filebuf_.is_open();
     this->filebuf_.sputn(filePart.data(), filePart.size());
 }
 
@@ -104,7 +117,29 @@ bool ReceiverOperator::receiveFile()
 
     this->fileMD5Hash_ = hashFileMD5(filePath_.string());
 
+    logArgs("this->fileMD5Hash_:", this->fileMD5Hash_);
+    logArgs("this->fileMD5HashFromSender_:", this->fileMD5HashFromSender_);
+
     return (this->fileMD5Hash_ == this->fileMD5HashFromSender_);
+}
+
+void ReceiverOperator::createFileAndOpen()
+{
+    // create file if it does not exist
+    if(!std::filesystem::exists(filePath_))
+    {
+        std::ofstream stream(filePath_);
+        stream.close();
+    }
+
+    auto openResult = filebuf_.open(filePath_, std::ios::binary | std::ios::out);
+
+    if(!openResult)
+    {
+        logArgsError(
+            QString("file %1 open error"),
+            getQString(filePath_.string()));
+    }
 }
 
 FileOperatorStorage::FileOperatorStorage() :

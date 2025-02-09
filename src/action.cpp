@@ -5,9 +5,24 @@ void Action::set()
     this->dialogPtr_->setAction(this);
     this->dialogPtr_->set();
 
-    if(this->dialogPtr_->getContainsDialogPtr())
+    // if(this->dialogPtr_->getContainsDialogPtr())
+
+    FileAction* actionCastPtr = dynamic_cast<FileAction*>(this);
+
+    if(actionCastPtr)
     {
-        this->dialogPtr_->showDialog();
+        if(actionCastPtr->getType() == FileActionType::SEND)
+        {
+            actionCastPtr->dialogPtr_->showDialog();
+        }
+        else if(actionCastPtr->getType() == FileActionType::SAVE)
+        {
+            actionCastPtr->defineFilePath();
+        }
+        else
+        {
+            logArgsError("unknown action type");
+        }
     }
     else
     {
@@ -309,28 +324,51 @@ void FileAction::sendData()
 
     case FileActionType::SAVE:
         {
-            for(auto& pathQString : dialogPtr->selectedFiles())  // one file
-            {
-                logArgs(pathQString);
+            // for(auto& pathQString : dialogPtr->selectedFiles())  // one file
+            // {
+            //     logArgs(pathQString);
 
-                auto path = std::filesystem::path(pathQString.toStdString());
+            //     auto path = std::filesystem::path(pathQString.toStdString());
 
-                this->filePath_ = path;
+            //     this->filePath_ = path;
 
-                // set file path for file operator
-                this->companionPtr_->getFileOperatorStoragePtr()->
-                    getOperator(this->networkId_)->setFilePath(path);
+            //     // set file path for file operator
+            //     this->companionPtr_->getFileOperatorStoragePtr()->
+            //         getOperator(this->networkId_)->setFilePath(path);
 
-                // send without saving to db
-                bool result = this->companionPtr_->sendMessage(
-                    false, NetworkMessageType::FILE_REQUEST,
-                    this->networkId_, nullptr);
+            //     // send without saving to db
+            //     bool result = this->companionPtr_->sendMessage(
+            //         false, NetworkMessageType::FILE_REQUEST,
+            //         this->networkId_, nullptr);
 
-                getManagerPtr()->setLastOpenedPath(path.parent_path());
+            //     getManagerPtr()->setLastOpenedPath(path.parent_path());
 
-            }
+            // }
+
+            // set file path for file operator
+            this->companionPtr_->getFileOperatorStoragePtr()->
+                getOperator(this->networkId_)->setFilePath(this->filePath_);
+
+            // send without saving to db
+            bool result = this->companionPtr_->sendMessage(
+                false, NetworkMessageType::FILE_REQUEST,
+                this->networkId_, nullptr);
+
+            getManagerPtr()->setLastOpenedPath(this->filePath_.parent_path());
         }
 
         break;
     }
+}
+
+void FileAction::defineFilePath()
+{
+    // this->filePath_ = this->dialogPtr_->getsavefilename(
+    this->filePath_ = QFileDialog::getSaveFileName(
+        getGraphicManagerPtr()->getMainWindowPtr(),
+        "Save File",
+        getQString(getManagerPtr()->getLastOpenedPath().string()))
+            .toStdString();
+
+    this->sendData();
 }
