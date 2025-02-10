@@ -92,7 +92,7 @@ QString getQString(bool);
 template<typename... Ts> QString getArgumentedQString(
     const QString& templateString, Ts&&... args)
 {
-    return templateString.arg(getQString(args)...);
+    return templateString.arg(getQString(std::forward<Ts>(args))...);
 }
 
 // data validation

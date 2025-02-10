@@ -48,18 +48,22 @@ SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
 
 void SenderOperator::sendFilePart(Companion* companionPtr, const std::string& networkId)
 {
+    std::stringstream sstream;
     char buffer[maxBufferSize] = { 0 };
 
     auto read = this->filebuf_.sgetn(buffer, maxBufferSize);
 
-    std::string bufferString(buffer);
+    sstream << std::hex << std::setfill('0');
 
-    if(*(bufferString.end() - 1) == 0x02)
+    for(size_t i = 0; i < read; i++)
     {
-        bufferString.erase(bufferString.end() - 1);
+        // double cast to get rid of precedence of ffffff for big values
+        sstream << std::setw(2) << (int)(unsigned char)buffer[i];
     }
 
-    bool result = companionPtr->sendFileBlock(networkId, bufferString);    
+    std::string resultString = sstream.str();
+
+    bool result = companionPtr->sendFileBlock(networkId, resultString);
 }
 
 void SenderOperator::sendFile(Companion* companionPtr, const std::string& networkId)
@@ -74,6 +78,9 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
 
             for(uint32_t i = 0; i < iterationNumber; i++)
             {
+                coutArgsWithSpaceSeparator(
+                    logCustomDelimiter, "iteration:", i, "/", iterationNumber);
+
                 this->sendFilePart(companionPtr, networkId);
             }
 
@@ -106,8 +113,18 @@ ReceiverOperator::ReceiverOperator(
 
 void ReceiverOperator::receiveFilePart(const std::string& filePart)
 {
-    auto isOpen = this->filebuf_.is_open();
-    this->filebuf_.sputn(filePart.data(), filePart.size());
+    const char* data = filePart.data();
+
+    size_t byteSize = filePart.size() / 2;
+
+    for(size_t i = 0; i < byteSize; i++)
+    {
+        std::string dataString(filePart.begin() + 2 * i, filePart.begin() + 2 * i + 2);
+
+        uint8_t value = std::stoi(dataString, nullptr, 16);
+
+        this->filebuf_.sputc(value);
+    }
 }
 
 bool ReceiverOperator::receiveFile()

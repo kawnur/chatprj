@@ -342,10 +342,8 @@ PGresult* updateCompanionAndSocketAndReturn(
         "WITH update_name AS (UPDATE companions SET name = '%1' WHERE id = %2 "
         "RETURNING id) UPDATE sockets SET ipaddress = '%3', client_port = '%4' "
         "WHERE id IN (SELECT id FROM update_name) RETURNING id",
-        companionAction.getName(),
-        companionAction.getCompanionId(),
-        companionAction.getIpAddress(),
-        companionAction.getClientPort());
+        companionAction.getName(), companionAction.getCompanionId(),
+        companionAction.getIpAddress(), companionAction.getClientPort());
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.toStdString().data());
 }
