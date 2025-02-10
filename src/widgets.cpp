@@ -532,8 +532,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
 
         QString text = (messageStatePtr->getIsAntecedent()) ? "NEW" : "";
 
-        QString textHtml = QString("<font color=\"%1\"><b>%2</b></font>")
-            .arg(receivedMessageColor, text);
+        QString textHtml = getArgumentedQString(
+            "<font color=\"%1\"><b>%2</b></font>", receivedMessageColor, text);
 
         newMessageLabelPtr_ = new QLabel(textHtml);
         newMessageLabelPtr_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
@@ -691,7 +691,7 @@ FileMessageWidget::FileMessageWidget(
         messageLabelPtr_->setText(
             getFormattedMessageBodyQString(
                 sentMessageColor,
-                QString("SEND FILE: %1").arg(getQString(path.string()))));
+                getArgumentedQString("SEND FILE: %1", path.string())));
     }
 
     fileWidgetPtr_ = new QWidget;

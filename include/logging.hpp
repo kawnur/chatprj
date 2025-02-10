@@ -19,26 +19,25 @@ class SocketInfo;
 class SocketInfoWidget;
 
 GraphicManager* getGraphicManagerPtr();
-template<typename T> QString getQString(T&&);
 
 template<typename T> QString argForLogging(T* const& value)
 {
     std::stringstream ss;
     ss << (void*)value;
-    return getQString(ss.str());
+    return QString::fromStdString(ss.str());
 }
 
 template<
     typename T,
-    typename std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+    std::enable_if_t<std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
 QString argForLogging(const T& value)
 {
-    return getQString(std::to_string(value));
+    return QString::fromStdString(std::to_string(value));
 }
 
 template<
     typename T,
-    typename std::enable_if_t<!std::is_arithmetic_v<T>, bool> = true>
+    std::enable_if_t<!std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
 QString argForLogging(const T& value)
 {
     return QString(value);
@@ -48,6 +47,7 @@ QString argForLogging(const std::string&);
 QString argForLogging(const char*);
 QString argForLogging(const bool&);
 QString argForLogging(std::nullptr_t);
+QString argForLogging(QString);
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {
@@ -60,6 +60,12 @@ template<typename... Ts> void logArgs(Ts&&... args)
 
     getGraphicManagerPtr()->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(text);
+}
+
+template<typename... Ts> void logArgsByArgumentedTemplate(
+    const QString& templateString, Ts&&... args)
+{
+    logArgs(templateString.arg(getQString(args...)));
 }
 
 template<typename... Ts> void logArgsInfo(Ts&&... args)
@@ -80,6 +86,18 @@ template<typename... Ts> void logArgsWarning(Ts&&... args)
 template<typename... Ts> void logArgsError(Ts&&... args)
 {
     logArgs("ERROR:", args...);
+}
+
+template<typename... Ts> void logArgsWarningByArgumentedTemplate(
+    const QString& templateString, Ts&&... args)
+{
+    logArgsWarning(templateString.arg(argForLogging(args)...));
+}
+
+template<typename... Ts> void logArgsErrorByArgumentedTemplate(
+    const QString& templateString, Ts&&... args)
+{
+    logArgsError(templateString.arg(argForLogging(args...)));
 }
 
 template<typename T> void logLine(const T& string)

@@ -1,13 +1,8 @@
 #include "logging.hpp"
 
-template<> QString argForLogging<const std::string&>(const std::string& value)
-{
-    return getQString(value);
-}
-
 QString argForLogging(const std::string& value)
 {
-    return getQString(value);
+    return QString::fromStdString(value);
 }
 
 QString argForLogging(const char* value)
@@ -23,6 +18,11 @@ QString argForLogging(const bool& value)
 QString argForLogging(std::nullptr_t value)
 {
     return QString("nullptr_t");
+}
+
+QString argForLogging(QString value)
+{
+    return value;
 }
 
 void logLine(const QString& string)

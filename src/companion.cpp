@@ -276,10 +276,9 @@ void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget*
 
     if(result == this->messageMapping_.end())
     {
-        logArgsError(
-            nullptr,
-            QString("message with id %1 was not found in messageMapping_")
-                .arg(messagePtr->getId()));
+        logArgsErrorByArgumentedTemplate(
+            "message with id %1 was not found in messageMapping_",
+            std::to_string(messagePtr->getId()));
     }
     else
     {

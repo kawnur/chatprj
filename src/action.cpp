@@ -70,8 +70,8 @@ CompanionAction::CompanionAction(
         dialogPtr_ = new TextDialog(
             mainWindowPtr_,
             DialogType::WARNING,
-            sendChatHistoryToCompanionDialogText
-                .arg(getQString(companionPtr->getName())),
+            getArgumentedQString(
+                sendChatHistoryToCompanionDialogText, companionPtr->getName()),
             getButtonInfoVectorPtr(sendChatHistoryButtonText));
 
         break;
@@ -309,8 +309,8 @@ void FileAction::sendData()
 
                 this->filePath_ = path;  // TODO ???
 
-                QString text = QString("SEND FILE: %1").arg(
-                    getQString(this->filePath_.filename().string()));
+                QString text = getArgumentedQString(
+                    "SEND FILE: %1", this->filePath_.filename().string());
 
                 getManagerPtr()->sendMessage(
                     MessageType::FILE, this->getCompanionPtr(),
@@ -363,12 +363,10 @@ void FileAction::sendData()
 
 void FileAction::defineFilePath()
 {
-    // this->filePath_ = this->dialogPtr_->getsavefilename(
     this->filePath_ = QFileDialog::getSaveFileName(
         getGraphicManagerPtr()->getMainWindowPtr(),
         "Save File",
-        getQString(getManagerPtr()->getLastOpenedPath().string()))
-            .toStdString();
+        getQString(getManagerPtr()->getLastOpenedPath().string())).toStdString();
 
     this->sendData();
 }

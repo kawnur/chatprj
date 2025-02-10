@@ -86,9 +86,8 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
         }
         else
         {
-            logArgsError(
-                QString("file opening error, path: %1")
-                    .arg(getQString(this->filePath_.string())));
+            logArgsErrorByArgumentedTemplate(
+                "file opening error, path: %1", this->filePath_.string());
         }
     };
 
@@ -152,9 +151,8 @@ void FileOperatorStorage::addSenderOperator(
 
     if(this->mapping_.count(networkId) != 0)
     {
-        logArgsError(
-            QString("file operator for key %1 already exists")
-                .arg(getQString(networkId)));
+        logArgsErrorByArgumentedTemplate(
+            "file operator for key %1 already exists", networkId);
 
         return;
     }
@@ -170,9 +168,8 @@ void FileOperatorStorage::addReceiverOperator(
 
     if(this->mapping_.count(networkId) != 0)
     {
-        logArgsError(
-            QString("file operator for key %1 already exists")
-                .arg(getQString(networkId)));
+        logArgsErrorByArgumentedTemplate(
+            "file operator for key %1 already exists", networkId);
 
         return;
     }

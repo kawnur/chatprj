@@ -166,7 +166,7 @@ void Manager::sendFile(Companion* companionPtr, const std::filesystem::path& pat
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
 {
-    logArgs(QString("manager received message: %1").arg(getQString(jsonString)));
+    logArgsByArgumentedTemplate("manager received message: %1", jsonString);
 
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
@@ -183,8 +183,6 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             networkId = jsonData.at("id");
             isAntecedent = jsonData.at("antecedent");
         });
-
-    // logArgsWithCustomMark("received:", networkId);
 
     switch(type)
     {
@@ -382,12 +380,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 {
                     showInfoDialogAndLogInfo(
                         nullptr,
-                        QString(
+                        getArgumentedQString(
                             "Message with timestamp %1 from companion "
-                            "with id %2 already exists")
-                            .arg(
-                                getQString(timestamp),
-                                getQString(std::to_string(companionId))));
+                            "with id %2 already exists",
+                            timestamp, companionId));
 
                     continue;
                 }
@@ -444,9 +440,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
             else
             {
-                logArgsError(
-                    QString("companion has no file operator for networkId = %1")
-                        .arg(getQString(networkId)));
+                logArgsErrorByArgumentedTemplate(
+                    "companion has no file operator for networkId = %1", networkId);
             }
         }
 
@@ -467,9 +462,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
             else
             {
-                logArgsError(
-                    QString("companion has no file operator for networkId = %1")
-                        .arg(getQString(networkId)));
+                logArgsErrorByArgumentedTemplate(
+                    "companion has no file operator for networkId = %1", networkId);
             }
         }
 
@@ -502,9 +496,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
             else
             {
-                logArgsError(
-                    QString("companion has no file operator for networkId = %1")
-                        .arg(getQString(networkId)));
+                logArgsErrorByArgumentedTemplate(
+                    "companion has no file operator for networkId = %1", networkId);
             }
         }
 
@@ -558,11 +551,9 @@ void Manager::addEarlyMessages(const Companion* companionPtr)
 
         if(messagesDataPtr->isEmpty())
         {
-            logArgsWarning(
-                QString("no messages earlier than id = %1 in db with companion %2")
-                    .arg(
-                        getQString(std::to_string(messageId)),
-                        getQString(std::to_string(companionId))));
+            logArgsWarningByArgumentedTemplate(
+                "no messages earlier than id = %1 in db with companion %2",
+                messageId, companionId);
 
             return;
         }
@@ -1145,10 +1136,8 @@ void Manager::fillCompanionMessageMapping(
 
     if(messagesDataPtr->isEmpty())
     {
-        logArgsWarning(
-            nullptr,
-            QString("no messages in db with companion %1")
-                .arg(getQString(companionPtr->getName())));
+        logArgsWarningByArgumentedTemplate(
+            "no messages in db with companion %1", companionPtr->getName());
 
         // return false;
         return;

@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <openssl/md5.h>
 #include <openssl/evp.h>
+#include <type_traits>
 
 #include "constants.hpp"
 #include "db_interaction.hpp"
@@ -22,6 +23,9 @@ class TextDialog;
 template<typename... Ts> void logArgsError(Ts&&... args);
 template<typename... Ts> void logArgsException(Ts&&... args);
 
+template<typename... Ts> void logArgsErrorByArgumentedTemplate(
+    const QString& templateString, Ts&&... args);
+
 template<typename T, typename U>
 U getConstantMappingValue(
     const char* mapName, const std::map<T, U>* mapPtr, const T& key)
@@ -32,7 +36,7 @@ U getConstantMappingValue(
     }
     catch(std::out_of_range)
     {
-        logArgsError(QString("mapping %1 key error").arg(mapName));
+        logArgsErrorByArgumentedTemplate("mapping %1 key error", mapName);
     }
     catch(std::exception& e)
     {
@@ -65,9 +69,30 @@ std::vector<std::string> buildStringVector(Ts... args)
     return result;
 }
 
-template<typename T> QString getQString(T&& string)
+template<
+    typename T,
+    std::enable_if_t<std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
+QString getQString(T&& value)
 {
-    return QString::fromStdString(std::forward<T>(string));
+    return QString::fromStdString(std::to_string(std::forward<T>(value)));
+}
+
+template<
+    typename T,
+    std::enable_if_t<!std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
+QString getQString(T&& value)
+{
+    return QString::fromStdString(std::forward<T>(value));
+}
+
+QString getQString(const char*);
+QString getQString(QString);
+QString getQString(bool);
+
+template<typename... Ts> QString getArgumentedQString(
+    const QString& templateString, Ts&&... args)
+{
+    return templateString.arg(getQString(args)...);
 }
 
 // data validation
@@ -102,7 +127,6 @@ std::string buildChatHistoryJSONString(
 nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
-QString getBoolQString(bool);
 bool getBoolFromDBValue(const char*);
 
 std::string hashFileMD5(const std::string&);

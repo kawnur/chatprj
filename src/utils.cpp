@@ -2,6 +2,21 @@
 
 // TODO move all constants to constants.hpp
 
+QString getQString(const char* valuePtr)
+{
+    return QString(valuePtr);
+}
+
+QString getQString(QString value)
+{
+    return value;
+}
+
+QString getQString(bool value)
+{
+    return (value) ? QString("true") : QString("false");
+}
+
 bool validateCompanionName(
     std::vector<std::string>& validationErrors, const std::string& name)
 {
@@ -325,11 +340,6 @@ void sleepForMilliseconds(uint32_t duration)
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-QString getBoolQString(bool value)
-{
-    return (value) ? QString("true") : QString("false");
-}
-
 bool getBoolFromDBValue(const char* valuePtr)
 {
     if(*valuePtr == 't')
@@ -342,7 +352,7 @@ bool getBoolFromDBValue(const char* valuePtr)
     }
     else
     {
-        logArgsError(QString("unknown bool value from DB: %1").arg(valuePtr));
+        logArgsErrorByArgumentedTemplate("unknown bool value from DB: %1", valuePtr);
     }
 
     return false;
