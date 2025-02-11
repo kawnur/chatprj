@@ -1213,7 +1213,7 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
 {
     this->appLogWidgetPtr_->appendPlainText(text);
 
-    QApplication::processEvents();
+    // QApplication::processEvents();
 
     this->appLogWidgetPtr_->ensureCursorVisible();
 }

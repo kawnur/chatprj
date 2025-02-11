@@ -31,7 +31,6 @@ private:
     std::string previous_;
 
     void do_read();
-    void do_write(std::size_t);
 };
 
 class ChatServer

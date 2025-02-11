@@ -22,15 +22,9 @@ void ServerSession::do_read()
 
                 if(length > 0)
                 {
-                    // logArgs("server got message:", str);
-
                     if(this->previous_.size() > 0)
                     {
-                        // logArgs("previous:", this->previous_);
-
                         str = previous_ + str;
-
-                        // logArgs("new str:", str);
                     }
 
                     // split messages
@@ -68,23 +62,6 @@ void ServerSession::do_read()
                     }
                 }                
 
-                do_write(length);
-            }
-        }
-    );
-}
-
-void ServerSession::do_write(std::size_t length)
-{
-    logArgs("do_write");
-
-    auto self(shared_from_this());
-
-    boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
-        [this, self](boost::system::error_code ec, std::size_t /*length*/)
-        {
-            if (!ec)
-            {
                 do_read();
             }
         }

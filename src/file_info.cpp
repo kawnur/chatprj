@@ -64,6 +64,7 @@ void SenderOperator::sendFilePart(Companion* companionPtr, const std::string& ne
     std::string resultString = sstream.str();
 
     bool result = companionPtr->sendFileBlock(networkId, resultString);
+    // coutWithEndl(resultString);
 }
 
 void SenderOperator::sendFile(Companion* companionPtr, const std::string& networkId)
@@ -79,9 +80,9 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
             for(uint32_t i = 0; i < iterationNumber; i++)
             {
                 coutArgsWithSpaceSeparator(
-                    logCustomDelimiter, "iteration:", i, "/", iterationNumber);
+                    logCustomDelimiter, "iteration:", i + 1, "/", iterationNumber);
 
-                this->sendFilePart(companionPtr, networkId);
+                this->sendFilePart(companionPtr, networkId);                
             }
 
             // send 'end of transmission' message

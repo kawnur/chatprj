@@ -51,14 +51,16 @@ bool ChatClient::send(std::string text)
 
     auto sendLambda = [&, this](bool& value)
     {
-        boost::asio::write(
+        std::size_t written = boost::asio::write(
             this->socket_, boost::asio::buffer(text.data(), text.size()));
+
+        coutArgsWithSpaceSeparator("written:", written);
 
         value = true;
     };
 
     runAndLogException(sendLambda, sent);
-    logArgs("client sent message:", text);
+    // logArgs("client sent message:", text);
 
     return sent;
 }

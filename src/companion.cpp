@@ -480,9 +480,6 @@ void Companion::addMessageWidgetsToChatHistory()
 
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    logArgsWithCustomMark(
-        "this->messageMapping_.size():", this->messageMapping_.size());
-
     for(auto& iterator : this->messageMapping_)
     {
         widgetGroupPtr->addMessageWidgetToCentralPanelChatHistory(

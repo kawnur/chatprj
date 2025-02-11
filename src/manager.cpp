@@ -166,7 +166,7 @@ void Manager::sendFile(Companion* companionPtr, const std::filesystem::path& pat
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
 {
-    logArgsByArgumentedTemplate("manager received message: %1", jsonString);
+    // logArgsByArgumentedTemplate("manager received message: %1", jsonString);
 
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
