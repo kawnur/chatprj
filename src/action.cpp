@@ -346,15 +346,23 @@ void FileAction::sendData()
             // }
 
             // set file path for file operator
-            this->companionPtr_->getFileOperatorStoragePtr()->
+            bool setResult = this->companionPtr_->getFileOperatorStoragePtr()->
                 getOperator(this->networkId_)->setFilePath(this->filePath_);
 
-            // send without saving to db
-            bool result = this->companionPtr_->sendMessage(
-                false, NetworkMessageType::FILE_REQUEST,
-                this->networkId_, nullptr);
+            if(setResult)
+            {
+                // send without saving to db
+                bool result = this->companionPtr_->sendMessage(
+                    false, NetworkMessageType::FILE_REQUEST,
+                    this->networkId_, nullptr);
 
-            getManagerPtr()->setLastOpenedPath(this->filePath_.parent_path());
+                getManagerPtr()->setLastOpenedPath(this->filePath_.parent_path());
+            }
+            else
+            {
+                logArgsErrorByArgumentedTemplate(
+                    "error saving file, path: %1", this->filePath_);
+            }
         }
 
         break;

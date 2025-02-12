@@ -25,6 +25,11 @@ QString argForLogging(QString value)
     return value;
 }
 
+QString argForLogging(std::filesystem::path& value)
+{
+    return QString::fromStdString(value.string());
+}
+
 void logLine(const QString& string)
 {
     getGraphicManagerPtr()->addTextToAppLogWidget(string);

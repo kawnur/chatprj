@@ -7,7 +7,7 @@ Manager::Manager() :
 {
     mapCompanionIdToCompanionInfo_ = std::map<int, std::pair<Companion*, WidgetGroup*>>();
     selectedCompanionPtr_ = nullptr;
-    lastOpenedPath_ = std::filesystem::path("~");
+    lastOpenedPath_ = homePath;
 }
 
 Manager::~Manager()
@@ -211,7 +211,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 companionPtr->getFileOperatorStoragePtr()->
                     addReceiverOperator(
                         networkId, hashMD5FromSender,
-                        std::filesystem::path("~"));
+                        homePath);
 
                 break;
             }
@@ -469,6 +469,26 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
         break;
 
+    case NetworkMessageType::FILE_DATA_CHECK_SUCCESS:
+        {
+            logArgs("got NetworkMessageType::FILE_DATA_CHECK_SUCCESS");
+
+            // delete operator
+
+        }
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
+        {
+            logArgs("got NetworkMessageType::FILE_DATA_CHECK_FAILURE");
+
+            // delete file
+
+        }
+
+        break;
+
     case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
         {
             logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_END");
@@ -481,10 +501,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             if(receiverPtr)
             {
                 auto resultType = (receiverPtr->receiveFile()) ?
-                    NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS :
-                    NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
+                    NetworkMessageType::FILE_DATA_CHECK_SUCCESS :
+                    NetworkMessageType::FILE_DATA_CHECK_FAILURE;
 
-                if(resultType == NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS)
+                if(resultType == NetworkMessageType::FILE_DATA_CHECK_SUCCESS)
                 {
                     logArgs("file received successfully");
 
@@ -512,14 +532,6 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
         break;
 
-    case NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS:
-        {
-            logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS");
-
-            // delete operator
-        }
-
-        break;
     }
 }
 

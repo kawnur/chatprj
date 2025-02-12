@@ -112,7 +112,7 @@ private:
         if(!dbResultPtr)
         {
             showErrorDialogAndLogError(
-                nullptr, QString("Database request error, dbResultPtr is nullptr"));
+                nullptr, "Database request error, dbResultPtr is nullptr");
 
             return nullptr;
         }
@@ -128,7 +128,7 @@ private:
 
         if(logging)
         {
-            logArgs("dbDataPtr->size():", dbDataPtr->size());
+            // logArgs("dbDataPtr->size():", dbDataPtr->size());
             logDBReplyData(dbDataPtr);
             logArgs(logDelimiter);
         }

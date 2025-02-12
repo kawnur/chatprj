@@ -343,8 +343,6 @@ bool Companion::sendMessage(
     {
         bool isConnected = this->clientPtr_->getIsConnected();
 
-        logArgs("clientPtr_->getIsConnected():", isConnected);
-
         if(isConnected)
         {
             // build json
@@ -372,8 +370,6 @@ bool Companion::sendChatHistory(
     if(this->clientPtr_)
     {
         bool isConnected = this->clientPtr_->getIsConnected();
-
-        logArgs("clientPtr_->getIsConnected():", isConnected);
 
         if(isConnected)
         {
@@ -430,9 +426,9 @@ bool Companion::sendFileRequest(FileMessageWidget* widgetPtr)
 
 bool Companion::sendFileBlock(const std::string& networkId, const std::string& data)
 {
-    bool isConnected = this->clientPtr_->getIsConnected();
+    bool result = false;
 
-    logArgs("clientPtr_->getIsConnected():", isConnected);
+    bool isConnected = this->clientPtr_->getIsConnected();
 
     if(isConnected)
     {
@@ -440,15 +436,15 @@ bool Companion::sendFileBlock(const std::string& networkId, const std::string& d
         std::string jsonData = buildFileBlockJSONString(this, networkId, data);
 
         // send json over network
-        auto result = this->clientPtr_->send(jsonData);
+        result = this->clientPtr_->send(jsonData);
 
         if(!result)
         {
             logArgsError("client message sending error");
         }
-
-        return result;
     }
+
+    return result;
 }
 
 void Companion::updateData(const CompanionData* dataPtr)

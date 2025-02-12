@@ -20,10 +20,10 @@ public:
 
     std::filesystem::path getFilePath() const;
     std::string getFileMD5Hash() const;
-    void setFilePath(const std::filesystem::path&);
-    void closeFile();
+    bool setFilePath(const std::filesystem::path&);
+    std::filebuf* closeFile();
 
-    virtual void createFileAndOpen() {}
+    virtual bool createFileAndOpen() { return false; }
 
 protected:
     std::filebuf filebuf_;
@@ -37,7 +37,7 @@ public:
     SenderOperator(const std::filesystem::path&);
     ~SenderOperator() = default;
 
-    void sendFilePart(Companion*, const std::string&);
+    bool sendFilePart(Companion*, const std::string&);
     void sendFile(Companion*, const std::string&);
 
 private:
@@ -56,7 +56,7 @@ public:
 private:
     std::string fileMD5HashFromSender_;
 
-    void createFileAndOpen() override;
+    bool createFileAndOpen() override;
 };
 
 class FileOperatorStorage

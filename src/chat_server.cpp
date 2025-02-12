@@ -9,8 +9,6 @@ void ServerSession::start()
 
 void ServerSession::do_read()
 {
-    logArgs("do_read");
-
     auto self(shared_from_this());
 
     socket_.async_read_some(boost::asio::buffer(data_, maxBufferSize),

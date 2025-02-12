@@ -21,7 +21,7 @@ std::string FileOperator::getFileMD5Hash() const
     return this->fileMD5Hash_;
 }
 
-void FileOperator::setFilePath(const std::filesystem::path& filePath)
+bool FileOperator::setFilePath(const std::filesystem::path& filePath)
 {
     if(this->filebuf_.is_open())
     {
@@ -30,29 +30,32 @@ void FileOperator::setFilePath(const std::filesystem::path& filePath)
 
     this->filePath_ = filePath;
 
-    createFileAndOpen();
+    return createFileAndOpen();
 }
 
-void FileOperator::closeFile()
+std::filebuf* FileOperator::closeFile()
 {
-    auto isOpen = this->filebuf_.is_open();
-    auto result = this->filebuf_.close();
+    return this->filebuf_.close();
 }
 
 SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
     FileOperator(filePath)
 {
     fileMD5Hash_ = hashFileMD5(filePath_.string());
-    filebuf_.open(filePath_, std::ios::binary | std::ios::in);
+
+    if(!filebuf_.open(filePath_, std::ios::binary | std::ios::in))
+    {
+        logArgsErrorByArgumentedTemplate(
+            "file opening error, path: %1", filePath_.string());
+    }
 }
 
-void SenderOperator::sendFilePart(Companion* companionPtr, const std::string& networkId)
+bool SenderOperator::sendFilePart(Companion* companionPtr, const std::string& networkId)
 {
     std::stringstream sstream;
     char buffer[maxBufferSize] = { 0 };
 
     auto read = this->filebuf_.sgetn(buffer, maxBufferSize);
-
     sstream << std::hex << std::setfill('0');
 
     for(size_t i = 0; i < read; i++)
@@ -65,6 +68,8 @@ void SenderOperator::sendFilePart(Companion* companionPtr, const std::string& ne
 
     bool result = companionPtr->sendFileBlock(networkId, resultString);
     // coutWithEndl(resultString);
+
+    return result;
 }
 
 void SenderOperator::sendFile(Companion* companionPtr, const std::string& networkId)
@@ -74,15 +79,30 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
         if(this->filebuf_.is_open())
         {
             auto length = this->filebuf_.in_avail();
-
             uint32_t iterationNumber = length / maxBufferSize + 1;
 
             for(uint32_t i = 0; i < iterationNumber; i++)
             {
-                coutArgsWithSpaceSeparator(
-                    logCustomDelimiter, "iteration:", i + 1, "/", iterationNumber);
+                if(i % 100 == 0)
+                {
+                    coutArgsWithSpaceSeparator(
+                        logCustomDelimiter, "iteration:", i + 1, "/", iterationNumber);
+                }
 
-                this->sendFilePart(companionPtr, networkId);                
+                bool result = this->sendFilePart(companionPtr, networkId);
+
+                if(!result)
+                {
+                    logArgsErrorByArgumentedTemplate(
+                        "file sending stopped because of error, path: %1",
+                        this->filePath_.string());
+
+                    companionPtr->sendMessage(
+                        false, NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE,
+                        networkId, nullptr);
+
+                    return;
+                }
             }
 
             // send 'end of transmission' message
@@ -90,7 +110,11 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
                 false, NetworkMessageType::FILE_DATA_TRANSMISSON_END,
                 networkId, nullptr);
 
-            this->closeFile();
+            if(!this->closeFile())
+            {
+                logArgsErrorByArgumentedTemplate(
+                    "file closing error, path: %1", this->filePath_.string());
+            }
         }
         else
         {
@@ -109,28 +133,31 @@ ReceiverOperator::ReceiverOperator(
     fileMD5Hash_ = std::string("");
     fileMD5HashFromSender_ = fileMD5HashFromSender;
 
-    createFileAndOpen();
+    if(filePath_ != homePath)
+    {
+        createFileAndOpen();
+    }
 }
 
 void ReceiverOperator::receiveFilePart(const std::string& filePart)
 {
-    const char* data = filePart.data();
-
     size_t byteSize = filePart.size() / 2;
 
     for(size_t i = 0; i < byteSize; i++)
     {
         std::string dataString(filePart.begin() + 2 * i, filePart.begin() + 2 * i + 2);
-
         uint8_t value = std::stoi(dataString, nullptr, 16);
-
         this->filebuf_.sputc(value);
     }
 }
 
 bool ReceiverOperator::receiveFile()
 {
-    this->closeFile();
+    if(!this->closeFile())
+    {
+        logArgsErrorByArgumentedTemplate(
+            "file closing error, path: %1", this->filePath_.string());
+    }
 
     this->fileMD5Hash_ = hashFileMD5(filePath_.string());
 
@@ -140,7 +167,7 @@ bool ReceiverOperator::receiveFile()
     return (this->fileMD5Hash_ == this->fileMD5HashFromSender_);
 }
 
-void ReceiverOperator::createFileAndOpen()
+bool ReceiverOperator::createFileAndOpen()
 {
     // create file if it does not exist
     if(!std::filesystem::exists(filePath_))
@@ -153,10 +180,10 @@ void ReceiverOperator::createFileAndOpen()
 
     if(!openResult)
     {
-        logArgsError(
-            QString("file %1 open error"),
-            getQString(filePath_.string()));
+        logArgsErrorByArgumentedTemplate("file %1 open error", filePath_);
     }
+
+    return (openResult) ? true : false;
 }
 
 FileOperatorStorage::FileOperatorStorage() :

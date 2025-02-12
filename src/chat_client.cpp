@@ -54,8 +54,6 @@ bool ChatClient::send(std::string text)
         std::size_t written = boost::asio::write(
             this->socket_, boost::asio::buffer(text.data(), text.size()));
 
-        coutArgsWithSpaceSeparator("written:", written);
-
         value = true;
     };
 

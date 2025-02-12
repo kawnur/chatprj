@@ -1,6 +1,7 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
+#include <filesystem>
 #include <map>
 #include <QString>
 #include <string>
@@ -22,6 +23,8 @@ static const char alphanum[] =
 const uint32_t sleepDurationInitial = 1000;
 const float sleepDurationIncreaseRate = 1.2f;
 
+const std::filesystem::path homePath("~");
+
 enum class MessageType
 {
     TEXT,
@@ -35,8 +38,9 @@ enum class NetworkMessageType
     FILE_PROPOSAL,
     FILE_REQUEST,
     FILE_DATA,
+    FILE_DATA_CHECK_SUCCESS,
+    FILE_DATA_CHECK_FAILURE,
     FILE_DATA_TRANSMISSON_END,
-    FILE_DATA_TRANSMISSON_SUCCESS,
     FILE_DATA_TRANSMISSON_FAILURE,
     RECEIVE_CONFIRMATION,
     RECEIVE_CONFIRMATION_REQUEST,
