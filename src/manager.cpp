@@ -209,9 +209,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
                 // create receiver operator
                 companionPtr->getFileOperatorStoragePtr()->
-                    addReceiverOperator(
-                        networkId, hashMD5FromSender,
-                        homePath);
+                    addReceiverOperator(networkId, hashMD5FromSender, homePath);
 
                 break;
             }
@@ -429,10 +427,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgs("got NetworkMessageType::FILE_REQUEST");
 
-            FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
-
             auto senderPtr =
-                dynamic_cast<SenderOperator*>(storagePtr->getOperator(networkId));
+                companionPtr->getFileOperatorPtrByNetworkId<SenderOperator>(networkId);
 
             if(senderPtr)
             {
@@ -440,7 +436,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
             else
             {
-                logArgsErrorByArgumentedTemplate(
+                logArgsErrorWithTemplate(
                     "companion has no file operator for networkId = %1", networkId);
             }
         }
@@ -451,10 +447,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgs("got NetworkMessageType::FILE_DATA");
 
-            FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
-
             auto receiverPtr =
-                dynamic_cast<ReceiverOperator*>(storagePtr->getOperator(networkId));
+                companionPtr->getFileOperatorPtrByNetworkId<ReceiverOperator>(networkId);
 
             if(receiverPtr)
             {
@@ -462,7 +456,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
             else
             {
-                logArgsErrorByArgumentedTemplate(
+                logArgsErrorWithTemplate(
                     "companion has no file operator for networkId = %1", networkId);
             }
         }
@@ -473,8 +467,11 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgs("got NetworkMessageType::FILE_DATA_CHECK_SUCCESS");
 
-            // delete operator
+            logArgsInfoWithTemplate(
+                "file %1 received by companion successfully",
+                companionPtr->getFileOperatorFilePathByNetworkId(networkId));
 
+            companionPtr->removeFileOperator<SenderOperator>(networkId);
         }
 
         break;
@@ -483,8 +480,11 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgs("got NetworkMessageType::FILE_DATA_CHECK_FAILURE");
 
-            // delete file
+            logArgsInfoWithTemplate(
+                "file %1 WAS NOT received by companion",
+                companionPtr->getFileOperatorFilePathByNetworkId(networkId));
 
+            companionPtr->removeFileOperator<SenderOperator>(networkId);
         }
 
         break;
@@ -493,10 +493,8 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_END");
 
-            FileOperatorStorage* storagePtr = companionPtr->getFileOperatorStoragePtr();
-
             auto receiverPtr =
-                dynamic_cast<ReceiverOperator*>(storagePtr->getOperator(networkId));
+                companionPtr->getFileOperatorPtrByNetworkId<ReceiverOperator>(networkId);
 
             if(receiverPtr)
             {
@@ -508,7 +506,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 {
                     logArgs("file received successfully");
 
-                    // delete operator
+                    companionPtr->removeFileOperator<ReceiverOperator>(networkId);
                 }
 
                 bool result =
@@ -516,7 +514,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
             }
             else
             {
-                logArgsErrorByArgumentedTemplate(
+                logArgsErrorWithTemplate(
                     "companion has no file operator for networkId = %1", networkId);
             }
         }
@@ -527,11 +525,14 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
         {
             logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE");
 
-            // create resend action
+            logArgsInfoWithTemplate(
+                "file %1 WAS NOT received by companion",
+                companionPtr->getFileOperatorFilePathByNetworkId(networkId));
+
+            companionPtr->removeFileOperator<SenderOperator>(networkId);
         }
 
         break;
-
     }
 }
 
@@ -563,7 +564,7 @@ void Manager::addEarlyMessages(const Companion* companionPtr)
 
         if(messagesDataPtr->isEmpty())
         {
-            logArgsWarningByArgumentedTemplate(
+            logArgsWarningWithTemplate(
                 "no messages earlier than id = %1 in db with companion %2",
                 messageId, companionId);
 
@@ -1148,7 +1149,7 @@ void Manager::fillCompanionMessageMapping(
 
     if(messagesDataPtr->isEmpty())
     {
-        logArgsWarningByArgumentedTemplate(
+        logArgsWarningWithTemplate(
             "no messages in db with companion %1", companionPtr->getName());
 
         // return false;
@@ -1285,7 +1286,8 @@ void Manager::buildWidgetGroups()
     auto companionsNumber = this->mapCompanionIdToCompanionInfo_.size();
     auto childrenSize = graphicManagerPtr->getCompanionPanelChildrenSize();
 
-    logArgs("companionsNumber:", companionsNumber, "childrenSize:", childrenSize);
+    logArgsWithTemplate(
+        "companionsNumber: %1, childrenSize: %2", companionsNumber, childrenSize);
 
     if(companionsNumber == 0 && childrenSize == 0)
     {
@@ -1632,7 +1634,7 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
 
     if(logDBInteraction)
     {
-        logArgs("companionId:", companionId, "timestampTz:", timestampTz);
+        logArgsWithTemplate("companionId: %1, timestampTz: %2", companionId, timestampTz);
     }
 
     return std::tuple<uint32_t, uint8_t, std::string>(id, companionId, timestampTz);

@@ -1,31 +1,31 @@
 #include "logging.hpp"
 
-QString argForLogging(const std::string& value)
+QString getQString(const std::string& value)
 {
     return QString::fromStdString(value);
 }
 
-QString argForLogging(const char* value)
+QString getQString(const char* value)
 {
     return QString(value);
 }
 
-QString argForLogging(const bool& value)
+QString getQString(const bool& value)
 {
-    return (value) ? QString("true") : QString("false");
+    return (value) ? "true" : "false";
 }
 
-QString argForLogging(std::nullptr_t value)
+QString getQString(std::nullptr_t value)
 {
-    return QString("nullptr_t");
+    return "nullptr_t";
 }
 
-QString argForLogging(QString value)
+QString getQString(QString value)
 {
     return value;
 }
 
-QString argForLogging(std::filesystem::path& value)
+QString getQString(std::filesystem::path& value)
 {
     return QString::fromStdString(value.string());
 }
@@ -42,10 +42,10 @@ void logLine(const std::string& string)
 
 void logSocketInfoData(const SocketInfo* objectPtr)
 {
-    logArgs(
-        "ipAddress:", objectPtr->getIpAddress(),
-        "serverPort_:", objectPtr->getServerPort(),
-        "clientPort_:", objectPtr->getClientPort());
+    logArgsWithTemplate(
+        "ipAddress: %1, serverPort_: %2, clientPort_: %3",
+        objectPtr->getIpAddress(), objectPtr->getServerPort(),
+        objectPtr->getClientPort());
 }
 
 void logDBResultUnknownField(const PGresult* result, int row, int column)
@@ -70,10 +70,8 @@ void logDBReplyData(std::shared_ptr<DBReplyData>& objectPtr)
 
 void logSocketInfoWidget(const SocketInfoWidget* objectPtr)
 {
-    logArgs(
-        "name:", objectPtr->getName(),
-        "ipAddress:", objectPtr->getIpAddress(),
-        "serverPort_:", objectPtr->getServerPort(),
-        "clientPort_:", objectPtr->getClientPort());
+    logArgsWithTemplate(
+        "name: %1, ipAddress: %2, serverPort_: %3, clientPort_: %4",
+        objectPtr->getName(), objectPtr->getIpAddress(),
+        objectPtr->getServerPort(), objectPtr->getClientPort());
 }
-

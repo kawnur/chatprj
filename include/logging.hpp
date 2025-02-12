@@ -20,7 +20,7 @@ class SocketInfoWidget;
 
 GraphicManager* getGraphicManagerPtr();
 
-template<typename T> QString argForLogging(T* const& value)
+template<typename T> QString getQString(T* value)
 {
     std::stringstream ss;
     ss << (void*)value;
@@ -30,25 +30,31 @@ template<typename T> QString argForLogging(T* const& value)
 template<
     typename T,
     std::enable_if_t<std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
-QString argForLogging(const T& value)
-{
-    return QString::fromStdString(std::to_string(value));
+QString getQString(T&& value)
+{    
+    return QString::fromStdString(std::to_string(std::forward<T>(value)));
 }
 
 template<
     typename T,
     std::enable_if_t<!std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
-QString argForLogging(const T& value)
+QString getQString(T&& value)
 {
-    return QString(value);
+    return QString::fromStdString(std::forward<T>(value));
 }
 
-QString argForLogging(const std::string&);
-QString argForLogging(const char*);
-QString argForLogging(const bool&);
-QString argForLogging(std::nullptr_t);
-QString argForLogging(QString);
-QString argForLogging(std::filesystem::path&);
+QString getQString(const std::string&);
+QString getQString(const char*);
+QString getQString(const bool&);
+QString getQString(std::nullptr_t);
+QString getQString(QString);
+QString getQString(std::filesystem::path&);
+
+template<typename... Ts> QString getArgumentedQString(
+    const QString& templateString, Ts&&... args)
+{    
+    return templateString.arg(getQString(std::forward<Ts>(args))...);
+}
 
 template<typename... Ts> void logArgs(Ts&&... args)
 {
@@ -57,16 +63,16 @@ template<typename... Ts> void logArgs(Ts&&... args)
 
     text += time.currentTime().toString() + QString(" - ");
 
-    ((text += (argForLogging(args) + QString(" "))), ...);
+    ((text += (getQString(args) + QString(" "))), ...);
 
     getGraphicManagerPtr()->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(text);
 }
 
-template<typename... Ts> void logArgsByArgumentedTemplate(
+template<typename... Ts> void logArgsWithTemplate(
     const QString& templateString, Ts&&... args)
 {
-    logArgs(templateString.arg(getQString(args...)));
+    logArgs(templateString.arg(getQString(args)...));
 }
 
 template<typename... Ts> void logArgsInfo(Ts&&... args)
@@ -89,16 +95,22 @@ template<typename... Ts> void logArgsError(Ts&&... args)
     logArgs("ERROR:", args...);
 }
 
-template<typename... Ts> void logArgsWarningByArgumentedTemplate(
+template<typename... Ts> void logArgsInfoWithTemplate(
     const QString& templateString, Ts&&... args)
 {
-    logArgsWarning(templateString.arg(argForLogging(args)...));
+    logArgsInfo(templateString.arg(getQString(args)...));
 }
 
-template<typename... Ts> void logArgsErrorByArgumentedTemplate(
+template<typename... Ts> void logArgsWarningWithTemplate(
     const QString& templateString, Ts&&... args)
 {
-    logArgsError(templateString.arg(argForLogging(args...)));
+    logArgsWarning(templateString.arg(getQString(args)...));
+}
+
+template<typename... Ts> void logArgsErrorWithTemplate(
+    const QString& templateString, Ts&&... args)
+{
+    logArgsError(templateString.arg(getQString(args...)));
 }
 
 template<typename T> void logLine(const T& string)

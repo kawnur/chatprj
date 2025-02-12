@@ -23,7 +23,7 @@ class TextDialog;
 template<typename... Ts> void logArgsError(Ts&&... args);
 template<typename... Ts> void logArgsException(Ts&&... args);
 
-template<typename... Ts> void logArgsErrorByArgumentedTemplate(
+template<typename... Ts> void logArgsErrorWithTemplate(
     const QString& templateString, Ts&&... args);
 
 template<typename T, typename U>
@@ -36,7 +36,7 @@ U getConstantMappingValue(
     }
     catch(std::out_of_range)
     {
-        logArgsErrorByArgumentedTemplate("mapping %1 key error", mapName);
+        logArgsErrorWithTemplate("mapping %1 key error", mapName);
     }
     catch(std::exception& e)
     {
@@ -67,32 +67,6 @@ std::vector<std::string> buildStringVector(Ts... args)
     (result.emplace_back(args), ...);
 
     return result;
-}
-
-template<
-    typename T,
-    std::enable_if_t<std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
-QString getQString(T&& value)
-{
-    return QString::fromStdString(std::to_string(std::forward<T>(value)));
-}
-
-template<
-    typename T,
-    std::enable_if_t<!std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
-QString getQString(T&& value)
-{
-    return QString::fromStdString(std::forward<T>(value));
-}
-
-QString getQString(const char*);
-QString getQString(QString);
-QString getQString(bool);
-
-template<typename... Ts> QString getArgumentedQString(
-    const QString& templateString, Ts&&... args)
-{
-    return templateString.arg(getQString(std::forward<Ts>(args))...);
 }
 
 // data validation

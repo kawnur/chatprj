@@ -72,6 +72,8 @@ public:
 
     FileOperator* getOperator(const std::string&);
 
+    bool removeOperator(const std::string&);
+
 private:
     std::mutex mappingMutex_;
     std::map<std::string, FileOperator*> mapping_;

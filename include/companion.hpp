@@ -25,6 +25,9 @@ class MessageInfo;
 class MessageState;
 class WidgetGroup;
 
+template<typename... Ts> void logArgsInfoWithTemplate(const QString&, Ts&&...);
+template<typename... Ts> void logArgsErrorWithTemplate(const QString&, Ts&&...);
+
 class SocketInfo
 {
 public:
@@ -72,6 +75,43 @@ public:
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
     FileOperatorStorage* getFileOperatorStoragePtr() const;
+    std::filesystem::path getFileOperatorFilePathByNetworkId(const std::string&);
+    bool removeOperatorFromStorage(const std::string&);
+
+    template<typename T>
+    T* getFileOperatorPtrByNetworkId(const std::string& networkId)
+    {
+        return dynamic_cast<T*>(this->fileOperatorStoragePtr_->getOperator(networkId));
+    }
+
+    template<typename T>
+    void removeFileOperator(const std::string& networkId)
+    {
+        auto operatorPtr =
+            this->getFileOperatorPtrByNetworkId<T>(networkId);
+
+        if(operatorPtr)
+        {
+            if(!this->removeOperatorFromStorage(networkId))
+            {
+                logArgsInfoWithTemplate(
+                    "remove file operator error for networkId %1", networkId);
+            }
+
+            if(operatorPtr)
+            {
+                delete operatorPtr;
+            }
+
+            logArgsInfoWithTemplate(
+                "file operator for networkId %1 deleted", networkId);
+        }
+        else
+        {
+            logArgsErrorWithTemplate(
+                "file operator was not found for networkId %1", networkId);
+        }
+    }
 
     const MessageState* getMappedMessageStatePtrByMessagePtr(const Message*);
     MessageWidget* getMappedMessageWidgetPtrByMessagePtr(const Message*);
@@ -95,6 +135,7 @@ public:
         std::shared_ptr<DBReplyData>&, size_t);
 
     void setSocketInfo(SocketInfo*);
+    bool setFileOperatorFilePath(const std::string&, const std::filesystem::path&);
     void setMappedMessageWidget(const Message*, MessageWidget*);
     bool startServer();
     bool createClient();

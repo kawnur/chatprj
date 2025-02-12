@@ -139,8 +139,9 @@ PGconn* getDBConnection()
             }
         }
 
-        logArgs("DB connection; address:", dbAddress, "port:", dbPort,
-                "login:", dbLogin, "password:", dbPassword);
+        logArgsWithTemplate(
+            "DB connection; address: %1, port: %2, login: %3, password: %4",
+            dbAddress, dbPort, dbLogin, dbPassword);
 
         dbConnection = PQsetdbLogin(
                     dbAddress,
@@ -154,7 +155,7 @@ PGconn* getDBConnection()
         ConnStatusType status = PQstatus(dbConnection);
         std::string mark = (status == 0) ? "OK" : "";
 
-        logArgs("DB connection status: ", std::to_string(status), mark);
+        logArgsWithTemplate("DB connection status: %1 %2", std::to_string(status), mark);
 
         if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
         {
@@ -438,7 +439,7 @@ int getDataFromDBResult(
 
     if(logging)
     {
-        logArgs("ntuples:", ntuples, "nfields:", nfields);
+        logArgsWithTemplate("ntuples: %1, nfields: %2", ntuples, nfields);
     }
 
     if(ntuples == 0)
@@ -449,7 +450,7 @@ int getDataFromDBResult(
 
     if(maxTuples == 1 and ntuples > 1)
     {
-        logArgsError(ntuples, "lines from OneToOne DB request");
+        logArgsErrorWithTemplate("%1 lines from OneToOne DB request", ntuples);
     }
 
     // create additional elements in result vector

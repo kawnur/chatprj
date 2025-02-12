@@ -2,21 +2,6 @@
 
 // TODO move all constants to constants.hpp
 
-QString getQString(const char* valuePtr)
-{
-    return QString(valuePtr);
-}
-
-QString getQString(QString value)
-{
-    return value;
-}
-
-QString getQString(bool value)
-{
-    return (value) ? QString("true") : QString("false");
-}
-
 bool validateCompanionName(
     std::vector<std::string>& validationErrors, const std::string& name)
 {
@@ -117,7 +102,7 @@ QString buildDialogText(std::string&& header, const std::vector<std::string>& me
 {
     if(messages.empty())
     {
-        return QString("");
+        return "";
     }
     else
     {
@@ -192,7 +177,7 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
 
 QString getFormattedMessageBodyQString(const QString& color, const QString& text)
 {
-    return QString("<font color=\"%1\"><br>%2</font>").arg(color, text);
+    return getArgumentedQString("<font color=\"%1\"><br>%2</font>", color, text);
 }
 
 std::pair<QString, QString> formatMessageHeaderAndBody(
@@ -219,9 +204,9 @@ std::pair<QString, QString> formatMessageHeaderAndBody(
         receiver = companionNameQString;
     }
 
-    QString header =
-        QString("<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>")
-            .arg(color, sender, receiver, time);
+    QString header = getArgumentedQString(
+        "<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>",
+        color, sender, receiver, time);
 
     QString body = getFormattedMessageBodyQString(color, text);
 
@@ -269,7 +254,8 @@ std::string buildMessageJSONString(
     case NetworkMessageType::CHAT_HISTORY_REQUEST:
     case NetworkMessageType::FILE_REQUEST:
     case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
-    case NetworkMessageType::FILE_DATA_TRANSMISSON_SUCCESS:
+    case NetworkMessageType::FILE_DATA_CHECK_SUCCESS:
+    case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
     case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
 
         break;
@@ -352,7 +338,7 @@ bool getBoolFromDBValue(const char* valuePtr)
     }
     else
     {
-        logArgsErrorByArgumentedTemplate("unknown bool value from DB: %1", valuePtr);
+        logArgsErrorWithTemplate("unknown bool value from DB: %1", valuePtr);
     }
 
     return false;

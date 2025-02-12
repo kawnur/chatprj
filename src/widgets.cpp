@@ -5,11 +5,11 @@ QString getInitialConnectButtonLabel()
     try
     {
         return connectButtonLabels.empty() ?
-            QString("_") : connectButtonLabels.at(0);
+            "_" : connectButtonLabels.at(0);
     }
     catch(...)
     {
-        return QString("_?_");
+        return "_?_";
     }
 }
 
@@ -19,7 +19,7 @@ QString getNextConnectButtonLabel(QString& currentLabel)
     {
         if(connectButtonLabels.empty())
         {
-            return QString("");
+            return "";
         }
         else
         {
@@ -45,7 +45,7 @@ QString getNextConnectButtonLabel(QString& currentLabel)
     }
     catch(...)
     {
-        return QString("_?_");
+        return "_?_";
     }
 }
 
@@ -685,8 +685,8 @@ FileMessageWidget::FileMessageWidget(
     // rewrite widget body text for sender's widget
     if(isMessageFromMe)
     {
-        auto path = companionPtr->getFileOperatorStoragePtr()->
-            getOperator(messageStatePtr->getNetworkId())->getFilePath();
+        auto path = companionPtr->getFileOperatorFilePathByNetworkId(
+            messageStatePtr->getNetworkId());
 
         messageLabelPtr_->setText(
             getFormattedMessageBodyQString(
@@ -1113,7 +1113,8 @@ bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
                 (eventCastPtr->key() &
                 (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home))))
             {
-                logArgs("scroll bar minimum event type", std::to_string(eventPtr->type()));
+                logArgsWithTemplate(
+                    "scroll bar minimum event type %1", std::to_string(eventPtr->type()));
 
                 getManagerPtr()->addEarlyMessages(this->companionPtr_);
             }

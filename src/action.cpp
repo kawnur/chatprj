@@ -346,8 +346,8 @@ void FileAction::sendData()
             // }
 
             // set file path for file operator
-            bool setResult = this->companionPtr_->getFileOperatorStoragePtr()->
-                getOperator(this->networkId_)->setFilePath(this->filePath_);
+            bool setResult = this->companionPtr_->setFileOperatorFilePath(
+                this->networkId_, this->filePath_);
 
             if(setResult)
             {
@@ -360,7 +360,7 @@ void FileAction::sendData()
             }
             else
             {
-                logArgsErrorByArgumentedTemplate(
+                logArgsErrorWithTemplate(
                     "error saving file, path: %1", this->filePath_);
             }
         }
@@ -374,6 +374,7 @@ void FileAction::defineFilePath()
     this->filePath_ = QFileDialog::getSaveFileName(
         getGraphicManagerPtr()->getMainWindowPtr(),
         "Save File",
+        // getQString(getManagerPtr()->getLastOpenedPath().string())).toStdString();
         getQString(getManagerPtr()->getLastOpenedPath().string())).toStdString();
 
     this->sendData();

@@ -87,6 +87,18 @@ FileOperatorStorage* Companion::getFileOperatorStoragePtr() const
     return this->fileOperatorStoragePtr_;
 }
 
+std::filesystem::path Companion::getFileOperatorFilePathByNetworkId(
+    const std::string& networkId)
+{
+    return this->fileOperatorStoragePtr_->
+        getOperator(networkId)->getFilePath();
+}
+
+bool Companion::removeOperatorFromStorage(const std::string& key)
+{
+    return this->fileOperatorStoragePtr_->removeOperator(key);
+}
+
 const MessageState* Companion::getMappedMessageStatePtrByMessagePtr(
     const Message* messagePtr)
 {
@@ -268,6 +280,13 @@ void Companion::setSocketInfo(SocketInfo* socketInfo)
     socketInfoPtr_ = socketInfo;
 }
 
+bool Companion::setFileOperatorFilePath(
+    const std::string& networkId, const std::filesystem::path& path)
+{
+    return this->fileOperatorStoragePtr_->
+        getOperator(networkId)->setFilePath(path);
+}
+
 void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget* widgetPtr)
 {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
@@ -276,9 +295,10 @@ void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget*
 
     if(result == this->messageMapping_.end())
     {
-        logArgsErrorByArgumentedTemplate(
+        logArgsErrorWithTemplate(
             "message with id %1 was not found in messageMapping_",
-            std::to_string(messagePtr->getId()));
+            // std::to_string(messagePtr->getId()));
+            messagePtr->getId());
     }
     else
     {
