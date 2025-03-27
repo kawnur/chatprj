@@ -1,6 +1,7 @@
 #ifndef DB_INTERACTION_HPP
 #define DB_INTERACTION_HPP
 
+#include <format>
 #include <libpq-events.h>
 #include <libpq-fe.h>
 #include <mutex>
@@ -24,7 +25,8 @@ public:
     ~DBReplyData();
 
     std::vector<std::map<std::string, const char*>>* getDataPtr();
-    std::vector<QString> buildDataQStringVector();
+    // std::vector<QString> buildDataQStringVector();
+    std::vector<std::string> buildDataStringVector();
 
     void clear();
     bool isEmpty();

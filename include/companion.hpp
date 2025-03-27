@@ -25,8 +25,13 @@ class MessageInfo;
 class MessageState;
 class WidgetGroup;
 
-template<typename... Ts> void logArgsInfoWithTemplate(const QString&, Ts&&...);
-template<typename... Ts> void logArgsErrorWithTemplate(const QString&, Ts&&...);
+// template<typename... Ts> void logArgsInfoWithTemplate(const QString&, Ts&&...);
+template<typename... Ts> void logArgsInfoWithTemplate(
+    const std::format_string<Ts...>&, Ts&&...);
+
+// template<typename... Ts> void logArgsErrorWithTemplate(const QString&, Ts&&...);
+template<typename... Ts> void logArgsErrorWithTemplate(
+    const std::format_string<Ts...>&, Ts&&...);
 
 class SocketInfo
 {
@@ -75,7 +80,7 @@ public:
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
     FileOperatorStorage* getFileOperatorStoragePtr() const;
-    std::filesystem::path getFileOperatorFilePathByNetworkId(const std::string&);
+    std::string getFileOperatorFilePathStringByNetworkId(const std::string&);
     bool removeOperatorFromStorage(const std::string&);
 
     template<typename T>
@@ -95,7 +100,7 @@ public:
             if(!this->removeOperatorFromStorage(networkId))
             {
                 logArgsInfoWithTemplate(
-                    "remove file operator error for networkId %1", networkId);
+                    "remove file operator error for networkId {}", networkId);
             }
 
             if(operatorPtr)
@@ -104,12 +109,12 @@ public:
             }
 
             logArgsInfoWithTemplate(
-                "file operator for networkId %1 deleted", networkId);
+                "file operator for networkId {} deleted", networkId);
         }
         else
         {
             logArgsErrorWithTemplate(
-                "file operator was not found for networkId %1", networkId);
+                "file operator was not found for networkId {}", networkId);
         }
     }
 

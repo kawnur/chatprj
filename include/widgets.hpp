@@ -581,7 +581,7 @@ class TextDialog : public Dialog
     Q_OBJECT
 
 public:
-    TextDialog(QWidget*, DialogType, const QString&, std::vector<ButtonInfo>*);
+    TextDialog(QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>*);
     ~TextDialog();
 
     void set() override;

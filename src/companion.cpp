@@ -87,11 +87,11 @@ FileOperatorStorage* Companion::getFileOperatorStoragePtr() const
     return this->fileOperatorStoragePtr_;
 }
 
-std::filesystem::path Companion::getFileOperatorFilePathByNetworkId(
+std::string Companion::getFileOperatorFilePathStringByNetworkId(
     const std::string& networkId)
 {
     return this->fileOperatorStoragePtr_->
-        getOperator(networkId)->getFilePath();
+        getOperator(networkId)->getFilePath().string();
 }
 
 bool Companion::removeOperatorFromStorage(const std::string& key)
@@ -296,8 +296,7 @@ void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget*
     if(result == this->messageMapping_.end())
     {
         logArgsErrorWithTemplate(
-            "message with id %1 was not found in messageMapping_",
-            // std::to_string(messagePtr->getId()));
+            "message with id {} was not found in messageMapping_",
             messagePtr->getId());
     }
     else

@@ -46,7 +46,7 @@ SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
     if(!filebuf_.open(filePath_, std::ios::binary | std::ios::in))
     {
         logArgsErrorWithTemplate(
-            "file opening error, path: %1", filePath_.string());
+            "file opening error, path: {}", filePath_.string());
     }
 }
 
@@ -94,7 +94,7 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
                 if(!result)
                 {
                     logArgsErrorWithTemplate(
-                        "file sending stopped because of error, path: %1",
+                        "file sending stopped because of error, path: {}",
                         this->filePath_.string());
 
                     // close file
@@ -103,7 +103,7 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
                     if(!closeResult)
                     {
                         logArgsErrorWithTemplate(
-                            "file closing error, path: %1", this->filePath_.string());
+                            "file closing error, path: {}", this->filePath_.string());
                     }
 
                     // remove file
@@ -112,7 +112,7 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
                     if(!removeResult)
                     {
                         logArgsErrorWithTemplate(
-                            "file %1 did not exist at deletion", this->filePath_.string());
+                            "file {} did not exist at deletion", this->filePath_.string());
                     }
 
                     // send message
@@ -139,13 +139,13 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
             if(!this->closeFile())
             {
                 logArgsErrorWithTemplate(
-                    "file closing error, path: %1", this->filePath_.string());
+                    "file closing error, path: {}", this->filePath_.string());
             }
         }
         else
         {
             logArgsErrorWithTemplate(
-                "file opening error, path: %1", this->filePath_.string());
+                "file opening error, path: {}", this->filePath_.string());
         }
     };
 
@@ -182,7 +182,7 @@ bool ReceiverOperator::receiveFile()
     if(!this->closeFile())
     {
         logArgsErrorWithTemplate(
-            "file closing error, path: %1", this->filePath_.string());
+            "file closing error, path: {}", this->filePath_.string());
     }
 
     this->fileMD5Hash_ = hashFileMD5(filePath_.string());
@@ -206,7 +206,7 @@ bool ReceiverOperator::createFileAndOpen()
 
     if(!openResult)
     {
-        logArgsErrorWithTemplate("file %1 open error", filePath_);
+        logArgsErrorWithTemplate("file {} open error", filePath_.string());
     }
 
     return (openResult) ? true : false;
@@ -223,7 +223,7 @@ void FileOperatorStorage::addSenderOperator(
     if(this->mapping_.count(networkId) != 0)
     {
         logArgsErrorWithTemplate(
-            "file operator for key %1 already exists", networkId);
+            "file operator for key {} already exists", networkId);
 
         return;
     }
@@ -240,7 +240,7 @@ void FileOperatorStorage::addReceiverOperator(
     if(this->mapping_.count(networkId) != 0)
     {
         logArgsErrorWithTemplate(
-            "file operator for key %1 already exists", networkId);
+            "file operator for key {} already exists", networkId);
 
         return;
     }

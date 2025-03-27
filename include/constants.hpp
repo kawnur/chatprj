@@ -3,7 +3,7 @@
 
 #include <filesystem>
 #include <map>
-#include <QString>
+#include <QString>  // TODO delete
 #include <string>
 
 const std::string logDelimiter { "############################" };
@@ -112,10 +112,10 @@ const std::vector<QString> connectButtonLabels
     connectButtonDisconnectLabel
 };
 
-const QString deleteCompanionDialogText { "Companion will be deleted with chat history." };
-const QString clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
-const QString sendChatHistoryToCompanionDialogText { "Companion %1 requested chat history sending." };
-const QString socketInfoStubWidget { "No companion info from DB..." };
+const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
+const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
+const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
+const std::string socketInfoStubWidget { "No companion info from DB..." };
 
 // new password dialog
 const QString newPasswordDialogTitle { "New password creation" };
@@ -151,7 +151,7 @@ const uint32_t buttonPanelBackGroundColor = 0x898989;
 const uint32_t textEditBackgroundColor = 0xe1e1e1;
 const uint32_t newMessageEditColor = 0xdcdc07;
 const uint32_t appLogBackgroundColor = 0xcccaca;
-const QString sentMessageColor = "#115e00";
-const QString receivedMessageColor = "#00115e";
+const std::string sentMessageColor = "#115e00";
+const std::string receivedMessageColor = "#00115e";
 
 #endif // CONSTANTS_HPP

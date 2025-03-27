@@ -98,7 +98,7 @@ bool validatePassword(
     return result;
 }
 
-QString buildDialogText(std::string&& header, const std::vector<std::string>& messages)
+std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages)
 {
     if(messages.empty())
     {
@@ -115,7 +115,7 @@ QString buildDialogText(std::string&& header, const std::vector<std::string>& me
             text += (std::string("- ") + message + std::string("\n"));
         }
 
-        return getQString(text);
+        return text;
     }
 }
 
@@ -175,42 +175,52 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
     logArgsError(message);
 }
 
-QString getFormattedMessageBodyQString(const QString& color, const QString& text)
+// QString getFormattedMessageBodyQString(const QString& color, const QString& text)
+std::string getFormattedMessageBodyString(const std::string& color, const std::string& text)
 {
-    return getArgumentedQString("<font color=\"%1\"><br>%2</font>", color, text);
+    // return getArgumentedQString("<font color=\"%1\"><br>%2</font>", color, text);
+    return std::format("<font color=\"{0}\"><br>{1}</font>", color, text);
 }
 
-std::pair<QString, QString> formatMessageHeaderAndBody(
+std::pair<std::string, std::string> formatMessageHeaderAndBody(
     const Companion* companionPtr, const Message* messagePtr)
 {
-    auto companionNameQString = getQString(companionPtr->getName());
+    // auto companionNameQString = getQString(companionPtr->getName());
+    auto companionName = companionPtr->getName();
     auto companionId = messagePtr->getCompanionId();
     auto authorId = messagePtr->getAuthorId();
-    auto time = getQString(messagePtr->getTime());
-    auto text = getQString(messagePtr->getText());
+    // auto time = getQString(messagePtr->getTime());
+    auto time = messagePtr->getTime();
+    // auto text = getQString(messagePtr->getText());
+    auto text = messagePtr->getText();
 
-    QString color, sender, receiver;
+    // QString color, sender, receiver;
+    std::string color, sender, receiver;
 
     if(companionId == authorId)
     {
         color = receivedMessageColor;
-        sender = companionNameQString;
+        sender = companionName;
         receiver = "Me";
     }
     else
     {
         color = sentMessageColor;
         sender = "Me";
-        receiver = companionNameQString;
+        receiver = companionName;
     }
 
-    QString header = getArgumentedQString(
-        "<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>",
+    // QString header = getArgumentedQString(
+    //     "<font color=\"%1\"><b><br><i>From %2 to %3 at %4:</i></b></font>",
+    //     color, sender, receiver, time);
+    std::string header = std::format(
+        "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>",
         color, sender, receiver, time);
 
-    QString body = getFormattedMessageBodyQString(color, text);
+    // QString body = getFormattedMessageBodyQString(color, text);
+    std::string body = getFormattedMessageBodyString(color, text);
 
-    std::pair<QString, QString> data (header, body);
+    std::pair<std::string, std::string> data (header, body);
 
     return data;
 }
@@ -338,7 +348,7 @@ bool getBoolFromDBValue(const char* valuePtr)
     }
     else
     {
-        logArgsErrorWithTemplate("unknown bool value from DB: %1", valuePtr);
+        logArgsErrorWithTemplate("unknown bool value from DB: {}", valuePtr);
     }
 
     return false;

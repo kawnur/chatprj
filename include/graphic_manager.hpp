@@ -45,7 +45,7 @@ public:
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
 
     void createTextDialogAndShow(
-        QWidget*, DialogType, const QString&, std::vector<ButtonInfo>*);
+        QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>*);
 
     void createCompanion();
     void updateCompanion(Companion*);

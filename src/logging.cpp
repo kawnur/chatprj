@@ -1,5 +1,20 @@
 #include "logging.hpp"
 
+std::string getString(const std::string& value)
+{
+    return value;
+}
+
+std::string getString(const char*& value)
+{
+    return std::string(value);
+}
+
+std::string getString(const QString& value)
+{
+    return value.toStdString();
+}
+
 QString getQString(const std::string& value)
 {
     return QString::fromStdString(value);
@@ -43,7 +58,7 @@ void logLine(const std::string& string)
 void logSocketInfoData(const SocketInfo* objectPtr)
 {
     logArgsWithTemplate(
-        "ipAddress: %1, serverPort_: %2, clientPort_: %3",
+        "ipAddress: {0}, serverPort_: {1}, clientPort_: {2}",
         objectPtr->getIpAddress(), objectPtr->getServerPort(),
         objectPtr->getClientPort());
 }
@@ -60,7 +75,8 @@ void logDBReplyData(std::shared_ptr<DBReplyData>& objectPtr)
 {
     logArgs(logDelimiter);
 
-    for(auto& element : objectPtr->buildDataQStringVector())
+    // for(auto& element : objectPtr->buildDataQStringVector())
+    for(auto& element : objectPtr->buildDataStringVector())
     {
         logArgs(element);
     }
@@ -71,7 +87,7 @@ void logDBReplyData(std::shared_ptr<DBReplyData>& objectPtr)
 void logSocketInfoWidget(const SocketInfoWidget* objectPtr)
 {
     logArgsWithTemplate(
-        "name: %1, ipAddress: %2, serverPort_: %3, clientPort_: %4",
-        objectPtr->getName(), objectPtr->getIpAddress(),
+        "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
+        objectPtr->getName().toStdString(), objectPtr->getIpAddress().toStdString(),
         objectPtr->getServerPort(), objectPtr->getClientPort());
 }

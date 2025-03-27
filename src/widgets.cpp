@@ -600,9 +600,8 @@ MessageWidget::MessageWidget(
 
     auto data = formatMessageHeaderAndBody(companionPtr, messagePtr);
 
-    headerLabelPtr_ = new QLabel(data.first);
-
-    messageLabelPtr_ = new QLabel(data.second);
+    headerLabelPtr_ = new QLabel(getQString(data.first));
+    messageLabelPtr_ = new QLabel(getQString(data.second));
 
     indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_, messageStatePtr);
 }
@@ -685,13 +684,14 @@ FileMessageWidget::FileMessageWidget(
     // rewrite widget body text for sender's widget
     if(isMessageFromMe)
     {
-        auto path = companionPtr->getFileOperatorFilePathByNetworkId(
+        auto pathString = companionPtr->getFileOperatorFilePathStringByNetworkId(
             messageStatePtr->getNetworkId());
 
         messageLabelPtr_->setText(
-            getFormattedMessageBodyQString(
-                sentMessageColor,
-                getArgumentedQString("SEND FILE: %1", path.string())));
+            getQString(
+                getFormattedMessageBodyString(
+                    sentMessageColor,
+                    std::format("SEND FILE: {}", pathString))));
     }
 
     fileWidgetPtr_ = new QWidget;
@@ -1114,7 +1114,7 @@ bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr)
                 (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home))))
             {
                 logArgsWithTemplate(
-                    "scroll bar minimum event type %1", std::to_string(eventPtr->type()));
+                    "scroll bar minimum event type {}", std::to_string(eventPtr->type()));
 
                 getManagerPtr()->addEarlyMessages(this->companionPtr_);
             }
@@ -1723,7 +1723,7 @@ ButtonInfo::ButtonInfo(
     buttonText_(buttonText), buttonRole_(buttonRole), functionPtr_(functionPtr) {}
 
 TextDialog::TextDialog(
-    QWidget* parentPtr, DialogType dialogType, const QString& text,
+    QWidget* parentPtr, DialogType dialogType, const std::string& text,
     std::vector<ButtonInfo>* buttonsInfoPtr)
 {
     if(parentPtr)
@@ -1749,7 +1749,7 @@ TextDialog::TextDialog(
 
     textEditPtr_ = new QPlainTextEdit;
     textEditPtr_->setReadOnly(true);
-    textEditPtr_->setPlainText(text);
+    textEditPtr_->setPlainText(getQString(text));
     layoutPtr_->addWidget(textEditPtr_);
 
     // set button box

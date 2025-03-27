@@ -81,7 +81,7 @@ void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget
 }
 
 void GraphicManager::createTextDialogAndShow(
-    QWidget* parentPtr, DialogType dialogType, const QString& text,
+    QWidget* parentPtr, DialogType dialogType, const std::string& text,
     std::vector<ButtonInfo>* buttonInfoPtr)
 {
     // TODO delete objects for closed dialoges?
