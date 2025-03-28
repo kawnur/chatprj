@@ -34,20 +34,16 @@ std::vector<std::map<std::string, const char*>>* DBReplyData::getDataPtr()
     return &this->data_;
 }
 
-// std::vector<QString> DBReplyData::buildDataQStringVector()
 std::vector<std::string> DBReplyData::buildDataStringVector()
 {
-    // std::vector<QString> result {};
     std::vector<std::string> result {};
 
     for(auto& element : this->data_)
     {
-        // QString representation { "" };
         std::string representation { "" };
 
         for(auto& pair : element)
         {
-            // representation += getArgumentedQString("%1: %2 ", pair.first, pair.second);
             representation += std::format("{0}: {1} ", pair.first, pair.second);
         }
 

@@ -447,7 +447,7 @@ void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 
 SocketInfoStubWidget::SocketInfoStubWidget()
 {
-    mark_ = socketInfoStubWidget;
+    mark_ = getQString(socketInfoStubWidget);
 
     layoutPtr_ = new QHBoxLayout;
     setLayout(layoutPtr_);
@@ -530,12 +530,12 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sentIndicatoPtr_ = nullptr;
         receivedIndicatoPtr_ = nullptr;
 
-        QString text = (messageStatePtr->getIsAntecedent()) ? "NEW" : "";
+        std::string text = (messageStatePtr->getIsAntecedent()) ? "NEW" : "";
 
-        QString textHtml = getArgumentedQString(
-            "<font color=\"%1\"><b>%2</b></font>", receivedMessageColor, text);
+        std::string textHtml = std::format(
+            "<font color=\"{0}\"><b>{1}</b></font>", receivedMessageColor, text);
 
-        newMessageLabelPtr_ = new QLabel(textHtml);
+        newMessageLabelPtr_ = new QLabel(getQString(textHtml));
         newMessageLabelPtr_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
 
         layoutPtr_->addWidget(newMessageLabelPtr_);

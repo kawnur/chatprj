@@ -114,7 +114,7 @@ const std::vector<QString> connectButtonLabels
 
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
-const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
+constexpr std::string_view sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
 const std::string socketInfoStubWidget { "No companion info from DB..." };
 
 // new password dialog

@@ -166,8 +166,6 @@ void Manager::sendFile(Companion* companionPtr, const std::filesystem::path& pat
 
 void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString)
 {
-    // logArgsByArgumentedTemplate("manager received message: %1", jsonString);
-
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
     NetworkMessageType type;
@@ -378,10 +376,11 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 {
                     showInfoDialogAndLogInfo(
                         nullptr,
-                        getArgumentedQString(
-                            "Message with timestamp %1 from companion "
-                            "with id %2 already exists",
-                            timestamp, companionId));
+                        getQString(
+                            std::format(
+                                "Message with timestamp {0} from companion "
+                                "with id {1} already exists",
+                                timestamp, companionId)));
 
                     continue;
                 }
@@ -1384,7 +1383,8 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr)
     {
         showErrorDialogAndLogError(
             nullptr,
-            buildDialogText(std::string { "Error messages:\n\n" }, validationErrors));
+            getQString(
+                buildDialogText(std::string { "Error messages:\n\n" }, validationErrors)));
 
         return false;
     }
@@ -1403,7 +1403,8 @@ bool Manager::passwordDataValidation(PasswordAction* passwordActionPtr)
     {
         showErrorDialogAndLogError(
             nullptr,
-            buildDialogText(std::string { "Error messages:\n\n" }, validationErrors));
+            getQString(
+                buildDialogText(std::string { "Error messages:\n\n" }, validationErrors)));
 
         return false;
     }
