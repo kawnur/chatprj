@@ -137,6 +137,7 @@ void GraphicManager::showCompanionInfoDialog(
     CompanionAction* companionActionPtr, std::string&& header) {
     QWidget* parentPtr = nullptr;
     void (TextDialog::*functionPtr)() = nullptr;
+    // void (QDialog::*functionPtr)() = nullptr;
 
     auto formDialogPtr = companionActionPtr->getDialogPtr();
 

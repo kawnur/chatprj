@@ -77,13 +77,16 @@ bool validatePort(std::vector<std::string>&, const std::string&);
 bool validateCompanionData(std::vector<std::string>&, const CompanionAction*);
 bool validatePassword(std::vector<std::string>&, const std::string&);
 std::string buildDialogText(std::string&&, const std::vector<std::string>&);
-std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
-void showInfoDialogAndLogInfo(QWidget*, const QString&, void (TextDialog::*)());
-void showInfoDialogAndLogInfo(QWidget*, QString&&);
-void showWarningDialogAndLogWarning(QWidget*, const QString&);
 
-void showErrorDialogAndLogError(QWidget*, const QString&);
-void showErrorDialogAndLogError(QWidget*, QString&&);
+std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
+// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*)());
+
+void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), QWidget*);
+void showInfoDialogAndLogInfo(QString&&, QWidget* = nullptr);
+void showWarningDialogAndLogWarning(const QString&, QWidget*);
+
+void showErrorDialogAndLogError(const QString&, QWidget*);
+void showErrorDialogAndLogError(QString&&, QWidget*);
 
 // template<typename T>
 // void showErrorDialogAndLogError(QWidget* parentPtr, T&& message) {

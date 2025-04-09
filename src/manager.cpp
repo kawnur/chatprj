@@ -69,7 +69,7 @@ void Manager::set() {
         }
     }
     else {
-        showErrorDialogAndLogError(nullptr, "problem with DB connection");
+        showErrorDialogAndLogError("problem with DB connection");
     }
 
     this->initialized_ = true;
@@ -328,13 +328,12 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                     companionId, timestamp);
 
                 if(!messageGetDataPtr) {
-                    showErrorDialogAndLogError(nullptr, "Error getting data from db");
+                    showErrorDialogAndLogError("Error getting data from db");
                     return;
                 }
 
                 if(!messageGetDataPtr->isEmpty()) {
                     showInfoDialogAndLogInfo(
-                        nullptr,
                         getQString(
                             std::format(
                                 "Message with timestamp {0} from companion "
@@ -356,12 +355,12 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                     idString, message, true, true);
 
                 if(!messageAddDataPtr) {
-                    showErrorDialogAndLogError(nullptr, "Error getting data from db");
+                    showErrorDialogAndLogError("Error getting data from db");
                     return;
                 }
 
                 if(messageAddDataPtr->isEmpty()) {
-                    showErrorDialogAndLogError(nullptr, "Error pushing chat history to db");
+                    showErrorDialogAndLogError("Error pushing chat history to db");
                     return;
                 }
             }
@@ -498,7 +497,7 @@ void Manager::addEarlyMessages(const Companion* companionPtr) {
             companionId, messageId);
 
         if(!messagesDataPtr) {
-            showErrorDialogAndLogError(nullptr, "Error getting data from db");
+            showErrorDialogAndLogError("Error getting data from db");
             return;
         }
 
@@ -584,12 +583,12 @@ void Manager::createCompanion(CompanionAction* companionActionPtr) {
         name);
 
     if(!companionIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
     if(companionIdDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Empty db reply to new companion pushing");
+        showErrorDialogAndLogError("Empty db reply to new companion pushing");
         return;
     }
 
@@ -606,12 +605,12 @@ void Manager::createCompanion(CompanionAction* companionActionPtr) {
         name, ipAddress, std::to_string(serverPort), clientPortStr);
 
     if(!socketDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
     if(socketDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Empty db reply to new socket pushing");
+        showErrorDialogAndLogError("Empty db reply to new socket pushing");
         return;
     }
 
@@ -653,12 +652,12 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr) {
         *companionActionPtr);
 
     if(!companionIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
     if(companionIdDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Empty db reply to companion update");
+        showErrorDialogAndLogError("Empty db reply to companion update");
         return;
     }
 
@@ -686,7 +685,7 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr) {
         *companionActionPtr);
 
     if(!companionIdMessagesDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
@@ -704,12 +703,12 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr) {
         *companionActionPtr);
 
     if(!companionIdCompanionDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
     if(companionIdCompanionDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Empty db reply to companion deletion");
+        showErrorDialogAndLogError("Empty db reply to companion deletion");
         return;
     }
 
@@ -738,7 +737,7 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr) {
         *companionActionPtr);
 
     if(!companionIdMessagesDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
@@ -773,20 +772,20 @@ void Manager::createUserPassword(PasswordAction* actionPtr) {
         actionPtr->getPassword());
 
     if(!passwordIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
     if(passwordIdDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Empty db reply to new password pushing");
+        showErrorDialogAndLogError("Empty db reply to new password pushing");
         return;
     }
 
     // show dialog
     showInfoDialogAndLogInfo(
-        actionPtr->getDialogPtr(),
         newPasswordCreatedLabel,
-        &TextDialog::unsetMainWindowBlurAndCloseDialogs);
+        &TextDialog::unsetMainWindowBlurAndCloseDialogs,
+        actionPtr->getDialogPtr());
 
     // delete action object
     delete actionPtr;
@@ -803,12 +802,12 @@ void Manager::authenticateUser(PasswordAction* actionPtr) {
         buildStringVector("id", "password"));
 
     if(!passwordDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting password from db");
+        showErrorDialogAndLogError("Error getting password from db");
         return;
     }
 
     if(passwordDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Db password data is empty");
+        showErrorDialogAndLogError("Db password data is empty");
         return;
     }
     else {
@@ -822,7 +821,7 @@ void Manager::authenticateUser(PasswordAction* actionPtr) {
             delete actionPtr;
         }
         else {
-            showErrorDialogAndLogError(nullptr, "Password is not correct");
+            showErrorDialogAndLogError("Password is not correct");
             return;
         }
     }
@@ -859,7 +858,7 @@ void Manager::startUserAuthentication() {
         buildStringVector("id", "password"));
 
     if(!passwordDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting password from db");
+        showErrorDialogAndLogError("Error getting password from db");
         return;
     }
 
@@ -885,7 +884,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr) {
         companionPtr->getName());
 
     if(!messagesDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
@@ -962,7 +961,7 @@ void Manager::sendChatHistoryToCompanion(const Companion* companionPtr) {
         companionPtr->getId());
 
     if(!messagesDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return;
     }
 
@@ -1015,7 +1014,7 @@ void Manager::fillCompanionMessageMapping(
         companionId);
 
     if(!messagesDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         // return false;
         return;
     }
@@ -1093,8 +1092,7 @@ bool Manager::buildCompanions() {
 
         // create companion object
         Companion* companionPtr = this->addCompanionObject(
-            id,
-            std::string(companionsDataPtr->getValue(index, "name")));
+            id, std::string(companionsDataPtr->getValue(index, "name")));
 
         if(!companionPtr) {
             logArgsError("companionPtr is nullptr");
@@ -1200,7 +1198,7 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(const Companion* companionPt
 
     if(findMapResult == this->mapCompanionIdToCompanionInfo_.end()) {
         showErrorDialogAndLogError(
-            nullptr, "Companion was not found in mapping at deletion");
+            "Companion was not found in mapping at deletion");
     }
     else {
         if(this->selectedCompanionPtr_ == companionPtr) {
@@ -1224,7 +1222,6 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr) {
 
     if(!validationResult) {
         showErrorDialogAndLogError(
-            nullptr,
             getQString(
                 buildDialogText(std::string { "Error messages:\n\n" }, validationErrors)));
 
@@ -1242,7 +1239,6 @@ bool Manager::passwordDataValidation(PasswordAction* passwordActionPtr) {
 
     if(!validationResult) {
         showErrorDialogAndLogError(
-            nullptr,
             getQString(
                 buildDialogText(std::string { "Error messages:\n\n" }, validationErrors)));
 
@@ -1262,12 +1258,12 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
         companionActionPtr->getName());
 
     if(!companionIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return false;
     }
 
     if(!companionIdDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Companion with such name already exists");
+        showErrorDialogAndLogError("Companion with such name already exists");
         return false;
     }
 
@@ -1281,12 +1277,12 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
         companionActionPtr->getClientPort());
 
     if(!socketIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return false;
     }
 
     if(!socketIdDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Companion with such socket already exists");
+        showErrorDialogAndLogError("Companion with such socket already exists");
         return false;
     }
 
@@ -1303,7 +1299,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
         companionActionPtr->getName());
 
     if(!companionIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return false;
     }
 
@@ -1317,7 +1313,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 
     if(nameExistsAtOtherCompanion) {
         // no return
-        showWarningDialogAndLogWarning(nullptr, "Companion with such name already exists");
+        showWarningDialogAndLogWarning("Companion with such name already exists");
     }
 
     // check if such socket already exists
@@ -1330,7 +1326,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
         companionActionPtr->getClientPort());
 
     if(!socketIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return false;
     }
 
@@ -1343,7 +1339,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
         (!findSocketResult && socketIdDataPtr->size() > 0);
 
     if(socketExistsAtOtherCompanion) {
-        showErrorDialogAndLogError(nullptr, "Companion with such socket already exists");
+        showErrorDialogAndLogError("Companion with such socket already exists");
         return false;
     }
 
@@ -1387,7 +1383,7 @@ bool Manager::markMessageAsSent(Companion* companionPtr, const Message* messageP
         messagePtr->getId());
 
     if(!messageIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error updating data in db");
+        showErrorDialogAndLogError("Error updating data in db");
         return false;
     }
 
@@ -1410,12 +1406,12 @@ bool Manager::markMessageAsReceived(Companion* companionPtr, const Message* mess
         messagePtr->getId());
 
     if(!messageIdDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return false;
     }
 
     if(messageIdDataPtr->isEmpty()) {
-        showErrorDialogAndLogError(nullptr, "Error setting message is_received in Db");
+        showErrorDialogAndLogError("Error setting message is_received in Db");
         return false;
     }
 
@@ -1438,7 +1434,7 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
         isSent, isReceived);
 
     if(!messageDataPtr) {
-        showErrorDialogAndLogError(nullptr, "Error getting data from db");
+        showErrorDialogAndLogError("Error getting data from db");
         return std::tuple<uint32_t, uint8_t, std::string>(0, 0, "");
     }
 

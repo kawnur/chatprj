@@ -104,6 +104,7 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
 }
 
 std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr)()) {
+// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*functionPtr)()) {
     std::vector<ButtonInfo>* vectorPtr = new std::vector<ButtonInfo>;
 
     vectorPtr->emplace_back(
@@ -113,7 +114,8 @@ std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr
 }
 
 void showInfoDialogAndLogInfo(
-    QWidget* parentPtr, const QString& message, void (TextDialog::*functionPtr)()) {
+    const QString& message, void (TextDialog::*functionPtr)(),
+    QWidget* parentPtr = nullptr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, message.toStdString(),
         createOkButtonInfoVector(functionPtr));
@@ -121,7 +123,8 @@ void showInfoDialogAndLogInfo(
     logArgsInfo(message);
 }
 
-void showInfoDialogAndLogInfo(QWidget* parentPtr, QString&& message) {
+void showInfoDialogAndLogInfo(
+    QString&& message, QWidget* parentPtr /*= nullptr*/) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -129,7 +132,8 @@ void showInfoDialogAndLogInfo(QWidget* parentPtr, QString&& message) {
     logArgsInfo(message);
 }
 
-void showWarningDialogAndLogWarning(QWidget* parentPtr, const QString& message) {
+void showWarningDialogAndLogWarning(
+    const QString& message, QWidget* parentPtr /*= nullptr*/) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::WARNING, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -137,8 +141,8 @@ void showWarningDialogAndLogWarning(QWidget* parentPtr, const QString& message) 
     logArgsWarning(message);
 }
 
-void showErrorDialogAndLogError(QWidget* parentPtr, const QString& message)
-{
+void showErrorDialogAndLogError(
+    const QString& message, QWidget* parentPtr /*= nullptr*/) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -146,8 +150,8 @@ void showErrorDialogAndLogError(QWidget* parentPtr, const QString& message)
     logArgsError(message);
 }
 
-void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
-{
+void showErrorDialogAndLogError(
+    QString&& message, QWidget* parentPtr = nullptr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -155,7 +159,8 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
     logArgsError(message);
 }
 
-std::string getFormattedMessageBodyString(const std::string& color, const std::string& text) {
+std::string getFormattedMessageBodyString(
+    const std::string& color, const std::string& text) {
     return std::format("<font color=\"{0}\"><br>{1}</font>", color, text);
 }
 

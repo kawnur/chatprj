@@ -228,7 +228,7 @@ void TextDialog::set() {
                 this, info.functionPtr_, Qt::QueuedConnection);
         }
         else {
-            showErrorDialogAndLogError(nullptr, "Unmanaged button role");
+            showErrorDialogAndLogError("Unmanaged button role");
         }
     }
 }

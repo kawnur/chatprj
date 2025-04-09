@@ -65,7 +65,7 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widge
 
     if(index == -1) {
         showErrorDialogAndLogError(
-            nullptr, "SocketInfoBaseWidget was not found in companion panel");
+            "SocketInfoBaseWidget was not found in companion panel");
     }
     else if(index == 0) {
 

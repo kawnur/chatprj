@@ -188,7 +188,7 @@ void PasswordAction::sendData() {
             if(text1 == text2) {
                 if(text1.size() == 0) {
                     showErrorDialogAndLogError(
-                        this->getDialogPtr(), "Empty password is invalid");
+                        "Empty password is invalid", this->getDialogPtr());
 
                     return;
                 }
@@ -198,7 +198,7 @@ void PasswordAction::sendData() {
             }
             else {
                 showErrorDialogAndLogError(
-                    this->getDialogPtr(), "Entered passwords are not equal");
+                    "Entered passwords are not equal", this->getDialogPtr());
             }
         }
 
@@ -212,7 +212,7 @@ void PasswordAction::sendData() {
 
             if(text.size() == 0) {
                 showErrorDialogAndLogError(
-                    this->getDialogPtr(), "Empty password is invalid");
+                    "Empty password is invalid", this->getDialogPtr());
 
                 return;
             }
