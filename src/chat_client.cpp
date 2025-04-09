@@ -6,10 +6,8 @@ ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
     isConnected_(false), ipAddress_(ipAddress), port_(port), io_context_(),
     socket_(io_context_), resolver_(io_context_) {}
 
-bool ChatClient::connect()
-{
-    auto connectLambda = [this]()
-    {
+bool ChatClient::connect() {
+    auto connectLambda = [this]() {
         logArgs("ChatClient connects to", this->ipAddress_, this->port_);
 
         boost::asio::connect(
@@ -27,10 +25,8 @@ bool ChatClient::connect()
     return this->isConnected_;
 }
 
-bool ChatClient::disconnect()
-{
-    auto disconnectLambda = [this]()
-    {
+bool ChatClient::disconnect() {
+    auto disconnectLambda = [this](){
         logArgs("ChatClient disconnects from", this->ipAddress_, this->port_);
 
         this->socket_.close();
@@ -45,12 +41,10 @@ bool ChatClient::disconnect()
     return !this->isConnected_;
 }
 
-bool ChatClient::send(std::string text)
-{
+bool ChatClient::send(std::string text) {
     bool sent = false;
 
-    auto sendLambda = [&, this](bool& value)
-    {
+    auto sendLambda = [&, this](bool& value){
         std::size_t written = boost::asio::write(
             this->socket_, boost::asio::buffer(text.data(), text.size()));
 
@@ -63,7 +57,6 @@ bool ChatClient::send(std::string text)
     return sent;
 }
 
-bool ChatClient::getIsConnected() const
-{
+bool ChatClient::getIsConnected() const {
     return this->isConnected_;
 }

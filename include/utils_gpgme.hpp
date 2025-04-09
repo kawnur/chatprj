@@ -5,29 +5,23 @@
 
 #include "utils_cout.hpp"
 
-extern "C"
-{
+extern "C" {
 #include <gpgme.h>
 }
 
-namespace TestGpgme
-{
+namespace TestGpgme {
     template<typename T, typename U>
-    void coutFuncResult(T (*type)(int), U (*func)(T))
-    {
+    void coutFuncResult(T (*type)(int), U (*func)(T)) {
 		int i = 0;
 
-        while(true)
-        {
+        while(true) {
 			auto typeVal = type(i);
 			auto result = func(typeVal);
 
-            if(result != nullptr)
-            {
+            if(result != nullptr) {
 				coutArgsWithSpaceSeparator(i, std::string(result));
 			}
-            else
-            {
+            else {
 				break;
 			}
 
@@ -38,8 +32,7 @@ namespace TestGpgme
     void checkProtocols();
     std::string getStringFromCharPtr(const char*);
 
-    template<typename T> auto getPtrOrString(T* parameter)
-    {
+    template<typename T> auto getPtrOrString(T* parameter) {
         return (parameter) ? parameter : std::string("nullptr");  // TODO ???
 	}
 

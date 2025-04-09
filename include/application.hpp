@@ -13,8 +13,7 @@
 class GraphicManager;
 class Manager;
 
-class ChatApp : public QApplication
-{
+class ChatApp : public QApplication {
 public:
     ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {}
     ~ChatApp();

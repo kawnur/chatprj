@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <QDialog>
 #include <QHostAddress>
 #include <nlohmann/json.hpp>
 #include <openssl/md5.h>
@@ -12,36 +13,37 @@
 #include "constants.hpp"
 #include "db_interaction.hpp"
 #include "logging.hpp"
+#include "widgets.hpp"
+#include "widgets_dialog.hpp"
 
 class ButtonInfo;
 class Companion;
 class CompanionAction;
 class DBReplyData;
+class GraphicManager;
 class Message;
 class TextDialog;
+
+GraphicManager* getGraphicManagerPtr();
+
+template<typename T> QString getQString(T&& value);
 
 template<typename... Ts> void logArgsError(Ts&&... args);
 template<typename... Ts> void logArgsException(Ts&&... args);
 
-// template<typename... Ts> void logArgsErrorWithTemplate(
-//     const QString& templateString, Ts&&... args);
 template<typename... Ts> void logArgsErrorWithTemplate(
     const std::format_string<Ts...>&, Ts&&...);
 
 template<typename T, typename U>
 U getConstantMappingValue(
-    const char* mapName, const std::map<T, U>* mapPtr, const T& key)
-{
-    try
-    {
+    const char* mapName, const std::map<T, U>* mapPtr, const T& key) {
+    try {
         return mapPtr->at(key);
     }
-    catch(std::out_of_range)
-    {
+    catch(std::out_of_range) {
         logArgsErrorWithTemplate("mapping {} key error", mapName);
     }
-    catch(std::exception& e)
-    {
+    catch(std::exception& e) {
         logArgsException(e.what());
     }
 
@@ -49,21 +51,17 @@ U getConstantMappingValue(
 }
 
 template<typename F, typename... Ts>
-void runAndLogException(F func, Ts&&... args)
-{
-    try
-    {
+void runAndLogException(F func, Ts&&... args) {
+    try {
         func(args...);
     }
-    catch(std::exception& e)
-    {
+    catch(std::exception& e) {
         logArgsException(e.what());
     }
 }
 
 template<typename... Ts>
-std::vector<std::string> buildStringVector(Ts... args)
-{
+std::vector<std::string> buildStringVector(Ts... args) {
     std::vector<std::string> result;
 
     (result.emplace_back(args), ...);
@@ -83,10 +81,21 @@ std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
 void showInfoDialogAndLogInfo(QWidget*, const QString&, void (TextDialog::*)());
 void showInfoDialogAndLogInfo(QWidget*, QString&&);
 void showWarningDialogAndLogWarning(QWidget*, const QString&);
+
 void showErrorDialogAndLogError(QWidget*, const QString&);
 void showErrorDialogAndLogError(QWidget*, QString&&);
 
-// QString getFormattedMessageBodyQString(const QString&, const QString&);
+// template<typename T>
+// void showErrorDialogAndLogError(QWidget* parentPtr, T&& message) {
+//     getGraphicManagerPtr()->createTextDialogAndShow(
+//         parentPtr, DialogType::ERROR,
+//         getQString(std::forward<T>(message)).toStdString(),
+//         // createOkButtonInfoVector(&QDialog::accept));
+//         createOkButtonInfoVector(&TextDialog::accept));
+
+//     logArgsError(message);
+// }
+
 std::string getFormattedMessageBodyString(const std::string&, const std::string&);
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(

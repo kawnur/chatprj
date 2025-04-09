@@ -29,40 +29,19 @@ template<typename T>
 concept IsNotArithmetic =
     !std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 
-template<IsArithmetic T> std::string getString(T&& value)
-{
-    return std::to_string(std::forward<T>(value));
-}
-
-template<IsNotArithmetic T> std::string getString(T&& value)
-{
-    return std::string(std::forward<T>(value));
-}
-
-std::string getString(const std::string&);
-std::string getString(const char*&);
-std::string getString(const QString&);
-
-template<typename T> QString getQString(T* value)
-{
+template<typename T> QString getQString(T* value) {
     std::stringstream ss;
     ss << (void*)value;
     return QString::fromStdString(ss.str());
 }
 
-template<
-    typename T,
-    std::enable_if_t<std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
-QString getQString(T&& value)
-{    
+template<IsArithmetic T>
+QString getQString(T&& value) {
     return QString::fromStdString(std::to_string(std::forward<T>(value)));
 }
 
-template<
-    typename T,
-    std::enable_if_t<!std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>, bool> = true>
-QString getQString(T&& value)
-{
+template<IsNotArithmetic T>
+QString getQString(T&& value) {
     return QString::fromStdString(std::forward<T>(value));
 }
 
@@ -74,13 +53,11 @@ QString getQString(QString);
 QString getQString(std::filesystem::path&);
 
 template<typename... Ts> QString getArgumentedQString(
-    const QString& templateString, Ts&&... args)
-{    
+    const QString& templateString, Ts&&... args) {
     return templateString.arg(getQString(std::forward<Ts>(args))...);
 }
 
-template<typename... Ts> void logArgs(Ts&&... args)
-{
+template<typename... Ts> void logArgs(Ts&&... args) {
     QTime time;
     QString text("- ");
 
@@ -92,65 +69,50 @@ template<typename... Ts> void logArgs(Ts&&... args)
     coutArgsWithSpaceSeparator(text);
 }
 
-// template<typename... Ts> void logArgsWithTemplate(
-//     const QString& templateString, Ts&&... args)
-// {
-//     logArgs(templateString.arg(getQString(args)...));
-// }
 template<typename... Ts> void logArgsWithTemplate(
-    const std::format_string<Ts...>& templateString, Ts&&... args)
-{
+    const std::format_string<Ts...>& templateString, Ts&&... args) {
     logArgs(std::format(templateString, std::forward<Ts>(args)...));
 }
 
-template<typename... Ts> void logArgsInfo(Ts&&... args)
-{
+template<typename... Ts> void logArgsInfo(Ts&&... args) {
     logArgs("INFO:", args...);
 }
 
-template<typename... Ts> void logArgsException(Ts&&... args)
-{
+template<typename... Ts> void logArgsException(Ts&&... args) {
     logArgs("EXCEPTION:", args...);
 }
 
-template<typename... Ts> void logArgsWarning(Ts&&... args)
-{
+template<typename... Ts> void logArgsWarning(Ts&&... args) {
     logArgs("WARNING:", args...);
 }
 
-template<typename... Ts> void logArgsError(Ts&&... args)
-{
+template<typename... Ts> void logArgsError(Ts&&... args) {
     logArgs("ERROR:", args...);
 }
 
 template<typename... Ts> void logArgsInfoWithTemplate(
-    const std::format_string<Ts...>& templateString, Ts&&... args)
-{
+    const std::format_string<Ts...>& templateString, Ts&&... args) {
     logArgsInfo(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts> void logArgsWarningWithTemplate(
-    const std::format_string<Ts...>& templateString, Ts&&... args)
-{
+    const std::format_string<Ts...>& templateString, Ts&&... args) {
     logArgsWarning(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts> void logArgsErrorWithTemplate(
-    const std::format_string<Ts...>& templateString, Ts&&... args)
-{
+    const std::format_string<Ts...>& templateString, Ts&&... args) {
     logArgsError(std::format(templateString, std::forward<Ts>(args)...));
 }
 
-template<typename T> void logLine(const T& string)
-{
+template<typename T> void logLine(const T& string) {
     getGraphicManagerPtr()->addTextToAppLogWidget(QString(string));
 }
 
 void logLine(const QString&);
 void logLine(const std::string&string);
 
-template<typename... Ts> void logArgsWithCustomMark(Ts&&... args)
-{
+template<typename... Ts> void logArgsWithCustomMark(Ts&&... args) {
     logArgs(logCustomDelimiter, args...);
 }
 

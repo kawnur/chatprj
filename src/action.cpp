@@ -1,7 +1,6 @@
 #include "action.hpp"
 
-void Action::set()
-{
+void Action::set() {
     this->dialogPtr_->setAction(this);
     this->dialogPtr_->set();
 
@@ -9,39 +8,32 @@ void Action::set()
 
     FileAction* actionCastPtr = dynamic_cast<FileAction*>(this);
 
-    if(actionCastPtr)
-    {
-        if(actionCastPtr->getType() == FileActionType::SEND)
-        {
+    if(actionCastPtr) {
+        if(actionCastPtr->getType() == FileActionType::SEND) {
             actionCastPtr->dialogPtr_->showDialog();
         }
-        else if(actionCastPtr->getType() == FileActionType::SAVE)
-        {
+        else if(actionCastPtr->getType() == FileActionType::SAVE) {
             actionCastPtr->defineFilePath();
         }
-        else
-        {
+        else {
             logArgsError("unknown action type");
         }
     }
-    else
-    {
+    else {
         this->dialogPtr_->show();
     }
 }
 
-Dialog* Action::getDialogPtr()
-{
+Dialog* Action::getDialogPtr() {
     return this->dialogPtr_;
 }
 
 CompanionAction::CompanionAction(
     CompanionActionType actionType, MainWindow* mainWindowPtr, Companion* companionPtr) :
     actionType_(actionType), mainWindowPtr_(mainWindowPtr), companionPtr_(companionPtr),
-    dataPtr_(nullptr), Action(nullptr)
-{
-    switch(actionType)
-    {
+    dataPtr_(nullptr), Action(nullptr) {
+
+    switch(actionType) {
     case CompanionActionType::CREATE:
     case CompanionActionType::UPDATE:
         dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
@@ -79,58 +71,46 @@ CompanionAction::CompanionAction(
     }
 }
 
-CompanionAction::~CompanionAction()
-{
+CompanionAction::~CompanionAction() {
     delete this->dataPtr_;
 }
 
-CompanionActionType CompanionAction::getActionType() const
-{
+CompanionActionType CompanionAction::getActionType() const {
     return this->actionType_;
 }
 
-std::string CompanionAction::getName() const
-{
+std::string CompanionAction::getName() const {
     return this->dataPtr_->getName();
 }
 
-std::string CompanionAction::getIpAddress() const
-{
+std::string CompanionAction::getIpAddress() const {
     return this->dataPtr_->getIpAddress();
 }
 
-std::string CompanionAction::getServerPort() const
-{
+std::string CompanionAction::getServerPort() const {
     return this->dataPtr_->getServerPort();
 }
 
-std::string CompanionAction::getClientPort() const
-{
+std::string CompanionAction::getClientPort() const {
     return this->dataPtr_->getClientPort();
 }
 
-int CompanionAction::getCompanionId() const
-{
+int CompanionAction::getCompanionId() const {
     return this->companionPtr_->getId();
 }
 
-Companion* CompanionAction::getCompanionPtr() const
-{
+Companion* CompanionAction::getCompanionPtr() const {
     return this->companionPtr_;
 }
 
-void CompanionAction::updateCompanionObjectData()
-{
+void CompanionAction::updateCompanionObjectData() {
     this->companionPtr_->updateData(this->dataPtr_);
 }
 
 // TODO deletion of action objects
-void CompanionAction::sendData()
-{
-    if(this->actionType_ == CompanionActionType::SEND_HISTORY)
-    {
+void CompanionAction::sendData() {
+    if(this->actionType_ == CompanionActionType::SEND_HISTORY) {
         // TODO if client is disconnected show error dialog
-
         getManagerPtr()->sendChatHistoryToCompanion(this->companionPtr_);
         return;
     }
@@ -140,11 +120,9 @@ void CompanionAction::sendData()
     std::string serverPort { "" };
     std::string clientPort;
 
-    switch(this->actionType_)
-    {
+    switch(this->actionType_) {
     case CompanionActionType::CREATE:
-    case CompanionActionType::UPDATE:
-        {
+    case CompanionActionType::UPDATE: {
             CompanionDataDialog* dataDialogPtr =
                 dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
 
@@ -156,8 +134,7 @@ void CompanionAction::sendData()
         break;
 
     case CompanionActionType::DELETE:
-    case CompanionActionType::CLEAR_HISTORY:
-        {
+    case CompanionActionType::CLEAR_HISTORY: {
             name = this->companionPtr_->getName();
             ipAddress = this->companionPtr_->getSocketIpAddress();
             clientPort = std::to_string(this->companionPtr_->getSocketClientPort());
@@ -173,12 +150,10 @@ void CompanionAction::sendData()
     getGraphicManagerPtr()->sendCompanionDataToManager(this);
 }
 
-PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)
-{
+PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr) {
     actionType_ = actionType;
 
-    switch(actionType)
-    {
+    switch(actionType) {
     case PasswordActionType::CREATE:
         dialogPtr_ = new CreatePasswordDialog;
 
@@ -191,35 +166,27 @@ PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)
     }
 }
 
-PasswordAction::~PasswordAction()
-{
-    if(this->actionType_ == PasswordActionType::GET)
-    {
+PasswordAction::~PasswordAction() {
+    if(this->actionType_ == PasswordActionType::GET) {
         this->dialogPtr_->close();
     }
 }
 
-std::string PasswordAction::getPassword()
-{
+std::string PasswordAction::getPassword() {
     return *this->passwordPtr_;
 }
 
-void PasswordAction::sendData()
-{
-    switch(this->actionType_)
-    {
-    case PasswordActionType::CREATE:
-        {
+void PasswordAction::sendData() {
+    switch(this->actionType_) {
+    case PasswordActionType::CREATE: {
             CreatePasswordDialog* passwordDialogPtr =
                 dynamic_cast<CreatePasswordDialog*>(this->dialogPtr_);
 
             auto text1 = passwordDialogPtr->getFirstEditText();
             auto text2 = passwordDialogPtr->getSecondEditText();
 
-            if(text1 == text2)
-            {
-                if(text1.size() == 0)
-                {
+            if(text1 == text2) {
+                if(text1.size() == 0) {
                     showErrorDialogAndLogError(
                         this->getDialogPtr(), "Empty password is invalid");
 
@@ -229,8 +196,7 @@ void PasswordAction::sendData()
                 this->passwordPtr_ = &text1;
                 getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
             }
-            else
-            {
+            else {
                 showErrorDialogAndLogError(
                     this->getDialogPtr(), "Entered passwords are not equal");
             }
@@ -238,15 +204,13 @@ void PasswordAction::sendData()
 
         break;
 
-    case PasswordActionType::GET:
-        {
+    case PasswordActionType::GET: {
             GetPasswordDialog* passwordDialogPtr =
                 dynamic_cast<GetPasswordDialog*>(this->dialogPtr_);
 
             auto text = passwordDialogPtr->getEditText();
 
-            if(text.size() == 0)
-            {
+            if(text.size() == 0) {
                 showErrorDialogAndLogError(
                     this->getDialogPtr(), "Empty password is invalid");
 
@@ -263,8 +227,7 @@ void PasswordAction::sendData()
 
 FileAction::FileAction(
     FileActionType actionType, const std::string& networkId, Companion* companionPtr) :
-    Action(nullptr)
-{
+    Action(nullptr) {
     actionType_ = actionType;
     companionPtr_ = companionPtr;
     networkId_ = networkId;
@@ -277,33 +240,26 @@ FileAction::FileAction(
     dialogPtr_ = new FileDialog(this, windowTitle);
 }
 
-FileActionType FileAction::getType() const
-{
+FileActionType FileAction::getType() const {
     return this->actionType_;
 }
 
-Companion* FileAction::getCompanionPtr() const
-{
+Companion* FileAction::getCompanionPtr() const {
     return this->companionPtr_;
 }
 
-std::filesystem::path FileAction::getPath() const
-{
+std::filesystem::path FileAction::getPath() const {
     return this->filePath_;
 }
 
-void FileAction::sendData()
-{
+void FileAction::sendData() {
     logArgs("FileAction::sendData");
 
     auto dialogPtr = dynamic_cast<FileDialog*>(this->dialogPtr_)->getFileDialogPtr();
 
-    switch(this->actionType_)
-    {
-    case FileActionType::SEND:
-        {
-            for(auto& pathQString : dialogPtr->selectedFiles())  // one file
-            {
+    switch(this->actionType_) {
+    case FileActionType::SEND: {
+            for(auto& pathQString : dialogPtr->selectedFiles()) {  // one file
                 logArgs(pathQString);
 
                 auto path = std::filesystem::path(pathQString.toStdString());
@@ -320,8 +276,7 @@ void FileAction::sendData()
 
         break;
 
-    case FileActionType::SAVE:
-        {
+    case FileActionType::SAVE: {
             // for(auto& pathQString : dialogPtr->selectedFiles())  // one file
             // {
             //     logArgs(pathQString);
@@ -347,8 +302,7 @@ void FileAction::sendData()
             bool setResult = this->companionPtr_->setFileOperatorFilePath(
                 this->networkId_, this->filePath_);
 
-            if(setResult)
-            {
+            if(setResult) {
                 // send without saving to db
                 bool result = this->companionPtr_->sendMessage(
                     false, NetworkMessageType::FILE_REQUEST,
@@ -356,8 +310,7 @@ void FileAction::sendData()
 
                 getManagerPtr()->setLastOpenedPath(this->filePath_.parent_path());
             }
-            else
-            {
+            else {
                 logArgsErrorWithTemplate(
                     "error saving file, path: {}", this->filePath_.string());
             }
@@ -367,8 +320,7 @@ void FileAction::sendData()
     }
 }
 
-void FileAction::defineFilePath()
-{
+void FileAction::defineFilePath() {
     this->filePath_ = QFileDialog::getSaveFileName(
         getGraphicManagerPtr()->getMainWindowPtr(),
         "Save File",

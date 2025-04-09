@@ -15,8 +15,8 @@ class Companion;
 class CompanionData;
 class MainWindow;
 
-class Action : public QObject
-{
+class Action : public QObject {
+
     Q_OBJECT
 
 public:
@@ -32,8 +32,8 @@ protected:
     Dialog* dialogPtr_;
 };
 
-class CompanionAction : public Action
-{
+class CompanionAction : public Action {
+
     Q_OBJECT
 
 public:
@@ -59,8 +59,8 @@ private:
     Companion* companionPtr_;
 };
 
-class PasswordAction : public Action
-{
+class PasswordAction : public Action {
+
     Q_OBJECT
 
 public:
@@ -75,8 +75,8 @@ private:
     const std::string* passwordPtr_;
 };
 
-class FileAction : public Action
-{
+class FileAction : public Action {
+
     Q_OBJECT
 
 public:

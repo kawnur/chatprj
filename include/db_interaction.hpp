@@ -17,8 +17,7 @@
 class Companion;
 class CompanionAction;
 
-class DBReplyData
-{
+class DBReplyData {
 public:
     DBReplyData(int count, ...);
     DBReplyData(const std::vector<std::string>&);

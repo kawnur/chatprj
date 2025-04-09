@@ -1,13 +1,11 @@
 #include "application.hpp"
 
-ChatApp::~ChatApp()
-{
+ChatApp::~ChatApp() {
     delete this->graphicManagerPtr_;
     delete this->managerPtr_;
 }
 
-void ChatApp::set()
-{
+void ChatApp::set() {
     graphicManagerPtr_ = new GraphicManager;
     graphicManagerPtr_->set();
 

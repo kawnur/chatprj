@@ -1,9 +1,8 @@
 #include "graphic_manager.hpp"
 
 GraphicManager::GraphicManager() :
-    messageToMessageWidgetMapMutex_(std::mutex())
-    // mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>())
-{
+    messageToMessageWidgetMapMutex_(std::mutex()) {
+    // mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>()) {
     // stubWidgetsPtr_ = new StubWidgetGroup;
     // mainWindowPtr_ = new MainWindow;
 
@@ -11,13 +10,11 @@ GraphicManager::GraphicManager() :
     // mainWindowPtr_ = nullptr;
 }
 
-MainWindow* GraphicManager::getMainWindowPtr()
-{
+MainWindow* GraphicManager::getMainWindowPtr() {
     return this->mainWindowPtr_;
 }
 
-void GraphicManager::set()
-{
+void GraphicManager::set() {
     stubWidgetsPtr_ = new StubWidgetGroup;
     mainWindowPtr_ = new MainWindow;
 
@@ -27,63 +24,52 @@ void GraphicManager::set()
 }
 
 void GraphicManager::setParentsForStubs(
-    QWidget* leftContainerPtr, QWidget* centralContainerPtr)
-{
+    QWidget* leftContainerPtr, QWidget* centralContainerPtr) {
     this->stubWidgetsPtr_->setParents(leftContainerPtr, centralContainerPtr);
 }
 
-void GraphicManager::setStubWidgets()
-{
+void GraphicManager::setStubWidgets() {
     this->stubWidgetsPtr_->set();
 }
 
 void GraphicManager::sendMessage(
-    MessageType type, Companion* companionPtr, const std::string& text)
-{
+    MessageType type, Companion* companionPtr, const std::string& text) {
     getManagerPtr()->sendMessage(type, companionPtr, nullptr, text);
 }
 
-void GraphicManager::addTextToAppLogWidget(const QString& text)
-{
+void GraphicManager::addTextToAppLogWidget(const QString& text) {
     this->mainWindowPtr_->addTextToAppLogWidget(text);
 }
 
-size_t GraphicManager::getCompanionPanelChildrenSize()
-{
+size_t GraphicManager::getCompanionPanelChildrenSize() {
     return this->mainWindowPtr_->getCompanionPanelChildrenSize();
 }
 
-void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroup* groupPtr)
-{
+void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroup* groupPtr) {
     groupPtr->hideCentralPanel();
 }
 
-void GraphicManager::showWidgetGroupCentralPanel(WidgetGroup* groupPtr)
-{
+void GraphicManager::showWidgetGroupCentralPanel(WidgetGroup* groupPtr) {
     groupPtr->showCentralPanel();
 }
 
 void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
-    MainWindowContainerPosition position, QWidget* widgetPtr)
-{
+    MainWindowContainerPosition position, QWidget* widgetPtr) {
     this->mainWindowPtr_->addWidgetToContainerAndSetParentTo(
         position, widgetPtr);
 }
 
-void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget)
-{
+void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget) {
     this->mainWindowPtr_->addWidgetToCompanionPanel(widget);
 }
 
-void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget)
-{
+void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget) {
     this->mainWindowPtr_->removeWidgetFromCompanionPanel(widget);
 }
 
 void GraphicManager::createTextDialogAndShow(
     QWidget* parentPtr, DialogType dialogType, const std::string& text,
-    std::vector<ButtonInfo>* buttonInfoPtr)
-{
+    std::vector<ButtonInfo>* buttonInfoPtr) {
     // TODO delete objects for closed dialoges?
     TextDialog* dialogPtr = new TextDialog(parentPtr, dialogType, text, buttonInfoPtr);
 
@@ -91,47 +77,40 @@ void GraphicManager::createTextDialogAndShow(
     dialogPtr->show();
 }
 
-void GraphicManager::createCompanion()
-{
+void GraphicManager::createCompanion() {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::CREATE, this->mainWindowPtr_, nullptr);
 
     actionPtr->set();
 }
 
-void GraphicManager::updateCompanion(Companion* companionPtr)
-{
+void GraphicManager::updateCompanion(Companion* companionPtr) {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::UPDATE, this->mainWindowPtr_, companionPtr);
 
     actionPtr->set();
 }
 
-void GraphicManager::clearCompanionHistory(Companion* companionPtr)
-{
+void GraphicManager::clearCompanionHistory(Companion* companionPtr) {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::CLEAR_HISTORY, this->mainWindowPtr_, companionPtr);
 
     actionPtr->set();
 }
 
-void GraphicManager::clearChatHistory(WidgetGroup* widgetGroupPtr)
-{
+void GraphicManager::clearChatHistory(WidgetGroup* widgetGroupPtr) {
     widgetGroupPtr->clearChatHistory();
 }
 
-void GraphicManager::deleteCompanion(Companion* companionPtr)
-{
+void GraphicManager::deleteCompanion(Companion* companionPtr) {
     CompanionAction* actionPtr = new CompanionAction(
         CompanionActionType::DELETE, this->mainWindowPtr_, companionPtr);
 
     actionPtr->set();
 }
 
-void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
-{
-    switch(actionPtr->getActionType())
-    {
+void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr) {
+    switch(actionPtr->getActionType()) {
     case CompanionActionType::CREATE:
         getManagerPtr()->createCompanion(actionPtr);
 
@@ -155,20 +134,17 @@ void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr)
 }
 
 void GraphicManager::showCompanionInfoDialog(
-    CompanionAction* companionActionPtr, std::string&& header)
-{
+    CompanionAction* companionActionPtr, std::string&& header) {
     QWidget* parentPtr = nullptr;
     void (TextDialog::*functionPtr)() = nullptr;
 
     auto formDialogPtr = companionActionPtr->getDialogPtr();
 
-    if(formDialogPtr)
-    {
+    if(formDialogPtr) {
         parentPtr = formDialogPtr;
         functionPtr = &TextDialog::closeSelfAndParentDialog;
     }
-    else
-    {
+    else {
         functionPtr = &TextDialog::closeSelf;
     }
 
@@ -177,8 +153,7 @@ void GraphicManager::showCompanionInfoDialog(
         DialogType::INFO,
         buildDialogText(
             std::move(header),
-            std::vector<std::string>
-            {
+            std::vector<std::string> {
                 std::string("name: ") + companionActionPtr->getName(),
                 std::string("ipAddress: ") + companionActionPtr->getIpAddress(),
                 std::string("port: ") + companionActionPtr->getClientPort()
@@ -188,43 +163,35 @@ void GraphicManager::showCompanionInfoDialog(
     delete companionActionPtr;
 }
 
-void GraphicManager::sendNewPasswordDataToManager(PasswordAction* actionPtr)
-{
+void GraphicManager::sendNewPasswordDataToManager(PasswordAction* actionPtr) {
     getManagerPtr()->createUserPassword(actionPtr);
 }
 
-void GraphicManager::sendExistingPasswordDataToManager(PasswordAction* actionPtr)
-{
+void GraphicManager::sendExistingPasswordDataToManager(PasswordAction* actionPtr) {
     getManagerPtr()->authenticateUser(actionPtr);
 }
 
-void GraphicManager::hideCompanionPanelStub()
-{
+void GraphicManager::hideCompanionPanelStub() {
     this->stubWidgetsPtr_->hideSocketInfoStubWidget();
 }
 
-void GraphicManager::hideCentralPanelStub()
-{
+void GraphicManager::hideCentralPanelStub() {
     this->stubWidgetsPtr_->hideCentralPanel();
 }
 
-void GraphicManager::showCentralPanelStub()
-{
+void GraphicManager::showCentralPanelStub() {
     this->stubWidgetsPtr_->showCentralPanel();
 }
 
-void GraphicManager::hideInfoViaBlur()
-{
+void GraphicManager::hideInfoViaBlur() {
     this->enableMainWindowBlurEffect();
 }
 
-void GraphicManager::showInfoViaBlur()
-{
+void GraphicManager::showInfoViaBlur() {
     this->disableMainWindowBlurEffect();
 }
 
-void GraphicManager::hideInfoViaStubs()
-{
+void GraphicManager::hideInfoViaStubs() {
     this->stubWidgetsPtr_->setLeftPanelWidth(
         this->mainWindowPtr_->getLeftPanelWidgetWidth());
 
@@ -233,63 +200,52 @@ void GraphicManager::hideInfoViaStubs()
     this->stubWidgetsPtr_->showStubPanels();
 }
 
-void GraphicManager::showInfoViaStubs()
-{
+void GraphicManager::showInfoViaStubs() {
     this->mainWindowPtr_->showLeftAndRightPanels();
     getManagerPtr()->showSelectedCompanionCentralPanel();
     this->stubWidgetsPtr_->hideStubPanels();
 }
 
-void GraphicManager::hideInfo()
-{
+void GraphicManager::hideInfo() {
     this->hideInfoViaBlur();
     // this->hideInfoViaStubs();
 }
 
-void GraphicManager::showInfo()
-{
+void GraphicManager::showInfo() {
     getManagerPtr()->startUserAuthentication();
 
     // this->showInfoViaBlur();
     // this->showInfoViaStubs();
 }
 
-void GraphicManager::createEntrancePassword()
-{
+void GraphicManager::createEntrancePassword() {
     PasswordAction* actionPtr = new PasswordAction(PasswordActionType::CREATE);
     actionPtr->set();
 }
 
-void GraphicManager::enableMainWindowBlurEffect()
-{
+void GraphicManager::enableMainWindowBlurEffect() {
     this->mainWindowPtr_->enableBlurEffect();
 }
 
-void GraphicManager::disableMainWindowBlurEffect()
-{
+void GraphicManager::disableMainWindowBlurEffect() {
     this->mainWindowPtr_->disableBlurEffect();
 }
 
-void GraphicManager::getEntrancePassword()
-{
+void GraphicManager::getEntrancePassword() {
     PasswordAction* actionPtr = new PasswordAction(PasswordActionType::GET);
     actionPtr->set();
 }
 
 void GraphicManager::markMessageWidgetAsSent(
-    Companion* companionPtr, const Message* messagePtr)
-{
-    auto setLambda = [&, this]()
-    {
+    Companion* companionPtr, const Message* messagePtr) {
+    auto setLambda = [&, this](){
         std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
-        try
-        {
+        try {
             companionPtr->getMappedMessageWidgetPtrByMessagePtr(messagePtr)->
                 setMessageWidgetAsSent();
         }
-        catch(std::out_of_range)
-        {
+        catch(std::out_of_range) {
             return;
         }
     };
@@ -298,19 +254,15 @@ void GraphicManager::markMessageWidgetAsSent(
 }
 
 void GraphicManager::markMessageWidgetAsReceived(
-    Companion* companionPtr, const Message* messagePtr)
-{
-    auto setLambda = [&, this]()
-    {
+    Companion* companionPtr, const Message* messagePtr) {
+    auto setLambda = [&, this](){
         std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
-        try
-        {
+        try {
             companionPtr->getMappedMessageWidgetPtrByMessagePtr(messagePtr)->
                 setMessageWidgetAsReceived();
         }
-        catch(std::out_of_range)
-        {
+        catch(std::out_of_range) {
             return;
         }
     };
@@ -318,25 +270,21 @@ void GraphicManager::markMessageWidgetAsReceived(
     runAndLogException(setLambda);
 }
 
-void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr)
-{
+void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr) {
     groupPtr->sortChatHistoryElements();
 }
 
-void GraphicManager::sendFile(Companion* companionPtr)
-{
+void GraphicManager::sendFile(Companion* companionPtr) {
     FileAction* actionPtr = new FileAction(FileActionType::SEND, "", companionPtr);
     actionPtr->set();
 }
 
-void GraphicManager::saveFile(const std::string& networkId, Companion* companionPtr)
-{
+void GraphicManager::saveFile(const std::string& networkId, Companion* companionPtr) {
     FileAction* actionPtr = new FileAction(FileActionType::SAVE, networkId, companionPtr);
     actionPtr->set();
 }
 
-GraphicManager* getGraphicManagerPtr()
-{
+GraphicManager* getGraphicManagerPtr() {
     QCoreApplication* coreApp = QCoreApplication::instance();
     ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
     return app->graphicManagerPtr_;

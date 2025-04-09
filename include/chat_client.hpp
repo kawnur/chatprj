@@ -11,8 +11,7 @@
 
 using boost::asio::ip::tcp;
 
-class ChatClient
-{
+class ChatClient {
 public:
     ChatClient(std::string&&, uint16_t&&);
     ~ChatClient() = default;

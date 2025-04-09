@@ -8,8 +8,7 @@
 
 class MessageWidget;
 
-class Message
-{
+class Message {
 public:
     Message(MessageType, uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
     ~Message() = default;
@@ -22,8 +21,7 @@ public:
     std::string getText() const;
     bool isMessageFromMe() const;
 
-    friend bool operator<(const Message& message1, const Message& message2)
-    {
+    friend bool operator<(const Message& message1, const Message& message2) {
         return message1.getId() < message2.getId();
     }
 
@@ -36,8 +34,7 @@ private:
     std::string text_;
 };
 
-class MessageState
-{
+class MessageState {
 public:
     MessageState(uint8_t, bool, bool, bool, std::string);
     ~MessageState() = default;
@@ -58,8 +55,7 @@ private:
     std::string networkId_;
 };
 
-class MessageInfo
-{
+class MessageInfo {
 public:
     MessageInfo(MessageState*, MessageWidget*);
     ~MessageInfo() = default;

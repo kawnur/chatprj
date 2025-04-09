@@ -18,6 +18,7 @@ class Message;
 class MessageState;
 class PasswordAction;
 class SocketInfoBaseWidget;
+class TextDialog;
 class WidgetGroup;
 
 int getDataFromDBResult(
@@ -25,10 +26,11 @@ int getDataFromDBResult(
 
 template<typename... Ts> void logArgs(Ts&&... args);
 void logDBReplyData(std::shared_ptr<DBReplyData>&);
-void showErrorDialogAndLogError(QWidget*, const QString&);
 
-class Manager : public QObject  // TODO do we need inheritance?
-{
+void showErrorDialogAndLogError(QWidget*, const QString&);
+// template<typename T> void showErrorDialogAndLogError(QWidget*, T&&);
+
+class Manager : public QObject { // TODO do we need inheritance?
 public:
     Manager();
     ~Manager();
@@ -97,20 +99,17 @@ private:
         const bool& logging,
         const char* mark,
         PGresult*(*func)(const PGconn*, const bool&, const Ts&...),
-        T&& keys,
-        const Ts&... args)
-    {
+        T&& keys, const Ts&... args) {
+
         const PGresult* dbResultPtr = func(this->dbConnectionPtr_, logging, args...);
 
-        if(logging)
-        {
+        if(logging) {
             logArgs(logDelimiter);
             logArgs(mark);
             logArgs("dbResultPtr:", dbResultPtr);
         }
 
-        if(!dbResultPtr)
-        {
+        if(!dbResultPtr) {
             showErrorDialogAndLogError(
                 nullptr, "Database request error, dbResultPtr is nullptr");
 
@@ -120,14 +119,12 @@ private:
         std::shared_ptr<DBReplyData> dbDataPtr =
             std::make_shared<DBReplyData>(std::forward<T>(keys));
 
-        if(getDataFromDBResult(logging, dbDataPtr, dbResultPtr, 0) == -1)
-        {
+        if(getDataFromDBResult(logging, dbDataPtr, dbResultPtr, 0) == -1) {
             showErrorDialogAndLogError(nullptr, "Error getting data from dbResultPtr");
             return nullptr;
         }
 
-        if(logging)
-        {
+        if(logging) {
             // logArgs("dbDataPtr->size():", dbDataPtr->size());
             logDBReplyData(dbDataPtr);
             logArgs(logDelimiter);

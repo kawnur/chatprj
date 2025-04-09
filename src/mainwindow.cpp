@@ -1,7 +1,6 @@
 #include "mainwindow.hpp"
 
-MainWindow::MainWindow()
-{
+MainWindow::MainWindow() {
     setWindowTitle(std::getenv("CLIENT_NAME"));
 
     // menu bar
@@ -64,16 +63,14 @@ MainWindow::MainWindow()
     centralWidgetLayoutPtr_->addWidget(splitterPtr_);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     // cannot set parent for palette
     delete this->menuBarPalettePtr_;
     delete this->centralWidgetPtr_;
     delete this->blurEffectPtr_;
 }
 
-void MainWindow::set()
-{
+void MainWindow::set() {
     this->createMenu();
 
     getGraphicManagerPtr()->setParentsForStubs(
@@ -91,74 +88,62 @@ void MainWindow::set()
     this->setBlurEffect();
 }
 
-void MainWindow::addTextToAppLogWidget(const QString& text)
-{
+void MainWindow::addTextToAppLogWidget(const QString& text) {
     this->rightPanelPtr_->addTextToAppLogWidget(text);    
 }
 
 void MainWindow::addWidgetToContainerAndSetParentTo(
-    MainWindowContainerPosition position, QWidget* widgetPtr)
-{
+    MainWindowContainerPosition position, QWidget* widgetPtr) {
     this->mapContainerPtrToContainerPosition.at(position)->
         addWidgetToLayoutAndSetParentTo(widgetPtr);
 }
 
-void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widgetPtr)
-{
+void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widgetPtr) {
     this->leftPanelPtr_->addWidgetToCompanionPanel(widgetPtr);
 }
 
-size_t MainWindow::getCompanionPanelChildrenSize()
-{
+size_t MainWindow::getCompanionPanelChildrenSize() {
     return this->leftPanelPtr_->getCompanionPanelChildrenSize();
 }
 
-void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr)
-{
+void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr) {
     this->leftPanelPtr_->removeWidgetFromCompanionPanel(widgetPtr);
 }
 
-void MainWindow::hideLeftAndRightPanels()
-{
+void MainWindow::hideLeftAndRightPanels() {
     this->leftPanelPtr_->hide();
     this->rightPanelPtr_->hide();
 }
 
-void MainWindow::showLeftAndRightPanels()
-{
+void MainWindow::showLeftAndRightPanels() {
     this->leftPanelPtr_->show();
     this->rightPanelPtr_->show();
 }
 
-int MainWindow::getLeftPanelWidgetWidth()
-{
+int MainWindow::getLeftPanelWidgetWidth() {
     return this->leftPanelPtr_->getLastCompanionPanelChildWidth();
 }
 
-void MainWindow::enableWidgetsForShowHide()
-{
+void MainWindow::enableWidgetsForShowHide() {
     this->menuBar()->setEnabled(true);
     this->leftPanelPtr_->setEnabled(true);
     this->centralContainerWidgetPtr_->setEnabled(true);
     this->rightContainerWidgetPtr_->setEnabled(true);
 }
 
-void MainWindow::disableWidgetsForShowHide()
-{
+void MainWindow::disableWidgetsForShowHide() {
     this->menuBar()->setEnabled(false);
     this->leftPanelPtr_->setEnabled(false);
     this->centralContainerWidgetPtr_->setEnabled(false);
     this->rightContainerWidgetPtr_->setEnabled(false);
 }
 
-void MainWindow::enableBlurEffect()
-{
+void MainWindow::enableBlurEffect() {
     this->disableWidgetsForShowHide();
     this->setGraphicsEffect(this->blurEffectPtr_);
 }
 
-void MainWindow::disableBlurEffect()
-{
+void MainWindow::disableBlurEffect() {
     this->enableWidgetsForShowHide();
     this->setGraphicsEffect(nullptr);
 
@@ -166,31 +151,25 @@ void MainWindow::disableBlurEffect()
     this->setBlurEffect();
 }
 
-void MainWindow::createCompanion()
-{
+void MainWindow::createCompanion() {
     getGraphicManagerPtr()->createCompanion();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
-{
+void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event)
-{
-    if(event->key() == Qt::Key_Escape)
-    {
+void MainWindow::keyPressEvent(QKeyEvent* event) {
+    if(event->key() == Qt::Key_Escape) {
         getManagerPtr()->resetSelectedCompanion(nullptr);
     }
 }
 
-void MainWindow::mouseDoubleClickEvent(QMouseEvent* event)
-{
+void MainWindow::mouseDoubleClickEvent(QMouseEvent* event) {
     // this->showFullScreen();
 }
 
-void MainWindow::createMenu()
-{
+void MainWindow::createMenu() {
     QMenu* fileMenu = menuBar()->addMenu("File");
     QAction* exitAction = new QAction("Exit", this);
     fileMenu->addAction(exitAction);
@@ -208,8 +187,7 @@ void MainWindow::createMenu()
         this, &MainWindow::createCompanion, Qt::QueuedConnection);
 }
 
-void MainWindow::setBlurEffect()
-{
+void MainWindow::setBlurEffect() {
     blurEffectPtr_ = new QGraphicsBlurEffect;
     blurEffectPtr_->setBlurRadius(30);
 }

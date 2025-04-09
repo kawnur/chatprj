@@ -3,12 +3,10 @@
 // TODO move all constants to constants.hpp
 
 bool validateCompanionName(
-    std::vector<std::string>& validationErrors, const std::string& name)
-{
+    std::vector<std::string>& validationErrors, const std::string& name) {
     bool result = (name.size() <= 30);
 
-    if(!result)
-    {
+    if(!result) {
         validationErrors.push_back(std::string("companion name length is greater than 30"));
     }
 
@@ -18,14 +16,12 @@ bool validateCompanionName(
 }
 
 bool validateIpAddress(
-    std::vector<std::string>& validationErrors, const std::string& ipAddress)
-{
+    std::vector<std::string>& validationErrors, const std::string& ipAddress) {
     QHostAddress address { getQString(ipAddress) };
 
     bool result = !(address.isNull());
 
-    if(!result)
-    {
+    if(!result) {
         validationErrors.push_back(std::string("companion ipaddress is invalid"));
     }
 
@@ -34,30 +30,25 @@ bool validateIpAddress(
     return result;
 }
 
-bool validatePort(std::vector<std::string>& validationErrors, const std::string& port)
-{
+bool validatePort(std::vector<std::string>& validationErrors, const std::string& port) {
     bool result = false;
 
     std::string errorMessage("port number must be greater than 0 and lower than 65536");
 
-    try
-    {
+    try {
         long long portNumber = std::stoll(port, nullptr, 10);
 
         result = (portNumber >= 0) && (portNumber <= 65535);
 
-        if(!result)
-        {
+        if(!result) {
             validationErrors.push_back(errorMessage);
         }
     }
-    catch(std::out_of_range)
-    {
+    catch(std::out_of_range) {
         validationErrors.push_back(
             errorMessage + std::string(", port number is too big, std::out_of_range"));
     }
-    catch(std::invalid_argument)
-    {
+    catch(std::invalid_argument) {
         validationErrors.push_back(
             errorMessage + std::string(", port number is invalid, std::invalid_argument"));
     }
@@ -69,8 +60,7 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
 
 bool validateCompanionData(
     std::vector<std::string>& errors,
-    const CompanionAction* actionPtr)
-{
+    const CompanionAction* actionPtr) {
     bool nameValidationResult = validateCompanionName(errors, actionPtr->getName());
     bool ipAddressValidationResult = validateIpAddress(errors, actionPtr->getIpAddress());
     bool portValidationResult = validatePort(errors, actionPtr->getClientPort());
@@ -84,12 +74,10 @@ bool validateCompanionData(
 }
 
 bool validatePassword(
-    std::vector<std::string>& validationErrors, const std::string& password)
-{
+    std::vector<std::string>& validationErrors, const std::string& password) {
     bool result = (password.size() <= 30);
 
-    if(!result)
-    {
+    if(!result) {
         validationErrors.push_back(std::string("password length is greater than 30"));
     }
 
@@ -98,20 +86,16 @@ bool validatePassword(
     return result;
 }
 
-std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages)
-{
-    if(messages.empty())
-    {
+std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages) {
+    if(messages.empty()) {
         return "";
     }
-    else
-    {
+    else {
         std::string text(header);
 
         logArgs("messages.size():", messages.size());
 
-        for(auto& message : messages)
-        {
+        for(auto& message : messages) {
             text += (std::string("- ") + message + std::string("\n"));
         }
 
@@ -119,8 +103,7 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
     }
 }
 
-std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr)())
-{
+std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr)()) {
     std::vector<ButtonInfo>* vectorPtr = new std::vector<ButtonInfo>;
 
     vectorPtr->emplace_back(
@@ -130,8 +113,7 @@ std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr
 }
 
 void showInfoDialogAndLogInfo(
-    QWidget* parentPtr, const QString& message, void (TextDialog::*functionPtr)())
-{
+    QWidget* parentPtr, const QString& message, void (TextDialog::*functionPtr)()) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, message.toStdString(),
         createOkButtonInfoVector(functionPtr));
@@ -139,8 +121,7 @@ void showInfoDialogAndLogInfo(
     logArgsInfo(message);
 }
 
-void showInfoDialogAndLogInfo(QWidget* parentPtr, QString&& message)
-{
+void showInfoDialogAndLogInfo(QWidget* parentPtr, QString&& message) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -148,8 +129,7 @@ void showInfoDialogAndLogInfo(QWidget* parentPtr, QString&& message)
     logArgsInfo(message);
 }
 
-void showWarningDialogAndLogWarning(QWidget* parentPtr, const QString& message)
-{
+void showWarningDialogAndLogWarning(QWidget* parentPtr, const QString& message) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::WARNING, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -175,14 +155,12 @@ void showErrorDialogAndLogError(QWidget* parentPtr, QString&& message)
     logArgsError(message);
 }
 
-std::string getFormattedMessageBodyString(const std::string& color, const std::string& text)
-{
+std::string getFormattedMessageBodyString(const std::string& color, const std::string& text) {
     return std::format("<font color=\"{0}\"><br>{1}</font>", color, text);
 }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    const Companion* companionPtr, const Message* messagePtr)
-{
+    const Companion* companionPtr, const Message* messagePtr) {
     auto companionName = companionPtr->getName();
     auto companionId = messagePtr->getCompanionId();
     auto authorId = messagePtr->getAuthorId();
@@ -191,14 +169,12 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 
     std::string color, sender, receiver;
 
-    if(companionId == authorId)
-    {
+    if(companionId == authorId) {
         color = receivedMessageColor;
         sender = companionName;
         receiver = "Me";
     }
-    else
-    {
+    else {
         color = sentMessageColor;
         sender = "Me";
         receiver = companionName;
@@ -217,8 +193,7 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 
 std::string buildMessageJSONString(
     bool isAntecedent, NetworkMessageType type, const Companion* companionPtr,
-    const std::string& networkId, const Message* messagePtr)
-{
+    const std::string& networkId, const Message* messagePtr) {
     using json = nlohmann::json;
 
     json jsonData;
@@ -228,8 +203,7 @@ std::string buildMessageJSONString(
     jsonData["companion_id"] = companionPtr->getId();
     jsonData["antecedent"] = isAntecedent;
 
-    switch(type)
-    {
+    switch(type) {
     case NetworkMessageType::TEXT:
         jsonData["time"] = messagePtr->getTime();
         jsonData["text"] = messagePtr->getText();
@@ -265,8 +239,7 @@ std::string buildMessageJSONString(
 }
 
 std::string buildFileBlockJSONString(
-    const Companion* companionPtr, const std::string& networkId, const std::string& data)
-{
+    const Companion* companionPtr, const std::string& networkId, const std::string& data) {
     using json = nlohmann::json;
 
     json jsonData;
@@ -280,18 +253,15 @@ std::string buildFileBlockJSONString(
 }
 
 std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys)
-{
+    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys) {
     using json = nlohmann::json;
     json jsonData;
 
     jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
     jsonData["messages"] = {};
 
-    for(size_t i = 0; i < dataPtr->size(); i++)  // TODO switch to iterators
-    {
-        for(auto& key : keys)
-        {
+    for(size_t i = 0; i < dataPtr->size(); i++) {  // TODO switch to iterators
+        for(auto& key : keys) {
             jsonData["messages"][i][key] = dataPtr->getValue(i, key);
         }
     }
@@ -301,55 +271,45 @@ std::string buildChatHistoryJSONString(
     return result;
 }
 
-nlohmann::json buildJsonObject(const std::string& jsonString)
-{
+nlohmann::json buildJsonObject(const std::string& jsonString) {
     nlohmann::json jsonData = nlohmann::json::parse(jsonString);
 
     return jsonData;
 }
 
-std::string getRandomString(uint8_t length)
-{
+std::string getRandomString(uint8_t length) {
     std::string result(length, '_');
     size_t baseSize = sizeof(alphanum);
 
-    for(int i = 0; i < length; i++)
-    {
+    for(int i = 0; i < length; i++) {
         result.at(i) = alphanum[rand() % (baseSize - 1)];
     }
 
     return result;
 }
 
-void sleepForMilliseconds(uint32_t duration)
-{
+void sleepForMilliseconds(uint32_t duration) {
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-bool getBoolFromDBValue(const char* valuePtr)
-{
-    if(*valuePtr == 't')
-    {
+bool getBoolFromDBValue(const char* valuePtr) {
+    if(*valuePtr == 't') {
         return true;
     }
-    else if(*valuePtr == 'f')
-    {
+    else if(*valuePtr == 'f') {
         return false;
     }
-    else
-    {
+    else {
         logArgsErrorWithTemplate("unknown bool value from DB: {}", valuePtr);
     }
 
     return false;
 }
 
-std::string hashFileMD5(const std::string& filename)
-{
+std::string hashFileMD5(const std::string& filename) {
     std::ifstream file(filename, std::ios::binary);
 
-    if (!file)
-    {
+    if (!file) {
         throw std::runtime_error("Failed to open file: " + filename);
     }
 
@@ -360,8 +320,7 @@ std::string hashFileMD5(const std::string& filename)
     const size_t bufferSize = 4096;
     char buffer[bufferSize];
 
-    while (!file.eof())
-    {
+    while (!file.eof()) {
         file.read(buffer, bufferSize);
         EVP_DigestUpdate(md5Context, buffer, file.gcount());
     }
@@ -374,8 +333,7 @@ std::string hashFileMD5(const std::string& filename)
 
     std::stringstream stream;
 
-    for(auto& element : result)
-    {
+    for(auto& element : result) {
         stream << std::hex << (int)element;
     }
 

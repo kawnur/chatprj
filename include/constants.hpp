@@ -25,14 +25,12 @@ const float sleepDurationIncreaseRate = 1.2f;
 
 const std::filesystem::path homePath("~");
 
-enum class MessageType
-{
+enum class MessageType {
     TEXT,
     FILE
 };
 
-enum class NetworkMessageType
-{
+enum class NetworkMessageType {
     NO_ACTION,
     TEXT,
     FILE_PROPOSAL,
@@ -48,15 +46,13 @@ enum class NetworkMessageType
     CHAT_HISTORY_DATA
 };
 
-enum class DialogType
-{
+enum class DialogType {
     INFO,
     WARNING,
     ERROR
 };
 
-enum class CompanionActionType
-{
+enum class CompanionActionType {
     CREATE,
     // READ,
     UPDATE,
@@ -65,40 +61,34 @@ enum class CompanionActionType
     SEND_HISTORY
 };
 
-enum class PasswordActionType
-{
+enum class PasswordActionType {
     CREATE,
     GET
 };
 
-enum class FileActionType
-{
+enum class FileActionType {
     SEND,
     SAVE
 };
 
-enum class MainWindowContainerPosition
-{
+enum class MainWindowContainerPosition {
     LEFT,
     CENTRAL,
     RIGHT
 };
 
-const std::map<CompanionActionType, QString> actionTypeStringRepresentation
-{
+const std::map<CompanionActionType, QString> actionTypeStringRepresentation {
     { CompanionActionType::CREATE, "Add new companion" },
     { CompanionActionType::UPDATE, "Edit companion" }
 };
 
-const std::map<DialogType, QString> dialogTypeStringRepresentation
-{
+const std::map<DialogType, QString> dialogTypeStringRepresentation {
     { DialogType::INFO, "INFO" },
     { DialogType::WARNING, "WARNING" },
     { DialogType::ERROR, "ERROR" }
 };
 
-const std::map<FileActionType, QString> fileDialogTypeQStringRepresentation
-{
+const std::map<FileActionType, QString> fileDialogTypeQStringRepresentation {
     { FileActionType::SEND, "Send file" },
     { FileActionType::SAVE, "Save file" }
 };
@@ -106,8 +96,7 @@ const std::map<FileActionType, QString> fileDialogTypeQStringRepresentation
 const QString connectButtonConnectLabel { "Connect" };
 const QString connectButtonDisconnectLabel { "Disconnect" };
 
-const std::vector<QString> connectButtonLabels
-{
+const std::vector<QString> connectButtonLabels {
     connectButtonConnectLabel,  // initial
     connectButtonDisconnectLabel
 };

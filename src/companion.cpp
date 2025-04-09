@@ -10,30 +10,25 @@ SocketInfo::SocketInfo(
     serverPort_(serverPort),
     clientPort_(clientPort) {}
 
-SocketInfo::SocketInfo(const SocketInfo& si)
-{
+SocketInfo::SocketInfo(const SocketInfo& si) {
     ipAddress_ = si.ipAddress_;
     serverPort_ = si.serverPort_;
     clientPort_ = si.clientPort_;
 }
 
-std::string SocketInfo::getIpAddress() const
-{
+std::string SocketInfo::getIpAddress() const {
     return this->ipAddress_;
 }
 
-uint16_t SocketInfo::getServerPort() const
-{
+uint16_t SocketInfo::getServerPort() const {
     return this->serverPort_;
 }
 
-uint16_t SocketInfo::getClientPort() const
-{
+uint16_t SocketInfo::getClientPort() const {
     return this->clientPort_;
 }
 
-void SocketInfo::updateData(const CompanionData* dataPtr)
-{
+void SocketInfo::updateData(const CompanionData* dataPtr) {
     this->ipAddress_ = dataPtr->getIpAddress();
     this->clientPort_ = std::stoi(dataPtr->getClientPort());
 }
@@ -44,64 +39,53 @@ Companion::Companion(int id, const std::string& name) :
     messageMapping_(std::map<Message, MessageInfo>()),
     fileOperatorStoragePtr_(new FileOperatorStorage) {}
 
-Companion::~Companion()
-{
+Companion::~Companion() {
     delete this->socketInfoPtr_;
     delete this->clientPtr_;
     delete this->serverPtr_;
     delete this->fileOperatorStoragePtr_;
 }
 
-int Companion::getId() const
-{
+int Companion::getId() const {
     return this->id_;
 }
 
-std::string Companion::getName() const
-{
+std::string Companion::getName() const {
     return this->name_;
 }
 
-SocketInfo* Companion::getSocketInfoPtr() const
-{
+SocketInfo* Companion::getSocketInfoPtr() const {
     return this->socketInfoPtr_;
 }
 
-std::string Companion::getSocketIpAddress() const
-{
+std::string Companion::getSocketIpAddress() const {
     return this->socketInfoPtr_->getIpAddress();
 }
 
-uint16_t Companion::getSocketServerPort() const
-{
+uint16_t Companion::getSocketServerPort() const {
     return this->socketInfoPtr_->getServerPort();
 }
 
-uint16_t Companion::getSocketClientPort() const
-{
+uint16_t Companion::getSocketClientPort() const {
     return this->socketInfoPtr_->getClientPort();
 }
 
-FileOperatorStorage* Companion::getFileOperatorStoragePtr() const
-{
+FileOperatorStorage* Companion::getFileOperatorStoragePtr() const {
     return this->fileOperatorStoragePtr_;
 }
 
 std::string Companion::getFileOperatorFilePathStringByNetworkId(
-    const std::string& networkId)
-{
+    const std::string& networkId) {
     return this->fileOperatorStoragePtr_->
         getOperator(networkId)->getFilePath().string();
 }
 
-bool Companion::removeOperatorFromStorage(const std::string& key)
-{
+bool Companion::removeOperatorFromStorage(const std::string& key) {
     return this->fileOperatorStoragePtr_->removeOperator(key);
 }
 
 const MessageState* Companion::getMappedMessageStatePtrByMessagePtr(
-    const Message* messagePtr)
-{
+    const Message* messagePtr) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     // TODO switch to map find method
@@ -109,16 +93,14 @@ const MessageState* Companion::getMappedMessageStatePtrByMessagePtr(
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iter)
-        {
+        [&](auto& iter){
             return &(iter.first) == messagePtr;
         });
 
     return (result == this->messageMapping_.end()) ? nullptr : result->second.getStatePtr();
 }
 
-MessageWidget* Companion::getMappedMessageWidgetPtrByMessagePtr(const Message* messagePtr)
-{
+MessageWidget* Companion::getMappedMessageWidgetPtrByMessagePtr(const Message* messagePtr) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     // TODO switch to map find method
@@ -126,8 +108,7 @@ MessageWidget* Companion::getMappedMessageWidgetPtrByMessagePtr(const Message* m
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iter)
-        {
+        [&](auto& iter){
             return &(iter.first) == messagePtr;
         });
 
@@ -135,8 +116,7 @@ MessageWidget* Companion::getMappedMessageWidgetPtrByMessagePtr(const Message* m
 }
 
 const Message* Companion::getMappedMessagePtrByMessageWidgetPtr(
-    bool lock, MessageWidget* widgetPtr)
-{
+    bool lock, MessageWidget* widgetPtr) {
     if(lock)
         std::lock_guard<std::mutex> lockObject(this->messagesMutex_);
 
@@ -145,8 +125,7 @@ const Message* Companion::getMappedMessagePtrByMessageWidgetPtr(
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iter)
-        {
+        [&](auto& iter){
             return iter.second.getWidgetPtr() == widgetPtr;
         });
 
@@ -154,8 +133,7 @@ const Message* Companion::getMappedMessagePtrByMessageWidgetPtr(
 }
 
 MessageState* Companion::getMappedMessageStatePtrByMessageWidgetPtr(
-    bool lock, MessageWidget* widgetPtr)
-{
+    bool lock, MessageWidget* widgetPtr) {
     if(lock)
         std::lock_guard<std::mutex> lockObject(this->messagesMutex_);
 
@@ -164,8 +142,7 @@ MessageState* Companion::getMappedMessageStatePtrByMessageWidgetPtr(
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iter)
-        {
+        [&](auto& iter){
             return iter.second.getWidgetPtr() == widgetPtr;
         });
 
@@ -174,15 +151,13 @@ MessageState* Companion::getMappedMessageStatePtrByMessageWidgetPtr(
 }
 
 std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMessageId(
-    uint32_t messageId)
-{
+    uint32_t messageId) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iter)
-        {
+        [&](auto& iter){
             return iter.first.getId() == messageId;
         });
 
@@ -190,28 +165,24 @@ std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByMess
 }
 
 std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByNetworkId(
-    const std::string& networkId)
-{
+    const std::string& networkId) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iter)
-        {
+        [&](auto& iter){
             return iter.second.getStatePtr()->getNetworkId() == networkId;
         });
 
     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
 }
 
-const Message* Companion::getEarliestMessagePtr() const
-{
+const Message* Companion::getEarliestMessagePtr() const {
     auto minPair = std::min_element(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto& iterator1, auto& iterator2)
-        {
+        [&](auto& iterator1, auto& iterator2){
             return iterator1.first.getId() < iterator2.first.getId();
         });
 
@@ -222,12 +193,10 @@ std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
     MessageType type, uint32_t messageId, uint8_t authorId,
     const std::string& messageTime, const std::string& messageText,
-    bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
-{
+    bool isAntecedent, bool isSent, bool isReceived, std::string networkId) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    if(networkId.size() == 0)
-    {
+    if(networkId.size() == 0) {
         networkId = this->generateNewNetworkId(false);
     }
 
@@ -246,8 +215,7 @@ Companion::createMessageAndAddToMapping(
 
 std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
-    std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index)
-{
+    std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto id = this->getId();
@@ -275,42 +243,36 @@ Companion::createMessageAndAddToMapping(
     return result;
 }
 
-void Companion::setSocketInfo(SocketInfo* socketInfo)
-{
+void Companion::setSocketInfo(SocketInfo* socketInfo) {
     socketInfoPtr_ = socketInfo;
 }
 
 bool Companion::setFileOperatorFilePath(
-    const std::string& networkId, const std::filesystem::path& path)
-{
+    const std::string& networkId, const std::filesystem::path& path) {
     return this->fileOperatorStoragePtr_->
         getOperator(networkId)->setFilePath(path);
 }
 
-void Companion::setMappedMessageWidget(const Message* messagePtr, MessageWidget* widgetPtr)
-{
+void Companion::setMappedMessageWidget(
+    const Message* messagePtr, MessageWidget* widgetPtr) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto result = this->messageMapping_.find(*messagePtr);
 
-    if(result == this->messageMapping_.end())
-    {
+    if(result == this->messageMapping_.end()) {
         logArgsErrorWithTemplate(
             "message with id {} was not found in messageMapping_",
             messagePtr->getId());
     }
-    else
-    {
+    else {
         result->second.setWidgetPtr(widgetPtr);
     }
 }
 
-bool Companion::startServer()
-{
+bool Companion::startServer() {
     bool started = false;
 
-    auto startLambda = [this](bool& value)
-    {
+    auto startLambda = [this](bool& value){
         this->serverPtr_ = new ChatServer(this, this->socketInfoPtr_->getServerPort());
         this->serverPtr_->run();
         value = true;
@@ -321,12 +283,10 @@ bool Companion::startServer()
     return started;
 }
 
-bool Companion::createClient()
-{
+bool Companion::createClient() {
     bool created = false;
 
-    auto createLambda = [this](bool& value)
-    {
+    auto createLambda = [this](bool& value){
         this->clientPtr_ = new ChatClient(
             this->socketInfoPtr_->getIpAddress(),
             this->socketInfoPtr_->getClientPort());
@@ -339,31 +299,25 @@ bool Companion::createClient()
     return created;
 }
 
-bool Companion::connectClient()
-{
+bool Companion::connectClient() {
     return this->clientPtr_->connect();
 }
 
-bool Companion::disconnectClient()
-{
+bool Companion::disconnectClient() {
     return this->clientPtr_->disconnect();
 }
 
 bool Companion::sendMessage(
     bool isAntecedent, NetworkMessageType type,
-    std::string networkId, const Message* messagePtr)
-{
-    if(type == NetworkMessageType::NO_ACTION)
-    {
+    std::string networkId, const Message* messagePtr) {
+    if(type == NetworkMessageType::NO_ACTION) {
         return true;
     }
 
-    if(this->clientPtr_)
-    {
+    if(this->clientPtr_) {
         bool isConnected = this->clientPtr_->getIsConnected();
 
-        if(isConnected)
-        {
+        if(isConnected) {
             // build json
             std::string jsonData = buildMessageJSONString(
                 isAntecedent, type, this, networkId, messagePtr);
@@ -371,8 +325,7 @@ bool Companion::sendMessage(
             // send json over network
             auto result = this->clientPtr_->send(jsonData);
 
-            if(!result)
-            {
+            if(!result) {
                 logArgsError("client message sending error");
             }
 
@@ -384,22 +337,18 @@ bool Companion::sendMessage(
 }
 
 bool Companion::sendChatHistory(
-    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys) const
-{
-    if(this->clientPtr_)
-    {
+    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys) const {
+    if(this->clientPtr_) {
         bool isConnected = this->clientPtr_->getIsConnected();
 
-        if(isConnected)
-        {
+        if(isConnected) {
             // build json
             std::string jsonData = buildChatHistoryJSONString(dataPtr, keys);
 
             // send json over network
             auto result = this->clientPtr_->send(jsonData);
 
-            if(!result)
-            {
+            if(!result) {
                 logArgsError("client chat history sending error");
             }
 
@@ -410,13 +359,11 @@ bool Companion::sendChatHistory(
     return false;
 }
 
-bool Companion::sendFileRequest(FileMessageWidget* widgetPtr)
-{
+bool Companion::sendFileRequest(FileMessageWidget* widgetPtr) {
     const Message* messagePtr =
         this->getMappedMessagePtrByMessageWidgetPtr(true, widgetPtr);
 
-    if(!messagePtr)
-    {
+    if(!messagePtr) {
         return false;
     }
 
@@ -425,15 +372,13 @@ bool Companion::sendFileRequest(FileMessageWidget* widgetPtr)
     {
         std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-        try
-        {
+        try {
             statePtr = this->messageMapping_.at(*messagePtr).getStatePtr();
         }
         catch(std::out_of_range) {}
     }
 
-    if(!statePtr)
-    {
+    if(!statePtr) {
         return false;
     }
 
@@ -443,22 +388,19 @@ bool Companion::sendFileRequest(FileMessageWidget* widgetPtr)
     return result;
 }
 
-bool Companion::sendFileBlock(const std::string& networkId, const std::string& data)
-{
+bool Companion::sendFileBlock(const std::string& networkId, const std::string& data) {
     bool result = false;
 
     bool isConnected = this->clientPtr_->getIsConnected();
 
-    if(isConnected)
-    {
+    if(isConnected) {
         // build json
         std::string jsonData = buildFileBlockJSONString(this, networkId, data);
 
         // send json over network
         result = this->clientPtr_->send(jsonData);
 
-        if(!result)
-        {
+        if(!result) {
             logArgsError("client message sending error");
         }
     }
@@ -466,21 +408,18 @@ bool Companion::sendFileBlock(const std::string& networkId, const std::string& d
     return result;
 }
 
-void Companion::updateData(const CompanionData* dataPtr)
-{
+void Companion::updateData(const CompanionData* dataPtr) {
     this->name_ = dataPtr->getName();
     this->socketInfoPtr_->updateData(dataPtr);
 }
 
-Message* Companion::findMessage(uint32_t messageId)
-{
+Message* Companion::findMessage(uint32_t messageId) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto result = std::find_if(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
-        [&](auto iter)
-        {
+        [&](auto iter){
             return iter.first.getId() == messageId;
         });
 
@@ -488,45 +427,38 @@ Message* Companion::findMessage(uint32_t messageId)
                nullptr : const_cast<Message*>(&(result->first));
 }
 
-void Companion::addMessageWidgetsToChatHistory()
-{
+void Companion::addMessageWidgetsToChatHistory() {
     WidgetGroup* widgetGroupPtr =
         getManagerPtr()->getMappedWidgetGroupPtrByCompanionPtr(this);
 
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    for(auto& iterator : this->messageMapping_)
-    {
+    for(auto& iterator : this->messageMapping_) {
         widgetGroupPtr->addMessageWidgetToCentralPanelChatHistory(
             &(iterator.first), iterator.second.getStatePtr());
     }
 }
 
-void Companion::clearMessageMapping()
-{
+void Companion::clearMessageMapping() {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     this->messageMapping_.clear();
 }
 
-std::string Companion::generateNewNetworkId(bool lock)
-{
+std::string Companion::generateNewNetworkId(bool lock) {
     if(lock)
         std::lock_guard<std::mutex> lockObject(this->messagesMutex_);
 
     std::string networkId { "" };
 
-    if(networkId.size() == 0)
-    {
+    if(networkId.size() == 0) {
         networkId = getRandomString(5);
 
-        auto lambda = [&]()
-        {
+        auto lambda = [&](){
             auto iterator = std::find_if(
                 this->messageMapping_.begin(),
                 this->messageMapping_.end(),
-                [&](auto iter)
-                {
+                [&](auto iter){
                     return iter.second.getStatePtr()->getNetworkId() == networkId;
                 });
 
@@ -534,8 +466,7 @@ std::string Companion::generateNewNetworkId(bool lock)
         };
 
         // loop while generated key is not unique
-        while(lambda())
-        {
+        while(lambda()) {
             networkId = getRandomString(5);
         }
     }
