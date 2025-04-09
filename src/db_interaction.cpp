@@ -201,10 +201,10 @@ PGresult* getMessagesDBResult(
     const PGconn* dbConnection, const bool& logging, const uint8_t& companionId) {
     std::string command = std::format(
         "WITH select_id AS "
-        "(SELECT id FROM messages WHERE companion_id = {0} "
+        "(SELECT id FROM companion_messages WHERE companion_id = {0} "
         "ORDER BY timestamp_tz DESC LIMIT {1}) "
         "SELECT id, companion_id, author_id, timestamp_tz, message, is_sent, is_received "
-        "FROM messages WHERE id IN (SELECT id FROM select_id) "
+        "FROM companion_messages WHERE id IN (SELECT id FROM select_id) "
         "ORDER BY timestamp_tz ASC", companionId, numberOfMessagesToGetFromDB);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
@@ -214,7 +214,7 @@ PGresult* getAllMessagesByCompanionIdDBResult(
     const PGconn* dbConnection, const bool& logging, const int& companionId) {
     std::string command = std::format(
         "SELECT author_id, timestamp_tz, message "
-        "FROM messages WHERE companion_id = {} "
+        "FROM companion_messages WHERE companion_id = {} "
         "ORDER BY timestamp_tz ASC", companionId);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
@@ -225,10 +225,10 @@ PGresult* getEarlyMessagesByMessageIdDBResult(
     const int& companionId,const uint32_t& messageId) {
     std::string command = std::format(
         "WITH select_id AS "
-        "(SELECT id FROM messages WHERE companion_id = {0} AND id < {1} "
+        "(SELECT id FROM companion_messages WHERE companion_id = {0} AND id < {1} "
         "ORDER BY timestamp_tz DESC LIMIT {2}) "
         "SELECT id, companion_id, author_id, timestamp_tz, message, is_sent, is_received "
-        "FROM messages WHERE id IN (SELECT id FROM select_id) "
+        "FROM companion_messages WHERE id IN (SELECT id FROM select_id) "
         "ORDER BY timestamp_tz ASC", companionId, messageId, numberOfMessagesToGetFromDB);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
@@ -238,7 +238,7 @@ PGresult* getMessageByCompanionIdAndTimestampDBResult(
     const PGconn* dbConnection, const bool& logging,
     const uint8_t& companionId, const std::string& timestamp) {
     std::string command = std::format(
-        "SELECT id FROM messages WHERE companion_id = {0} AND timestamp_tz = '{1}'",
+        "SELECT id FROM companion_messages WHERE companion_id = {0} AND timestamp_tz = '{1}'",
         companionId, timestamp);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
@@ -248,7 +248,7 @@ PGresult* getUnsentMessagesByCompanionNameDBResult(
     const PGconn* dbConnection, const bool& logging, const std::string& companionName) {
     std::string command = std::format(
         "SELECT id, author_id, companion_id, timestamp_tz, message, is_received "
-        "FROM messages WHERE companion_id = (SELECT id FROM companions WHERE name = '{}') "
+        "FROM companion_messages WHERE companion_id = (SELECT id FROM companions WHERE name = '{}') "
         "AND author_id = (SELECT id FROM companions WHERE name = 'me') "
         "AND is_sent IS false", companionName);
 
@@ -362,7 +362,7 @@ PGresult* deleteMessagesFromDBAndReturn(
     const PGconn* dbConnection, const bool& logging,
     const CompanionAction& companionAction) {
     std::string command = std::format(
-        "DELETE FROM messages WHERE companion_id = {} RETURNING companion_id",
+        "DELETE FROM companion_messages WHERE companion_id = {} RETURNING companion_id",
         companionAction.getCompanionId());
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
