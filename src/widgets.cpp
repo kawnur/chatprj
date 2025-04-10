@@ -503,7 +503,7 @@ void WidgetGroup::set() {
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
     const Message* messagePtr, const MessageState* messageStatePtr) {
-    this->centralPanelPtr_-> addMessageWidgetToChatHistory(
+    this->centralPanelPtr_->addMessageWidgetToChatHistory(
         this, this->companionPtr_, messagePtr, messageStatePtr);
 }
 
@@ -549,8 +549,7 @@ void WidgetGroup::messageAdded() {
 
 void WidgetGroup::askUserForHistorySendingConfirmation() {
     CompanionAction* actionPtr = new CompanionAction(
-        CompanionActionType::SEND_HISTORY,
-        getGraphicManagerPtr()->getMainWindowPtr(),
+        ChatActionType::SEND_HISTORY,
         const_cast<Companion*>(this->companionPtr_));
 
     actionPtr->set();

@@ -307,7 +307,7 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
 
             auto json = buildJsonObject(jsonString);
 
-            for(size_t i = 0; i < json["messages"].size(); i++) {
+            for(std::size_t i = 0; i < json["messages"].size(); i++) {
                 uint8_t authorId = std::stoi(
                     json["messages"][i]["author_id"].get<std::string>());
 
@@ -512,7 +512,7 @@ void Manager::addEarlyMessages(const Companion* companionPtr) {
         WidgetGroup* widgetGroupPtr =
             this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
-        for(size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
+        for(std::size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
             logArgs("adding message with id", messagesDataPtr->getValue(i, "id"));
             auto pair = const_cast<Companion*>(companionPtr)->
                 createMessageAndAddToMapping(messagesDataPtr, i);
@@ -893,7 +893,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr) {
         return;
     }
 
-    for(size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
+    for(std::size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
         uint32_t messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
         Message* messagePtr = companionCastPtr->findMessage(messageId);
         std::string networkId;
@@ -1027,7 +1027,7 @@ void Manager::fillCompanionMessageMapping(
         return;
     }
 
-    for(size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
+    for(std::size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
         auto messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
 
         if(containersAlreadyHaveMessages) {
@@ -1087,7 +1087,7 @@ bool Manager::buildCompanions() {
     //     }
     // );
 
-    for(size_t index = 0; index < companionsDataPtr->size(); index++) {  // TODO switch to iterators
+    for(std::size_t index = 0; index < companionsDataPtr->size(); index++) {  // TODO switch to iterators
         int id = std::atoi(companionsDataPtr->getValue(index, "id"));
 
         // create companion object

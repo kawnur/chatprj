@@ -127,7 +127,7 @@ public:
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
     createMessageAndAddToMapping(
-        std::shared_ptr<DBReplyData>&, size_t);
+        std::shared_ptr<DBReplyData>&, std::size_t);
 
     void setSocketInfo(SocketInfo*);
     bool setFileOperatorFilePath(const std::string&, const std::filesystem::path&);

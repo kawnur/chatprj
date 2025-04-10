@@ -48,7 +48,7 @@ void LeftPanelWidget::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget) {
     this->companionPanelLayoutPtr_->addWidget(widget);
 }
 
-size_t LeftPanelWidget::getCompanionPanelChildrenSize() {
+std::size_t LeftPanelWidget::getCompanionPanelChildrenSize() {
     QList<SocketInfoBaseWidget*> companionPanelChildren =
         this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
             Qt::FindDirectChildrenOnly);

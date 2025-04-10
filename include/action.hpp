@@ -13,6 +13,7 @@
 class Dialog;
 class Companion;
 class CompanionData;
+class GroupChatData;
 class MainWindow;
 
 class Action : public QObject {
@@ -37,10 +38,10 @@ class CompanionAction : public Action {
     Q_OBJECT
 
 public:
-    CompanionAction(CompanionActionType, MainWindow*, Companion*);
+    CompanionAction(ChatActionType, Companion*);
     ~CompanionAction();
 
-    CompanionActionType getActionType() const;
+    ChatActionType getActionType() const;
     std::string getName() const;
     std::string getIpAddress() const;
     std::string getServerPort() const;
@@ -53,10 +54,25 @@ public slots:
     void sendData() override;
 
 private:
-    CompanionActionType actionType_;
+    ChatActionType actionType_;
     CompanionData* dataPtr_;
-    MainWindow* mainWindowPtr_;  // TODO do we need it here?
     Companion* companionPtr_;
+};
+
+class GroupChatAction : public Action {
+
+    Q_OBJECT
+
+public:
+    GroupChatAction(ChatActionType);
+    ~GroupChatAction();
+
+public slots:
+    void sendData() override;
+
+private:
+    ChatActionType actionType_;
+    GroupChatData* dataPtr_;
 };
 
 class PasswordAction : public Action {

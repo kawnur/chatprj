@@ -29,11 +29,11 @@ public:
 
     void clear();
     bool isEmpty();
-    void fill(size_t);
-    size_t count(size_t, std::string);
-    void push(size_t, std::string, const char*);
-    size_t size();
-    const char* getValue(size_t, std::string);
+    void fill(std::size_t);
+    std::size_t count(std::size_t, std::string);
+    void push(std::size_t, std::string, const char*);
+    std::size_t size();
+    const char* getValue(std::size_t, std::string);
     bool findValue(const std::string&, const std::string&);    
 
 private:

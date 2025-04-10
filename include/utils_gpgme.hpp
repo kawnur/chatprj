@@ -1,6 +1,7 @@
 #ifndef UTILS_GPGME_HPP
 #define UTILS_GPGME_HPP
 
+#include <sys/types.h>  // std::ssize_t
 #include <string.h>
 
 #include "utils_cout.hpp"
@@ -43,8 +44,8 @@ namespace TestGpgme {
     void getKeyByUser(gpgme_ctx_t*, gpgme_key_t*, const char*);
     void createDataObject(gpgme_data_t*);
     void printAsBytesTillNullTerminator(const char*);
-    void printAsBytes(const char*, size_t);
-    void printAsChars(const char*, size_t);
+    void printAsBytes(const char*, std::size_t);
+    void printAsChars(const char*, std::size_t);
     int getTerminatorPosition(const char*, ssize_t);
     void seekSetZero(gpgme_data_t&);
 
@@ -53,7 +54,7 @@ namespace TestGpgme {
         gpgme_data_t&, gpgme_data_t&);
 
     void decrypt(gpgme_ctx_t*, gpgme_data_t&, gpgme_data_t&);
-    ssize_t readData(gpgme_data_t&, char*, size_t);
+    ssize_t readData(gpgme_data_t&, char*, std::size_t);
     void readData1(gpgme_data_t&, std::string&);
     char* readData2(gpgme_data_t&);
 }

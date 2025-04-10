@@ -3,6 +3,10 @@
 
 #include <string>
 
+#include "companion.hpp"
+
+class Companion;
+
 class CompanionData {
 public:
     CompanionData(
@@ -21,6 +25,15 @@ private:
     std::string ipAddress_;
     std::string serverPort_;
     std::string clientPort_;
+};
+
+class GroupChatData {
+public:
+    GroupChatData();
+    ~GroupChatData() = default;
+
+private:
+    std::vector<Companion*> members_;
 };
 
 #endif // DATA_HPP

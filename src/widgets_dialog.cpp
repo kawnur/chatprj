@@ -1,13 +1,13 @@
 #include "widgets_dialog.hpp"
 
 CompanionDataDialog::CompanionDataDialog(
-    CompanionActionType actionType, QWidget* parentPtr, Companion* companionPtr) {
+    ChatActionType actionType, QWidget* parentPtr, Companion* companionPtr) {
     setParent(parentPtr);
 
     setWindowTitle(
         getConstantMappingValue(
-            "actionTypeStringRepresentation",
-            &actionTypeStringRepresentation,
+            "companionActionTypeStringRepresentation",
+            &companionActionTypeStringRepresentation,
             actionType));
 
     setModal(true);
@@ -27,7 +27,7 @@ CompanionDataDialog::CompanionDataDialog(
     portLabelPtr_ = new QLabel("Port");
     portEditPtr_ = new QLineEdit;
 
-    if(actionType_ == CompanionActionType::UPDATE && companionPtr) {
+    if(actionType_ == ChatActionType::UPDATE && companionPtr) {
         nameEditPtr_->setText(getQString(companionPtr->getName()));
 
         ipAddressEditPtr_->setText(
@@ -81,6 +81,31 @@ std::string CompanionDataDialog::getIpAddressString() {
 std::string CompanionDataDialog::getPortString() {
     return this->portEditPtr_->text().toStdString();
 }
+
+GroupChatDataDialog::GroupChatDataDialog(
+    ChatActionType actionType, QWidget* parentPtr) {
+
+    setParent(parentPtr);
+
+    setWindowTitle(
+        getConstantMappingValue(
+            "groupChatActionTypeStringRepresentation",
+            &groupChatActionTypeStringRepresentation,
+            actionType));
+
+    setModal(true);
+    setWindowFlag(Qt::Window);
+
+    actionType_ = actionType;
+
+
+
+
+}
+
+GroupChatDataDialog::~GroupChatDataDialog() {}
+
+void GroupChatDataDialog::set() {}
 
 CreatePasswordDialog::CreatePasswordDialog() {
     setWindowTitle(newPasswordDialogTitle);

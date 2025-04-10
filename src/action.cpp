@@ -29,38 +29,40 @@ Dialog* Action::getDialogPtr() {
 }
 
 CompanionAction::CompanionAction(
-    CompanionActionType actionType, MainWindow* mainWindowPtr, Companion* companionPtr) :
-    actionType_(actionType), mainWindowPtr_(mainWindowPtr), companionPtr_(companionPtr),
+    ChatActionType actionType, Companion* companionPtr) :
+    actionType_(actionType), companionPtr_(companionPtr),
     dataPtr_(nullptr), Action(nullptr) {
 
+    MainWindow* mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
+
     switch(actionType) {
-    case CompanionActionType::CREATE:
-    case CompanionActionType::UPDATE:
-        dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr_, companionPtr_);
+    case ChatActionType::CREATE:
+    case ChatActionType::UPDATE:
+        dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr, companionPtr_);
 
         break;
 
-    case CompanionActionType::DELETE:
+    case ChatActionType::DELETE:
         dialogPtr_ = new TextDialog(
-            mainWindowPtr_,
+            mainWindowPtr,
             DialogType::WARNING,
             deleteCompanionDialogText,
             getButtonInfoVectorPtr(deleteCompanionButtonText));
 
         break;
 
-    case CompanionActionType::CLEAR_HISTORY:
+    case ChatActionType::CLEAR_HISTORY:
         dialogPtr_ = new TextDialog(
-            mainWindowPtr_,
+            mainWindowPtr,
             DialogType::WARNING,
             clearCompanionHistoryDialogText,
             getButtonInfoVectorPtr(clearHistoryButtonText));
 
         break;
 
-    case CompanionActionType::SEND_HISTORY:
+    case ChatActionType::SEND_HISTORY:
         dialogPtr_ = new TextDialog(
-            mainWindowPtr_,
+            mainWindowPtr,
             DialogType::WARNING,
             // getArgumentedQString(
             //     sendChatHistoryToCompanionDialogText, companionPtr->getName()),
@@ -75,7 +77,7 @@ CompanionAction::~CompanionAction() {
     delete this->dataPtr_;
 }
 
-CompanionActionType CompanionAction::getActionType() const {
+ChatActionType CompanionAction::getActionType() const {
     return this->actionType_;
 }
 
@@ -109,7 +111,7 @@ void CompanionAction::updateCompanionObjectData() {
 
 // TODO deletion of action objects
 void CompanionAction::sendData() {
-    if(this->actionType_ == CompanionActionType::SEND_HISTORY) {
+    if(this->actionType_ == ChatActionType::SEND_HISTORY) {
         // TODO if client is disconnected show error dialog
         getManagerPtr()->sendChatHistoryToCompanion(this->companionPtr_);
         return;
@@ -121,8 +123,8 @@ void CompanionAction::sendData() {
     std::string clientPort;
 
     switch(this->actionType_) {
-    case CompanionActionType::CREATE:
-    case CompanionActionType::UPDATE: {
+    case ChatActionType::CREATE:
+    case ChatActionType::UPDATE: {
             CompanionDataDialog* dataDialogPtr =
                 dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
 
@@ -133,8 +135,8 @@ void CompanionAction::sendData() {
 
         break;
 
-    case CompanionActionType::DELETE:
-    case CompanionActionType::CLEAR_HISTORY: {
+    case ChatActionType::DELETE:
+    case ChatActionType::CLEAR_HISTORY: {
             name = this->companionPtr_->getName();
             ipAddress = this->companionPtr_->getSocketIpAddress();
             clientPort = std::to_string(this->companionPtr_->getSocketClientPort());
@@ -148,6 +150,27 @@ void CompanionAction::sendData() {
     this->dataPtr_ = new CompanionData(name, ipAddress, serverPort, clientPort);
 
     getGraphicManagerPtr()->sendCompanionDataToManager(this);
+}
+
+GroupChatAction::GroupChatAction(ChatActionType actionType)
+    : actionType_(actionType), dataPtr_(new GroupChatData), Action(nullptr) {
+
+    MainWindow* mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
+
+    switch(actionType) {
+    case ChatActionType::CREATE:
+        dialogPtr_ = new GroupChatDataDialog(actionType_, mainWindowPtr);
+
+        break;
+    }
+}
+
+GroupChatAction::~GroupChatAction() {
+    delete this->dataPtr_;
+}
+
+void GroupChatAction::sendData() {
+
 }
 
 PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr) {

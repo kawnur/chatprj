@@ -37,6 +37,7 @@ template<typename... Ts> void logArgsErrorWithTemplate(
 template<typename T, typename U>
 U getConstantMappingValue(
     const char* mapName, const std::map<T, U>* mapPtr, const T& key) {
+
     try {
         return mapPtr->at(key);
     }

@@ -35,7 +35,7 @@ public:
     ~LeftPanelWidget();
 
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
-    size_t getCompanionPanelChildrenSize();
+    std::size_t getCompanionPanelChildrenSize();
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
     int getLastCompanionPanelChildWidth();
 

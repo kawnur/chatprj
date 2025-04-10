@@ -265,7 +265,7 @@ std::string buildChatHistoryJSONString(
     jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
     jsonData["messages"] = {};
 
-    for(size_t i = 0; i < dataPtr->size(); i++) {  // TODO switch to iterators
+    for(std::size_t i = 0; i < dataPtr->size(); i++) {  // TODO switch to iterators
         for(auto& key : keys) {
             jsonData["messages"][i][key] = dataPtr->getValue(i, key);
         }
@@ -284,7 +284,7 @@ nlohmann::json buildJsonObject(const std::string& jsonString) {
 
 std::string getRandomString(uint8_t length) {
     std::string result(length, '_');
-    size_t baseSize = sizeof(alphanum);
+    std::size_t baseSize = sizeof(alphanum);
 
     for(int i = 0; i < length; i++) {
         result.at(i) = alphanum[rand() % (baseSize - 1)];
@@ -322,7 +322,7 @@ std::string hashFileMD5(const std::string& filename) {
     EVP_MD_CTX_init(md5Context);
     EVP_DigestInit_ex(md5Context, EVP_md5(), nullptr);
 
-    const size_t bufferSize = 4096;
+    const std::size_t bufferSize = 4096;
     char buffer[bufferSize];
 
     while (!file.eof()) {

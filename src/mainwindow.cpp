@@ -102,7 +102,7 @@ void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widgetPtr) {
     this->leftPanelPtr_->addWidgetToCompanionPanel(widgetPtr);
 }
 
-size_t MainWindow::getCompanionPanelChildrenSize() {
+std::size_t MainWindow::getCompanionPanelChildrenSize() {
     return this->leftPanelPtr_->getCompanionPanelChildrenSize();
 }
 
@@ -155,6 +155,10 @@ void MainWindow::createCompanion() {
     getGraphicManagerPtr()->createCompanion();
 }
 
+void MainWindow::createGroupChat() {
+    getGraphicManagerPtr()->createGroupChat();
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
 }
@@ -185,6 +189,14 @@ void MainWindow::createMenu() {
     connect(
         addCompanionAction, &QAction::triggered,
         this, &MainWindow::createCompanion, Qt::QueuedConnection);
+
+    QMenu* groupChatMenu = menuBar()->addMenu("Group chat");
+    QAction* addGroupChatAction = new QAction("Add new group chat", this);
+    groupChatMenu->addAction(addGroupChatAction);
+
+    connect(
+        addGroupChatAction, &QAction::triggered,
+        this, &MainWindow::createGroupChat, Qt::QueuedConnection);
 }
 
 void MainWindow::setBlurEffect() {

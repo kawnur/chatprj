@@ -48,7 +48,7 @@ bool SenderOperator::sendFilePart(Companion* companionPtr, const std::string& ne
     auto read = this->filebuf_.sgetn(buffer, maxBufferSize);
     sstream << std::hex << std::setfill('0');
 
-    for(size_t i = 0; i < read; i++) {
+    for(std::size_t i = 0; i < read; i++) {
         // double cast to get rid of precedence of ffffff for big values
         sstream << std::setw(2) << (int)(unsigned char)buffer[i];
     }
@@ -142,9 +142,9 @@ ReceiverOperator::ReceiverOperator(
 }
 
 void ReceiverOperator::receiveFilePart(const std::string& filePart) {
-    size_t byteSize = filePart.size() / 2;
+    std::size_t byteSize = filePart.size() / 2;
 
-    for(size_t i = 0; i < byteSize; i++) {
+    for(std::size_t i = 0; i < byteSize; i++) {
         std::string dataString(filePart.begin() + 2 * i, filePart.begin() + 2 * i + 2);
         uint8_t value = std::stoi(dataString, nullptr, 16);
         this->filebuf_.sputc(value);

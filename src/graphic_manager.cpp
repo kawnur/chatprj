@@ -41,7 +41,7 @@ void GraphicManager::addTextToAppLogWidget(const QString& text) {
     this->mainWindowPtr_->addTextToAppLogWidget(text);
 }
 
-size_t GraphicManager::getCompanionPanelChildrenSize() {
+std::size_t GraphicManager::getCompanionPanelChildrenSize() {
     return this->mainWindowPtr_->getCompanionPanelChildrenSize();
 }
 
@@ -79,21 +79,26 @@ void GraphicManager::createTextDialogAndShow(
 
 void GraphicManager::createCompanion() {
     CompanionAction* actionPtr = new CompanionAction(
-        CompanionActionType::CREATE, this->mainWindowPtr_, nullptr);
+        ChatActionType::CREATE, nullptr);
 
+    actionPtr->set();
+}
+
+void GraphicManager::createGroupChat() {
+    GroupChatAction* actionPtr = new GroupChatAction(ChatActionType::CREATE);
     actionPtr->set();
 }
 
 void GraphicManager::updateCompanion(Companion* companionPtr) {
     CompanionAction* actionPtr = new CompanionAction(
-        CompanionActionType::UPDATE, this->mainWindowPtr_, companionPtr);
+        ChatActionType::UPDATE, companionPtr);
 
     actionPtr->set();
 }
 
 void GraphicManager::clearCompanionHistory(Companion* companionPtr) {
     CompanionAction* actionPtr = new CompanionAction(
-        CompanionActionType::CLEAR_HISTORY, this->mainWindowPtr_, companionPtr);
+        ChatActionType::CLEAR_HISTORY, companionPtr);
 
     actionPtr->set();
 }
@@ -104,29 +109,29 @@ void GraphicManager::clearChatHistory(WidgetGroup* widgetGroupPtr) {
 
 void GraphicManager::deleteCompanion(Companion* companionPtr) {
     CompanionAction* actionPtr = new CompanionAction(
-        CompanionActionType::DELETE, this->mainWindowPtr_, companionPtr);
+        ChatActionType::DELETE, companionPtr);
 
     actionPtr->set();
 }
 
 void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr) {
     switch(actionPtr->getActionType()) {
-    case CompanionActionType::CREATE:
+    case ChatActionType::CREATE:
         getManagerPtr()->createCompanion(actionPtr);
 
         break;
 
-    case CompanionActionType::UPDATE:
+    case ChatActionType::UPDATE:
         getManagerPtr()->updateCompanion(actionPtr);
 
         break;
 
-    case CompanionActionType::DELETE:
+    case ChatActionType::DELETE:
         getManagerPtr()->deleteCompanion(actionPtr);
 
         break;
 
-    case CompanionActionType::CLEAR_HISTORY:
+    case ChatActionType::CLEAR_HISTORY:
         getManagerPtr()->clearCompanionHistory(actionPtr);
 
         break;

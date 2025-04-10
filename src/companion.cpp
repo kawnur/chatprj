@@ -215,7 +215,7 @@ Companion::createMessageAndAddToMapping(
 
 std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
 Companion::createMessageAndAddToMapping(
-    std::shared_ptr<DBReplyData>& messagesDataPtr, size_t index) {
+    std::shared_ptr<DBReplyData>& messagesDataPtr, std::size_t index) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto id = this->getId();

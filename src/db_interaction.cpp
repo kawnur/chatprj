@@ -53,27 +53,27 @@ bool DBReplyData::isEmpty() {
     return this->data_.empty();
 }
 
-void DBReplyData::fill(size_t count) {
-    size_t size = this->data_.size();
+void DBReplyData::fill(std::size_t count) {
+    std::size_t size = this->data_.size();
 
     for(int i = 0; i < count - size; i++) {
         this->data_.push_back(this->data_.at(0));
     }
 }
 
-size_t DBReplyData::count(size_t position, std::string key) {
+std::size_t DBReplyData::count(std::size_t position, std::string key) {
     return this->data_.at(position).count(key);
 }
 
-void DBReplyData::push(size_t position, std::string key, const char* value) {
+void DBReplyData::push(std::size_t position, std::string key, const char* value) {
     this->data_.at(position).at(key) = value;
 }
 
-size_t DBReplyData::size() {
+std::size_t DBReplyData::size() {
     return this->data_.size();
 }
 
-const char* DBReplyData::getValue(size_t position, std::string key) {
+const char* DBReplyData::getValue(std::size_t position, std::string key) {
     return this->data_.at(position).at(key);
 }
 

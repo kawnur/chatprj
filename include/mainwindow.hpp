@@ -41,7 +41,7 @@ public:
     void addTextToAppLogWidget(const QString&);
     void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, QWidget*);
     void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
-    size_t getCompanionPanelChildrenSize();
+    std::size_t getCompanionPanelChildrenSize();
     void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
     void hideLeftAndRightPanels();
     void showLeftAndRightPanels();
@@ -53,6 +53,7 @@ public:
 
 private slots:
     void createCompanion();
+    void createGroupChat();
 
 private:
     QPalette* menuBarPalettePtr_;

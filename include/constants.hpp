@@ -9,7 +9,7 @@
 const std::string logDelimiter { "############################" };
 const std::string logCustomDelimiter { "?????????????????????????" };
 
-const size_t maxBufferSize = 1024;
+const std::size_t maxBufferSize = 1024;
 
 const int numberOfMessagesToGetFromDB = 10;
 
@@ -52,7 +52,7 @@ enum class DialogType {
     ERROR
 };
 
-enum class CompanionActionType {
+enum class ChatActionType {
     CREATE,
     // READ,
     UPDATE,
@@ -77,9 +77,13 @@ enum class MainWindowContainerPosition {
     RIGHT
 };
 
-const std::map<CompanionActionType, QString> actionTypeStringRepresentation {
-    { CompanionActionType::CREATE, "Add new companion" },
-    { CompanionActionType::UPDATE, "Edit companion" }
+const std::map<ChatActionType, QString> companionActionTypeStringRepresentation {
+    { ChatActionType::CREATE, "Add new companion" },
+    { ChatActionType::UPDATE, "Edit companion" }
+};
+
+const std::map<ChatActionType, QString> groupChatActionTypeStringRepresentation {
+    { ChatActionType::CREATE, "Add new group chat" }
 };
 
 const std::map<DialogType, QString> dialogTypeStringRepresentation {

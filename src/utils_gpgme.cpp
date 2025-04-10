@@ -206,10 +206,10 @@ void printAsBytesTillNullTerminator(const char* value) {
     endline(1);
 }
 
-void printAsBytes(const char* value, size_t size) {
+void printAsBytes(const char* value, std::size_t size) {
     const char* p = value;
 
-    size_t i = 0;
+    std::size_t i = 0;
 
     while(i < size) {
         printf("%x ", *p);
@@ -219,10 +219,10 @@ void printAsBytes(const char* value, size_t size) {
     endline(1);
 }
 
-void printAsChars(const char* value, size_t size) {
+void printAsChars(const char* value, std::size_t size) {
     const char* p = value;
 
-    size_t i = 0;
+    std::size_t i = 0;
 
     while(i < size) {
         printf("%c ", *p);
@@ -306,7 +306,7 @@ void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& d
     }
 }
 
-ssize_t readData(gpgme_data_t& data, char* dataString, size_t size) {
+ssize_t readData(gpgme_data_t& data, char* dataString, std::size_t size) {
     seekSetZero(data);
 
     auto sizeRead = gpgme_data_read(data, dataString, size);
@@ -347,8 +347,8 @@ void readData1(gpgme_data_t& data, std::string& dataString) {
 char* readData2(gpgme_data_t& data) {
     seekSetZero(data);
 
-    size_t blockSize = 10;
-    size_t bufferSize = blockSize;
+    std::size_t blockSize = 10;
+    std::size_t bufferSize = blockSize;
     ssize_t sizeRead = blockSize;
     char* bufferHead = (char*)malloc(bufferSize);
     char* current = bufferHead;

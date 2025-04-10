@@ -80,7 +80,7 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& vector) {
 void printArray(std::array<int, 10>& array) {
     std::cout << "&a: " << &array << std::endl;
 
-    for(size_t i = 0; i < array.size(); i++) {
+    for(std::size_t i = 0; i < array.size(); i++) {
         std::cout << "&a[" << i << "]: " << &array[i] << '\t';
         std::cout << "a[" << i << "]: " << array[i] << std::endl;
     }

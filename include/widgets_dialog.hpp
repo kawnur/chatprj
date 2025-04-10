@@ -40,7 +40,7 @@ class CompanionDataDialog : public Dialog {
     Q_OBJECT
 
 public:
-    CompanionDataDialog(CompanionActionType, QWidget*, Companion*);
+    CompanionDataDialog(ChatActionType, QWidget*, Companion*);
     ~CompanionDataDialog();
 
     void set() override;
@@ -49,7 +49,7 @@ public:
     std::string getPortString();
 
 private:
-    CompanionActionType actionType_;
+    ChatActionType actionType_;
     QFormLayout* layoutPtr_;
     QLabel* nameLabelPtr_;
     QLineEdit* nameEditPtr_;
@@ -58,6 +58,20 @@ private:
     QLabel* portLabelPtr_;
     QLineEdit* portEditPtr_;
     QDialogButtonBox* buttonBoxPtr_;
+};
+
+class GroupChatDataDialog : public Dialog {
+
+    Q_OBJECT
+
+public:
+    GroupChatDataDialog(ChatActionType, QWidget*);
+    ~GroupChatDataDialog();
+
+    void set() override;
+
+private:
+    ChatActionType actionType_;
 };
 
 class CreatePasswordDialog : public Dialog {

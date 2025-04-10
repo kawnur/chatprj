@@ -33,7 +33,7 @@ public:
     void setStubWidgets();
     void sendMessage(MessageType, Companion*, const std::string&);
     void addTextToAppLogWidget(const QString&);
-    size_t getCompanionPanelChildrenSize();
+    std::size_t getCompanionPanelChildrenSize();
     void hideWidgetGroupCentralPanel(WidgetGroup*);
     void showWidgetGroupCentralPanel(WidgetGroup*);
 
@@ -47,6 +47,7 @@ public:
         QWidget*, DialogType, const std::string&, std::vector<ButtonInfo>*);
 
     void createCompanion();
+    void createGroupChat();
     void updateCompanion(Companion*);
     void clearCompanionHistory(Companion*);
     void clearChatHistory(WidgetGroup*);
