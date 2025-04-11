@@ -28,10 +28,11 @@ template<typename... Ts> void logArgs(Ts&&... args);
 void logDBReplyData(std::shared_ptr<DBReplyData>&);
 
 void showInfoDialogAndLogInfo(QString&&, QWidget* /*= nullptr*/);
-void showWarningDialogAndLogWarning(const QString&, QWidget* = nullptr);
+void showWarningDialogAndLogWarning(const QString&, QWidget* /*= nullptr*/);
 
-void showErrorDialogAndLogError(const QString&, QWidget* = nullptr);
+// void showErrorDialogAndLogError(const QString&, QWidget* /*= nullptr*/);
 // template<typename T> void showErrorDialogAndLogError(QWidget*, T&&);
+void showErrorDialogAndLogError(QString&&, QWidget* = nullptr);
 
 class Manager : public QObject { // TODO do we need inheritance?
 public:

@@ -48,7 +48,7 @@ U getConstantMappingValue(
         logArgsException(e.what());
     }
 
-    return U("");
+    return U();
 }
 
 template<typename F, typename... Ts>
@@ -84,10 +84,10 @@ std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
 
 void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), QWidget*);
 void showInfoDialogAndLogInfo(QString&&, QWidget* = nullptr);
-void showWarningDialogAndLogWarning(const QString&, QWidget*);
+void showWarningDialogAndLogWarning(const QString&, QWidget* = nullptr);
 
-void showErrorDialogAndLogError(const QString&, QWidget*);
-void showErrorDialogAndLogError(QString&&, QWidget*);
+// void showErrorDialogAndLogError(const QString&, QWidget* = nullptr);
+void showErrorDialogAndLogError(QString&&, QWidget* = nullptr);
 
 // template<typename T>
 // void showErrorDialogAndLogError(QWidget* parentPtr, T&& message) {

@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <map>
+#include <QDialogButtonBox>
 #include <QString>  // TODO delete
 #include <string>
 
@@ -109,6 +110,9 @@ const std::string deleteCompanionDialogText { "Companion will be deleted with ch
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 constexpr std::string_view sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
 const std::string socketInfoStubWidget { "No companion info from DB..." };
+
+// new group chat dialog
+const QString newGroupChatDialogLabel { "Choose companions to add to new group chat" };
 
 // new password dialog
 const QString newPasswordDialogTitle { "New password creation" };

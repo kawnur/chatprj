@@ -141,17 +141,17 @@ void showWarningDialogAndLogWarning(
     logArgsWarning(message);
 }
 
-void showErrorDialogAndLogError(
-    const QString& message, QWidget* parentPtr /*= nullptr*/) {
-    getGraphicManagerPtr()->createTextDialogAndShow(
-        parentPtr, DialogType::ERROR, message.toStdString(),
-        createOkButtonInfoVector(&QDialog::accept));
+// void showErrorDialogAndLogError(
+//     const QString& message, QWidget* parentPtr /*= nullptr*/) {
+//     getGraphicManagerPtr()->createTextDialogAndShow(
+//         parentPtr, DialogType::ERROR, message.toStdString(),
+//         createOkButtonInfoVector(&QDialog::accept));
 
-    logArgsError(message);
-}
+//     logArgsError(message);
+// }
 
 void showErrorDialogAndLogError(
-    QString&& message, QWidget* parentPtr = nullptr) {
+    QString&& message, QWidget* parentPtr /*= nullptr*/) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));

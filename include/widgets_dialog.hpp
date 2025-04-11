@@ -7,6 +7,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QPlainTextEdit>
 
 #include "constants.hpp"
@@ -72,6 +73,10 @@ public:
 
 private:
     ChatActionType actionType_;
+    QVBoxLayout* layoutPtr_;
+    QLabel* labelPtr_;
+    QListWidget* listPtr_;
+
 };
 
 class CreatePasswordDialog : public Dialog {

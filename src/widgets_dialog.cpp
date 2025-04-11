@@ -98,12 +98,25 @@ GroupChatDataDialog::GroupChatDataDialog(
 
     actionType_ = actionType;
 
+    layoutPtr_ = new QVBoxLayout;
+    setLayout(layoutPtr_);
+
+    labelPtr_ = new QLabel(newGroupChatDialogLabel);
+
+    listPtr_ = new QListWidget;
+    layoutPtr_->addWidget(listPtr_);
+
+
+
+
 
 
 
 }
 
-GroupChatDataDialog::~GroupChatDataDialog() {}
+GroupChatDataDialog::~GroupChatDataDialog() {
+    delete this->layoutPtr_;
+}
 
 void GroupChatDataDialog::set() {}
 
@@ -238,24 +251,25 @@ TextDialog::~TextDialog() {
 }
 
 void TextDialog::set() {
-    for(auto& info : *this->buttonsInfoPtr_) {
-        QPushButton* buttonPtr = this->buttonBoxPtr_->addButton(
-            info.buttonText_, info.buttonRole_);
+    // for(auto& info : *this->buttonsInfoPtr_) {
+    //     QPushButton* buttonPtr = this->buttonBoxPtr_->addButton(
+    //         info.buttonText_, info.buttonRole_);
 
-        if(info.buttonRole_ == QDialogButtonBox::AcceptRole) {
-            connect(
-                this->buttonBoxPtr_, &QDialogButtonBox::accepted,
-                this, info.functionPtr_, Qt::QueuedConnection);
-        }
-        else if(info.buttonRole_ == QDialogButtonBox::RejectRole) {
-            connect(
-                this->buttonBoxPtr_, &QDialogButtonBox::rejected,
-                this, info.functionPtr_, Qt::QueuedConnection);
-        }
-        else {
-            showErrorDialogAndLogError("Unmanaged button role");
-        }
-    }
+    //     // TODO create mapping and select signal by role
+    //     if(info.buttonRole_ == QDialogButtonBox::AcceptRole) {
+    //         connect(
+    //             this->buttonBoxPtr_, &QDialogButtonBox::accepted,
+    //             this, info.functionPtr_, Qt::QueuedConnection);
+    //     }
+    //     else if(info.buttonRole_ == QDialogButtonBox::RejectRole) {
+    //         connect(
+    //             this->buttonBoxPtr_, &QDialogButtonBox::rejected,
+    //             this, info.functionPtr_, Qt::QueuedConnection);
+    //     }
+    //     else {
+    //         showErrorDialogAndLogError("Unmanaged button role");
+    //     }
+    // }
 }
 
 void TextDialog::closeSelf() {
