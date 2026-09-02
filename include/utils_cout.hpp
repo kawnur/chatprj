@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
-#include <QString>
+// #include <QString>
 #include <map>
 #include <set>
 #include <type_traits>
@@ -61,18 +61,6 @@ void coutWithManipulators(T&& value) {
               << std::setfill(separator) << std::forward<T>(value);
 }
 
-template<typename T> void coutWithEndl(T&& value) {
-    std::cout << value << std::endl;
-}
-
-template<typename T> void coutWithTab(T&& value) {
-    std::cout << value << '\t';
-}
-
-template<typename T> void coutWithoutInterval(T&& value) {
-    std::cout << value;
-}
-
 template<typename T> std::string argForCout(T* const& value) {
     std::stringstream ss;
     ss << (void*)value;
@@ -83,9 +71,30 @@ template<typename T> std::string argForCout(const T& value) {
     return std::to_string(value);
 }
 
-std::string argForCout(const QString&);
+// std::string argForCout(const QString&);
 std::string argForCout(const std::string&);
 std::string argForCout(const char*);
+std::string argForCout(const bool);
+
+template<typename T> void coutWithEndl(T&& value)
+{
+    std::cout << argForCout(value) << std::endl;
+}
+
+template<typename T> void coutWithTab(T&& value)
+{
+    std::cout << argForCout(value) << '\t';
+}
+
+template<typename T> void coutWithSpace(T&& value)
+{
+    std::cout << argForCout(value) << ' ';
+}
+
+template<typename T> void coutWithoutInterval(T&& value)
+{
+    std::cout << argForCout(value);
+}
 
 template<typename... Ts> void coutArgsWithSeparator(char separator, Ts&&... args) {
     ((std::cout << argForCout(args) << separator), ...);
@@ -128,6 +137,8 @@ void printVector(T& vector, bool showSize = false, bool showCapacity = false) {
 template<typename T> void coutVectorState(T& vector) {
 	endline(1);
 	coutWithEndl("coutVectorState");
+
+    coutArgsWithSpaceSeparator("vector object address:", &vector);
 
 	int width = 20;
 	int width1 = 11;

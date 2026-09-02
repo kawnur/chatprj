@@ -10,9 +10,9 @@ template<> int getSizeAsInt<std::string>(std::string& string) {
     return (int)string.size();
 }
 
-std::string argForCout(const QString& value) {
-    return value.toStdString();
-}
+// std::string argForCout(const QString& value) {
+//     return value.toStdString();
+// }
 
 std::string argForCout(const std::string& value) {
     return value;
@@ -20,6 +20,11 @@ std::string argForCout(const std::string& value) {
 
 std::string argForCout(const char* value) {
     return (value) ? std::string(value) : std::string("0x0");
+}
+
+std::string argForCout(const bool value)
+{
+    return (value) ? "true" : "false";
 }
 
 void coutVector1(const std::vector<int>& vector) {
