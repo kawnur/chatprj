@@ -1,6 +1,8 @@
 #ifndef WIDGETS_DIALOG_HPP
 #define WIDGETS_DIALOG_HPP
 
+#include <memory>
+
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFileDialog>

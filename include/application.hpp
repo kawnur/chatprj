@@ -1,8 +1,10 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
-#include <QApplication>
+#include <memory>
 #include <queue>
+
+#include <QApplication>
 
 #include "chat_client.hpp"
 #include "chat_server.hpp"

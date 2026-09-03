@@ -4,9 +4,11 @@
 #include <format>
 #include <libpq-events.h>
 #include <libpq-fe.h>
+#include <memory>
 #include <mutex>
-#include <QString>
 #include <string>
+
+#include <QString>
 
 #include "action.hpp"
 #include "logging.hpp"

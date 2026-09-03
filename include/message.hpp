@@ -2,6 +2,7 @@
 #define MESSAGE_HPP
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 #include "utils.hpp"

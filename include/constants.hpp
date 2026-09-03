@@ -3,9 +3,10 @@
 
 #include <filesystem>
 #include <map>
+#include <string>
+
 #include <QDialogButtonBox>
 #include <QString>  // TODO delete
-#include <string>
 
 const std::string logDelimiter { "############################" };
 const std::string logCustomDelimiter { "?????????????????????????" };

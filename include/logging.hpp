@@ -2,10 +2,12 @@
 #define LOGGING_HPP
 
 #include <format>
-#include <QString>
-#include <QTime>
+#include <memory>
 #include <string>
 #include <type_traits>
+
+#include <QString>
+#include <QTime>
 
 #include "constants.hpp"
 #include "graphic_manager.hpp"

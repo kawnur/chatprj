@@ -1,10 +1,12 @@
 #ifndef GRAPHIC_MANAGER_HPP
 #define GRAPHIC_MANAGER_HPP
 
-#include <QString>
-#include <QWidget>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include <QString>
+#include <QWidget>
 
 #include "constants.hpp"
 #include "mainwindow.hpp"

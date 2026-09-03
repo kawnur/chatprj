@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include <memory>
+
 #include <QGraphicsBlurEffect>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>

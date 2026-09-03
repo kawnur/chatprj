@@ -2,6 +2,7 @@
 #define COMPANION_HPP
 
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <utility>

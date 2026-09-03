@@ -1,7 +1,9 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 
+#include <memory>
 #include <filesystem>
+
 #include <QObject>
 
 #include "data.hpp"

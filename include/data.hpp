@@ -1,6 +1,7 @@
 #ifndef DATA_HPP
 #define DATA_HPP
 
+#include <memory>
 #include <string>
 
 #include "companion.hpp"

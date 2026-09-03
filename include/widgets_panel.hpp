@@ -1,7 +1,9 @@
 #ifndef WIDGETS_PANEL_HPP
 #define WIDGETS_PANEL_HPP
 
+#include <memory>
 #include <mutex>
+
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPalette>

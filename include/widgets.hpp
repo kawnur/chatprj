@@ -2,6 +2,9 @@
 #define WIDGETS_HPP
 
 #include <chrono>
+#include <memory>
+#include <thread>
+
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFileDialog>
@@ -15,7 +18,6 @@
 #include <QSplitter>
 #include <QTextEdit>
 #include <QTimer>
-#include <thread>
 
 #include "constants.hpp"
 #include "mainwindow.hpp"
