@@ -1,6 +1,7 @@
 #ifndef UTILS_GPGME_HPP
 #define UTILS_GPGME_HPP
 
+#include <memory>
 #include <sys/types.h>  // std::ssize_t
 #include <string.h>
 

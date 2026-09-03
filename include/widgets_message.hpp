@@ -1,6 +1,8 @@
 #ifndef WIDGETS_MESSAGE_HPP
 #define WIDGETS_MESSAGE_HPP
 
+#include <memory>
+
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QPushButton>

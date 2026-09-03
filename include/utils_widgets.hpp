@@ -1,6 +1,8 @@
 #ifndef UTILS_WIDGETS_HPP
 #define UTILS_WIDGETS_HPP
 
+#include <memory>
+
 #include "constants.hpp"
 #include "utils.hpp"
 #include "widgets.hpp"
