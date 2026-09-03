@@ -124,7 +124,7 @@ void showInfoDialogAndLogInfo(
 }
 
 void showInfoDialogAndLogInfo(
-    QString&& message, QWidget* parentPtr /*= nullptr*/) {
+    QString&& message, QWidget* parentPtr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -133,7 +133,7 @@ void showInfoDialogAndLogInfo(
 }
 
 void showWarningDialogAndLogWarning(
-    const QString& message, QWidget* parentPtr /*= nullptr*/) {
+    const QString& message, QWidget* parentPtr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::WARNING, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -142,7 +142,7 @@ void showWarningDialogAndLogWarning(
 }
 
 // void showErrorDialogAndLogError(
-//     const QString& message, QWidget* parentPtr /*= nullptr*/) {
+//     const QString& message, QWidget* parentPtr) {
 //     getGraphicManagerPtr()->createTextDialogAndShow(
 //         parentPtr, DialogType::ERROR, message.toStdString(),
 //         createOkButtonInfoVector(&QDialog::accept));
@@ -151,7 +151,7 @@ void showWarningDialogAndLogWarning(
 // }
 
 void showErrorDialogAndLogError(
-    QString&& message, QWidget* parentPtr /*= nullptr*/) {
+    QString&& message, QWidget* parentPtr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));

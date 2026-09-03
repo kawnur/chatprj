@@ -24,7 +24,7 @@ class SocketInfoBaseWidget;
 class TextEditWidget;
 class WidgetGroup;
 
-void showErrorDialogAndLogError(QString&&, QWidget* /*= nullptr*/);
+void showErrorDialogAndLogError(QString&&, QWidget*);
 
 class LeftPanelWidget : public QWidget {
 

@@ -27,10 +27,10 @@ int getDataFromDBResult(
 template<typename... Ts> void logArgs(Ts&&... args);
 void logDBReplyData(std::shared_ptr<DBReplyData>&);
 
-void showInfoDialogAndLogInfo(QString&&, QWidget* /*= nullptr*/);
-void showWarningDialogAndLogWarning(const QString&, QWidget* /*= nullptr*/);
+void showInfoDialogAndLogInfo(QString&&, QWidget*);
+void showWarningDialogAndLogWarning(const QString&, QWidget*);
 
-// void showErrorDialogAndLogError(const QString&, QWidget* /*= nullptr*/);
+// void showErrorDialogAndLogError(const QString&, QWidget*);
 // template<typename T> void showErrorDialogAndLogError(QWidget*, T&&);
 void showErrorDialogAndLogError(QString&&, QWidget* = nullptr);
 
