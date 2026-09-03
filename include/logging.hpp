@@ -3,6 +3,7 @@
 
 #include <format>
 #include <memory>
+#include <optional>
 #include <string>
 #include <type_traits>
 
@@ -48,8 +49,14 @@ QString getQString(T&& value) {
     return QString::fromStdString(std::forward<T>(value));
 }
 
+template<typename T>
+QString getQString(const std::optional<T> &value)
+{
+    return (value) ? getQString(value.value()) : "EMPTY OPTIONAL";
+}
+
 QString getQString(const std::string&);
-QString getQString(std::shared_ptr<char>);
+QString getQString(const char *value);
 QString getQString(const bool&);
 QString getQString(std::nullptr_t);
 QString getQString(QString);

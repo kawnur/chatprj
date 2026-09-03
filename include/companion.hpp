@@ -60,7 +60,7 @@ private:
     uint16_t clientPort_;  // port number to connect with client to
 };
 
-class Companion : public std::enable_shared_from_this
+class Companion : public std::enable_shared_from_this<Companion>
 {
 public:
     Companion(int, const std::string&);
@@ -108,20 +108,20 @@ public:
     std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, std::shared_ptr<MessageWidget>);
     std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(bool, std::shared_ptr<MessageWidget>);
 
-    std::pair<const Message, MessageInfo>* getMessageMappingPairByMessageId(uint32_t);
+    // std::pair<const Message, MessageInfo>* getMessageMappingPairByMessageId(uint32_t);
 
-    std::pair<const Message, MessageInfo>* getMessageMappingPairByNetworkId(
-        const std::string&);
+    // std::pair<const Message, MessageInfo>* getMessageMappingPairByNetworkId(
+    //     const std::string&);
 
     std::shared_ptr<Message> getEarliestMessage() const;
 
-    std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-        createMessageAndAddToMapping(
-            MessageType, uint32_t, uint8_t, const std::string&, const std::string&,
-            bool, bool, bool, std::string);
+    // std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+    //     createMessageAndAddToMapping(
+    //         MessageType, uint32_t, uint8_t, const std::string&, const std::string&,
+    //         bool, bool, bool, std::string);
 
-    std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-        createMessageAndAddToMapping(std::shared_ptr<DBReplyData>, std::size_t);
+    // std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+    //     createMessageAndAddToMapping(std::shared_ptr<DBReplyData>, std::size_t);
 
     void setSocketInfo(std::shared_ptr<SocketInfo>);
     bool setFileOperatorFilePath(const std::string&, const std::filesystem::path&);

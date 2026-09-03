@@ -29,10 +29,7 @@ void logDBReplyData(std::shared_ptr<DBReplyData>);
 
 void showInfoDialogAndLogInfo(QString&&, std::shared_ptr<QWidget>);
 void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget>);
-
-// void showErrorDialogAndLogError(const QString&, std::shared_ptr<QWidget>);
-// template<typename T> void showErrorDialogAndLogError(std::shared_ptr<QWidget>, T&&);
-void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
+void showErrorDialogAndLogError(QString &&message);
 
 class Manager : public QObject { // TODO do we need inheritance?
 public:
@@ -116,8 +113,7 @@ private:
         }
 
         if(!dbResult) {
-            showErrorDialogAndLogError(
-                "Database request error, dbResult is nullptr");
+            showErrorDialogAndLogError("Database request error, dbResult is nullptr");
 
             return nullptr;
         }
@@ -127,6 +123,7 @@ private:
 
         if(getDataFromDBResult(logging, dbData, dbResult, 0) == -1) {
             showErrorDialogAndLogError("Error getting data from dbResult");
+
             return nullptr;
         }
 

@@ -18,7 +18,7 @@ class CompanionData;
 class GroupChatData;
 class MainWindow;
 
-class Action : public QObject {
+class Action : public QObject, public std::enable_shared_from_this<Action> {
 
     Q_OBJECT
 
@@ -90,7 +90,7 @@ public:
 
 private:
     PasswordActionType actionType_;
-    std::shared_ptr<std::string> password_;
+    std::string password_;
 };
 
 class FileAction : public Action {

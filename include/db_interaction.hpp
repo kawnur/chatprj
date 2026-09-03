@@ -6,6 +6,7 @@
 #include <libpq-fe.h>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #include <QString>
@@ -23,9 +24,9 @@ class DBReplyData {
 public:
     DBReplyData(int count, ...);
     DBReplyData(const std::vector<std::string>&);
-    ~DBReplyData();
+    ~DBReplyData() = default;
 
-    std::vector<std::map<std::string, std::shared_ptr<char>>>* getData();
+    // std::vector<std::map<std::string, std::shared_ptr<char>>>* getData();
     // std::vector<QString> buildDataQStringVector();
     std::vector<std::string> buildDataStringVector();
 
@@ -33,16 +34,17 @@ public:
     bool isEmpty();
     void fill(std::size_t);
     std::size_t count(std::size_t, std::string);
-    void push(std::size_t, std::string, std::shared_ptr<char>);
+    void push(std::size_t, std::string, const std::string &value);
     std::size_t size();
-    std::shared_ptr<char> getValue(std::size_t, std::string);
+    std::string getValue(std::size_t, std::string);
     bool findValue(const std::string&, const std::string&);    
 
 private:
-    std::vector<std::map<std::string, std::shared_ptr<char>>> data_;
+    std::vector<std::map<std::string, std::string>> data_;
 };
 
-std::shared_ptr<char> getValueFromEnvironmentVariable(std::shared_ptr<char>);
+std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
+const char * getPQArg(const std::optional<std::string> &value);
 std::shared_ptr<PGconn> getDBConnection();
 std::shared_ptr<PGresult> sendDBRequestAndReturnResult(std::shared_ptr<PGconn>, const bool&, std::shared_ptr<char>);
 

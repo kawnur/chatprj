@@ -150,8 +150,14 @@ void showWarningDialogAndLogWarning(
 //     logArgsError(message);
 // }
 
-void showErrorDialogAndLogError(
-    QString&& message, std::shared_ptr<QWidget> parent) {
+
+void showErrorDialogAndLogError(QString &&message)
+{
+    showErrorDialogAndLogError(std::forward<QString>(message), nullptr);
+}
+
+void showErrorDialogAndLogError(QString&& message, std::shared_ptr<QWidget> parent)
+{
     getGraphicManager()->createTextDialogAndShow(
         parent, DialogType::ERROR, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));

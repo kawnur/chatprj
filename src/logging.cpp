@@ -4,7 +4,8 @@ QString getQString(const std::string& value) {
     return QString::fromStdString(value);
 }
 
-QString getQString(std::shared_ptr<char> value) {
+QString getQString(const char *value)
+{
     return QString(value);
 }
 
@@ -39,8 +40,9 @@ void logSocketInfoData(std::shared_ptr<SocketInfo> object) {
         object->getClientPort());
 }
 
-void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column) {
-    std::shared_ptr<char> value = PQgetvalue(result, row, column);
+void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column)
+{
+    auto value = PQgetvalue(result, row, column);
     auto logMark = (value) ? std::string(value) : "nullptr";
 
     logArgsError("unknown field name:", logMark);

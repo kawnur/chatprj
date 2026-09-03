@@ -26,7 +26,7 @@ class SocketInfoBaseWidget;
 class TextEditWidget;
 class WidgetGroup;
 
-void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget>);
+// void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget>);
 
 class LeftPanelWidget : public QWidget {
 

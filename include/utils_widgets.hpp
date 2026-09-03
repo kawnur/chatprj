@@ -8,7 +8,7 @@
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
-void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
+// void showErrorDialogAndLogError(QString&& message, std::shared_ptr<QWidget> parent = nullptr);
 
 std::vector<ButtonInfo>* getButtonInfoVector(const QString&);
 

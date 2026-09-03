@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <type_traits>
 
 #include <nlohmann/json.hpp>
@@ -36,7 +37,8 @@ template<typename... Ts> void logArgsErrorWithTemplate(const std::format_string<
 
 template<typename T, typename U>
 U getConstantMappingValue(
-    std::shared_ptr<char> mapName, const std::map<T, U>* map, const T& key)
+    // std::shared_ptr<char> mapName, const std::map<T, U>* map, const T& key)
+    std::string mapName, const std::map<T, U>* map, const T& key)
 {
     try {
         return map->at(key);
@@ -85,11 +87,14 @@ std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
 // std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*)());
 
 void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), std::shared_ptr<QWidget>);
-void showInfoDialogAndLogInfo(QString&&, std::shared_ptr<QWidget> = nullptr);
-void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget> = nullptr);
+void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent = nullptr);
+void showWarningDialogAndLogWarning(const QString& message, std::shared_ptr<QWidget> parent = nullptr);
 
 // void showErrorDialogAndLogError(const QString&, std::shared_ptr<QWidget> = nullptr);
-void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
+// void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
+
+void showErrorDialogAndLogError(QString &&message);
+void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
 
 // template<typename T>
 // void showErrorDialogAndLogError(std::shared_ptr<QWidget> parent, T&& message) {

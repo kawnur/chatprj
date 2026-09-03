@@ -139,33 +139,33 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
         nullptr : result->second->getState();
 }
 
-std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairByMessageId(
-    uint32_t messageId) {
-    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+// std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairByMessageId(
+//     uint32_t messageId) {
+//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    auto result = std::find_if(
-        this->messageMapping_.begin(),
-        this->messageMapping_.end(),
-        [&](auto& iter){
-            return iter.first->getId() == messageId;
-        });
+//     auto result = std::find_if(
+//         this->messageMapping_.begin(),
+//         this->messageMapping_.end(),
+//         [&](auto& iter){
+//             return iter.first->getId() == messageId;
+//         });
 
-    return (result == this->messageMapping_.end()) ? nullptr : *result;
-}
+//     return (result == this->messageMapping_.end()) ? nullptr : *result;
+// }
 
-std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairByNetworkId(
-    const std::string& networkId) {
-    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+// std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairByNetworkId(
+//     const std::string& networkId) {
+//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    auto result = std::find_if(
-        this->messageMapping_.begin(),
-        this->messageMapping_.end(),
-        [&](auto& iter){
-            return iter.second->getState()->getNetworkId() == networkId;
-        });
+//     auto result = std::find_if(
+//         this->messageMapping_.begin(),
+//         this->messageMapping_.end(),
+//         [&](auto& iter){
+//             return iter.second->getState()->getNetworkId() == networkId;
+//         });
 
-    return (result == this->messageMapping_.end()) ? nullptr : *result;
-}
+//     return (result == this->messageMapping_.end()) ? nullptr : *result;
+// }
 
 std::shared_ptr<Message> Companion::getEarliestMessage() const {
     auto minPair = std::min_element(
@@ -178,60 +178,60 @@ std::shared_ptr<Message> Companion::getEarliestMessage() const {
     return minPair->first;
 }
 
-std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-Companion::createMessageAndAddToMapping(
-    MessageType type, uint32_t messageId, uint8_t authorId, const std::string& messageTime,
-    const std::string& messageText, bool isAntecedent, bool isSent, bool isReceived,
-    std::string networkId)
-{
-    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+// std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+// Companion::createMessageAndAddToMapping(
+//     MessageType type, uint32_t messageId, uint8_t authorId, const std::string& messageTime,
+//     const std::string& messageText, bool isAntecedent, bool isSent, bool isReceived,
+//     std::string networkId)
+// {
+//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    if(networkId.size() == 0)
-        networkId = this->generateNewNetworkId(false);
+//     if(networkId.size() == 0)
+//         networkId = this->generateNewNetworkId(false);
 
-    auto companionId = this->getId();
+//     auto companionId = this->getId();
 
-    auto messageState = std::make_shared<MessageState>(
-        companionId, isAntecedent, isSent, isReceived, networkId);
+//     auto messageState = std::make_shared<MessageState>(
+//         companionId, isAntecedent, isSent, isReceived, networkId);
 
-    auto message = std::make_shared<Message>(
-        type, messageId, companionId, authorId, messageTime, messageText);
+//     auto message = std::make_shared<Message>(
+//         type, messageId, companionId, authorId, messageTime, messageText);
 
-    auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
+//     auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
 
-    auto result = this->messageMapping_.emplace(std::make_pair(message, messageInfo));
+//     auto result = this->messageMapping_.emplace(std::make_pair(message, messageInfo));
 
-    return result;
-}
+//     return result;
+// }
 
-std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-Companion::createMessageAndAddToMapping(
-    std::shared_ptr<DBReplyData> messagesData, std::size_t index) {
-    std::lock_guard<std::mutex> lock(this->messagesMutex_);
+// std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
+// Companion::createMessageAndAddToMapping(
+//     std::shared_ptr<DBReplyData> messagesData, std::size_t index) {
+//     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
-    auto id = this->getId();
+//     auto id = this->getId();
 
-    auto messageState = std::make_shared<MessageState>(
-        id, false,
-        getBoolFromDBValue(messagesData->getValue(index, "is_sent")),
-        getBoolFromDBValue(messagesData->getValue(index, "is_received")),
-        this->generateNewNetworkId(false));
+//     auto messageState = std::make_shared<MessageState>(
+//         id, false,
+//         getBoolFromDBValue(messagesData->getValue(index, "is_sent")),
+//         getBoolFromDBValue(messagesData->getValue(index, "is_received")),
+//         this->generateNewNetworkId(false));
 
-    auto message = std::make_shared<Message>(
-        MessageType::TEXT,
-        std::atoi(messagesData->getValue(index, "id")),
-        id,
-        std::atoi(messagesData->getValue(index, "author_id")),
-        messagesData->getValue(index, "timestamp_tz"),
-        messagesData->getValue(index, "message")
-    );
+//     auto message = std::make_shared<Message>(
+//         MessageType::TEXT,
+//         std::atoi(messagesData->getValue(index, "id")),
+//         id,
+//         std::atoi(messagesData->getValue(index, "author_id")),
+//         messagesData->getValue(index, "timestamp_tz"),
+//         messagesData->getValue(index, "message")
+//     );
 
-    auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
+//     auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
 
-    auto result = this->messageMapping_.emplace(std::make_pair(message, messageInfo));
+//     auto result = this->messageMapping_.emplace(std::make_pair(message, messageInfo));
 
-    return result;
-}
+//     return result;
+// }
 
 void Companion::setSocketInfo(std::shared_ptr<SocketInfo> socketInfo) {
     socketInfo_ = socketInfo;
@@ -263,8 +263,8 @@ bool Companion::startServer() {
 
     auto startLambda = [this](bool &value)
     {
-        this->server_ = std::make_shared<ChatServer>(this, this->socketInfo_->getServerPort());
-        this->server_->run();
+        server_ = std::make_shared<ChatServer>(shared_from_this(), socketInfo_->getServerPort());
+        server_->run();
         value = true;
     };
 
@@ -299,8 +299,8 @@ bool Companion::disconnectClient() {
 }
 
 bool Companion::sendMessage(
-    bool isAntecedent, NetworkMessageType type,
-    std::string networkId, std::shared_ptr<Message> message)
+    bool isAntecedent, NetworkMessageType type, std::string networkId,
+    std::shared_ptr<Message> message)
 {
     if (type == NetworkMessageType::NO_ACTION)
         return true;
@@ -314,7 +314,8 @@ bool Companion::sendMessage(
         return false;
 
     // build json
-    auto jsonData = buildMessageJSONString(isAntecedent, type, this, networkId, message);
+    auto jsonData =
+        buildMessageJSONString(isAntecedent, type, shared_from_this(), networkId, message);
 
     // send json over network
     auto result = this->client_->send(jsonData);
@@ -350,7 +351,7 @@ bool Companion::sendChatHistory(
 
 bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widget)
 {
-    std::shared_ptr<Message> message = this->getMappedMessageByMessageWidget(true, widget);
+    auto message = this->getMappedMessageByMessageWidget(true, widget);
 
     if(!message)
         return false;
@@ -361,7 +362,7 @@ bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widget)
         std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
         try {
-            state = this->messageMapping_.at(*message).getState();
+            state = this->messageMapping_.at(message)->getState();
         }
         catch(std::out_of_range) {}
     }
@@ -383,7 +384,7 @@ bool Companion::sendFileBlock(const std::string& networkId, const std::string& d
         return false;
 
     // build json
-    std::string jsonData = buildFileBlockJSONString(this, networkId, data);
+    auto jsonData = buildFileBlockJSONString(shared_from_this(), networkId, data);
 
     // send json over network
     bool result = this->client_->send(jsonData);
@@ -416,7 +417,7 @@ std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
 
 void Companion::addMessageWidgetsToChatHistory()
 {
-    auto widgetGroup = getManager()->getMappedWidgetGroupByCompanion(this);
+    auto widgetGroup = getManager()->getMappedWidgetGroupByCompanion(shared_from_this());
 
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
@@ -433,12 +434,12 @@ void Companion::clearMessageMapping() {
 }
 
 std::string Companion::generateNewNetworkId(bool lock) {
-    if(lock)
+    if (lock)
         std::lock_guard<std::mutex> lockObject(this->messagesMutex_);
 
     std::string networkId { "" };
 
-    if(networkId.size() == 0) {
+    if (networkId.size() == 0) {  // TODO ???
         networkId = getRandomString(5);
 
         auto lambda = [&](){
@@ -446,7 +447,7 @@ std::string Companion::generateNewNetworkId(bool lock) {
                 this->messageMapping_.begin(),
                 this->messageMapping_.end(),
                 [&](auto iter){
-                    return iter.second.getState()->getNetworkId() == networkId;
+                    return iter.second->getState()->getNetworkId() == networkId;
                 });
 
             return !(iterator == this->messageMapping_.end());
