@@ -60,7 +60,7 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
 
 bool validateCompanionData(
     std::vector<std::string>& errors,
-    const CompanionAction* actionPtr) {
+    std::shared_ptr<CompanionAction> actionPtr) {
     bool nameValidationResult = validateCompanionName(errors, actionPtr->getName());
     bool ipAddressValidationResult = validateIpAddress(errors, actionPtr->getIpAddress());
     bool portValidationResult = validatePort(errors, actionPtr->getClientPort());
@@ -115,7 +115,7 @@ std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr
 
 void showInfoDialogAndLogInfo(
     const QString& message, void (TextDialog::*functionPtr)(),
-    QWidget* parentPtr = nullptr) {
+    std::shared_ptr<QWidget> parentPtr = nullptr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, message.toStdString(),
         createOkButtonInfoVector(functionPtr));
@@ -124,7 +124,7 @@ void showInfoDialogAndLogInfo(
 }
 
 void showInfoDialogAndLogInfo(
-    QString&& message, QWidget* parentPtr) {
+    QString&& message, std::shared_ptr<QWidget> parentPtr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::INFO, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -133,7 +133,7 @@ void showInfoDialogAndLogInfo(
 }
 
 void showWarningDialogAndLogWarning(
-    const QString& message, QWidget* parentPtr) {
+    const QString& message, std::shared_ptr<QWidget> parentPtr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::WARNING, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -142,7 +142,7 @@ void showWarningDialogAndLogWarning(
 }
 
 // void showErrorDialogAndLogError(
-//     const QString& message, QWidget* parentPtr) {
+//     const QString& message, std::shared_ptr<QWidget> parentPtr) {
 //     getGraphicManagerPtr()->createTextDialogAndShow(
 //         parentPtr, DialogType::ERROR, message.toStdString(),
 //         createOkButtonInfoVector(&QDialog::accept));
@@ -151,7 +151,7 @@ void showWarningDialogAndLogWarning(
 // }
 
 void showErrorDialogAndLogError(
-    QString&& message, QWidget* parentPtr) {
+    QString&& message, std::shared_ptr<QWidget> parentPtr) {
     getGraphicManagerPtr()->createTextDialogAndShow(
         parentPtr, DialogType::ERROR, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -165,7 +165,7 @@ std::string getFormattedMessageBodyString(
 }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    const Companion* companionPtr, const Message* messagePtr) {
+    std::shared_ptr<Companion> companionPtr, std::shared_ptr<Message> messagePtr) {
     auto companionName = companionPtr->getName();
     auto companionId = messagePtr->getCompanionId();
     auto authorId = messagePtr->getAuthorId();
@@ -197,8 +197,8 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 }
 
 std::string buildMessageJSONString(
-    bool isAntecedent, NetworkMessageType type, const Companion* companionPtr,
-    const std::string& networkId, const Message* messagePtr) {
+    bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companionPtr,
+    const std::string& networkId, std::shared_ptr<Message> messagePtr) {
     using json = nlohmann::json;
 
     json jsonData;
@@ -244,7 +244,7 @@ std::string buildMessageJSONString(
 }
 
 std::string buildFileBlockJSONString(
-    const Companion* companionPtr, const std::string& networkId, const std::string& data) {
+    std::shared_ptr<Companion> companionPtr, const std::string& networkId, const std::string& data) {
     using json = nlohmann::json;
 
     json jsonData;
@@ -297,7 +297,7 @@ void sleepForMilliseconds(uint32_t duration) {
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-bool getBoolFromDBValue(const char* valuePtr) {
+bool getBoolFromDBValue(std::shared_ptr<char> valuePtr) {
     if(*valuePtr == 't') {
         return true;
     }
@@ -318,7 +318,7 @@ std::string hashFileMD5(const std::string& filename) {
         throw std::runtime_error("Failed to open file: " + filename);
     }
 
-    EVP_MD_CTX* md5Context = EVP_MD_CTX_new();
+    EVP_MD_std::shared_ptr<CTX> md5Context = EVP_MD_CTX_new();
     EVP_MD_CTX_init(md5Context);
     EVP_DigestInit_ex(md5Context, EVP_md5(), nullptr);
 

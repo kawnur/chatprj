@@ -61,9 +61,9 @@ void coutWithManipulators(T&& value) {
               << std::setfill(separator) << std::forward<T>(value);
 }
 
-template<typename T> std::string argForCout(T* const& value) {
+template<typename T> std::string argForCout(std::shared_ptr<T> const& value) {
     std::stringstream ss;
-    ss << (void*)value;
+    ss << (std::shared_ptr<void>)value;
     return ss.str();
 }
 
@@ -73,7 +73,7 @@ template<typename T> std::string argForCout(const T& value) {
 
 // std::string argForCout(const QString&);
 std::string argForCout(const std::string&);
-std::string argForCout(const char*);
+std::string argForCout(std::shared_ptr<char>);
 std::string argForCout(const bool);
 
 template<typename T> void coutWithEndl(T&& value)

@@ -1,7 +1,7 @@
 #include "widgets_message.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
-    bool isMessageFromMe, const MessageState* messageStatePtr) {
+    bool isMessageFromMe, std::shared_ptr<MessageState> messageStatePtr) {
     isMessageFromMe_ = isMessageFromMe;
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -60,8 +60,8 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel() {
 }
 
 MessageWidget::MessageWidget(
-    QWidget* parentPtr, Companion* companionPtr,
-    const MessageState* messageStatePtr, const Message* messagePtr) {
+    std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr,
+    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) {
     companionPtr_ = companionPtr;
     messagePtr_ = messagePtr;
 
@@ -103,7 +103,7 @@ MessageWidget::~MessageWidget() {
     delete this->indicatorPanelPtr_;
 }
 
-void MessageWidget::setBase(const WidgetGroup* groupPtr) {
+void MessageWidget::setBase(std::shared_ptr<WidgetGroup> groupPtr) {
     this->addMembersToLayout();
 
     this->indicatorPanelPtr_->setParent(this);
@@ -123,14 +123,14 @@ void MessageWidget::setMessageWidgetAsReceived() {
     this->indicatorPanelPtr_->setReceivedIndicatorOn();
 }
 
-void MessageWidget::mousePressEvent(QMouseEvent* event) {
+void MessageWidget::mousePressEvent(std::shared_ptr<QMouseEvent> event) {
     this->indicatorPanelPtr_->unsetNewMessageLabel();
     emit this->widgetSelectedSignal(this);
 }
 
 TextMessageWidget::TextMessageWidget(
-    QWidget* parentPtr, Companion* companionPtr,
-    const MessageState* messageStatePtr, const Message* messagePtr) :
+    std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr,
+    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) :
     MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr) {
     if(parentPtr) {
         setParent(parentPtr);
@@ -146,8 +146,8 @@ void TextMessageWidget::addMembersToLayout() {
 }
 
 FileMessageWidget::FileMessageWidget(
-    QWidget* parentPtr, Companion* companionPtr,
-    const MessageState* messageStatePtr, const Message* messagePtr) :
+    std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr,
+    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) :
     MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr) {
     if(parentPtr) {
         setParent(parentPtr);
@@ -184,7 +184,7 @@ FileMessageWidget::~FileMessageWidget() {
     delete this->downloadButtonPtr_;
 }
 
-void FileMessageWidget::set(const WidgetGroup* groupPtr) {
+void FileMessageWidget::set(std::shared_ptr<WidgetGroup> groupPtr) {
     connect(
         this->downloadButtonPtr_, &QPushButton::clicked,
         this, &FileMessageWidget::saveFileSlot, Qt::QueuedConnection);

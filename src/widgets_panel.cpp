@@ -1,6 +1,6 @@
 #include "widgets_panel.hpp"
 
-LeftPanelWidget::LeftPanelWidget(QWidget* parent) {
+LeftPanelWidget::LeftPanelWidget(std::shared_ptr<QWidget> parent) {
     if(parent) {
         setParent(parent);
     }
@@ -44,21 +44,21 @@ LeftPanelWidget::~LeftPanelWidget() {
     delete this->spacerPtr_;
 }
 
-void LeftPanelWidget::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget) {
+void LeftPanelWidget::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget) {
     this->companionPanelLayoutPtr_->addWidget(widget);
 }
 
 std::size_t LeftPanelWidget::getCompanionPanelChildrenSize() {
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+    QList<std::shared_ptr<SocketInfoBaseWidget>> companionPanelChildren =
+        this->companionPanelPtr_->findChildren<std::shared_ptr<SocketInfoBaseWidget>>(
             Qt::FindDirectChildrenOnly);
 
     return companionPanelChildren.size();
 }
 
-void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr) {
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+void LeftPanelWidget::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widgetPtr) {
+    QList<std::shared_ptr<SocketInfoBaseWidget>> companionPanelChildren =
+        this->companionPanelPtr_->findChildren<std::shared_ptr<SocketInfoBaseWidget>>(
             Qt::FindDirectChildrenOnly);
 
     qsizetype index = companionPanelChildren.indexOf(widgetPtr);
@@ -71,7 +71,7 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widge
 
     }
     else if(index > 0) {
-        Manager* managerPtr = getManagerPtr();
+        std::shared_ptr<Manager> managerPtr = getManagerPtr();
         auto previousWidget = companionPanelChildren.at(index - 1);
 
         auto previousCompanionPtr =
@@ -83,8 +83,8 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widge
 }
 
 int LeftPanelWidget::getLastCompanionPanelChildWidth() {
-    QList<SocketInfoBaseWidget*> companionPanelChildren =
-        this->companionPanelPtr_->findChildren<SocketInfoBaseWidget*>(
+    QList<std::shared_ptr<SocketInfoBaseWidget>> companionPanelChildren =
+        this->companionPanelPtr_->findChildren<std::shared_ptr<SocketInfoBaseWidget>>(
             Qt::FindDirectChildrenOnly);
 
     if(companionPanelChildren.size() == 0) {
@@ -95,7 +95,7 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth() {
     }
 }
 
-CentralPanelWidget::CentralPanelWidget(QWidget* parent, const std::string& name) :
+CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string& name) :
     chatHistoryMutex_(std::mutex()) {
     chatHistoryScrollAreaPtr_ = nullptr;
     chatHistoryWidgetPalettePtr_ = nullptr;
@@ -182,7 +182,7 @@ CentralPanelWidget::~CentralPanelWidget() {
     // TODO delete message widgets
 }
 
-void CentralPanelWidget::set(Companion* companionPtr) {
+void CentralPanelWidget::set(std::shared_ptr<Companion> companionPtr) {
     this->companionPtr_ = companionPtr;
 
     connect(
@@ -197,12 +197,12 @@ void CentralPanelWidget::set(Companion* companionPtr) {
 }
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
-    const WidgetGroup* widgetGroupPtr, Companion* companionPtr,
-    const Message* messagePtr, const MessageState* messageStatePtr) {
+    std::shared_ptr<WidgetGroup> widgetGroupPtr, std::shared_ptr<Companion> companionPtr,
+    std::shared_ptr<Message> messagePtr, std::shared_ptr<MessageState> messageStatePtr) {
     {
         std::lock_guard<std::mutex> lock(this->chatHistoryMutex_);
 
-        MessageWidget* widgetPtr = nullptr;
+        std::shared_ptr<MessageWidget> widgetPtr = nullptr;
 
         switch(messagePtr->getType()) {
         case MessageType::TEXT:
@@ -237,7 +237,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
     // widget group action
     if(widgetGroupPtr) {
-        const_cast<WidgetGroup*>(widgetGroupPtr)->messageAdded();
+        const_cast<std::shared_ptr<WidgetGroup>>(widgetGroupPtr)->messageAdded();
     }
 
     this->scrollDownChatHistory();
@@ -257,7 +257,7 @@ void CentralPanelWidget::clearChatHistory() {
     auto children = this->chatHistoryWidgetPtr_->children();
 
     for(auto& child : children) {
-        MessageWidget* messageWidgetPtr = dynamic_cast<MessageWidget*>(child);
+        std::shared_ptr<MessageWidget> messageWidgetPtr = dynamic_cast<std::shared_ptr<MessageWidget>>(child);
 
         if(messageWidgetPtr) {
             messageWidgetPtr->hide();
@@ -273,9 +273,9 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock) {
     auto list = this->chatHistoryWidgetPtr_->children();
 
     auto lambda = [&](auto item) {
-        const Message* messagePtr =
+        std::shared_ptr<Message> messagePtr =
             companionPtr_->getMappedMessagePtrByMessageWidgetPtr(
-                false, dynamic_cast<MessageWidget*>(item));
+                false, dynamic_cast<std::shared_ptr<MessageWidget>>(item));
 
         return (messagePtr) ? messagePtr->getTime() : std::string("");
     };
@@ -296,9 +296,9 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock) {
     coutArgsWithSpaceSeparator("AFTER SORTING");
 
     for(auto& element : list) {
-        auto elementCast = dynamic_cast<MessageWidget*>(element);
+        auto elementCast = dynamic_cast<std::shared_ptr<MessageWidget>>(element);
 
-        const Message* messagePtr =
+        std::shared_ptr<Message> messagePtr =
             companionPtr_->getMappedMessagePtrByMessageWidgetPtr(false, elementCast);
 
         coutArgsWithSpaceSeparator("messagePtr:", messagePtr);
@@ -312,7 +312,7 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock) {
     }
 }
 
-bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr) {
+bool CentralPanelWidget::eventFilter(std::shared_ptr<QObject> objectPtr, std::shared_ptr<QEvent> eventPtr) {
     auto result = QWidget::eventFilter(objectPtr, eventPtr);
 
     if(objectPtr == this->chatHistoryScrollAreaPtr_) {
@@ -321,7 +321,7 @@ bool CentralPanelWidget::eventFilter(QObject* objectPtr, QEvent* eventPtr) {
 
         if(verticalScrollBarPtr &&
             verticalScrollBarPtr->value() == verticalScrollBarPtr->minimum()) {
-            QKeyEvent* eventCastPtr = dynamic_cast<QKeyEvent*>(eventPtr);
+            std::shared_ptr<QKeyEvent> eventCastPtr = dynamic_cast<std::shared_ptr<QKeyEvent>>(eventPtr);
 
             if(eventPtr->type() == QEvent::Wheel ||
                 (eventPtr->type() == QEvent::KeyPress &&
@@ -354,7 +354,7 @@ void CentralPanelWidget::saveFileSlot() {
     getGraphicManagerPtr()->sendFile(this->companionPtr_);
 }
 
-RightPanelWidget::RightPanelWidget(QWidget* parent) {
+RightPanelWidget::RightPanelWidget(std::shared_ptr<QWidget> parent) {
     if(parent) {
         setParent(parent);
     }
@@ -424,9 +424,9 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text) {
 }
 
 void RightPanelWidget::customMenuRequestedSlot(QPoint position) {
-    QMenu* menu = new QMenu(this);
+    std::shared_ptr<QMenu> menu = new QMenu(this);
 
-    QAction* clearLogAction = new QAction("Clear log", this);
+    std::shared_ptr<QAction> clearLogAction = new QAction("Clear log", this);
     menu->addAction(clearLogAction);
 
     connect(

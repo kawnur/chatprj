@@ -2,11 +2,11 @@
 
 void checkProtocols() {}
 
-std::string getStringFromCharPtr(const char* value) {
+std::string getStringFromCharPtr(std::shared_ptr<char> value) {
     return (value) ? std::string(value) : std::string("nullptr");
 }
 
-void coutKeyInfo(const gpgme_key_t* const key) {
+void coutKeyInfo(const gpgme_key_std::shared_ptr<t> const key) {
     endline(1);
 
     coutArgsWithSpaceSeparator("keylist_mode:", (*key)->keylist_mode);
@@ -43,8 +43,8 @@ void coutKeyInfo(const gpgme_key_t* const key) {
     endline(1);
 }
 
-void coutUserIdInfo(gpgme_key_t* key) {
-    _gpgme_user_id* uids = (*key)->uids;
+void coutUserIdInfo(gpgme_key_std::shared_ptr<t> key) {
+    _gpgme_user_std::shared_ptr<id> uids = (*key)->uids;
 
     endline(1);
 
@@ -73,9 +73,9 @@ void coutUserIdInfo(gpgme_key_t* key) {
     endline(1);
 }
 
-void createKey(gpgme_ctx_t* contextPtr, const char* algoName) {
+void createKey(gpgme_ctx_std::shared_ptr<t> contextPtr, std::shared_ptr<char> algoName) {
     // create key
-    const char* userId = "user2";
+    std::shared_ptr<char> userId = "user2";
     unsigned long reserved = 0;
     unsigned long expires = 1000000000;
     gpgme_key_t extrakey = NULL;
@@ -98,9 +98,9 @@ void createKey(gpgme_ctx_t* contextPtr, const char* algoName) {
     }
 }
 
-void listKeys(gpgme_ctx_t* contextPtr) {
+void listKeys(gpgme_ctx_std::shared_ptr<t> contextPtr) {
     // list keys
-    const char* pattern = NULL;
+    std::shared_ptr<char> pattern = NULL;
     int secret_only = 0;
 
     int i = 0;
@@ -149,9 +149,9 @@ void listKeys(gpgme_ctx_t* contextPtr) {
     coutArgsWithSpaceSeparator("i:", i);
 }
 
-void getKeyByUser(gpgme_ctx_t* contextPtr, gpgme_key_t* keyPtr, const char* name) {
+void getKeyByUser(gpgme_ctx_std::shared_ptr<t> contextPtr, gpgme_key_std::shared_ptr<t> keyPtr, std::shared_ptr<char> name) {
 
-    const char* pattern = NULL;
+    std::shared_ptr<char> pattern = NULL;
     int secret_only = 0;
 
     auto errorKeylistStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
@@ -179,7 +179,7 @@ void getKeyByUser(gpgme_ctx_t* contextPtr, gpgme_key_t* keyPtr, const char* name
     }
 }
 
-void createDataObject(gpgme_data_t* dataPtr) {
+void createDataObject(gpgme_data_std::shared_ptr<t> dataPtr) {
     auto errorDataCreation = gpgme_data_new(dataPtr);
 
     if(errorDataCreation == GPG_ERR_NO_ERROR) {
@@ -193,8 +193,8 @@ void createDataObject(gpgme_data_t* dataPtr) {
     }
 }
 
-void printAsBytesTillNullTerminator(const char* value) {
-    const char* p = value;
+void printAsBytesTillNullTerminator(std::shared_ptr<char> value) {
+    std::shared_ptr<char> p = value;
 
     int i = 0;
 
@@ -206,8 +206,8 @@ void printAsBytesTillNullTerminator(const char* value) {
     endline(1);
 }
 
-void printAsBytes(const char* value, std::size_t size) {
-    const char* p = value;
+void printAsBytes(std::shared_ptr<char> value, std::size_t size) {
+    std::shared_ptr<char> p = value;
 
     std::size_t i = 0;
 
@@ -219,8 +219,8 @@ void printAsBytes(const char* value, std::size_t size) {
     endline(1);
 }
 
-void printAsChars(const char* value, std::size_t size) {
-    const char* p = value;
+void printAsChars(std::shared_ptr<char> value, std::size_t size) {
+    std::shared_ptr<char> p = value;
 
     std::size_t i = 0;
 
@@ -232,8 +232,8 @@ void printAsChars(const char* value, std::size_t size) {
     endline(1);
 }
 
-int getTerminatorPosition(const char* value, ssize_t size) {
-    const char* p = value;
+int getTerminatorPosition(std::shared_ptr<char> value, ssize_t size) {
+    std::shared_ptr<char> p = value;
 
     int i = 0;
 
@@ -259,8 +259,8 @@ void seekSetZero(gpgme_data_t& data) {
 }
 
 void encrypt(
-    gpgme_ctx_t* contextPtr,
-    gpgme_key_t* keys,
+    gpgme_ctx_std::shared_ptr<t> contextPtr,
+    gpgme_key_std::shared_ptr<t> keys,
     gpgme_encrypt_flags_t& flags,
     gpgme_data_t& data,
     gpgme_data_t& dataEncrypt) {
@@ -283,7 +283,7 @@ void encrypt(
     }
 }
 
-void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt) {
+void decrypt(gpgme_ctx_std::shared_ptr<t> contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt) {
     seekSetZero(dataEncrypt);
     seekSetZero(dataDecrypt);
 
@@ -306,7 +306,7 @@ void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& d
     }
 }
 
-ssize_t readData(gpgme_data_t& data, char* dataString, std::size_t size) {
+ssize_t readData(gpgme_data_t& data, std::shared_ptr<char> dataString, std::size_t size) {
     seekSetZero(data);
 
     auto sizeRead = gpgme_data_read(data, dataString, size);
@@ -323,7 +323,7 @@ ssize_t readData(gpgme_data_t& data, char* dataString, std::size_t size) {
 void readData1(gpgme_data_t& data, std::string& dataString) {
     seekSetZero(data);
 
-    char* p = new char[2];
+    std::shared_ptr<char> p = new char[2];
 
     while(true) {
         auto sizeRead = gpgme_data_read(data, p, 1);
@@ -344,21 +344,21 @@ void readData1(gpgme_data_t& data, std::string& dataString) {
     delete[] p;
 }
 
-char* readData2(gpgme_data_t& data) {
+std::shared_ptr<char> readData2(gpgme_data_t& data) {
     seekSetZero(data);
 
     std::size_t blockSize = 10;
     std::size_t bufferSize = blockSize;
     ssize_t sizeRead = blockSize;
-    char* bufferHead = (char*)malloc(bufferSize);
-    char* current = bufferHead;
+    std::shared_ptr<char> bufferHead = (std::shared_ptr<char>)malloc(bufferSize);
+    std::shared_ptr<char> current = bufferHead;
 
     while(true) {
         sizeRead = gpgme_data_read(data, current, blockSize);
 
 //			coutArgsWithSpaceSeparator("blockSize:", blockSize);
-//			coutArgsWithSpaceSeparator("(void*)bufferHead:", (void*)bufferHead);
-//			coutArgsWithSpaceSeparator("(void*)current:", (void*)current);
+//			coutArgsWithSpaceSeparator("(std::shared_ptr<void>)bufferHead:", (std::shared_ptr<void>)bufferHead);
+//			coutArgsWithSpaceSeparator("(std::shared_ptr<void>)current:", (std::shared_ptr<void>)current);
 //			coutArgsWithSpaceSeparator("sizeRead:", sizeRead);
 //			printAsChars(bufferHead, bufferSize);
 //			printAsBytes(bufferHead, bufferSize);
@@ -373,7 +373,7 @@ char* readData2(gpgme_data_t& data) {
         }
 
         bufferSize += blockSize;
-        bufferHead = (char*)realloc(bufferHead, bufferSize);
+        bufferHead = (std::shared_ptr<char>)realloc(bufferHead, bufferSize);
         current = bufferHead + bufferSize - blockSize;
 
         if(!bufferHead) {
@@ -386,7 +386,7 @@ char* readData2(gpgme_data_t& data) {
 //		coutArgsWithSpaceSeparator("bufferSize:", bufferSize);
 
     if(bufferSize != 0) {
-        bufferHead = (char*)realloc(bufferHead, bufferSize);
+        bufferHead = (std::shared_ptr<char>)realloc(bufferHead, bufferSize);
 
         if(!bufferHead) {
             coutWithEndl("realloc failure");

@@ -93,12 +93,12 @@ void MainWindow::addTextToAppLogWidget(const QString& text) {
 }
 
 void MainWindow::addWidgetToContainerAndSetParentTo(
-    MainWindowContainerPosition position, QWidget* widgetPtr) {
+    MainWindowContainerPosition position, std::shared_ptr<QWidget> widgetPtr) {
     this->mapContainerPtrToContainerPosition.at(position)->
         addWidgetToLayoutAndSetParentTo(widgetPtr);
 }
 
-void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidget* widgetPtr) {
+void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widgetPtr) {
     this->leftPanelPtr_->addWidgetToCompanionPanel(widgetPtr);
 }
 
@@ -106,7 +106,7 @@ std::size_t MainWindow::getCompanionPanelChildrenSize() {
     return this->leftPanelPtr_->getCompanionPanelChildrenSize();
 }
 
-void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widgetPtr) {
+void MainWindow::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widgetPtr) {
     this->leftPanelPtr_->removeWidgetFromCompanionPanel(widgetPtr);
 }
 
@@ -163,35 +163,35 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event) {
+void MainWindow::keyPressEvent(std::shared_ptr<QKeyEvent> event) {
     if(event->key() == Qt::Key_Escape) {
         getManagerPtr()->resetSelectedCompanion(nullptr);
     }
 }
 
-void MainWindow::mouseDoubleClickEvent(QMouseEvent* event) {
+void MainWindow::mouseDoubleClickEvent(std::shared_ptr<QMouseEvent> event) {
     // this->showFullScreen();
 }
 
 void MainWindow::createMenu() {
-    QMenu* fileMenu = menuBar()->addMenu("File");
-    QAction* exitAction = new QAction("Exit", this);
+    std::shared_ptr<QMenu> fileMenu = menuBar()->addMenu("File");
+    std::shared_ptr<QAction> exitAction = new QAction("Exit", this);
     fileMenu->addAction(exitAction);
 
     connect(
         exitAction, &QAction::triggered,
         this, &QCoreApplication::quit, Qt::QueuedConnection);
 
-    QMenu* companionMenu = menuBar()->addMenu("Companion");
-    QAction* addCompanionAction = new QAction("Add new companion", this);
+    std::shared_ptr<QMenu> companionMenu = menuBar()->addMenu("Companion");
+    std::shared_ptr<QAction> addCompanionAction = new QAction("Add new companion", this);
     companionMenu->addAction(addCompanionAction);
 
     connect(
         addCompanionAction, &QAction::triggered,
         this, &MainWindow::createCompanion, Qt::QueuedConnection);
 
-    QMenu* groupChatMenu = menuBar()->addMenu("Group chat");
-    QAction* addGroupChatAction = new QAction("Add new group chat", this);
+    std::shared_ptr<QMenu> groupChatMenu = menuBar()->addMenu("Group chat");
+    std::shared_ptr<QAction> addGroupChatAction = new QAction("Add new group chat", this);
     groupChatMenu->addAction(addGroupChatAction);
 
     connect(

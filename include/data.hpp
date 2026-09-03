@@ -33,7 +33,7 @@ public:
     ~GroupChatData() = default;
 
 private:
-    std::vector<Companion*> members_;
+    std::vector<std::shared_ptr<Companion>> members_;
 };
 
 #endif // DATA_HPP

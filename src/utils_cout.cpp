@@ -18,7 +18,7 @@ std::string argForCout(const std::string& value) {
     return value;
 }
 
-std::string argForCout(const char* value) {
+std::string argForCout(std::shared_ptr<char> value) {
     return (value) ? std::string(value) : std::string("0x0");
 }
 

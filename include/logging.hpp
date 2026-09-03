@@ -19,7 +19,7 @@ class GraphicManager;
 class SocketInfo;
 class SocketInfoWidget;
 
-GraphicManager* getGraphicManagerPtr();
+std::shared_ptr<GraphicManager> getGraphicManagerPtr();
 
 template<typename T>
 concept IsArithmetic =
@@ -29,9 +29,9 @@ template<typename T>
 concept IsNotArithmetic =
     !std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 
-template<typename T> QString getQString(T* value) {
+template<typename T> QString getQString(std::shared_ptr<T> value) {
     std::stringstream ss;
-    ss << (void*)value;
+    ss << (std::shared_ptr<void>)value;
     return QString::fromStdString(ss.str());
 }
 
@@ -46,7 +46,7 @@ QString getQString(T&& value) {
 }
 
 QString getQString(const std::string&);
-QString getQString(const char*);
+QString getQString(std::shared_ptr<char>);
 QString getQString(const bool&);
 QString getQString(std::nullptr_t);
 QString getQString(QString);
@@ -116,9 +116,9 @@ template<typename... Ts> void logArgsWithCustomMark(Ts&&... args) {
     logArgs(logCustomDelimiter, args...);
 }
 
-void logSocketInfoData(const SocketInfo*);
-void logDBResultUnknownField(const PGresult*, int, int);
+void logSocketInfoData(std::shared_ptr<SocketInfo>);
+void logDBResultUnknownField(std::shared_ptr<PGresult>, int, int);
 void logDBReplyData(std::shared_ptr<DBReplyData>&);
-void logSocketInfoWidget(const SocketInfoWidget*);
+void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget>);
 
 #endif // LOGGING_HPP

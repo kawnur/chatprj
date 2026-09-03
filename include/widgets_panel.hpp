@@ -24,27 +24,27 @@ class SocketInfoBaseWidget;
 class TextEditWidget;
 class WidgetGroup;
 
-void showErrorDialogAndLogError(QString&&, QWidget*);
+void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget>);
 
 class LeftPanelWidget : public QWidget {
 
     Q_OBJECT
 
 public:
-    LeftPanelWidget(QWidget*);
+    LeftPanelWidget(std::shared_ptr<QWidget>);
     ~LeftPanelWidget();
 
-    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
+    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     int getLastCompanionPanelChildWidth();
 
 private:
-    QVBoxLayout* layoutPtr_;
-    QPalette* palettePtr_;
-    QWidget* companionPanelPtr_;
-    QVBoxLayout* companionPanelLayoutPtr_;
-    QSpacerItem* spacerPtr_;
+    std::shared_ptr<QVBoxLayout> layoutPtr_;
+    std::shared_ptr<QPalette> palettePtr_;
+    std::shared_ptr<QWidget> companionPanelPtr_;
+    std::shared_ptr<QVBoxLayout> companionPanelLayoutPtr_;
+    std::shared_ptr<QSpacerItem> spacerPtr_;
 };
 
 class CentralPanelWidget : public QWidget {
@@ -52,13 +52,13 @@ class CentralPanelWidget : public QWidget {
     Q_OBJECT
 
 public:
-    CentralPanelWidget(QWidget*, const std::string&);
+    CentralPanelWidget(std::shared_ptr<QWidget>, const std::string&);
     ~CentralPanelWidget();
 
-    void set(Companion*);
+    void set(std::shared_ptr<Companion>);
 
     void addMessageWidgetToChatHistory(
-        const WidgetGroup*, Companion*, const Message*, const MessageState*);
+        std::shared_ptr<WidgetGroup>, std::shared_ptr<Companion>, std::shared_ptr<Message>, std::shared_ptr<MessageState>);
 
     void scrollDownChatHistory();
     void clearChatHistory();
@@ -66,37 +66,37 @@ public:
 
 private:
     std::mutex chatHistoryMutex_;
-    Companion* companionPtr_;
-    QVBoxLayout* layoutPtr_;
+    std::shared_ptr<Companion> companionPtr_;
+    std::shared_ptr<QVBoxLayout> layoutPtr_;
 
-    //    QGraphicsScene* graphicsScene_;
-    //    QGraphicsView* graphicsView_;
-    //    QRectF* rect_;
-    //    QGraphicsSimpleTextItem* textItem_;
+    //    std::shared_ptr<QGraphicsScene> graphicsScene_;
+    //    std::shared_ptr<QGraphicsView> graphicsView_;
+    //    std::shared_ptr<QRectF> rect_;
+    //    std::shared_ptr<QGraphicsSimpleTextItem> textItem_;
     //    int linesCount_;
-    //    QFont* font_;
+    //    std::shared_ptr<QFont> font_;
 
-    QLabel* companionNameLabelPtr_;
-    QPalette* companionNameLabelPalettePtr_;
-    QPalette* chatHistoryWidgetPalettePtr_;
+    std::shared_ptr<QLabel> companionNameLabelPtr_;
+    std::shared_ptr<QPalette> companionNameLabelPalettePtr_;
+    std::shared_ptr<QPalette> chatHistoryWidgetPalettePtr_;
 
-    QScrollArea* chatHistoryScrollAreaPtr_;
-    // ScrollArea* chatHistoryScrollAreaPtr_;
+    std::shared_ptr<QScrollArea> chatHistoryScrollAreaPtr_;
+    // std::shared_ptr<ScrollArea> chatHistoryScrollAreaPtr_;
 
-    QWidget* chatHistoryWidgetPtr_;
-    QVBoxLayout* chatHistoryLayoutPtr_;
+    std::shared_ptr<QWidget> chatHistoryWidgetPtr_;
+    std::shared_ptr<QVBoxLayout> chatHistoryLayoutPtr_;
 
-    QWidget* buttonPanelWidgetPtr_;
-    QHBoxLayout* buttonPanelLayoutPtr_;
-    QPalette* buttonPanelPalettePtr_;
-    QPushButton* sendFileButtonPtr_;
+    std::shared_ptr<QWidget> buttonPanelWidgetPtr_;
+    std::shared_ptr<QHBoxLayout> buttonPanelLayoutPtr_;
+    std::shared_ptr<QPalette> buttonPanelPalettePtr_;
+    std::shared_ptr<QPushButton> sendFileButtonPtr_;
 
-    TextEditWidget* textEditPtr_;
-    QPalette* textEditPalettePtr_;
+    std::shared_ptr<TextEditWidget> textEditPtr_;
+    std::shared_ptr<QPalette> textEditPalettePtr_;
 
-    // QSplitter* splitterPtr_;
+    // std::shared_ptr<QSplitter> splitterPtr_;
 
-    bool eventFilter(QObject*, QEvent*) override;
+    bool eventFilter(std::shared_ptr<QObject>, std::shared_ptr<QEvent>) override;
 
 private slots:
     void sendMessage(const QString&);
@@ -109,7 +109,7 @@ class RightPanelWidget : public QWidget {
     Q_OBJECT
 
 public:
-    RightPanelWidget(QWidget*);
+    RightPanelWidget(std::shared_ptr<QWidget>);
     ~RightPanelWidget();
 
     void set();
@@ -122,9 +122,9 @@ signals:
     void addTextToAppLogWidgetSignal(const QString&);
 
 private:
-    QVBoxLayout* layoutPtr_;
-    QPlainTextEdit* appLogWidgetPtr_;
-    QPalette* appLogWidgetPalettePtr_;
+    std::shared_ptr<QVBoxLayout> layoutPtr_;
+    std::shared_ptr<QPlainTextEdit> appLogWidgetPtr_;
+    std::shared_ptr<QPalette> appLogWidgetPalettePtr_;
 
 private slots:
     void addTextToAppLogWidgetSlot(const QString&);

@@ -22,4 +22,4 @@ std::string CompanionData::getClientPort() const {
     return this->clientPort_;
 }
 
-GroupChatData::GroupChatData() : members_(std::vector<Companion*>()) {}
+GroupChatData::GroupChatData() : members_(std::vector<std::shared_ptr<Companion>>()) {}

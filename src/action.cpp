@@ -6,7 +6,7 @@ void Action::set() {
 
     // if(this->dialogPtr_->getContainsDialogPtr())
 
-    FileAction* actionCastPtr = dynamic_cast<FileAction*>(this);
+    std::shared_ptr<FileAction> actionCastPtr = dynamic_cast<std::shared_ptr<FileAction>>(this);
 
     if(actionCastPtr) {
         if(actionCastPtr->getType() == FileActionType::SEND) {
@@ -24,16 +24,16 @@ void Action::set() {
     }
 }
 
-Dialog* Action::getDialogPtr() {
+std::shared_ptr<Dialog> Action::getDialogPtr() {
     return this->dialogPtr_;
 }
 
 CompanionAction::CompanionAction(
-    ChatActionType actionType, Companion* companionPtr) :
+    ChatActionType actionType, std::shared_ptr<Companion> companionPtr) :
     actionType_(actionType), companionPtr_(companionPtr),
     dataPtr_(nullptr), Action(nullptr) {
 
-    MainWindow* mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
+    std::shared_ptr<MainWindow> mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
 
     switch(actionType) {
     case ChatActionType::CREATE:
@@ -101,7 +101,7 @@ int CompanionAction::getCompanionId() const {
     return this->companionPtr_->getId();
 }
 
-Companion* CompanionAction::getCompanionPtr() const {
+std::shared_ptr<Companion> CompanionAction::getCompanionPtr() const {
     return this->companionPtr_;
 }
 
@@ -125,8 +125,8 @@ void CompanionAction::sendData() {
     switch(this->actionType_) {
     case ChatActionType::CREATE:
     case ChatActionType::UPDATE: {
-            CompanionDataDialog* dataDialogPtr =
-                dynamic_cast<CompanionDataDialog*>(this->dialogPtr_);
+            std::shared_ptr<CompanionDataDialog> dataDialogPtr =
+                dynamic_cast<std::shared_ptr<CompanionDataDialog>>(this->dialogPtr_);
 
             name = dataDialogPtr->getNameString();
             ipAddress = dataDialogPtr->getIpAddressString();
@@ -155,7 +155,7 @@ void CompanionAction::sendData() {
 GroupChatAction::GroupChatAction(ChatActionType actionType)
     : actionType_(actionType), dataPtr_(new GroupChatData), Action(nullptr) {
 
-    MainWindow* mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
+    std::shared_ptr<MainWindow> mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
 
     switch(actionType) {
     case ChatActionType::CREATE:
@@ -202,8 +202,8 @@ std::string PasswordAction::getPassword() {
 void PasswordAction::sendData() {
     switch(this->actionType_) {
     case PasswordActionType::CREATE: {
-            CreatePasswordDialog* passwordDialogPtr =
-                dynamic_cast<CreatePasswordDialog*>(this->dialogPtr_);
+            std::shared_ptr<CreatePasswordDialog> passwordDialogPtr =
+                dynamic_cast<std::shared_ptr<CreatePasswordDialog>>(this->dialogPtr_);
 
             auto text1 = passwordDialogPtr->getFirstEditText();
             auto text2 = passwordDialogPtr->getSecondEditText();
@@ -228,8 +228,8 @@ void PasswordAction::sendData() {
         break;
 
     case PasswordActionType::GET: {
-            GetPasswordDialog* passwordDialogPtr =
-                dynamic_cast<GetPasswordDialog*>(this->dialogPtr_);
+            std::shared_ptr<GetPasswordDialog> passwordDialogPtr =
+                dynamic_cast<std::shared_ptr<GetPasswordDialog>>(this->dialogPtr_);
 
             auto text = passwordDialogPtr->getEditText();
 
@@ -249,7 +249,7 @@ void PasswordAction::sendData() {
 }
 
 FileAction::FileAction(
-    FileActionType actionType, const std::string& networkId, Companion* companionPtr) :
+    FileActionType actionType, const std::string& networkId, std::shared_ptr<Companion> companionPtr) :
     Action(nullptr) {
     actionType_ = actionType;
     companionPtr_ = companionPtr;
@@ -267,7 +267,7 @@ FileActionType FileAction::getType() const {
     return this->actionType_;
 }
 
-Companion* FileAction::getCompanionPtr() const {
+std::shared_ptr<Companion> FileAction::getCompanionPtr() const {
     return this->companionPtr_;
 }
 
@@ -278,7 +278,7 @@ std::filesystem::path FileAction::getPath() const {
 void FileAction::sendData() {
     logArgs("FileAction::sendData");
 
-    auto dialogPtr = dynamic_cast<FileDialog*>(this->dialogPtr_)->getFileDialogPtr();
+    auto dialogPtr = dynamic_cast<std::shared_ptr<FileDialog>>(this->dialogPtr_)->getFileDialogPtr();
 
     switch(this->actionType_) {
     case FileActionType::SEND: {

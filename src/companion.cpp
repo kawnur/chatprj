@@ -28,7 +28,7 @@ uint16_t SocketInfo::getClientPort() const {
     return this->clientPort_;
 }
 
-void SocketInfo::updateData(const CompanionData* dataPtr) {
+void SocketInfo::updateData(std::shared_ptr<CompanionData> dataPtr) {
     this->ipAddress_ = dataPtr->getIpAddress();
     this->clientPort_ = std::stoi(dataPtr->getClientPort());
 }
@@ -54,7 +54,7 @@ std::string Companion::getName() const {
     return this->name_;
 }
 
-SocketInfo* Companion::getSocketInfoPtr() const {
+std::shared_ptr<SocketInfo> Companion::getSocketInfoPtr() const {
     return this->socketInfoPtr_;
 }
 
@@ -70,7 +70,7 @@ uint16_t Companion::getSocketClientPort() const {
     return this->socketInfoPtr_->getClientPort();
 }
 
-FileOperatorStorage* Companion::getFileOperatorStoragePtr() const {
+std::shared_ptr<FileOperatorStorage> Companion::getFileOperatorStoragePtr() const {
     return this->fileOperatorStoragePtr_;
 }
 
@@ -84,8 +84,8 @@ bool Companion::removeOperatorFromStorage(const std::string& key) {
     return this->fileOperatorStoragePtr_->removeOperator(key);
 }
 
-const MessageState* Companion::getMappedMessageStatePtrByMessagePtr(
-    const Message* messagePtr) {
+std::shared_ptr<MessageState> Companion::getMappedMessageStatePtrByMessagePtr(
+    std::shared_ptr<Message> messagePtr) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     // TODO switch to map find method
@@ -100,7 +100,7 @@ const MessageState* Companion::getMappedMessageStatePtrByMessagePtr(
     return (result == this->messageMapping_.end()) ? nullptr : result->second.getStatePtr();
 }
 
-MessageWidget* Companion::getMappedMessageWidgetPtrByMessagePtr(const Message* messagePtr) {
+std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetPtrByMessagePtr(std::shared_ptr<Message> messagePtr) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     // TODO switch to map find method
@@ -115,8 +115,8 @@ MessageWidget* Companion::getMappedMessageWidgetPtrByMessagePtr(const Message* m
     return (result == this->messageMapping_.end()) ? nullptr : result->second.getWidgetPtr();
 }
 
-const Message* Companion::getMappedMessagePtrByMessageWidgetPtr(
-    bool lock, MessageWidget* widgetPtr) {
+std::shared_ptr<Message> Companion::getMappedMessagePtrByMessageWidgetPtr(
+    bool lock, std::shared_ptr<MessageWidget> widgetPtr) {
     if(lock)
         std::lock_guard<std::mutex> lockObject(this->messagesMutex_);
 
@@ -132,8 +132,8 @@ const Message* Companion::getMappedMessagePtrByMessageWidgetPtr(
     return (result == this->messageMapping_.end()) ? nullptr : &(result->first);
 }
 
-MessageState* Companion::getMappedMessageStatePtrByMessageWidgetPtr(
-    bool lock, MessageWidget* widgetPtr) {
+std::shared_ptr<MessageState> Companion::getMappedMessageStatePtrByMessageWidgetPtr(
+    bool lock, std::shared_ptr<MessageWidget> widgetPtr) {
     if(lock)
         std::lock_guard<std::mutex> lockObject(this->messagesMutex_);
 
@@ -178,7 +178,7 @@ std::pair<const Message, MessageInfo>* Companion::getMessageMappingPairPtrByNetw
     return (result == this->messageMapping_.end()) ? nullptr : &(*result);
 }
 
-const Message* Companion::getEarliestMessagePtr() const {
+std::shared_ptr<Message> Companion::getEarliestMessagePtr() const {
     auto minPair = std::min_element(
         this->messageMapping_.begin(),
         this->messageMapping_.end(),
@@ -202,7 +202,7 @@ Companion::createMessageAndAddToMapping(
 
     auto companionId = this->getId();
 
-    MessageState* messageStatePtr = new MessageState(
+    std::shared_ptr<MessageState> messageStatePtr = new MessageState(
         companionId, isAntecedent, isSent, isReceived, networkId);
 
     auto result = this->messageMapping_.emplace(
@@ -220,7 +220,7 @@ Companion::createMessageAndAddToMapping(
 
     auto id = this->getId();
 
-    MessageState* messageStatePtr = new MessageState(
+    std::shared_ptr<MessageState> messageStatePtr = new MessageState(
         id, false,
         getBoolFromDBValue(messagesDataPtr->getValue(index, "is_sent")),
         getBoolFromDBValue(messagesDataPtr->getValue(index, "is_received")),
@@ -243,7 +243,7 @@ Companion::createMessageAndAddToMapping(
     return result;
 }
 
-void Companion::setSocketInfo(SocketInfo* socketInfo) {
+void Companion::setSocketInfo(std::shared_ptr<SocketInfo> socketInfo) {
     socketInfoPtr_ = socketInfo;
 }
 
@@ -254,7 +254,7 @@ bool Companion::setFileOperatorFilePath(
 }
 
 void Companion::setMappedMessageWidget(
-    const Message* messagePtr, MessageWidget* widgetPtr) {
+    std::shared_ptr<Message> messagePtr, std::shared_ptr<MessageWidget> widgetPtr) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto result = this->messageMapping_.find(*messagePtr);
@@ -309,7 +309,7 @@ bool Companion::disconnectClient() {
 
 bool Companion::sendMessage(
     bool isAntecedent, NetworkMessageType type,
-    std::string networkId, const Message* messagePtr) {
+    std::string networkId, std::shared_ptr<Message> messagePtr) {
     if(type == NetworkMessageType::NO_ACTION) {
         return true;
     }
@@ -359,15 +359,15 @@ bool Companion::sendChatHistory(
     return false;
 }
 
-bool Companion::sendFileRequest(FileMessageWidget* widgetPtr) {
-    const Message* messagePtr =
+bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widgetPtr) {
+    std::shared_ptr<Message> messagePtr =
         this->getMappedMessagePtrByMessageWidgetPtr(true, widgetPtr);
 
     if(!messagePtr) {
         return false;
     }
 
-    MessageState* statePtr = nullptr;
+    std::shared_ptr<MessageState> statePtr = nullptr;
 
     {
         std::lock_guard<std::mutex> lock(this->messagesMutex_);
@@ -408,12 +408,12 @@ bool Companion::sendFileBlock(const std::string& networkId, const std::string& d
     return result;
 }
 
-void Companion::updateData(const CompanionData* dataPtr) {
+void Companion::updateData(std::shared_ptr<CompanionData> dataPtr) {
     this->name_ = dataPtr->getName();
     this->socketInfoPtr_->updateData(dataPtr);
 }
 
-Message* Companion::findMessage(uint32_t messageId) {
+std::shared_ptr<Message> Companion::findMessage(uint32_t messageId) {
     std::lock_guard<std::mutex> lock(this->messagesMutex_);
 
     auto result = std::find_if(
@@ -424,11 +424,11 @@ Message* Companion::findMessage(uint32_t messageId) {
         });
 
     return (result == this->messageMapping_.end()) ?
-               nullptr : const_cast<Message*>(&(result->first));
+               nullptr : const_cast<std::shared_ptr<Message>>(&(result->first));
 }
 
 void Companion::addMessageWidgetsToChatHistory() {
-    WidgetGroup* widgetGroupPtr =
+    std::shared_ptr<WidgetGroup> widgetGroupPtr =
         getManagerPtr()->getMappedWidgetGroupPtrByCompanionPtr(this);
 
     std::lock_guard<std::mutex> lock(this->messagesMutex_);

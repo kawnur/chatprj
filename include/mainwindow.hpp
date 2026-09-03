@@ -39,10 +39,10 @@ public:
 
     void set();
     void addTextToAppLogWidget(const QString&);
-    void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, QWidget*);
-    void addWidgetToCompanionPanel(SocketInfoBaseWidget*);
+    void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, std::shared_ptr<QWidget>);
+    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidget*);
+    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     void hideLeftAndRightPanels();
     void showLeftAndRightPanels();
     int getLeftPanelWidgetWidth();
@@ -56,33 +56,33 @@ private slots:
     void createGroupChat();
 
 private:
-    QPalette* menuBarPalettePtr_;
-    QWidget* centralWidgetPtr_;
-    QHBoxLayout* centralWidgetLayoutPtr_;
-    QSplitter* splitterPtr_;
+    std::shared_ptr<QPalette> menuBarPalettePtr_;
+    std::shared_ptr<QWidget> centralWidgetPtr_;
+    std::shared_ptr<QHBoxLayout> centralWidgetLayoutPtr_;
+    std::shared_ptr<QSplitter> splitterPtr_;
 
     // left panel
-    MainWindowContainerWidget* leftContainerWidgetPtr_;
-    LeftPanelWidget* leftPanelPtr_;
+    std::shared_ptr<MainWindowContainerWidget> leftContainerWidgetPtr_;
+    std::shared_ptr<LeftPanelWidget> leftPanelPtr_;
 
     // central panel
-    MainWindowContainerWidget* centralContainerWidgetPtr_;
-    CentralPanelWidget* centralPanelPtr_;
+    std::shared_ptr<MainWindowContainerWidget> centralContainerWidgetPtr_;
+    std::shared_ptr<CentralPanelWidget> centralPanelPtr_;
 
     // right panel
-    MainWindowContainerWidget* rightContainerWidgetPtr_;
-    RightPanelWidget* rightPanelPtr_;
+    std::shared_ptr<MainWindowContainerWidget> rightContainerWidgetPtr_;
+    std::shared_ptr<RightPanelWidget> rightPanelPtr_;
 
-    ShowHideWidget* showHideWidgetPtr_;
+    std::shared_ptr<ShowHideWidget> showHideWidgetPtr_;
 
-    std::map<MainWindowContainerPosition, MainWindowContainerWidget*>
+    std::map<MainWindowContainerPosition, std::shared_ptr<MainWindowContainerWidget>>
         mapContainerPtrToContainerPosition;
 
-    QGraphicsBlurEffect* blurEffectPtr_;
+    std::shared_ptr<QGraphicsBlurEffect> blurEffectPtr_;
 
-    void closeEvent(QCloseEvent*) override;
-    void keyPressEvent(QKeyEvent*) override;
-    void mouseDoubleClickEvent(QMouseEvent*) override;
+    void closeEvent(std::shared_ptr<QCloseEvent>) override;
+    void keyPressEvent(std::shared_ptr<QKeyEvent>) override;
+    void mouseDoubleClickEvent(std::shared_ptr<QMouseEvent>) override;
     void createMenu();
     void setBlurEffect();
 };

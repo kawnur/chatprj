@@ -1,7 +1,7 @@
 #include "widgets_dialog.hpp"
 
 CompanionDataDialog::CompanionDataDialog(
-    ChatActionType actionType, QWidget* parentPtr, Companion* companionPtr) {
+    ChatActionType actionType, std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr) {
     setParent(parentPtr);
 
     setWindowTitle(
@@ -83,7 +83,7 @@ std::string CompanionDataDialog::getPortString() {
 }
 
 GroupChatDataDialog::GroupChatDataDialog(
-    ChatActionType actionType, QWidget* parentPtr) {
+    ChatActionType actionType, std::shared_ptr<QWidget> parentPtr) {
 
     setParent(parentPtr);
 
@@ -210,7 +210,7 @@ ButtonInfo::ButtonInfo(
     buttonText_(buttonText), buttonRole_(buttonRole), functionPtr_(functionPtr) {}
 
 TextDialog::TextDialog(
-    QWidget* parentPtr, DialogType dialogType, const std::string& text,
+    std::shared_ptr<QWidget> parentPtr, DialogType dialogType, const std::string& text,
     std::vector<ButtonInfo>* buttonsInfoPtr) {
     if(parentPtr) {
         setParent(parentPtr);
@@ -252,7 +252,7 @@ TextDialog::~TextDialog() {
 
 void TextDialog::set() {
     // for(auto& info : *this->buttonsInfoPtr_) {
-    //     QPushButton* buttonPtr = this->buttonBoxPtr_->addButton(
+    //     std::shared_ptr<QPushButton> buttonPtr = this->buttonBoxPtr_->addButton(
     //         info.buttonText_, info.buttonRole_);
 
     //     // TODO create mapping and select signal by role
@@ -282,7 +282,7 @@ void TextDialog::closeSelfAndParentDialog() {
     auto parentPtr = this->parent();
 
     if(parentPtr) {
-        dynamic_cast<QWidget*>(parentPtr)->close();
+        dynamic_cast<std::shared_ptr<QWidget>>(parentPtr)->close();
     }
 }
 
@@ -300,7 +300,7 @@ void TextDialog::reject() {
     QDialog::reject();
 }
 
-FileDialog::FileDialog(FileAction* actionPtr, const QString& windowTitle) {
+FileDialog::FileDialog(std::shared_ptr<FileAction> actionPtr, const QString& windowTitle) {
     actionPtr_ = actionPtr;
 
     containsDialogPtr_ = true;
@@ -329,6 +329,6 @@ void FileDialog::showDialog() {
     this->fileDialogPtr_->show();
 }
 
-QFileDialog* FileDialog::getFileDialogPtr() {
+std::shared_ptr<QFileDialog> FileDialog::getFileDialogPtr() {
     return this->fileDialogPtr_;
 }

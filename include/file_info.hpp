@@ -20,7 +20,7 @@ public:
     std::filesystem::path getFilePath() const;
     std::string getFileMD5Hash() const;
     bool setFilePath(const std::filesystem::path&);
-    std::filebuf* closeFile();
+    std::shared_ptr<filebuf> closeFile();
 
     virtual bool createFileAndOpen() { return false; }
 
@@ -35,8 +35,8 @@ public:
     SenderOperator(const std::filesystem::path&);
     ~SenderOperator() = default;
 
-    bool sendFilePart(Companion*, const std::string&);
-    void sendFile(Companion*, const std::string&);
+    bool sendFilePart(std::shared_ptr<Companion>, const std::string&);
+    void sendFile(std::shared_ptr<Companion>, const std::string&);
 
 private:
 
@@ -66,13 +66,13 @@ public:
     void addReceiverOperator(
         const std::string&, const std::string&, const std::filesystem::path&);
 
-    FileOperator* getOperator(const std::string&);
+    std::shared_ptr<FileOperator> getOperator(const std::string&);
 
     bool removeOperator(const std::string&);
 
 private:
     std::mutex mappingMutex_;
-    std::map<std::string, FileOperator*> mapping_;
+    std::map<std::string, std::shared_ptr<FileOperator>> mapping_;
 };
 
 #endif // FILE_INFO_HPP

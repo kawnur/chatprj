@@ -3,12 +3,12 @@
 std::mutex dbMutex;
 
 DBReplyData::DBReplyData(int count, ...)
-    : data_(std::vector<std::map<std::string, const char*>>(1)) {
+    : data_(std::vector<std::map<std::string, std::shared_ptr<char>>>(1)) {
     va_list args;
     va_start(args, count);
 
     for(int i = 0; i < count; i++)     {
-        auto key = std::string(va_arg(args, char*));
+        auto key = std::string(va_arg(args, std::shared_ptr<char>));
 
         data_.at(0).insert({key, nullptr});
     }
@@ -17,7 +17,7 @@ DBReplyData::DBReplyData(int count, ...)
 }
 
 DBReplyData::DBReplyData(const std::vector<std::string>& keys)
-    : data_(std::vector<std::map<std::string, const char*>>(1)) {
+    : data_(std::vector<std::map<std::string, std::shared_ptr<char>>>(1)) {
     for(auto& key : keys) {
         data_.at(0).insert({key, nullptr});
     }
@@ -25,7 +25,7 @@ DBReplyData::DBReplyData(const std::vector<std::string>& keys)
 
 DBReplyData::~DBReplyData() {}
 
-std::vector<std::map<std::string, const char*>>* DBReplyData::getDataPtr() {
+std::vector<std::map<std::string, std::shared_ptr<char>>>* DBReplyData::getDataPtr() {
     return &this->data_;
 }
 
@@ -65,7 +65,7 @@ std::size_t DBReplyData::count(std::size_t position, std::string key) {
     return this->data_.at(position).count(key);
 }
 
-void DBReplyData::push(std::size_t position, std::string key, const char* value) {
+void DBReplyData::push(std::size_t position, std::string key, std::shared_ptr<char> value) {
     this->data_.at(position).at(key) = value;
 }
 
@@ -73,7 +73,7 @@ std::size_t DBReplyData::size() {
     return this->data_.size();
 }
 
-const char* DBReplyData::getValue(std::size_t position, std::string key) {
+std::shared_ptr<char> DBReplyData::getValue(std::size_t position, std::string key) {
     return this->data_.at(position).at(key);
 }
 
@@ -88,8 +88,8 @@ bool DBReplyData::findValue(const std::string& key, const std::string& value) {
     return !(findMapResult == this->data_.end());
 }
 
-const char* getValueFromEnvironmentVariable(const char* variableName) {
-    const char* valuePtr { std::getenv(variableName) };
+std::shared_ptr<char> getValueFromEnvironmentVariable(std::shared_ptr<char> variableName) {
+    std::shared_ptr<char> valuePtr { std::getenv(variableName) };
 
     if(!valuePtr) {
         logArgsError("Did not find environment variable", variableName);
@@ -98,16 +98,16 @@ const char* getValueFromEnvironmentVariable(const char* variableName) {
     return valuePtr;
 }
 
-PGconn* getDBConnection() {
+std::shared_ptr<PGconn> getDBConnection() {
     // TODO make connection to db secure
 
-    PGconn* dbConnection = nullptr;
+    std::shared_ptr<PGconn> dbConnection = nullptr;
 
     auto connectLambda = [&](){
-        const char* dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
-        const char* dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
-        const char* dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
-        const char* dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
+        std::shared_ptr<char> dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
+        std::shared_ptr<char> dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
+        std::shared_ptr<char> dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
+        std::shared_ptr<char> dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
 
         for(auto& value : { dbAddress, dbPort, dbLogin, dbPassword }) {
             if(!value) {
@@ -143,34 +143,34 @@ PGconn* getDBConnection() {
     return dbConnection;
 }
 
-PGresult* sendDBRequestAndReturnResult(
-    const PGconn* dbConnection, const bool& logging, const char* command) {
+std::shared_ptr<PGresult> sendDBRequestAndReturnResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, std::shared_ptr<char> command) {
     if(logging) {
         logArgs(command);
     }
 
     std::lock_guard<std::mutex> lock(dbMutex);
 
-    PGresult* result = PQexec(const_cast<PGconn*>(dbConnection), command);
+    std::shared_ptr<PGresult> result = PQexec(const_cast<std::shared_ptr<PGconn>>(dbConnection), command);
 
     return result;
 }
 
-PGresult* getCompanionsDBResult(const PGconn* dbConnection, const bool& logging) {
-    const char* command = "SELECT id, name FROM companions";
+std::shared_ptr<PGresult> getCompanionsDBResult(std::shared_ptr<PGconn> dbConnection, const bool& logging) {
+    std::shared_ptr<char> command = "SELECT id, name FROM companions";
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
-PGresult* getCompanionByNameDBResult(
-    const PGconn* dbConnection, const bool& logging, const std::string& name) {
+std::shared_ptr<PGresult> getCompanionByNameDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& name) {
     std::string command = std::format("SELECT id FROM companions WHERE name = '{}'", name);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getCompanionAndSocketDBResult(
-    const PGconn* dbConnection, const bool& logging, const int& id) {
+std::shared_ptr<PGresult> getCompanionAndSocketDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const int& id) {
     std::string command = std::format(
         "SELECT companions.name, sockets.ipaddress, sockets.client_port "
         "FROM companions JOIN sockets ON companions.id = sockets.id "
@@ -179,16 +179,16 @@ PGresult* getCompanionAndSocketDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getSocketInfoDBResult(
-    const PGconn* dbConnection, const bool& logging, const int& id) {
+std::shared_ptr<PGresult> getSocketInfoDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const int& id) {
     std::string command = std::format(
         "SELECT ipaddress, server_port, client_port FROM sockets WHERE id = {}", id);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getSocketByIpAddressAndPortDBResult(
-    const PGconn* dbConnection, const bool& logging,
+std::shared_ptr<PGresult> getSocketByIpAddressAndPortDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging,
     const std::string& ipAddress, const std::string& port) {
     std::string command = std::format(
         "SELECT id FROM sockets WHERE ipaddress = '{0}' AND client_port = '{1}'",
@@ -197,8 +197,8 @@ PGresult* getSocketByIpAddressAndPortDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getMessagesDBResult(
-    const PGconn* dbConnection, const bool& logging, const uint8_t& companionId) {
+std::shared_ptr<PGresult> getMessagesDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const uint8_t& companionId) {
     std::string command = std::format(
         "WITH select_id AS "
         "(SELECT id FROM companion_messages WHERE companion_id = {0} "
@@ -210,8 +210,8 @@ PGresult* getMessagesDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getAllMessagesByCompanionIdDBResult(
-    const PGconn* dbConnection, const bool& logging, const int& companionId) {
+std::shared_ptr<PGresult> getAllMessagesByCompanionIdDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const int& companionId) {
     std::string command = std::format(
         "SELECT author_id, timestamp_tz, message "
         "FROM companion_messages WHERE companion_id = {} "
@@ -220,8 +220,8 @@ PGresult* getAllMessagesByCompanionIdDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getEarlyMessagesByMessageIdDBResult(
-    const PGconn* dbConnection, const bool& logging,
+std::shared_ptr<PGresult> getEarlyMessagesByMessageIdDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging,
     const int& companionId,const uint32_t& messageId) {
     std::string command = std::format(
         "WITH select_id AS "
@@ -234,8 +234,8 @@ PGresult* getEarlyMessagesByMessageIdDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getMessageByCompanionIdAndTimestampDBResult(
-    const PGconn* dbConnection, const bool& logging,
+std::shared_ptr<PGresult> getMessageByCompanionIdAndTimestampDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging,
     const uint8_t& companionId, const std::string& timestamp) {
     std::string command = std::format(
         "SELECT id FROM companion_messages WHERE companion_id = {0} AND timestamp_tz = '{1}'",
@@ -244,8 +244,8 @@ PGresult* getMessageByCompanionIdAndTimestampDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getUnsentMessagesByCompanionNameDBResult(
-    const PGconn* dbConnection, const bool& logging, const std::string& companionName) {
+std::shared_ptr<PGresult> getUnsentMessagesByCompanionNameDBResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& companionName) {
     std::string command = std::format(
         "SELECT id, author_id, companion_id, timestamp_tz, message, is_received "
         "FROM companion_messages WHERE companion_id = (SELECT id FROM companions WHERE name = '{}') "
@@ -255,46 +255,46 @@ PGresult* getUnsentMessagesByCompanionNameDBResult(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* getPasswordDBResult(const PGconn* dbConnection, const bool& logging) {
-    const char* command = "SELECT password FROM passwords";
+std::shared_ptr<PGresult> getPasswordDBResult(std::shared_ptr<PGconn> dbConnection, const bool& logging) {
+    std::shared_ptr<char> command = "SELECT password FROM passwords";
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command);
 }
 
-PGresult* setMessageIsSentInDbAndReturn(
-    const PGconn* dbConnection, const bool& logging, const uint32_t& messageId) {
+std::shared_ptr<PGresult> setMessageIsSentInDbAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const uint32_t& messageId) {
     std::string command = std::format(
         "UPDATE messages SET is_sent = 'true' WHERE id = {} RETURNING id", messageId);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* setMessageIsReceivedInDbAndReturn(
-    const PGconn* dbConnection, const bool& logging, const uint32_t& messageId) {
+std::shared_ptr<PGresult> setMessageIsReceivedInDbAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const uint32_t& messageId) {
     std::string command = std::format(
         "UPDATE messages SET is_received = 'true' WHERE id = {} RETURNING id", messageId);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* pushCompanionToDBAndReturn(
-    const PGconn* dbConnection, const bool& logging, const std::string& companionName) {
+std::shared_ptr<PGresult> pushCompanionToDBAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& companionName) {
     std::string command = std::format(
         "INSERT INTO companions (name) VALUES ('{}') RETURNING id", companionName);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* updateCompanionAndReturn(  // TODO change function names
-    const PGconn* dbConnection, const bool& logging, const std::string& companionName) {
+std::shared_ptr<PGresult> updateCompanionAndReturn(  // TODO change function names
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& companionName) {
     std::string command = std::format(
         "INSERT INTO companions (name) VALUES ('{}') RETURNING id", companionName);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* updateCompanionAndSocketAndReturn(
-    const PGconn* dbConnection, const bool& logging,
+std::shared_ptr<PGresult> updateCompanionAndSocketAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging,
     const CompanionAction& companionAction) {
     std::string command = std::format(
         "WITH update_name AS (UPDATE companions SET name = '{0}' WHERE id = {1} "
@@ -306,8 +306,8 @@ PGresult* updateCompanionAndSocketAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* pushSocketToDBAndReturn(
-    const PGconn* dbConnection, const bool& logging, const std::string& companionName,
+std::shared_ptr<PGresult> pushSocketToDBAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& companionName,
     const std::string& ipAddress, const std::string& serverPort,
     const std::string& clientPort) {
     std::string command = std::format(
@@ -318,8 +318,8 @@ PGresult* pushSocketToDBAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* pushMessageToDBAndReturn(
-    const PGconn* dbConnection, const bool& logging, const std::string& companionName,
+std::shared_ptr<PGresult> pushMessageToDBAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& companionName,
     const std::string& authorName, const std::string& timestamp,
     const std::string& returningFieldName, const std::string& message,
     const bool& isSent, const bool& isReceived) {
@@ -335,8 +335,8 @@ PGresult* pushMessageToDBAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* pushMessageToDBWithAuthorIdAndReturn(
-    const PGconn* dbConnection, const bool& logging, const std::string& companionName,
+std::shared_ptr<PGresult> pushMessageToDBWithAuthorIdAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& companionName,
     const std::string& authorIdString, const std::string& timestamp,
     const std::string& returningFieldName, const std::string& message,
     const bool& isSent, const bool& isReceived) {
@@ -350,16 +350,16 @@ PGresult* pushMessageToDBWithAuthorIdAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* pushPasswordToDBAndReturn(
-    const PGconn* dbConnection, const bool& logging, const std::string& password) {
+std::shared_ptr<PGresult> pushPasswordToDBAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string& password) {
     std::string command = std::format(
         "INSERT INTO passwords (password) VALUES ('{}') RETURNING id", password);
 
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* deleteMessagesFromDBAndReturn(
-    const PGconn* dbConnection, const bool& logging,
+std::shared_ptr<PGresult> deleteMessagesFromDBAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging,
     const CompanionAction& companionAction) {
     std::string command = std::format(
         "DELETE FROM companion_messages WHERE companion_id = {} RETURNING companion_id",
@@ -368,8 +368,8 @@ PGresult* deleteMessagesFromDBAndReturn(
     return sendDBRequestAndReturnResult(dbConnection, logging, command.data());
 }
 
-PGresult* deleteCompanionAndSocketAndReturn(
-    const PGconn* dbConnection, const bool& logging,
+std::shared_ptr<PGresult> deleteCompanionAndSocketAndReturn(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging,
     const CompanionAction& companionAction) {
     std::string command = std::format(
         "WITH delete_socket AS (DELETE FROM sockets WHERE id = {} RETURNING id) "
@@ -381,7 +381,7 @@ PGresult* deleteCompanionAndSocketAndReturn(
 
 int getDataFromDBResult(
     const bool& logging, std::shared_ptr<DBReplyData>& dataPtr,
-    const PGresult*& result, int maxTuples) {
+    std::shared_ptr<PGresult> result, int maxTuples) {
     int dataIsOk = 0;
 
     int ntuples = PQntuples(result);
@@ -409,13 +409,13 @@ int getDataFromDBResult(
         std::string logString;
 
         for(int j = 0; j < nfields; j++) {
-            char* fname = PQfname(result, j);
+            std::shared_ptr<char> fname = PQfname(result, j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
             auto found = dataPtr->count(i, fnameString);
 
             if(found == 1) {
-                const char* value = PQgetvalue(result, i, j);
+                std::shared_ptr<char> value = PQgetvalue(result, i, j);
                 dataPtr->push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");

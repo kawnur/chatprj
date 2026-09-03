@@ -48,9 +48,9 @@ public:
     ~TextEditWidget();
 
 private:
-    QPalette* palettePtr_;
+    std::shared_ptr<QPalette> palettePtr_;
 
-    void keyPressEvent(QKeyEvent*);
+    void keyPressEvent(std::shared_ptr<QKeyEvent>);
 
 signals:
     void send(const QString&);
@@ -62,7 +62,7 @@ class IndicatorWidget : public QWidget {
 
 public:
     IndicatorWidget(uint8_t, bool);
-    IndicatorWidget(const IndicatorWidget*);
+    IndicatorWidget(std::shared_ptr<IndicatorWidget>);
     ~IndicatorWidget();
 
     void setOn();
@@ -78,7 +78,7 @@ private:
     QColor onColor_;
     QColor offColor_;
     QColor meColor_;
-    QPalette* palettePtr_;
+    std::shared_ptr<QPalette> palettePtr_;
 };
 
 class SocketInfoBaseWidget : public QWidget {
@@ -104,7 +104,7 @@ public:
     SocketInfoWidget(SocketInfoWidget&&) {}
     SocketInfoWidget(std::string&, std::string&, uint16_t&, uint16_t&);
     SocketInfoWidget(std::string&&, std::string&&, uint16_t&&, uint16_t&&);
-    SocketInfoWidget(Companion*);
+    SocketInfoWidget(std::shared_ptr<Companion>);
     ~SocketInfoWidget();
 
     QString getName() const;
@@ -130,29 +130,29 @@ public slots:
 private:
     bool isSelected_;
     bool isConnected_;
-    Companion* companionPtr_;
+    std::shared_ptr<Companion> companionPtr_;
     QString name_;
     QString ipAddress_;
     uint16_t serverPort_;
     uint16_t clientPort_;
     QColor selectedColor_;
     QColor unselectedColor_;
-    QPalette* palettePtr_;
-    QHBoxLayout* layoutPtr_;
-    IndicatorWidget* connectionStateIndicatorPtr_;
-    QLabel* nameLabelPtr_;
-    QLabel* ipAddressLabelPtr_;
-    QLabel* serverPortLabelPtr_;
-    QLabel* clientPortLabelPtr_;
-    QPushButton* editButtonPtr_;
-    QPushButton* connectButtonPtr_;
-    IndicatorWidget* newMessagesIndicatorPtr_;
-    QAction* requestHistoryAction_;
+    std::shared_ptr<QPalette> palettePtr_;
+    std::shared_ptr<QHBoxLayout> layoutPtr_;
+    std::shared_ptr<IndicatorWidget> connectionStateIndicatorPtr_;
+    std::shared_ptr<QLabel> nameLabelPtr_;
+    std::shared_ptr<QLabel> ipAddressLabelPtr_;
+    std::shared_ptr<QLabel> serverPortLabelPtr_;
+    std::shared_ptr<QLabel> clientPortLabelPtr_;
+    std::shared_ptr<QPushButton> editButtonPtr_;
+    std::shared_ptr<QPushButton> connectButtonPtr_;
+    std::shared_ptr<IndicatorWidget> newMessagesIndicatorPtr_;
+    std::shared_ptr<QAction> requestHistoryAction_;
 
     void initializeFields();
     void changeColor(QColor&);
-    void mousePressEvent(QMouseEvent*) override;
-    void mouseReleaseEvent(QMouseEvent*) override;
+    void mousePressEvent(std::shared_ptr<QMouseEvent>) override;
+    void mouseReleaseEvent(std::shared_ptr<QMouseEvent>) override;
 
 private slots:
     void customMenuRequestedSlot(QPoint);
@@ -170,8 +170,8 @@ public:
 
 private:
     QString mark_;
-    QHBoxLayout* layoutPtr_;
-    QLabel* markLabelPtr_;
+    std::shared_ptr<QHBoxLayout> layoutPtr_;
+    std::shared_ptr<QLabel> markLabelPtr_;
 
     void initializeFields();
 };
@@ -186,13 +186,13 @@ public:
 
 private:
     bool show_;
-    QVBoxLayout* layoutPtr_;
-    QLabel* labelPtr_;
-    QPalette* palettePtr_;
+    std::shared_ptr<QVBoxLayout> layoutPtr_;
+    std::shared_ptr<QLabel> labelPtr_;
+    std::shared_ptr<QPalette> palettePtr_;
 
     void hideInfo();
     void showInfo();
-    void mousePressEvent(QMouseEvent*) override;
+    void mousePressEvent(std::shared_ptr<QMouseEvent>) override;
 };
 
 // class ScrollArea : public QScrollArea
@@ -203,7 +203,7 @@ private:
 
 // private:
 
-//     // void wheelEvent(QWheelEvent*) override;
+//     // void wheelEvent(std::shared_ptr<QWheelEvent>) override;
 // };
 
 class WidgetGroup : public QObject {
@@ -211,40 +211,40 @@ class WidgetGroup : public QObject {
     Q_OBJECT
 
 public:
-    WidgetGroup(Companion*);
+    WidgetGroup(std::shared_ptr<Companion>);
     ~WidgetGroup();
 
     void set();
-    void addMessageWidgetToCentralPanelChatHistory(const Message*, const MessageState*);
+    void addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message>, std::shared_ptr<MessageState>);
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
-    SocketInfoBaseWidget* getSocketInfoBasePtr();
+    std::shared_ptr<SocketInfoBaseWidget> getSocketInfoBasePtr();
     void sortChatHistoryElements();
     void messageAdded();
     void askUserForHistorySendingConfirmation();
 
 signals:
     void addMessageWidgetToCentralPanelChatHistorySignal(
-        const MessageState*, const Message*);
+        std::shared_ptr<MessageState>, std::shared_ptr<Message>);
 
     void askUserForHistorySendingConfirmationSignal();
     void buildChatHistorySignal();    
 
 public slots:
-    void messageWidgetSelected(MessageWidget*);
+    void messageWidgetSelected(std::shared_ptr<MessageWidget>);
     void buildChatHistorySlot();
 
 private slots:
     void addMessageWidgetToCentralPanelChatHistorySlot(
-        const MessageState*, const Message*);
+        std::shared_ptr<MessageState>, std::shared_ptr<Message>);
 
     void askUserForHistorySendingConfirmationSlot();
 
 private:
-    Companion* companionPtr_;
-    SocketInfoBaseWidget* socketInfoBasePtr_;
-    CentralPanelWidget* centralPanelPtr_;
+    std::shared_ptr<Companion> companionPtr_;
+    std::shared_ptr<SocketInfoBaseWidget> socketInfoBasePtr_;
+    std::shared_ptr<CentralPanelWidget> centralPanelPtr_;
     uint32_t antecedentMessagesCounter_;
     std::mutex antecedentMessagesCounterMutex_;
 };
@@ -255,7 +255,7 @@ public:
     ~StubWidgetGroup();
 
     void set();
-    void setParents(QWidget*, QWidget*);
+    void setParents(std::shared_ptr<QWidget>, std::shared_ptr<QWidget>);
     void hideSocketInfoStubWidget();
     void hideCentralPanel();
     void showCentralPanel();
@@ -264,10 +264,10 @@ public:
     void setLeftPanelWidth(int);
 
 private:
-    SocketInfoStubWidget* socketInfoPtr_;
-    LeftPanelWidget* leftPanelPtr_;
-    CentralPanelWidget* centralPanelPtr_;
-    RightPanelWidget* rightPanelPtr_;
+    std::shared_ptr<SocketInfoStubWidget> socketInfoPtr_;
+    std::shared_ptr<LeftPanelWidget> leftPanelPtr_;
+    std::shared_ptr<CentralPanelWidget> centralPanelPtr_;
+    std::shared_ptr<RightPanelWidget> rightPanelPtr_;
 };
 
 class MainWindowContainerWidget : public QWidget {
@@ -275,14 +275,14 @@ class MainWindowContainerWidget : public QWidget {
     Q_OBJECT
 
 public:
-    MainWindowContainerWidget(QWidget*);
+    MainWindowContainerWidget(std::shared_ptr<QWidget>);
     ~MainWindowContainerWidget();
 
-    void addWidgetToLayout(QWidget*);
-    void addWidgetToLayoutAndSetParentTo(QWidget*);
+    void addWidgetToLayout(std::shared_ptr<QWidget>);
+    void addWidgetToLayoutAndSetParentTo(std::shared_ptr<QWidget>);
 
 private:
-    QVBoxLayout* layoutPtr_;
+    std::shared_ptr<QVBoxLayout> layoutPtr_;
 };
 
 #endif // WIDGETS_HPP

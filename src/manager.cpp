@@ -4,7 +4,7 @@ Manager::Manager() :
     initialized_(false),
     messageStateToMessageMapMutex_(std::mutex()),
     dbConnectionPtr_(nullptr), userIsAuthenticated_(false) {
-    mapCompanionIdToCompanionInfo_ = std::map<int, std::pair<Companion*, WidgetGroup*>>();
+    mapCompanionIdToCompanionInfo_ = std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>();
     selectedCompanionPtr_ = nullptr;
     lastOpenedPath_ = homePath;
 }
@@ -18,7 +18,7 @@ Manager::~Manager() {
     }
 }
 
-const Companion* Manager::getSelectedCompanionPtr() {
+std::shared_ptr<Companion> Manager::getSelectedCompanionPtr() {
     return this->selectedCompanionPtr_;
 }
 
@@ -26,8 +26,8 @@ bool Manager::getUserIsAuthenticated() {
     return this->userIsAuthenticated_;
 }
 
-const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
-    SocketInfoBaseWidget* widget) const {
+std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
+    std::shared_ptr<SocketInfoBaseWidget> widget) const {
 
     auto findWidget = [&](auto& pair){
         return pair.second.second->getSocketInfoBasePtr() == widget;
@@ -41,9 +41,9 @@ const Companion* Manager::getMappedCompanionBySocketInfoBaseWidget(
     return result->second.first;
 }
 
-WidgetGroup* Manager::getMappedWidgetGroupPtrByCompanionPtr(
-    const Companion* companionPtr) const {
-    WidgetGroup* groupPtr = nullptr;
+std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupPtrByCompanionPtr(
+    std::shared_ptr<Companion> companionPtr) const {
+    std::shared_ptr<WidgetGroup> groupPtr = nullptr;
 
     try {
         groupPtr = this->mapCompanionIdToCompanionInfo_.at(companionPtr->getId()).second;
@@ -76,9 +76,9 @@ void Manager::set() {
 }
 
 void Manager::sendMessage(
-    MessageType type, Companion* companionPtr,
-    Action* actionPtr, const std::string& text) {
-    WidgetGroup* groupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
+    MessageType type, std::shared_ptr<Companion> companionPtr,
+    std::shared_ptr<Action> actionPtr, const std::string& text) {
+    std::shared_ptr<WidgetGroup> groupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
     // encrypt message
 
@@ -101,13 +101,13 @@ void Manager::sendMessage(
 
     if(pair.second) {
         // add to widget
-        const Message* messagePtr = &(pair.first->first);
-        MessageState* messageStatePtr = pair.first->second.getStatePtr();
+        std::shared_ptr<Message> messagePtr = &(pair.first->first);
+        std::shared_ptr<MessageState> messageStatePtr = pair.first->second.getStatePtr();
 
         if(type == MessageType::FILE) {
             companionPtr->getFileOperatorStoragePtr()->addSenderOperator(
                 messageStatePtr->getNetworkId(),
-                dynamic_cast<FileAction*>(actionPtr)->getPath());
+                dynamic_cast<std::shared_ptr<FileAction>>(actionPtr)->getPath());
         }
 
         groupPtr->addMessageWidgetToCentralPanelChatHistory(messagePtr, messageStatePtr);
@@ -141,11 +141,11 @@ void Manager::sendMessage(
     }
 }
 
-void Manager::sendFile(Companion* companionPtr, const std::filesystem::path& path) {
+void Manager::sendFile(std::shared_ptr<Companion> companionPtr, const std::filesystem::path& path) {
     logArgs("Manager::sendFile");
 }
 
-void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonString) {
+void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std::string& jsonString) {
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
     NetworkMessageType type;
@@ -208,13 +208,13 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
                 isAntecedent, false, true, networkId);
 
             if(pair.second) {
-                const Message* messagePtr = &(pair.first->first);
-                MessageState* messageStatePtr = pair.first->second.getStatePtr();
+                std::shared_ptr<Message> messagePtr = &(pair.first->first);
+                std::shared_ptr<MessageState> messageStatePtr = pair.first->second.getStatePtr();
 
                 // decrypt message
 
                 // add to widget
-                WidgetGroup* groupPtr =
+                std::shared_ptr<WidgetGroup> groupPtr =
                     this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
                 emit groupPtr->addMessageWidgetToCentralPanelChatHistorySignal(
@@ -478,10 +478,10 @@ void Manager::receiveMessage(Companion* companionPtr, const std::string& jsonStr
     }
 }
 
-void Manager::addEarlyMessages(const Companion* companionPtr) {
+void Manager::addEarlyMessages(std::shared_ptr<Companion> companionPtr) {
     if(companionPtr) {
         // get earliest message in current messages
-        const Message* earliestMessagePtr = companionPtr->getEarliestMessagePtr();
+        std::shared_ptr<Message> earliestMessagePtr = companionPtr->getEarliestMessagePtr();
 
         auto messageId = earliestMessagePtr->getId();
         auto companionId = companionPtr->getId();
@@ -509,12 +509,12 @@ void Manager::addEarlyMessages(const Companion* companionPtr) {
             return;
         }
 
-        WidgetGroup* widgetGroupPtr =
+        std::shared_ptr<WidgetGroup> widgetGroupPtr =
             this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
         for(std::size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
             logArgs("adding message with id", messagesDataPtr->getValue(i, "id"));
-            auto pair = const_cast<Companion*>(companionPtr)->
+            auto pair = const_cast<std::shared_ptr<Companion>>(companionPtr)->
                 createMessageAndAddToMapping(messagesDataPtr, i);
 
             if(pair.second) {
@@ -532,14 +532,14 @@ void Manager::addEarlyMessages(const Companion* companionPtr) {
     }
 }
 
-void Manager::resetSelectedCompanion(const Companion* newSelected) {  // TODO rewrite
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+void Manager::resetSelectedCompanion(std::shared_ptr<Companion> newSelected) {  // TODO rewrite
+    std::shared_ptr<GraphicManager> graphicManagerPtr = getGraphicManagerPtr();
 
     if(this->selectedCompanionPtr_) {
         auto widgetGroupPtr =
             this->getMappedWidgetGroupPtrByCompanionPtr(this->selectedCompanionPtr_);
 
-        dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->unselect();
+        dynamic_cast<std::shared_ptr<SocketInfoWidget>>(widgetGroupPtr->getSocketInfoBasePtr())->unselect();
 
         widgetGroupPtr->hideCentralPanel();
     }
@@ -553,7 +553,7 @@ void Manager::resetSelectedCompanion(const Companion* newSelected) {  // TODO re
         auto widgetGroupPtr =
             this->getMappedWidgetGroupPtrByCompanionPtr(this->selectedCompanionPtr_);
 
-        dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->
+        dynamic_cast<std::shared_ptr<SocketInfoWidget>>(widgetGroupPtr->getSocketInfoBasePtr())->
             select();
 
         widgetGroupPtr->showCentralPanel();
@@ -563,7 +563,7 @@ void Manager::resetSelectedCompanion(const Companion* newSelected) {  // TODO re
     }
 }
 
-void Manager::createCompanion(CompanionAction* companionActionPtr) {
+void Manager::createCompanion(std::shared_ptr<CompanionAction> companionActionPtr) {
     // data validation and checking
     if(!(companionDataValidation(companionActionPtr) &&
           this->checkCompanionDataForExistanceAtCreation(companionActionPtr))) {
@@ -615,7 +615,7 @@ void Manager::createCompanion(CompanionAction* companionActionPtr) {
     }
 
     // create Companion object
-    Companion* companionPtr = this->addCompanionObject(id, name);
+    std::shared_ptr<Companion> companionPtr = this->addCompanionObject(id, name);
 
     if(!companionPtr) {
         logArgsError("companionPtr is nullptr");
@@ -623,7 +623,7 @@ void Manager::createCompanion(CompanionAction* companionActionPtr) {
     }
 
     // create SocketInfo object
-    SocketInfo* socketInfoPtr = new SocketInfo(
+    std::shared_ptr<SocketInfo> socketInfoPtr = new SocketInfo(
         ipAddress, serverPort, std::stoi(clientPortStr));
 
     companionPtr->setSocketInfo(socketInfoPtr);
@@ -636,7 +636,7 @@ void Manager::createCompanion(CompanionAction* companionActionPtr) {
         companionActionPtr, std::string { "New companion added:\n\n" });
 }
 
-void Manager::updateCompanion(CompanionAction* companionActionPtr) {
+void Manager::updateCompanion(std::shared_ptr<CompanionAction> companionActionPtr) {
     // data validation and checking
     if(!(companionDataValidation(companionActionPtr) &&
           this->checkCompanionDataForExistanceAtUpdate(companionActionPtr))) {
@@ -668,14 +668,14 @@ void Manager::updateCompanion(CompanionAction* companionActionPtr) {
     auto widgetGroupPtr = this->getMappedWidgetGroupPtrByCompanionPtr(
         companionActionPtr->getCompanionPtr());
 
-    dynamic_cast<SocketInfoWidget*>(widgetGroupPtr->getSocketInfoBasePtr())->update();
+    dynamic_cast<std::shared_ptr<SocketInfoWidget>>(widgetGroupPtr->getSocketInfoBasePtr())->update();
 
     // show info dialog
     getGraphicManagerPtr()->showCompanionInfoDialog(
         companionActionPtr, std::string { "Companion updated:\n\n" });
 }
 
-void Manager::deleteCompanion(CompanionAction* companionActionPtr) {
+void Manager::deleteCompanion(std::shared_ptr<CompanionAction> companionActionPtr) {
     // delete companion chat messages from db
     std::shared_ptr<DBReplyData> companionIdMessagesDataPtr = this->getDBDataPtr(
         logDBInteraction,
@@ -720,14 +720,14 @@ void Manager::deleteCompanion(CompanionAction* companionActionPtr) {
         companionActionPtr, std::string { "Companion deleted:\n\n" });
 }
 
-void Manager::clearChatHistory(Companion* companionPtr) {
-    WidgetGroup* widgetGroupPtr =
+void Manager::clearChatHistory(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<WidgetGroup> widgetGroupPtr =
         this->getMappedWidgetGroupPtrByCompanionPtr(companionPtr);
 
     getGraphicManagerPtr()->clearChatHistory(widgetGroupPtr);
 }
 
-void Manager::clearCompanionHistory(CompanionAction* companionActionPtr) {
+void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> companionActionPtr) {
     // delete companion chat messages from db
     std::shared_ptr<DBReplyData> companionIdMessagesDataPtr = this->getDBDataPtr(
         logDBInteraction,
@@ -757,7 +757,7 @@ void Manager::clearCompanionHistory(CompanionAction* companionActionPtr) {
         companionActionPtr, std::string { "Companion chat history cleared:\n\n" });
 }
 
-void Manager::createUserPassword(PasswordAction* actionPtr) {
+void Manager::createUserPassword(std::shared_ptr<PasswordAction> actionPtr) {
     // data validation and checking
     if(!(this->passwordDataValidation(actionPtr))) {
         return;
@@ -791,8 +791,8 @@ void Manager::createUserPassword(PasswordAction* actionPtr) {
     delete actionPtr;
 }
 
-void Manager::authenticateUser(PasswordAction* actionPtr) {
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+void Manager::authenticateUser(std::shared_ptr<PasswordAction> actionPtr) {
+    std::shared_ptr<GraphicManager> graphicManagerPtr = getGraphicManagerPtr();
 
     // do we have password in db?
     std::shared_ptr<DBReplyData> passwordDataPtr = this->getDBDataPtr(
@@ -846,7 +846,7 @@ void Manager::showSelectedCompanionCentralPanel() {
 }
 
 void Manager::startUserAuthentication() {
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+    std::shared_ptr<GraphicManager> graphicManagerPtr = getGraphicManagerPtr();
 
     graphicManagerPtr->enableMainWindowBlurEffect();
 
@@ -870,8 +870,8 @@ void Manager::startUserAuthentication() {
     }
 }
 
-void Manager::sendUnsentMessages(const Companion* companionPtr) {
-    Companion* companionCastPtr = const_cast<Companion*>(companionPtr);
+void Manager::sendUnsentMessages(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<Companion> companionCastPtr = const_cast<std::shared_ptr<Companion>>(companionPtr);
 
     // get unsent messages from db
     std::shared_ptr<DBReplyData> messagesDataPtr = this->getDBDataPtr(
@@ -895,12 +895,12 @@ void Manager::sendUnsentMessages(const Companion* companionPtr) {
 
     for(std::size_t i = 0; i < messagesDataPtr->size(); i++) {  // TODO switch to iterators
         uint32_t messageId = std::atoi(messagesDataPtr->getValue(i, "id"));
-        Message* messagePtr = companionCastPtr->findMessage(messageId);
+        std::shared_ptr<Message> messagePtr = companionCastPtr->findMessage(messageId);
         std::string networkId;
 
         if(messagePtr) {
-            const MessageState* messageStatePtr =
-                const_cast<Companion*>(companionPtr)->
+            std::shared_ptr<MessageState> messageStatePtr =
+                const_cast<std::shared_ptr<Companion>>(companionPtr)->
                     getMappedMessageStatePtrByMessagePtr(messagePtr);
 
             if(!messageStatePtr) {
@@ -916,7 +916,7 @@ void Manager::sendUnsentMessages(const Companion* companionPtr) {
             // add to companion's messages if needed
             networkId = getRandomString(5);
 
-            const_cast<Companion*>(companionPtr)->createMessageAndAddToMapping(
+            const_cast<std::shared_ptr<Companion>>(companionPtr)->createMessageAndAddToMapping(
                 MessageType::TEXT,
                 messageId,
                 1,
@@ -934,19 +934,19 @@ void Manager::sendUnsentMessages(const Companion* companionPtr) {
 
         // mark message as sent
         if(result) {
-            this->markMessageAsSent(const_cast<Companion*>(companionPtr), messagePtr);
+            this->markMessageAsSent(const_cast<std::shared_ptr<Companion>>(companionPtr), messagePtr);
         }
     }
 }
 
-void Manager::requestHistoryFromCompanion(const Companion* companionPtr) {
-    Companion* companionCastPtr = const_cast<Companion*>(companionPtr);
+void Manager::requestHistoryFromCompanion(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<Companion> companionCastPtr = const_cast<std::shared_ptr<Companion>>(companionPtr);
 
     bool result = companionCastPtr->sendMessage(
         true, NetworkMessageType::CHAT_HISTORY_REQUEST, "", nullptr);
 }
 
-void Manager::sendChatHistoryToCompanion(const Companion* companionPtr) {
+void Manager::sendChatHistoryToCompanion(std::shared_ptr<Companion> companionPtr) {
     logArgs("Manager::sendChatHistoryToCompanion");
 
     std::vector<std::string> keys =
@@ -985,8 +985,8 @@ void Manager::setLastOpenedPath(const std::filesystem::path& path) {
     this->lastOpenedPath_ = path;
 }
 
-const Companion* Manager::getMappedCompanionByWidgetGroup(
-    WidgetGroup* groupPtr) const {
+std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
+    std::shared_ptr<WidgetGroup> groupPtr) const {
     auto findWidget = [&](auto& pair){
         return pair.second.second == groupPtr;
     };
@@ -1000,7 +1000,7 @@ const Companion* Manager::getMappedCompanionByWidgetGroup(
 }
 
 void Manager::fillCompanionMessageMapping(
-    Companion* companionPtr, bool containersAlreadyHaveMessages) {
+    std::shared_ptr<Companion> companionPtr, bool containersAlreadyHaveMessages) {
     uint8_t companionId = companionPtr->getId();
 
     // get messages data
@@ -1034,7 +1034,7 @@ void Manager::fillCompanionMessageMapping(
             auto pairPtr = companionPtr->getMessageMappingPairPtrByMessageId(messageId);
 
             if(pairPtr && pairPtr->second.getStatePtr()) {
-                // companionPtr->addMessage(const_cast<Message*>(pair.second));
+                // companionPtr->addMessage(const_cast<std::shared_ptr<Message>>(pair.second));
             }
             else {
                 companionPtr->createMessageAndAddToMapping(messagesDataPtr, i);
@@ -1091,7 +1091,7 @@ bool Manager::buildCompanions() {
         int id = std::atoi(companionsDataPtr->getValue(index, "id"));
 
         // create companion object
-        Companion* companionPtr = this->addCompanionObject(
+        std::shared_ptr<Companion> companionPtr = this->addCompanionObject(
             id, std::string(companionsDataPtr->getValue(index, "name")));
 
         if(!companionPtr) {
@@ -1109,7 +1109,7 @@ bool Manager::buildCompanions() {
 
         if(socketsDataPtr->size() > 0) {
             // TODO use port number pool
-            SocketInfo* socketInfoPtr = new SocketInfo(
+            std::shared_ptr<SocketInfo> socketInfoPtr = new SocketInfo(
                 socketsDataPtr->getValue(0, "ipaddress"),
                 std::atoi(socketsDataPtr->getValue(0, "server_port")),
                 std::atoi(socketsDataPtr->getValue(0, "client_port")));
@@ -1134,7 +1134,7 @@ bool Manager::buildCompanions() {
 }
 
 void Manager::buildWidgetGroups() {
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+    std::shared_ptr<GraphicManager> graphicManagerPtr = getGraphicManagerPtr();
 
     auto companionsNumber = this->mapCompanionIdToCompanionInfo_.size();
     auto childrenSize = graphicManagerPtr->getCompanionPanelChildrenSize();
@@ -1157,7 +1157,7 @@ void Manager::buildWidgetGroups() {
     }
 }
 
-Companion* Manager::addCompanionObject(int id, const std::string& name) {
+std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string& name) {
     if(id == 0) {
         logArgsError("companion id == 0");
         return nullptr;
@@ -1166,13 +1166,13 @@ Companion* Manager::addCompanionObject(int id, const std::string& name) {
     auto result = this->mapCompanionIdToCompanionInfo_.emplace(
         std::make_pair(
             id,
-            std::pair<Companion*, WidgetGroup*>(new Companion(id, name), nullptr)));
+            std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>(new Companion(id, name), nullptr)));
 
     return (result.second) ? result.first->second.first : nullptr;
 }
 
-void Manager::createWidgetGroupAndAddToMapping(Companion* companionPtr) {
-    WidgetGroup* widgetGroupPtr = new WidgetGroup(companionPtr);
+void Manager::createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<WidgetGroup> widgetGroupPtr = new WidgetGroup(companionPtr);
 
     widgetGroupPtr->set();
 
@@ -1182,11 +1182,11 @@ void Manager::createWidgetGroupAndAddToMapping(Companion* companionPtr) {
     companionPtr->addMessageWidgetsToChatHistory();
 }
 
-void Manager::deleteCompanionObject(Companion* companionPtr) {
+void Manager::deleteCompanionObject(std::shared_ptr<Companion> companionPtr) {
     this->deleteWidgetGroupAndDeleteFromMapping(companionPtr);
 }
 
-void Manager::deleteWidgetGroupAndDeleteFromMapping(const Companion* companionPtr) {
+void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companionPtr) {
     auto findMapLambda = [&](auto& iterator){
         return iterator.second.first == companionPtr;
     };
@@ -1215,7 +1215,7 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(const Companion* companionPt
     }
 }
 
-bool Manager::companionDataValidation(CompanionAction* companionActionPtr) {
+bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> companionActionPtr) {
     std::vector<std::string> validationErrors {};
 
     bool validationResult = validateCompanionData(validationErrors, companionActionPtr);
@@ -1231,7 +1231,7 @@ bool Manager::companionDataValidation(CompanionAction* companionActionPtr) {
     return true;
 }
 
-bool Manager::passwordDataValidation(PasswordAction* passwordActionPtr) {
+bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> passwordActionPtr) {
     std::vector<std::string> validationErrors {};
 
     bool validationResult = validatePassword(
@@ -1248,7 +1248,7 @@ bool Manager::passwordDataValidation(PasswordAction* passwordActionPtr) {
     return true;
 }
 
-bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companionActionPtr) {
+bool Manager::checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> companionActionPtr) {
     // check if companion with such name already exists
     std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
         logDBInteraction,
@@ -1289,7 +1289,7 @@ bool Manager::checkCompanionDataForExistanceAtCreation(CompanionAction* companio
     return true;
 }
 
-bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionActionPtr) {
+bool Manager::checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> companionActionPtr) {
     // check if companion with such name already exists
     std::shared_ptr<DBReplyData> companionIdDataPtr = this->getDBDataPtr(
         logDBInteraction,
@@ -1347,7 +1347,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(CompanionAction* companionA
 }
 
 void Manager::waitForMessageReceptionConfirmation(
-    Companion* companionPtr, MessageState* messageStatePtr, const Message* messagePtr) {
+    std::shared_ptr<Companion> companionPtr, std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) {
     auto lambda = [=](){
         uint32_t sleepDuration = sleepDurationInitial;
 
@@ -1373,7 +1373,7 @@ void Manager::waitForMessageReceptionConfirmation(
     std::thread(lambda).detach();
 }
 
-bool Manager::markMessageAsSent(Companion* companionPtr, const Message* messagePtr) {
+bool Manager::markMessageAsSent(std::shared_ptr<Companion> companionPtr, std::shared_ptr<Message> messagePtr) {
     // mark in db
     std::shared_ptr<DBReplyData> messageIdDataPtr = this->getDBDataPtr(
         logDBInteraction,
@@ -1393,7 +1393,7 @@ bool Manager::markMessageAsSent(Companion* companionPtr, const Message* messageP
     return true;
 }
 
-bool Manager::markMessageAsReceived(Companion* companionPtr, const Message* messagePtr) {
+bool Manager::markMessageAsReceived(std::shared_ptr<Companion> companionPtr, std::shared_ptr<Message> messagePtr) {
     // mark in widget
     getGraphicManagerPtr()->markMessageWidgetAsReceived(companionPtr, messagePtr);
 
@@ -1454,8 +1454,8 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     return std::tuple<uint32_t, uint8_t, std::string>(id, companionId, timestampTz);
 }
 
-Manager* getManagerPtr() {
-    QCoreApplication* coreApp = QCoreApplication::instance();
-    ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
+std::shared_ptr<Manager> getManagerPtr() {
+    std::shared_ptr<QCoreApplication> coreApp = QCoreApplication::instance();
+    std::shared_ptr<ChatApp> app = dynamic_cast<std::shared_ptr<ChatApp>>(coreApp);
     return app->managerPtr_;
 }

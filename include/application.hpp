@@ -21,8 +21,8 @@ public:
 
     void set();
 
-    GraphicManager* graphicManagerPtr_;
-    Manager* managerPtr_;
+    std::shared_ptr<GraphicManager> graphicManagerPtr_;
+    std::shared_ptr<Manager> managerPtr_;
 };
 
 #endif // APPLICATION_HPP

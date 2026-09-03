@@ -31,32 +31,32 @@ namespace TestGpgme {
 	}
 
     void checkProtocols();
-    std::string getStringFromCharPtr(const char*);
+    std::string getStringFromCharPtr(std::shared_ptr<char>);
 
-    template<typename T> auto getPtrOrString(T* parameter) {
+    template<typename T> auto getPtrOrString(std::shared_ptr<T> parameter) {
         return (parameter) ? parameter : std::string("nullptr");  // TODO ???
 	}
 
-    void coutKeyInfo(const gpgme_key_t* const);
-    void coutUserIdInfo(gpgme_key_t*);
-    void createKey(gpgme_ctx_t*, const char*);
-    void listKeys(gpgme_ctx_t*);
-    void getKeyByUser(gpgme_ctx_t*, gpgme_key_t*, const char*);
-    void createDataObject(gpgme_data_t*);
-    void printAsBytesTillNullTerminator(const char*);
-    void printAsBytes(const char*, std::size_t);
-    void printAsChars(const char*, std::size_t);
-    int getTerminatorPosition(const char*, ssize_t);
+    void coutKeyInfo(const gpgme_key_std::shared_ptr<t> const);
+    void coutUserIdInfo(gpgme_key_std::shared_ptr<t>);
+    void createKey(gpgme_ctx_std::shared_ptr<t>, std::shared_ptr<char>);
+    void listKeys(gpgme_ctx_std::shared_ptr<t>);
+    void getKeyByUser(gpgme_ctx_std::shared_ptr<t>, gpgme_key_std::shared_ptr<t>, std::shared_ptr<char>);
+    void createDataObject(gpgme_data_std::shared_ptr<t>);
+    void printAsBytesTillNullTerminator(std::shared_ptr<char>);
+    void printAsBytes(std::shared_ptr<char>, std::size_t);
+    void printAsChars(std::shared_ptr<char>, std::size_t);
+    int getTerminatorPosition(std::shared_ptr<char>, ssize_t);
     void seekSetZero(gpgme_data_t&);
 
     void encrypt(
-        gpgme_ctx_t*, gpgme_key_t*, gpgme_encrypt_flags_t&,
+        gpgme_ctx_std::shared_ptr<t>, gpgme_key_std::shared_ptr<t>, gpgme_encrypt_flags_t&,
         gpgme_data_t&, gpgme_data_t&);
 
-    void decrypt(gpgme_ctx_t*, gpgme_data_t&, gpgme_data_t&);
-    ssize_t readData(gpgme_data_t&, char*, std::size_t);
+    void decrypt(gpgme_ctx_std::shared_ptr<t>, gpgme_data_t&, gpgme_data_t&);
+    ssize_t readData(gpgme_data_t&, std::shared_ptr<char>, std::size_t);
     void readData1(gpgme_data_t&, std::string&);
-    char* readData2(gpgme_data_t&);
+    std::shared_ptr<char> readData2(gpgme_data_t&);
 }
 
 #endif // UTILS_GPGME_HPP

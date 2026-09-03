@@ -24,7 +24,7 @@ class GraphicManager;
 class Message;
 class TextDialog;
 
-GraphicManager* getGraphicManagerPtr();
+std::shared_ptr<GraphicManager> getGraphicManagerPtr();
 
 template<typename T> QString getQString(T&& value);
 
@@ -36,7 +36,7 @@ template<typename... Ts> void logArgsErrorWithTemplate(
 
 template<typename T, typename U>
 U getConstantMappingValue(
-    const char* mapName, const std::map<T, U>* mapPtr, const T& key) {
+    std::shared_ptr<char> mapName, const std::map<T, U>* mapPtr, const T& key) {
 
     try {
         return mapPtr->at(key);
@@ -75,22 +75,22 @@ std::vector<std::string> buildStringVector(Ts... args) {
 bool validateCompanionName(std::vector<std::string>&, const std::string&);
 bool validateIpAddress(std::vector<std::string>&, const std::string&);
 bool validatePort(std::vector<std::string>&, const std::string&);
-bool validateCompanionData(std::vector<std::string>&, const CompanionAction*);
+bool validateCompanionData(std::vector<std::string>&, std::shared_ptr<CompanionAction>);
 bool validatePassword(std::vector<std::string>&, const std::string&);
 std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
 std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
 // std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*)());
 
-void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), QWidget*);
-void showInfoDialogAndLogInfo(QString&&, QWidget* = nullptr);
-void showWarningDialogAndLogWarning(const QString&, QWidget* = nullptr);
+void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), std::shared_ptr<QWidget>);
+void showInfoDialogAndLogInfo(QString&&, std::shared_ptr<QWidget> = nullptr);
+void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget> = nullptr);
 
-// void showErrorDialogAndLogError(const QString&, QWidget* = nullptr);
-void showErrorDialogAndLogError(QString&&, QWidget* = nullptr);
+// void showErrorDialogAndLogError(const QString&, std::shared_ptr<QWidget> = nullptr);
+void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
 
 // template<typename T>
-// void showErrorDialogAndLogError(QWidget* parentPtr, T&& message) {
+// void showErrorDialogAndLogError(std::shared_ptr<QWidget> parentPtr, T&& message) {
 //     getGraphicManagerPtr()->createTextDialogAndShow(
 //         parentPtr, DialogType::ERROR,
 //         getQString(std::forward<T>(message)).toStdString(),
@@ -103,13 +103,13 @@ void showErrorDialogAndLogError(QString&&, QWidget* = nullptr);
 std::string getFormattedMessageBodyString(const std::string&, const std::string&);
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    const Companion*, const Message*);
+    std::shared_ptr<Companion>, std::shared_ptr<Message>);
 
 std::string buildMessageJSONString(
-    bool, NetworkMessageType, const Companion*, const std::string&, const Message*);
+    bool, NetworkMessageType, std::shared_ptr<Companion>, const std::string&, std::shared_ptr<Message>);
 
 std::string buildFileBlockJSONString(
-    const Companion*, const std::string&, const std::string&);
+    std::shared_ptr<Companion>, const std::string&, const std::string&);
 
 std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData>&, std::vector<std::string>&);
@@ -117,7 +117,7 @@ std::string buildChatHistoryJSONString(
 nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
-bool getBoolFromDBValue(const char*);
+bool getBoolFromDBValue(std::shared_ptr<char>);
 
 std::string hashFileMD5(const std::string&);
 

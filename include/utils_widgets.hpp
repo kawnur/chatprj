@@ -6,17 +6,17 @@
 #include "widgets.hpp"
 
 class ButtonInfo;
-void showErrorDialogAndLogError(QString&&, QWidget* = nullptr);
+void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
 
 std::vector<ButtonInfo>* getButtonInfoVectorPtr(const QString&);
 
 template<class T>
 void setButtonBox(
-    T* dialogPtr, QDialogButtonBox* buttonBoxPtr,
+    std::shared_ptr<T> dialogPtr, std::shared_ptr<QDialogButtonBox> buttonBoxPtr,
     std::vector<ButtonInfo>* infoVector) {
 
     for(auto& info : *infoVector) {
-        QPushButton* buttonPtr = buttonBoxPtr->addButton(
+        std::shared_ptr<QPushButton> buttonPtr = buttonBoxPtr->addButton(
             info.buttonText_, info.buttonRole_);
 
         // TODO create mapping and select signal by role

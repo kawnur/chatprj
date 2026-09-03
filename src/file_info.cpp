@@ -27,7 +27,7 @@ bool FileOperator::setFilePath(const std::filesystem::path& filePath) {
     return createFileAndOpen();
 }
 
-std::filebuf* FileOperator::closeFile() {
+std::shared_ptr<filebuf> FileOperator::closeFile() {
     return this->filebuf_.close();
 }
 
@@ -41,7 +41,7 @@ SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
     }
 }
 
-bool SenderOperator::sendFilePart(Companion* companionPtr, const std::string& networkId) {
+bool SenderOperator::sendFilePart(std::shared_ptr<Companion> companionPtr, const std::string& networkId) {
     std::stringstream sstream;
     char buffer[maxBufferSize] = { 0 };
 
@@ -61,7 +61,7 @@ bool SenderOperator::sendFilePart(Companion* companionPtr, const std::string& ne
     return result;
 }
 
-void SenderOperator::sendFile(Companion* companionPtr, const std::string& networkId) {
+void SenderOperator::sendFile(std::shared_ptr<Companion> companionPtr, const std::string& networkId) {
     auto sendFileLambda = [=, this](){
         if(this->filebuf_.is_open()) {
             auto length = this->filebuf_.in_avail();
@@ -81,7 +81,7 @@ void SenderOperator::sendFile(Companion* companionPtr, const std::string& networ
                         this->filePath_.string());
 
                     // close file
-                    std::filebuf* closeResult = this->filebuf_.close();
+                    std::shared_ptr<filebuf> closeResult = this->filebuf_.close();
 
                     if(!closeResult) {
                         logArgsErrorWithTemplate(
@@ -182,7 +182,7 @@ bool ReceiverOperator::createFileAndOpen() {
 }
 
 FileOperatorStorage::FileOperatorStorage() :
-    mappingMutex_(std::mutex()), mapping_(std::map<std::string, FileOperator*>()) {}
+    mappingMutex_(std::mutex()), mapping_(std::map<std::string, std::shared_ptr<FileOperator>>()) {}
 
 void FileOperatorStorage::addSenderOperator(
     const std::string& networkId, const std::filesystem::path& filePath) {
@@ -221,7 +221,7 @@ FileOperatorStorage::~FileOperatorStorage() {
     }
 }
 
-FileOperator* FileOperatorStorage::getOperator(const std::string& key) {
+std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string& key) {
     std::lock_guard<std::mutex> lock(this->mappingMutex_);
 
     try {

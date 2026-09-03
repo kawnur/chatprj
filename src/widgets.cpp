@@ -50,7 +50,7 @@ TextEditWidget::~TextEditWidget() {
     delete this->palettePtr_;
 }
 
-void TextEditWidget::keyPressEvent(QKeyEvent* event) {
+void TextEditWidget::keyPressEvent(std::shared_ptr<QKeyEvent> event) {
 //    coutWithEndl("keyPressEvent");
 //    coutArgsWithSpaceSeparator("event->type():", std::hex, event->type());
 //    coutArgsWithSpaceSeparator("event->key():", std::hex, event->key());
@@ -93,7 +93,7 @@ IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn) {
     setPalette(*palettePtr_);
 }
 
-IndicatorWidget::IndicatorWidget(const IndicatorWidget* indicator) {
+IndicatorWidget::IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator) {
     size_ = indicator->size_;
     isOn_ = indicator->isOn_;
     onColor_ = indicator->onColor_;
@@ -155,7 +155,7 @@ SocketInfoWidget::SocketInfoWidget(
     initializeFields();
 }
 
-SocketInfoWidget::SocketInfoWidget(Companion* companionPtr) :
+SocketInfoWidget::SocketInfoWidget(std::shared_ptr<Companion> companionPtr) :
     companionPtr_(companionPtr),
     name_(getQString(companionPtr->getName())),
     ipAddress_(getQString(companionPtr->getSocketInfoPtr()->getIpAddress())),
@@ -244,17 +244,17 @@ void SocketInfoWidget::deleteCompanionAction() {
 void SocketInfoWidget::clientAction() {
     bool result = false;
 
-    const Companion* companion =
+    std::shared_ptr<Companion> companion =
         getManagerPtr()->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
     QString currentText = this->connectButtonPtr_->text();
 
     if(this->isConnected_) {
-        result = const_cast<Companion*>(companion)->disconnectClient();
+        result = const_cast<std::shared_ptr<Companion>>(companion)->disconnectClient();
     }
     else {
-        result = const_cast<Companion*>(companion)->connectClient();
+        result = const_cast<std::shared_ptr<Companion>>(companion)->connectClient();
         getManagerPtr()->sendUnsentMessages(companion);
     }
 
@@ -321,7 +321,7 @@ void SocketInfoWidget::initializeFields() {
 //                toggleIndicatorButton_, &QPushButton::pressed,
 //                indicator_, &IndicatorWidget::toggle);
 
-    std::initializer_list<QWidget*> widgets {
+    std::initializer_list<std::shared_ptr<QWidget>> widgets {
         connectionStateIndicatorPtr_, nameLabelPtr_, ipAddressLabelPtr_,
         serverPortLabelPtr_, clientPortLabelPtr_, editButtonPtr_,
         connectButtonPtr_, newMessagesIndicatorPtr_
@@ -356,10 +356,10 @@ void SocketInfoWidget::changeColor(QColor& color) {
     this->setPalette(*this->palettePtr_);
 }
 
-void SocketInfoWidget::mousePressEvent(QMouseEvent* event) {
-    Manager* managerPtr = getManagerPtr();
+void SocketInfoWidget::mousePressEvent(std::shared_ptr<QMouseEvent> event) {
+    std::shared_ptr<Manager> managerPtr = getManagerPtr();
 
-    auto baseObjectPtr = dynamic_cast<SocketInfoBaseWidget*>(this);
+    auto baseObjectPtr = dynamic_cast<std::shared_ptr<SocketInfoBaseWidget>>(this);
 
     auto newCompanion =
         managerPtr->getMappedCompanionBySocketInfoBaseWidget(baseObjectPtr);
@@ -367,21 +367,21 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent* event) {
     managerPtr->resetSelectedCompanion(newCompanion);
 }
 
-void SocketInfoWidget::mouseReleaseEvent(QMouseEvent* event) {}
+void SocketInfoWidget::mouseReleaseEvent(std::shared_ptr<QMouseEvent> event) {}
 
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position) {
-    QMenu* menu = new QMenu(this);
+    std::shared_ptr<QMenu> menu = new QMenu(this);
 
     menu->addAction(this->requestHistoryAction_);
 
-    QAction* clearHistoryAction = new QAction("Clear chat history", this);
+    std::shared_ptr<QAction> clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
 
     connect(
         clearHistoryAction, &QAction::triggered,
         this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
 
-    QAction* deleteCompanionAction = new QAction("Delete companion", this);
+    std::shared_ptr<QAction> deleteCompanionAction = new QAction("Delete companion", this);
     menu->addAction(deleteCompanionAction);
 
     connect(
@@ -435,29 +435,29 @@ void ShowHideWidget::showInfo() {
     getGraphicManagerPtr()->showInfo();
 }
 
-void ShowHideWidget::mousePressEvent(QMouseEvent* event) {
+void ShowHideWidget::mousePressEvent(std::shared_ptr<QMouseEvent> event) {
     (this->show_) ? this->hideInfo() : this->showInfo();
     this->show_ = !(this->show_);
 }
 
-// void ScrollArea::wheelEvent(QWheelEvent* event)
+// void ScrollArea::wheelEvent(std::shared_ptr<QWheelEvent> event)
 // {
 //     logArgs("ScrollArea::wheelEvent");
 // }
 
-WidgetGroup::WidgetGroup(Companion* companionPtr) :
+WidgetGroup::WidgetGroup(std::shared_ptr<Companion> companionPtr) :
     companionPtr_(companionPtr),
     antecedentMessagesCounterMutex_(std::mutex()) {
     antecedentMessagesCounter_ = 0;
 
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+    std::shared_ptr<GraphicManager> graphicManagerPtr = getGraphicManagerPtr();
 
-    const SocketInfo* socketInfoPtr = companionPtr_->getSocketInfoPtr();
+    std::shared_ptr<SocketInfo> socketInfoPtr = companionPtr_->getSocketInfoPtr();
 
-    SocketInfoWidget* widget = new SocketInfoWidget(
-        const_cast<Companion*>(companionPtr_));
+    std::shared_ptr<SocketInfoWidget> widget = new SocketInfoWidget(
+        const_cast<std::shared_ptr<Companion>>(companionPtr_));
 
-    socketInfoBasePtr_ = dynamic_cast<SocketInfoBaseWidget*>(widget);
+    socketInfoBasePtr_ = dynamic_cast<std::shared_ptr<SocketInfoBaseWidget>>(widget);
     graphicManagerPtr->addWidgetToCompanionPanel(socketInfoBasePtr_);
 
     centralPanelPtr_ = new CentralPanelWidget(
@@ -465,7 +465,7 @@ WidgetGroup::WidgetGroup(Companion* companionPtr) :
 
     // centralPanelPtr_ = new CentralPanelWidget(nullptr, companionPtr_->getName());
 
-    centralPanelPtr_->set(const_cast<Companion*>(companionPtr_));
+    centralPanelPtr_->set(const_cast<std::shared_ptr<Companion>>(companionPtr_));
 
     graphicManagerPtr->addWidgetToMainWindowContainerAndSetParentTo(
         MainWindowContainerPosition::CENTRAL, centralPanelPtr_);
@@ -502,7 +502,7 @@ void WidgetGroup::set() {
 }
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
-    const Message* messagePtr, const MessageState* messageStatePtr) {
+    std::shared_ptr<Message> messagePtr, std::shared_ptr<MessageState> messageStatePtr) {
     this->centralPanelPtr_->addMessageWidgetToChatHistory(
         this, this->companionPtr_, messagePtr, messageStatePtr);
 }
@@ -510,7 +510,7 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
 void WidgetGroup::clearChatHistory() {
     this->centralPanelPtr_->clearChatHistory();
 
-    dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->
+    dynamic_cast<std::shared_ptr<SocketInfoWidget>>(this->socketInfoBasePtr_)->
         setNewMessagesIndicatorOff();
 
     std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
@@ -527,7 +527,7 @@ void WidgetGroup::showCentralPanel() {
     this->centralPanelPtr_->scrollDownChatHistory();
 }
 
-SocketInfoBaseWidget* WidgetGroup::getSocketInfoBasePtr() {
+std::shared_ptr<SocketInfoBaseWidget> WidgetGroup::getSocketInfoBasePtr() {
     return this->socketInfoBasePtr_;
 }
 
@@ -539,8 +539,8 @@ void WidgetGroup::messageAdded() {
     std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
 
     // set new message indicator on if socket info widget is not selected
-    SocketInfoWidget* castPtr =
-        dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_);
+    std::shared_ptr<SocketInfoWidget> castPtr =
+        dynamic_cast<std::shared_ptr<SocketInfoWidget>>(this->socketInfoBasePtr_);
 
     if(castPtr && this->antecedentMessagesCounter_ > 0) {
         castPtr->setNewMessagesIndicatorOn();
@@ -548,18 +548,18 @@ void WidgetGroup::messageAdded() {
 }
 
 void WidgetGroup::askUserForHistorySendingConfirmation() {
-    CompanionAction* actionPtr = new CompanionAction(
+    std::shared_ptr<CompanionAction> actionPtr = new CompanionAction(
         ChatActionType::SEND_HISTORY,
-        const_cast<Companion*>(this->companionPtr_));
+        const_cast<std::shared_ptr<Companion>>(this->companionPtr_));
 
     actionPtr->set();
 }
 
-void WidgetGroup::messageWidgetSelected(MessageWidget* messageWidgetPtr) {
+void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> messageWidgetPtr) {
     std::lock_guard<std::mutex> lock(this->antecedentMessagesCounterMutex_);
 
-    MessageState* messageStatePtr =
-        const_cast<Companion*>(this->companionPtr_)->
+    std::shared_ptr<MessageState> messageStatePtr =
+        const_cast<std::shared_ptr<Companion>>(this->companionPtr_)->
         getMappedMessageStatePtrByMessageWidgetPtr(
             true, messageWidgetPtr);
 
@@ -577,18 +577,18 @@ void WidgetGroup::messageWidgetSelected(MessageWidget* messageWidgetPtr) {
         messageStatePtr->setIsAntecedent(false);
 
         if(this->antecedentMessagesCounter_ == 0) {
-            dynamic_cast<SocketInfoWidget*>(this->socketInfoBasePtr_)->
+            dynamic_cast<std::shared_ptr<SocketInfoWidget>>(this->socketInfoBasePtr_)->
                 setNewMessagesIndicatorOff();
         }
     }
 }
 
 void WidgetGroup::buildChatHistorySlot() {
-    const_cast<Companion*>(this->companionPtr_)->addMessageWidgetsToChatHistory();
+    const_cast<std::shared_ptr<Companion>>(this->companionPtr_)->addMessageWidgetsToChatHistory();
 }
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
-    const MessageState* messageStatePtr, const Message* messagePtr) {
+    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) {
     bool isAntecedent = messageStatePtr->getIsAntecedent();
 
     if(isAntecedent) {
@@ -620,10 +620,10 @@ StubWidgetGroup::~StubWidgetGroup() {
 }
 
 void StubWidgetGroup::set() {
-    GraphicManager* graphicManagerPtr = getGraphicManagerPtr();
+    std::shared_ptr<GraphicManager> graphicManagerPtr = getGraphicManagerPtr();
 
-    SocketInfoBaseWidget* baseObjectCastPtr =
-        dynamic_cast<SocketInfoBaseWidget*>(socketInfoPtr_);
+    std::shared_ptr<SocketInfoBaseWidget> baseObjectCastPtr =
+        dynamic_cast<std::shared_ptr<SocketInfoBaseWidget>>(socketInfoPtr_);
 
     graphicManagerPtr->addWidgetToCompanionPanel(baseObjectCastPtr);
 
@@ -642,7 +642,7 @@ void StubWidgetGroup::set() {
 }
 
 void StubWidgetGroup::setParents(
-    QWidget* leftContainerPtr, QWidget* centralContainerPtr) {
+    std::shared_ptr<QWidget> leftContainerPtr, std::shared_ptr<QWidget> centralContainerPtr) {
     this->leftPanelPtr_->setParent(centralContainerPtr);
     this->centralPanelPtr_->setParent(centralContainerPtr);
     this->rightPanelPtr_->setParent(centralContainerPtr);
@@ -680,7 +680,7 @@ void StubWidgetGroup::setLeftPanelWidth(int width) {
     this->leftPanelPtr_->resize(width, this->leftPanelPtr_->height());
 }
 
-MainWindowContainerWidget::MainWindowContainerWidget(QWidget* widgetPtr) {
+MainWindowContainerWidget::MainWindowContainerWidget(std::shared_ptr<QWidget> widgetPtr) {
     if(widgetPtr)     {
         setParent(widgetPtr);
     }
@@ -695,13 +695,13 @@ MainWindowContainerWidget::~MainWindowContainerWidget() {
     delete this->layoutPtr_;
 }
 
-void MainWindowContainerWidget::addWidgetToLayout(QWidget* widgetPtr) {
+void MainWindowContainerWidget::addWidgetToLayout(std::shared_ptr<QWidget> widgetPtr) {
     if(widgetPtr) {
         this->layoutPtr_->addWidget(widgetPtr);
     }
 }
 
-void MainWindowContainerWidget::addWidgetToLayoutAndSetParentTo(QWidget* widgetPtr) {
+void MainWindowContainerWidget::addWidgetToLayoutAndSetParentTo(std::shared_ptr<QWidget> widgetPtr) {
     if(widgetPtr) {
         this->layoutPtr_->addWidget(widgetPtr);
         widgetPtr->setParent(this);

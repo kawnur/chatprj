@@ -2,7 +2,7 @@
 
 GraphicManager::GraphicManager() :
     messageToMessageWidgetMapMutex_(std::mutex()) {
-    // mapMessageToMessageWidget_(std::map<const Message*, const MessageWidget*>()) {
+    // mapMessageToMessageWidget_(std::map<std::shared_ptr<Message>, std::shared_ptr<MessageWidget>>()) {
     // stubWidgetsPtr_ = new StubWidgetGroup;
     // mainWindowPtr_ = new MainWindow;
 
@@ -10,7 +10,7 @@ GraphicManager::GraphicManager() :
     // mainWindowPtr_ = nullptr;
 }
 
-MainWindow* GraphicManager::getMainWindowPtr() {
+std::shared_ptr<MainWindow> GraphicManager::getMainWindowPtr() {
     return this->mainWindowPtr_;
 }
 
@@ -24,7 +24,7 @@ void GraphicManager::set() {
 }
 
 void GraphicManager::setParentsForStubs(
-    QWidget* leftContainerPtr, QWidget* centralContainerPtr) {
+    std::shared_ptr<QWidget> leftContainerPtr, std::shared_ptr<QWidget> centralContainerPtr) {
     this->stubWidgetsPtr_->setParents(leftContainerPtr, centralContainerPtr);
 }
 
@@ -33,7 +33,7 @@ void GraphicManager::setStubWidgets() {
 }
 
 void GraphicManager::sendMessage(
-    MessageType type, Companion* companionPtr, const std::string& text) {
+    MessageType type, std::shared_ptr<Companion> companionPtr, const std::string& text) {
     getManagerPtr()->sendMessage(type, companionPtr, nullptr, text);
 }
 
@@ -45,76 +45,76 @@ std::size_t GraphicManager::getCompanionPanelChildrenSize() {
     return this->mainWindowPtr_->getCompanionPanelChildrenSize();
 }
 
-void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroup* groupPtr) {
+void GraphicManager::hideWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> groupPtr) {
     groupPtr->hideCentralPanel();
 }
 
-void GraphicManager::showWidgetGroupCentralPanel(WidgetGroup* groupPtr) {
+void GraphicManager::showWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> groupPtr) {
     groupPtr->showCentralPanel();
 }
 
 void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
-    MainWindowContainerPosition position, QWidget* widgetPtr) {
+    MainWindowContainerPosition position, std::shared_ptr<QWidget> widgetPtr) {
     this->mainWindowPtr_->addWidgetToContainerAndSetParentTo(
         position, widgetPtr);
 }
 
-void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidget* widget) {
+void GraphicManager::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget) {
     this->mainWindowPtr_->addWidgetToCompanionPanel(widget);
 }
 
-void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidget* widget) {
+void GraphicManager::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget) {
     this->mainWindowPtr_->removeWidgetFromCompanionPanel(widget);
 }
 
 void GraphicManager::createTextDialogAndShow(
-    QWidget* parentPtr, DialogType dialogType, const std::string& text,
+    std::shared_ptr<QWidget> parentPtr, DialogType dialogType, const std::string& text,
     std::vector<ButtonInfo>* buttonInfoPtr) {
     // TODO delete objects for closed dialoges?
-    TextDialog* dialogPtr = new TextDialog(parentPtr, dialogType, text, buttonInfoPtr);
+    std::shared_ptr<TextDialog> dialogPtr = new TextDialog(parentPtr, dialogType, text, buttonInfoPtr);
 
     dialogPtr->set();
     dialogPtr->show();
 }
 
 void GraphicManager::createCompanion() {
-    CompanionAction* actionPtr = new CompanionAction(
+    std::shared_ptr<CompanionAction> actionPtr = new CompanionAction(
         ChatActionType::CREATE, nullptr);
 
     actionPtr->set();
 }
 
 void GraphicManager::createGroupChat() {
-    GroupChatAction* actionPtr = new GroupChatAction(ChatActionType::CREATE);
+    std::shared_ptr<GroupChatAction> actionPtr = new GroupChatAction(ChatActionType::CREATE);
     actionPtr->set();
 }
 
-void GraphicManager::updateCompanion(Companion* companionPtr) {
-    CompanionAction* actionPtr = new CompanionAction(
+void GraphicManager::updateCompanion(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<CompanionAction> actionPtr = new CompanionAction(
         ChatActionType::UPDATE, companionPtr);
 
     actionPtr->set();
 }
 
-void GraphicManager::clearCompanionHistory(Companion* companionPtr) {
-    CompanionAction* actionPtr = new CompanionAction(
+void GraphicManager::clearCompanionHistory(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<CompanionAction> actionPtr = new CompanionAction(
         ChatActionType::CLEAR_HISTORY, companionPtr);
 
     actionPtr->set();
 }
 
-void GraphicManager::clearChatHistory(WidgetGroup* widgetGroupPtr) {
+void GraphicManager::clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroupPtr) {
     widgetGroupPtr->clearChatHistory();
 }
 
-void GraphicManager::deleteCompanion(Companion* companionPtr) {
-    CompanionAction* actionPtr = new CompanionAction(
+void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<CompanionAction> actionPtr = new CompanionAction(
         ChatActionType::DELETE, companionPtr);
 
     actionPtr->set();
 }
 
-void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr) {
+void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> actionPtr) {
     switch(actionPtr->getActionType()) {
     case ChatActionType::CREATE:
         getManagerPtr()->createCompanion(actionPtr);
@@ -139,8 +139,8 @@ void GraphicManager::sendCompanionDataToManager(CompanionAction* actionPtr) {
 }
 
 void GraphicManager::showCompanionInfoDialog(
-    CompanionAction* companionActionPtr, std::string&& header) {
-    QWidget* parentPtr = nullptr;
+    std::shared_ptr<CompanionAction> companionActionPtr, std::string&& header) {
+    std::shared_ptr<QWidget> parentPtr = nullptr;
     void (TextDialog::*functionPtr)() = nullptr;
     // void (QDialog::*functionPtr)() = nullptr;
 
@@ -169,11 +169,11 @@ void GraphicManager::showCompanionInfoDialog(
     delete companionActionPtr;
 }
 
-void GraphicManager::sendNewPasswordDataToManager(PasswordAction* actionPtr) {
+void GraphicManager::sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> actionPtr) {
     getManagerPtr()->createUserPassword(actionPtr);
 }
 
-void GraphicManager::sendExistingPasswordDataToManager(PasswordAction* actionPtr) {
+void GraphicManager::sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> actionPtr) {
     getManagerPtr()->authenticateUser(actionPtr);
 }
 
@@ -225,7 +225,7 @@ void GraphicManager::showInfo() {
 }
 
 void GraphicManager::createEntrancePassword() {
-    PasswordAction* actionPtr = new PasswordAction(PasswordActionType::CREATE);
+    std::shared_ptr<PasswordAction> actionPtr = new PasswordAction(PasswordActionType::CREATE);
     actionPtr->set();
 }
 
@@ -238,12 +238,12 @@ void GraphicManager::disableMainWindowBlurEffect() {
 }
 
 void GraphicManager::getEntrancePassword() {
-    PasswordAction* actionPtr = new PasswordAction(PasswordActionType::GET);
+    std::shared_ptr<PasswordAction> actionPtr = new PasswordAction(PasswordActionType::GET);
     actionPtr->set();
 }
 
 void GraphicManager::markMessageWidgetAsSent(
-    Companion* companionPtr, const Message* messagePtr) {
+    std::shared_ptr<Companion> companionPtr, std::shared_ptr<Message> messagePtr) {
     auto setLambda = [&, this](){
         std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
@@ -260,7 +260,7 @@ void GraphicManager::markMessageWidgetAsSent(
 }
 
 void GraphicManager::markMessageWidgetAsReceived(
-    Companion* companionPtr, const Message* messagePtr) {
+    std::shared_ptr<Companion> companionPtr, std::shared_ptr<Message> messagePtr) {
     auto setLambda = [&, this](){
         std::lock_guard<std::mutex> lock(this->messageToMessageWidgetMapMutex_);
 
@@ -276,22 +276,22 @@ void GraphicManager::markMessageWidgetAsReceived(
     runAndLogException(setLambda);
 }
 
-void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroup* groupPtr) {
+void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> groupPtr) {
     groupPtr->sortChatHistoryElements();
 }
 
-void GraphicManager::sendFile(Companion* companionPtr) {
-    FileAction* actionPtr = new FileAction(FileActionType::SEND, "", companionPtr);
+void GraphicManager::sendFile(std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<FileAction> actionPtr = new FileAction(FileActionType::SEND, "", companionPtr);
     actionPtr->set();
 }
 
-void GraphicManager::saveFile(const std::string& networkId, Companion* companionPtr) {
-    FileAction* actionPtr = new FileAction(FileActionType::SAVE, networkId, companionPtr);
+void GraphicManager::saveFile(const std::string& networkId, std::shared_ptr<Companion> companionPtr) {
+    std::shared_ptr<FileAction> actionPtr = new FileAction(FileActionType::SAVE, networkId, companionPtr);
     actionPtr->set();
 }
 
-GraphicManager* getGraphicManagerPtr() {
-    QCoreApplication* coreApp = QCoreApplication::instance();
-    ChatApp* app = dynamic_cast<ChatApp*>(coreApp);
+std::shared_ptr<GraphicManager> getGraphicManagerPtr() {
+    std::shared_ptr<QCoreApplication> coreApp = QCoreApplication::instance();
+    std::shared_ptr<ChatApp> app = dynamic_cast<std::shared_ptr<ChatApp>>(coreApp);
     return app->graphicManagerPtr_;
 }

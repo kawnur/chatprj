@@ -23,7 +23,7 @@ public:
     DBReplyData(const std::vector<std::string>&);
     ~DBReplyData();
 
-    std::vector<std::map<std::string, const char*>>* getDataPtr();
+    std::vector<std::map<std::string, std::shared_ptr<char>>>* getDataPtr();
     // std::vector<QString> buildDataQStringVector();
     std::vector<std::string> buildDataStringVector();
 
@@ -31,73 +31,73 @@ public:
     bool isEmpty();
     void fill(std::size_t);
     std::size_t count(std::size_t, std::string);
-    void push(std::size_t, std::string, const char*);
+    void push(std::size_t, std::string, std::shared_ptr<char>);
     std::size_t size();
-    const char* getValue(std::size_t, std::string);
+    std::shared_ptr<char> getValue(std::size_t, std::string);
     bool findValue(const std::string&, const std::string&);    
 
 private:
-    std::vector<std::map<std::string, const char*>> data_;
+    std::vector<std::map<std::string, std::shared_ptr<char>>> data_;
 };
 
-const char* getValueFromEnvironmentVariable(const char*);
-PGconn* getDBConnection();
-PGresult* sendDBRequestAndReturnResult(const PGconn*, const bool&, const char*);
+std::shared_ptr<char> getValueFromEnvironmentVariable(std::shared_ptr<char>);
+std::shared_ptr<PGconn> getDBConnection();
+std::shared_ptr<PGresult> sendDBRequestAndReturnResult(std::shared_ptr<PGconn>, const bool&, std::shared_ptr<char>);
 
-PGresult* getCompanionsDBResult(const PGconn*, const bool&);
-PGresult* getCompanionByNameDBResult(const PGconn*, const bool&, const std::string&);
-PGresult* getCompanionAndSocketDBResult(const PGconn*, const bool&, const int&);
+std::shared_ptr<PGresult> getCompanionsDBResult(std::shared_ptr<PGconn>, const bool&);
+std::shared_ptr<PGresult> getCompanionByNameDBResult(std::shared_ptr<PGconn>, const bool&, const std::string&);
+std::shared_ptr<PGresult> getCompanionAndSocketDBResult(std::shared_ptr<PGconn>, const bool&, const int&);
 
-PGresult* getSocketInfoDBResult(const PGconn*, const bool&, const int&);
+std::shared_ptr<PGresult> getSocketInfoDBResult(std::shared_ptr<PGconn>, const bool&, const int&);
 
-PGresult* getSocketByIpAddressAndPortDBResult(
-    const PGconn*, const bool&, const std::string&, const std::string&);
+std::shared_ptr<PGresult> getSocketByIpAddressAndPortDBResult(
+    std::shared_ptr<PGconn>, const bool&, const std::string&, const std::string&);
 
-PGresult* getMessagesDBResult(const PGconn*, const bool&, const uint8_t&);
-PGresult* getAllMessagesByCompanionIdDBResult(const PGconn*, const bool&, const int&);
+std::shared_ptr<PGresult> getMessagesDBResult(std::shared_ptr<PGconn>, const bool&, const uint8_t&);
+std::shared_ptr<PGresult> getAllMessagesByCompanionIdDBResult(std::shared_ptr<PGconn>, const bool&, const int&);
 
-PGresult* getEarlyMessagesByMessageIdDBResult(
-    const PGconn*, const bool&, const int&, const uint32_t&);
+std::shared_ptr<PGresult> getEarlyMessagesByMessageIdDBResult(
+    std::shared_ptr<PGconn>, const bool&, const int&, const uint32_t&);
 
-PGresult* getMessageByCompanionIdAndTimestampDBResult(
-    const PGconn*, const bool&, const uint8_t&, const std::string&);
+std::shared_ptr<PGresult> getMessageByCompanionIdAndTimestampDBResult(
+    std::shared_ptr<PGconn>, const bool&, const uint8_t&, const std::string&);
 
-PGresult* getUnsentMessagesByCompanionNameDBResult(
-    const PGconn*, const bool&, const std::string&);
+std::shared_ptr<PGresult> getUnsentMessagesByCompanionNameDBResult(
+    std::shared_ptr<PGconn>, const bool&, const std::string&);
 
-PGresult* getPasswordDBResult(const PGconn*, const bool&);
+std::shared_ptr<PGresult> getPasswordDBResult(std::shared_ptr<PGconn>, const bool&);
 
-PGresult* setMessageIsSentInDbAndReturn(const PGconn*, const bool&, const uint32_t&);
-PGresult* setMessageIsReceivedInDbAndReturn(const PGconn*, const bool&, const uint32_t&);
+std::shared_ptr<PGresult> setMessageIsSentInDbAndReturn(std::shared_ptr<PGconn>, const bool&, const uint32_t&);
+std::shared_ptr<PGresult> setMessageIsReceivedInDbAndReturn(std::shared_ptr<PGconn>, const bool&, const uint32_t&);
 
-PGresult* pushCompanionToDBAndReturn(const PGconn*, const bool&, const std::string&);
-PGresult* updateCompanionAndReturn(const PGconn*, const bool&, const std::string&);
+std::shared_ptr<PGresult> pushCompanionToDBAndReturn(std::shared_ptr<PGconn>, const bool&, const std::string&);
+std::shared_ptr<PGresult> updateCompanionAndReturn(std::shared_ptr<PGconn>, const bool&, const std::string&);
 
-PGresult* updateCompanionAndSocketAndReturn(
-    const PGconn*, const bool&, const CompanionAction&);
+std::shared_ptr<PGresult> updateCompanionAndSocketAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
 
-PGresult* pushSocketToDBAndReturn(
-    const PGconn*, const bool&, const std::string&, const std::string&,
+std::shared_ptr<PGresult> pushSocketToDBAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const std::string&, const std::string&,
     const std::string&, const std::string&);
 
-PGresult* pushMessageToDBAndReturn(
-    const PGconn*, const bool&, const std::string&, const std::string&,
+std::shared_ptr<PGresult> pushMessageToDBAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const std::string&, const std::string&,
     const std::string&, const std::string&, const std::string&,
     const bool&, const bool&);
 
-PGresult* pushMessageToDBWithAuthorIdAndReturn(
-    const PGconn*, const bool&, const std::string&, const std::string&,
+std::shared_ptr<PGresult> pushMessageToDBWithAuthorIdAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const std::string&, const std::string&,
     const std::string&, const std::string&, const std::string&,
     const bool&, const bool&);
 
-PGresult* pushPasswordToDBAndReturn(const PGconn*, const bool&, const std::string&);
+std::shared_ptr<PGresult> pushPasswordToDBAndReturn(std::shared_ptr<PGconn>, const bool&, const std::string&);
 
-PGresult* deleteMessagesFromDBAndReturn(const PGconn*, const bool&, const CompanionAction&);
+std::shared_ptr<PGresult> deleteMessagesFromDBAndReturn(std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
 
-PGresult* deleteCompanionAndSocketAndReturn(
-    const PGconn*, const bool&, const CompanionAction&);
+std::shared_ptr<PGresult> deleteCompanionAndSocketAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
 
 int getDataFromDBResult(
-    const bool&, std::shared_ptr<DBReplyData>&, const PGresult*&, int);
+    const bool&, std::shared_ptr<DBReplyData>&, std::shared_ptr<PGresult>, int);
 
 #endif // DB_INTERACTION_HPP
