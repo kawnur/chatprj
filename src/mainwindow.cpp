@@ -163,13 +163,13 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     std::exit(0);
 }
 
-void MainWindow::keyPressEvent(std::shared_ptr<QKeyEvent> event) {
+void MainWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
         getManagerPtr()->resetSelectedCompanion(nullptr);
     }
 }
 
-void MainWindow::mouseDoubleClickEvent(std::shared_ptr<QMouseEvent> event) {
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event) {
     // this->showFullScreen();
 }
 

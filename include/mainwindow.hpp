@@ -82,9 +82,9 @@ private:
 
     std::shared_ptr<QGraphicsBlurEffect> blurEffectPtr_;
 
-    void closeEvent(std::shared_ptr<QCloseEvent>) override;
-    void keyPressEvent(std::shared_ptr<QKeyEvent>) override;
-    void mouseDoubleClickEvent(std::shared_ptr<QMouseEvent>) override;
+    void closeEvent(QCloseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
     void createMenu();
     void setBlurEffect();
 };

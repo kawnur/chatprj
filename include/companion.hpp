@@ -27,11 +27,11 @@ class MessageInfo;
 class MessageState;
 class WidgetGroup;
 
-template<typename... Ts> void logArgsInfoWithTemplate(
-    const std::format_string<Ts...>&, Ts&&...);
+template<typename... Ts>
+void logTemplateInfo(const std::format_string<Ts...>&, Ts&&...);
 
-template<typename... Ts> void logArgsErrorWithTemplate(
-    const std::format_string<Ts...>&, Ts&&...);
+template<typename... Ts>
+void logTemplateError(const std::format_string<Ts...>&, Ts&&...);
 
 class SocketInfo {
 public:
@@ -39,10 +39,9 @@ public:
     SocketInfo(std::string&, uint16_t&, uint16_t&);  // TODO remove
     SocketInfo(std::string&&, uint16_t&&, uint16_t&&);  // TODO remove
 
-    template<typename T, typename U, typename P> SocketInfo
-        (T&& ipAddress, U&& serverPort, P&& clientPort) :
-        ipAddress_(std::forward<T>(ipAddress)),
-        serverPort_(std::forward<U>(serverPort)),
+    template<typename T, typename U, typename P>
+    SocketInfo(T&& ipAddress, U&& serverPort, P&& clientPort) :
+        ipAddress_(std::forward<T>(ipAddress)), serverPort_(std::forward<U>(serverPort)),
         clientPort_(std::forward<P>(clientPort)) {}
 
     SocketInfo(const SocketInfo&);
@@ -64,7 +63,7 @@ private:
 class Companion {
 public:
     Companion(int, const std::string&);
-    ~Companion();
+    ~Companion() = default;
 
     friend bool operator<(const Companion& object1, const Companion& object2) {
         return object1.getId() < object2.getId();
@@ -87,25 +86,19 @@ public:
 
     template<typename T>
     void removeFileOperator(const std::string& networkId) {
-        auto operatorPtr =
-            this->getFileOperatorPtrByNetworkId<T>(networkId);
+        auto operatorPtr = this->getFileOperatorPtrByNetworkId<T>(networkId);
 
         if(operatorPtr) {
-            if(!this->removeOperatorFromStorage(networkId)) {
-                logArgsInfoWithTemplate(
-                    "remove file operator error for networkId {}", networkId);
-            }
+            if(!this->removeOperatorFromStorage(networkId))
+                logTemplateInfo("remove file operator error for networkId {}", networkId);
 
-            if(operatorPtr) {
-                delete operatorPtr;
-            }
+            if(operatorPtr)
+                delete operatorPtr;  // TODO remove
 
-            logArgsInfoWithTemplate(
-                "file operator for networkId {} deleted", networkId);
+            logTemplateInfo("file operator for networkId {} deleted", networkId);
         }
         else {
-            logArgsErrorWithTemplate(
-                "file operator was not found for networkId {}", networkId);
+            logTemplateError("file operator was not found for networkId {}", networkId);
         }
     }
 

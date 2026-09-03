@@ -100,8 +100,7 @@ private:
 
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBDataPtr(
-        const bool& logging,
-        std::shared_ptr<char> mark,
+        const bool& logging, std::shared_ptr<char> mark,
         std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, const bool&, const Ts&...),
         T&& keys, const Ts&... args) {
 

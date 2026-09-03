@@ -90,7 +90,7 @@ public:
 
 private:
     PasswordActionType actionType_;
-    std::shared_ptr<string> passwordPtr_;
+    std::shared_ptr<std::string> passwordPtr_;
 };
 
 class FileAction : public Action {

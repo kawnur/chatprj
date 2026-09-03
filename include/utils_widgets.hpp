@@ -6,8 +6,8 @@
 #include "constants.hpp"
 #include "utils.hpp"
 #include "widgets.hpp"
+#include "widgets_dialog.hpp"
 
-class ButtonInfo;
 void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
 
 std::vector<ButtonInfo>* getButtonInfoVectorPtr(const QString&);
@@ -15,8 +15,8 @@ std::vector<ButtonInfo>* getButtonInfoVectorPtr(const QString&);
 template<class T>
 void setButtonBox(
     std::shared_ptr<T> dialogPtr, std::shared_ptr<QDialogButtonBox> buttonBoxPtr,
-    std::vector<ButtonInfo>* infoVector) {
-
+    std::vector<ButtonInfo>* infoVector)
+{
     for(auto& info : *infoVector) {
         std::shared_ptr<QPushButton> buttonPtr = buttonBoxPtr->addButton(
             info.buttonText_, info.buttonRole_);

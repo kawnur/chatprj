@@ -39,13 +39,6 @@ Companion::Companion(int id, const std::string& name) :
     messageMapping_(std::map<Message, MessageInfo>()),
     fileOperatorStoragePtr_(new FileOperatorStorage) {}
 
-Companion::~Companion() {
-    delete this->socketInfoPtr_;
-    delete this->clientPtr_;
-    delete this->serverPtr_;
-    delete this->fileOperatorStoragePtr_;
-}
-
 int Companion::getId() const {
     return this->id_;
 }
@@ -260,9 +253,8 @@ void Companion::setMappedMessageWidget(
     auto result = this->messageMapping_.find(*messagePtr);
 
     if(result == this->messageMapping_.end()) {
-        logArgsErrorWithTemplate(
-            "message with id {} was not found in messageMapping_",
-            messagePtr->getId());
+        logTemplateError(
+            "message with id {} was not found in messageMapping_", messagePtr->getId());
     }
     else {
         result->second.setWidgetPtr(widgetPtr);

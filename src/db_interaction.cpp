@@ -397,7 +397,7 @@ int getDataFromDBResult(
     }
 
     if(maxTuples == 1 and ntuples > 1) {
-        logArgsErrorWithTemplate("{} lines from OneToOne DB request", ntuples);
+        logTemplateError("{} lines from OneToOne DB request", ntuples);
     }
 
     // create additional elements in result vector

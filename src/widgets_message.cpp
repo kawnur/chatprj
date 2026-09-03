@@ -123,7 +123,7 @@ void MessageWidget::setMessageWidgetAsReceived() {
     this->indicatorPanelPtr_->setReceivedIndicatorOn();
 }
 
-void MessageWidget::mousePressEvent(std::shared_ptr<QMouseEvent> event) {
+void MessageWidget::mousePressEvent(QMouseEvent * event) {
     this->indicatorPanelPtr_->unsetNewMessageLabel();
     emit this->widgetSelectedSignal(this);
 }

@@ -356,7 +356,7 @@ void SocketInfoWidget::changeColor(QColor& color) {
     this->setPalette(*this->palettePtr_);
 }
 
-void SocketInfoWidget::mousePressEvent(std::shared_ptr<QMouseEvent> event) {
+void SocketInfoWidget::mousePressEvent(QMouseEvent * event) {
     std::shared_ptr<Manager> managerPtr = getManagerPtr();
 
     auto baseObjectPtr = dynamic_cast<std::shared_ptr<SocketInfoBaseWidget>>(this);
@@ -435,7 +435,7 @@ void ShowHideWidget::showInfo() {
     getGraphicManagerPtr()->showInfo();
 }
 
-void ShowHideWidget::mousePressEvent(std::shared_ptr<QMouseEvent> event) {
+void ShowHideWidget::mousePressEvent(QMouseEvent * event) {
     (this->show_) ? this->hideInfo() : this->showInfo();
     this->show_ = !(this->show_);
 }

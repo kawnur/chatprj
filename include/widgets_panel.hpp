@@ -98,7 +98,7 @@ private:
 
     // std::shared_ptr<QSplitter> splitterPtr_;
 
-    bool eventFilter(std::shared_ptr<QObject>, std::shared_ptr<QEvent>) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
 private slots:
     void sendMessage(const QString&);

@@ -69,7 +69,7 @@ protected:
     virtual void addMembersToLayout() {}
 
 private:
-    void mousePressEvent(std::shared_ptr<QMouseEvent>) override;
+    void mousePressEvent(QMouseEvent *) override;
 };
 
 class TextMessageWidget : public MessageWidget {

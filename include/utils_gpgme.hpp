@@ -13,19 +13,18 @@ extern "C" {
 
 namespace TestGpgme {
     template<typename T, typename U>
-    void coutFuncResult(T (*type)(int), U (*func)(T)) {
+    void coutFuncResult(T (*type)(int), U (*func)(T))
+{
 		int i = 0;
 
         while(true) {
 			auto typeVal = type(i);
 			auto result = func(typeVal);
 
-            if(result != nullptr) {
+            if(result != nullptr)
 				coutArgsWithSpaceSeparator(i, std::string(result));
-			}
-            else {
+            else
 				break;
-			}
 
 			i++;
 		}
@@ -34,7 +33,9 @@ namespace TestGpgme {
     void checkProtocols();
     std::string getStringFromCharPtr(std::shared_ptr<char>);
 
-    template<typename T> auto getPtrOrString(std::shared_ptr<T> parameter) {
+    template<typename T>
+    auto getPtrOrString(std::shared_ptr<T> parameter)
+    {
         return (parameter) ? parameter : std::string("nullptr");  // TODO ???
 	}
 

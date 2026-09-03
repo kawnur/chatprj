@@ -312,7 +312,7 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock) {
     }
 }
 
-bool CentralPanelWidget::eventFilter(std::shared_ptr<QObject> objectPtr, std::shared_ptr<QEvent> eventPtr) {
+bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event) {
     auto result = QWidget::eventFilter(objectPtr, eventPtr);
 
     if(objectPtr == this->chatHistoryScrollAreaPtr_) {

@@ -388,7 +388,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std:
                 senderPtr->sendFile(companionPtr, networkId);
             }
             else {
-                logArgsErrorWithTemplate(
+                logTemplateError(
                     "companion has no file operator for networkId = {}", networkId);
             }
         }
@@ -405,7 +405,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std:
                 receiverPtr->receiveFilePart(jsonData.at("data"));
             }
             else {
-                logArgsErrorWithTemplate(
+                logTemplateError(
                     "companion has no file operator for networkId = {}", networkId);
             }
         }
@@ -415,7 +415,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std:
     case NetworkMessageType::FILE_DATA_CHECK_SUCCESS: {
             logArgs("got NetworkMessageType::FILE_DATA_CHECK_SUCCESS");
 
-            logArgsInfoWithTemplate(
+            logTemplateInfo(
                 "file {} received by companion successfully",
                 companionPtr->getFileOperatorFilePathStringByNetworkId(networkId));
 
@@ -427,7 +427,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std:
     case NetworkMessageType::FILE_DATA_CHECK_FAILURE: {
             logArgs("got NetworkMessageType::FILE_DATA_CHECK_FAILURE");
 
-            logArgsInfoWithTemplate(
+            logTemplateInfo(
                 "file {} WAS NOT received by companion",
                 companionPtr->getFileOperatorFilePathStringByNetworkId(networkId));
 
@@ -457,7 +457,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std:
                     companionPtr->sendMessage(false, resultType, networkId, nullptr);
             }
             else {
-                logArgsErrorWithTemplate(
+                logTemplateError(
                     "companion has no file operator for networkId = {}", networkId);
             }
         }
@@ -467,7 +467,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companionPtr, const std:
     case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE: {
             logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE");
 
-            logArgsInfoWithTemplate(
+            logTemplateInfo(
                 "file {} WAS NOT received by companion",
                 companionPtr->getFileOperatorFilePathStringByNetworkId(networkId));
 
@@ -502,7 +502,7 @@ void Manager::addEarlyMessages(std::shared_ptr<Companion> companionPtr) {
         }
 
         if(messagesDataPtr->isEmpty()) {
-            logArgsWarningWithTemplate(
+            logTemplateWarning(
                 "no messages earlier than id = {0} in db with companion {1}",
                 messageId, companionId);
 
@@ -1020,7 +1020,7 @@ void Manager::fillCompanionMessageMapping(
     }
 
     if(messagesDataPtr->isEmpty()) {
-        logArgsWarningWithTemplate(
+        logTemplateWarning(
             "no messages in db with companion {}", companionPtr->getName());
 
         // return false;

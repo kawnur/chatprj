@@ -21,7 +21,7 @@ public:
     std::filesystem::path getFilePath() const;
     std::string getFileMD5Hash() const;
     bool setFilePath(const std::filesystem::path&);
-    std::shared_ptr<filebuf> closeFile();
+    std::shared_ptr<std::filebuf> closeFile();
 
     virtual bool createFileAndOpen() { return false; }
 

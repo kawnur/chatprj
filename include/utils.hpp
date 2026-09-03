@@ -30,17 +30,14 @@ class TextDialog;
 std::shared_ptr<GraphicManager> getGraphicManagerPtr();
 
 template<typename T> QString getQString(T&& value);
-
 template<typename... Ts> void logArgsError(Ts&&... args);
 template<typename... Ts> void logArgsException(Ts&&... args);
-
-template<typename... Ts> void logArgsErrorWithTemplate(
-    const std::format_string<Ts...>&, Ts&&...);
+template<typename... Ts> void logArgsErrorWithTemplate(const std::format_string<Ts...>&, Ts&&...);
 
 template<typename T, typename U>
 U getConstantMappingValue(
-    std::shared_ptr<char> mapName, const std::map<T, U>* mapPtr, const T& key) {
-
+    std::shared_ptr<char> mapName, const std::map<T, U>* mapPtr, const T& key)
+{
     try {
         return mapPtr->at(key);
     }
@@ -55,7 +52,8 @@ U getConstantMappingValue(
 }
 
 template<typename F, typename... Ts>
-void runAndLogException(F func, Ts&&... args) {
+void runAndLogException(F func, Ts&&... args)
+{
     try {
         func(args...);
     }
@@ -65,7 +63,8 @@ void runAndLogException(F func, Ts&&... args) {
 }
 
 template<typename... Ts>
-std::vector<std::string> buildStringVector(Ts... args) {
+std::vector<std::string> buildStringVector(Ts... args)
+{
     std::vector<std::string> result;
 
     (result.emplace_back(args), ...);

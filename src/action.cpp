@@ -334,8 +334,7 @@ void FileAction::sendData() {
                 getManagerPtr()->setLastOpenedPath(this->filePath_.parent_path());
             }
             else {
-                logArgsErrorWithTemplate(
-                    "error saving file, path: {}", this->filePath_.string());
+                logTemplateError("error saving file, path: {}", this->filePath_.string());
             }
         }
 

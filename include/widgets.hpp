@@ -153,8 +153,8 @@ private:
 
     void initializeFields();
     void changeColor(QColor&);
-    void mousePressEvent(std::shared_ptr<QMouseEvent>) override;
-    void mouseReleaseEvent(std::shared_ptr<QMouseEvent>) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
 
 private slots:
     void customMenuRequestedSlot(QPoint);
@@ -194,7 +194,7 @@ private:
 
     void hideInfo();
     void showInfo();
-    void mousePressEvent(std::shared_ptr<QMouseEvent>) override;
+    void mousePressEvent(QMouseEvent *) override;
 };
 
 // class ScrollArea : public QScrollArea
