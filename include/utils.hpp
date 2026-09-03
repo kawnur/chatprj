@@ -27,7 +27,7 @@ class GraphicManager;
 class Message;
 class TextDialog;
 
-std::shared_ptr<GraphicManager> getGraphicManagerPtr();
+std::shared_ptr<GraphicManager> getGraphicManager();
 
 template<typename T> QString getQString(T&& value);
 template<typename... Ts> void logArgsError(Ts&&... args);
@@ -36,10 +36,10 @@ template<typename... Ts> void logArgsErrorWithTemplate(const std::format_string<
 
 template<typename T, typename U>
 U getConstantMappingValue(
-    std::shared_ptr<char> mapName, const std::map<T, U>* mapPtr, const T& key)
+    std::shared_ptr<char> mapName, const std::map<T, U>* map, const T& key)
 {
     try {
-        return mapPtr->at(key);
+        return map->at(key);
     }
     catch(std::out_of_range) {
         logArgsErrorWithTemplate("mapping {} key error", mapName);
@@ -92,9 +92,9 @@ void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget> = n
 void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
 
 // template<typename T>
-// void showErrorDialogAndLogError(std::shared_ptr<QWidget> parentPtr, T&& message) {
-//     getGraphicManagerPtr()->createTextDialogAndShow(
-//         parentPtr, DialogType::ERROR,
+// void showErrorDialogAndLogError(std::shared_ptr<QWidget> parent, T&& message) {
+//     getGraphicManager()->createTextDialogAndShow(
+//         parent, DialogType::ERROR,
 //         getQString(std::forward<T>(message)).toStdString(),
 //         // createOkButtonInfoVector(&QDialog::accept));
 //         createOkButtonInfoVector(&TextDialog::accept));
@@ -113,8 +113,7 @@ std::string buildMessageJSONString(
 std::string buildFileBlockJSONString(
     std::shared_ptr<Companion>, const std::string&, const std::string&);
 
-std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData>&, std::vector<std::string>&);
+std::string buildChatHistoryJSONString(std::shared_ptr<DBReplyData>, std::vector<std::string>&);
 
 nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);

@@ -80,7 +80,7 @@ std::string argForCout(const T& value)
     return std::to_string(value);
 }
 
-// std::string argForCout(const QString&);
+std::string argForCout(const QString&);
 std::string argForCout(const std::string&);
 std::string argForCout(std::shared_ptr<char>);
 std::string argForCout(const bool);
@@ -206,16 +206,16 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>&);
 void printArray(std::array<int, 10>&);
 
 // tuple
-template<typename T, std::size_t... I>
-void printTuple(T&& container)
-{
-    auto lambda = [](auto container)
-    {
-        std::cout << "a.get<" << I << ">(a): " << std::get<I>(container) << std::endl;
-    };
+// template<typename T, std::size_t... I>
+// void printTuple(T&& container)
+// {
+//     auto lambda = [](auto container)
+//     {
+//         std::cout << "a.get<" << I << ">(a): " << std::get<I>(container) << std::endl;
+//     };
 
-    (lambda, ...);
-}
+//     (lambda, ...);
+// }
 
 // set
 void printSet(std::set<int>&);

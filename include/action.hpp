@@ -23,16 +23,16 @@ class Action : public QObject {
     Q_OBJECT
 
 public:
-    Action(std::shared_ptr<Dialog> dialogPtr) : dialogPtr_(dialogPtr) {}
+    Action(std::shared_ptr<Dialog> dialog) : dialog_(dialog) {}
     ~Action() = default;
 
     void set();
-    std::shared_ptr<Dialog> getDialogPtr();
+    std::shared_ptr<Dialog> getDialog();
 
     virtual void sendData() {}
 
 protected:
-    std::shared_ptr<Dialog> dialogPtr_;
+    std::shared_ptr<Dialog> dialog_;
 };
 
 class CompanionAction : public Action {
@@ -41,7 +41,7 @@ class CompanionAction : public Action {
 
 public:
     CompanionAction(ChatActionType, std::shared_ptr<Companion>);
-    ~CompanionAction();
+    ~CompanionAction() = default;
 
     ChatActionType getActionType() const;
     std::string getName() const;
@@ -49,7 +49,7 @@ public:
     std::string getServerPort() const;
     std::string getClientPort() const;
     int getCompanionId() const;
-    std::shared_ptr<Companion> getCompanionPtr() const;
+    std::shared_ptr<Companion> getCompanion() const;
     void updateCompanionObjectData();
 
 public slots:
@@ -57,8 +57,8 @@ public slots:
 
 private:
     ChatActionType actionType_;
-    std::shared_ptr<CompanionData> dataPtr_;
-    std::shared_ptr<Companion> companionPtr_;
+    std::shared_ptr<CompanionData> data_;
+    std::shared_ptr<Companion> companion_;
 };
 
 class GroupChatAction : public Action {
@@ -67,14 +67,14 @@ class GroupChatAction : public Action {
 
 public:
     GroupChatAction(ChatActionType);
-    ~GroupChatAction();
+    ~GroupChatAction() = default;
 
 public slots:
     void sendData() override;
 
 private:
     ChatActionType actionType_;
-    std::shared_ptr<GroupChatData> dataPtr_;
+    std::shared_ptr<GroupChatData> data_;
 };
 
 class PasswordAction : public Action {
@@ -90,7 +90,7 @@ public:
 
 private:
     PasswordActionType actionType_;
-    std::shared_ptr<std::string> passwordPtr_;
+    std::shared_ptr<std::string> password_;
 };
 
 class FileAction : public Action {
@@ -102,7 +102,7 @@ public:
     ~FileAction() = default;
 
     FileActionType getType() const;
-    std::shared_ptr<Companion> getCompanionPtr() const;
+    std::shared_ptr<Companion> getCompanion() const;
     std::filesystem::path getPath() const;
     void sendData() override;
     void defineFilePath();
@@ -110,7 +110,7 @@ public:
 private:
     FileActionType actionType_;
     std::filesystem::path filePath_;
-    std::shared_ptr<Companion> companionPtr_;
+    std::shared_ptr<Companion> companion_;
     std::string networkId_;
 };
 

@@ -10,9 +10,9 @@ template<> int getSizeAsInt<std::string>(std::string& string) {
     return (int)string.size();
 }
 
-// std::string argForCout(const QString& value) {
-//     return value.toStdString();
-// }
+std::string argForCout(const QString& value) {
+    return value.toStdString();
+}
 
 std::string argForCout(const std::string& value) {
     return value;

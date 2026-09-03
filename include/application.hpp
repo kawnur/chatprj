@@ -19,12 +19,12 @@ class Manager;
 class ChatApp : public QApplication {
 public:
     ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {}
-    ~ChatApp();
+    ~ChatApp() = default;
 
     void set();
 
-    std::shared_ptr<GraphicManager> graphicManagerPtr_;
-    std::shared_ptr<Manager> managerPtr_;
+    std::shared_ptr<GraphicManager> graphicManager_;
+    std::shared_ptr<Manager> manager_;
 };
 
 #endif // APPLICATION_HPP

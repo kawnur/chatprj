@@ -28,7 +28,7 @@ public:
     GraphicManager();
     ~GraphicManager() = default;
 
-    std::shared_ptr<MainWindow> getMainWindowPtr();
+    std::shared_ptr<MainWindow> getMainWindow();
 
     void set();
     void setParentsForStubs(std::shared_ptr<QWidget>, std::shared_ptr<QWidget>);
@@ -79,10 +79,10 @@ public:
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;
-    std::shared_ptr<StubWidgetGroup> stubWidgetsPtr_;
-    std::shared_ptr<MainWindow> mainWindowPtr_;
+    std::shared_ptr<StubWidgetGroup> stubWidgets_;
+    std::shared_ptr<MainWindow> mainWindow_;
 };
 
-std::shared_ptr<GraphicManager> getGraphicManagerPtr();
+std::shared_ptr<GraphicManager> getGraphicManager();
 
 #endif // GRAPHIC_MANAGER_HPP

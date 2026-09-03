@@ -60,7 +60,7 @@ private:
 class FileOperatorStorage {
 public:
     FileOperatorStorage();
-    ~FileOperatorStorage();
+    ~FileOperatorStorage() = default;
 
     void addSenderOperator(const std::string&, const std::filesystem::path&);
 

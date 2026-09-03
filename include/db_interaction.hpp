@@ -25,7 +25,7 @@ public:
     DBReplyData(const std::vector<std::string>&);
     ~DBReplyData();
 
-    std::vector<std::map<std::string, std::shared_ptr<char>>>* getDataPtr();
+    std::vector<std::map<std::string, std::shared_ptr<char>>>* getData();
     // std::vector<QString> buildDataQStringVector();
     std::vector<std::string> buildDataStringVector();
 
@@ -100,6 +100,6 @@ std::shared_ptr<PGresult> deleteCompanionAndSocketAndReturn(
     std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
 
 int getDataFromDBResult(
-    const bool&, std::shared_ptr<DBReplyData>&, std::shared_ptr<PGresult>, int);
+    const bool&, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
 
 #endif // DB_INTERACTION_HPP

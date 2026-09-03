@@ -25,18 +25,18 @@ QString getQString(std::filesystem::path& value) {
 }
 
 void logLine(const QString& string) {
-    getGraphicManagerPtr()->addTextToAppLogWidget(string);
+    getGraphicManager()->addTextToAppLogWidget(string);
 }
 
 void logLine(const std::string& string) {
-    getGraphicManagerPtr()->addTextToAppLogWidget(getQString(string));
+    getGraphicManager()->addTextToAppLogWidget(getQString(string));
 }
 
-void logSocketInfoData(std::shared_ptr<SocketInfo> objectPtr) {
+void logSocketInfoData(std::shared_ptr<SocketInfo> object) {
     logArgsWithTemplate(
         "ipAddress: {0}, serverPort_: {1}, clientPort_: {2}",
-        objectPtr->getIpAddress(), objectPtr->getServerPort(),
-        objectPtr->getClientPort());
+        object->getIpAddress(), object->getServerPort(),
+        object->getClientPort());
 }
 
 void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column) {
@@ -46,19 +46,19 @@ void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int colu
     logArgsError("unknown field name:", logMark);
 }
 
-void logDBReplyData(std::shared_ptr<DBReplyData>& objectPtr) {
+void logDBReplyData(std::shared_ptr<DBReplyData> object) {
     logArgs(logDelimiter);
 
-    for(auto& element : objectPtr->buildDataStringVector()) {
+    for(auto& element : object->buildDataStringVector()) {
         logArgs(element);
     }
 
     logArgs(logDelimiter);
 }
 
-void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> objectPtr) {
+void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object) {
     logArgsWithTemplate(
         "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
-        objectPtr->getName().toStdString(), objectPtr->getIpAddress().toStdString(),
-        objectPtr->getServerPort(), objectPtr->getClientPort());
+        object->getName().toStdString(), object->getIpAddress().toStdString(),
+        object->getServerPort(), object->getClientPort());
 }

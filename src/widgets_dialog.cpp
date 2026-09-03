@@ -1,8 +1,8 @@
 #include "widgets_dialog.hpp"
 
 CompanionDataDialog::CompanionDataDialog(
-    ChatActionType actionType, std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr) {
-    setParent(parentPtr);
+    ChatActionType actionType, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion) {
+    setParent(parent);
 
     setWindowTitle(
         getConstantMappingValue(
@@ -15,77 +15,66 @@ CompanionDataDialog::CompanionDataDialog(
 
     actionType_ = actionType;
 
-    layoutPtr_ = new QFormLayout;
-    setLayout(layoutPtr_);
+    layout_ = new QFormLayout;
+    setLayout(layout_);
 
-    nameLabelPtr_ = new QLabel("Name");
-    nameEditPtr_ = new QLineEdit;
+    nameLabel_ = new QLabel("Name");
+    nameEdit_ = new QLineEdit;
 
-    ipAddressLabelPtr_ = new QLabel("IpAddress");
-    ipAddressEditPtr_ = new QLineEdit;
+    ipAddressLabel_ = new QLabel("IpAddress");
+    ipAddressEdit_ = new QLineEdit;
 
-    portLabelPtr_ = new QLabel("Port");
-    portEditPtr_ = new QLineEdit;
+    portLabel_ = new QLabel("Port");
+    portEdit_ = new QLineEdit;
 
-    if(actionType_ == ChatActionType::UPDATE && companionPtr) {
-        nameEditPtr_->setText(getQString(companionPtr->getName()));
+    if(actionType_ == ChatActionType::UPDATE && companion) {
+        nameEdit_->setText(getQString(companion->getName()));
 
-        ipAddressEditPtr_->setText(
-            getQString(companionPtr->getSocketInfoPtr()->getIpAddress()));
+        ipAddressEdit_->setText(
+            getQString(companion->getSocketInfo()->getIpAddress()));
 
-        portEditPtr_->setText(
+        portEdit_->setText(
             getQString(std::to_string(
-                companionPtr->getSocketInfoPtr()->getClientPort())));
+                companion->getSocketInfo()->getClientPort())));
     }
 
-    layoutPtr_->addRow(nameLabelPtr_, nameEditPtr_);
-    layoutPtr_->addRow(ipAddressLabelPtr_, ipAddressEditPtr_);
-    layoutPtr_->addRow(portLabelPtr_, portEditPtr_);
+    layout_->addRow(nameLabel_, nameEdit_);
+    layout_->addRow(ipAddressLabel_, ipAddressEdit_);
+    layout_->addRow(portLabel_, portEdit_);
 
-    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    layoutPtr_->addWidget(buttonBoxPtr_);
-}
-
-CompanionDataDialog::~CompanionDataDialog() {
-    delete this->layoutPtr_;
-    delete this->nameLabelPtr_;
-    delete this->nameEditPtr_;
-    delete this->ipAddressLabelPtr_;
-    delete this->ipAddressEditPtr_;
-    delete this->portLabelPtr_;
-    delete this->portEditPtr_;
-    delete this->buttonBoxPtr_;
+    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout_->addWidget(buttonBox_);
 }
 
 void CompanionDataDialog::set() {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
-        this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
+        this->buttonBox_, &QDialogButtonBox::accepted,
+        this->action_, &Action::sendData, Qt::QueuedConnection);
 
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::rejected,
+        this->buttonBox_, &QDialogButtonBox::rejected,
         this, &QDialog::reject, Qt::QueuedConnection);
 }
 
 std::string CompanionDataDialog::getNameString() {
-    return this->nameEditPtr_->text().toStdString();
+    return this->nameEdit_->text().toStdString();
 }
 
 std::string CompanionDataDialog::getIpAddressString() {
-    auto ipAddressFromWidget = this->ipAddressEditPtr_->text().toStdString();  // TODO change
+    auto ipAddressFromWidget = this->ipAddressEdit_->text().toStdString();  // TODO change
     QHostAddress hostAddress { getQString(ipAddressFromWidget) };
 
     return hostAddress.toString().toStdString();
 }
 
 std::string CompanionDataDialog::getPortString() {
-    return this->portEditPtr_->text().toStdString();
+    return this->portEdit_->text().toStdString();
 }
 
 GroupChatDataDialog::GroupChatDataDialog(
-    ChatActionType actionType, std::shared_ptr<QWidget> parentPtr) {
+    ChatActionType actionType, std::shared_ptr<QWidget> parent) {
 
-    setParent(parentPtr);
+    setParent(parent);
 
     setWindowTitle(
         getConstantMappingValue(
@@ -98,24 +87,13 @@ GroupChatDataDialog::GroupChatDataDialog(
 
     actionType_ = actionType;
 
-    layoutPtr_ = new QVBoxLayout;
-    setLayout(layoutPtr_);
+    layout_ = new QVBoxLayout;
+    setLayout(layout_);
 
-    labelPtr_ = new QLabel(newGroupChatDialogLabel);
+    label_ = new QLabel(newGroupChatDialogLabel);
 
-    listPtr_ = new QListWidget;
-    layoutPtr_->addWidget(listPtr_);
-
-
-
-
-
-
-
-}
-
-GroupChatDataDialog::~GroupChatDataDialog() {
-    delete this->layoutPtr_;
+    list_ = new QListWidget;
+    layout_->addWidget(list_);
 }
 
 void GroupChatDataDialog::set() {}
@@ -123,100 +101,84 @@ void GroupChatDataDialog::set() {}
 CreatePasswordDialog::CreatePasswordDialog() {
     setWindowTitle(newPasswordDialogTitle);
 
-    setParent(getGraphicManagerPtr()->getMainWindowPtr());
+    setParent(getGraphicManager()->getMainWindow());
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    layoutPtr_ = new QFormLayout;
-    setLayout(layoutPtr_);
+    layout_ = new QFormLayout;
+    setLayout(layout_);
 
-    firstLabelPtr_ = new QLabel(newPasswordDialogFirstLabel);
-    firstEditPtr_ = new QLineEdit;
+    firstLabel_ = new QLabel(newPasswordDialogFirstLabel);
+    firstEdit_ = new QLineEdit;
 
-    secondLabelPtr_ = new QLabel(newPasswordDialogSecondLabel);
-    secondEditPtr_ = new QLineEdit;
+    secondLabel_ = new QLabel(newPasswordDialogSecondLabel);
+    secondEdit_ = new QLineEdit;
 
-    layoutPtr_->addRow(firstLabelPtr_, firstEditPtr_);
-    layoutPtr_->addRow(secondLabelPtr_, secondEditPtr_);
+    layout_->addRow(firstLabel_, firstEdit_);
+    layout_->addRow(secondLabel_, secondEdit_);
 
-    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-    layoutPtr_->addWidget(buttonBoxPtr_);
-}
-
-CreatePasswordDialog::~CreatePasswordDialog() {
-    delete this->layoutPtr_;
-    delete this->firstLabelPtr_;
-    delete this->firstEditPtr_;
-    delete this->secondLabelPtr_;
-    delete this->secondEditPtr_;
-    delete this->buttonBoxPtr_;
+    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+    layout_->addWidget(buttonBox_);
 }
 
 void CreatePasswordDialog::set() {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
-        this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
+        this->buttonBox_, &QDialogButtonBox::accepted,
+        this->action_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string CreatePasswordDialog::getFirstEditText() {
-    return this->firstEditPtr_->text().toStdString();
+    return this->firstEdit_->text().toStdString();
 }
 
 std::string CreatePasswordDialog::getSecondEditText() {
-    return this->secondEditPtr_->text().toStdString();
+    return this->secondEdit_->text().toStdString();
 }
 
 GetPasswordDialog::GetPasswordDialog() {
     setWindowTitle(getPasswordDialogTitle);
 
-    setParent(getGraphicManagerPtr()->getMainWindowPtr());
+    setParent(getGraphicManager()->getMainWindow());
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    layoutPtr_ = new QFormLayout;
-    setLayout(layoutPtr_);
+    layout_ = new QFormLayout;
+    setLayout(layout_);
 
-    labelPtr_ = new QLabel(getPasswordDialogLabel);
-    editPtr_ = new QLineEdit;
+    label_ = new QLabel(getPasswordDialogLabel);
+    edit_ = new QLineEdit;
 
-    layoutPtr_->addRow(labelPtr_, editPtr_);
+    layout_->addRow(label_, edit_);
 
-    buttonBoxPtr_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-    layoutPtr_->addWidget(buttonBoxPtr_);
-}
-
-GetPasswordDialog::~GetPasswordDialog() {
-    delete this->layoutPtr_;
-    delete this->labelPtr_;
-    delete this->editPtr_;
-    delete this->buttonBoxPtr_;
+    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok);
+    layout_->addWidget(buttonBox_);
 }
 
 void GetPasswordDialog::set() {
     connect(
-        this->buttonBoxPtr_, &QDialogButtonBox::accepted,
-        this->actionPtr_, &Action::sendData, Qt::QueuedConnection);
+        this->buttonBox_, &QDialogButtonBox::accepted,
+        this->action_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText() {
-    return this->editPtr_->text().toStdString();
+    return this->edit_->text().toStdString();
 }
 
 ButtonInfo::ButtonInfo(
     const QString& buttonText, QDialogButtonBox::ButtonRole buttonRole,
-    void (TextDialog::*functionPtr)()) :
-    buttonText_(buttonText), buttonRole_(buttonRole), functionPtr_(functionPtr) {}
+    void (TextDialog::*function)()) :
+    buttonText_(buttonText), buttonRole_(buttonRole), function_(function) {}
 
 TextDialog::TextDialog(
-    std::shared_ptr<QWidget> parentPtr, DialogType dialogType, const std::string& text,
-    std::vector<ButtonInfo>* buttonsInfoPtr) {
-    if(parentPtr) {
-        setParent(parentPtr);
+    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string& text,
+    std::vector<ButtonInfo>* buttonsInfo) {
+    if(parent) {
+        setParent(parent);
     }
     else {
-        setParent(getGraphicManagerPtr()->getMainWindowPtr());
+        setParent(getGraphicManager()->getMainWindow());
     }
 
     setModal(true);
@@ -228,43 +190,36 @@ TextDialog::TextDialog(
             &dialogTypeStringRepresentation,
             dialogType));
 
-    layoutPtr_ = new QVBoxLayout;
-    setLayout(layoutPtr_);
+    layout_ = new QVBoxLayout;
+    setLayout(layout_);
 
-    textEditPtr_ = new QPlainTextEdit;
-    textEditPtr_->setReadOnly(true);
-    textEditPtr_->setPlainText(getQString(text));
-    layoutPtr_->addWidget(textEditPtr_);
+    textEdit_ = new QPlainTextEdit;
+    textEdit_->setReadOnly(true);
+    textEdit_->setPlainText(getQString(text));
+    layout_->addWidget(textEdit_);
 
     // set button box
-    buttonBoxPtr_ = new QDialogButtonBox;
-    layoutPtr_->addWidget(buttonBoxPtr_);
+    buttonBox_ = new QDialogButtonBox;
+    layout_->addWidget(buttonBox_);
 
-    buttonsInfoPtr_ = buttonsInfoPtr;
-}
-
-TextDialog::~TextDialog() {
-    delete this->layoutPtr_;
-    delete this->textEditPtr_;
-    delete this->buttonBoxPtr_;
-    delete this->buttonsInfoPtr_;
+    buttonsInfo_ = buttonsInfo;
 }
 
 void TextDialog::set() {
-    // for(auto& info : *this->buttonsInfoPtr_) {
-    //     std::shared_ptr<QPushButton> buttonPtr = this->buttonBoxPtr_->addButton(
+    // for(auto& info : *this->buttonsInfo_) {
+    //     std::shared_ptr<QPushButton> button = this->buttonBox_->addButton(
     //         info.buttonText_, info.buttonRole_);
 
     //     // TODO create mapping and select signal by role
     //     if(info.buttonRole_ == QDialogButtonBox::AcceptRole) {
     //         connect(
-    //             this->buttonBoxPtr_, &QDialogButtonBox::accepted,
-    //             this, info.functionPtr_, Qt::QueuedConnection);
+    //             this->buttonBox_, &QDialogButtonBox::accepted,
+    //             this, info.function_, Qt::QueuedConnection);
     //     }
     //     else if(info.buttonRole_ == QDialogButtonBox::RejectRole) {
     //         connect(
-    //             this->buttonBoxPtr_, &QDialogButtonBox::rejected,
-    //             this, info.functionPtr_, Qt::QueuedConnection);
+    //             this->buttonBox_, &QDialogButtonBox::rejected,
+    //             this, info.function_, Qt::QueuedConnection);
     //     }
     //     else {
     //         showErrorDialogAndLogError("Unmanaged button role");
@@ -279,20 +234,20 @@ void TextDialog::closeSelf() {
 void TextDialog::closeSelfAndParentDialog() {
     this->close();
 
-    auto parentPtr = this->parent();
+    auto parent = this->parent();
 
-    if(parentPtr) {
-        dynamic_cast<std::shared_ptr<QWidget>>(parentPtr)->close();
+    if(parent) {
+        dynamic_cast<std::shared_ptr<QWidget>>(parent)->close();
     }
 }
 
 void TextDialog::acceptAction() {
     this->close();
-    this->actionPtr_->sendData();
+    this->action_->sendData();
 }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs() {
-    getGraphicManagerPtr()->disableMainWindowBlurEffect();
+    getGraphicManager()->disableMainWindowBlurEffect();
     this->closeSelfAndParentDialog();
 }
 
@@ -300,35 +255,30 @@ void TextDialog::reject() {
     QDialog::reject();
 }
 
-FileDialog::FileDialog(std::shared_ptr<FileAction> actionPtr, const QString& windowTitle) {
-    actionPtr_ = actionPtr;
+FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString& windowTitle) {
+    action_ = action;
 
-    containsDialogPtr_ = true;
-    fileDialogPtr_ = new QFileDialog;
-    fileDialogPtr_->setFileMode(QFileDialog::AnyFile);
-    fileDialogPtr_->setViewMode(QFileDialog::Detail);
+    containsDialog_ = true;
+    fileDialog_ = new QFileDialog;
+    fileDialog_->setFileMode(QFileDialog::AnyFile);
+    fileDialog_->setViewMode(QFileDialog::Detail);
 
-    fileDialogPtr_->
-        setDirectory(getQString(getManagerPtr()->getLastOpenedPath().string()));
+    fileDialog_->
+        setDirectory(getQString(getManager()->getLastOpenedPath().string()));
 
-    fileDialogPtr_->setWindowTitle(windowTitle);
-}
-
-FileDialog::~FileDialog() {
-    delete this->fileDialogPtr_;
+    fileDialog_->setWindowTitle(windowTitle);
 }
 
 void FileDialog::set() {
     connect(
-        this->fileDialogPtr_, &QFileDialog::accepted,
-        this->actionPtr_, &Action::sendData,
-        Qt::QueuedConnection);
+        this->fileDialog_, &QFileDialog::accepted,
+        this->action_, &Action::sendData, Qt::QueuedConnection);
 }
 
 void FileDialog::showDialog() {
-    this->fileDialogPtr_->show();
+    this->fileDialog_->show();
 }
 
-std::shared_ptr<QFileDialog> FileDialog::getFileDialogPtr() {
-    return this->fileDialogPtr_;
+std::shared_ptr<QFileDialog> FileDialog::getFileDialog() {
+    return this->fileDialog_;
 }

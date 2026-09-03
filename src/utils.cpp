@@ -60,10 +60,10 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
 
 bool validateCompanionData(
     std::vector<std::string>& errors,
-    std::shared_ptr<CompanionAction> actionPtr) {
-    bool nameValidationResult = validateCompanionName(errors, actionPtr->getName());
-    bool ipAddressValidationResult = validateIpAddress(errors, actionPtr->getIpAddress());
-    bool portValidationResult = validatePort(errors, actionPtr->getClientPort());
+    std::shared_ptr<CompanionAction> action) {
+    bool nameValidationResult = validateCompanionName(errors, action->getName());
+    bool ipAddressValidationResult = validateIpAddress(errors, action->getIpAddress());
+    bool portValidationResult = validatePort(errors, action->getClientPort());
 
     bool result =
         nameValidationResult && ipAddressValidationResult && portValidationResult;
@@ -103,57 +103,57 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
     }
 }
 
-std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*functionPtr)()) {
-// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*functionPtr)()) {
-    std::vector<ButtonInfo>* vectorPtr = new std::vector<ButtonInfo>;
+std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*function)()) {
+// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*function)()) {
+    std::vector<ButtonInfo>* vector = new std::vector<ButtonInfo>;
 
-    vectorPtr->emplace_back(
-        okButtonText, QDialogButtonBox::AcceptRole, functionPtr);
+    vector->emplace_back(
+        okButtonText, QDialogButtonBox::AcceptRole, function);
 
-    return vectorPtr;
+    return vector;
 }
 
 void showInfoDialogAndLogInfo(
-    const QString& message, void (TextDialog::*functionPtr)(),
-    std::shared_ptr<QWidget> parentPtr = nullptr) {
-    getGraphicManagerPtr()->createTextDialogAndShow(
-        parentPtr, DialogType::INFO, message.toStdString(),
-        createOkButtonInfoVector(functionPtr));
+    const QString& message, void (TextDialog::*function)(),
+    std::shared_ptr<QWidget> parent = nullptr) {
+    getGraphicManager()->createTextDialogAndShow(
+        parent, DialogType::INFO, message.toStdString(),
+        createOkButtonInfoVector(function));
 
     logArgsInfo(message);
 }
 
 void showInfoDialogAndLogInfo(
-    QString&& message, std::shared_ptr<QWidget> parentPtr) {
-    getGraphicManagerPtr()->createTextDialogAndShow(
-        parentPtr, DialogType::INFO, std::move(message).toStdString(),
+    QString&& message, std::shared_ptr<QWidget> parent) {
+    getGraphicManager()->createTextDialogAndShow(
+        parent, DialogType::INFO, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
 
     logArgsInfo(message);
 }
 
 void showWarningDialogAndLogWarning(
-    const QString& message, std::shared_ptr<QWidget> parentPtr) {
-    getGraphicManagerPtr()->createTextDialogAndShow(
-        parentPtr, DialogType::WARNING, message.toStdString(),
+    const QString& message, std::shared_ptr<QWidget> parent) {
+    getGraphicManager()->createTextDialogAndShow(
+        parent, DialogType::WARNING, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
 
     logArgsWarning(message);
 }
 
 // void showErrorDialogAndLogError(
-//     const QString& message, std::shared_ptr<QWidget> parentPtr) {
-//     getGraphicManagerPtr()->createTextDialogAndShow(
-//         parentPtr, DialogType::ERROR, message.toStdString(),
+//     const QString& message, std::shared_ptr<QWidget> parent) {
+//     getGraphicManager()->createTextDialogAndShow(
+//         parent, DialogType::ERROR, message.toStdString(),
 //         createOkButtonInfoVector(&QDialog::accept));
 
 //     logArgsError(message);
 // }
 
 void showErrorDialogAndLogError(
-    QString&& message, std::shared_ptr<QWidget> parentPtr) {
-    getGraphicManagerPtr()->createTextDialogAndShow(
-        parentPtr, DialogType::ERROR, std::move(message).toStdString(),
+    QString&& message, std::shared_ptr<QWidget> parent) {
+    getGraphicManager()->createTextDialogAndShow(
+        parent, DialogType::ERROR, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
 
     logArgsError(message);
@@ -165,12 +165,12 @@ std::string getFormattedMessageBodyString(
 }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companionPtr, std::shared_ptr<Message> messagePtr) {
-    auto companionName = companionPtr->getName();
-    auto companionId = messagePtr->getCompanionId();
-    auto authorId = messagePtr->getAuthorId();
-    auto time = messagePtr->getTime();
-    auto text = messagePtr->getText();
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message) {
+    auto companionName = companion->getName();
+    auto companionId = message->getCompanionId();
+    auto authorId = message->getAuthorId();
+    auto time = message->getTime();
+    auto text = message->getText();
 
     std::string color, sender, receiver;
 
@@ -197,29 +197,29 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 }
 
 std::string buildMessageJSONString(
-    bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companionPtr,
-    const std::string& networkId, std::shared_ptr<Message> messagePtr) {
+    bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
+    const std::string& networkId, std::shared_ptr<Message> message) {
     using json = nlohmann::json;
 
     json jsonData;
 
     jsonData["type"] = type;
     jsonData["id"] = networkId;
-    jsonData["companion_id"] = companionPtr->getId();
+    jsonData["companion_id"] = companion->getId();
     jsonData["antecedent"] = isAntecedent;
 
     switch(type) {
     case NetworkMessageType::TEXT:
-        jsonData["time"] = messagePtr->getTime();
-        jsonData["text"] = messagePtr->getText();
+        jsonData["time"] = message->getTime();
+        jsonData["text"] = message->getText();
 
         break;
 
     case NetworkMessageType::FILE_PROPOSAL:
-        jsonData["time"] = messagePtr->getTime();
-        jsonData["text"] = messagePtr->getText();
+        jsonData["time"] = message->getTime();
+        jsonData["text"] = message->getText();
         jsonData["hashMD5"] =
-            companionPtr->getFileOperatorStoragePtr()->
+            companion->getFileOperatorStorage()->
                 getOperator(networkId)->getFileMD5Hash();
 
         break;
@@ -244,30 +244,30 @@ std::string buildMessageJSONString(
 }
 
 std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companionPtr, const std::string& networkId, const std::string& data) {
+    std::shared_ptr<Companion> companion, const std::string& networkId, const std::string& data) {
     using json = nlohmann::json;
 
     json jsonData;
 
     jsonData["type"] = NetworkMessageType::FILE_DATA;
     jsonData["id"] = networkId;
-    jsonData["companion_id"] = companionPtr->getId();
+    jsonData["companion_id"] = companion->getId();
     jsonData["data"] = data;
 
     return jsonData.dump();
 }
 
 std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData>& dataPtr, std::vector<std::string>& keys) {
+    std::shared_ptr<DBReplyData> data, std::vector<std::string>& keys) {
     using json = nlohmann::json;
     json jsonData;
 
     jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
     jsonData["messages"] = {};
 
-    for(std::size_t i = 0; i < dataPtr->size(); i++) {  // TODO switch to iterators
+    for(std::size_t i = 0; i < data->size(); i++) {  // TODO switch to iterators
         for(auto& key : keys) {
-            jsonData["messages"][i][key] = dataPtr->getValue(i, key);
+            jsonData["messages"][i][key] = data->getValue(i, key);
         }
     }
 
@@ -297,15 +297,15 @@ void sleepForMilliseconds(uint32_t duration) {
     std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 }
 
-bool getBoolFromDBValue(std::shared_ptr<char> valuePtr) {
-    if(*valuePtr == 't') {
+bool getBoolFromDBValue(std::shared_ptr<char> value) {
+    if(*value == 't') {
         return true;
     }
-    else if(*valuePtr == 'f') {
+    else if(*value == 'f') {
         return false;
     }
     else {
-        logArgsErrorWithTemplate("unknown bool value from DB: {}", valuePtr);
+        logArgsErrorWithTemplate("unknown bool value from DB: {}", value);
     }
 
     return false;

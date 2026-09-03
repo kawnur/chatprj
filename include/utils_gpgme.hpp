@@ -31,10 +31,10 @@ namespace TestGpgme {
 	}
 
     void checkProtocols();
-    std::string getStringFromCharPtr(std::shared_ptr<char>);
+    std::string getStringFromChar(std::shared_ptr<char>);
 
     template<typename T>
-    auto getPtrOrString(std::shared_ptr<T> parameter)
+    auto getOrString(std::shared_ptr<T> parameter)
     {
         return (parameter) ? parameter : std::string("nullptr");  // TODO ???
 	}

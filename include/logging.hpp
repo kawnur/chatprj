@@ -21,7 +21,7 @@ class GraphicManager;
 class SocketInfo;
 class SocketInfoWidget;
 
-std::shared_ptr<GraphicManager> getGraphicManagerPtr();
+std::shared_ptr<GraphicManager> getGraphicManager();
 
 template<typename T>
 concept IsArithmetic =
@@ -71,7 +71,7 @@ void logArgs(Ts&&... args)
 
     ((text += (getQString(args) + QString(" "))), ...);
 
-    getGraphicManagerPtr()->addTextToAppLogWidget(text);
+    getGraphicManager()->addTextToAppLogWidget(text);
     coutArgsWithSpaceSeparator(text);
 }
 
@@ -126,7 +126,7 @@ void logTemplateError(const std::format_string<Ts...>& templateString, Ts&&... a
 template<typename T>
 void logLine(const T& string)
 {
-    getGraphicManagerPtr()->addTextToAppLogWidget(QString(string));
+    getGraphicManager()->addTextToAppLogWidget(QString(string));
 }
 
 void logLine(const QString&);
@@ -140,7 +140,7 @@ void logArgsWithCustomMark(Ts&&... args)
 
 void logSocketInfoData(std::shared_ptr<SocketInfo>);
 void logDBResultUnknownField(std::shared_ptr<PGresult>, int, int);
-void logDBReplyData(std::shared_ptr<DBReplyData>&);
+void logDBReplyData(std::shared_ptr<DBReplyData>);
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget>);
 
 #endif // LOGGING_HPP

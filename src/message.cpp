@@ -68,17 +68,17 @@ void MessageState::setNetworkId(const std::string& networkId) {
     this->networkId_ = networkId;
 }
 
-MessageInfo::MessageInfo(std::shared_ptr<MessageState> statePtr, std::shared_ptr<MessageWidget> widgetPtr) :
-    statePtr_(statePtr), widgetPtr_(widgetPtr) {}
+MessageInfo::MessageInfo(std::shared_ptr<MessageState> state, std::shared_ptr<MessageWidget> widget) :
+    state_(state), widget_(widget) {}
 
-std::shared_ptr<MessageState> MessageInfo::getStatePtr() const {
-    return this->statePtr_;
+std::shared_ptr<MessageState> MessageInfo::getState() const {
+    return this->state_;
 }
 
-std::shared_ptr<MessageWidget> MessageInfo::getWidgetPtr() const {
-    return this->widgetPtr_;
+std::shared_ptr<MessageWidget> MessageInfo::getWidget() const {
+    return this->widget_;
 }
 
-void MessageInfo::setWidgetPtr(std::shared_ptr<MessageWidget> widgetPtr) {
-    this->widgetPtr_ = widgetPtr;
+void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget) {
+    this->widget_ = widget;
 }

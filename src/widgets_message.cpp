@@ -1,212 +1,191 @@
 #include "widgets_message.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
-    bool isMessageFromMe, std::shared_ptr<MessageState> messageStatePtr) {
+    bool isMessageFromMe, std::shared_ptr<MessageState> messageState) {
     isMessageFromMe_ = isMessageFromMe;
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    layoutPtr_ = new QHBoxLayout;
-    layoutPtr_->setAlignment(Qt::AlignRight | Qt::AlignTop);
-    layoutPtr_->setSpacing(5);
-    layoutPtr_->setContentsMargins(0, 0, 10, 10);
+    layout_ = new QHBoxLayout;
+    layout_->setAlignment(Qt::AlignRight | Qt::AlignTop);
+    layout_->setSpacing(5);
+    layout_->setContentsMargins(0, 0, 10, 10);
 
-    setLayout(layoutPtr_);
+    setLayout(layout_);
 
     if(isMessageFromMe_) {
-        sentIndicatoPtr_ = new IndicatorWidget(10, messageStatePtr->getIsSent());
-        receivedIndicatoPtr_ = new IndicatorWidget(10, messageStatePtr->getIsReceived());
+        sentIndicato_ = new IndicatorWidget(10, messageState->getIsSent());
+        receivedIndicato_ = new IndicatorWidget(10, messageState->getIsReceived());
 
-        newMessageLabelPtr_ = nullptr;
+        newMessageLabel_ = nullptr;
 
-        layoutPtr_->addWidget(sentIndicatoPtr_);
-        layoutPtr_->addWidget(receivedIndicatoPtr_);
+        layout_->addWidget(sentIndicato_);
+        layout_->addWidget(receivedIndicato_);
     }
     else {
-        sentIndicatoPtr_ = nullptr;
-        receivedIndicatoPtr_ = nullptr;
+        sentIndicato_ = nullptr;
+        receivedIndicato_ = nullptr;
 
-        std::string text = (messageStatePtr->getIsAntecedent()) ? "NEW" : "";
+        std::string text = (messageState->getIsAntecedent()) ? "NEW" : "";
 
         std::string textHtml = std::format(
             "<font color=\"{0}\"><b>{1}</b></font>", receivedMessageColor, text);
 
-        newMessageLabelPtr_ = new QLabel(getQString(textHtml));
-        newMessageLabelPtr_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
+        newMessageLabel_ = new QLabel(getQString(textHtml));
+        newMessageLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
 
-        layoutPtr_->addWidget(newMessageLabelPtr_);
+        layout_->addWidget(newMessageLabel_);
     }
 }
 
-MessageIndicatorPanelWidget::~MessageIndicatorPanelWidget() {
-    delete this->layoutPtr_;
-    delete this->sentIndicatoPtr_;
-    delete this->receivedIndicatoPtr_;
-    delete this->newMessageLabelPtr_;
-}
-
 void MessageIndicatorPanelWidget::setSentIndicatorOn() {
-    this->sentIndicatoPtr_->setOn();
+    this->sentIndicato_->setOn();
 }
 
 void MessageIndicatorPanelWidget::setReceivedIndicatorOn() {
-    this->receivedIndicatoPtr_->setOn();
+    this->receivedIndicato_->setOn();
 }
 
 void MessageIndicatorPanelWidget::unsetNewMessageLabel() {
-    if(this->newMessageLabelPtr_) {
-        this->newMessageLabelPtr_->setText("");
+    if(this->newMessageLabel_) {
+        this->newMessageLabel_->setText("");
     }
 }
 
 MessageWidget::MessageWidget(
-    std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr,
-    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) {
-    companionPtr_ = companionPtr;
-    messagePtr_ = messagePtr;
+    std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
+    std::shared_ptr<MessageState> messageState, std::shared_ptr<Message> message) {
+    companion_ = companion;
+    message_ = message;
 
-    // createdAsAntecedent_ = messageStatePtr->getIsAntecedent();
-    isMessageFromMe_ = messagePtr->isMessageFromMe();
+    // createdAsAntecedent_ = messageState->getIsAntecedent();
+    isMessageFromMe_ = message->isMessageFromMe();
 
     // set parent
-    if(parentPtr) {
-        setParent(parentPtr);
+    if(parent) {
+        setParent(parent);
     }
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    palettePtr_ = new QPalette;
-    palettePtr_->setColor(QPalette::Window, QColor(messageWidgetBackGroundColor));
+    palette_ = new QPalette;
+    palette_->setColor(QPalette::Window, QColor(messageWidgetBackGroundColor));
     setAutoFillBackground(true);
-    setPalette(*palettePtr_);
+    setPalette(*palette_);
 
-    layoutPtr_ = new QVBoxLayout;
-    layoutPtr_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    layoutPtr_->setSpacing(0);
-    layoutPtr_->setContentsMargins(0, 0, 0, 0);
+    layout_ = new QVBoxLayout;
+    layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    layout_->setSpacing(0);
+    layout_->setContentsMargins(0, 0, 0, 0);
 
-    setLayout(layoutPtr_);
+    setLayout(layout_);
 
-    auto data = formatMessageHeaderAndBody(companionPtr, messagePtr);
+    auto data = formatMessageHeaderAndBody(companion, message);
 
-    headerLabelPtr_ = new QLabel(getQString(data.first));
-    messageLabelPtr_ = new QLabel(getQString(data.second));
+    headerLabel_ = new QLabel(getQString(data.first));
+    messageLabel_ = new QLabel(getQString(data.second));
 
-    indicatorPanelPtr_ = new MessageIndicatorPanelWidget(isMessageFromMe_, messageStatePtr);
+    indicatorPanel_ = new MessageIndicatorPanelWidget(isMessageFromMe_, messageState);
 }
 
-MessageWidget::~MessageWidget() {
-    delete this->palettePtr_;
-    delete this->layoutPtr_;
-    delete this->headerLabelPtr_;
-    delete this->messageLabelPtr_;
-    delete this->indicatorPanelPtr_;
-}
-
-void MessageWidget::setBase(std::shared_ptr<WidgetGroup> groupPtr) {
+void MessageWidget::setBase(std::shared_ptr<WidgetGroup> group) {
     this->addMembersToLayout();
 
-    this->indicatorPanelPtr_->setParent(this);
+    this->indicatorPanel_->setParent(this);
 
     connect(
         this, &MessageWidget::widgetSelectedSignal,
-        groupPtr, &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
+        group, &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
 
-    this->set(groupPtr);
+    this->set(group);
 }
 
 void MessageWidget::setMessageWidgetAsSent() {
-    this->indicatorPanelPtr_->setSentIndicatorOn();
+    this->indicatorPanel_->setSentIndicatorOn();
 }
 
 void MessageWidget::setMessageWidgetAsReceived() {
-    this->indicatorPanelPtr_->setReceivedIndicatorOn();
+    this->indicatorPanel_->setReceivedIndicatorOn();
 }
 
 void MessageWidget::mousePressEvent(QMouseEvent * event) {
-    this->indicatorPanelPtr_->unsetNewMessageLabel();
+    this->indicatorPanel_->unsetNewMessageLabel();
     emit this->widgetSelectedSignal(this);
 }
 
 TextMessageWidget::TextMessageWidget(
-    std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr,
-    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) :
-    MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr) {
-    if(parentPtr) {
-        setParent(parentPtr);
+    std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
+    std::shared_ptr<MessageState> messageState, std::shared_ptr<Message> message) :
+    MessageWidget(parent, companion, messageState, message) {
+    if(parent) {
+        setParent(parent);
     }
 }
 
 TextMessageWidget::~TextMessageWidget() {}
 
 void TextMessageWidget::addMembersToLayout() {
-    layoutPtr_->addWidget(headerLabelPtr_);
-    layoutPtr_->addWidget(messageLabelPtr_);
-    layoutPtr_->addWidget(indicatorPanelPtr_);
+    layout_->addWidget(headerLabel_);
+    layout_->addWidget(messageLabel_);
+    layout_->addWidget(indicatorPanel_);
 }
 
 FileMessageWidget::FileMessageWidget(
-    std::shared_ptr<QWidget> parentPtr, std::shared_ptr<Companion> companionPtr,
-    std::shared_ptr<MessageState> messageStatePtr, std::shared_ptr<Message> messagePtr) :
-    MessageWidget(parentPtr, companionPtr, messageStatePtr, messagePtr) {
-    if(parentPtr) {
-        setParent(parentPtr);
+    std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
+    std::shared_ptr<MessageState> messageState, std::shared_ptr<Message> message) :
+    MessageWidget(parent, companion, messageState, message) {
+    if(parent) {
+        setParent(parent);
     }
 
-    bool isMessageFromMe = messagePtr->isMessageFromMe();
+    bool isMessageFromMe = message->isMessageFromMe();
 
     showButton_ = !isMessageFromMe;
 
-    messageStatePtr_ = messageStatePtr;
+    messageState_ = messageState;
 
     // rewrite widget body text for sender's widget
     if(isMessageFromMe) {
-        auto pathString = companionPtr->getFileOperatorFilePathStringByNetworkId(
-            messageStatePtr->getNetworkId());
+        auto pathString = companion->getFileOperatorFilePathStringByNetworkId(
+            messageState->getNetworkId());
 
-        messageLabelPtr_->setText(
+        messageLabel_->setText(
             getQString(
                 getFormattedMessageBodyString(
                     sentMessageColor,
                     std::format("SEND FILE: {}", pathString))));
     }
 
-    fileWidgetPtr_ = new QWidget;
-    fileWidgetLayoutPtr_ = new QHBoxLayout;
-    fileWidgetPtr_->setLayout(fileWidgetLayoutPtr_);
+    fileWidget_ = new QWidget;
+    fileWidgetLayout_ = new QHBoxLayout;
+    fileWidget_->setLayout(fileWidgetLayout_);
 
-    downloadButtonPtr_ = (showButton_) ? new QPushButton("Download file") : nullptr;
+    downloadButton_ = (showButton_) ? new QPushButton("Download file") : nullptr;
 }
 
-FileMessageWidget::~FileMessageWidget() {
-    delete this->fileWidgetPtr_;
-    delete this->fileWidgetLayoutPtr_;
-    delete this->downloadButtonPtr_;
-}
-
-void FileMessageWidget::set(std::shared_ptr<WidgetGroup> groupPtr) {
+void FileMessageWidget::set(std::shared_ptr<WidgetGroup> group) {
     connect(
-        this->downloadButtonPtr_, &QPushButton::clicked,
+        this->downloadButton_, &QPushButton::clicked,
         this, &FileMessageWidget::saveFileSlot, Qt::QueuedConnection);
 }
 
 void FileMessageWidget::addMembersToLayout() {
-    layoutPtr_->addWidget(headerLabelPtr_);
-    fileWidgetLayoutPtr_->addWidget(messageLabelPtr_);
+    layout_->addWidget(headerLabel_);
+    fileWidgetLayout_->addWidget(messageLabel_);
     logArgs("this->showButton_:", this->showButton_);
 
     if(this->showButton_) {
-        fileWidgetLayoutPtr_->addWidget(downloadButtonPtr_);
+        fileWidgetLayout_->addWidget(downloadButton_);
     }
 
-    layoutPtr_->addWidget(fileWidgetPtr_);
-    layoutPtr_->addWidget(indicatorPanelPtr_);
+    layout_->addWidget(fileWidget_);
+    layout_->addWidget(indicatorPanel_);
 }
 
 void FileMessageWidget::saveFileSlot() {
     // create file operator for this networkId
-    auto networkId = this->companionPtr_->
-                     getMappedMessageStatePtrByMessagePtr(this->messagePtr_)->getNetworkId();
+    auto networkId = this->companion_->
+                     getMappedMessageStateByMessage(this->message_)->getNetworkId();
 
-    getGraphicManagerPtr()->saveFile(networkId, this->companionPtr_);
+    getGraphicManager()->saveFile(networkId, this->companion_);
 }

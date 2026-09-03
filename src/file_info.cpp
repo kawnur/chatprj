@@ -41,7 +41,7 @@ SenderOperator::SenderOperator(const std::filesystem::path& filePath) :
     }
 }
 
-bool SenderOperator::sendFilePart(std::shared_ptr<Companion> companionPtr, const std::string& networkId) {
+bool SenderOperator::sendFilePart(std::shared_ptr<Companion> companion, const std::string& networkId) {
     std::stringstream sstream;
     char buffer[maxBufferSize] = { 0 };
 
@@ -55,13 +55,13 @@ bool SenderOperator::sendFilePart(std::shared_ptr<Companion> companionPtr, const
 
     std::string resultString = sstream.str();
 
-    bool result = companionPtr->sendFileBlock(networkId, resultString);
+    bool result = companion->sendFileBlock(networkId, resultString);
     // coutWithEndl(resultString);
 
     return result;
 }
 
-void SenderOperator::sendFile(std::shared_ptr<Companion> companionPtr, const std::string& networkId) {
+void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::string& networkId) {
     auto sendFileLambda = [=, this](){
         if(this->filebuf_.is_open()) {
             auto length = this->filebuf_.in_avail();
@@ -73,7 +73,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companionPtr, const std
                         logCustomDelimiter, "iteration:", i + 1, "/", iterationNumber);
                 }
 
-                bool result = this->sendFilePart(companionPtr, networkId);
+                bool result = this->sendFilePart(companion, networkId);
 
                 if(!result) {
                     logTemplateError(
@@ -97,14 +97,14 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companionPtr, const std
                     }
 
                     // send message
-                    companionPtr->sendMessage(
+                    companion->sendMessage(
                         false, NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE,
                         networkId, nullptr);
 
                     // remove self
                     std::thread(
                         [=](){
-                            companionPtr->removeFileOperator<SenderOperator>(networkId);
+                            companion->removeFileOperator<SenderOperator>(networkId);
                         }).detach();
 
                     return;
@@ -112,7 +112,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companionPtr, const std
             }
 
             // send 'end of transmission' message
-            companionPtr->sendMessage(
+            companion->sendMessage(
                 false, NetworkMessageType::FILE_DATA_TRANSMISSON_END,
                 networkId, nullptr);
 
@@ -211,14 +211,6 @@ void FileOperatorStorage::addReceiverOperator(
     }
 
     this->mapping_[networkId] = new ReceiverOperator(filePath, fileMD5HashFromSender);
-}
-
-FileOperatorStorage::~FileOperatorStorage() {
-    std::lock_guard<std::mutex> lock(this->mappingMutex_);
-
-    for(auto& pair : this->mapping_) {
-        delete pair.second;
-    }
 }
 
 std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string& key) {

@@ -27,15 +27,15 @@ public:
     Dialog() = default;
     ~Dialog() = default;
 
-    void setAction(std::shared_ptr<Action> actionPtr) { this->actionPtr_ = actionPtr; }
+    void setAction(std::shared_ptr<Action> action) { this->action_ = action; }
     virtual void set() {}
 
-    bool getContainsDialogPtr() const { return this->containsDialogPtr_; }
+    bool getContainsDialog() const { return this->containsDialog_; }
     virtual void showDialog() {}
 
 protected:
-    bool containsDialogPtr_ = false;
-    std::shared_ptr<Action> actionPtr_;
+    bool containsDialog_ = false;
+    std::shared_ptr<Action> action_;
 };
 
 class CompanionDataDialog : public Dialog {
@@ -44,7 +44,7 @@ class CompanionDataDialog : public Dialog {
 
 public:
     CompanionDataDialog(ChatActionType, std::shared_ptr<QWidget>, std::shared_ptr<Companion>);
-    ~CompanionDataDialog();
+    ~CompanionDataDialog() = default;
 
     void set() override;
     std::string getNameString();
@@ -53,14 +53,14 @@ public:
 
 private:
     ChatActionType actionType_;
-    std::shared_ptr<QFormLayout> layoutPtr_;
-    std::shared_ptr<QLabel> nameLabelPtr_;
-    std::shared_ptr<QLineEdit> nameEditPtr_;
-    std::shared_ptr<QLabel> ipAddressLabelPtr_;
-    std::shared_ptr<QLineEdit> ipAddressEditPtr_;
-    std::shared_ptr<QLabel> portLabelPtr_;
-    std::shared_ptr<QLineEdit> portEditPtr_;
-    std::shared_ptr<QDialogButtonBox> buttonBoxPtr_;
+    std::shared_ptr<QFormLayout> layout_;
+    std::shared_ptr<QLabel> nameLabel_;
+    std::shared_ptr<QLineEdit> nameEdit_;
+    std::shared_ptr<QLabel> ipAddressLabel_;
+    std::shared_ptr<QLineEdit> ipAddressEdit_;
+    std::shared_ptr<QLabel> portLabel_;
+    std::shared_ptr<QLineEdit> portEdit_;
+    std::shared_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class GroupChatDataDialog : public Dialog {
@@ -69,15 +69,15 @@ class GroupChatDataDialog : public Dialog {
 
 public:
     GroupChatDataDialog(ChatActionType, std::shared_ptr<QWidget>);
-    ~GroupChatDataDialog();
+    ~GroupChatDataDialog() = default;
 
     void set() override;
 
 private:
     ChatActionType actionType_;
-    std::shared_ptr<QVBoxLayout> layoutPtr_;
-    std::shared_ptr<QLabel> labelPtr_;
-    std::shared_ptr<QListWidget> listPtr_;
+    std::shared_ptr<QVBoxLayout> layout_;
+    std::shared_ptr<QLabel> label_;
+    std::shared_ptr<QListWidget> list_;
 
 };
 
@@ -87,19 +87,19 @@ class CreatePasswordDialog : public Dialog {
 
 public:
     CreatePasswordDialog();
-    ~CreatePasswordDialog();
+    ~CreatePasswordDialog() = default;
 
     void set() override;
     std::string getFirstEditText();
     std::string getSecondEditText();
 
 private:
-    std::shared_ptr<QFormLayout> layoutPtr_;
-    std::shared_ptr<QLabel> firstLabelPtr_;
-    std::shared_ptr<QLineEdit> firstEditPtr_;
-    std::shared_ptr<QLabel> secondLabelPtr_;
-    std::shared_ptr<QLineEdit> secondEditPtr_;
-    std::shared_ptr<QDialogButtonBox> buttonBoxPtr_;
+    std::shared_ptr<QFormLayout> layout_;
+    std::shared_ptr<QLabel> firstLabel_;
+    std::shared_ptr<QLineEdit> firstEdit_;
+    std::shared_ptr<QLabel> secondLabel_;
+    std::shared_ptr<QLineEdit> secondEdit_;
+    std::shared_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class GetPasswordDialog : public Dialog {
@@ -108,16 +108,16 @@ class GetPasswordDialog : public Dialog {
 
 public:
     GetPasswordDialog();
-    ~GetPasswordDialog();
+    ~GetPasswordDialog() = default;
 
     void set() override;
     std::string getEditText();
 
 private:
-    std::shared_ptr<QFormLayout> layoutPtr_;
-    std::shared_ptr<QLabel> labelPtr_;
-    std::shared_ptr<QLineEdit> editPtr_;
-    std::shared_ptr<QDialogButtonBox> buttonBoxPtr_;
+    std::shared_ptr<QFormLayout> layout_;
+    std::shared_ptr<QLabel> label_;
+    std::shared_ptr<QLineEdit> edit_;
+    std::shared_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class TextDialog;
@@ -131,7 +131,7 @@ public:
 
     QString buttonText_;
     QDialogButtonBox::ButtonRole buttonRole_;
-    void (TextDialog::*functionPtr_)();
+    void (TextDialog::*function_)();
 };
 
 class TextDialog : public Dialog {
@@ -140,7 +140,7 @@ class TextDialog : public Dialog {
 
 public:
     TextDialog(std::shared_ptr<QWidget>, DialogType, const std::string&, std::vector<ButtonInfo>*);
-    ~TextDialog();
+    ~TextDialog() = default;
 
     void set() override;
     void closeSelf();
@@ -152,10 +152,10 @@ public slots:
     void reject() override;
 
 private:
-    std::shared_ptr<QPlainTextEdit> textEditPtr_;
-    std::shared_ptr<QVBoxLayout> layoutPtr_;
-    std::shared_ptr<QDialogButtonBox> buttonBoxPtr_;
-    std::vector<ButtonInfo>* buttonsInfoPtr_;
+    std::shared_ptr<QPlainTextEdit> textEdit_;
+    std::shared_ptr<QVBoxLayout> layout_;
+    std::shared_ptr<QDialogButtonBox> buttonBox_;
+    std::vector<ButtonInfo>* buttonsInfo_;
 };
 
 class FileDialog : public Dialog {
@@ -164,16 +164,16 @@ class FileDialog : public Dialog {
 
 public:
     FileDialog(std::shared_ptr<FileAction>, const QString&);
-    ~FileDialog();
+    ~FileDialog() = default;
 
     void set();
     void showDialog() override;
 
-    std::shared_ptr<QFileDialog> getFileDialogPtr();
+    std::shared_ptr<QFileDialog> getFileDialog();
 
 private:
-    std::shared_ptr<FileAction> actionPtr_;
-    std::shared_ptr<QFileDialog> fileDialogPtr_;
+    std::shared_ptr<FileAction> action_;
+    std::shared_ptr<QFileDialog> fileDialog_;
 };
 
 #endif // WIDGETS_DIALOG_HPP

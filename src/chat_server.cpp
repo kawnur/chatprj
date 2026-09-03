@@ -39,7 +39,7 @@ void ServerSession::do_read() {
                                 closeCounter = 0;
                                 this->previous_ = "";
 
-                                getManagerPtr()->receiveMessage(this->companionPtr_, message);
+                                getManager()->receiveMessage(this->companion_, message);
                             }
                         }
                     }
@@ -66,7 +66,7 @@ void ChatServer::do_accept() {
         [this](boost::system::error_code ec, tcp::socket socket){
             if(!ec) {
                 std::make_shared<ServerSession>(
-                    this->companionPtr_, std::move(socket))->start();
+                    this->companion_, std::move(socket))->start();
             }
 
             do_accept();

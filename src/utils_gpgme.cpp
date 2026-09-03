@@ -2,7 +2,7 @@
 
 void checkProtocols() {}
 
-std::string getStringFromCharPtr(std::shared_ptr<char> value) {
+std::string getStringFromChar(std::shared_ptr<char> value) {
     return (value) ? std::string(value) : std::string("nullptr");
 }
 
@@ -26,15 +26,15 @@ void coutKeyInfo(const gpgme_key_std::shared_ptr<t> const key) {
     coutArgsWithSpaceSeparator("origin:", (int)(*key)->origin);
     coutArgsWithSpaceSeparator("protocol:", (*key)->protocol);
 
-    coutArgsWithSpaceSeparator("issuer_serial:", getStringFromCharPtr((*key)->issuer_serial));
-    coutArgsWithSpaceSeparator("issuer_name:", getStringFromCharPtr((*key)->issuer_name));
-    coutArgsWithSpaceSeparator("chain_id:", getStringFromCharPtr((*key)->chain_id));
+    coutArgsWithSpaceSeparator("issuer_serial:", getStringFromChar((*key)->issuer_serial));
+    coutArgsWithSpaceSeparator("issuer_name:", getStringFromChar((*key)->issuer_name));
+    coutArgsWithSpaceSeparator("chain_id:", getStringFromChar((*key)->chain_id));
 
     coutArgsWithSpaceSeparator("owner_trust:", (*key)->owner_trust);
     coutArgsWithSpaceSeparator("subkeys:", (*key)->subkeys);
     coutArgsWithSpaceSeparator("uids:", (*key)->uids);
 
-    coutArgsWithSpaceSeparator("fpr:", getStringFromCharPtr((*key)->fpr));
+    coutArgsWithSpaceSeparator("fpr:", getStringFromChar((*key)->fpr));
 
     coutArgsWithSpaceSeparator("last_update:", (*key)->last_update);
 
@@ -55,25 +55,25 @@ void coutUserIdInfo(gpgme_key_std::shared_ptr<t> key) {
     coutArgsWithSpaceSeparator("origin:", (int)(uids->origin));
     coutArgsWithSpaceSeparator("validity:", uids->validity);
 
-    coutArgsWithSpaceSeparator("uid:", getStringFromCharPtr(uids->uid));
-    coutArgsWithSpaceSeparator("name:", getStringFromCharPtr(uids->name));
-    coutArgsWithSpaceSeparator("email:", getStringFromCharPtr(uids->email));
-    coutArgsWithSpaceSeparator("comment:", getStringFromCharPtr(uids->comment));
+    coutArgsWithSpaceSeparator("uid:", getStringFromChar(uids->uid));
+    coutArgsWithSpaceSeparator("name:", getStringFromChar(uids->name));
+    coutArgsWithSpaceSeparator("email:", getStringFromChar(uids->email));
+    coutArgsWithSpaceSeparator("comment:", getStringFromChar(uids->comment));
 
     coutArgsWithSpaceSeparator("signatures:", uids->signatures);
     coutArgsWithSpaceSeparator("_last_keysig:", uids->_last_keysig);
 
-    coutArgsWithSpaceSeparator("address:", getStringFromCharPtr(uids->address));
+    coutArgsWithSpaceSeparator("address:", getStringFromChar(uids->address));
 
     coutArgsWithSpaceSeparator("tofu:", uids->tofu);
     coutArgsWithSpaceSeparator("last_update:", uids->last_update);
 
-    coutArgsWithSpaceSeparator("uidhash:", getStringFromCharPtr(uids->uidhash));
+    coutArgsWithSpaceSeparator("uidhash:", getStringFromChar(uids->uidhash));
 
     endline(1);
 }
 
-void createKey(gpgme_ctx_std::shared_ptr<t> contextPtr, std::shared_ptr<char> algoName) {
+void createKey(gpgme_ctx_std::shared_ptr<t> context, std::shared_ptr<char> algoName) {
     // create key
     std::shared_ptr<char> userId = "user2";
     unsigned long reserved = 0;
@@ -82,7 +82,7 @@ void createKey(gpgme_ctx_std::shared_ptr<t> contextPtr, std::shared_ptr<char> al
     unsigned int flags = GPGME_CREATE_ENCR;
 
     auto errorCreateKey = gpgme_op_createkey(
-            *contextPtr, userId, algoName, reserved, expires, extrakey, flags
+            *context, userId, algoName, reserved, expires, extrakey, flags
             );
 
     coutWithEndl(errorCreateKey);
@@ -98,7 +98,7 @@ void createKey(gpgme_ctx_std::shared_ptr<t> contextPtr, std::shared_ptr<char> al
     }
 }
 
-void listKeys(gpgme_ctx_std::shared_ptr<t> contextPtr) {
+void listKeys(gpgme_ctx_std::shared_ptr<t> context) {
     // list keys
     std::shared_ptr<char> pattern = NULL;
     int secret_only = 0;
@@ -106,7 +106,7 @@ void listKeys(gpgme_ctx_std::shared_ptr<t> contextPtr) {
     int i = 0;
     coutArgsWithSpaceSeparator("i:", i);
 
-    auto errorKeylistStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
+    auto errorKeylistStart = gpgme_op_keylist_start(*context, pattern, secret_only);
 
     if(errorKeylistStart == GPG_ERR_INV_VALUE) {
         coutWithEndl("key listing: context is not a valid pointer");
@@ -118,7 +118,7 @@ void listKeys(gpgme_ctx_std::shared_ptr<t> contextPtr) {
         gpgme_key_t r_key;
 //			coutArgsWithSpaceSeparator("&r_key:", &r_key);
 
-        errorKeylistNext = gpgme_op_keylist_next(*contextPtr, &r_key);
+        errorKeylistNext = gpgme_op_keylist_next(*context, &r_key);
 
         if(errorKeylistNext == GPG_ERR_INV_VALUE) {
             coutWithEndl("key listing: context or r_key is not a valid pointer");
@@ -136,7 +136,7 @@ void listKeys(gpgme_ctx_std::shared_ptr<t> contextPtr) {
         coutArgsWithSpaceSeparator("i:", i);
     }
 
-    auto errorKeylistEnd = gpgme_op_keylist_end(*contextPtr);
+    auto errorKeylistEnd = gpgme_op_keylist_end(*context);
 
     if(errorKeylistEnd == GPG_ERR_INV_VALUE) {
         coutWithEndl("key listing: context is not a valid pointer");
@@ -149,12 +149,12 @@ void listKeys(gpgme_ctx_std::shared_ptr<t> contextPtr) {
     coutArgsWithSpaceSeparator("i:", i);
 }
 
-void getKeyByUser(gpgme_ctx_std::shared_ptr<t> contextPtr, gpgme_key_std::shared_ptr<t> keyPtr, std::shared_ptr<char> name) {
+void getKeyByUser(gpgme_ctx_std::shared_ptr<t> context, gpgme_key_std::shared_ptr<t> key, std::shared_ptr<char> name) {
 
     std::shared_ptr<char> pattern = NULL;
     int secret_only = 0;
 
-    auto errorKeylistStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
+    auto errorKeylistStart = gpgme_op_keylist_start(*context, pattern, secret_only);
 
     if(errorKeylistStart == GPG_ERR_INV_VALUE) {
         coutWithEndl("getKeyByUser: context is not a valid pointer");
@@ -163,7 +163,7 @@ void getKeyByUser(gpgme_ctx_std::shared_ptr<t> contextPtr, gpgme_key_std::shared
     gpgme_error_t errorKeylistNext = NULL;
 
     while(true) {
-        errorKeylistNext = gpgme_op_keylist_next(*contextPtr, keyPtr);
+        errorKeylistNext = gpgme_op_keylist_next(*context, key);
 
         if(errorKeylistNext == GPG_ERR_INV_VALUE) {
             coutWithEndl("key listing: context or r_key is not a valid pointer");
@@ -172,15 +172,15 @@ void getKeyByUser(gpgme_ctx_std::shared_ptr<t> contextPtr, gpgme_key_std::shared
             coutWithEndl("key listing: there is not enough memory for the operation");
         }
 
-        if(strcmp((*keyPtr)->uids->name, name) == 0) {
+        if(strcmp((*key)->uids->name, name) == 0) {
             coutWithEndl("key found");
             break;
         }
     }
 }
 
-void createDataObject(gpgme_data_std::shared_ptr<t> dataPtr) {
-    auto errorDataCreation = gpgme_data_new(dataPtr);
+void createDataObject(gpgme_data_std::shared_ptr<t> data) {
+    auto errorDataCreation = gpgme_data_new(data);
 
     if(errorDataCreation == GPG_ERR_NO_ERROR) {
         coutWithEndl("data object was successfully created");
@@ -249,17 +249,17 @@ int getTerminatorPosition(std::shared_ptr<char> value, ssize_t size) {
     return -1;
 }
 
-void seekSetZero(gpgme_data_t& data) {
+void seekSetZero(gpgme_data_t &data)
+{
     auto off = gpgme_data_seek(data, 0, SEEK_SET);
 //		coutArgsWithSpaceSeparator("off:", off);
 
-    if(off == -1) {
+    if (off == -1)
         coutWithEndl("gpgme_data_seek error");
-    }
 }
 
 void encrypt(
-    gpgme_ctx_std::shared_ptr<t> contextPtr,
+    gpgme_ctx_std::shared_ptr<t> context,
     gpgme_key_std::shared_ptr<t> keys,
     gpgme_encrypt_flags_t& flags,
     gpgme_data_t& data,
@@ -267,7 +267,7 @@ void encrypt(
     seekSetZero(data);
     seekSetZero(dataEncrypt);
 
-    auto errorEncryption = gpgme_op_encrypt(*contextPtr, keys, flags, data, dataEncrypt);
+    auto errorEncryption = gpgme_op_encrypt(*context, keys, flags, data, dataEncrypt);
 
     if(errorEncryption == GPG_ERR_NO_ERROR) {
         coutWithEndl("ciphertext created successfully");
@@ -283,11 +283,11 @@ void encrypt(
     }
 }
 
-void decrypt(gpgme_ctx_std::shared_ptr<t> contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt) {
+void decrypt(gpgme_ctx_std::shared_ptr<t> context, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt) {
     seekSetZero(dataEncrypt);
     seekSetZero(dataDecrypt);
 
-    auto errorDecryption = gpgme_op_decrypt(*contextPtr, dataEncrypt, dataDecrypt);
+    auto errorDecryption = gpgme_op_decrypt(*context, dataEncrypt, dataDecrypt);
 
     if(errorDecryption == GPG_ERR_NO_ERROR) {
         coutWithEndl("ciphertext decrypted successfully");
@@ -320,7 +320,9 @@ ssize_t readData(gpgme_data_t& data, std::shared_ptr<char> dataString, std::size
     return sizeRead;
 }
 
-void readData1(gpgme_data_t& data, std::string& dataString) {
+void readData1(gpgme_data_t& data, std::string& dataString)
+{
+    // TODO rewrite
     seekSetZero(data);
 
     std::shared_ptr<char> p = new char[2];
@@ -340,8 +342,6 @@ void readData1(gpgme_data_t& data, std::string& dataString) {
             break;
         }
     }
-
-    delete[] p;
 }
 
 std::shared_ptr<char> readData2(gpgme_data_t& data) {

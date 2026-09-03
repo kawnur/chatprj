@@ -4,143 +4,136 @@ MainWindow::MainWindow() {
     setWindowTitle(std::getenv("CLIENT_NAME"));
 
     // menu bar
-    menuBarPalettePtr_ = new QPalette;
+    menuBarPalette_ = new QPalette;
 
-    menuBarPalettePtr_->setColor(
+    menuBarPalette_->setColor(
         QPalette::Window, QColor(mainWindowMenuBarBackgroundColor));
 
     menuBar()->setAutoFillBackground(true);
-    menuBar()->setPalette(*menuBarPalettePtr_);
+    menuBar()->setPalette(*menuBarPalette_);
 
     // central widget
-    centralWidgetPtr_ = new QWidget;
-    setCentralWidget(centralWidgetPtr_);
+    centralWidget_ = new QWidget;
+    setCentralWidget(centralWidget_);
 
-    centralWidgetLayoutPtr_ = new QHBoxLayout(centralWidgetPtr_);
-    centralWidgetLayoutPtr_->setSpacing(0);
-    centralWidgetLayoutPtr_->setContentsMargins(0, 0, 0, 0);
-    centralWidgetPtr_->setLayout(centralWidgetLayoutPtr_);
+    centralWidgetLayout_ = new QHBoxLayout(centralWidget_);
+    centralWidgetLayout_->setSpacing(0);
+    centralWidgetLayout_->setContentsMargins(0, 0, 0, 0);
+    centralWidget_->setLayout(centralWidgetLayout_);
 
     // left panel
-    leftContainerWidgetPtr_ = new MainWindowContainerWidget(centralWidgetPtr_);
-    centralWidgetLayoutPtr_->addWidget(leftContainerWidgetPtr_);
+    leftContainerWidget_ = new MainWindowContainerWidget(centralWidget_);
+    centralWidgetLayout_->addWidget(leftContainerWidget_);
 
-    leftPanelPtr_ = new LeftPanelWidget(leftContainerWidgetPtr_);
-    leftContainerWidgetPtr_->addWidgetToLayout(leftPanelPtr_);
+    leftPanel_ = new LeftPanelWidget(leftContainerWidget_);
+    leftContainerWidget_->addWidgetToLayout(leftPanel_);
 
     // central panel
-    centralContainerWidgetPtr_ = new MainWindowContainerWidget(centralWidgetPtr_);
-    centralWidgetLayoutPtr_->addWidget(centralContainerWidgetPtr_);
+    centralContainerWidget_ = new MainWindowContainerWidget(centralWidget_);
+    centralWidgetLayout_->addWidget(centralContainerWidget_);
 
-    centralPanelPtr_ = nullptr;
+    centralPanel_ = nullptr;
 
     // right panel
-    rightContainerWidgetPtr_ = new MainWindowContainerWidget(centralWidgetPtr_);
-    centralWidgetLayoutPtr_->addWidget(rightContainerWidgetPtr_);
+    rightContainerWidget_ = new MainWindowContainerWidget(centralWidget_);
+    centralWidgetLayout_->addWidget(rightContainerWidget_);
 
-    rightPanelPtr_ = new RightPanelWidget(rightContainerWidgetPtr_);
-    rightPanelPtr_->set();
+    rightPanel_ = new RightPanelWidget(rightContainerWidget_);
+    rightPanel_->set();
 
-    rightContainerWidgetPtr_->addWidgetToLayout(rightPanelPtr_);
+    rightContainerWidget_->addWidgetToLayout(rightPanel_);
 
     // map container ptr to position
-    mapContainerPtrToContainerPosition[MainWindowContainerPosition::LEFT] =
-        leftContainerWidgetPtr_;
+    mapContainerToContainerPosition[MainWindowContainerPosition::LEFT] =
+        leftContainerWidget_;
 
-    mapContainerPtrToContainerPosition[MainWindowContainerPosition::CENTRAL] =
-        centralContainerWidgetPtr_;
+    mapContainerToContainerPosition[MainWindowContainerPosition::CENTRAL] =
+        centralContainerWidget_;
 
-    mapContainerPtrToContainerPosition[MainWindowContainerPosition::RIGHT] =
-        rightContainerWidgetPtr_;
+    mapContainerToContainerPosition[MainWindowContainerPosition::RIGHT] =
+        rightContainerWidget_;
     
     // blur effect moved to set
 
     // splitter
-    splitterPtr_ = new QSplitter(centralWidgetPtr_);
-    // splitterPtr_->addWidget(leftContainerWidgetPtr_);
-    splitterPtr_->addWidget(centralContainerWidgetPtr_);
-    splitterPtr_->addWidget(rightContainerWidgetPtr_);
-    centralWidgetLayoutPtr_->addWidget(splitterPtr_);
-}
-
-MainWindow::~MainWindow() {
-    // cannot set parent for palette
-    delete this->menuBarPalettePtr_;
-    delete this->centralWidgetPtr_;
-    delete this->blurEffectPtr_;
+    splitter_ = new QSplitter(centralWidget_);
+    // splitter_->addWidget(leftContainerWidget_);
+    splitter_->addWidget(centralContainerWidget_);
+    splitter_->addWidget(rightContainerWidget_);
+    centralWidgetLayout_->addWidget(splitter_);
 }
 
 void MainWindow::set() {
     this->createMenu();
 
-    getGraphicManagerPtr()->setParentsForStubs(
-        this->leftContainerWidgetPtr_, this->centralContainerWidgetPtr_);
+    getGraphicManager()->setParentsForStubs(
+        this->leftContainerWidget_, this->centralContainerWidget_);
 
-    getGraphicManagerPtr()->setStubWidgets();
+    getGraphicManager()->setStubWidgets();
 
-    getGraphicManagerPtr()->showCentralPanelStub();
+    getGraphicManager()->showCentralPanelStub();
 
-    this->showHideWidgetPtr_ = new ShowHideWidget;
+    this->showHideWidget_ = new ShowHideWidget;
 
     this->addWidgetToContainerAndSetParentTo(
-        MainWindowContainerPosition::LEFT, this->showHideWidgetPtr_);
+        MainWindowContainerPosition::LEFT, this->showHideWidget_);
 
     this->setBlurEffect();
 }
 
 void MainWindow::addTextToAppLogWidget(const QString& text) {
-    this->rightPanelPtr_->addTextToAppLogWidget(text);    
+    this->rightPanel_->addTextToAppLogWidget(text);    
 }
 
 void MainWindow::addWidgetToContainerAndSetParentTo(
-    MainWindowContainerPosition position, std::shared_ptr<QWidget> widgetPtr) {
-    this->mapContainerPtrToContainerPosition.at(position)->
-        addWidgetToLayoutAndSetParentTo(widgetPtr);
+    MainWindowContainerPosition position, std::shared_ptr<QWidget> widget) {
+    this->mapContainerToContainerPosition.at(position)->
+        addWidgetToLayoutAndSetParentTo(widget);
 }
 
-void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widgetPtr) {
-    this->leftPanelPtr_->addWidgetToCompanionPanel(widgetPtr);
+void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget) {
+    this->leftPanel_->addWidgetToCompanionPanel(widget);
 }
 
 std::size_t MainWindow::getCompanionPanelChildrenSize() {
-    return this->leftPanelPtr_->getCompanionPanelChildrenSize();
+    return this->leftPanel_->getCompanionPanelChildrenSize();
 }
 
-void MainWindow::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widgetPtr) {
-    this->leftPanelPtr_->removeWidgetFromCompanionPanel(widgetPtr);
+void MainWindow::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget) {
+    this->leftPanel_->removeWidgetFromCompanionPanel(widget);
 }
 
 void MainWindow::hideLeftAndRightPanels() {
-    this->leftPanelPtr_->hide();
-    this->rightPanelPtr_->hide();
+    this->leftPanel_->hide();
+    this->rightPanel_->hide();
 }
 
 void MainWindow::showLeftAndRightPanels() {
-    this->leftPanelPtr_->show();
-    this->rightPanelPtr_->show();
+    this->leftPanel_->show();
+    this->rightPanel_->show();
 }
 
 int MainWindow::getLeftPanelWidgetWidth() {
-    return this->leftPanelPtr_->getLastCompanionPanelChildWidth();
+    return this->leftPanel_->getLastCompanionPanelChildWidth();
 }
 
 void MainWindow::enableWidgetsForShowHide() {
     this->menuBar()->setEnabled(true);
-    this->leftPanelPtr_->setEnabled(true);
-    this->centralContainerWidgetPtr_->setEnabled(true);
-    this->rightContainerWidgetPtr_->setEnabled(true);
+    this->leftPanel_->setEnabled(true);
+    this->centralContainerWidget_->setEnabled(true);
+    this->rightContainerWidget_->setEnabled(true);
 }
 
 void MainWindow::disableWidgetsForShowHide() {
     this->menuBar()->setEnabled(false);
-    this->leftPanelPtr_->setEnabled(false);
-    this->centralContainerWidgetPtr_->setEnabled(false);
-    this->rightContainerWidgetPtr_->setEnabled(false);
+    this->leftPanel_->setEnabled(false);
+    this->centralContainerWidget_->setEnabled(false);
+    this->rightContainerWidget_->setEnabled(false);
 }
 
 void MainWindow::enableBlurEffect() {
     this->disableWidgetsForShowHide();
-    this->setGraphicsEffect(this->blurEffectPtr_);
+    this->setGraphicsEffect(this->blurEffect_);
 }
 
 void MainWindow::disableBlurEffect() {
@@ -152,11 +145,11 @@ void MainWindow::disableBlurEffect() {
 }
 
 void MainWindow::createCompanion() {
-    getGraphicManagerPtr()->createCompanion();
+    getGraphicManager()->createCompanion();
 }
 
 void MainWindow::createGroupChat() {
-    getGraphicManagerPtr()->createGroupChat();
+    getGraphicManager()->createGroupChat();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -165,7 +158,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
-        getManagerPtr()->resetSelectedCompanion(nullptr);
+        getManager()->resetSelectedCompanion(nullptr);
     }
 }
 
@@ -200,6 +193,6 @@ void MainWindow::createMenu() {
 }
 
 void MainWindow::setBlurEffect() {
-    blurEffectPtr_ = new QGraphicsBlurEffect;
-    blurEffectPtr_->setBlurRadius(30);
+    blurEffect_ = new QGraphicsBlurEffect;
+    blurEffect_->setBlurRadius(30);
 }

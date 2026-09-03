@@ -1,80 +1,76 @@
 #include "action.hpp"
 
 void Action::set() {
-    this->dialogPtr_->setAction(this);
-    this->dialogPtr_->set();
+    this->dialog_->setAction(this);
+    this->dialog_->set();
 
-    // if(this->dialogPtr_->getContainsDialogPtr())
+    // if(this->dialog_->getContainsDialog())
 
-    std::shared_ptr<FileAction> actionCastPtr = dynamic_cast<std::shared_ptr<FileAction>>(this);
+    std::shared_ptr<FileAction> actionCast = dynamic_cast<std::shared_ptr<FileAction>>(this);
 
-    if(actionCastPtr) {
-        if(actionCastPtr->getType() == FileActionType::SEND) {
-            actionCastPtr->dialogPtr_->showDialog();
+    if(actionCast) {
+        if(actionCast->getType() == FileActionType::SEND) {
+            actionCast->dialog_->showDialog();
         }
-        else if(actionCastPtr->getType() == FileActionType::SAVE) {
-            actionCastPtr->defineFilePath();
+        else if(actionCast->getType() == FileActionType::SAVE) {
+            actionCast->defineFilePath();
         }
         else {
             logArgsError("unknown action type");
         }
     }
     else {
-        this->dialogPtr_->show();
+        this->dialog_->show();
     }
 }
 
-std::shared_ptr<Dialog> Action::getDialogPtr() {
-    return this->dialogPtr_;
+std::shared_ptr<Dialog> Action::getDialog() {
+    return this->dialog_;
 }
 
 CompanionAction::CompanionAction(
-    ChatActionType actionType, std::shared_ptr<Companion> companionPtr) :
-    actionType_(actionType), companionPtr_(companionPtr),
-    dataPtr_(nullptr), Action(nullptr) {
+    ChatActionType actionType, std::shared_ptr<Companion> companion) :
+    actionType_(actionType), companion_(companion),
+    data_(nullptr), Action(nullptr) {
 
-    std::shared_ptr<MainWindow> mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
+    std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
 
     switch(actionType) {
     case ChatActionType::CREATE:
     case ChatActionType::UPDATE:
-        dialogPtr_ = new CompanionDataDialog(actionType_, mainWindowPtr, companionPtr_);
+        dialog_ = new CompanionDataDialog(actionType_, mainWindow, companion_);
 
         break;
 
     case ChatActionType::DELETE:
-        dialogPtr_ = new TextDialog(
-            mainWindowPtr,
+        dialog_ = new TextDialog(
+            mainWindow,
             DialogType::WARNING,
             deleteCompanionDialogText,
-            getButtonInfoVectorPtr(deleteCompanionButtonText));
+            getButtonInfoVector(deleteCompanionButtonText));
 
         break;
 
     case ChatActionType::CLEAR_HISTORY:
-        dialogPtr_ = new TextDialog(
-            mainWindowPtr,
+        dialog_ = new TextDialog(
+            mainWindow,
             DialogType::WARNING,
             clearCompanionHistoryDialogText,
-            getButtonInfoVectorPtr(clearHistoryButtonText));
+            getButtonInfoVector(clearHistoryButtonText));
 
         break;
 
     case ChatActionType::SEND_HISTORY:
-        dialogPtr_ = new TextDialog(
-            mainWindowPtr,
+        dialog_ = new TextDialog(
+            mainWindow,
             DialogType::WARNING,
             // getArgumentedQString(
-            //     sendChatHistoryToCompanionDialogText, companionPtr->getName()),
-            std::format(sendChatHistoryToCompanionDialogText, companionPtr->getName()),
-            getButtonInfoVectorPtr(sendChatHistoryButtonText));
+            //     sendChatHistoryToCompanionDialogText, companion->getName()),
+            std::format(sendChatHistoryToCompanionDialogText, companion->getName()),
+            getButtonInfoVector(sendChatHistoryButtonText));
 
         break;
     }
-}
-
-CompanionAction::~CompanionAction() {
-    delete this->dataPtr_;
 }
 
 ChatActionType CompanionAction::getActionType() const {
@@ -82,38 +78,38 @@ ChatActionType CompanionAction::getActionType() const {
 }
 
 std::string CompanionAction::getName() const {
-    return this->dataPtr_->getName();
+    return this->data_->getName();
 }
 
 std::string CompanionAction::getIpAddress() const {
-    return this->dataPtr_->getIpAddress();
+    return this->data_->getIpAddress();
 }
 
 std::string CompanionAction::getServerPort() const {
-    return this->dataPtr_->getServerPort();
+    return this->data_->getServerPort();
 }
 
 std::string CompanionAction::getClientPort() const {
-    return this->dataPtr_->getClientPort();
+    return this->data_->getClientPort();
 }
 
 int CompanionAction::getCompanionId() const {
-    return this->companionPtr_->getId();
+    return this->companion_->getId();
 }
 
-std::shared_ptr<Companion> CompanionAction::getCompanionPtr() const {
-    return this->companionPtr_;
+std::shared_ptr<Companion> CompanionAction::getCompanion() const {
+    return this->companion_;
 }
 
 void CompanionAction::updateCompanionObjectData() {
-    this->companionPtr_->updateData(this->dataPtr_);
+    this->companion_->updateData(this->data_);
 }
 
 // TODO deletion of action objects
 void CompanionAction::sendData() {
     if(this->actionType_ == ChatActionType::SEND_HISTORY) {
         // TODO if client is disconnected show error dialog
-        getManagerPtr()->sendChatHistoryToCompanion(this->companionPtr_);
+        getManager()->sendChatHistoryToCompanion(this->companion_);
         return;
     }
 
@@ -125,21 +121,21 @@ void CompanionAction::sendData() {
     switch(this->actionType_) {
     case ChatActionType::CREATE:
     case ChatActionType::UPDATE: {
-            std::shared_ptr<CompanionDataDialog> dataDialogPtr =
-                dynamic_cast<std::shared_ptr<CompanionDataDialog>>(this->dialogPtr_);
+            std::shared_ptr<CompanionDataDialog> dataDialog =
+                dynamic_cast<std::shared_ptr<CompanionDataDialog>>(this->dialog_);
 
-            name = dataDialogPtr->getNameString();
-            ipAddress = dataDialogPtr->getIpAddressString();
-            clientPort = dataDialogPtr->getPortString();
+            name = dataDialog->getNameString();
+            ipAddress = dataDialog->getIpAddressString();
+            clientPort = dataDialog->getPortString();
         }
 
         break;
 
     case ChatActionType::DELETE:
     case ChatActionType::CLEAR_HISTORY: {
-            name = this->companionPtr_->getName();
-            ipAddress = this->companionPtr_->getSocketIpAddress();
-            clientPort = std::to_string(this->companionPtr_->getSocketClientPort());
+            name = this->companion_->getName();
+            ipAddress = this->companion_->getSocketIpAddress();
+            clientPort = std::to_string(this->companion_->getSocketClientPort());
         }
 
         break;
@@ -147,26 +143,22 @@ void CompanionAction::sendData() {
 
     logArgs("name:", name, "ipAddress:", ipAddress, "clientPort:", clientPort);
 
-    this->dataPtr_ = new CompanionData(name, ipAddress, serverPort, clientPort);
+    this->data_ = new CompanionData(name, ipAddress, serverPort, clientPort);
 
-    getGraphicManagerPtr()->sendCompanionDataToManager(this);
+    getGraphicManager()->sendCompanionDataToManager(this);
 }
 
 GroupChatAction::GroupChatAction(ChatActionType actionType)
-    : actionType_(actionType), dataPtr_(new GroupChatData), Action(nullptr) {
+    : actionType_(actionType), data_(new GroupChatData), Action(nullptr) {
 
-    std::shared_ptr<MainWindow> mainWindowPtr = getGraphicManagerPtr()->getMainWindowPtr();
+    std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
 
     switch(actionType) {
     case ChatActionType::CREATE:
-        dialogPtr_ = new GroupChatDataDialog(actionType_, mainWindowPtr);
+        dialog_ = new GroupChatDataDialog(actionType_, mainWindow);
 
         break;
     }
-}
-
-GroupChatAction::~GroupChatAction() {
-    delete this->dataPtr_;
 }
 
 void GroupChatAction::sendData() {
@@ -178,12 +170,12 @@ PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr) 
 
     switch(actionType) {
     case PasswordActionType::CREATE:
-        dialogPtr_ = new CreatePasswordDialog;
+        dialog_ = new CreatePasswordDialog;
 
         break;
 
     case PasswordActionType::GET:
-        dialogPtr_ = new GetPasswordDialog;
+        dialog_ = new GetPasswordDialog;
 
         break;
     }
@@ -191,57 +183,57 @@ PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr) 
 
 PasswordAction::~PasswordAction() {
     if(this->actionType_ == PasswordActionType::GET) {
-        this->dialogPtr_->close();
+        this->dialog_->close();
     }
 }
 
 std::string PasswordAction::getPassword() {
-    return *this->passwordPtr_;
+    return *this->password_;
 }
 
 void PasswordAction::sendData() {
     switch(this->actionType_) {
     case PasswordActionType::CREATE: {
-            std::shared_ptr<CreatePasswordDialog> passwordDialogPtr =
-                dynamic_cast<std::shared_ptr<CreatePasswordDialog>>(this->dialogPtr_);
+            std::shared_ptr<CreatePasswordDialog> passwordDialog =
+                dynamic_cast<std::shared_ptr<CreatePasswordDialog>>(this->dialog_);
 
-            auto text1 = passwordDialogPtr->getFirstEditText();
-            auto text2 = passwordDialogPtr->getSecondEditText();
+            auto text1 = passwordDialog->getFirstEditText();
+            auto text2 = passwordDialog->getSecondEditText();
 
             if(text1 == text2) {
                 if(text1.size() == 0) {
                     showErrorDialogAndLogError(
-                        "Empty password is invalid", this->getDialogPtr());
+                        "Empty password is invalid", this->getDialog());
 
                     return;
                 }
 
-                this->passwordPtr_ = &text1;
-                getGraphicManagerPtr()->sendNewPasswordDataToManager(this);
+                this->password_ = &text1;
+                getGraphicManager()->sendNewPasswordDataToManager(this);
             }
             else {
                 showErrorDialogAndLogError(
-                    "Entered passwords are not equal", this->getDialogPtr());
+                    "Entered passwords are not equal", this->getDialog());
             }
         }
 
         break;
 
     case PasswordActionType::GET: {
-            std::shared_ptr<GetPasswordDialog> passwordDialogPtr =
-                dynamic_cast<std::shared_ptr<GetPasswordDialog>>(this->dialogPtr_);
+            std::shared_ptr<GetPasswordDialog> passwordDialog =
+                dynamic_cast<std::shared_ptr<GetPasswordDialog>>(this->dialog_);
 
-            auto text = passwordDialogPtr->getEditText();
+            auto text = passwordDialog->getEditText();
 
             if(text.size() == 0) {
                 showErrorDialogAndLogError(
-                    "Empty password is invalid", this->getDialogPtr());
+                    "Empty password is invalid", this->getDialog());
 
                 return;
             }
 
-            this->passwordPtr_ = &text;
-            getGraphicManagerPtr()->sendExistingPasswordDataToManager(this);
+            this->password_ = &text;
+            getGraphicManager()->sendExistingPasswordDataToManager(this);
         }
 
         break;
@@ -249,10 +241,10 @@ void PasswordAction::sendData() {
 }
 
 FileAction::FileAction(
-    FileActionType actionType, const std::string& networkId, std::shared_ptr<Companion> companionPtr) :
+    FileActionType actionType, const std::string& networkId, std::shared_ptr<Companion> companion) :
     Action(nullptr) {
     actionType_ = actionType;
-    companionPtr_ = companionPtr;
+    companion_ = companion;
     networkId_ = networkId;
 
     QString windowTitle = getConstantMappingValue(
@@ -260,15 +252,15 @@ FileAction::FileAction(
         &fileDialogTypeQStringRepresentation,
         actionType);
 
-    dialogPtr_ = new FileDialog(this, windowTitle);
+    dialog_ = new FileDialog(this, windowTitle);
 }
 
 FileActionType FileAction::getType() const {
     return this->actionType_;
 }
 
-std::shared_ptr<Companion> FileAction::getCompanionPtr() const {
-    return this->companionPtr_;
+std::shared_ptr<Companion> FileAction::getCompanion() const {
+    return this->companion_;
 }
 
 std::filesystem::path FileAction::getPath() const {
@@ -278,29 +270,29 @@ std::filesystem::path FileAction::getPath() const {
 void FileAction::sendData() {
     logArgs("FileAction::sendData");
 
-    auto dialogPtr = dynamic_cast<std::shared_ptr<FileDialog>>(this->dialogPtr_)->getFileDialogPtr();
+    auto dialog = dynamic_cast<std::shared_ptr<FileDialog>>(this->dialog_)->getFileDialog();
 
     switch(this->actionType_) {
     case FileActionType::SEND: {
-            for(auto& pathQString : dialogPtr->selectedFiles()) {  // one file
+            for(auto& pathQString : dialog->selectedFiles()) {  // one file
                 logArgs(pathQString);
 
                 auto path = std::filesystem::path(pathQString.toStdString());
 
                 this->filePath_ = path;  // TODO ???
 
-                getManagerPtr()->sendMessage(
-                    MessageType::FILE, this->getCompanionPtr(), this,
+                getManager()->sendMessage(
+                    MessageType::FILE, this->getCompanion(), this,
                     std::format("SEND FILE: {}", this->filePath_.filename().string()));
 
-                getManagerPtr()->setLastOpenedPath(path.parent_path());
+                getManager()->setLastOpenedPath(path.parent_path());
             }
         }
 
         break;
 
     case FileActionType::SAVE: {
-            // for(auto& pathQString : dialogPtr->selectedFiles())  // one file
+            // for(auto& pathQString : dialog->selectedFiles())  // one file
             // {
             //     logArgs(pathQString);
 
@@ -309,29 +301,29 @@ void FileAction::sendData() {
             //     this->filePath_ = path;
 
             //     // set file path for file operator
-            //     this->companionPtr_->getFileOperatorStoragePtr()->
+            //     this->companion_->getFileOperatorStorage()->
             //         getOperator(this->networkId_)->setFilePath(path);
 
             //     // send without saving to db
-            //     bool result = this->companionPtr_->sendMessage(
+            //     bool result = this->companion_->sendMessage(
             //         false, NetworkMessageType::FILE_REQUEST,
             //         this->networkId_, nullptr);
 
-            //     getManagerPtr()->setLastOpenedPath(path.parent_path());
+            //     getManager()->setLastOpenedPath(path.parent_path());
 
             // }
 
             // set file path for file operator
-            bool setResult = this->companionPtr_->setFileOperatorFilePath(
+            bool setResult = this->companion_->setFileOperatorFilePath(
                 this->networkId_, this->filePath_);
 
             if(setResult) {
                 // send without saving to db
-                bool result = this->companionPtr_->sendMessage(
+                bool result = this->companion_->sendMessage(
                     false, NetworkMessageType::FILE_REQUEST,
                     this->networkId_, nullptr);
 
-                getManagerPtr()->setLastOpenedPath(this->filePath_.parent_path());
+                getManager()->setLastOpenedPath(this->filePath_.parent_path());
             }
             else {
                 logTemplateError("error saving file, path: {}", this->filePath_.string());
@@ -344,10 +336,10 @@ void FileAction::sendData() {
 
 void FileAction::defineFilePath() {
     this->filePath_ = QFileDialog::getSaveFileName(
-        getGraphicManagerPtr()->getMainWindowPtr(),
+        getGraphicManager()->getMainWindow(),
         "Save File",
-        // getQString(getManagerPtr()->getLastOpenedPath().string())).toStdString();
-        getQString(getManagerPtr()->getLastOpenedPath().string())).toStdString();
+        // getQString(getManager()->getLastOpenedPath().string())).toStdString();
+        getQString(getManager()->getLastOpenedPath().string())).toStdString();
 
     this->sendData();
 }

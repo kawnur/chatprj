@@ -61,14 +61,14 @@ public:
     MessageInfo(std::shared_ptr<MessageState>, std::shared_ptr<MessageWidget>);
     ~MessageInfo() = default;
 
-    std::shared_ptr<MessageState> getStatePtr() const;
-    std::shared_ptr<MessageWidget> getWidgetPtr() const;
+    std::shared_ptr<MessageState> getState() const;
+    std::shared_ptr<MessageWidget> getWidget() const;
 
-    void setWidgetPtr(std::shared_ptr<MessageWidget>);
+    void setWidget(std::shared_ptr<MessageWidget>);
 
 private:
-    std::shared_ptr<MessageState> statePtr_;
-    std::shared_ptr<MessageWidget> widgetPtr_;    
+    std::shared_ptr<MessageState> state_;
+    std::shared_ptr<MessageWidget> widget_;    
 };
 
 #endif // MESSAGE_HPP

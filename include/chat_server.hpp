@@ -18,13 +18,13 @@ class Companion;
 class ServerSession
         : public std::enable_shared_from_this<class ServerSession> {
 public:
-    ServerSession(std::shared_ptr<Companion> companionPtr, tcp::socket socket)
-        : companionPtr_(companionPtr), socket_(std::move(socket)) {}
+    ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket)
+        : companion_(companion), socket_(std::move(socket)) {}
 
     void start();
 
 private:
-    std::shared_ptr<Companion> companionPtr_;
+    std::shared_ptr<Companion> companion_;
     tcp::socket socket_;
     char data_[maxBufferSize];
     std::string previous_;
@@ -35,8 +35,8 @@ private:
 class ChatServer {
 public:
     // TODO what if port is blocked?
-    ChatServer(std::shared_ptr<Companion> companionPtr, uint16_t port)
-        : companionPtr_(companionPtr), port_(port), io_context_(),
+    ChatServer(std::shared_ptr<Companion> companion, uint16_t port)
+        : companion_(companion), port_(port), io_context_(),
         acceptor_(io_context_, tcp::endpoint(tcp::v4(), port)) {
 
         do_accept();
@@ -48,7 +48,7 @@ public:
 private:
     boost::asio::io_context io_context_;
     uint16_t port_;
-    std::shared_ptr<Companion> companionPtr_;
+    std::shared_ptr<Companion> companion_;
     tcp::acceptor acceptor_;
 
     void do_accept();

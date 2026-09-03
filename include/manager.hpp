@@ -22,10 +22,10 @@ class TextDialog;
 class WidgetGroup;
 
 int getDataFromDBResult(
-    const bool&, std::shared_ptr<DBReplyData>&, std::shared_ptr<PGresult>, int);
+    const bool&, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
 
 template<typename... Ts> void logArgs(Ts&&... args);
-void logDBReplyData(std::shared_ptr<DBReplyData>&);
+void logDBReplyData(std::shared_ptr<DBReplyData>);
 
 void showInfoDialogAndLogInfo(QString&&, std::shared_ptr<QWidget>);
 void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget>);
@@ -39,11 +39,11 @@ public:
     Manager();
     ~Manager();
 
-    std::shared_ptr<Companion> getSelectedCompanionPtr();
+    std::shared_ptr<Companion> getSelectedCompanion();
     bool getUserIsAuthenticated();
 
     std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
-    std::shared_ptr<WidgetGroup> getMappedWidgetGroupPtrByCompanionPtr(std::shared_ptr<Companion>) const;
+    std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(std::shared_ptr<Companion>) const;
 
     void set();
     void sendMessage(MessageType, std::shared_ptr<Companion>, std::shared_ptr<Action>, const std::string&);
@@ -71,10 +71,13 @@ public:
 private:
     bool initialized_;
     std::mutex messageStateToMessageMapMutex_;
-    std::shared_ptr<PGconn> dbConnectionPtr_;
+    std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;
-    std::shared_ptr<Companion> selectedCompanionPtr_;
-    std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>> mapCompanionIdToCompanionInfo_;
+    std::shared_ptr<Companion> selectedCompanion_;
+
+    std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>
+        mapCompanionIdToCompanionInfo_;
+
     std::filesystem::path lastOpenedPath_;
 
     std::shared_ptr<Companion> getMappedCompanionByWidgetGroup(std::shared_ptr<WidgetGroup>) const;
@@ -99,44 +102,44 @@ private:
         const std::string&, const bool&, const bool&);
 
     template<typename T, typename... Ts>
-    std::shared_ptr<DBReplyData> getDBDataPtr(
+    std::shared_ptr<DBReplyData> getDBData(
         const bool& logging, std::shared_ptr<char> mark,
         std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, const bool&, const Ts&...),
         T&& keys, const Ts&... args) {
 
-        std::shared_ptr<PGresult> dbResultPtr = func(this->dbConnectionPtr_, logging, args...);
+        std::shared_ptr<PGresult> dbResult = func(this->dbConnection_, logging, args...);
 
         if(logging) {
             logArgs(logDelimiter);
             logArgs(mark);
-            logArgs("dbResultPtr:", dbResultPtr);
+            logArgs("dbResult:", dbResult);
         }
 
-        if(!dbResultPtr) {
+        if(!dbResult) {
             showErrorDialogAndLogError(
-                "Database request error, dbResultPtr is nullptr");
+                "Database request error, dbResult is nullptr");
 
             return nullptr;
         }
 
-        std::shared_ptr<DBReplyData> dbDataPtr =
+        std::shared_ptr<DBReplyData> dbData =
             std::make_shared<DBReplyData>(std::forward<T>(keys));
 
-        if(getDataFromDBResult(logging, dbDataPtr, dbResultPtr, 0) == -1) {
-            showErrorDialogAndLogError("Error getting data from dbResultPtr");
+        if(getDataFromDBResult(logging, dbData, dbResult, 0) == -1) {
+            showErrorDialogAndLogError("Error getting data from dbResult");
             return nullptr;
         }
 
         if(logging) {
-            // logArgs("dbDataPtr->size():", dbDataPtr->size());
-            logDBReplyData(dbDataPtr);
+            // logArgs("dbData->size():", dbData->size());
+            logDBReplyData(dbData);
             logArgs(logDelimiter);
         }
 
-        return dbDataPtr;
+        return dbData;
     }
 };
 
-std::shared_ptr<Manager> getManagerPtr();
+std::shared_ptr<Manager> getManager();
 
 #endif // MANAGER_HPP

@@ -60,7 +60,8 @@ private:
     uint16_t clientPort_;  // port number to connect with client to
 };
 
-class Companion {
+class Companion : public std::enable_shared_from_this
+{
 public:
     Companion(int, const std::string&);
     ~Companion() = default;
@@ -71,57 +72,56 @@ public:
 
     int getId() const;
     std::string getName() const;
-    std::shared_ptr<SocketInfo> getSocketInfoPtr() const;
+    std::shared_ptr<SocketInfo> getSocketInfo() const;
     std::string getSocketIpAddress() const;
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
-    std::shared_ptr<FileOperatorStorage> getFileOperatorStoragePtr() const;
+    std::shared_ptr<FileOperatorStorage> getFileOperatorStorage() const;
     std::string getFileOperatorFilePathStringByNetworkId(const std::string&);
     bool removeOperatorFromStorage(const std::string&);
 
     template<typename T>
-    std::shared_ptr<T> getFileOperatorPtrByNetworkId(const std::string& networkId) {
-        return dynamic_cast<std::shared_ptr<T>>(this->fileOperatorStoragePtr_->getOperator(networkId));
+    std::shared_ptr<T> getFileOperatorByNetworkId(const std::string& networkId) {
+        return dynamic_cast<std::shared_ptr<T>>(this->fileOperatorStorage_->getOperator(networkId));
     }
 
-    template<typename T>
-    void removeFileOperator(const std::string& networkId) {
-        auto operatorPtr = this->getFileOperatorPtrByNetworkId<T>(networkId);
+    // template<typename T>
+    // void removeFileOperator(const std::string& networkId) {
+    //     auto operator = this->getFileOperatorByNetworkId<T>(networkId);
 
-        if(operatorPtr) {
-            if(!this->removeOperatorFromStorage(networkId))
-                logTemplateInfo("remove file operator error for networkId {}", networkId);
+    //     if(operator) {
+    //         if(!this->removeOperatorFromStorage(networkId))
+    //             logTemplateInfo("remove file operator error for networkId {}", networkId);
 
-            if(operatorPtr)
-                delete operatorPtr;  // TODO remove
+    //         if(operator)
+    //             delete operator;  // TODO remove
 
-            logTemplateInfo("file operator for networkId {} deleted", networkId);
-        }
-        else {
-            logTemplateError("file operator was not found for networkId {}", networkId);
-        }
-    }
+    //         logTemplateInfo("file operator for networkId {} deleted", networkId);
+    //     }
+    //     else {
+    //         logTemplateError("file operator was not found for networkId {}", networkId);
+    //     }
+    // }
 
-    std::shared_ptr<MessageState> getMappedMessageStatePtrByMessagePtr(std::shared_ptr<Message>);
-    std::shared_ptr<MessageWidget> getMappedMessageWidgetPtrByMessagePtr(std::shared_ptr<Message>);
-    std::shared_ptr<Message> getMappedMessagePtrByMessageWidgetPtr(bool, std::shared_ptr<MessageWidget>);
-    std::shared_ptr<MessageState> getMappedMessageStatePtrByMessageWidgetPtr(bool, std::shared_ptr<MessageWidget>);
+    std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message>);
+    std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message>);
+    std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, std::shared_ptr<MessageWidget>);
+    std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(bool, std::shared_ptr<MessageWidget>);
 
-    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByMessageId(uint32_t);
+    std::pair<const Message, MessageInfo>* getMessageMappingPairByMessageId(uint32_t);
 
-    std::pair<const Message, MessageInfo>* getMessageMappingPairPtrByNetworkId(
+    std::pair<const Message, MessageInfo>* getMessageMappingPairByNetworkId(
         const std::string&);
 
-    std::shared_ptr<Message> getEarliestMessagePtr() const;
+    std::shared_ptr<Message> getEarliestMessage() const;
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-    createMessageAndAddToMapping(
-        MessageType, uint32_t, uint8_t, const std::string&, const std::string&,
-        bool, bool, bool, std::string);
+        createMessageAndAddToMapping(
+            MessageType, uint32_t, uint8_t, const std::string&, const std::string&,
+            bool, bool, bool, std::string);
 
     std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-    createMessageAndAddToMapping(
-        std::shared_ptr<DBReplyData>&, std::size_t);
+        createMessageAndAddToMapping(std::shared_ptr<DBReplyData>, std::size_t);
 
     void setSocketInfo(std::shared_ptr<SocketInfo>);
     bool setFileOperatorFilePath(const std::string&, const std::filesystem::path&);
@@ -131,7 +131,7 @@ public:
     bool connectClient();
     bool disconnectClient();
     bool sendMessage(bool, NetworkMessageType, std::string, std::shared_ptr<Message>);
-    bool sendChatHistory(std::shared_ptr<DBReplyData>&, std::vector<std::string>&) const;
+    bool sendChatHistory(std::shared_ptr<DBReplyData>, std::vector<std::string>&) const;
     bool sendFileRequest(std::shared_ptr<FileMessageWidget>);
     bool sendFileBlock(const std::string&, const std::string&);
     void updateData(std::shared_ptr<CompanionData>);
@@ -143,11 +143,11 @@ private:
     std::mutex messagesMutex_;
     int id_;  // TODO change type
     std::string name_;
-    std::shared_ptr<SocketInfo> socketInfoPtr_;
-    std::shared_ptr<ChatClient> clientPtr_;
-    std::shared_ptr<ChatServer> serverPtr_;
-    std::shared_ptr<FileOperatorStorage> fileOperatorStoragePtr_;
-    std::map<Message, MessageInfo> messageMapping_;
+    std::shared_ptr<SocketInfo> socketInfo_;
+    std::shared_ptr<ChatClient> client_;
+    std::shared_ptr<ChatServer> server_;
+    std::shared_ptr<FileOperatorStorage> fileOperatorStorage_;
+    std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>> messageMapping_;
 
     std::string generateNewNetworkId(bool);
 };

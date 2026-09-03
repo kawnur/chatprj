@@ -32,12 +32,13 @@ class SocketInfoBaseWidget;
 class SocketInfoWidget;
 class TextEditWidget;
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
     MainWindow();
-    ~MainWindow();
+    ~MainWindow() = default;
 
     void set();
     void addTextToAppLogWidget(const QString&);
@@ -58,29 +59,29 @@ private slots:
     void createGroupChat();
 
 private:
-    std::shared_ptr<QPalette> menuBarPalettePtr_;
-    std::shared_ptr<QWidget> centralWidgetPtr_;
-    std::shared_ptr<QHBoxLayout> centralWidgetLayoutPtr_;
-    std::shared_ptr<QSplitter> splitterPtr_;
+    std::shared_ptr<QPalette> menuBarPalette_;
+    std::shared_ptr<QWidget> centralWidget_;
+    std::shared_ptr<QHBoxLayout> centralWidgetLayout_;
+    std::shared_ptr<QSplitter> splitter_;
 
     // left panel
-    std::shared_ptr<MainWindowContainerWidget> leftContainerWidgetPtr_;
-    std::shared_ptr<LeftPanelWidget> leftPanelPtr_;
+    std::shared_ptr<MainWindowContainerWidget> leftContainerWidget_;
+    std::shared_ptr<LeftPanelWidget> leftPanel_;
 
     // central panel
-    std::shared_ptr<MainWindowContainerWidget> centralContainerWidgetPtr_;
-    std::shared_ptr<CentralPanelWidget> centralPanelPtr_;
+    std::shared_ptr<MainWindowContainerWidget> centralContainerWidget_;
+    std::shared_ptr<CentralPanelWidget> centralPanel_;
 
     // right panel
-    std::shared_ptr<MainWindowContainerWidget> rightContainerWidgetPtr_;
-    std::shared_ptr<RightPanelWidget> rightPanelPtr_;
+    std::shared_ptr<MainWindowContainerWidget> rightContainerWidget_;
+    std::shared_ptr<RightPanelWidget> rightPanel_;
 
-    std::shared_ptr<ShowHideWidget> showHideWidgetPtr_;
+    std::shared_ptr<ShowHideWidget> showHideWidget_;
 
     std::map<MainWindowContainerPosition, std::shared_ptr<MainWindowContainerWidget>>
-        mapContainerPtrToContainerPosition;
+        mapContainerToContainerPosition;
 
-    std::shared_ptr<QGraphicsBlurEffect> blurEffectPtr_;
+    std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
 
     void closeEvent(QCloseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;

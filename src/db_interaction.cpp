@@ -25,7 +25,7 @@ DBReplyData::DBReplyData(const std::vector<std::string>& keys)
 
 DBReplyData::~DBReplyData() {}
 
-std::vector<std::map<std::string, std::shared_ptr<char>>>* DBReplyData::getDataPtr() {
+std::vector<std::map<std::string, std::shared_ptr<char>>>* DBReplyData::getData() {
     return &this->data_;
 }
 
@@ -89,13 +89,13 @@ bool DBReplyData::findValue(const std::string& key, const std::string& value) {
 }
 
 std::shared_ptr<char> getValueFromEnvironmentVariable(std::shared_ptr<char> variableName) {
-    std::shared_ptr<char> valuePtr { std::getenv(variableName) };
+    std::shared_ptr<char> value { std::getenv(variableName) };
 
-    if(!valuePtr) {
+    if(!value) {
         logArgsError("Did not find environment variable", variableName);
     }
 
-    return valuePtr;
+    return value;
 }
 
 std::shared_ptr<PGconn> getDBConnection() {
@@ -380,7 +380,7 @@ std::shared_ptr<PGresult> deleteCompanionAndSocketAndReturn(
 }
 
 int getDataFromDBResult(
-    const bool& logging, std::shared_ptr<DBReplyData>& dataPtr,
+    const bool& logging, std::shared_ptr<DBReplyData> data,
     std::shared_ptr<PGresult> result, int maxTuples) {
     int dataIsOk = 0;
 
@@ -392,7 +392,7 @@ int getDataFromDBResult(
     }
 
     if(ntuples == 0) {
-        dataPtr->clear();
+        data->clear();
         return dataIsOk;
     }
 
@@ -401,7 +401,7 @@ int getDataFromDBResult(
     }
 
     // create additional elements in result vector
-    dataPtr->fill(ntuples);
+    data->fill(ntuples);
 
     dataIsOk = 1;
 
@@ -412,11 +412,11 @@ int getDataFromDBResult(
             std::shared_ptr<char> fname = PQfname(result, j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
-            auto found = dataPtr->count(i, fnameString);
+            auto found = data->count(i, fnameString);
 
             if(found == 1) {
                 std::shared_ptr<char> value = PQgetvalue(result, i, j);
-                dataPtr->push(i, fnameString, value);
+                data->push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");
             }

@@ -34,7 +34,7 @@ class LeftPanelWidget : public QWidget {
 
 public:
     LeftPanelWidget(std::shared_ptr<QWidget>);
-    ~LeftPanelWidget();
+    ~LeftPanelWidget() = default;
 
     void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     std::size_t getCompanionPanelChildrenSize();
@@ -42,11 +42,11 @@ public:
     int getLastCompanionPanelChildWidth();
 
 private:
-    std::shared_ptr<QVBoxLayout> layoutPtr_;
-    std::shared_ptr<QPalette> palettePtr_;
-    std::shared_ptr<QWidget> companionPanelPtr_;
-    std::shared_ptr<QVBoxLayout> companionPanelLayoutPtr_;
-    std::shared_ptr<QSpacerItem> spacerPtr_;
+    std::shared_ptr<QVBoxLayout> layout_;
+    std::shared_ptr<QPalette> palette_;
+    std::shared_ptr<QWidget> companionPanel_;
+    std::shared_ptr<QVBoxLayout> companionPanelLayout_;
+    std::shared_ptr<QSpacerItem> spacer_;
 };
 
 class CentralPanelWidget : public QWidget {
@@ -55,7 +55,7 @@ class CentralPanelWidget : public QWidget {
 
 public:
     CentralPanelWidget(std::shared_ptr<QWidget>, const std::string&);
-    ~CentralPanelWidget();
+    ~CentralPanelWidget() = default;
 
     void set(std::shared_ptr<Companion>);
 
@@ -68,8 +68,8 @@ public:
 
 private:
     std::mutex chatHistoryMutex_;
-    std::shared_ptr<Companion> companionPtr_;
-    std::shared_ptr<QVBoxLayout> layoutPtr_;
+    std::shared_ptr<Companion> companion_;
+    std::shared_ptr<QVBoxLayout> layout_;
 
     //    std::shared_ptr<QGraphicsScene> graphicsScene_;
     //    std::shared_ptr<QGraphicsView> graphicsView_;
@@ -78,25 +78,25 @@ private:
     //    int linesCount_;
     //    std::shared_ptr<QFont> font_;
 
-    std::shared_ptr<QLabel> companionNameLabelPtr_;
-    std::shared_ptr<QPalette> companionNameLabelPalettePtr_;
-    std::shared_ptr<QPalette> chatHistoryWidgetPalettePtr_;
+    std::shared_ptr<QLabel> companionNameLabel_;
+    std::shared_ptr<QPalette> companionNameLabelPalette_;
+    std::shared_ptr<QPalette> chatHistoryWidgetPalette_;
 
-    std::shared_ptr<QScrollArea> chatHistoryScrollAreaPtr_;
-    // std::shared_ptr<ScrollArea> chatHistoryScrollAreaPtr_;
+    std::shared_ptr<QScrollArea> chatHistoryScrollArea_;
+    // std::shared_ptr<ScrollArea> chatHistoryScrollArea_;
 
-    std::shared_ptr<QWidget> chatHistoryWidgetPtr_;
-    std::shared_ptr<QVBoxLayout> chatHistoryLayoutPtr_;
+    std::shared_ptr<QWidget> chatHistoryWidget_;
+    std::shared_ptr<QVBoxLayout> chatHistoryLayout_;
 
-    std::shared_ptr<QWidget> buttonPanelWidgetPtr_;
-    std::shared_ptr<QHBoxLayout> buttonPanelLayoutPtr_;
-    std::shared_ptr<QPalette> buttonPanelPalettePtr_;
-    std::shared_ptr<QPushButton> sendFileButtonPtr_;
+    std::shared_ptr<QWidget> buttonPanelWidget_;
+    std::shared_ptr<QHBoxLayout> buttonPanelLayout_;
+    std::shared_ptr<QPalette> buttonPanelPalette_;
+    std::shared_ptr<QPushButton> sendFileButton_;
 
-    std::shared_ptr<TextEditWidget> textEditPtr_;
-    std::shared_ptr<QPalette> textEditPalettePtr_;
+    std::shared_ptr<TextEditWidget> textEdit_;
+    std::shared_ptr<QPalette> textEditPalette_;
 
-    // std::shared_ptr<QSplitter> splitterPtr_;
+    // std::shared_ptr<QSplitter> splitter_;
 
     bool eventFilter(QObject *object, QEvent *event) override;
 
@@ -112,7 +112,7 @@ class RightPanelWidget : public QWidget {
 
 public:
     RightPanelWidget(std::shared_ptr<QWidget>);
-    ~RightPanelWidget();
+    ~RightPanelWidget() = default;
 
     void set();
     void addTextToAppLogWidget(const QString&);
@@ -124,9 +124,9 @@ signals:
     void addTextToAppLogWidgetSignal(const QString&);
 
 private:
-    std::shared_ptr<QVBoxLayout> layoutPtr_;
-    std::shared_ptr<QPlainTextEdit> appLogWidgetPtr_;
-    std::shared_ptr<QPalette> appLogWidgetPalettePtr_;
+    std::shared_ptr<QVBoxLayout> layout_;
+    std::shared_ptr<QPlainTextEdit> appLogWidget_;
+    std::shared_ptr<QPalette> appLogWidgetPalette_;
 
 private slots:
     void addTextToAppLogWidgetSlot(const QString&);

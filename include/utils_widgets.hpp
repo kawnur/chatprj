@@ -10,27 +10,27 @@
 
 void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget> = nullptr);
 
-std::vector<ButtonInfo>* getButtonInfoVectorPtr(const QString&);
+std::vector<ButtonInfo>* getButtonInfoVector(const QString&);
 
 template<class T>
 void setButtonBox(
-    std::shared_ptr<T> dialogPtr, std::shared_ptr<QDialogButtonBox> buttonBoxPtr,
+    std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
     std::vector<ButtonInfo>* infoVector)
 {
     for(auto& info : *infoVector) {
-        std::shared_ptr<QPushButton> buttonPtr = buttonBoxPtr->addButton(
+        std::shared_ptr<QPushButton> button = buttonBox->addButton(
             info.buttonText_, info.buttonRole_);
 
         // TODO create mapping and select signal by role
         if(info.buttonRole_ == QDialogButtonBox::AcceptRole) {
             connect(
-                buttonBoxPtr, &QDialogButtonBox::accepted,
-                dialogPtr, info.functionPtr_, Qt::QueuedConnection);
+                buttonBox, &QDialogButtonBox::accepted,
+                dialog, info.function_, Qt::QueuedConnection);
         }
         else if(info.buttonRole_ == QDialogButtonBox::RejectRole) {
             connect(
-                buttonBoxPtr, &QDialogButtonBox::rejected,
-                dialogPtr, info.functionPtr_, Qt::QueuedConnection);
+                buttonBox, &QDialogButtonBox::rejected,
+                dialog, info.function_, Qt::QueuedConnection);
         }
         else {
             showErrorDialogAndLogError("Unmanaged button role");

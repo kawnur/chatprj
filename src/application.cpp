@@ -1,16 +1,11 @@
 #include "application.hpp"
 
-ChatApp::~ChatApp() {
-    delete this->graphicManagerPtr_;
-    delete this->managerPtr_;
-}
-
 void ChatApp::set() {
-    graphicManagerPtr_ = new GraphicManager;
-    graphicManagerPtr_->set();
+    graphicManager_ = std::make_shared<GraphicManager>();
+    graphicManager_->set();
 
-    managerPtr_ = new Manager;
-    managerPtr_->set();
+    manager_ = std::make_shared<Manager>();
+    manager_->set();
 
-    // managerPtr_->startUserAuthentication();
+    // manager_->startUserAuthentication();
 }
