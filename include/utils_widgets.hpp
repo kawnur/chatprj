@@ -3,33 +3,36 @@
 
 #include <memory>
 
+#include <QObject>
+
 #include "constants.hpp"
 #include "utils.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
-// void showErrorDialogAndLogError(QString&& message, std::shared_ptr<QWidget> parent = nullptr);
+void showErrorDialogAndLogError(QString&& message);
 
-std::vector<ButtonInfo>* getButtonInfoVector(const QString&);
+class ButtonInfo;
+
+std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString&);
 
 template<class T>
 void setButtonBox(
     std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
     std::vector<ButtonInfo>* infoVector)
 {
-    for(auto& info : *infoVector) {
-        std::shared_ptr<QPushButton> button = buttonBox->addButton(
-            info.buttonText_, info.buttonRole_);
+    for (auto& info : *infoVector) {
+        auto button = buttonBox->addButton(info.buttonText_, info.buttonRole_);
 
         // TODO create mapping and select signal by role
-        if(info.buttonRole_ == QDialogButtonBox::AcceptRole) {
-            connect(
-                buttonBox, &QDialogButtonBox::accepted,
+        if (info.buttonRole_ == QDialogButtonBox::AcceptRole) {
+            QObject::connect(
+                buttonBox.get(), &QDialogButtonBox::accepted,
                 dialog, info.function_, Qt::QueuedConnection);
         }
-        else if(info.buttonRole_ == QDialogButtonBox::RejectRole) {
-            connect(
-                buttonBox, &QDialogButtonBox::rejected,
+        else if (info.buttonRole_ == QDialogButtonBox::RejectRole) {
+            QObject::connect(
+                buttonBox.get(), &QDialogButtonBox::rejected,
                 dialog, info.function_, Qt::QueuedConnection);
         }
         else {

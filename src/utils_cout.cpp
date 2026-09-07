@@ -1,7 +1,7 @@
 #include "utils_cout.hpp"
 
 void endline(int number) {
-    for(int i = 0; i < number; i++) {
+    for (int i = 0; i < number; i++) {
         std::cout << std::endl;
     }
 }
@@ -18,7 +18,8 @@ std::string argForCout(const std::string& value) {
     return value;
 }
 
-std::string argForCout(std::shared_ptr<char> value) {
+std::string argForCout(const char *value)
+{
     return (value) ? std::string(value) : std::string("0x0");
 }
 
@@ -30,7 +31,7 @@ std::string argForCout(const bool value)
 void coutVector1(const std::vector<int>& vector) {
     std::cout << std::endl;
 
-    for(auto& i : vector) {
+    for (auto& i : vector) {
         std::cout << i << '\t';
     }
 
@@ -42,7 +43,7 @@ void coutVectorAndSum(const std::vector<int>& vector) {
 
     std::cout << std::endl;
 
-    for(auto& i : vector) {
+    for (auto& i : vector) {
         std::cout << i << '\t';
         sum += i;
     }
@@ -66,7 +67,7 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& vector) {
 
     coutWithManipulators("Index: ", width);
 
-    for(int i = 0; i < (int)vector.size(); i++) {
+    for (int i = 0; i < (int)vector.size(); i++) {
         coutWithManipulators(std::to_string(i), width);
     }
 
@@ -74,7 +75,7 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& vector) {
 
     coutWithManipulators("Value: ", width);
 
-    for(int i = 0; i < (int)vector.size(); i++) {
+    for (int i = 0; i < (int)vector.size(); i++) {
         coutWithManipulators(std::to_string(vector.at(i)), width);
     }
 
@@ -85,7 +86,7 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& vector) {
 void printArray(std::array<int, 10>& array) {
     std::cout << "&a: " << &array << std::endl;
 
-    for(std::size_t i = 0; i < array.size(); i++) {
+    for (std::size_t i = 0; i < array.size(); i++) {
         std::cout << "&a[" << i << "]: " << &array[i] << '\t';
         std::cout << "a[" << i << "]: " << array[i] << std::endl;
     }
@@ -98,7 +99,7 @@ void printArray(std::array<int, 10>& array) {
 void printSet(std::set<int>& set) {
     std::cout << std::endl << "&s: " << &set << std::endl;
 
-    for(std::set<int>::iterator i = set.cbegin(); i != set.cend(); i++) {
+    for (std::set<int>::iterator i = set.cbegin(); i != set.cend(); i++) {
         std::cout << "&(*i): " << &(*i) << '\t';
         std::cout << " *i: " << *i << std::endl;
     }
@@ -110,7 +111,7 @@ void printSet(std::set<int>& set) {
 // string
 void coutString(
     std::string::const_iterator iterator1, std::string::const_iterator iterator2) {
-    for(auto it = iterator1; it != iterator2; it++) {
+    for (auto it = iterator1; it != iterator2; it++) {
         std::cout << *it;
     }
     endline(1);

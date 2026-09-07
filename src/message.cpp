@@ -7,31 +7,31 @@ Message::Message(
     time_(time), text_(text) {}
 
 MessageType Message::getType() const {
-    return this->type_;
+    return type_;
 }
 
 uint32_t Message::getId() const {
-    return this->id_;
+    return id_;
 }
 
 uint8_t Message::getCompanionId() const {
-    return this->companion_id_;
+    return companion_id_;
 }
 
 uint8_t Message::getAuthorId() const {
-    return this->author_id_;
+    return author_id_;
 }
 
 std::string Message::getTime() const {
-    return this->time_;
+    return time_;
 }
 
 std::string Message::getText() const {
-    return this->text_;
+    return text_;
 }
 
 bool Message::isMessageFromMe() const {
-    return !(this->author_id_ == this->companion_id_);
+    return !(author_id_ == companion_id_);
 }
 
 MessageState::MessageState(
@@ -41,44 +41,44 @@ MessageState::MessageState(
     networkId_(networkId) {}
 
 bool MessageState::getIsAntecedent() const {
-    return this->isAntecedent_;
+    return isAntecedent_;
 }
 
 bool MessageState::getIsSent() const {
-    return this->isSent_;
+    return isSent_;
 }
 
 bool MessageState::getIsReceived() const {
-    return this->isReceived_;
+    return isReceived_;
 }
 
 std::string MessageState::getNetworkId() const {
-    return this->networkId_;
+    return networkId_;
 }
 
 void MessageState::setIsAntecedent(bool value) {
-    this->isAntecedent_ = value;
+    isAntecedent_ = value;
 }
 
 void MessageState::setIsReceived(bool value) {
-    this->isReceived_ = value;
+    isReceived_ = value;
 }
 
 void MessageState::setNetworkId(const std::string& networkId) {
-    this->networkId_ = networkId;
+    networkId_ = networkId;
 }
 
 MessageInfo::MessageInfo(std::shared_ptr<MessageState> state, std::shared_ptr<MessageWidget> widget) :
     state_(state), widget_(widget) {}
 
 std::shared_ptr<MessageState> MessageInfo::getState() const {
-    return this->state_;
+    return state_;
 }
 
 std::shared_ptr<MessageWidget> MessageInfo::getWidget() const {
-    return this->widget_;
+    return widget_;
 }
 
 void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget) {
-    this->widget_ = widget;
+    widget_ = widget;
 }

@@ -6,12 +6,13 @@
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
-// #include <QString>
 #include <map>
 #include <memory>
 #include <set>
 #include <type_traits>
 #include <vector>
+
+#include <QString>
 
 void endline(int);
 
@@ -55,7 +56,7 @@ void coutContainerArgsResultWithManupulators(std::vector<T>& container, Ts&&... 
     auto maxLengthElement = std::max_element(container.begin(), container.end(), check);
 	int width = (int)(maxLengthElement->size());
 
-    for(auto& element : container)
+    for (auto& element : container)
 		coutArgsWithManipulators(width, (args(element), ...));	
 }
 
@@ -80,10 +81,10 @@ std::string argForCout(const T& value)
     return std::to_string(value);
 }
 
-std::string argForCout(const QString&);
-std::string argForCout(const std::string&);
-std::string argForCout(std::shared_ptr<char>);
-std::string argForCout(const bool);
+std::string argForCout(const QString &value);
+std::string argForCout(const std::string &value);
+std::string argForCout(const char *value);
+std::string argForCout(const bool value);
 
 template<typename T>
 void coutWithEndl(T&& value)
@@ -132,7 +133,7 @@ void coutArgsWithTabSeparator(Ts&&... args)
 template<typename T>
 void coutVectorInLine(const std::vector<T>& vector)
 {
-    for(auto& item : vector)
+    for (auto& item : vector)
         std::cout << item << ' ';
 }
 
@@ -141,15 +142,15 @@ void printVector(T& vector, bool showSize = false, bool showCapacity = false)
 {
 	std::cout << std::endl << "printVector" << std::endl;
 
-    for(std::size_t i = 0; i < vector.size(); i++)
+    for (std::size_t i = 0; i < vector.size(); i++)
         std::cout << vector.at(i) << " ";
 
     endline(1);
 
-    if(showSize)
+    if (showSize)
         std::cout << "v.size(): " << vector.size() << std::endl;
 
-    if(showCapacity)
+    if (showCapacity)
         std::cout << "v.capacity(): " << vector.capacity() << std::endl;
 
 	endline(1);
@@ -168,7 +169,7 @@ void coutVectorState(T& vector)
 
 	coutArgsWithManipulators(width, "ADDRESS", "INDEX", "VALUE");
 
-    for(std::size_t i = 0; i < vector.size(); i++)
+    for (std::size_t i = 0; i < vector.size(); i++)
         coutArgsWithManipulators(width, &(vector.at(i)), i, vector.at(i));
 
     coutArgsWithManipulators(width1, "SIZE:", vector.size());
@@ -182,7 +183,7 @@ void coutVectorOfVectorsState(T& vector)
 	endline(1);
 	coutWithEndl("coutVectorState");
 
-    for(auto iter = vector.begin(); iter != vector.end(); iter++) {
+    for (auto iter = vector.begin(); iter != vector.end(); iter++) {
 		coutWithTab(&*iter);
 		coutVectorInLine(*iter);
 		endline(1);
@@ -224,7 +225,7 @@ void printSet(std::set<int>&);
 template<typename T, typename U>
 void coutMap(std::map<T, U>& map)
 {
-    for(auto it = map.begin(); it != map.end(); it++)
+    for (auto it = map.begin(); it != map.end(); it++)
 		coutArgsWithManipulators(15, it->first, it->second);
 
 	endline(1);

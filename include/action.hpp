@@ -29,6 +29,7 @@ public:
     void set();
     std::shared_ptr<Dialog> getDialog();
 
+    virtual std::filesystem::path getPath() const { return std::filesystem::path(); }
     virtual void sendData() {}
 
 protected:

@@ -33,18 +33,16 @@ std::shared_ptr<GraphicManager> getGraphicManager();
 template<typename T> QString getQString(T&& value);
 template<typename... Ts> void logArgsError(Ts&&... args);
 template<typename... Ts> void logArgsException(Ts&&... args);
-template<typename... Ts> void logArgsErrorWithTemplate(const std::format_string<Ts...>&, Ts&&...);
+template<typename... Ts> void logTemplateError(const std::format_string<Ts...>&, Ts&&...);
 
 template<typename T, typename U>
-U getConstantMappingValue(
-    // std::shared_ptr<char> mapName, const std::map<T, U>* map, const T& key)
-    std::string mapName, const std::map<T, U>* map, const T& key)
+U getConstantMappingValue(std::string mapName, const std::map<T, U>* map, const T& key)
 {
     try {
         return map->at(key);
     }
     catch(std::out_of_range) {
-        logArgsErrorWithTemplate("mapping {} key error", mapName);
+        logTemplateError("mapping {} key error", mapName);
     }
     catch(std::exception& e) {
         logArgsException(e.what());
@@ -83,7 +81,7 @@ bool validateCompanionData(std::vector<std::string>&, std::shared_ptr<CompanionA
 bool validatePassword(std::vector<std::string>&, const std::string&);
 std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
-std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*)());
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*)());
 // std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*)());
 
 void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), std::shared_ptr<QWidget>);
@@ -123,7 +121,7 @@ std::string buildChatHistoryJSONString(std::shared_ptr<DBReplyData>, std::vector
 nlohmann::json buildJsonObject(const std::string&);
 std::string getRandomString(uint8_t);
 void sleepForMilliseconds(uint32_t);
-bool getBoolFromDBValue(std::shared_ptr<char>);
+bool getBoolFromDBValue(const std::string &value);
 
 std::string hashFileMD5(const std::string&);
 

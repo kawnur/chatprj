@@ -14,8 +14,8 @@ void ServerSession::do_read() {
             if (!ec) {
                 std::string str(data_, length);
 
-                if(length > 0) {
-                    if(this->previous_.size() > 0) {
+                if (length > 0) {
+                    if (previous_.size() > 0) {
                         str = previous_ + str;
                     }
 
@@ -24,28 +24,28 @@ void ServerSession::do_read() {
                     int closeCounter = 0;
                     auto currentIterator = str.begin();
 
-                    for(auto iterator = str.begin(); iterator != str.end(); iterator++) {
-                        if(*iterator == '{') {
+                    for (auto iterator = str.begin(); iterator != str.end(); iterator++) {
+                        if (*iterator == '{') {
                             openCounter++;
                         }
 
-                        if(*iterator == '}') {
+                        if (*iterator == '}') {
                             closeCounter++;
 
-                            if(openCounter == closeCounter) {
+                            if (openCounter == closeCounter) {
                                 std::string message(currentIterator, iterator + 1);
                                 currentIterator = iterator + 1;
                                 openCounter = 0;
                                 closeCounter = 0;
-                                this->previous_ = "";
+                                previous_ = "";
 
-                                getManager()->receiveMessage(this->companion_, message);
+                                getManager()->receiveMessage(companion_, message);
                             }
                         }
                     }
 
-                    if(currentIterator != str.end()) {
-                        this->previous_ = std::string(currentIterator, str.end());
+                    if (currentIterator != str.end()) {
+                        previous_ = std::string(currentIterator, str.end());
                     }
                 }                
 
@@ -56,7 +56,7 @@ void ServerSession::do_read() {
 }
 
 void ChatServer::run() {
-    std::thread([this](){ this->io_context_.run(); }).detach();
+    std::thread([this](){ io_context_.run(); }).detach();
 }
 
 void ChatServer::do_accept() {
@@ -64,9 +64,9 @@ void ChatServer::do_accept() {
 
     acceptor_.async_accept(
         [this](boost::system::error_code ec, tcp::socket socket){
-            if(!ec) {
+            if (!ec) {
                 std::make_shared<ServerSession>(
-                    this->companion_, std::move(socket))->start();
+                    companion_, std::move(socket))->start();
             }
 
             do_accept();

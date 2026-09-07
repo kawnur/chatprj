@@ -7,19 +7,19 @@ CompanionData::CompanionData(
     serverPort_(serverPort), clientPort_(clientPort) {}
 
 std::string CompanionData::getName() const {
-    return this->name_;
+    return name_;
 }
 
 std::string CompanionData::getIpAddress() const {
-    return this->ipAddress_;
+    return ipAddress_;
 }
 
 std::string CompanionData::getServerPort() const {
-    return this->serverPort_;
+    return serverPort_;
 }
 
 std::string CompanionData::getClientPort() const {
-    return this->clientPort_;
+    return clientPort_;
 }
 
 GroupChatData::GroupChatData() : members_(std::vector<std::shared_ptr<Companion>>()) {}

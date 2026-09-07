@@ -49,9 +49,9 @@ public:
     ~TextEditWidget() = default;
 
 private:
-    std::shared_ptr<QPalette> palette_;
+    std::unique_ptr<QPalette> palette_;
 
-    void keyPressEvent(std::shared_ptr<QKeyEvent>);
+    void keyPressEvent(QKeyEvent *event);
 
 signals:
     void send(const QString&);
@@ -92,10 +92,13 @@ public:
     virtual ~SocketInfoBaseWidget() {}
 
     virtual bool isStub() { return false; }
+    virtual void setNewMessagesIndicatorOff() {}
+
     void initializeFields();  // non-virtual because is called from constructor
 };
 
-class SocketInfoWidget : public SocketInfoBaseWidget
+class SocketInfoWidget
+    : public SocketInfoBaseWidget, public std::enable_shared_from_this<SocketInfoWidget>
 {
     Q_OBJECT
 
@@ -119,7 +122,7 @@ public:
     void unselect();
     void update();
     void setNewMessagesIndicatorOn();
-    void setNewMessagesIndicatorOff();
+    void setNewMessagesIndicatorOff() override;
 
 public slots:
     void requestHistoryFromCompanionAction();
@@ -138,16 +141,16 @@ private:
     uint16_t clientPort_;
     QColor selectedColor_;
     QColor unselectedColor_;
-    std::shared_ptr<QPalette> palette_;
-    std::shared_ptr<QHBoxLayout> layout_;
-    std::shared_ptr<IndicatorWidget> connectionStateIndicator_;
-    std::shared_ptr<QLabel> nameLabel_;
-    std::shared_ptr<QLabel> ipAddressLabel_;
-    std::shared_ptr<QLabel> serverPortLabel_;
-    std::shared_ptr<QLabel> clientPortLabel_;
-    std::shared_ptr<QPushButton> editButton_;
-    std::shared_ptr<QPushButton> connectButton_;
-    std::shared_ptr<IndicatorWidget> newMessagesIndicator_;
+    std::unique_ptr<QPalette> palette_;
+    std::unique_ptr<QHBoxLayout> layout_;
+    std::unique_ptr<IndicatorWidget> connectionStateIndicator_;
+    std::unique_ptr<QLabel> nameLabel_;
+    std::unique_ptr<QLabel> ipAddressLabel_;
+    std::unique_ptr<QLabel> serverPortLabel_;
+    std::unique_ptr<QLabel> clientPortLabel_;
+    std::unique_ptr<QPushButton> editButton_;
+    std::unique_ptr<QPushButton> connectButton_;
+    std::unique_ptr<IndicatorWidget> newMessagesIndicator_;
     std::shared_ptr<QAction> requestHistoryAction_;
 
     void initializeFields();
@@ -171,8 +174,8 @@ public:
 
 private:
     QString mark_;
-    std::shared_ptr<QHBoxLayout> layout_;
-    std::shared_ptr<QLabel> markLabel_;
+    std::unique_ptr<QHBoxLayout> layout_;
+    std::unique_ptr<QLabel> markLabel_;
 
     void initializeFields();
 };
@@ -187,9 +190,9 @@ public:
 
 private:
     bool show_;
-    std::shared_ptr<QVBoxLayout> layout_;
-    std::shared_ptr<QLabel> label_;
-    std::shared_ptr<QPalette> palette_;
+    std::unique_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QLabel> label_;
+    std::unique_ptr<QPalette> palette_;
 
     void hideInfo();
     void showInfo();
@@ -266,7 +269,7 @@ public:
     void setLeftPanelWidth(int);
 
 private:
-    std::shared_ptr<SocketInfoStubWidget> socketInfo_;
+    std::unique_ptr<SocketInfoStubWidget> socketInfo_;
     std::shared_ptr<LeftPanelWidget> leftPanel_;
     std::shared_ptr<CentralPanelWidget> centralPanel_;
     std::shared_ptr<RightPanelWidget> rightPanel_;
@@ -284,7 +287,7 @@ public:
     void addWidgetToLayoutAndSetParentTo(std::shared_ptr<QWidget>);
 
 private:
-    std::shared_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QVBoxLayout> layout_;
 };
 
 #endif // WIDGETS_HPP

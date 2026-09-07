@@ -27,7 +27,7 @@ CompanionDataDialog::CompanionDataDialog(
     portLabel_ = new QLabel("Port");
     portEdit_ = new QLineEdit;
 
-    if(actionType_ == ChatActionType::UPDATE && companion) {
+    if (actionType_ == ChatActionType::UPDATE && companion) {
         nameEdit_->setText(getQString(companion->getName()));
 
         ipAddressEdit_->setText(
@@ -48,27 +48,27 @@ CompanionDataDialog::CompanionDataDialog(
 
 void CompanionDataDialog::set() {
     connect(
-        this->buttonBox_, &QDialogButtonBox::accepted,
-        this->action_, &Action::sendData, Qt::QueuedConnection);
+        buttonBox_, &QDialogButtonBox::accepted,
+        action_, &Action::sendData, Qt::QueuedConnection);
 
     connect(
-        this->buttonBox_, &QDialogButtonBox::rejected,
+        buttonBox_, &QDialogButtonBox::rejected,
         this, &QDialog::reject, Qt::QueuedConnection);
 }
 
 std::string CompanionDataDialog::getNameString() {
-    return this->nameEdit_->text().toStdString();
+    return nameEdit_->text().toStdString();
 }
 
 std::string CompanionDataDialog::getIpAddressString() {
-    auto ipAddressFromWidget = this->ipAddressEdit_->text().toStdString();  // TODO change
+    auto ipAddressFromWidget = ipAddressEdit_->text().toStdString();  // TODO change
     QHostAddress hostAddress { getQString(ipAddressFromWidget) };
 
     return hostAddress.toString().toStdString();
 }
 
 std::string CompanionDataDialog::getPortString() {
-    return this->portEdit_->text().toStdString();
+    return portEdit_->text().toStdString();
 }
 
 GroupChatDataDialog::GroupChatDataDialog(
@@ -124,16 +124,16 @@ CreatePasswordDialog::CreatePasswordDialog() {
 
 void CreatePasswordDialog::set() {
     connect(
-        this->buttonBox_, &QDialogButtonBox::accepted,
-        this->action_, &Action::sendData, Qt::QueuedConnection);
+        buttonBox_, &QDialogButtonBox::accepted,
+        action_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string CreatePasswordDialog::getFirstEditText() {
-    return this->firstEdit_->text().toStdString();
+    return firstEdit_->text().toStdString();
 }
 
 std::string CreatePasswordDialog::getSecondEditText() {
-    return this->secondEdit_->text().toStdString();
+    return secondEdit_->text().toStdString();
 }
 
 GetPasswordDialog::GetPasswordDialog() {
@@ -158,12 +158,12 @@ GetPasswordDialog::GetPasswordDialog() {
 
 void GetPasswordDialog::set() {
     connect(
-        this->buttonBox_, &QDialogButtonBox::accepted,
-        this->action_, &Action::sendData, Qt::QueuedConnection);
+        buttonBox_, &QDialogButtonBox::accepted,
+        action_, &Action::sendData, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText() {
-    return this->edit_->text().toStdString();
+    return edit_->text().toStdString();
 }
 
 ButtonInfo::ButtonInfo(
@@ -173,8 +173,9 @@ ButtonInfo::ButtonInfo(
 
 TextDialog::TextDialog(
     std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string& text,
-    std::vector<ButtonInfo>* buttonsInfo) {
-    if(parent) {
+    std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
+{
+    if (parent) {
         setParent(parent);
     }
     else {
@@ -206,19 +207,19 @@ TextDialog::TextDialog(
 }
 
 void TextDialog::set() {
-    // for(auto& info : *this->buttonsInfo_) {
-    //     std::shared_ptr<QPushButton> button = this->buttonBox_->addButton(
+    // for (auto& info : *buttonsInfo_) {
+    //     std::shared_ptr<QPushButton> button = buttonBox_->addButton(
     //         info.buttonText_, info.buttonRole_);
 
     //     // TODO create mapping and select signal by role
-    //     if(info.buttonRole_ == QDialogButtonBox::AcceptRole) {
+    //     if (info.buttonRole_ == QDialogButtonBox::AcceptRole) {
     //         connect(
-    //             this->buttonBox_, &QDialogButtonBox::accepted,
+    //             buttonBox_, &QDialogButtonBox::accepted,
     //             this, info.function_, Qt::QueuedConnection);
     //     }
-    //     else if(info.buttonRole_ == QDialogButtonBox::RejectRole) {
+    //     else if (info.buttonRole_ == QDialogButtonBox::RejectRole) {
     //         connect(
-    //             this->buttonBox_, &QDialogButtonBox::rejected,
+    //             buttonBox_, &QDialogButtonBox::rejected,
     //             this, info.function_, Qt::QueuedConnection);
     //     }
     //     else {
@@ -228,27 +229,27 @@ void TextDialog::set() {
 }
 
 void TextDialog::closeSelf() {
-    this->close();
+    close();
 }
 
 void TextDialog::closeSelfAndParentDialog() {
-    this->close();
+    close();
 
-    auto parent = this->parent();
+    auto parent = parent();
 
-    if(parent) {
+    if (parent) {
         dynamic_cast<std::shared_ptr<QWidget>>(parent)->close();
     }
 }
 
 void TextDialog::acceptAction() {
-    this->close();
-    this->action_->sendData();
+    close();
+    action_->sendData();
 }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs() {
     getGraphicManager()->disableMainWindowBlurEffect();
-    this->closeSelfAndParentDialog();
+    closeSelfAndParentDialog();
 }
 
 void TextDialog::reject() {
@@ -271,14 +272,14 @@ FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString& window
 
 void FileDialog::set() {
     connect(
-        this->fileDialog_, &QFileDialog::accepted,
-        this->action_, &Action::sendData, Qt::QueuedConnection);
+        fileDialog_, &QFileDialog::accepted,
+        action_, &Action::sendData, Qt::QueuedConnection);
 }
 
 void FileDialog::showDialog() {
-    this->fileDialog_->show();
+    fileDialog_->show();
 }
 
 std::shared_ptr<QFileDialog> FileDialog::getFileDialog() {
-    return this->fileDialog_;
+    return fileDialog_;
 }

@@ -27,10 +27,10 @@ public:
     Dialog() = default;
     ~Dialog() = default;
 
-    void setAction(std::shared_ptr<Action> action) { this->action_ = action; }
+    void setAction(std::shared_ptr<Action> action) { action_ = action; }
     virtual void set() {}
 
-    bool getContainsDialog() const { return this->containsDialog_; }
+    bool getContainsDialog() const { return containsDialog_; }
     virtual void showDialog() {}
 
 protected:
@@ -139,7 +139,10 @@ class TextDialog : public Dialog {
     Q_OBJECT
 
 public:
-    TextDialog(std::shared_ptr<QWidget>, DialogType, const std::string&, std::vector<ButtonInfo>*);
+    TextDialog(
+        std::shared_ptr<QWidget>, DialogType, const std::string&,
+        std::shared_ptr<std::vector<ButtonInfo>>);
+
     ~TextDialog() = default;
 
     void set() override;
@@ -155,7 +158,7 @@ private:
     std::shared_ptr<QPlainTextEdit> textEdit_;
     std::shared_ptr<QVBoxLayout> layout_;
     std::shared_ptr<QDialogButtonBox> buttonBox_;
-    std::vector<ButtonInfo>* buttonsInfo_;
+    std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
 };
 
 class FileDialog : public Dialog {

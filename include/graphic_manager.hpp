@@ -46,7 +46,8 @@ public:
     void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
 
     void createTextDialogAndShow(
-        std::shared_ptr<QWidget>, DialogType, const std::string&, std::vector<ButtonInfo>*);
+        std::shared_ptr<QWidget>, DialogType, const std::string&,
+        std::shared_ptr<std::vector<ButtonInfo>>);
 
     void createCompanion();
     void createGroupChat();

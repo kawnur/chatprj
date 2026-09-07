@@ -42,7 +42,7 @@ void logSocketInfoData(std::shared_ptr<SocketInfo> object) {
 
 void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column)
 {
-    auto value = PQgetvalue(result, row, column);
+    auto value = PQgetvalue(result.get(), row, column);
     auto logMark = (value) ? std::string(value) : "nullptr";
 
     logArgsError("unknown field name:", logMark);
@@ -51,7 +51,7 @@ void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int colu
 void logDBReplyData(std::shared_ptr<DBReplyData> object) {
     logArgs(logDelimiter);
 
-    for(auto& element : object->buildDataStringVector()) {
+    for (auto& element : object->buildDataStringVector()) {
         logArgs(element);
     }
 

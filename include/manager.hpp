@@ -100,19 +100,19 @@ private:
 
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(
-        const bool& logging, std::shared_ptr<char> mark,
+        const bool& logging, std::string &&mark,
         std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, const bool&, const Ts&...),
-        T&& keys, const Ts&... args) {
+        T&& keys, const Ts&... args)
+    {
+        std::shared_ptr<PGresult> dbResult = func(dbConnection_, logging, args...);
 
-        std::shared_ptr<PGresult> dbResult = func(this->dbConnection_, logging, args...);
-
-        if(logging) {
+        if (logging) {
             logArgs(logDelimiter);
             logArgs(mark);
             logArgs("dbResult:", dbResult);
         }
 
-        if(!dbResult) {
+        if (!dbResult) {
             showErrorDialogAndLogError("Database request error, dbResult is nullptr");
 
             return nullptr;
@@ -121,13 +121,13 @@ private:
         std::shared_ptr<DBReplyData> dbData =
             std::make_shared<DBReplyData>(std::forward<T>(keys));
 
-        if(getDataFromDBResult(logging, dbData, dbResult, 0) == -1) {
+        if (getDataFromDBResult(logging, dbData, dbResult, 0) == -1) {
             showErrorDialogAndLogError("Error getting data from dbResult");
 
             return nullptr;
         }
 
-        if(logging) {
+        if (logging) {
             // logArgs("dbData->size():", dbData->size());
             logDBReplyData(dbData);
             logArgs(logDelimiter);

@@ -28,17 +28,17 @@ DBReplyData::DBReplyData(const std::vector<std::string>& keys)
 
 // std::vector<std::map<std::string, std::string>>* DBReplyData::getData()
 // {
-//     return this->data_;
+//     return data_;
 // }
 
 std::vector<std::string> DBReplyData::buildDataStringVector()
 {
     std::vector<std::string> result {};
 
-    for(auto& element : this->data_) {
+    for (auto& element : data_) {
         std::string representation { "" };
 
-        for(auto& pair : element)
+        for (auto& pair : element)
             representation += std::format("{0}: {1}, ", pair.first, pair.second);
 
         result.push_back(representation);
@@ -49,41 +49,41 @@ std::vector<std::string> DBReplyData::buildDataStringVector()
 
 void DBReplyData::clear()
 {
-    this->data_.clear();
+    data_.clear();
 }
 
 bool DBReplyData::isEmpty()
 {
-    return this->data_.empty();
+    return data_.empty();
 }
 
 void DBReplyData::fill(std::size_t count)
 {
-    std::size_t size = this->data_.size();
+    std::size_t size = data_.size();
 
-    for(int i = 0; i < count - size; i++)
-        this->data_.push_back(this->data_.at(0));
+    for (int i = 0; i < count - size; i++)
+        data_.push_back(data_.at(0));
 }
 
 std::size_t DBReplyData::count(std::size_t position, std::string key)
 {
     // TODO return optional
-    return this->data_.at(position).count(key);
+    return data_.at(position).count(key);
 }
 
 void DBReplyData::push(std::size_t position, std::string key, const std::string &value)
 {
-    this->data_.at(position).at(key) = value;
+    data_.at(position).at(key) = value;
 }
 
 std::size_t DBReplyData::size()
 {
-    return this->data_.size();
+    return data_.size();
 }
 
 std::string DBReplyData::getValue(std::size_t position, std::string key)
 {
-    return this->data_.at(position).at(key);
+    return data_.at(position).at(key);
 }
 
 bool DBReplyData::findValue(const std::string& key, const std::string& value)
@@ -93,9 +93,9 @@ bool DBReplyData::findValue(const std::string& key, const std::string& value)
         return iterator.at(key) == value;
     };
 
-    auto findMapResult = std::find_if(this->data_.begin(), this->data_.end(), findLambda);
+    auto findMapResult = std::find_if (data_.begin(), data_.end(), findLambda);
 
-    return !(findMapResult == this->data_.end());
+    return !(findMapResult == data_.end());
 }
 
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName)
@@ -113,7 +113,7 @@ std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variabl
 
 const char * getPQArg(const std::optional<std::string> &value)
 {
-    return value.value().data();
+    return (value) ? value.value().data() : nullptr;
 }
 
 std::shared_ptr<PGconn> getDBConnection()
@@ -129,24 +129,26 @@ std::shared_ptr<PGconn> getDBConnection()
         auto dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
         auto dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
 
-        for(const auto &value : { dbAddress, dbPort, dbLogin, dbPassword }) {
-            if(!value)
+        for (const auto &value : { dbAddress, dbPort, dbLogin, dbPassword }) {
+            if (!value)
                 return;
         }
 
+        // TODO create formatters
         logArgsWithTemplate(
             "DB connection; address: {0}, port: {1}, login: {2}, password: {3}",
-            dbAddress, dbPort, dbLogin, dbPassword);
+            getPQArg(dbAddress), getPQArg(dbPort), getPQArg(dbLogin), getPQArg(dbPassword));
 
-        dbConnection = PQsetdbLogin(
-            getPQArg(dbAddress), getPQArg(dbPort), "", "", "postgres", dbLogin, dbPassword);
+        dbConnection.reset(PQsetdbLogin(
+            getPQArg(dbAddress), getPQArg(dbPort), "", "", "postgres", getPQArg(dbLogin),
+            getPQArg(dbPassword)));
 
-        ConnStatusType status = PQstatus(getPQArg(dbConnection));
+        ConnStatusType status = PQstatus(dbConnection.get());
         std::string mark = (status == 0) ? "OK" : "?";
 
         logArgsWithTemplate("DB connection status: {0} {1}", std::to_string(status), mark);
 
-        if(status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
+        if (status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
             logArgsError("DB connection status: CONNECTION_BAD");
     };
 
@@ -158,13 +160,12 @@ std::shared_ptr<PGconn> getDBConnection()
 std::shared_ptr<PGresult> sendDBRequestAndReturnResult(
     std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string &command)
 {
-    if(logging)
+    if (logging)
         logArgs(command);
 
     std::lock_guard<std::mutex> lock(dbMutex);
 
-    std::shared_ptr<PGresult> result =
-        PQexec(const_cast<std::shared_ptr<PGconn>>(dbConnection), command.data());
+    auto result = std::make_shared<PGresult>(PQexec(dbConnection.get(), command.data()));
 
     return result;
 }
@@ -425,15 +426,15 @@ int getDataFromDBResult(
     int ntuples = PQntuples(result.get());
     int nfields = PQnfields(result.get());
 
-    if(logging)
+    if (logging)
         logArgsWithTemplate("ntuples: {0}, nfields: {1}", ntuples, nfields);
 
-    if(ntuples == 0) {
+    if (ntuples == 0) {
         data->clear();
         return dataIsOk;
     }
 
-    if(maxTuples == 1 and ntuples > 1)
+    if (maxTuples == 1 and ntuples > 1)
         logTemplateError("{} lines from OneToOne DB request", ntuples);
 
     // create additional elements in result vector
@@ -441,17 +442,17 @@ int getDataFromDBResult(
 
     dataIsOk = 1;
 
-    for(int i = 0; i < ntuples; i++) {
+    for (int i = 0; i < ntuples; i++) {
         std::string logString;
 
-        for(int j = 0; j < nfields; j++) {
-            std::shared_ptr<char> fname = PQfname(result, j);
+        for (int j = 0; j < nfields; j++) {
+            const char *fname = PQfname(result.get(), j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
             auto found = data->count(i, fnameString);
 
-            if(found == 1) {
-                std::shared_ptr<char> value = PQgetvalue(result, i, j);
+            if (found == 1) {
+                const char *value = PQgetvalue(result.get(), i, j);
                 data->push(i, fnameString, value);
 
                 logString += (fnameString + ": " + std::string(value) + " ");

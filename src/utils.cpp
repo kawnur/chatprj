@@ -1,14 +1,15 @@
 #include "utils.hpp"
 
+#include <cstring>
+
 // TODO move all constants to constants.hpp
 
-bool validateCompanionName(
-    std::vector<std::string>& validationErrors, const std::string& name) {
+bool validateCompanionName(std::vector<std::string>& validationErrors, const std::string& name)
+{
     bool result = (name.size() <= 30);
 
-    if(!result) {
-        validationErrors.push_back(std::string("companion name length is greater than 30"));
-    }
+    if (!result)
+        validationErrors.emplace_back("companion name length is greater than 30");
 
     logArgs("validateCompanionName result:", result);
 
@@ -16,41 +17,39 @@ bool validateCompanionName(
 }
 
 bool validateIpAddress(
-    std::vector<std::string>& validationErrors, const std::string& ipAddress) {
+    std::vector<std::string>& validationErrors, const std::string& ipAddress)
+{
     QHostAddress address { getQString(ipAddress) };
-
     bool result = !(address.isNull());
 
-    if(!result) {
-        validationErrors.push_back(std::string("companion ipaddress is invalid"));
-    }
+    if (!result)
+        validationErrors.emplace_back("companion ipaddress is invalid");
 
     logArgs("validateIpAddress result:", result);
 
     return result;
 }
 
-bool validatePort(std::vector<std::string>& validationErrors, const std::string& port) {
+bool validatePort(std::vector<std::string>& validationErrors, const std::string& port)
+{
     bool result = false;
-
-    std::string errorMessage("port number must be greater than 0 and lower than 65536");
+    char *errorMessage = "port number must be greater than 0 and lower than 65536";
 
     try {
         long long portNumber = std::stoll(port, nullptr, 10);
 
         result = (portNumber >= 0) && (portNumber <= 65535);
 
-        if(!result) {
-            validationErrors.push_back(errorMessage);
-        }
+        if (!result)
+            validationErrors.emplace_back(errorMessage);
     }
     catch(std::out_of_range) {
-        validationErrors.push_back(
-            errorMessage + std::string(", port number is too big, std::out_of_range"));
+        validationErrors.emplace_back(
+            strcat(errorMessage, ", port number is too big, std::out_of_range"));
     }
     catch(std::invalid_argument) {
-        validationErrors.push_back(
-            errorMessage + std::string(", port number is invalid, std::invalid_argument"));
+        validationErrors.emplace_back(
+            strcat(errorMessage, ", port number is invalid, std::invalid_argument"));
     }
 
     logArgs("validatePort result:", result);
@@ -59,14 +58,13 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
 }
 
 bool validateCompanionData(
-    std::vector<std::string>& errors,
-    std::shared_ptr<CompanionAction> action) {
+    std::vector<std::string>& errors, std::shared_ptr<CompanionAction> action)
+{
     bool nameValidationResult = validateCompanionName(errors, action->getName());
     bool ipAddressValidationResult = validateIpAddress(errors, action->getIpAddress());
     bool portValidationResult = validatePort(errors, action->getClientPort());
 
-    bool result =
-        nameValidationResult && ipAddressValidationResult && portValidationResult;
+    bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
 
     logArgs("validateCompanionData result:", result);
 
@@ -74,57 +72,54 @@ bool validateCompanionData(
 }
 
 bool validatePassword(
-    std::vector<std::string>& validationErrors, const std::string& password) {
+    std::vector<std::string>& validationErrors, const std::string& password)
+{
     bool result = (password.size() <= 30);
 
-    if(!result) {
-        validationErrors.push_back(std::string("password length is greater than 30"));
-    }
+    if (!result)
+        validationErrors.emplace_back("password length is greater than 30");
 
     logArgs("validatePassword result:", result);
 
     return result;
 }
 
-std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages) {
-    if(messages.empty()) {
+std::string buildDialogText(std::string&& header, const std::vector<std::string>& messages)
+{
+    if (messages.empty())
         return "";
-    }
-    else {
-        std::string text(header);
 
-        logArgs("messages.size():", messages.size());
+    std::string text(header);
 
-        for(auto& message : messages) {
-            text += (std::string("- ") + message + std::string("\n"));
-        }
+    logArgs("messages.size():", messages.size());
 
-        return text;
-    }
+    for (auto& message : messages)
+        text += std::format("- {}\n", message);
+
+    return text;
 }
 
-std::vector<ButtonInfo>* createOkButtonInfoVector(void (TextDialog::*function)()) {
-// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*function)()) {
-    std::vector<ButtonInfo>* vector = new std::vector<ButtonInfo>;
-
-    vector->emplace_back(
-        okButtonText, QDialogButtonBox::AcceptRole, function);
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
+// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*function)())
+{
+    auto vector = std::make_shared<std::vector<ButtonInfo>>();
+    vector->emplace_back(okButtonText, QDialogButtonBox::AcceptRole, function);
 
     return vector;
 }
 
 void showInfoDialogAndLogInfo(
     const QString& message, void (TextDialog::*function)(),
-    std::shared_ptr<QWidget> parent = nullptr) {
+    std::shared_ptr<QWidget> parent = nullptr)
+{
     getGraphicManager()->createTextDialogAndShow(
-        parent, DialogType::INFO, message.toStdString(),
-        createOkButtonInfoVector(function));
+        parent, DialogType::INFO, message.toStdString(), createOkButtonInfoVector(function));
 
     logArgsInfo(message);
 }
 
-void showInfoDialogAndLogInfo(
-    QString&& message, std::shared_ptr<QWidget> parent) {
+void showInfoDialogAndLogInfo(QString&& message, std::shared_ptr<QWidget> parent)
+{
     getGraphicManager()->createTextDialogAndShow(
         parent, DialogType::INFO, std::move(message).toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -132,8 +127,8 @@ void showInfoDialogAndLogInfo(
     logArgsInfo(message);
 }
 
-void showWarningDialogAndLogWarning(
-    const QString& message, std::shared_ptr<QWidget> parent) {
+void showWarningDialogAndLogWarning(const QString& message, std::shared_ptr<QWidget> parent)
+{
     getGraphicManager()->createTextDialogAndShow(
         parent, DialogType::WARNING, message.toStdString(),
         createOkButtonInfoVector(&QDialog::accept));
@@ -166,12 +161,14 @@ void showErrorDialogAndLogError(QString&& message, std::shared_ptr<QWidget> pare
 }
 
 std::string getFormattedMessageBodyString(
-    const std::string& color, const std::string& text) {
+    const std::string& color, const std::string& text)
+{
     return std::format("<font color=\"{0}\"><br>{1}</font>", color, text);
 }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message) {
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+{
     auto companionName = companion->getName();
     auto companionId = message->getCompanionId();
     auto authorId = message->getAuthorId();
@@ -180,7 +177,7 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 
     std::string color, sender, receiver;
 
-    if(companionId == authorId) {
+    if (companionId == authorId) {
         color = receivedMessageColor;
         sender = companionName;
         receiver = "Me";
@@ -204,7 +201,8 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 
 std::string buildMessageJSONString(
     bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    const std::string& networkId, std::shared_ptr<Message> message) {
+    const std::string& networkId, std::shared_ptr<Message> message)
+{
     using json = nlohmann::json;
 
     json jsonData;
@@ -250,7 +248,8 @@ std::string buildMessageJSONString(
 }
 
 std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companion, const std::string& networkId, const std::string& data) {
+    std::shared_ptr<Companion> companion, const std::string& networkId, const std::string& data)
+{
     using json = nlohmann::json;
 
     json jsonData;
@@ -264,17 +263,18 @@ std::string buildFileBlockJSONString(
 }
 
 std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData> data, std::vector<std::string>& keys) {
+    std::shared_ptr<DBReplyData> data, std::vector<std::string>& keys)
+{
     using json = nlohmann::json;
+
     json jsonData;
 
     jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
     jsonData["messages"] = {};
 
-    for(std::size_t i = 0; i < data->size(); i++) {  // TODO switch to iterators
-        for(auto& key : keys) {
+    for (std::size_t i = 0; i < data->size(); i++) {  // TODO switch to iterators
+        for (auto& key : keys)
             jsonData["messages"][i][key] = data->getValue(i, key);
-        }
     }
 
     std::string result = jsonData.dump();
@@ -282,49 +282,54 @@ std::string buildChatHistoryJSONString(
     return result;
 }
 
-nlohmann::json buildJsonObject(const std::string& jsonString) {
+nlohmann::json buildJsonObject(const std::string& jsonString)
+{
     nlohmann::json jsonData = nlohmann::json::parse(jsonString);
 
     return jsonData;
 }
 
-std::string getRandomString(uint8_t length) {
+std::string getRandomString(uint8_t length)
+{
     std::string result(length, '_');
     std::size_t baseSize = sizeof(alphanum);
 
-    for(int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
         result.at(i) = alphanum[rand() % (baseSize - 1)];
-    }
 
     return result;
 }
 
-void sleepForMilliseconds(uint32_t duration) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+void sleepForMilliseconds(uint32_t duration)
+{
+    std::this_thread::sleep_for (std::chrono::milliseconds(duration));
 }
 
-bool getBoolFromDBValue(std::shared_ptr<char> value) {
-    if(*value == 't') {
+bool getBoolFromDBValue(const std::string &value)
+{
+    const char *data = value.data();
+
+    if (*data == 't') {
         return true;
     }
-    else if(*value == 'f') {
+    else if (*data == 'f') {
         return false;
     }
     else {
-        logArgsErrorWithTemplate("unknown bool value from DB: {}", value);
+        logTemplateError("unknown bool value from DB: {}", value);
     }
 
     return false;
 }
 
-std::string hashFileMD5(const std::string& filename) {
+std::string hashFileMD5(const std::string& filename)
+{
     std::ifstream file(filename, std::ios::binary);
 
-    if (!file) {
+    if (!file)
         throw std::runtime_error("Failed to open file: " + filename);
-    }
 
-    EVP_MD_std::shared_ptr<CTX> md5Context = EVP_MD_CTX_new();
+    EVP_MD_CTX *md5Context = EVP_MD_CTX_new();
     EVP_MD_CTX_init(md5Context);
     EVP_DigestInit_ex(md5Context, EVP_md5(), nullptr);
 
@@ -344,9 +349,8 @@ std::string hashFileMD5(const std::string& filename) {
 
     std::stringstream stream;
 
-    for(auto& element : result) {
+    for (auto& element : result)
         stream << std::hex << (int)element;
-    }
 
     return stream.str();
 }

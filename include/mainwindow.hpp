@@ -42,7 +42,7 @@ public:
 
     void set();
     void addTextToAppLogWidget(const QString&);
-    void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, std::shared_ptr<QWidget>);
+    // void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, std::shared_ptr<QWidget>);
     void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     std::size_t getCompanionPanelChildrenSize();
     void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
@@ -59,10 +59,10 @@ private slots:
     void createGroupChat();
 
 private:
-    std::shared_ptr<QPalette> menuBarPalette_;
+    std::unique_ptr<QPalette> menuBarPalette_;
     std::shared_ptr<QWidget> centralWidget_;
-    std::shared_ptr<QHBoxLayout> centralWidgetLayout_;
-    std::shared_ptr<QSplitter> splitter_;
+    std::unique_ptr<QHBoxLayout> centralWidgetLayout_;
+    std::unique_ptr<QSplitter> splitter_;
 
     // left panel
     std::shared_ptr<MainWindowContainerWidget> leftContainerWidget_;
@@ -78,8 +78,8 @@ private:
 
     std::shared_ptr<ShowHideWidget> showHideWidget_;
 
-    std::map<MainWindowContainerPosition, std::shared_ptr<MainWindowContainerWidget>>
-        mapContainerToContainerPosition;
+    // std::map<MainWindowContainerPosition, MainWindowContainerWidget
+    //     mapContainerToContainerPosition;
 
     std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
 

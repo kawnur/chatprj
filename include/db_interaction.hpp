@@ -26,7 +26,7 @@ public:
     DBReplyData(const std::vector<std::string>&);
     ~DBReplyData() = default;
 
-    // std::vector<std::map<std::string, std::shared_ptr<char>>>* getData();
+    // std::vector<std::map<std::string, std::string>>>* getData();
     // std::vector<QString> buildDataQStringVector();
     std::vector<std::string> buildDataStringVector();
 
@@ -46,7 +46,9 @@ private:
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
 const char * getPQArg(const std::optional<std::string> &value);
 std::shared_ptr<PGconn> getDBConnection();
-std::shared_ptr<PGresult> sendDBRequestAndReturnResult(std::shared_ptr<PGconn>, const bool&, std::shared_ptr<char>);
+
+std::shared_ptr<PGresult> sendDBRequestAndReturnResult(
+    std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string &command);
 
 std::shared_ptr<PGresult> getCompanionsDBResult(std::shared_ptr<PGconn>, const bool&);
 std::shared_ptr<PGresult> getCompanionByNameDBResult(std::shared_ptr<PGconn>, const bool&, const std::string&);

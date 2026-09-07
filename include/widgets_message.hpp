@@ -34,8 +34,8 @@ public:
 private:
     bool isMessageFromMe_;
     std::shared_ptr<QHBoxLayout> layout_;
-    std::shared_ptr<IndicatorWidget> sentIndicato_;
-    std::shared_ptr<IndicatorWidget> receivedIndicato_;
+    std::shared_ptr<IndicatorWidget> sentIndicator_;
+    std::shared_ptr<IndicatorWidget> receivedIndicator_;
     std::shared_ptr<QLabel> newMessageLabel_;
 };
 

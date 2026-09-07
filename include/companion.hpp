@@ -33,6 +33,10 @@ void logTemplateInfo(const std::format_string<Ts...>&, Ts&&...);
 template<typename... Ts>
 void logTemplateError(const std::format_string<Ts...>&, Ts&&...);
 
+using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
+using MessageMappingIterator = MessageMapping::iterator;
+using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
+
 class SocketInfo {
 public:
     SocketInfo() {}
@@ -66,7 +70,8 @@ public:
     Companion(int, const std::string&);
     ~Companion() = default;
 
-    friend bool operator<(const Companion& object1, const Companion& object2) {
+    friend bool operator<(const Companion& object1, const Companion& object2)
+    {
         return object1.getId() < object2.getId();
     }
 
@@ -81,47 +86,45 @@ public:
     bool removeOperatorFromStorage(const std::string&);
 
     template<typename T>
-    std::shared_ptr<T> getFileOperatorByNetworkId(const std::string& networkId) {
-        return dynamic_cast<std::shared_ptr<T>>(this->fileOperatorStorage_->getOperator(networkId));
+    std::shared_ptr<T> getFileOperatorByNetworkId(const std::string& networkId)
+    {
+        return dynamic_pointer_cast<T>(fileOperatorStorage_->getOperator(networkId));
     }
 
-    // template<typename T>
-    // void removeFileOperator(const std::string& networkId) {
-    //     auto operator = this->getFileOperatorByNetworkId<T>(networkId);
+    template<typename T>
+    void removeFileOperator(const std::string& networkId)
+    {
+        auto fileOperator = getFileOperatorByNetworkId<T>(networkId);
 
-    //     if(operator) {
-    //         if(!this->removeOperatorFromStorage(networkId))
-    //             logTemplateInfo("remove file operator error for networkId {}", networkId);
+        if (fileOperator) {
+            logTemplateError("file operator was not found for networkId {}", networkId);
 
-    //         if(operator)
-    //             delete operator;  // TODO remove
+            return;
+        }
 
-    //         logTemplateInfo("file operator for networkId {} deleted", networkId);
-    //     }
-    //     else {
-    //         logTemplateError("file operator was not found for networkId {}", networkId);
-    //     }
-    // }
+        if (!removeOperatorFromStorage(networkId))
+            logTemplateInfo("remove file operator error for networkId {}", networkId);
+
+        // if (fileOperator)
+        //     delete fileOperator;  // TODO remove
+
+        // logTemplateInfo("file operator for networkId {} deleted", networkId);
+    }
 
     std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message>);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message>);
     std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, std::shared_ptr<MessageWidget>);
     std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(bool, std::shared_ptr<MessageWidget>);
-
-    // std::pair<const Message, MessageInfo>* getMessageMappingPairByMessageId(uint32_t);
-
-    // std::pair<const Message, MessageInfo>* getMessageMappingPairByNetworkId(
-    //     const std::string&);
-
+    MessageMappingPair getMessageMappingPairByMessageId(uint32_t);
+    MessageMappingPair getMessageMappingPairByNetworkId(const std::string&);
     std::shared_ptr<Message> getEarliestMessage() const;
 
-    // std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-    //     createMessageAndAddToMapping(
-    //         MessageType, uint32_t, uint8_t, const std::string&, const std::string&,
-    //         bool, bool, bool, std::string);
+    std::pair<MessageMappingIterator, bool> createMessageAndAddToMapping(
+        MessageType, uint32_t, uint8_t, const std::string&, const std::string&, bool, bool, bool,
+        std::string);
 
-    // std::pair<std::_Rb_tree_iterator<std::pair<const Message, MessageInfo>>, bool>
-    //     createMessageAndAddToMapping(std::shared_ptr<DBReplyData>, std::size_t);
+    std::pair<MessageMappingIterator, bool> createMessageAndAddToMapping(
+        std::shared_ptr<DBReplyData>, std::size_t);
 
     void setSocketInfo(std::shared_ptr<SocketInfo>);
     bool setFileOperatorFilePath(const std::string&, const std::filesystem::path&);
@@ -147,7 +150,7 @@ private:
     std::shared_ptr<ChatClient> client_;
     std::shared_ptr<ChatServer> server_;
     std::shared_ptr<FileOperatorStorage> fileOperatorStorage_;
-    std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>> messageMapping_;
+    MessageMapping messageMapping_;
 
     std::string generateNewNetworkId(bool);
 };
