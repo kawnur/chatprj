@@ -1,6 +1,7 @@
 #include "graphic_manager.hpp"
 
-GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex()) {
+GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
+{
     // mapMessageToMessageWidget_(std::map<std::shared_ptr<Message>, std::shared_ptr<MessageWidget>>()) {
     // stubWidgets_ = new StubWidgetGroup;
     // mainWindow_ = new MainWindow;
@@ -125,7 +126,7 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 
 void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
 {
-    switch(action->getActionType()) {
+    switch (action->getActionType()) {
     case ChatActionType::CREATE:
         getManager()->createCompanion(action);
 
@@ -319,6 +320,9 @@ std::shared_ptr<GraphicManager> getGraphicManager()
 {
     QCoreApplication *coreApp = QCoreApplication::instance();
     ChatApp *app = dynamic_cast<ChatApp*>(coreApp);
+
+    if (!app)
+        return nullptr;
 
     return app->graphicManager_;
 }

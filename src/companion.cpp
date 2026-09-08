@@ -162,9 +162,16 @@ MessageMappingPair Companion::getMessageMappingPairByMessageId(uint32_t messageI
             return iter.first->getId() == messageId;
         });
 
-    return (result == messageMapping_.end())
-               ? MessageMappingPair(nullptr, nullptr)
-               : MessageMappingPair(result->first, result->first);
+    // return (result == messageMapping_.end())
+    //            ? MessageMappingPair(nullptr, nullptr)
+    //            : std::make_pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>(result->first, result->second);
+
+    if (result == messageMapping_.end())
+        return MessageMappingPair(nullptr, nullptr);
+
+    auto pair = MessageMappingPair(result->first, result->second);
+
+    return pair;
 }
 
 MessageMappingPair Companion::getMessageMappingPairByNetworkId(const std::string& networkId)
@@ -178,8 +185,12 @@ MessageMappingPair Companion::getMessageMappingPairByNetworkId(const std::string
             return iter.second->getState()->getNetworkId() == networkId;
         });
 
-    return (result == messageMapping_.end())
-               ? std::pair(nullptr, nullptr) : std::pair(result->first, result->first);
+    if (result == messageMapping_.end())
+        return MessageMappingPair(nullptr, nullptr);
+
+    auto pair = MessageMappingPair(result->first, result->second);
+
+    return pair;
 }
 
 std::shared_ptr<Message> Companion::getEarliestMessage() const

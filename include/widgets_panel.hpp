@@ -42,11 +42,11 @@ public:
     int getLastCompanionPanelChildWidth();
 
 private:
-    std::shared_ptr<QVBoxLayout> layout_;
-    std::shared_ptr<QPalette> palette_;
-    std::shared_ptr<QWidget> companionPanel_;
-    std::shared_ptr<QVBoxLayout> companionPanelLayout_;
-    std::shared_ptr<QSpacerItem> spacer_;
+    std::unique_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QPalette> palette_;
+    std::unique_ptr<QWidget> companionPanel_;
+    std::unique_ptr<QVBoxLayout> companionPanelLayout_;
+    std::unique_ptr<QSpacerItem> spacer_;
 };
 
 class CentralPanelWidget : public QWidget {
@@ -69,7 +69,7 @@ public:
 private:
     std::mutex chatHistoryMutex_;
     std::shared_ptr<Companion> companion_;
-    std::shared_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QVBoxLayout> layout_;
 
     //    std::shared_ptr<QGraphicsScene> graphicsScene_;
     //    std::shared_ptr<QGraphicsView> graphicsView_;
@@ -78,23 +78,23 @@ private:
     //    int linesCount_;
     //    std::shared_ptr<QFont> font_;
 
-    std::shared_ptr<QLabel> companionNameLabel_;
-    std::shared_ptr<QPalette> companionNameLabelPalette_;
-    std::shared_ptr<QPalette> chatHistoryWidgetPalette_;
+    std::unique_ptr<QLabel> companionNameLabel_;
+    std::unique_ptr<QPalette> companionNameLabelPalette_;
+    std::unique_ptr<QPalette> chatHistoryWidgetPalette_;
 
-    std::shared_ptr<QScrollArea> chatHistoryScrollArea_;
+    std::unique_ptr<QScrollArea> chatHistoryScrollArea_;
     // std::shared_ptr<ScrollArea> chatHistoryScrollArea_;
 
-    std::shared_ptr<QWidget> chatHistoryWidget_;
-    std::shared_ptr<QVBoxLayout> chatHistoryLayout_;
+    std::unique_ptr<QWidget> chatHistoryWidget_;
+    std::unique_ptr<QVBoxLayout> chatHistoryLayout_;
 
-    std::shared_ptr<QWidget> buttonPanelWidget_;
-    std::shared_ptr<QHBoxLayout> buttonPanelLayout_;
-    std::shared_ptr<QPalette> buttonPanelPalette_;
-    std::shared_ptr<QPushButton> sendFileButton_;
+    std::unique_ptr<QWidget> buttonPanelWidget_;
+    std::unique_ptr<QHBoxLayout> buttonPanelLayout_;
+    std::unique_ptr<QPalette> buttonPanelPalette_;
+    std::unique_ptr<QPushButton> sendFileButton_;
 
-    std::shared_ptr<TextEditWidget> textEdit_;
-    std::shared_ptr<QPalette> textEditPalette_;
+    std::unique_ptr<TextEditWidget> textEdit_;
+    std::unique_ptr<QPalette> textEditPalette_;
 
     // std::shared_ptr<QSplitter> splitter_;
 
@@ -124,9 +124,9 @@ signals:
     void addTextToAppLogWidgetSignal(const QString&);
 
 private:
-    std::shared_ptr<QVBoxLayout> layout_;
-    std::shared_ptr<QPlainTextEdit> appLogWidget_;
-    std::shared_ptr<QPalette> appLogWidgetPalette_;
+    std::unique_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QPlainTextEdit> appLogWidget_;
+    std::unique_ptr<QPalette> appLogWidgetPalette_;
 
 private slots:
     void addTextToAppLogWidgetSlot(const QString&);

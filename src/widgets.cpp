@@ -500,13 +500,19 @@ void WidgetGroup::set()
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
     std::shared_ptr<Message> message, std::shared_ptr<MessageState> messageState)
 {
-    centralPanel_->addMessageWidgetToChatHistory(this, companion_, message, messageState);
+    centralPanel_->addMessageWidgetToChatHistory(
+        shared_from_this(), companion_, message, messageState);
 }
 
 void WidgetGroup::clearChatHistory()
 {
     centralPanel_->clearChatHistory();
-    dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_)->setNewMessagesIndicatorOff();
+
+    auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
+
+    if (cast)
+        cast->setNewMessagesIndicatorOff();
+
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
     antecedentMessagesCounter_ = 0;
 }
@@ -537,8 +543,7 @@ void WidgetGroup::messageAdded()
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
     // set new message indicator on if socket info widget is not selected
-    std::shared_ptr<SocketInfoWidget> cast =
-        dynamic_cast<std::shared_ptr<SocketInfoWidget>>(socketInfoBase_);
+    auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
 
     if (cast && antecedentMessagesCounter_ > 0)
         cast->setNewMessagesIndicatorOn();
@@ -568,8 +573,10 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> messageWi
         messageState->setIsAntecedent(false);
 
         if (antecedentMessagesCounter_ == 0) {
-            dynamic_cast<std::shared_ptr<SocketInfoWidget>>(socketInfoBase_)->
-                setNewMessagesIndicatorOff();
+            auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
+
+            if (cast)
+                cast->setNewMessagesIndicatorOff();
         }
     }
 }
@@ -590,7 +597,8 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
     }
 
-    centralPanel_->addMessageWidgetToChatHistory(this, companion_, message, messageState);
+    centralPanel_->addMessageWidgetToChatHistory(
+        shared_from_this(), companion_, message, messageState);
 }
 
 void WidgetGroup::askUserForHistorySendingConfirmationSlot()
@@ -600,16 +608,16 @@ void WidgetGroup::askUserForHistorySendingConfirmationSlot()
 
 StubWidgetGroup::StubWidgetGroup()
 {
-    socketInfo_ = std::make_unique<SocketInfoStubWidget>();
-    leftPanel_ = std::make_shared<LeftPanelWidget(nullptr);
-    centralPanel_ = std::make_shared<CentralPanelWidget(nullptr, "");
-    rightPanel_ = std::make_shared<RightPanelWidget(nullptr);
+    socketInfo_ = std::make_shared<SocketInfoStubWidget>();
+    leftPanel_ = std::make_shared<LeftPanelWidget>(nullptr);
+    centralPanel_ = std::make_shared<CentralPanelWidget>(nullptr, "");
+    rightPanel_ = std::make_shared<RightPanelWidget>(nullptr);
 }
 
 void StubWidgetGroup::set()
 {
     auto graphicManager = getGraphicManager();
-    auto baseObjectCast = dynamic_cast<std::shared_ptr<SocketInfoBaseWidget>>(socketInfo_);
+    auto baseObjectCast = dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
     graphicManager->addWidgetToCompanionPanel(baseObjectCast);
 
     graphicManager->addWidgetToMainWindowContainerAndSetParentTo(

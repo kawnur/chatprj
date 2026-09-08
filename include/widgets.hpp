@@ -210,7 +210,7 @@ private:
 //     // void wheelEvent(std::shared_ptr<QWheelEvent>) override;
 // };
 
-class WidgetGroup : public QObject
+class WidgetGroup : public QObject, public std::enable_shared_from_this<WidgetGroup>
 {
     Q_OBJECT
 
@@ -269,7 +269,7 @@ public:
     void setLeftPanelWidth(int);
 
 private:
-    std::unique_ptr<SocketInfoStubWidget> socketInfo_;
+    std::shared_ptr<SocketInfoStubWidget> socketInfo_;
     std::shared_ptr<LeftPanelWidget> leftPanel_;
     std::shared_ptr<CentralPanelWidget> centralPanel_;
     std::shared_ptr<RightPanelWidget> rightPanel_;

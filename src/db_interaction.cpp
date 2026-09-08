@@ -111,6 +111,13 @@ std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variabl
     return std::string(value);
 }
 
+const char *getValueFromEnvironmentVariableAlt1(std::string &&variableName)
+{
+    auto value = getValueFromEnvironmentVariable(std::forward<std::string>(variableName));
+
+    return getPQArg(value);
+}
+
 const char * getPQArg(const std::optional<std::string> &value)
 {
     return (value) ? value.value().data() : nullptr;
@@ -122,27 +129,73 @@ std::shared_ptr<PGconn> getDBConnection()
 
     std::shared_ptr<PGconn> dbConnection = nullptr;
 
-    auto connectLambda = [&]()
-    {
-        auto dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
-        auto dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
-        auto dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
-        auto dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
+    // constexpr auto connectLambda = [&]()
+    // {
+    //     auto dbAddress = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_ADDRESS");
+    //     auto dbPort = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PORT");
+    //     auto dbLogin = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_USER");
+    //     auto dbPassword = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PASSWORD");
+
+    //     for (const auto &value : { dbAddress, dbPort, dbLogin, dbPassword }) {
+    //         if (!value)
+    //             return;
+    //     }
+
+    //     // TODO create formatters
+    //     logArgsWithTemplate(
+    //         "DB connection; address: {0}, port: {1}, login: {2}, password: {3}",
+    //         dbAddress, dbPort, dbLogin, dbPassword);
+
+    //     // create connection
+    //     std::string infoTemplate { "dbname={0} user={1} password={2} host={3}" };
+    //     const char *dbName = "postgres";  // TODO add var
+
+    //     auto args = std::make_format_args(dbName, dbLogin, dbPassword, dbAddress);
+    //     auto connectionInfo = std::vformat(infoTemplate, args);
+    //     dbConnection = std::make_shared<PGconn>(PQconnectdb(connectionInfo.data()), PQfinish);
+
+    //     // check connection status
+    //     ConnStatusType status = PQstatus(dbConnection.get());
+    //     std::string mark = (status == 0) ? "OK" : "?";
+
+    //     logArgsWithTemplate("DB connection status: {0} {1}", std::to_string(status), mark);
+
+    //     if (status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
+    //         logArgsError("DB connection status: CONNECTION_BAD");
+    // };
+
+    // runAndLogException(connectLambda);
+
+    try {
+        // connectLambda();
+
+        auto dbAddress = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_ADDRESS");
+        auto dbPort = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PORT");
+        auto dbLogin = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_USER");
+        auto dbPassword = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PASSWORD");
 
         for (const auto &value : { dbAddress, dbPort, dbLogin, dbPassword }) {
             if (!value)
-                return;
+                // return;
+                return nullptr;
         }
 
         // TODO create formatters
         logArgsWithTemplate(
             "DB connection; address: {0}, port: {1}, login: {2}, password: {3}",
-            getPQArg(dbAddress), getPQArg(dbPort), getPQArg(dbLogin), getPQArg(dbPassword));
+            dbAddress, dbPort, dbLogin, dbPassword);
 
-        dbConnection.reset(PQsetdbLogin(
-            getPQArg(dbAddress), getPQArg(dbPort), "", "", "postgres", getPQArg(dbLogin),
-            getPQArg(dbPassword)));
+        // create connection
+        std::string infoTemplate { "dbname={0} user={1} password={2} host={3}" };
+        const char *dbName = "postgres";  // TODO add var
 
+        auto args = std::make_format_args(dbName, dbLogin, dbPassword, dbAddress);
+        auto connectionInfo = std::vformat(infoTemplate, args);
+        // auto dbConnection = std::make_shared<PGconn>(PQconnectdb(connectionInfo.data()), PQfinish);
+        // std::shared_ptr<PGconn> dbConnection(PQconnectdb(connectionInfo.data()), PQfinish);
+        dbConnection = std::shared_ptr<PGconn>(PQconnectdb(connectionInfo.data()), PQfinish);
+
+        // check connection status
         ConnStatusType status = PQstatus(dbConnection.get());
         std::string mark = (status == 0) ? "OK" : "?";
 
@@ -150,9 +203,10 @@ std::shared_ptr<PGconn> getDBConnection()
 
         if (status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
             logArgsError("DB connection status: CONNECTION_BAD");
-    };
-
-    runAndLogException(connectLambda);
+    }
+    catch(std::exception& e) {
+        logArgsException(e.what());
+    }
 
     return dbConnection;
 }
@@ -165,7 +219,13 @@ std::shared_ptr<PGresult> sendDBRequestAndReturnResult(
 
     std::lock_guard<std::mutex> lock(dbMutex);
 
-    auto result = std::make_shared<PGresult>(PQexec(dbConnection.get(), command.data()));
+    auto lambda = [](PGresult* result)
+    {
+        if (result)
+            PQclear(result);
+    };
+
+    std::shared_ptr<PGresult> result(PQexec(dbConnection.get(), command.data()), lambda);
 
     return result;
 }

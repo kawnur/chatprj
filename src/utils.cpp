@@ -33,7 +33,7 @@ bool validateIpAddress(
 bool validatePort(std::vector<std::string>& validationErrors, const std::string& port)
 {
     bool result = false;
-    char *errorMessage = "port number must be greater than 0 and lower than 65536";
+    std::string errorMessage { "port number must be greater than 0 and lower than 65536" };
 
     try {
         long long portNumber = std::stoll(port, nullptr, 10);
@@ -44,12 +44,10 @@ bool validatePort(std::vector<std::string>& validationErrors, const std::string&
             validationErrors.emplace_back(errorMessage);
     }
     catch(std::out_of_range) {
-        validationErrors.emplace_back(
-            strcat(errorMessage, ", port number is too big, std::out_of_range"));
+        validationErrors.push_back(errorMessage + ", port is too big, std::out_of_range");
     }
     catch(std::invalid_argument) {
-        validationErrors.emplace_back(
-            strcat(errorMessage, ", port number is invalid, std::invalid_argument"));
+        validationErrors.push_back(errorMessage + ", port is invalid, std::invalid_argument");
     }
 
     logArgs("validatePort result:", result);
@@ -212,26 +210,29 @@ std::string buildMessageJSONString(
     jsonData["companion_id"] = companion->getId();
     jsonData["antecedent"] = isAntecedent;
 
-    switch(type) {
+    switch (type) {
     case NetworkMessageType::TEXT:
+    {
         jsonData["time"] = message->getTime();
         jsonData["text"] = message->getText();
+    }
 
-        break;
+    break;
 
     case NetworkMessageType::FILE_PROPOSAL:
+    {
         jsonData["time"] = message->getTime();
         jsonData["text"] = message->getText();
         jsonData["hashMD5"] =
-            companion->getFileOperatorStorage()->
-                getOperator(networkId)->getFileMD5Hash();
+            companion->getFileOperatorStorage()->getOperator(networkId)->getFileMD5Hash();
+    }
 
-        break;
+    break;
 
-    case NetworkMessageType::RECEIVE_CONFIRMATION:
+    case NetworkMessageType::RECEIVE_CONFIRMATION:        
         jsonData["received"] = 1;
 
-        break;
+    break;
 
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
     case NetworkMessageType::CHAT_HISTORY_REQUEST:
@@ -241,7 +242,7 @@ std::string buildMessageJSONString(
     case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
     case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
 
-        break;
+    break;
     }
 
     return jsonData.dump();

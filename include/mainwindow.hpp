@@ -42,7 +42,7 @@ public:
 
     void set();
     void addTextToAppLogWidget(const QString&);
-    // void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, std::shared_ptr<QWidget>);
+    void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, std::shared_ptr<QWidget>);
     void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
     std::size_t getCompanionPanelChildrenSize();
     void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
@@ -78,8 +78,8 @@ private:
 
     std::shared_ptr<ShowHideWidget> showHideWidget_;
 
-    // std::map<MainWindowContainerPosition, MainWindowContainerWidget
-    //     mapContainerToContainerPosition;
+    // containerMap
+    std::map<MainWindowContainerPosition, std::shared_ptr<MainWindowContainerWidget>> containerMap;
 
     std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
 

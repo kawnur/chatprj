@@ -44,9 +44,9 @@ MainWindow::MainWindow()
     rightContainerWidget_->addWidgetToLayout(rightPanel_);
 
     // map container ptr to position
-    // mapContainerToContainerPosition[MainWindowContainerPosition::LEFT] = leftContainerWidget_;
-    // mapContainerToContainerPosition[MainWindowContainerPosition::CENTRAL] = centralContainerWidget_;
-    // mapContainerToContainerPosition[MainWindowContainerPosition::RIGHT] = rightContainerWidget_;
+    containerMap[MainWindowContainerPosition::LEFT] = leftContainerWidget_;
+    containerMap[MainWindowContainerPosition::CENTRAL] = centralContainerWidget_;
+    containerMap[MainWindowContainerPosition::RIGHT] = rightContainerWidget_;
     
     // blur effect moved to set
 
@@ -69,8 +69,7 @@ void MainWindow::set()
 
     showHideWidget_ = std::make_shared<ShowHideWidget>();
 
-    // addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_);
-    leftContainerWidget_->addWidgetToLayoutAndSetParentTo(showHideWidget_);
+    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_);
 
     setBlurEffect();
 }
@@ -80,11 +79,11 @@ void MainWindow::addTextToAppLogWidget(const QString& text)
     rightPanel_->addTextToAppLogWidget(text);
 }
 
-// void MainWindow::addWidgetToContainerAndSetParentTo(
-//     MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
-// {
-//     mapContainerToContainerPosition.at(position)->addWidgetToLayoutAndSetParentTo(widget);
-// }
+void MainWindow::addWidgetToContainerAndSetParentTo(
+    MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
+{
+    containerMap.at(position)->addWidgetToLayoutAndSetParentTo(widget);
+}
 
 void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
 {

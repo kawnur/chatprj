@@ -1,7 +1,9 @@
 #include "widgets_dialog.hpp"
 
 CompanionDataDialog::CompanionDataDialog(
-    ChatActionType actionType, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion) {
+    ChatActionType actionType, std::shared_ptr<QWidget> parent,
+    std::shared_ptr<Companion> companion)
+{
     setParent(parent);
 
     setWindowTitle(
@@ -29,13 +31,8 @@ CompanionDataDialog::CompanionDataDialog(
 
     if (actionType_ == ChatActionType::UPDATE && companion) {
         nameEdit_->setText(getQString(companion->getName()));
-
-        ipAddressEdit_->setText(
-            getQString(companion->getSocketInfo()->getIpAddress()));
-
-        portEdit_->setText(
-            getQString(std::to_string(
-                companion->getSocketInfo()->getClientPort())));
+        ipAddressEdit_->setText(getQString(companion->getSocketInfo()->getIpAddress()));
+        portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->getClientPort())));
     }
 
     layout_->addRow(nameLabel_, nameEdit_);
@@ -46,7 +43,8 @@ CompanionDataDialog::CompanionDataDialog(
     layout_->addWidget(buttonBox_);
 }
 
-void CompanionDataDialog::set() {
+void CompanionDataDialog::set()
+{
     connect(
         buttonBox_, &QDialogButtonBox::accepted,
         action_, &Action::sendData, Qt::QueuedConnection);
@@ -56,24 +54,26 @@ void CompanionDataDialog::set() {
         this, &QDialog::reject, Qt::QueuedConnection);
 }
 
-std::string CompanionDataDialog::getNameString() {
+std::string CompanionDataDialog::getNameString()
+{
     return nameEdit_->text().toStdString();
 }
 
-std::string CompanionDataDialog::getIpAddressString() {
+std::string CompanionDataDialog::getIpAddressString()
+{
     auto ipAddressFromWidget = ipAddressEdit_->text().toStdString();  // TODO change
     QHostAddress hostAddress { getQString(ipAddressFromWidget) };
 
     return hostAddress.toString().toStdString();
 }
 
-std::string CompanionDataDialog::getPortString() {
+std::string CompanionDataDialog::getPortString()
+{
     return portEdit_->text().toStdString();
 }
 
-GroupChatDataDialog::GroupChatDataDialog(
-    ChatActionType actionType, std::shared_ptr<QWidget> parent) {
-
+GroupChatDataDialog::GroupChatDataDialog(ChatActionType actionType, std::shared_ptr<QWidget> parent)
+{
     setParent(parent);
 
     setWindowTitle(
@@ -237,9 +237,13 @@ void TextDialog::closeSelfAndParentDialog() {
 
     auto parent = parent();
 
-    if (parent) {
-        dynamic_cast<std::shared_ptr<QWidget>>(parent)->close();
-    }
+    if (!parent)
+        return;
+
+    auto cast = dynamic_cast<QWidget *>(parent);
+
+    if (cast)
+        cast->close();
 }
 
 void TextDialog::acceptAction() {

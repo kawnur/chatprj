@@ -44,7 +44,8 @@ private:
 };
 
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
-const char * getPQArg(const std::optional<std::string> &value);
+const char *getValueFromEnvironmentVariableAlt1(std::string &&variableName);
+const char *getPQArg(const std::optional<std::string> &value);
 std::shared_ptr<PGconn> getDBConnection();
 
 std::shared_ptr<PGresult> sendDBRequestAndReturnResult(

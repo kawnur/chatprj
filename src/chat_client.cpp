@@ -2,18 +2,17 @@
 
 using boost::asio::ip::tcp;
 
-ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port) :
-    isConnected_(false), ipAddress_(ipAddress), port_(port), io_context_(),
-    socket_(io_context_), resolver_(io_context_) {}
+ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port)
+    : isConnected_(false), ipAddress_(ipAddress), port_(port), io_context_(), socket_(io_context_),
+    resolver_(io_context_) {}
 
-bool ChatClient::connect() {
-    auto connectLambda = [this]() {
+bool ChatClient::connect()
+{
+    auto connectLambda = [this]()
+    {
         logArgs("ChatClient connects to", ipAddress_, port_);
 
-        boost::asio::connect(
-            socket_,
-            resolver_.resolve(ipAddress_, std::to_string(port_))
-        );
+        boost::asio::connect(socket_, resolver_.resolve(ipAddress_, std::to_string(port_)));
 
         logArgs("socket_.is_open():", socket_.is_open());
 
@@ -25,8 +24,10 @@ bool ChatClient::connect() {
     return isConnected_;
 }
 
-bool ChatClient::disconnect() {
-    auto disconnectLambda = [this](){
+bool ChatClient::disconnect()
+{
+    auto disconnectLambda = [this]()
+    {
         logArgs("ChatClient disconnects from", ipAddress_, port_);
 
         socket_.close();
@@ -41,13 +42,13 @@ bool ChatClient::disconnect() {
     return !isConnected_;
 }
 
-bool ChatClient::send(std::string text) {
+bool ChatClient::send(std::string text)
+{
     bool sent = false;
 
-    auto sendLambda = [&, this](bool& value){
-        std::size_t written = boost::asio::write(
-            socket_, boost::asio::buffer(text.data(), text.size()));
-
+    auto sendLambda = [&, this](bool& value)
+    {
+        auto written = boost::asio::write(socket_, boost::asio::buffer(text.data(), text.size()));
         value = true;
     };
 
@@ -57,6 +58,7 @@ bool ChatClient::send(std::string text) {
     return sent;
 }
 
-bool ChatClient::getIsConnected() const {
+bool ChatClient::getIsConnected() const
+{
     return isConnected_;
 }

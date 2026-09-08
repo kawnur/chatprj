@@ -1,6 +1,7 @@
 #include "logging.hpp"
 
-QString getQString(const std::string& value) {
+QString getQString(const std::string& value)
+{
     return QString::fromStdString(value);
 }
 
@@ -9,35 +10,41 @@ QString getQString(const char *value)
     return QString(value);
 }
 
-QString getQString(const bool& value) {
+QString getQString(const bool& value)
+{
     return (value) ? "true" : "false";
 }
 
-QString getQString(std::nullptr_t value) {
+QString getQString(std::nullptr_t value)
+{
     return "nullptr_t";
 }
 
-QString getQString(QString value) {
+QString getQString(QString value)
+{
     return value;
 }
 
-QString getQString(std::filesystem::path& value) {
+QString getQString(std::filesystem::path& value)
+{
     return QString::fromStdString(value.string());
 }
 
-void logLine(const QString& string) {
+void logLine(const QString& string)
+{
     getGraphicManager()->addTextToAppLogWidget(string);
 }
 
-void logLine(const std::string& string) {
+void logLine(const std::string& string)
+{
     getGraphicManager()->addTextToAppLogWidget(getQString(string));
 }
 
-void logSocketInfoData(std::shared_ptr<SocketInfo> object) {
+void logSocketInfoData(std::shared_ptr<SocketInfo> object)
+{
     logArgsWithTemplate(
         "ipAddress: {0}, serverPort_: {1}, clientPort_: {2}",
-        object->getIpAddress(), object->getServerPort(),
-        object->getClientPort());
+        object->getIpAddress(), object->getServerPort(), object->getClientPort());
 }
 
 void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column)
@@ -48,17 +55,18 @@ void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int colu
     logArgsError("unknown field name:", logMark);
 }
 
-void logDBReplyData(std::shared_ptr<DBReplyData> object) {
+void logDBReplyData(std::shared_ptr<DBReplyData> object)
+{
     logArgs(logDelimiter);
 
-    for (auto& element : object->buildDataStringVector()) {
+    for (auto& element : object->buildDataStringVector())
         logArgs(element);
-    }
 
     logArgs(logDelimiter);
 }
 
-void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object) {
+void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
+{
     logArgsWithTemplate(
         "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
         object->getName().toStdString(), object->getIpAddress().toStdString(),

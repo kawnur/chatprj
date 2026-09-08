@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 20.0.0, 2026-09-03T16:54:41. -->
+<!-- Written by QtCreator 20.0.1, 2026-09-08T17:47:41. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{c1a3ffb9-adac-43ff-9464-2ecc6cff9014}</value>
+  <value type="QByteArray">{7fc52158-57a4-4776-9fd7-a063abeec6d8}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -33,7 +33,6 @@
    <value type="bool" key="EditorConfiguration.SpacesForTabs">true</value>
    <value type="int" key="EditorConfiguration.TabSize">8</value>
    <value type="bool" key="EditorConfiguration.UseGlobal">true</value>
-   <value type="bool" key="EditorConfiguration.addFinalNewLine">true</value>
   </valuemap>
  </data>
  <data>
@@ -68,7 +67,7 @@
    <value type="bool" key="HasPerBcDcs">true</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{af54dc15-ce39-4242-be95-c61fab1ae090}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{eaf602d9-476e-4cab-bdf2-8e62294cf85d}</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
@@ -76,19 +75,20 @@
     <value type="QString" key="CMake.Build.Type">Debug</value>
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
-    <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
+    <value type="UnknownType" key="CMake.Configure.UserEnvironmentChanges"></value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_BUILD_TYPE:STRING=Debug
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
--DCMAKE_GENERATOR:STRING=Ninja
--DCMAKE_MAKE_PROGRAM:STRING=/usr/bin/ninja
+-DCMAKE_GENERATOR:STRING=Unix Makefiles
 -DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
 -DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtcreator/cmake-helper/qtcreator-project.cmake
 -DQT_CREATOR_ENABLE_MAINTENANCE_TOOL_PROVIDER:BOOL=ON
 -DQT_CREATOR_ENABLE_PACKAGE_MANAGER_SETUP:BOOL=ON
+-DQT_ENABLE_QML_DEBUG:BOOL=%{Qt:QT_ENABLE_QML_DEBUG}
 -DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/user/my/qt_projects/build-chatprj-Desktop-Debug</value>
+    <value type="int" key="EnableQmlDebugging">0</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">./build/%{FileSystemFriendly:%{Kit:Name}_%{BuildConfig:Name}}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -147,40 +147,6 @@
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.1">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">cap_net_raw,cap_net_admin=eip ./chatapp</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">setcap</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml down</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml --env-file ./docker/.env up</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">3</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Deploy</value>
-     </valuemap>
-     <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">1</value>
-     <valuemap type="QVariantMap" key="ProjectExplorer.DeployConfiguration.CustomData"/>
-     <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy Configuration2</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
-    </valuemap>
-    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.2">
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
        <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
        <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
         <value type="QString"></value>
@@ -188,6 +154,7 @@
        <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
        <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
        <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
+       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
        <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.CMakePackageStep</value>
       </valuemap>
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
@@ -212,7 +179,7 @@
      <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.Configuration</value>
     </valuemap>
-    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">3</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">2</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.PluginSettings">
      <value type="bool" key="AndroidBuildTargetDirSupport">false</value>
      <valuelist type="QVariantList" key="ApplicationmanagerPackageTargets"/>
@@ -226,73 +193,38 @@
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
      <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
+     <value type="UnknownType" key="PE.EnvironmentAspect.Changes"></value>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
-     <value type="QString" key="RunConfiguration.Arguments">--app</value>
-     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
-     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
-    </valuemap>
-    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
-     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
-     <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
-     <value type="int" key="Analyzer.Valgrind.Callgrind.CostFormat">0</value>
-     <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
-     <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
-     <valuelist type="QVariantList" key="CustomOutputParsers"/>
-     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
-     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
-     <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
      <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
+     <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{RunConfig:Executable:Path}</value>
     </valuemap>
-    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
     <value type="QString" key="CMake.Build.Type">Release</value>
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
-    <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
+    <value type="UnknownType" key="CMake.Configure.UserEnvironmentChanges"></value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_BUILD_TYPE:STRING=Release
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
--DCMAKE_GENERATOR:STRING=Ninja
+-DCMAKE_GENERATOR:STRING=Unix Makefiles
 -DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtcreator/cmake-helper/qtcreator-project.cmake
+-DQT_CREATOR_ENABLE_MAINTENANCE_TOOL_PROVIDER:BOOL=ON
+-DQT_CREATOR_ENABLE_PACKAGE_MANAGER_SETUP:BOOL=ON
+-DQT_ENABLE_QML_DEBUG:BOOL=%{Qt:QT_ENABLE_QML_DEBUG}
 -DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/user/my/qt_projects/build-chatprj-Desktop-Release</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">./build/%{FileSystemFriendly:%{Kit:Name}_%{BuildConfig:Name}}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -302,7 +234,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -319,7 +250,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -334,7 +264,7 @@
     <value type="UnknownType" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Release</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeBuildConfiguration</value>
-    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">1</value>
     <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
@@ -349,40 +279,6 @@
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.1">
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">cap_net_raw,cap_net_admin=eip ./chatapp</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">setcap</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml down</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml --env-file ./docker/.env up</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">3</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Deploy</value>
-     </valuemap>
-     <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">1</value>
-     <valuemap type="QVariantMap" key="ProjectExplorer.DeployConfiguration.CustomData"/>
-     <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy Configuration2</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
-    </valuemap>
-    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.2">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
        <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -416,7 +312,7 @@
      <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.Configuration</value>
     </valuemap>
-    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">3</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">2</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.0">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
      <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
@@ -425,27 +321,17 @@
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
      <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
+     <value type="UnknownType" key="PE.EnvironmentAspect.Changes"></value>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
-     <value type="QString" key="RunConfiguration.Arguments">--app</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
+     <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{RunConfig:Executable:Path}</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -454,27 +340,14 @@
      <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
-     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
-     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteDebugger.RunConfig</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
     </valuemap>
     <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
    </valuemap>
@@ -482,16 +355,19 @@
     <value type="QString" key="CMake.Build.Type">RelWithDebInfo</value>
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
-    <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
+    <value type="UnknownType" key="CMake.Configure.UserEnvironmentChanges"></value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
--DCMAKE_GENERATOR:STRING=Ninja
+-DCMAKE_GENERATOR:STRING=Unix Makefiles
 -DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtcreator/cmake-helper/qtcreator-project.cmake
+-DQT_CREATOR_ENABLE_MAINTENANCE_TOOL_PROVIDER:BOOL=ON
+-DQT_CREATOR_ENABLE_PACKAGE_MANAGER_SETUP:BOOL=ON
+-DQT_ENABLE_QML_DEBUG:BOOL=%{Qt:QT_ENABLE_QML_DEBUG}
 -DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/user/my/qt_projects/build-chatprj-Desktop-RelWithDebInfo</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">./build/%{FileSystemFriendly:%{Kit:Name}_%{BuildConfig:Name}}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -501,7 +377,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -518,7 +393,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -531,9 +405,9 @@
     <valuelist type="QVariantList" key="ProjectExplorer.BuildConfiguration.CustomParsers"/>
     <value type="bool" key="ProjectExplorer.BuildConfiguration.ParseStandardOutput">false</value>
     <value type="UnknownType" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Release with Debug Information</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">RelWithDebInfo</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeBuildConfiguration</value>
-    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">1</value>
     <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
@@ -548,40 +422,6 @@
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.1">
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">cap_net_raw,cap_net_admin=eip ./chatapp</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">setcap</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml down</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml --env-file ./docker/.env up</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">3</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Deploy</value>
-     </valuemap>
-     <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">1</value>
-     <valuemap type="QVariantMap" key="ProjectExplorer.DeployConfiguration.CustomData"/>
-     <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy Configuration2</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
-    </valuemap>
-    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.2">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
        <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -615,7 +455,7 @@
      <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.Configuration</value>
     </valuemap>
-    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">3</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">2</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.0">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
      <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
@@ -624,27 +464,17 @@
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
      <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
+     <value type="UnknownType" key="PE.EnvironmentAspect.Changes"></value>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
-     <value type="QString" key="RunConfiguration.Arguments">--app</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
+     <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{RunConfig:Executable:Path}</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -653,27 +483,14 @@
      <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
-     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
-     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteDebugger.RunConfig</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
     </valuemap>
     <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
    </valuemap>
@@ -681,17 +498,20 @@
     <value type="QString" key="CMake.Build.Type">RelWithDebInfo</value>
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
-    <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
+    <value type="UnknownType" key="CMake.Configure.UserEnvironmentChanges"></value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
--DCMAKE_GENERATOR:STRING=Ninja
+-DCMAKE_GENERATOR:STRING=Unix Makefiles
 -DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtcreator/cmake-helper/qtcreator-project.cmake
+-DQT_CREATOR_ENABLE_MAINTENANCE_TOOL_PROVIDER:BOOL=ON
+-DQT_CREATOR_ENABLE_PACKAGE_MANAGER_SETUP:BOOL=ON
+-DQT_ENABLE_QML_DEBUG:BOOL=%{Qt:QT_ENABLE_QML_DEBUG}
 -DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
     <value type="int" key="EnableQmlDebugging">0</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/user/my/qt_projects/build-chatprj-Desktop-Profile</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">./build/%{FileSystemFriendly:%{Kit:Name}_%{BuildConfig:Name}}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -701,7 +521,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -718,7 +537,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -733,7 +551,7 @@
     <value type="UnknownType" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Profile</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeBuildConfiguration</value>
-    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">1</value>
     <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
@@ -748,40 +566,6 @@
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.1">
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">cap_net_raw,cap_net_admin=eip ./chatapp</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">setcap</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml down</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml --env-file ./docker/.env up</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">3</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Deploy</value>
-     </valuemap>
-     <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">1</value>
-     <valuemap type="QVariantMap" key="ProjectExplorer.DeployConfiguration.CustomData"/>
-     <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy Configuration2</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
-    </valuemap>
-    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.2">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
        <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -815,7 +599,7 @@
      <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.Configuration</value>
     </valuemap>
-    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">3</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">2</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.0">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
      <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
@@ -824,27 +608,17 @@
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
      <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
+     <value type="UnknownType" key="PE.EnvironmentAspect.Changes"></value>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
-     <value type="QString" key="RunConfiguration.Arguments">--app</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
+     <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{RunConfig:Executable:Path}</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -853,27 +627,14 @@
      <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
-     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
-     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteDebugger.RunConfig</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
     </valuemap>
     <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
    </valuemap>
@@ -881,16 +642,19 @@
     <value type="QString" key="CMake.Build.Type">MinSizeRel</value>
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
-    <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
+    <value type="UnknownType" key="CMake.Configure.UserEnvironmentChanges"></value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_BUILD_TYPE:STRING=MinSizeRel
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
--DCMAKE_GENERATOR:STRING=Ninja
+-DCMAKE_GENERATOR:STRING=Unix Makefiles
 -DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtcreator/cmake-helper/qtcreator-project.cmake
+-DQT_CREATOR_ENABLE_MAINTENANCE_TOOL_PROVIDER:BOOL=ON
+-DQT_CREATOR_ENABLE_PACKAGE_MANAGER_SETUP:BOOL=ON
+-DQT_ENABLE_QML_DEBUG:BOOL=%{Qt:QT_ENABLE_QML_DEBUG}
 -DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/user/my/qt_projects/build-chatprj-Desktop-MinSizeRel</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">./build/%{FileSystemFriendly:%{Kit:Name}_%{BuildConfig:Name}}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -900,7 +664,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -917,7 +680,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -930,9 +692,9 @@
     <valuelist type="QVariantList" key="ProjectExplorer.BuildConfiguration.CustomParsers"/>
     <value type="bool" key="ProjectExplorer.BuildConfiguration.ParseStandardOutput">false</value>
     <value type="UnknownType" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Minimum Size Release</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">MinSizeRel</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeBuildConfiguration</value>
-    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">1</value>
     <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
@@ -947,40 +709,6 @@
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.1">
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">cap_net_raw,cap_net_admin=eip ./chatapp</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">setcap</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml down</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml --env-file ./docker/.env up</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-      </valuemap>
-      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">3</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Deploy</value>
-     </valuemap>
-     <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">1</value>
-     <valuemap type="QVariantMap" key="ProjectExplorer.DeployConfiguration.CustomData"/>
-     <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy Configuration2</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
-    </valuemap>
-    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.2">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
        <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -1014,7 +742,7 @@
      <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.Configuration</value>
     </valuemap>
-    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">3</value>
+    <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">2</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.0">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
      <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
@@ -1023,27 +751,17 @@
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
      <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
+     <value type="UnknownType" key="PE.EnvironmentAspect.Changes"></value>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
-     <value type="QString" key="RunConfiguration.Arguments">--app</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
+     <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{RunConfig:Executable:Path}</value>
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
      <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -1052,27 +770,14 @@
      <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
      <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
-     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-     <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-      <value type="QString" key="File"></value>
-      <valuelist type="QVariantList" key="UserItems">
-       <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-       <value type="QString">CHATAPP_DB_PORT=5432</value>
-       <value type="QString">CHATAPP_DB_USER=postgres</value>
-       <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-      </valuelist>
-     </valuemap>
-     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteDebugger.RunConfig</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
     </valuemap>
     <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
    </valuemap>
@@ -1092,40 +797,6 @@
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.1">
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">false</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">cap_net_raw,cap_net_admin=eip ./chatapp</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Command">setcap</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-     </valuemap>
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml down</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-     </valuemap>
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.2">
-      <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">compose --file ./docker/compose.yaml --env-file ./docker/.env up</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Command">docker</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/user/my/qt_projects/chatprj</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
-     </valuemap>
-     <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">3</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Deploy</value>
-    </valuemap>
-    <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">1</value>
-    <valuemap type="QVariantMap" key="ProjectExplorer.DeployConfiguration.CustomData"/>
-    <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Deploy Configuration2</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.DefaultDeployConfiguration</value>
-   </valuemap>
-   <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.2">
-    <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
-     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
        <value type="QString"></value>
@@ -1133,6 +804,7 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <value type="UnknownType" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.CMakePackageStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
@@ -1157,7 +829,7 @@
     <value type="bool" key="ProjectExplorer.DeployConfiguration.CustomDataEnabled">false</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ApplicationManagerPlugin.Deploy.Configuration</value>
    </valuemap>
-   <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">3</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.DeployConfigurationCount">2</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.0">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
     <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
@@ -1166,58 +838,20 @@
     <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-    <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-     <value type="QString" key="File"></value>
-     <valuelist type="QVariantList" key="UserItems">
-      <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-      <value type="QString">CHATAPP_DB_PORT=5432</value>
-      <value type="QString">CHATAPP_DB_USER=postgres</value>
-      <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-     </valuelist>
-    </valuemap>
+    <value type="UnknownType" key="PE.EnvironmentAspect.Changes"></value>
     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
     <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
-    <value type="QString" key="RunConfiguration.Arguments">--app</value>
-    <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-    <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
-    <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
-   </valuemap>
-   <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
-    <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
-    <value type="bool" key="Analyzer.QmlProfiler.Settings.UseGlobalSettings">true</value>
-    <value type="int" key="Analyzer.Valgrind.Callgrind.CostFormat">0</value>
-    <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
-    <valuelist type="QVariantList" key="Analyzer.Valgrind.SuppressionFiles"/>
-    <valuelist type="QVariantList" key="CustomOutputParsers"/>
-    <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-    <valuemap type="QVariantMap" key="PE.EnvironmentAspect.Changes">
-     <value type="QString" key="File"></value>
-     <valuelist type="QVariantList" key="UserItems">
-      <value type="QString">CHATAPP_DB_ADDRESS=172.21.0.12</value>
-      <value type="QString">CHATAPP_DB_PORT=5432</value>
-      <value type="QString">CHATAPP_DB_USER=postgres</value>
-      <value type="QString">CHATAPP_DB_PASSWORD=postgres123</value>
-     </valuelist>
-    </valuemap>
-    <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
-    <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph dwarf,4096 -F 250</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">chatapp_docker</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">chatapp</value>
-    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.UniqueId"></value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/user/my/qt_projects/build-chatprj-Desktop-Debug/app</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{RunConfig:Executable:Path}</value>
    </valuemap>
-   <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
  </data>
  <data>
