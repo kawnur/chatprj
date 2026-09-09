@@ -85,7 +85,7 @@ private:
     std::unique_ptr<QScrollArea> chatHistoryScrollArea_;
     // std::shared_ptr<ScrollArea> chatHistoryScrollArea_;
 
-    std::unique_ptr<QWidget> chatHistoryWidget_;
+    std::shared_ptr<QWidget> chatHistoryWidget_;
     std::unique_ptr<QVBoxLayout> chatHistoryLayout_;
 
     std::unique_ptr<QWidget> buttonPanelWidget_;

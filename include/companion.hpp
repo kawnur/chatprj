@@ -113,7 +113,10 @@ public:
 
     std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message>);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message>);
+
     std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, std::shared_ptr<MessageWidget>);
+    std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, MessageWidget *);
+
     std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(bool, std::shared_ptr<MessageWidget>);
     MessageMappingPair getMessageMappingPairByMessageId(uint32_t);
     MessageMappingPair getMessageMappingPairByNetworkId(const std::string&);

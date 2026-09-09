@@ -35,6 +35,7 @@ class LeftPanelWidget;
 class MainWindow;
 class Message;
 class MessageState;
+class MessageWidget;
 class RightPanelWidget;
 
 QString getInitialConnectButtonLabel();
@@ -98,7 +99,8 @@ public:
 };
 
 class SocketInfoWidget
-    : public SocketInfoBaseWidget, public std::enable_shared_from_this<SocketInfoWidget>
+    // : public SocketInfoBaseWidget, public std::enable_shared_from_this<SocketInfoWidget>
+    : public SocketInfoBaseWidget
 {
     Q_OBJECT
 

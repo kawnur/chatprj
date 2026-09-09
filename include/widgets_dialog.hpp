@@ -1,6 +1,7 @@
 #ifndef WIDGETS_DIALOG_HPP
 #define WIDGETS_DIALOG_HPP
 
+#include <functional>
 #include <memory>
 
 #include <QDialog>
@@ -14,6 +15,9 @@
 
 #include "constants.hpp"
 #include "logging.hpp"
+#include "utils.hpp"
+
+void showErrorDialogAndLogError(QString&& message);
 
 class Action;
 class Companion;
@@ -53,14 +57,14 @@ public:
 
 private:
     ChatActionType actionType_;
-    std::shared_ptr<QFormLayout> layout_;
-    std::shared_ptr<QLabel> nameLabel_;
-    std::shared_ptr<QLineEdit> nameEdit_;
-    std::shared_ptr<QLabel> ipAddressLabel_;
-    std::shared_ptr<QLineEdit> ipAddressEdit_;
-    std::shared_ptr<QLabel> portLabel_;
-    std::shared_ptr<QLineEdit> portEdit_;
-    std::shared_ptr<QDialogButtonBox> buttonBox_;
+    std::unique_ptr<QFormLayout> layout_;
+    std::unique_ptr<QLabel> nameLabel_;
+    std::unique_ptr<QLineEdit> nameEdit_;
+    std::unique_ptr<QLabel> ipAddressLabel_;
+    std::unique_ptr<QLineEdit> ipAddressEdit_;
+    std::unique_ptr<QLabel> portLabel_;
+    std::unique_ptr<QLineEdit> portEdit_;
+    std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class GroupChatDataDialog : public Dialog {
@@ -75,10 +79,9 @@ public:
 
 private:
     ChatActionType actionType_;
-    std::shared_ptr<QVBoxLayout> layout_;
-    std::shared_ptr<QLabel> label_;
-    std::shared_ptr<QListWidget> list_;
-
+    std::unique_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QLabel> label_;
+    std::unique_ptr<QListWidget> list_;
 };
 
 class CreatePasswordDialog : public Dialog {
@@ -94,12 +97,12 @@ public:
     std::string getSecondEditText();
 
 private:
-    std::shared_ptr<QFormLayout> layout_;
-    std::shared_ptr<QLabel> firstLabel_;
-    std::shared_ptr<QLineEdit> firstEdit_;
-    std::shared_ptr<QLabel> secondLabel_;
-    std::shared_ptr<QLineEdit> secondEdit_;
-    std::shared_ptr<QDialogButtonBox> buttonBox_;
+    std::unique_ptr<QFormLayout> layout_;
+    std::unique_ptr<QLabel> firstLabel_;
+    std::unique_ptr<QLineEdit> firstEdit_;
+    std::unique_ptr<QLabel> secondLabel_;
+    std::unique_ptr<QLineEdit> secondEdit_;
+    std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class GetPasswordDialog : public Dialog {
@@ -114,24 +117,31 @@ public:
     std::string getEditText();
 
 private:
-    std::shared_ptr<QFormLayout> layout_;
-    std::shared_ptr<QLabel> label_;
-    std::shared_ptr<QLineEdit> edit_;
-    std::shared_ptr<QDialogButtonBox> buttonBox_;
+    std::unique_ptr<QFormLayout> layout_;
+    std::unique_ptr<QLabel> label_;
+    std::unique_ptr<QLineEdit> edit_;
+    std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class TextDialog;
 
-class ButtonInfo {
+class ButtonInfo
+{
 public:
-    ButtonInfo(
-        const QString&, QDialogButtonBox::ButtonRole, void (TextDialog::*)());
-
+    // ButtonInfo(const QString&, QDialogButtonBox::ButtonRole, void (TextDialog::*)());
+    ButtonInfo(const QString &text, QDialogButtonBox::ButtonRole role, std::function<void(TextDialog &)> function);
     ~ButtonInfo() = default;
 
-    QString buttonText_;
-    QDialogButtonBox::ButtonRole buttonRole_;
-    void (TextDialog::*function_)();
+    QString getText();
+    QDialogButtonBox::ButtonRole getRole();
+
+    // void (TextDialog::*function_)();
+    std::function<void(TextDialog &)> getFunction();
+
+private:
+    QString text_;
+    QDialogButtonBox::ButtonRole role_;
+    std::function<void(TextDialog &)> function_;
 };
 
 class TextDialog : public Dialog {
@@ -155,9 +165,9 @@ public slots:
     void reject() override;
 
 private:
-    std::shared_ptr<QPlainTextEdit> textEdit_;
-    std::shared_ptr<QVBoxLayout> layout_;
-    std::shared_ptr<QDialogButtonBox> buttonBox_;
+    std::unique_ptr<QPlainTextEdit> textEdit_;
+    std::unique_ptr<QVBoxLayout> layout_;
+    std::unique_ptr<QDialogButtonBox> buttonBox_;
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
 };
 
@@ -178,5 +188,51 @@ private:
     std::shared_ptr<FileAction> action_;
     std::shared_ptr<QFileDialog> fileDialog_;
 };
+
+template<class T>
+void setButtonBox(
+    std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
+    std::vector<ButtonInfo>* infoVector)
+{
+    for (auto& info : *infoVector) {
+        auto role = info.getRole();
+        auto function = info.getFunction();
+        auto button = buttonBox->addButton(info.getText(), role);
+
+        // TODO create mapping and select signal by role
+        // if (role == QDialogButtonBox::AcceptRole) {
+        //     QObject::connect(
+        //         buttonBox.get(), &QDialogButtonBox::accepted,
+        //         dialog, info.function_, Qt::QueuedConnection);
+        // }
+        // else if (role == QDialogButtonBox::RejectRole) {
+        //     QObject::connect(
+        //         buttonBox.get(), &QDialogButtonBox::rejected,
+        //         dialog, info.function_, Qt::QueuedConnection);
+        // }
+        // else {
+        //     showErrorDialogAndLogError("Unmanaged button role");
+        // }
+
+        std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
+            { QDialogButtonBox::AcceptRole, &QDialogButtonBox::accepted },
+            { QDialogButtonBox::RejectRole, &QDialogButtonBox::rejected }
+        };
+
+        auto connectLambda = [&]()
+        {
+            QObject::connect(
+                buttonBox.get(), signalMap.at(role), dialog, function, Qt::QueuedConnection);
+        };
+
+        auto handlerLambda = [&](const std::exception& e)
+        {
+            if (dynamic_cast<std::out_of_range *>(&e))
+                showErrorDialogAndLogError("Unmanaged button role");
+        };
+
+        runAndHandleException(connectLambda, handlerLambda, role);
+    }
+}
 
 #endif // WIDGETS_DIALOG_HPP

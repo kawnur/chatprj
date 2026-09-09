@@ -39,7 +39,8 @@ public:
     std::shared_ptr<Companion> getSelectedCompanion();
     bool getUserIsAuthenticated();
 
-    std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
+    // std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
+    std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *) const;
     std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(std::shared_ptr<Companion>) const;
 
     void set();

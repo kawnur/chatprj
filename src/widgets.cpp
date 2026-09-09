@@ -251,7 +251,8 @@ void SocketInfoWidget::clientAction()
 {
     bool result = false;
 
-    auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(shared_from_this());
+    // auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(shared_from_this());
+    auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
     QString currentText = connectButton_->text();
@@ -365,7 +366,10 @@ void SocketInfoWidget::changeColor(QColor& color)
 void SocketInfoWidget::mousePressEvent(QMouseEvent * event)
 {
     auto manager = getManager();
-    auto baseObject = dynamic_pointer_cast<SocketInfoBaseWidget>(shared_from_this());
+
+    // auto baseObject = dynamic_pointer_cast<SocketInfoBaseWidget>(shared_from_this());
+    auto baseObject = qobject_cast<SocketInfoBaseWidget *>(this);
+
     auto newCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(baseObject);
     manager->resetSelectedCompanion(newCompanion);
 }
@@ -637,9 +641,9 @@ void StubWidgetGroup::set()
 void StubWidgetGroup::setParents(
     std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer)
 {
-    leftPanel_->setParent(centralContainer);
-    centralPanel_->setParent(centralContainer);
-    rightPanel_->setParent(centralContainer);
+    leftPanel_->setParent(centralContainer.get());
+    centralPanel_->setParent(centralContainer.get());
+    rightPanel_->setParent(centralContainer.get());
 }
 
 void StubWidgetGroup::hideSocketInfoStubWidget()
@@ -682,12 +686,12 @@ void StubWidgetGroup::setLeftPanelWidth(int width)
 MainWindowContainerWidget::MainWindowContainerWidget(std::shared_ptr<QWidget> widget)
 {
     if (widget)
-        setParent(widget);
+        setParent(widget.get());
 
     layout_ = std::make_unique<QVBoxLayout>();
     layout_->setSpacing(0);
     layout_->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout_);
+    setLayout(layout_.get());
 }
 
 void MainWindowContainerWidget::addWidgetToLayout(std::shared_ptr<QWidget> widget)

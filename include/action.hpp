@@ -6,20 +6,15 @@
 
 #include <QObject>
 
-#include "data.hpp"
-#include "companion.hpp"
 #include "constants.hpp"
-#include "utils_widgets.hpp"
-#include "widgets.hpp"
 
 class Dialog;
 class Companion;
 class CompanionData;
 class GroupChatData;
-class MainWindow;
 
-class Action : public QObject, public std::enable_shared_from_this<Action> {
-
+class Action : public QObject, public std::enable_shared_from_this<Action>
+{
     Q_OBJECT
 
 public:
@@ -36,12 +31,12 @@ protected:
     std::shared_ptr<Dialog> dialog_;
 };
 
-class CompanionAction : public Action {
-
+class CompanionAction : public Action
+{
     Q_OBJECT
 
 public:
-    CompanionAction(ChatActionType, std::shared_ptr<Companion>);
+    CompanionAction(ChatActionType actionType, std::shared_ptr<Companion> companion);
     ~CompanionAction() = default;
 
     ChatActionType getActionType() const;
@@ -62,12 +57,12 @@ private:
     std::shared_ptr<Companion> companion_;
 };
 
-class GroupChatAction : public Action {
-
+class GroupChatAction : public Action
+{
     Q_OBJECT
 
 public:
-    GroupChatAction(ChatActionType);
+    GroupChatAction(ChatActionType actionType);
     ~GroupChatAction() = default;
 
 public slots:
@@ -78,12 +73,12 @@ private:
     std::shared_ptr<GroupChatData> data_;
 };
 
-class PasswordAction : public Action {
-
+class PasswordAction : public Action
+{
     Q_OBJECT
 
 public:
-    PasswordAction(PasswordActionType);
+    PasswordAction(PasswordActionType actionType);
     ~PasswordAction();
 
     std::string getPassword();
@@ -94,12 +89,15 @@ private:
     std::string password_;
 };
 
-class FileAction : public Action {
-
+class FileAction : public Action
+{
     Q_OBJECT
 
 public:
-    FileAction(FileActionType, const std::string&, std::shared_ptr<Companion>);
+    FileAction(
+        FileActionType actionType, const std::string& networkId,
+        std::shared_ptr<Companion> companion);
+
     ~FileAction() = default;
 
     FileActionType getType() const;

@@ -16,29 +16,30 @@ class ButtonInfo;
 
 std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString&);
 
-template<class T>
-void setButtonBox(
-    std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
-    std::vector<ButtonInfo>* infoVector)
-{
-    for (auto& info : *infoVector) {
-        auto button = buttonBox->addButton(info.buttonText_, info.buttonRole_);
+// template<class T>
+// void setButtonBox(
+//     std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
+//     std::vector<ButtonInfo>* infoVector)
+// {
+//     for (auto& info : *infoVector) {
+//         auto role = info.getRole();
+//         auto button = buttonBox->addButton(info.getText(), role);
 
-        // TODO create mapping and select signal by role
-        if (info.buttonRole_ == QDialogButtonBox::AcceptRole) {
-            QObject::connect(
-                buttonBox.get(), &QDialogButtonBox::accepted,
-                dialog, info.function_, Qt::QueuedConnection);
-        }
-        else if (info.buttonRole_ == QDialogButtonBox::RejectRole) {
-            QObject::connect(
-                buttonBox.get(), &QDialogButtonBox::rejected,
-                dialog, info.function_, Qt::QueuedConnection);
-        }
-        else {
-            showErrorDialogAndLogError("Unmanaged button role");
-        }
-    }
-}
+//         // TODO create mapping and select signal by role
+//         if (role == QDialogButtonBox::AcceptRole) {
+//             QObject::connect(
+//                 buttonBox.get(), &QDialogButtonBox::accepted,
+//                 dialog, info.function_, Qt::QueuedConnection);
+//         }
+//         else if (role == QDialogButtonBox::RejectRole) {
+//             QObject::connect(
+//                 buttonBox.get(), &QDialogButtonBox::rejected,
+//                 dialog, info.function_, Qt::QueuedConnection);
+//         }
+//         else {
+//             showErrorDialogAndLogError("Unmanaged button role");
+//         }
+//     }
+// }
 
 #endif // UTILS_WIDGETS_HPP

@@ -204,7 +204,7 @@ std::shared_ptr<PGconn> getDBConnection()
         if (status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
             logArgsError("DB connection status: CONNECTION_BAD");
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         logArgsException(e.what());
     }
 

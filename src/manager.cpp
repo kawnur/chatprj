@@ -29,11 +29,12 @@ bool Manager::getUserIsAuthenticated()
 }
 
 std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
-    std::shared_ptr<SocketInfoBaseWidget> widget) const
+    // std::shared_ptr<SocketInfoBaseWidget> widget) const
+    SocketInfoBaseWidget *widget) const
 {
     auto findWidget = [&](auto& pair)
     {
-        return pair.second.second->getSocketInfoBase() == widget;
+        return pair.second.second->getSocketInfoBase().get() == widget;
     };
 
     auto result = std::find_if (
@@ -1175,8 +1176,7 @@ void Manager::buildWidgetGroups()
     auto companionsNumber = mapCompanionIdToCompanionInfo_.size();
     auto childrenSize = graphicManager->getCompanionPanelChildrenSize();
 
-    logArgsWithTemplate(
-        "companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
+    logArgsWithTemplate("companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
 
     if (companionsNumber == 0 && childrenSize == 0) {
         logArgsWarning("strange case, empty sockets panel");

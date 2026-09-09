@@ -97,7 +97,8 @@ std::string buildDialogText(std::string&& header, const std::vector<std::string>
     return text;
 }
 
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
+// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function)
 // std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*function)())
 {
     auto vector = std::make_shared<std::vector<ButtonInfo>>();

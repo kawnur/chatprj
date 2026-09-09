@@ -216,7 +216,7 @@ std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string
     try {
         return mapping_.at(key);
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         logArgsError(e.what());
     }
 
@@ -232,7 +232,7 @@ bool FileOperatorStorage::removeOperator(const std::string& key)
 
         return result;
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         logArgsError(e.what());
     }
 

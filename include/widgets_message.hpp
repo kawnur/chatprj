@@ -19,8 +19,8 @@ class Message;
 class MessageState;
 class WidgetGroup;
 
-class MessageIndicatorPanelWidget : public QWidget {
-
+class MessageIndicatorPanelWidget : public QWidget
+{
     Q_OBJECT
 
 public:
@@ -39,13 +39,16 @@ private:
     std::shared_ptr<QLabel> newMessageLabel_;
 };
 
-class MessageWidget : public QWidget {
-
+class MessageWidget : public QWidget, public std::enable_shared_from_this<MessageWidget>
+{
     Q_OBJECT
 
 public:
-    MessageWidget(std::shared_ptr<QWidget>, std::shared_ptr<Companion>, std::shared_ptr<MessageState>, std::shared_ptr<Message>);
-    virtual ~MessageWidget();
+    MessageWidget(
+        std::shared_ptr<QWidget>, std::shared_ptr<Companion>, std::shared_ptr<MessageState>,
+        std::shared_ptr<Message>);
+
+    virtual ~MessageWidget() {}
 
     void setBase(std::shared_ptr<WidgetGroup>);
     void setMessageWidgetAsSent();

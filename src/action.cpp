@@ -1,5 +1,9 @@
 #include "action.hpp"
 
+#include "constants.hpp"
+#include "utils_widgets.hpp"
+#include "widgets.hpp"
+
 void Action::set()
 {
     dialog_->setAction(shared_from_this());

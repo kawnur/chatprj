@@ -326,7 +326,7 @@ ssize_t readData(gpgme_data_t& data, char* dataString, std::size_t size) {
 void readData1(gpgme_data_t& data, std::string& dataString) {
     seekSetZero(data);
 
-    char* p = new char[2];
+    char* p = new char[2];  // TODO use stack allocation
 
     while(true) {
         auto sizeRead = gpgme_data_read(data, p, 1);

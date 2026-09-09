@@ -4,7 +4,7 @@ CompanionDataDialog::CompanionDataDialog(
     ChatActionType actionType, std::shared_ptr<QWidget> parent,
     std::shared_ptr<Companion> companion)
 {
-    setParent(parent);
+    setParent(parent.get());
 
     setWindowTitle(
         getConstantMappingValue(
@@ -17,17 +17,17 @@ CompanionDataDialog::CompanionDataDialog(
 
     actionType_ = actionType;
 
-    layout_ = new QFormLayout;
-    setLayout(layout_);
+    layout_ = std::make_unique<QFormLayout>();
+    setLayout(layout_.get());
 
-    nameLabel_ = new QLabel("Name");
-    nameEdit_ = new QLineEdit;
+    nameLabel_ = std::make_unique<QLabel>("Name");
+    nameEdit_ = std::make_unique<QLineEdit>();
 
-    ipAddressLabel_ = new QLabel("IpAddress");
-    ipAddressEdit_ = new QLineEdit;
+    ipAddressLabel_ = std::make_unique<QLabel>("IpAddress");
+    ipAddressEdit_ = std::make_unique<QLineEdit>();
 
-    portLabel_ = new QLabel("Port");
-    portEdit_ = new QLineEdit;
+    portLabel_ = std::make_unique<QLabel>("Port");
+    portEdit_ = std::make_unique<QLineEdit>();
 
     if (actionType_ == ChatActionType::UPDATE && companion) {
         nameEdit_->setText(getQString(companion->getName()));
@@ -35,22 +35,22 @@ CompanionDataDialog::CompanionDataDialog(
         portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->getClientPort())));
     }
 
-    layout_->addRow(nameLabel_, nameEdit_);
-    layout_->addRow(ipAddressLabel_, ipAddressEdit_);
-    layout_->addRow(portLabel_, portEdit_);
+    layout_->addRow(nameLabel_.get(), nameEdit_.get());
+    layout_->addRow(ipAddressLabel_.get(), ipAddressEdit_.get());
+    layout_->addRow(portLabel_.get(), portEdit_.get());
 
-    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    layout_->addWidget(buttonBox_);
+    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout_->addWidget(buttonBox_.get());
 }
 
 void CompanionDataDialog::set()
 {
     connect(
-        buttonBox_, &QDialogButtonBox::accepted,
-        action_, &Action::sendData, Qt::QueuedConnection);
+        buttonBox_.get(), &QDialogButtonBox::accepted,
+        action_.get(), &Action::sendData, Qt::QueuedConnection);
 
     connect(
-        buttonBox_, &QDialogButtonBox::rejected,
+        buttonBox_.get(), &QDialogButtonBox::rejected,
         this, &QDialog::reject, Qt::QueuedConnection);
 }
 
@@ -74,7 +74,7 @@ std::string CompanionDataDialog::getPortString()
 
 GroupChatDataDialog::GroupChatDataDialog(ChatActionType actionType, std::shared_ptr<QWidget> parent)
 {
-    setParent(parent);
+    setParent(parent.get());
 
     setWindowTitle(
         getConstantMappingValue(
@@ -87,100 +87,118 @@ GroupChatDataDialog::GroupChatDataDialog(ChatActionType actionType, std::shared_
 
     actionType_ = actionType;
 
-    layout_ = new QVBoxLayout;
-    setLayout(layout_);
+    layout_ = std::make_unique<QVBoxLayout>();
+    setLayout(layout_.get());
 
-    label_ = new QLabel(newGroupChatDialogLabel);
+    label_ = std::make_unique<QLabel>(newGroupChatDialogLabel);
 
-    list_ = new QListWidget;
-    layout_->addWidget(list_);
+    list_ = std::make_unique<QListWidget>();
+    layout_->addWidget(list_.get());
 }
 
 void GroupChatDataDialog::set() {}
 
-CreatePasswordDialog::CreatePasswordDialog() {
+CreatePasswordDialog::CreatePasswordDialog()
+{
     setWindowTitle(newPasswordDialogTitle);
 
-    setParent(getGraphicManager()->getMainWindow());
+    setParent(getGraphicManager()->getMainWindow().get());
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    layout_ = new QFormLayout;
-    setLayout(layout_);
+    layout_ = std::make_unique<QFormLayout>();
+    setLayout(layout_.get());
 
-    firstLabel_ = new QLabel(newPasswordDialogFirstLabel);
-    firstEdit_ = new QLineEdit;
+    firstLabel_ = std::make_unique<QLabel>(newPasswordDialogFirstLabel);
+    firstEdit_ = std::make_unique<QLineEdit>();
 
-    secondLabel_ = new QLabel(newPasswordDialogSecondLabel);
-    secondEdit_ = new QLineEdit;
+    secondLabel_ = std::make_unique<QLabel>(newPasswordDialogSecondLabel);
+    secondEdit_ = std::make_unique<QLineEdit>();
 
-    layout_->addRow(firstLabel_, firstEdit_);
-    layout_->addRow(secondLabel_, secondEdit_);
+    layout_->addRow(firstLabel_.get(), firstEdit_.get());
+    layout_->addRow(secondLabel_.get(), secondEdit_.get());
 
-    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-    layout_->addWidget(buttonBox_);
+    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok);
+    layout_->addWidget(buttonBox_.get());
 }
 
-void CreatePasswordDialog::set() {
+void CreatePasswordDialog::set()
+{
     connect(
-        buttonBox_, &QDialogButtonBox::accepted,
-        action_, &Action::sendData, Qt::QueuedConnection);
+        buttonBox_.get(), &QDialogButtonBox::accepted,
+        action_.get(), &Action::sendData, Qt::QueuedConnection);
 }
 
-std::string CreatePasswordDialog::getFirstEditText() {
+std::string CreatePasswordDialog::getFirstEditText()
+{
     return firstEdit_->text().toStdString();
 }
 
-std::string CreatePasswordDialog::getSecondEditText() {
+std::string CreatePasswordDialog::getSecondEditText()
+{
     return secondEdit_->text().toStdString();
 }
 
-GetPasswordDialog::GetPasswordDialog() {
+GetPasswordDialog::GetPasswordDialog()
+{
     setWindowTitle(getPasswordDialogTitle);
 
-    setParent(getGraphicManager()->getMainWindow());
+    setParent(getGraphicManager()->getMainWindow().get());
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    layout_ = new QFormLayout;
-    setLayout(layout_);
+    layout_ = std::make_unique<QFormLayout>();
+    setLayout(layout_.get());
 
-    label_ = new QLabel(getPasswordDialogLabel);
-    edit_ = new QLineEdit;
+    label_ = std::make_unique<QLabel>(getPasswordDialogLabel);
+    edit_ = std::make_unique<QLineEdit>();
 
-    layout_->addRow(label_, edit_);
+    layout_->addRow(label_.get(), edit_.get());
 
-    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok);
-    layout_->addWidget(buttonBox_);
+    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok);
+    layout_->addWidget(buttonBox_.get());
 }
 
-void GetPasswordDialog::set() {
+void GetPasswordDialog::set()
+{
     connect(
-        buttonBox_, &QDialogButtonBox::accepted,
-        action_, &Action::sendData, Qt::QueuedConnection);
+        buttonBox_.get(), &QDialogButtonBox::accepted,
+        action_.get(), &Action::sendData, Qt::QueuedConnection);
 }
 
-std::string GetPasswordDialog::getEditText() {
+std::string GetPasswordDialog::getEditText()
+{
     return edit_->text().toStdString();
 }
 
+// ButtonInfo::ButtonInfo(
+//     const QString& text, QDialogButtonBox::ButtonRole role, void (TextDialog::*function)())
+//     : text_(text), role_(role), function_(function) {}
+
 ButtonInfo::ButtonInfo(
-    const QString& buttonText, QDialogButtonBox::ButtonRole buttonRole,
-    void (TextDialog::*function)()) :
-    buttonText_(buttonText), buttonRole_(buttonRole), function_(function) {}
+    const QString &text, QDialogButtonBox::ButtonRole role, std::function<void(TextDialog &)> function)
+    : text_(text), role_(role), function_(function) {}
+
+QString ButtonInfo::getText()
+{
+    return text_;
+}
+
+std::function<void(TextDialog &)> ButtonInfo::getFunction()
+{
+    return function_;
+}
 
 TextDialog::TextDialog(
     std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string& text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 {
-    if (parent) {
-        setParent(parent);
-    }
-    else {
-        setParent(getGraphicManager()->getMainWindow());
-    }
+    if (parent)
+        setParent(parent.get());
+    else
+        setParent(getGraphicManager()->getMainWindow().get());
 
     setModal(true);
     setWindowFlag(Qt::Window);
@@ -191,22 +209,23 @@ TextDialog::TextDialog(
             &dialogTypeStringRepresentation,
             dialogType));
 
-    layout_ = new QVBoxLayout;
-    setLayout(layout_);
+    layout_ = std::make_unique<QVBoxLayout>();
+    setLayout(layout_.get());
 
-    textEdit_ = new QPlainTextEdit;
+    textEdit_ = std::make_unique<QPlainTextEdit>();
     textEdit_->setReadOnly(true);
     textEdit_->setPlainText(getQString(text));
-    layout_->addWidget(textEdit_);
+    layout_->addWidget(textEdit_.get());
 
     // set button box
-    buttonBox_ = new QDialogButtonBox;
-    layout_->addWidget(buttonBox_);
+    buttonBox_ = std::make_unique<QDialogButtonBox>();
+    layout_->addWidget(buttonBox_.get());
 
     buttonsInfo_ = buttonsInfo;
 }
 
-void TextDialog::set() {
+void TextDialog::set()
+{
     // for (auto& info : *buttonsInfo_) {
     //     std::shared_ptr<QPushButton> button = buttonBox_->addButton(
     //         info.buttonText_, info.buttonRole_);
@@ -228,62 +247,67 @@ void TextDialog::set() {
     // }
 }
 
-void TextDialog::closeSelf() {
+void TextDialog::closeSelf()
+{
     close();
 }
 
-void TextDialog::closeSelfAndParentDialog() {
+void TextDialog::closeSelfAndParentDialog()
+{
     close();
 
-    auto parent = parent();
+    auto parentWidget = parent();
 
-    if (!parent)
+    if (!parentWidget)
         return;
 
-    auto cast = dynamic_cast<QWidget *>(parent);
+    auto cast = qobject_cast<QWidget *>(parentWidget);
 
     if (cast)
         cast->close();
 }
 
-void TextDialog::acceptAction() {
+void TextDialog::acceptAction()
+{
     close();
     action_->sendData();
 }
 
-void TextDialog::unsetMainWindowBlurAndCloseDialogs() {
+void TextDialog::unsetMainWindowBlurAndCloseDialogs()
+{
     getGraphicManager()->disableMainWindowBlurEffect();
     closeSelfAndParentDialog();
 }
 
-void TextDialog::reject() {
+void TextDialog::reject()
+{
     QDialog::reject();
 }
 
-FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString& windowTitle) {
+FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString& windowTitle)
+{
     action_ = action;
-
     containsDialog_ = true;
-    fileDialog_ = new QFileDialog;
+    fileDialog_ = std::make_shared<QFileDialog>();
     fileDialog_->setFileMode(QFileDialog::AnyFile);
     fileDialog_->setViewMode(QFileDialog::Detail);
-
-    fileDialog_->
-        setDirectory(getQString(getManager()->getLastOpenedPath().string()));
-
+    fileDialog_->setDirectory(getQString(getManager()->getLastOpenedPath().string()));
     fileDialog_->setWindowTitle(windowTitle);
 }
 
-void FileDialog::set() {
+void FileDialog::set()
+{
     connect(
-        fileDialog_, &QFileDialog::accepted,
-        action_, &Action::sendData, Qt::QueuedConnection);
+        fileDialog_.get(), &QFileDialog::accepted,
+        action_.get(), &Action::sendData, Qt::QueuedConnection);
 }
 
-void FileDialog::showDialog() {
+void FileDialog::showDialog()
+{
     fileDialog_->show();
 }
 
-std::shared_ptr<QFileDialog> FileDialog::getFileDialog() {
+std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
+{
     return fileDialog_;
 }

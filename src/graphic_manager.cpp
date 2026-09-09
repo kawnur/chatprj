@@ -153,17 +153,19 @@ void GraphicManager::showCompanionInfoDialog(
     std::shared_ptr<CompanionAction> companionAction, std::string&& header)
 {
     std::shared_ptr<QWidget> parent = nullptr;
-    void (TextDialog::*function)() = nullptr;
+    // void (TextDialog::*function)() = nullptr;
+    std::function<void(TextDialog &)> function;
     // void (QDialog::*function)() = nullptr;
 
     auto formDialog = companionAction->getDialog();
 
     if (formDialog) {
         parent = formDialog;
-        function = &TextDialog::closeSelfAndParentDialog;
+        function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
     }
     else {
-        function = &TextDialog::closeSelf;
+        // function = &TextDialog::closeSelf;
+        function = [](TextDialog &dialog) { dialog.closeSelf(); };
     }
 
     createTextDialogAndShow(

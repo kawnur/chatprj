@@ -44,7 +44,7 @@ U getConstantMappingValue(std::string mapName, const std::map<T, U>* map, const 
     catch(std::out_of_range) {
         logTemplateError("mapping {} key error", mapName);
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         logArgsException(e.what());
     }
 
@@ -57,8 +57,20 @@ void runAndLogException(F func, Ts&&... args)
     try {
         func(args...);
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         logArgsException(e.what());
+    }
+}
+
+template<typename F, typename FH, typename... Ts>
+void runAndHandleException(F func, FH handler, Ts&&... args)
+{
+    try {
+        func(args...);
+    }
+    catch(const std::exception& e) {
+        logArgsException(e.what());
+        handler(e);
     }
 }
 
@@ -81,7 +93,8 @@ bool validateCompanionData(std::vector<std::string>&, std::shared_ptr<CompanionA
 bool validatePassword(std::vector<std::string>&, const std::string&);
 std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*)());
+// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*)());
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function);
 // std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*)());
 
 void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), std::shared_ptr<QWidget>);

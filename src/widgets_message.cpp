@@ -20,8 +20,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
 
         newMessageLabel_ = nullptr;
 
-        layout_->addWidget(sentIndicator_);
-        layout_->addWidget(receivedIndicator_);
+        layout_->addWidget(sentIndicator_.get());
+        layout_->addWidget(receivedIndicator_.get());
     }
     else {
         sentIndicator_ = nullptr;
@@ -35,7 +35,7 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         newMessageLabel_ = std::make_shared<QLabel>(getQString(textHtml));
         newMessageLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
 
-        layout_->addWidget(newMessageLabel_);
+        layout_->addWidget(newMessageLabel_.get());
     }
 }
 
@@ -67,7 +67,7 @@ MessageWidget::MessageWidget(
 
     // set parent
     if (parent)
-        setParent(parent);
+        setParent(parent.get());
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -81,7 +81,7 @@ MessageWidget::MessageWidget(
     layout_->setSpacing(0);
     layout_->setContentsMargins(0, 0, 0, 0);
 
-    setLayout(layout_);
+    setLayout(layout_.get());
 
     auto data = formatMessageHeaderAndBody(companion, message);
 
@@ -99,7 +99,7 @@ void MessageWidget::setBase(std::shared_ptr<WidgetGroup> group)
 
     connect(
         this, &MessageWidget::widgetSelectedSignal,
-        group, &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
+        group.get(), &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
 
     set(group);
 }
@@ -117,7 +117,7 @@ void MessageWidget::setMessageWidgetAsReceived()
 void MessageWidget::mousePressEvent(QMouseEvent * event)
 {
     indicatorPanel_->unsetNewMessageLabel();
-    emit widgetSelectedSignal(this);
+    emit widgetSelectedSignal(shared_from_this());
 }
 
 TextMessageWidget::TextMessageWidget(
@@ -126,16 +126,16 @@ TextMessageWidget::TextMessageWidget(
     : MessageWidget(parent, companion, messageState, message)
 {
     if (parent)
-        setParent(parent);
+        setParent(parent.get());
 }
 
 TextMessageWidget::~TextMessageWidget() {}
 
 void TextMessageWidget::addMembersToLayout()
 {
-    layout_->addWidget(headerLabel_);
-    layout_->addWidget(messageLabel_);
-    layout_->addWidget(indicatorPanel_);
+    layout_->addWidget(headerLabel_.get());
+    layout_->addWidget(messageLabel_.get());
+    layout_->addWidget(indicatorPanel_.get());
 }
 
 FileMessageWidget::FileMessageWidget(
@@ -144,7 +144,7 @@ FileMessageWidget::FileMessageWidget(
     : MessageWidget(parent, companion, messageState, message)
 {
     if (parent)
-        setParent(parent);
+        setParent(parent.get());
 
     bool isMessageFromMe = message->isMessageFromMe();
 
@@ -166,7 +166,7 @@ FileMessageWidget::FileMessageWidget(
 
     fileWidget_ = std::make_shared<QWidget>();
     fileWidgetLayout_ = std::make_shared<QHBoxLayout>();
-    fileWidget_->setLayout(fileWidgetLayout_);
+    fileWidget_->setLayout(fileWidgetLayout_.get());
 
     downloadButton_ = (showButton_) ? std::make_shared<QPushButton>("Download file") : nullptr;
 }
@@ -174,21 +174,21 @@ FileMessageWidget::FileMessageWidget(
 void FileMessageWidget::set(std::shared_ptr<WidgetGroup> group)
 {
     connect(
-        downloadButton_, &QPushButton::clicked,
+        downloadButton_.get(), &QPushButton::clicked,
         this, &FileMessageWidget::saveFileSlot, Qt::QueuedConnection);
 }
 
 void FileMessageWidget::addMembersToLayout()
 {
-    layout_->addWidget(headerLabel_);
-    fileWidgetLayout_->addWidget(messageLabel_);
+    layout_->addWidget(headerLabel_.get());
+    fileWidgetLayout_->addWidget(messageLabel_.get());
     logArgs("showButton_:", showButton_);
 
     if (showButton_)
-        fileWidgetLayout_->addWidget(downloadButton_);
+        fileWidgetLayout_->addWidget(downloadButton_.get());
 
-    layout_->addWidget(fileWidget_);
-    layout_->addWidget(indicatorPanel_);
+    layout_->addWidget(fileWidget_.get());
+    layout_->addWidget(indicatorPanel_.get());
 }
 
 void FileMessageWidget::saveFileSlot()

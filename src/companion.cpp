@@ -121,12 +121,18 @@ std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetByMessage(
 std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
     bool lock, std::shared_ptr<MessageWidget> widget)
 {
+    return getMappedMessageByMessageWidget(lock, widget.get());
+}
+
+std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
+    bool lock, MessageWidget *widget)
+{
     if (lock)
         std::lock_guard<std::mutex> lockObject(messagesMutex_);
 
     // TODO switch to map find method
 
-    auto lambda = [&](auto& iter) { return iter.second->getWidget() == widget; };
+    auto lambda = [&](auto& iter) { return iter.second->getWidget().get() == widget; };
     auto result = std::find_if (messageMapping_.begin(), messageMapping_.end(), lambda);
 
     return (result == messageMapping_.end()) ? nullptr : result->first;
@@ -484,9 +490,8 @@ std::string Companion::generateNewNetworkId(bool lock)
         };
 
         // loop while generated key is not unique
-        while (lambda()) {
+        while (lambda())
             networkId = getRandomString(5);
-        }
     }
 
     return networkId;
