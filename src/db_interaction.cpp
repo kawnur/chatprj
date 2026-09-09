@@ -1,5 +1,10 @@
 #include "db_interaction.hpp"
 
+#include <mutex>
+
+#include "action.hpp"
+#include "logging.hpp"
+
 std::mutex dbMutex;
 
 DBReplyData::DBReplyData(int count, ...)

@@ -1,15 +1,13 @@
 #ifndef UTILS_COUT_HPP
 #define UTILS_COUT_HPP
 
-#include <algorithm>
-#include <array>
 #include <iomanip>
-#include <iosfwd>
+#include <ios>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <set>
-#include <type_traits>
+#include <string>
 #include <vector>
 
 #include <QString>

@@ -1,5 +1,8 @@
 #include "utils_widgets.hpp"
 
+#include "constants.hpp"
+#include "widgets_dialog.hpp"
+
 std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString& buttonText)
 {
     auto vector = std::make_shared<std::vector<ButtonInfo>>();

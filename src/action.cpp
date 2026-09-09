@@ -1,8 +1,16 @@
 #include "action.hpp"
 
+#include <format>
+
+#include "companion.hpp"
 #include "constants.hpp"
+#include "data.hpp"
+#include "logging.hpp"
+#include "manager.hpp"
+#include "utils.hpp"
 #include "utils_widgets.hpp"
 #include "widgets.hpp"
+#include "widgets_dialog.hpp"
 
 void Action::set()
 {
@@ -369,8 +377,7 @@ void FileAction::sendData()
         // }
 
         // set file path for file operator
-        bool setResult = companion_->setFileOperatorFilePath(
-            networkId_, filePath_);
+        bool setResult = companion_->setFileOperatorFilePath(networkId_, filePath_);
 
         if (setResult) {
             // send without saving to db

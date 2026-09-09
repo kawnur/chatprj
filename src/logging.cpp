@@ -1,5 +1,9 @@
 #include "logging.hpp"
 
+#include "companion.hpp"
+#include "db_interaction.hpp"
+#include "widgets.hpp"
+
 QString getQString(const std::string& value)
 {
     return QString::fromStdString(value);

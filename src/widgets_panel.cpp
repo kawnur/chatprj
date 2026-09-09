@@ -1,5 +1,14 @@
 #include "widgets_panel.hpp"
 
+#include <QApplication>
+#include <QMenu>
+#include <QScrollBar>
+
+#include "companion.hpp"
+#include "constants.hpp"
+#include "message.hpp"
+#include "widgets.hpp"
+
 LeftPanelWidget::LeftPanelWidget(std::shared_ptr<QWidget> parent)
 {
     if (parent)

@@ -2,6 +2,7 @@
 #define GRAPHIC_MANAGER_HPP
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -9,15 +10,12 @@
 #include <QWidget>
 
 #include "constants.hpp"
-#include "mainwindow.hpp"
-#include "widgets.hpp"
 
 class ButtonInfo;
 class Companion;
 class CompanionAction;
 class MainWindow;
 class Message;
-class MessageWidget;
 class PasswordAction;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;

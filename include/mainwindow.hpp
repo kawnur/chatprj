@@ -1,27 +1,17 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include <map>
 #include <memory>
 
 #include <QGraphicsBlurEffect>
-#include <QGraphicsScene>
-#include <QGraphicsTextItem>
-#include <QGraphicsView>
 #include <QHBoxLayout>
 #include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
-#include <QPlainTextEdit>
-#include <QScrollBar>
-#include <QSpacerItem>
 #include <QSplitter>
-#include <QVBoxLayout>
+#include <QString>
+#include <QWidget>
 
-#include "application.hpp"
-#include "db_interaction.hpp"
-#include "manager.hpp"
-#include "utils_cout.hpp"
-#include "widgets.hpp"
+#include "constants.hpp"
 
 class CentralPanelWidget;
 class LeftPanelWidget;
@@ -29,8 +19,6 @@ class MainWindowContainerWidget;
 class RightPanelWidget;
 class ShowHideWidget;
 class SocketInfoBaseWidget;
-class SocketInfoWidget;
-class TextEditWidget;
 
 class MainWindow : public QMainWindow
 {

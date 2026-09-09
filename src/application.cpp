@@ -1,5 +1,8 @@
 #include "application.hpp"
 
+#include "graphic_manager.hpp"
+#include "manager.hpp"
+
 void ChatApp::set()
 {
     graphicManager_ = std::make_shared<GraphicManager>();

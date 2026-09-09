@@ -2,16 +2,8 @@
 #define APPLICATION_HPP
 
 #include <memory>
-#include <queue>
 
 #include <QApplication>
-
-#include "chat_client.hpp"
-#include "chat_server.hpp"
-#include "constants.hpp"
-#include "db_interaction.hpp"
-#include "mainwindow.hpp"
-#include "manager.hpp"
 
 class GraphicManager;
 class Manager;

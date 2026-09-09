@@ -1,5 +1,15 @@
 #include "graphic_manager.hpp"
 
+#include "action.hpp"
+#include "application.hpp"
+#include "companion.hpp"
+#include "mainwindow.hpp"
+#include "manager.hpp"
+#include "widgets.hpp"
+#include "widgets_dialog.hpp"
+#include "widgets_message.hpp"
+#include "utils.hpp"
+
 GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
 {
     // mapMessageToMessageWidget_(std::map<std::shared_ptr<Message>, std::shared_ptr<MessageWidget>>()) {

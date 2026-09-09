@@ -1,5 +1,11 @@
 #include "file_info.hpp"
 
+#include <thread>
+
+#include "companion.hpp"
+#include "logging.hpp"
+#include "utils.hpp"
+
 FileOperator::FileOperator(const std::filesystem::path& path)
     : filePath_(path), filebuf_(std::filebuf()) {}
 
@@ -46,9 +52,9 @@ bool SenderOperator::sendFilePart(
     std::shared_ptr<Companion> companion, const std::string& networkId)
 {
     std::stringstream sstream;
-    char buffer[maxBufferSize] = { 0 };
+    char buffer[MAX_BUFFER_SIZE] = { 0 };
 
-    auto read = filebuf_.sgetn(buffer, maxBufferSize);
+    auto read = filebuf_.sgetn(buffer, MAX_BUFFER_SIZE);
     sstream << std::hex << std::setfill('0');
 
     for (std::size_t i = 0; i < read; i++)
@@ -69,7 +75,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
     {
         if (filebuf_.is_open()) {
             auto length = filebuf_.in_avail();
-            uint32_t iterationNumber = length / maxBufferSize + 1;
+            uint32_t iterationNumber = length / MAX_BUFFER_SIZE + 1;
 
             for (uint32_t i = 0; i < iterationNumber; i++) {
                 if (i % 100 == 0) {

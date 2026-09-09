@@ -1,23 +1,23 @@
 #ifndef LOGGING_HPP
 #define LOGGING_HPP
 
+#include <cstddef>
+#include <filesystem>
 #include <format>
 #include <memory>
 #include <optional>
 #include <string>
 #include <type_traits>
 
+#include <libpq-fe.h>
+
 #include <QString>
 #include <QTime>
 
-#include "constants.hpp"
 #include "graphic_manager.hpp"
-#include "mainwindow.hpp"
-#include "manager.hpp"
 #include "utils_cout.hpp"
 
 class DBReplyData;
-class MainWindow;
 class GraphicManager;
 class SocketInfo;
 class SocketInfoWidget;
@@ -25,27 +25,28 @@ class SocketInfoWidget;
 std::shared_ptr<GraphicManager> getGraphicManager();
 
 template<typename T>
-concept IsArithmetic =
-    std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
+concept IsArithmetic = std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 
 template<typename T>
-concept IsNotArithmetic =
-    !std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
+concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 
 template<typename T>
-QString getQString(std::shared_ptr<T> value) {
+QString getQString(std::shared_ptr<T> value)
+{
     std::stringstream ss;
     ss << (std::shared_ptr<void>)value;
     return QString::fromStdString(ss.str());
 }
 
 template<IsArithmetic T>
-QString getQString(T&& value) {
+QString getQString(T&& value)
+{
     return QString::fromStdString(std::to_string(std::forward<T>(value)));
 }
 
 template<IsNotArithmetic T>
-QString getQString(T&& value) {
+QString getQString(T&& value)
+{
     return QString::fromStdString(std::forward<T>(value));
 }
 

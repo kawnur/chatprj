@@ -1,5 +1,12 @@
 #include "mainwindow.hpp"
 
+#include <QMenuBar>
+
+#include "graphic_manager.hpp"
+#include "manager.hpp"
+#include "widgets.hpp"
+#include "widgets_panel.hpp"
+
 MainWindow::MainWindow()
 {
     setWindowTitle(std::getenv("CLIENT_NAME"));
@@ -26,7 +33,7 @@ MainWindow::MainWindow()
     centralWidgetLayout_->addWidget(leftContainerWidget_.get());
 
     leftPanel_ = std::make_shared<LeftPanelWidget>(leftContainerWidget_);
-    leftContainerWidget_->addWidgetToLayout(leftPanel_);
+    leftContainerWidget_->addWidgetToLayout(dynamic_pointer_cast<QWidget>(leftPanel_));
 
     // central panel
     centralContainerWidget_ = std::make_shared<MainWindowContainerWidget>(centralWidget_);

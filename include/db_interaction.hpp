@@ -1,21 +1,14 @@
 #ifndef DB_INTERACTION_HPP
 #define DB_INTERACTION_HPP
 
-#include <format>
 #include <libpq-events.h>
 #include <libpq-fe.h>
+#include <map>
 #include <memory>
-#include <mutex>
-#include <optional>
 #include <string>
+#include <vector>
 
 #include <QString>
-
-#include "action.hpp"
-#include "logging.hpp"
-#include "mainwindow.hpp"
-#include "manager.hpp"
-#include "utils_cout.hpp"
 
 class Companion;
 class CompanionAction;

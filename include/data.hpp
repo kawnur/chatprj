@@ -3,8 +3,7 @@
 
 #include <memory>
 #include <string>
-
-#include "companion.hpp"
+#include <vector>
 
 class Companion;
 

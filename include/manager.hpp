@@ -1,28 +1,30 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
+#include <filesystem>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 
-#include "action.hpp"
-#include "companion.hpp"
-#include "db_interaction.hpp"
-#include "utils.hpp"
+#include <libpq-fe.h>
+
+#include <QString>
+#include <QWidget>
+
+#include "constants.hpp"
 
 class Action;
 class Companion;
 class CompanionAction;
 class DBReplyData;
-class FileAction;
 class Message;
 class MessageState;
 class PasswordAction;
 class SocketInfoBaseWidget;
-class TextDialog;
 class WidgetGroup;
 
-int getDataFromDBResult(
-    const bool&, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
+int getDataFromDBResult(const bool&, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
 
 template<typename... Ts> void logArgs(Ts&&... args);
 void logDBReplyData(std::shared_ptr<DBReplyData>);
@@ -119,8 +121,7 @@ private:
             return nullptr;
         }
 
-        std::shared_ptr<DBReplyData> dbData =
-            std::make_shared<DBReplyData>(std::forward<T>(keys));
+        auto dbData = std::make_shared<DBReplyData>(std::forward<T>(keys));
 
         if (getDataFromDBResult(logging, dbData, dbResult, 0) == -1) {
             showErrorDialogAndLogError("Error getting data from dbResult");

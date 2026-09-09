@@ -1,38 +1,38 @@
 #ifndef WIDGETS_HPP
 #define WIDGETS_HPP
 
-#include <chrono>
+// #include <chrono>
+#include <cstdint>
 #include <memory>
-#include <thread>
+#include <mutex>
+// #include <thread>
 
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QFileDialog>
+#include <QColor>
+// #include <QDialog>
+// #include <QDialogButtonBox>
+// #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
+// #include <QLineEdit>
 #include <QPushButton>
-#include <QScrollArea>
-#include <QSplitter>
+// #include <QScrollArea>
+// #include <QSplitter>
 #include <QTextEdit>
-#include <QTimer>
+// #include <QTimer>
 
-#include "constants.hpp"
-#include "mainwindow.hpp"
-#include "manager.hpp"
-#include "logging.hpp"
-#include "utils.hpp"
-#include "widgets_message.hpp"
-#include "widgets_panel.hpp"
+// #include "mainwindow.hpp"
+// #include "manager.hpp"
+// #include "utils.hpp"
+// #include "widgets_message.hpp"
 
-class Action;
+// class Action;
 class CentralPanelWidget;
 class Companion;
-class CompanionAction;
-class FileAction;
+// class CompanionAction;
+// class FileAction;
 class LeftPanelWidget;
-class MainWindow;
+// class MainWindow;
 class Message;
 class MessageState;
 class MessageWidget;

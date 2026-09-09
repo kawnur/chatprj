@@ -1,5 +1,15 @@
 #include "widgets_dialog.hpp"
 
+#include <filesystem>
+
+#include <QHostAddress>
+
+#include "action.hpp"
+#include "companion.hpp"
+#include "mainwindow.hpp"
+#include "manager.hpp"
+#include "utils.hpp"
+
 CompanionDataDialog::CompanionDataDialog(
     ChatActionType actionType, std::shared_ptr<QWidget> parent,
     std::shared_ptr<Companion> companion)

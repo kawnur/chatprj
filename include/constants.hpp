@@ -5,12 +5,13 @@
 #include <map>
 #include <string>
 
-#include <QDialogButtonBox>
+// #include <QDialogButtonBox>
+#include <QString>
 
 const std::string logDelimiter { "############################" };
 const std::string logCustomDelimiter { "?????????????????????????" };
 
-const std::size_t maxBufferSize = 1024;
+const std::size_t MAX_BUFFER_SIZE = 1024;
 
 const int numberOfMessagesToGetFromDB = 10;
 

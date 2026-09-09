@@ -1,31 +1,18 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <fstream>
-#include <iostream>
-#include <memory>
+#include <functional>
+#include <map>
 #include <string>
-#include <type_traits>
+#include <vector>
 
 #include <nlohmann/json.hpp>
-#include <openssl/md5.h>
-#include <openssl/evp.h>
 
-#include <QDialog>
-#include <QHostAddress>
+#include <QString>
 
-#include "constants.hpp"
-#include "db_interaction.hpp"
 #include "logging.hpp"
-#include "widgets.hpp"
-#include "widgets_dialog.hpp"
 
-class ButtonInfo;
-class Companion;
-class CompanionAction;
-class DBReplyData;
 class GraphicManager;
-class Message;
 class TextDialog;
 
 std::shared_ptr<GraphicManager> getGraphicManager();

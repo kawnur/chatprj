@@ -1,6 +1,12 @@
 #include "chat_server.hpp"
 
+#include "logging.hpp"
+#include "manager.hpp"
+
 using boost::asio::ip::tcp;
+
+ServerSession::ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket)
+    : companion_(companion), socket_(std::move(socket)) {}
 
 void ServerSession::start()
 {
@@ -53,7 +59,14 @@ void ServerSession::do_read()
         do_read();
     };
 
-    socket_.async_read_some(boost::asio::buffer(data_, maxBufferSize), lambda);
+    socket_.async_read_some(boost::asio::buffer(data_, MAX_BUFFER_SIZE), lambda);
+}
+
+ChatServer::ChatServer(std::shared_ptr<Companion> companion, uint16_t port)
+    : companion_(companion), port_(port), io_context_(),
+    acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
+{
+    do_accept();
 }
 
 void ChatServer::run()

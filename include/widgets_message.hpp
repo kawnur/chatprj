@@ -7,11 +7,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QVBoxLayout>
-
-#include "constants.hpp"
-#include "logging.hpp"
-#include "utils.hpp"
-#include "widgets.hpp"
+#include <QWidget>
 
 class Companion;
 class IndicatorWidget;

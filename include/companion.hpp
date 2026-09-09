@@ -2,18 +2,16 @@
 #define COMPANION_HPP
 
 #include <cstdint>
+#include <filesystem>
+#include <format>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <vector>
 #include <utility>
 
 #include "constants.hpp"
-#include "data.hpp"
-#include "db_interaction.hpp"
-#include "file_info.hpp"
-#include "logging.hpp"
-#include "message.hpp"
-#include "widgets_message.hpp"
 
 class CentralPanelWidget;
 class ChatClient;
@@ -25,6 +23,7 @@ class FileMessageWidget;
 class Message;
 class MessageInfo;
 class MessageState;
+class MessageWidget;
 class WidgetGroup;
 
 template<typename... Ts>

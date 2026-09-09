@@ -1,6 +1,20 @@
 #include "utils.hpp"
 
-#include <cstring>
+#include <thread>
+
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QHostAddress>
+
+#include <openssl/md5.h>
+#include <openssl/evp.h>
+
+#include "action.hpp"
+#include "companion.hpp"
+#include "db_interaction.hpp"
+#include "file_info.hpp"
+#include "message.hpp"
+#include "widgets_dialog.hpp"
 
 // TODO move all constants to constants.hpp
 

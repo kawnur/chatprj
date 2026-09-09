@@ -2,12 +2,7 @@
 #define CHAT_CLIENT
 
 #include <boost/asio.hpp>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-
-#include "mainwindow.hpp"
-#include "utils.hpp"
+#include <string>
 
 using boost::asio::ip::tcp;
 

@@ -4,7 +4,6 @@
 #include <memory>
 #include <mutex>
 
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QPalette>
 #include <QPlainTextEdit>
@@ -14,11 +13,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "constants.hpp"
-#include "manager.hpp"
-#include "utils.hpp"
-#include "widgets.hpp"
-
 class Companion;
 class Message;
 class MessageState;
@@ -26,10 +20,8 @@ class SocketInfoBaseWidget;
 class TextEditWidget;
 class WidgetGroup;
 
-// void showErrorDialogAndLogError(QString&&, std::shared_ptr<QWidget>);
-
-class LeftPanelWidget : public QWidget {
-
+class LeftPanelWidget : public QWidget
+{
     Q_OBJECT
 
 public:
@@ -49,8 +41,8 @@ private:
     std::unique_ptr<QSpacerItem> spacer_;
 };
 
-class CentralPanelWidget : public QWidget {
-
+class CentralPanelWidget : public QWidget
+{
     Q_OBJECT
 
 public:
@@ -106,8 +98,8 @@ private slots:
     void saveFileSlot();
 };
 
-class RightPanelWidget : public QWidget {
-
+class RightPanelWidget : public QWidget
+{
     Q_OBJECT
 
 public:

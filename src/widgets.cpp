@@ -1,5 +1,14 @@
 #include "widgets.hpp"
 
+#include <QMenu>
+
+// #include "action.hpp"
+#include "companion.hpp"
+#include "constants.hpp"
+#include "logging.hpp"
+#include "message.hpp"
+#include "widgets_panel.hpp"
+
 QString getInitialConnectButtonLabel()
 {
     try {

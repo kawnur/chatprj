@@ -8,9 +8,6 @@
 #include <mutex>
 #include <string>
 
-#include "logging.hpp"
-#include "utils.hpp"
-
 class Companion;
 
 class FileOperator {
@@ -38,9 +35,6 @@ public:
 
     bool sendFilePart(std::shared_ptr<Companion>, const std::string&);
     void sendFile(std::shared_ptr<Companion>, const std::string&);
-
-private:
-
 };
 
 class ReceiverOperator : public FileOperator {

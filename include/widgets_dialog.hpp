@@ -3,6 +3,8 @@
 
 #include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -12,10 +14,9 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPlainTextEdit>
+#include <QString>
 
 #include "constants.hpp"
-#include "logging.hpp"
-#include "utils.hpp"
 
 void showErrorDialogAndLogError(QString&& message);
 

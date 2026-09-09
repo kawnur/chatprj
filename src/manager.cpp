@@ -1,9 +1,16 @@
 #include "manager.hpp"
 
+#include "action.hpp"
+#include "application.hpp"
 #include "companion.hpp"
+#include "db_interaction.hpp"
+#include "file_info.hpp"
+#include "message.hpp"
+#include "widgets.hpp"
+#include "widgets_dialog.hpp"
 
 Manager::Manager()
-    : initialized_(false), messageStateToMessageMapMutex_(std::mutex()), dbConnection_(nullptr),
+    : initialized_(false), messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false)
 {
     mapCompanionIdToCompanionInfo_ =

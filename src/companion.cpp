@@ -1,5 +1,17 @@
 #include "companion.hpp"
 
+#include "chat_client.hpp"
+#include "chat_server.hpp"
+#include "data.hpp"
+#include "db_interaction.hpp"
+#include "file_info.hpp"
+#include "logging.hpp"
+#include "manager.hpp"
+#include "message.hpp"
+#include "utils.hpp"
+#include "widgets.hpp"
+#include "widgets_message.hpp"
+
 SocketInfo::SocketInfo(std::string& ipAddress, uint16_t& serverPort, uint16_t& clientPort)
     : ipAddress_(ipAddress), serverPort_(serverPort), clientPort_(clientPort) {}
 
@@ -153,8 +165,7 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
             return iter.second->getWidget() == widget;
         });
 
-    return (result == messageMapping_.end()) ?
-        nullptr : result->second->getState();
+    return (result == messageMapping_.end()) ? nullptr : result->second->getState();
 }
 
 MessageMappingPair Companion::getMessageMappingPairByMessageId(uint32_t messageId)

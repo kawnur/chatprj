@@ -1,5 +1,9 @@
 #include "widgets_message.hpp"
 
+#include "companion.hpp"
+#include "message.hpp"
+#include "widgets.hpp"
+
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
     bool isMessageFromMe, std::shared_ptr<MessageState> messageState)
 {

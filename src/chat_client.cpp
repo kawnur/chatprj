@@ -1,5 +1,8 @@
 #include "chat_client.hpp"
 
+#include "logging.hpp"
+#include "utils.hpp"
+
 using boost::asio::ip::tcp;
 
 ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port)
