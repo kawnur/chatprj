@@ -339,6 +339,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
         logArgsInfo("got chat history from " + companion->getName());
         logArgs("jsonString:", jsonString);
 
+        bool log = logDBInteraction;
         auto json = buildJsonObject(jsonString);
 
         for (std::size_t i = 0; i < json["messages"].size(); i++) {
@@ -351,7 +352,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
             // check if message from this companion with such timestamp
             // already exists
             auto messageGetData = getDBData(
-                logDBInteraction,
+                log,
                 "getMessageByCompanionIdAndTimestampDBResult",
                 &getMessageByCompanionIdAndTimestampDBResult,
                 buildStringVector("id"),

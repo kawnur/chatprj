@@ -24,7 +24,7 @@ class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
 
-int getDataFromDBResult(const bool&, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
+int getDataFromDBResult(bool, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
 
 template<typename... Ts> void logArgs(Ts&&... args);
 void logDBReplyData(std::shared_ptr<DBReplyData>);
@@ -104,13 +104,13 @@ private:
 
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(
-        const bool &logging, std::string &&mark,
-        std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, const bool&, const Ts&...),
+        bool log, std::string &&mark,
+        std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, bool, const Ts&...),
         T &&keys, const Ts&... args)
     {
-        std::shared_ptr<PGresult> dbResult = func(dbConnection_, logging, args...);
+        std::shared_ptr<PGresult> dbResult = func(dbConnection_, log, args...);
 
-        if (logging) {
+        if (log) {
             logArgs(logDelimiter);
             logArgs(mark);
             logArgs("dbResult:", dbResult);
@@ -124,13 +124,13 @@ private:
 
         auto dbData = std::make_shared<DBReplyData>(std::forward<T>(keys));
 
-        if (getDataFromDBResult(logging, dbData, dbResult, 0) == -1) {
+        if (getDataFromDBResult(log, dbData, dbResult, 0) == -1) {
             showErrorDialogAndLogError("Error getting data from dbResult");
 
             return nullptr;
         }
 
-        if (logging) {
+        if (log) {
             // logArgs("dbData->size():", dbData->size());
             logDBReplyData(dbData);
             logArgs(logDelimiter);
