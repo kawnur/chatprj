@@ -317,7 +317,7 @@ std::filesystem::path FileAction::getPath() const
 
 void FileAction::sendData()
 {
-    logArgs("FileAction::sendData");
+    logArgs(__FUNCTION__);
 
     auto cast = dynamic_pointer_cast<FileDialog>(dialog_);
 
@@ -332,7 +332,7 @@ void FileAction::sendData()
     switch (type_) {
     case FileActionType::SEND:
     {
-        for (auto &pathQString : dialog->selectedFiles()) {  // one file
+        for (const auto &pathQString : dialog->selectedFiles()) {  // one file
             logArgs(pathQString);
 
             auto path = std::filesystem::path(pathQString.toStdString());

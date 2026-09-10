@@ -81,7 +81,7 @@ std::shared_ptr<FileOperatorStorage> Companion::getFileOperatorStorage() const
 
 std::string Companion::getFileOperatorFilePathStringByNetworkId(const std::string &networkId)
 {
-    return fileOperatorStorage_->getOperator(networkId)->getFilePath().string();
+    return fileOperatorStorage_->getOperator(networkId)->getPath().string();
 }
 
 bool Companion::removeOperatorFromStorage(const std::string &key)
@@ -277,7 +277,7 @@ void Companion::setSocketInfo(std::shared_ptr<SocketInfo> socketInfo)
 bool Companion::setFileOperatorFilePath(
     const std::string &networkId, const std::filesystem::path &path)
 {
-    return fileOperatorStorage_->getOperator(networkId)->setFilePath(path);
+    return fileOperatorStorage_->getOperator(networkId)->setPath(path);
 }
 
 void Companion::setMappedMessageWidget(

@@ -29,11 +29,14 @@ public:
     ~MainWindow() = default;
 
     void set();
-    void addTextToAppLogWidget(const QString&);
-    void addWidgetToContainerAndSetParentTo(MainWindowContainerPosition, std::shared_ptr<QWidget>);
-    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
+    void addTextToAppLogWidget(const QString &text);
+
+    void addWidgetToContainerAndSetParentTo(
+        MainWindowContainerPosition position, std::shared_ptr<QWidget> widget);
+
+    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
+    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
     void hideLeftAndRightPanels();
     void showLeftAndRightPanels();
     int getLeftPanelWidgetWidth();
@@ -47,10 +50,11 @@ private slots:
     void createGroupChat();
 
 private:
-    std::unique_ptr<QPalette> menuBarPalette_;
-    std::shared_ptr<QWidget> centralWidget_;
-    std::unique_ptr<QHBoxLayout> centralWidgetLayout_;
-    std::unique_ptr<QSplitter> splitter_;
+    void closeEvent(QCloseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void createMenu();
+    void setBlurEffect();
 
     // left panel
     std::shared_ptr<MainWindowContainerWidget> leftContainerWidget_;
@@ -70,12 +74,10 @@ private:
     std::map<MainWindowContainerPosition, std::shared_ptr<MainWindowContainerWidget>> containerMap;
 
     std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
-
-    void closeEvent(QCloseEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
-    void mouseDoubleClickEvent(QMouseEvent *event) override;
-    void createMenu();
-    void setBlurEffect();
+    std::unique_ptr<QPalette> menuBarPalette_;
+    std::shared_ptr<QWidget> centralWidget_;
+    std::unique_ptr<QHBoxLayout> centralWidgetLayout_;
+    std::unique_ptr<QSplitter> splitter_;
 };
 
 #endif // MAINWINDOW_HPP

@@ -37,7 +37,7 @@ void coutWithManipulatorsRight(T &&value, int width)
 }
 
 template<typename... Ts>
-void coutArgsWithManipulators(int width, Ts&&... args)
+void coutArgsWithManipulators(int width, Ts &&...args)
 {
 	(coutWithManipulators(args, width), ...);
 	endline(1);
@@ -51,7 +51,7 @@ int getSizeAsInt(T &parameter)
 
 // TODO does not work with multiple function pointers as params
 template<typename T, typename... Ts>
-void coutContainerArgsResultWithManupulators(std::vector<T> &container, Ts&&... args)
+void coutContainerArgsResultWithManupulators(std::vector<T> &container, Ts &&...args)
 {
     auto check = [&](T &u1, T &u2) { return getSizeAsInt(u1) < getSizeAsInt(u2); };
 
@@ -62,7 +62,7 @@ void coutContainerArgsResultWithManupulators(std::vector<T> &container, Ts&&... 
 		coutArgsWithManipulators(width, (args(element), ...));	
 }
 
-template<typename T, std::ios_base &(*alignment)(std::ios_base&), int width, char separator>
+template<typename T, std::ios_base &(*alignment)(std::ios_base &), int width, char separator>
 void coutWithManipulators(T &&value)
 {
     std::cout << alignment << std::setw(width)
@@ -199,14 +199,14 @@ void coutVectorOfVectorsState(T &vector)
 	endline(2);
 }
 
-void coutVector1(const std::vector<int>&);
-void coutVectorAndSum(const std::vector<int>&);
-void coutVectorWithIndexesHorizontally(const std::vector<int>&);
+void coutVector1(const std::vector<int> &vector);
+void coutVectorAndSum(const std::vector<int> &vector);
+void coutVectorWithIndexesHorizontally(const std::vector<int> &vector);
 
 // TODO rewrite functions below with ranges
 
 // array
-void printArray(std::array<int, 10>&);
+void printArray(std::array<int, 10> &array);
 
 // tuple
 // template<typename T, std::size_t... I>
@@ -221,7 +221,7 @@ void printArray(std::array<int, 10>&);
 // }
 
 // set
-void printSet(std::set<int>&);
+void printSet(std::set<int> &set);
 
 // map
 template<typename T, typename U>
@@ -243,8 +243,8 @@ void coutMappingValue(const std::map<T, U> &map, const T &key)
 }
 
 // string
-void coutString(std::string::const_iterator, std::string::const_iterator);
-void coutStringFull(std::string&);
-void coutHeader(const std::string&);
+void coutString(std::string::const_iterator iterator1, std::string::const_iterator iterator2);
+void coutStringFull(std::string &string);
+void coutHeader(const std::string &header);
 
 #endif

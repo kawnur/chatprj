@@ -80,7 +80,7 @@ void coutUserIdInfo(gpgme_key_t *key)
     // endline(1);
 }
 
-void createKey(gpgme_ctx_t *contextPtr, const char *algoName)
+void createKey(gpgme_ctx_t *context, const char *algoName)
 {
     // create key
     const char *userId = "user2";
@@ -89,8 +89,7 @@ void createKey(gpgme_ctx_t *contextPtr, const char *algoName)
     gpgme_key_t extrakey = NULL;
     unsigned int flags = GPGME_CREATE_ENCR;
 
-    auto key =
-        gpgme_op_createkey(*contextPtr, userId, algoName, reserved, expires, extrakey, flags);
+    auto key = gpgme_op_createkey(*context, userId, algoName, reserved, expires, extrakey, flags);
 
     coutWithEndl(key);
 
@@ -102,7 +101,7 @@ void createKey(gpgme_ctx_t *contextPtr, const char *algoName)
     coutWithEndl(getMappingValueOrDefault(map, key, "key creation: some other error"s));
 }
 
-void listKeys(gpgme_ctx_t *contextPtr)
+void listKeys(gpgme_ctx_t *context)
 {
     // list keys
     const char *pattern = NULL;
@@ -111,7 +110,7 @@ void listKeys(gpgme_ctx_t *contextPtr)
     int i = 0;
     coutArgsWithSpaceSeparator("i:", i);
 
-    auto errorStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
+    auto errorStart = gpgme_op_keylist_start(*context, pattern, secret_only);
 
     if (errorStart == GPG_ERR_INV_VALUE)
         coutWithEndl("key listing: context is not a valid pointer");
@@ -122,7 +121,7 @@ void listKeys(gpgme_ctx_t *contextPtr)
         gpgme_key_t r_key;
         //			coutArgsWithSpaceSeparator("&r_key:", &r_key);
 
-        errorNext = gpgme_op_keylist_next(*contextPtr, &r_key);
+        errorNext = gpgme_op_keylist_next(*context, &r_key);
 
         std::map<gpgme_error_t, std::string> mapNext {
             { GPG_ERR_INV_VALUE, "key listing: context or r_key is not a valid pointer" },
@@ -140,7 +139,7 @@ void listKeys(gpgme_ctx_t *contextPtr)
         coutArgsWithSpaceSeparator("i:", i);
     }
 
-    auto errorEnd = gpgme_op_keylist_end(*contextPtr);
+    auto errorEnd = gpgme_op_keylist_end(*context);
 
     std::map<gpgme_error_t, std::string> mapEnd {
         { GPG_ERR_INV_VALUE, "key listing: context is not a valid pointer" },
@@ -153,12 +152,12 @@ void listKeys(gpgme_ctx_t *contextPtr)
     coutArgsWithSpaceSeparator("i:", i);
 }
 
-void getKeyByUser(gpgme_ctx_t *contextPtr, gpgme_key_t *keyPtr, const char *name)
+void getKeyByUser(gpgme_ctx_t *context, gpgme_key_t *key, const char *name)
 {
     const char *pattern = NULL;
     int secret_only = 0;
 
-    auto errorStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
+    auto errorStart = gpgme_op_keylist_start(*context, pattern, secret_only);
 
     std::map<gpgme_error_t, std::string> mapStart {
         { GPG_ERR_INV_VALUE, "getKeyByUser: context is not a valid pointer" }
@@ -174,20 +173,20 @@ void getKeyByUser(gpgme_ctx_t *contextPtr, gpgme_key_t *keyPtr, const char *name
     };
 
     while (true) {
-        errorNext = gpgme_op_keylist_next(*contextPtr, keyPtr);
+        errorNext = gpgme_op_keylist_next(*context, key);
 
         coutMappingValue(mapNext, errorNext);
 
-        if (strcmp((*keyPtr)->uids->name, name) == 0) {
+        if (strcmp((*key)->uids->name, name) == 0) {
             coutWithEndl("key found");
             break;
         }
     }
 }
 
-void createDataObject(gpgme_data_t *dataPtr)
+void createDataObject(gpgme_data_t *data)
 {
-    auto error = gpgme_data_new(dataPtr);
+    auto error = gpgme_data_new(data);
 
     std::map<gpgme_error_t, std::string> map {
         { GPG_ERR_NO_ERROR, "data object was successfully created" },
@@ -271,13 +270,13 @@ void seekSetZero(gpgme_data_t &data)
 }
 
 void encrypt(
-    gpgme_ctx_t *contextPtr, gpgme_key_t *keys, gpgme_encrypt_flags_t &flags, gpgme_data_t &data,
+    gpgme_ctx_t *context, gpgme_key_t *keys, gpgme_encrypt_flags_t &flags, gpgme_data_t &data,
     gpgme_data_t &dataEncrypt)
 {
     seekSetZero(data);
     seekSetZero(dataEncrypt);
 
-    auto error = gpgme_op_encrypt(*contextPtr, keys, flags, data, dataEncrypt);
+    auto error = gpgme_op_encrypt(*context, keys, flags, data, dataEncrypt);
 
     std::map<gpgme_error_t, std::string> map {
         { GPG_ERR_NO_ERROR, "ciphertext created successfully" },
@@ -289,12 +288,12 @@ void encrypt(
     coutMappingValue(map, error);
 }
 
-void decrypt(gpgme_ctx_t *contextPtr, gpgme_data_t &dataEncrypt, gpgme_data_t &dataDecrypt)
+void decrypt(gpgme_ctx_t *context, gpgme_data_t &dataEncrypt, gpgme_data_t &dataDecrypt)
 {
     seekSetZero(dataEncrypt);
     seekSetZero(dataDecrypt);
 
-    auto error = gpgme_op_decrypt(*contextPtr, dataEncrypt, dataDecrypt);
+    auto error = gpgme_op_decrypt(*context, dataEncrypt, dataDecrypt);
 
     std::map<gpgme_error_t, std::string> map {
         { GPG_ERR_NO_ERROR, "ciphertext decrypted successfully" },
@@ -353,15 +352,15 @@ char *readData2(gpgme_data_t &data)
     std::size_t blockSize = 10;
     std::size_t bufferSize = blockSize;
     ssize_t sizeRead = blockSize;
-    char *bufferHead = (char*)malloc(bufferSize);
+    char *bufferHead = (char *)malloc(bufferSize);
     char *current = bufferHead;
 
     while (true) {
         sizeRead = gpgme_data_read(data, current, blockSize);
 
         //			coutArgsWithSpaceSeparator("blockSize:", blockSize);
-        //			coutArgsWithSpaceSeparator("(void*)bufferHead:", (void*)bufferHead);
-        //			coutArgsWithSpaceSeparator("(void*)current:", (void*)current);
+        //			coutArgsWithSpaceSeparator("(void *)bufferHead:", (void *)bufferHead);
+        //			coutArgsWithSpaceSeparator("(void *)current:", (void *)current);
         //			coutArgsWithSpaceSeparator("sizeRead:", sizeRead);
         //			printAsChars(bufferHead, bufferSize);
         //			printAsBytes(bufferHead, bufferSize);
@@ -375,7 +374,7 @@ char *readData2(gpgme_data_t &data)
             break;
 
         bufferSize += blockSize;
-        bufferHead = (char*)realloc(bufferHead, bufferSize);
+        bufferHead = (char *)realloc(bufferHead, bufferSize);
         current = bufferHead + bufferSize - blockSize;
 
         if (!bufferHead)
@@ -387,7 +386,7 @@ char *readData2(gpgme_data_t &data)
     //		coutArgsWithSpaceSeparator("bufferSize:", bufferSize);
 
     if (bufferSize != 0) {
-        bufferHead = (char*)realloc(bufferHead, bufferSize);
+        bufferHead = (char *)realloc(bufferHead, bufferSize);
 
         if (!bufferHead)
             coutWithEndl("realloc failure");

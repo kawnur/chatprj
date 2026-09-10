@@ -11,21 +11,19 @@
 #include "utils.hpp"
 
 CompanionDataDialog::CompanionDataDialog(
-    ChatActionType actionType, std::shared_ptr<QWidget> parent,
-    std::shared_ptr<Companion> companion)
+    ChatActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
 {
     setParent(parent.get());
 
     setWindowTitle(
         getConstantMappingValue(
             "companionActionTypeStringRepresentation",
-            &companionActionTypeStringRepresentation,
-            actionType));
+            &companionActionTypeStringRepresentation, type));
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    actionType_ = actionType;
+    type_ = type;
 
     layout_ = std::make_unique<QFormLayout>();
     setLayout(layout_.get());
@@ -39,7 +37,7 @@ CompanionDataDialog::CompanionDataDialog(
     portLabel_ = std::make_unique<QLabel>("Port");
     portEdit_ = std::make_unique<QLineEdit>();
 
-    if (actionType_ == ChatActionType::UPDATE && companion) {
+    if (type_ == ChatActionType::UPDATE && companion) {
         nameEdit_->setText(getQString(companion->getName()));
         ipAddressEdit_->setText(getQString(companion->getSocketInfo()->getIpAddress()));
         portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->getClientPort())));
@@ -51,17 +49,6 @@ CompanionDataDialog::CompanionDataDialog(
 
     buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     layout_->addWidget(buttonBox_.get());
-}
-
-void CompanionDataDialog::set()
-{
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::accepted,
-        action_.get(), &Action::sendData, Qt::QueuedConnection);
-
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::rejected,
-        this, &QDialog::reject, Qt::QueuedConnection);
 }
 
 std::string CompanionDataDialog::getNameString()
@@ -82,20 +69,30 @@ std::string CompanionDataDialog::getPortString()
     return portEdit_->text().toStdString();
 }
 
-GroupChatDataDialog::GroupChatDataDialog(ChatActionType actionType, std::shared_ptr<QWidget> parent)
+void CompanionDataDialog::set()
+{
+    connect(
+        buttonBox_.get(), &QDialogButtonBox::accepted,
+        action_.get(), &Action::sendData, Qt::QueuedConnection);
+
+    connect(
+        buttonBox_.get(), &QDialogButtonBox::rejected,
+        this, &QDialog::reject, Qt::QueuedConnection);
+}
+
+GroupChatDataDialog::GroupChatDataDialog(ChatActionType type, std::shared_ptr<QWidget> parent)
 {
     setParent(parent.get());
 
     setWindowTitle(
         getConstantMappingValue(
             "groupChatActionTypeStringRepresentation",
-            &groupChatActionTypeStringRepresentation,
-            actionType));
+            &groupChatActionTypeStringRepresentation, type));
 
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    actionType_ = actionType;
+    type_ = type;
 
     layout_ = std::make_unique<QVBoxLayout>();
     setLayout(layout_.get());
@@ -183,12 +180,9 @@ std::string GetPasswordDialog::getEditText()
     return edit_->text().toStdString();
 }
 
-// ButtonInfo::ButtonInfo(
-//     const QString &text, QDialogButtonBox::ButtonRole role, void (TextDialog::*function)())
-//     : text_(text), role_(role), function_(function) {}
-
 ButtonInfo::ButtonInfo(
-    const QString &text, QDialogButtonBox::ButtonRole role, std::function<void(TextDialog &)> function)
+    const QString &text, QDialogButtonBox::ButtonRole role,
+    std::function<void(TextDialog  &)> function)
     : text_(text), role_(role), function_(function) {}
 
 QString ButtonInfo::getText()
@@ -196,13 +190,13 @@ QString ButtonInfo::getText()
     return text_;
 }
 
-std::function<void(TextDialog &)> ButtonInfo::getFunction()
+std::function<void(TextDialog  &)> ButtonInfo::getFunction()
 {
     return function_;
 }
 
 TextDialog::TextDialog(
-    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string &text,
+    std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 {
     if (parent)
@@ -217,7 +211,7 @@ TextDialog::TextDialog(
         getConstantMappingValue(
             "dialogTypeStringRepresentation",
             &dialogTypeStringRepresentation,
-            dialogType));
+            type));
 
     layout_ = std::make_unique<QVBoxLayout>();
     setLayout(layout_.get());
@@ -294,30 +288,30 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString &windowTitle)
+FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString &title)
 {
     action_ = action;
     containsDialog_ = true;
-    fileDialog_ = std::make_shared<QFileDialog>();
-    fileDialog_->setFileMode(QFileDialog::AnyFile);
-    fileDialog_->setViewMode(QFileDialog::Detail);
-    fileDialog_->setDirectory(getQString(getManager()->getLastOpenedPath().string()));
-    fileDialog_->setWindowTitle(windowTitle);
+    dialog_ = std::make_shared<QFileDialog>();
+    dialog_->setFileMode(QFileDialog::AnyFile);
+    dialog_->setViewMode(QFileDialog::Detail);
+    dialog_->setDirectory(getQString(getManager()->getLastOpenedPath().string()));
+    dialog_->setWindowTitle(title);
 }
 
 void FileDialog::set()
 {
     connect(
-        fileDialog_.get(), &QFileDialog::accepted,
+        dialog_.get(), &QFileDialog::accepted,
         action_.get(), &Action::sendData, Qt::QueuedConnection);
 }
 
 void FileDialog::showDialog()
 {
-    fileDialog_->show();
+    dialog_->show();
 }
 
 std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
 {
-    return fileDialog_;
+    return dialog_;
 }

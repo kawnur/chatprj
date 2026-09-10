@@ -17,7 +17,7 @@ Manager::Manager()
     : initialized_(false), messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false)
 {
-    mapCompanionIdToCompanionInfo_ =
+    mapCompanionToWidgetGroup_ =
         std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>();
 
     selectedCompanion_ = nullptr;
@@ -39,36 +39,6 @@ bool Manager::userIsAuthenticated()
     return userIsAuthenticated_;
 }
 
-std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
-    // std::shared_ptr<SocketInfoBaseWidget> widget) const
-    SocketInfoBaseWidget *widget) const
-{
-    auto findWidget = [&](auto &pair)
-    {
-        return pair.second.second->getSocketInfoBase().get() == widget;
-    };
-
-    auto result = std::find_if (
-        mapCompanionIdToCompanionInfo_.cbegin(),
-        mapCompanionIdToCompanionInfo_.cend(),
-        findWidget);
-
-    return result->second.first;
-}
-
-std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(
-    std::shared_ptr<Companion> companion) const
-{
-    std::shared_ptr<WidgetGroup> group = nullptr;
-
-    try {
-        group = mapCompanionIdToCompanionInfo_.at(companion->getId()).second;
-    }
-    catch(std::out_of_range) {}
-
-    return group;
-}
-
 void Manager::set()
 {
     bool connectedToDB = connectToDb();
@@ -88,6 +58,36 @@ void Manager::set()
     }
 
     initialized_ = true;
+}
+
+std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
+    // std::shared_ptr<SocketInfoBaseWidget> widget) const
+    SocketInfoBaseWidget *widget) const
+{
+    auto findWidget = [&](auto &pair)
+    {
+        return pair.second.second->getSocketInfoBase().get() == widget;
+    };
+
+    auto result = std::find_if (
+        mapCompanionToWidgetGroup_.cbegin(),
+        mapCompanionToWidgetGroup_.cend(),
+        findWidget);
+
+    return result->second.first;
+}
+
+std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(
+    std::shared_ptr<Companion> companion) const
+{
+    std::shared_ptr<WidgetGroup> group = nullptr;
+
+    try {
+        group = mapCompanionToWidgetGroup_.at(companion->getId()).second;
+    }
+    catch(std::out_of_range) {}
+
+    return group;
 }
 
 void Manager::sendMessage(
@@ -160,12 +160,12 @@ void Manager::sendMessage(
 
 void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path)
 {
-    logArgs("Manager::sendFile");
+    logArgs(__FUNCTION__);
 }
 
-void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::string &jsonString)
+void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::string &json)
 {
-    nlohmann::json jsonData = buildJsonObject(jsonString);
+    nlohmann::json jsonData = buildJsonObject(json);
 
     NetworkMessageType type;
     int companionId;
@@ -337,16 +337,15 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
     case NetworkMessageType::CHAT_HISTORY_DATA:
     {
         logArgsInfo("got chat history from " + companion->getName());
-        logArgs("jsonString:", jsonString);
+        logArgs("jsonString:", json);
 
         bool log = logDBInteraction;
-        auto json = buildJsonObject(jsonString);
 
-        for (std::size_t i = 0; i < json["messages"].size(); i++) {
-            uint8_t authorId = std::stoi(json["messages"][i]["author_id"].get<std::string>());
+        for (std::size_t i = 0; i < jsonData["messages"].size(); i++) {
+            uint8_t authorId = std::stoi(jsonData["messages"][i]["author_id"].get<std::string>());
             authorId = (authorId == 1) ? companion->getId() : 1;
-            std::string timestamp = json["messages"][i]["timestamp_tz"];
-            std::string message = json["messages"][i]["message"];
+            std::string timestamp = jsonData["messages"][i]["timestamp_tz"];
+            std::string message = jsonData["messages"][i]["message"];
             uint8_t companionId = companion->getId();
 
             // check if message from this companion with such timestamp
@@ -570,7 +569,7 @@ void Manager::addEarlyMessages(std::shared_ptr<Companion> companion)
     widgetGroup->sortChatHistoryElements();
 }
 
-void Manager::resetSelectedCompanion(std::shared_ptr<Companion> newSelected)  // TODO rewrite
+void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // TODO rewrite
 {
     auto graphicManager = getGraphicManager();
 
@@ -587,7 +586,7 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> newSelected)  //
         graphicManager->hideCentralPanelStub();
     }
 
-    selectedCompanion_ = newSelected;
+    selectedCompanion_ = companion;
 
     if (selectedCompanion_) {
         auto widgetGroup = getMappedWidgetGroupByCompanion(selectedCompanion_);
@@ -603,17 +602,15 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> newSelected)  //
     }
 }
 
-void Manager::createCompanion(std::shared_ptr<CompanionAction> companionAction)
+void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 {
     // data validation and checking
-    if (!(companionDataValidation(companionAction) &&
-          checkCompanionDataForExistanceAtCreation(companionAction))) {
+    if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
         return;
-    }
 
-    auto name = companionAction->getName();
-    auto ipAddress = companionAction->getIpAddress();
-    auto clientPortStr = companionAction->getClientPort();
+    auto name = action->getName();
+    auto ipAddress = action->getIpAddress();
+    auto clientPortStr = action->getClientPort();
 
     // push companion data to db
     auto companionIdData = getDBData(
@@ -677,16 +674,14 @@ void Manager::createCompanion(std::shared_ptr<CompanionAction> companionAction)
     createWidgetGroupAndAddToMapping(companion);
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(companionAction, "New companion added:\n\n");
+    getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
 }
 
-void Manager::updateCompanion(std::shared_ptr<CompanionAction> companionAction)
+void Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
 {
     // data validation and checking
-    if (!(companionDataValidation(companionAction) &&
-          checkCompanionDataForExistanceAtUpdate(companionAction))) {
+    if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtUpdate(action)))
         return;
-    }
 
     // update companion data at db
     auto companionIdData = getDBData(
@@ -694,7 +689,7 @@ void Manager::updateCompanion(std::shared_ptr<CompanionAction> companionAction)
         "updateCompanionAndSocketAndReturn",
         &updateCompanionAndSocketAndReturn,
         buildStringVector("id"),
-        *companionAction);
+        *action);
 
     if (!companionIdData) {
         showErrorDialogAndLogError("Error getting data from db");
@@ -709,17 +704,17 @@ void Manager::updateCompanion(std::shared_ptr<CompanionAction> companionAction)
     }
 
     // update Companion and SocketInfo object
-    companionAction->updateCompanionObjectData();
+    action->updateCompanionObjectData();
 
     // update SocketInfoWidget
-    auto widgetGroup = getMappedWidgetGroupByCompanion(companionAction->getCompanion());
+    auto widgetGroup = getMappedWidgetGroupByCompanion(action->getCompanion());
     widgetGroup->getSocketInfoBase()->update();
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(companionAction, "Companion updated:\n\n");
+    getGraphicManager()->showCompanionInfoDialog(action, "Companion updated:\n\n");
 }
 
-void Manager::deleteCompanion(std::shared_ptr<CompanionAction> companionAction)
+void Manager::deleteCompanion(std::shared_ptr<CompanionAction> action)
 {
     // delete companion chat messages from db
     auto companionIdMessagesData = getDBData(
@@ -727,7 +722,7 @@ void Manager::deleteCompanion(std::shared_ptr<CompanionAction> companionAction)
         "deleteMessagesFromDBAndReturn",
         &deleteMessagesFromDBAndReturn,
         buildStringVector("id"),
-        *companionAction);
+        *action);
 
     if (!companionIdMessagesData) {
         showErrorDialogAndLogError("Error getting data from db");
@@ -746,7 +741,7 @@ void Manager::deleteCompanion(std::shared_ptr<CompanionAction> companionAction)
         "deleteCompanionAndSocketAndReturn",
         &deleteCompanionAndSocketAndReturn,
         buildStringVector("id"),
-        *companionAction);
+        *action);
 
     if (!companionIdCompanionData) {
         showErrorDialogAndLogError("Error getting data from db");
@@ -761,10 +756,10 @@ void Manager::deleteCompanion(std::shared_ptr<CompanionAction> companionAction)
     }
 
     // delete companion object
-    deleteCompanionObject(companionAction->getCompanion());
+    deleteCompanionObject(action->getCompanion());
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(companionAction, "Companion deleted:\n\n");
+    getGraphicManager()->showCompanionInfoDialog(action, "Companion deleted:\n\n");
 }
 
 void Manager::clearChatHistory(std::shared_ptr<Companion> companion)
@@ -773,7 +768,7 @@ void Manager::clearChatHistory(std::shared_ptr<Companion> companion)
     getGraphicManager()->clearChatHistory(widgetGroup);
 }
 
-void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> companionAction)
+void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
 {
     // delete companion chat messages from db
     auto companionIdMessagesData = getDBData(
@@ -781,7 +776,7 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> companionAc
         "deleteMessagesFromDBAndReturn",
         &deleteMessagesFromDBAndReturn,
         buildStringVector("companion_id"),
-        *companionAction);
+        *action);
 
     if (!companionIdMessagesData) {
         showErrorDialogAndLogError("Error getting data from db");
@@ -795,14 +790,13 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> companionAc
     }
 
     // clear companion's message mapping
-    companionAction->getCompanion()->clearMessageMapping();
+    action->getCompanion()->clearMessageMapping();
 
     // clear chat history widget
-    clearChatHistory(companionAction->getCompanion());
+    clearChatHistory(action->getCompanion());
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(
-        companionAction, "Companion chat history cleared:\n\n");
+    getGraphicManager()->showCompanionInfoDialog(action, "Companion chat history cleared:\n\n");
 }
 
 void Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
@@ -988,7 +982,7 @@ void Manager::requestHistoryFromCompanion(std::shared_ptr<Companion> companion)
 
 void Manager::sendChatHistoryToCompanion(std::shared_ptr<Companion> companion)
 {
-    logArgs("Manager::sendChatHistoryToCompanion");
+    logArgs(__FUNCTION__);
 
     std::vector<std::string> keys =
         buildStringVector("author_id", "timestamp_tz", "message");
@@ -1040,15 +1034,15 @@ std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
     };
 
     auto result = std::find_if (
-        mapCompanionIdToCompanionInfo_.cbegin(),
-        mapCompanionIdToCompanionInfo_.cend(),
+        mapCompanionToWidgetGroup_.cbegin(),
+        mapCompanionToWidgetGroup_.cend(),
         findWidget);
 
     return result->second.first;
 }
 
 void Manager::fillCompanionMessageMapping(
-    std::shared_ptr<Companion> companion, bool containersAlreadyHaveMessages)
+    std::shared_ptr<Companion> companion, bool containersNotEmpty)
 {
     uint8_t companionId = companion->getId();
 
@@ -1079,7 +1073,7 @@ void Manager::fillCompanionMessageMapping(
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
         auto messageId = std::stoi(messagesData->getValue(i, "id"));
 
-        if (containersAlreadyHaveMessages) {
+        if (containersNotEmpty) {
             auto pair = companion->getMessageMappingPairByMessageId(messageId);
 
             auto info = pair.second;
@@ -1184,7 +1178,7 @@ void Manager::buildWidgetGroups()
 {
     auto graphicManager = getGraphicManager();
 
-    auto companionsNumber = mapCompanionIdToCompanionInfo_.size();
+    auto companionsNumber = mapCompanionToWidgetGroup_.size();
     auto childrenSize = graphicManager->getCompanionPanelChildrenSize();
 
     logArgsWithTemplate("companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
@@ -1198,7 +1192,7 @@ void Manager::buildWidgetGroups()
         // hide companion panel stub widget
         graphicManager->hideCompanionPanelStub();
 
-        for (auto &pair : mapCompanionIdToCompanionInfo_)
+        for (auto &pair : mapCompanionToWidgetGroup_)
             createWidgetGroupAndAddToMapping(pair.second.first);
     }
 }
@@ -1218,7 +1212,7 @@ std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string
     auto companion = std::make_shared<Companion>(id, name);
     std::shared_ptr<WidgetGroup> group = nullptr;
     auto value = std::pair(companion, group);
-    auto result = mapCompanionIdToCompanionInfo_.emplace(id, value);
+    auto result = mapCompanionToWidgetGroup_.emplace(id, value);
 
     return (result.second) ? result.first->second.first : nullptr;
 }
@@ -1227,7 +1221,7 @@ void Manager::createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> compan
 {
     auto widgetGroup = std::make_shared<WidgetGroup>(companion);
     widgetGroup->set();
-    mapCompanionIdToCompanionInfo_[companion->getId()].second = widgetGroup;
+    mapCompanionToWidgetGroup_[companion->getId()].second = widgetGroup;
     companion->addMessageWidgetsToChatHistory();
 }
 
@@ -1245,26 +1239,26 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> c
 
     // TODO use range
     auto findMapResult = std::find_if (
-        mapCompanionIdToCompanionInfo_.begin(),
-        mapCompanionIdToCompanionInfo_.end(),
+        mapCompanionToWidgetGroup_.begin(),
+        mapCompanionToWidgetGroup_.end(),
         findMapLambda);
 
-    if (findMapResult == mapCompanionIdToCompanionInfo_.end()) {
+    if (findMapResult == mapCompanionToWidgetGroup_.end()) {
         showErrorDialogAndLogError("Companion was not found in mapping at deletion");
     }
     else {
         if (selectedCompanion_ == companion)
             selectedCompanion_ = nullptr;
 
-        mapCompanionIdToCompanionInfo_.erase(findMapResult);
+        mapCompanionToWidgetGroup_.erase(findMapResult);
     }
 }
 
-bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> companionAction)
+bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> action)
 {
     std::vector<std::string> validationErrors {};
 
-    bool validationResult = validateCompanionData(validationErrors, companionAction);
+    bool validationResult = validateCompanionData(validationErrors, action);
 
     if (!validationResult) {
         showErrorDialogAndLogError(
@@ -1276,11 +1270,11 @@ bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> companion
     return true;
 }
 
-bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> passwordAction)
+bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> action)
 {
     std::vector<std::string> validationErrors {};
 
-    bool validationResult = validatePassword(validationErrors, passwordAction->getPassword());
+    bool validationResult = validatePassword(validationErrors, action->getPassword());
 
     if (!validationResult) {
         showErrorDialogAndLogError(
@@ -1293,7 +1287,7 @@ bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> passwordAct
 }
 
 bool Manager::checkCompanionDataForExistanceAtCreation(
-    std::shared_ptr<CompanionAction> companionAction)
+    std::shared_ptr<CompanionAction> action)
 {
     // check if companion with such name already exists
     auto companionIdData = getDBData(
@@ -1301,7 +1295,7 @@ bool Manager::checkCompanionDataForExistanceAtCreation(
         "getCompanionByNameDBResult",
         &getCompanionByNameDBResult,
         buildStringVector("id"),
-        companionAction->getName());
+        action->getName());
 
     if (!companionIdData) {
         showErrorDialogAndLogError("Error getting data from db");
@@ -1321,8 +1315,8 @@ bool Manager::checkCompanionDataForExistanceAtCreation(
         "getSocketByIpAddressAndPortDBResult",
         &getSocketByIpAddressAndPortDBResult,
         buildStringVector("id"),
-        companionAction->getIpAddress(),
-        companionAction->getClientPort());
+        action->getIpAddress(),
+        action->getClientPort());
 
     if (!socketIdData) {
         showErrorDialogAndLogError("Error getting data from db");
@@ -1340,54 +1334,52 @@ bool Manager::checkCompanionDataForExistanceAtCreation(
 }
 
 bool Manager::checkCompanionDataForExistanceAtUpdate(
-    std::shared_ptr<CompanionAction> companionAction)
+    std::shared_ptr<CompanionAction> action)
 {
     // check if companion with such name already exists
-    auto companionIdData = getDBData(
+    auto companionData = getDBData(
         logDBInteraction,
         "getCompanionByNameDBResult",
         &getCompanionByNameDBResult,
         buildStringVector("id"),
-        companionAction->getName());
+        action->getName());
 
-    if (!companionIdData) {
+    if (!companionData) {
         showErrorDialogAndLogError("Error getting data from db");
 
         return false;
     }
 
-    bool findNameResult = companionIdData->findValue(
-        "id"s, std::to_string(companionAction->getCompanionId()));
+    bool findNameResult = companionData->findValue("id"s, std::to_string(action->getCompanionId()));
 
     bool nameExistsAtOtherCompanion =
-        (findNameResult && companionIdData->size() > 1) ||
-        (!findNameResult && companionIdData->size() > 0);
+        (findNameResult && companionData->size() > 1) ||
+        (!findNameResult && companionData->size() > 0);
 
     if (nameExistsAtOtherCompanion)
         // no return
         showWarningDialogAndLogWarning("Companion with such name already exists");
 
     // check if such socket already exists
-    auto socketIdData = getDBData(
+    auto socketData = getDBData(
         logDBInteraction,
         "getSocketByIpAddressAndPortDBResult",
         &getSocketByIpAddressAndPortDBResult,
         buildStringVector("id"),
-        companionAction->getIpAddress(),
-        companionAction->getClientPort());
+        action->getIpAddress(),
+        action->getClientPort());
 
-    if (!socketIdData) {
+    if (!socketData) {
         showErrorDialogAndLogError("Error getting data from db");
 
         return false;
     }
 
-    bool findSocketResult = socketIdData->findValue(
-        "id"s, std::to_string(companionAction->getCompanionId()));
+    bool findSocketResult = socketData->findValue("id"s, std::to_string(action->getCompanionId()));
 
     bool socketExistsAtOtherCompanion =
-        (findSocketResult && socketIdData->size() > 1) ||
-        (!findSocketResult && socketIdData->size() > 0);
+        (findSocketResult && socketData->size() > 1) ||
+        (!findSocketResult && socketData->size() > 0);
 
     if (socketExistsAtOtherCompanion) {
         showErrorDialogAndLogError("Companion with such socket already exists");
@@ -1399,7 +1391,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(
 }
 
 void Manager::waitForMessageReceptionConfirmation(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageState> messageState,
+    std::shared_ptr<Companion> companion, std::shared_ptr<MessageState> state,
     std::shared_ptr<Message> message)
 {
     auto lambda = [=]()
@@ -1409,19 +1401,17 @@ void Manager::waitForMessageReceptionConfirmation(
         sleepForMilliseconds(sleepDuration);
 
         while (true) {
-            if (messageState->isReceived()) {
+            if (state->isReceived())
                 return;
-            }
-            else {
-                // send message reception confirmation request
-                bool result = companion->sendMessage(
-                    false, NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST,
-                    messageState->getNetworkId(), message);
 
-                // sleep
-                sleepForMilliseconds(sleepDuration);
-                sleepDuration *= sleepDurationIncreaseRate;
-            }
+            // send message reception confirmation request
+            bool result = companion->sendMessage(
+                false, NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST, state->getNetworkId(),
+                message);
+
+            // sleep
+            sleepForMilliseconds(sleepDuration);
+            sleepDuration *= sleepDurationIncreaseRate;
         }
     };
 

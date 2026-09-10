@@ -13,7 +13,7 @@ DBReplyData::DBReplyData(int count, ...) : data_(1)
     va_start(args, count);
 
     for (int i = 0; i < count; i++) {
-        auto key = std::string(va_arg(args, char*));
+        auto key = std::string(va_arg(args, char *));
 
         data_.at(0).insert({key, ""});
     }

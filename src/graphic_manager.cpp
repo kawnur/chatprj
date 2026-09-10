@@ -91,11 +91,11 @@ void GraphicManager::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBa
 }
 
 void GraphicManager::createTextDialogAndShow(
-    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string &text,
+    std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonInfo)
 {
     // TODO delete objects for closed dialoges?
-    auto dialog = std::make_shared<TextDialog>(parent, dialogType, text, buttonInfo);
+    auto dialog = std::make_shared<TextDialog>(parent, type, text, buttonInfo);
 
     dialog->set();
     dialog->show();
@@ -162,14 +162,14 @@ void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction>
 }
 
 void GraphicManager::showCompanionInfoDialog(
-    std::shared_ptr<CompanionAction> companionAction, std::string &&header)
+    std::shared_ptr<CompanionAction> action, std::string &&header)
 {
     std::shared_ptr<QWidget> parent = nullptr;
     // void (TextDialog::*function)() = nullptr;
-    std::function<void(TextDialog &)> function;
+    std::function<void(TextDialog  &)> function;
     // void (QDialog::*function)() = nullptr;
 
-    auto formDialog = companionAction->getDialog();
+    auto formDialog = action->getDialog();
 
     if (formDialog) {
         parent = formDialog;
@@ -186,9 +186,9 @@ void GraphicManager::showCompanionInfoDialog(
         buildDialogText(
             std::move(header),
             std::vector<std::string> {
-                std::format("name: {}", companionAction->getName()),
-                std::format("ipAddress: {}", companionAction->getIpAddress()),
-                std::format("port: {}", companionAction->getClientPort()),
+                std::format("name: {}", action->getName()),
+                std::format("ipAddress: {}", action->getIpAddress()),
+                std::format("port: {}", action->getClientPort())
             }),
         createOkButtonInfoVector(function));
 }

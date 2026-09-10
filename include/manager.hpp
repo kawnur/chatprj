@@ -24,13 +24,15 @@ class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
 
-int getDataFromDBResult(bool, std::shared_ptr<DBReplyData>, std::shared_ptr<PGresult>, int);
+int getDataFromDBResult(
+    bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result, int maxTuples);
 
-template<typename... Ts> void logArgs(Ts&&... args);
-void logDBReplyData(std::shared_ptr<DBReplyData>);
+template<typename... Ts>
+void logArgs(Ts &&...args);
 
-void showInfoDialogAndLogInfo(QString&&, std::shared_ptr<QWidget>);
-void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget>);
+void logDBReplyData(std::shared_ptr<DBReplyData> object);
+void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent);
+void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent);
 void showErrorDialogAndLogError(QString &&message);
 
 class Manager : public QObject // TODO do we need inheritance?
@@ -41,67 +43,73 @@ public:
 
     std::shared_ptr<Companion> getSelectedCompanion();
     bool userIsAuthenticated();
+    void set();
 
     // std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
-    std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *) const;
-    std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(std::shared_ptr<Companion>) const;
+    std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(
+        SocketInfoBaseWidget *widget) const;
 
-    void set();
-    void sendMessage(MessageType, std::shared_ptr<Companion>, std::shared_ptr<Action>, const std::string&);
-    void sendFile(std::shared_ptr<Companion>, const std::filesystem::path&);
-    void receiveMessage(std::shared_ptr<Companion>, const std::string&);
-    void addEarlyMessages(std::shared_ptr<Companion>);
-    void resetSelectedCompanion(std::shared_ptr<Companion>);
-    void createCompanion(std::shared_ptr<CompanionAction>);
-    void updateCompanion(std::shared_ptr<CompanionAction>);
-    void deleteCompanion(std::shared_ptr<CompanionAction>);
-    void clearChatHistory(std::shared_ptr<Companion>);
-    void clearCompanionHistory(std::shared_ptr<CompanionAction>);
-    void createUserPassword(std::shared_ptr<PasswordAction>);
-    void authenticateUser(std::shared_ptr<PasswordAction>);
+    std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(
+        std::shared_ptr<Companion> companion) const;
+
+    void sendMessage(
+        MessageType type, std::shared_ptr<Companion> companion, std::shared_ptr<Action> action,
+        const std::string &text);
+
+    void sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path);
+    void receiveMessage(std::shared_ptr<Companion> companion, const std::string &json);
+    void addEarlyMessages(std::shared_ptr<Companion> companion);
+    void resetSelectedCompanion(std::shared_ptr<Companion> companion);
+    void createCompanion(std::shared_ptr<CompanionAction> action);
+    void updateCompanion(std::shared_ptr<CompanionAction> action);
+    void deleteCompanion(std::shared_ptr<CompanionAction> action);
+    void clearChatHistory(std::shared_ptr<Companion> companion);
+    void clearCompanionHistory(std::shared_ptr<CompanionAction> action);
+    void createUserPassword(std::shared_ptr<PasswordAction> action);
+    void authenticateUser(std::shared_ptr<PasswordAction> action);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
-    void sendUnsentMessages(std::shared_ptr<Companion>);
-    void requestHistoryFromCompanion(std::shared_ptr<Companion>);
-    void sendChatHistoryToCompanion(std::shared_ptr<Companion>);
+    void sendUnsentMessages(std::shared_ptr<Companion> companion);
+    void requestHistoryFromCompanion(std::shared_ptr<Companion> companion);
+    void sendChatHistoryToCompanion(std::shared_ptr<Companion> companion);
     bool isInitialised();
     std::filesystem::path getLastOpenedPath();
-    void setLastOpenedPath(const std::filesystem::path&);
+    void setLastOpenedPath(const std::filesystem::path &path);
 
 private:
-    bool initialized_;
-    std::mutex messageStateToMessageMapMutex_;
-    std::shared_ptr<PGconn> dbConnection_;
-    bool userIsAuthenticated_;
-    std::shared_ptr<Companion> selectedCompanion_;
 
-    std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>
-        mapCompanionIdToCompanionInfo_;
+    std::shared_ptr<Companion> getMappedCompanionByWidgetGroup(
+        std::shared_ptr<WidgetGroup> group) const;
 
-    std::filesystem::path lastOpenedPath_;
-
-    std::shared_ptr<Companion> getMappedCompanionByWidgetGroup(std::shared_ptr<WidgetGroup>) const;
-    void fillCompanionMessageMapping(std::shared_ptr<Companion>, bool);
+    void fillCompanionMessageMapping(std::shared_ptr<Companion> companion, bool containersNotEmpty);
     bool connectToDb();
     bool buildCompanions();
     void buildWidgetGroups();
-    std::shared_ptr<Companion> addCompanionObject(int, const std::string&);
-    void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion>);
-    void deleteCompanionObject(std::shared_ptr<Companion>);
-    void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion>);
-    bool companionDataValidation(std::shared_ptr<CompanionAction>);
-    bool passwordDataValidation(std::shared_ptr<PasswordAction>);
-    bool checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction>);
-    bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction>);
-    void waitForMessageReceptionConfirmation(std::shared_ptr<Companion>, std::shared_ptr<MessageState>, std::shared_ptr<Message>);
-    bool markMessageAsSent(std::shared_ptr<Companion>, std::shared_ptr<Message>);
-    bool markMessageAsReceived(std::shared_ptr<Companion>, std::shared_ptr<Message>);
+    std::shared_ptr<Companion> addCompanionObject(int id, const std::string &name);
+    void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion);
+    void deleteCompanionObject(std::shared_ptr<Companion> companion);
+    void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
+    bool companionDataValidation(std::shared_ptr<CompanionAction> action);
+    bool passwordDataValidation(std::shared_ptr<PasswordAction> action);
+    bool checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> action);
+    bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> action);
+
+    void waitForMessageReceptionConfirmation(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageState> state,
+        std::shared_ptr<Message> message);
+
+    bool markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+
+    bool markMessageAsReceived(
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
     std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
-        const std::string&, const std::string&, const std::string&,
-        const std::string&, const bool&, const bool&);
+        const std::string &companionName, const std::string &authorName,
+        const std::string &timestamp, const std::string &text, const bool &isSent,
+        const bool &isReceived);
 
+    // TODO use std::function instead of function ptr
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(
         bool log, std::string &&mark,
@@ -138,6 +146,17 @@ private:
 
         return dbData;
     }
+
+    bool initialized_;
+    std::mutex messageStateToMessageMapMutex_;
+    std::shared_ptr<PGconn> dbConnection_;
+    bool userIsAuthenticated_;
+    std::shared_ptr<Companion> selectedCompanion_;
+
+    std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>
+        mapCompanionToWidgetGroup_;
+
+    std::filesystem::path lastOpenedPath_;
 };
 
 std::shared_ptr<Manager> getManager();

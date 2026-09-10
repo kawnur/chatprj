@@ -24,11 +24,6 @@ QString getQString(std::nullptr_t value)
     return "nullptr_t";
 }
 
-QString getQString(QString value)
-{
-    return value;
-}
-
 QString getQString(std::filesystem::path &value)
 {
     return QString::fromStdString(value.string());

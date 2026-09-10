@@ -1,8 +1,8 @@
 #include "message.hpp"
 
 Message::Message(
-    MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
-    const std::string &time, const std::string &text)
+    MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,
+    const std::string &text)
     : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
     text_(text) {}
 
@@ -38,12 +38,11 @@ std::string Message::getText() const
 
 bool Message::isMessageFromMe() const
 {
-    return !(author_id_ == companion_id_);
+    return (author_id_ != companion_id_);
 }
 
 MessageState::MessageState(
-    uint8_t companionId, bool isAntecedent, bool isSent,
-    bool isReceived, std::string networkId)
+    uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
 {}
 

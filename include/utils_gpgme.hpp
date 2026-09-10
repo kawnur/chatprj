@@ -44,26 +44,26 @@ namespace TestGpgme
         return (parameter) ? parameter : "nullptr"s;  // TODO ???
 	}
 
-    void coutKeyInfo(const gpgme_key_t *const);
-    void coutUserIdInfo(gpgme_key_t*);
-    void createKey(gpgme_ctx_t*, const char*);
-    void listKeys(gpgme_ctx_t*);
-    void getKeyByUser(gpgme_ctx_t*, gpgme_key_t*, const char*);
-    void createDataObject(gpgme_data_t*);
-    void printAsBytesTillNullTerminator(const char*);
-    void printAsBytes(const char*, std::size_t);
-    void printAsChars(const char*, std::size_t);
-    int getTerminatorPosition(const char*, ssize_t);
-    void seekSetZero(gpgme_data_t&);
+    void coutKeyInfo(const gpgme_key_t * const key);
+    void coutUserIdInfo(gpgme_key_t *key);
+    void createKey(gpgme_ctx_t *context, const char *algoName);
+    void listKeys(gpgme_ctx_t *context);
+    void getKeyByUser(gpgme_ctx_t *context, gpgme_key_t *key, const char *name);
+    void createDataObject(gpgme_data_t *data);
+    void printAsBytesTillNullTerminator(const char *value);
+    void printAsBytes(const char *value, std::size_t size);
+    void printAsChars(const char *value, std::size_t size);
+    int getTerminatorPosition(const char *value, ssize_t size);
+    void seekSetZero(gpgme_data_t &data);
 
     void encrypt(
-        gpgme_ctx_t*, gpgme_key_t*, gpgme_encrypt_flags_t&,
-        gpgme_data_t&, gpgme_data_t&);
+        gpgme_ctx_t *context, gpgme_key_t *keys, gpgme_encrypt_flags_t &flags, gpgme_data_t &data,
+        gpgme_data_t &dataEncrypt);
 
-    void decrypt(gpgme_ctx_t*, gpgme_data_t&, gpgme_data_t&);
-    ssize_t readData(gpgme_data_t&, char*, std::size_t);
-    void readData1(gpgme_data_t&, std::string&);
-    char *readData2(gpgme_data_t&);
+    void decrypt(gpgme_ctx_t *context, gpgme_data_t &dataEncrypt, gpgme_data_t &dataDecrypt);
+    ssize_t readData(gpgme_data_t &data, char *dataString, std::size_t size);
+    void readData1(gpgme_data_t &data, std::string &dataString);
+    char *readData2(gpgme_data_t &data);
 }
 
 #endif // UTILS_GPGME_HPP

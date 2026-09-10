@@ -30,34 +30,40 @@ public:
     std::shared_ptr<MainWindow> getMainWindow();
 
     void set();
-    void setParentsForStubs(std::shared_ptr<QWidget>, std::shared_ptr<QWidget>);
+
+    void setParentsForStubs(
+        std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer);
+
     void setStubWidgets();
-    void sendMessage(MessageType, std::shared_ptr<Companion>, const std::string&);
-    void addTextToAppLogWidget(const QString&);
+
+    void sendMessage(
+        MessageType type, std::shared_ptr<Companion> companion, const std::string &text);
+
+    void addTextToAppLogWidget(const QString &text);
     std::size_t getCompanionPanelChildrenSize();
-    void hideWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup>);
-    void showWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup>);
+    void hideWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group);
+    void showWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group);
 
     void addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition, std::shared_ptr<QWidget>);
+        MainWindowContainerPosition position, std::shared_ptr<QWidget> widget);
 
-    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
-    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget>);
+    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
+    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
 
     void createTextDialogAndShow(
-        std::shared_ptr<QWidget>, DialogType, const std::string&,
-        std::shared_ptr<std::vector<ButtonInfo>>);
+        std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+        std::shared_ptr<std::vector<ButtonInfo>> buttonInfo);
 
     void createCompanion();
     void createGroupChat();
-    void updateCompanion(std::shared_ptr<Companion>);
-    void clearCompanionHistory(std::shared_ptr<Companion>);
-    void clearChatHistory(std::shared_ptr<WidgetGroup>);
-    void deleteCompanion(std::shared_ptr<Companion>);
-    void sendCompanionDataToManager(std::shared_ptr<CompanionAction>);
-    void showCompanionInfoDialog(std::shared_ptr<CompanionAction>, std::string&&);
-    void sendNewPasswordDataToManager(std::shared_ptr<PasswordAction>);
-    void sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction>);
+    void updateCompanion(std::shared_ptr<Companion> companion);
+    void clearCompanionHistory(std::shared_ptr<Companion> companion);
+    void clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup);
+    void deleteCompanion(std::shared_ptr<Companion> companion);
+    void sendCompanionDataToManager(std::shared_ptr<CompanionAction> action);
+    void showCompanionInfoDialog(std::shared_ptr<CompanionAction> action, std::string &&header);
+    void sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action);
+    void sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action);
     void hideCompanionPanelStub();
     void hideCentralPanelStub();
     void showCentralPanelStub();
@@ -71,11 +77,16 @@ public:
     void enableMainWindowBlurEffect();
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
-    void markMessageWidgetAsSent(std::shared_ptr<Companion>, std::shared_ptr<Message>);
-    void markMessageWidgetAsReceived(std::shared_ptr<Companion>, std::shared_ptr<Message>);
-    void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup>);
-    void sendFile(std::shared_ptr<Companion>);
-    void saveFile(const std::string&, std::shared_ptr<Companion>);
+
+    void markMessageWidgetAsSent(
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+
+    void markMessageWidgetAsReceived(
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+
+    void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
+    void sendFile(std::shared_ptr<Companion> companion);
+    void saveFile(const std::string& networkId, std::shared_ptr<Companion> companion);
 
 private:
     std::mutex messageToMessageWidgetMapMutex_;

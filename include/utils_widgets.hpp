@@ -10,6 +10,6 @@ void showErrorDialogAndLogError(QString &&message);
 
 class ButtonInfo;
 
-std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString&);
+std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString &buttonText);
 
 #endif // UTILS_WIDGETS_HPP

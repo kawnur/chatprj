@@ -12,7 +12,10 @@ class MessageWidget;
 class Message
 {
 public:
-    Message(MessageType, uint32_t, uint8_t, uint8_t, const std::string&, const std::string&);
+    Message(
+        MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
+        const std::string &time, const std::string &text);
+
     ~Message() = default;
 
     MessageType getType() const;
@@ -40,7 +43,10 @@ private:
 class MessageState
 {
 public:
-    MessageState(uint8_t, bool, bool, bool, std::string);
+    MessageState(
+        uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived,
+        std::string networkId);
+
     ~MessageState() = default;
 
     bool isAntecedent() const;
@@ -50,7 +56,7 @@ public:
 
     void setIsAntecedent(bool);
     void setIsReceived(bool);
-    void setNetworkId(const std::string&);
+    void setNetworkId(const std::string &);
 
 private:
     bool isAntecedent_;

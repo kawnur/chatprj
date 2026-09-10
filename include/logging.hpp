@@ -33,6 +33,12 @@ concept IsArithmetic = std::is_arithmetic_v<std::remove_const_t<std::remove_refe
 template<typename T>
 concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 
+QString getQString(const std::string &value);
+QString getQString(const char *value);
+QString getQString(const bool &value);
+QString getQString(std::nullptr_t value);
+QString getQString(const std::filesystem::path &value);
+
 template<typename T>
 QString getQString(std::shared_ptr<T> value)
 {
@@ -50,7 +56,10 @@ QString getQString(T &&value)
 template<IsNotArithmetic T>
 QString getQString(T &&value)
 {
-    return QString::fromStdString(std::forward<T>(value));
+    if constexpr (std::is_same_v<std::remove_cvref_t<T>, QString>)
+        return std::forward<T>(value);
+    else
+        return QString::fromStdString(std::forward<T>(value));
 }
 
 template<typename T>
@@ -59,13 +68,6 @@ QString getQString(const std::optional<T> &value)
     return (value) ? getQString(value.value()) : "EMPTY OPTIONAL";
 }
 
-QString getQString(const std::string&);
-QString getQString(const char *value);
-QString getQString(const bool&);
-QString getQString(std::nullptr_t);
-QString getQString(QString);
-QString getQString(std::filesystem::path&);
-
 template<typename... Ts>
 QString getArgumentedQString(const QString &templateString, Ts&&... args)
 {
@@ -73,7 +75,7 @@ QString getArgumentedQString(const QString &templateString, Ts&&... args)
 }
 
 template<typename... Ts>
-void logArgs(Ts&&... args)
+void logArgs(Ts &&...args)
 {
     QTime time;
     QString text("- ");
@@ -87,49 +89,49 @@ void logArgs(Ts&&... args)
 }
 
 template<typename... Ts>
-void logArgsWithTemplate(const std::format_string<Ts...> &templateString, Ts&&... args)
+void logArgsWithTemplate(const std::format_string<Ts...> &templateString, Ts &&...args)
 {
     logArgs(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts>
-void logArgsInfo(Ts&&... args)
+void logArgsInfo(Ts &&...args)
 {
     logArgs("INFO:", args...);
 }
 
 template<typename... Ts>
-void logArgsException(Ts&&... args)
+void logArgsException(Ts &&...args)
 {
     logArgs("EXCEPTION:", args...);
 }
 
 template<typename... Ts>
-void logArgsWarning(Ts&&... args)
+void logArgsWarning(Ts &&...args)
 {
     logArgs("WARNING:", args...);
 }
 
 template<typename... Ts>
-void logArgsError(Ts&&... args)
+void logArgsError(Ts &&...args)
 {
     logArgs("ERROR:", args...);
 }
 
 template<typename... Ts>
-void logTemplateInfo(const std::format_string<Ts...> &templateString, Ts&&... args)
+void logTemplateInfo(const std::format_string<Ts...> &templateString, Ts &&...args)
 {
     logArgsInfo(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts>
-void logTemplateWarning(const std::format_string<Ts...> &templateString, Ts&&... args)
+void logTemplateWarning(const std::format_string<Ts...> &templateString, Ts &&...args)
 {
     logArgsWarning(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts>
-void logTemplateError(const std::format_string<Ts...> &templateString, Ts&&... args)
+void logTemplateError(const std::format_string<Ts...> &templateString, Ts &&...args)
 {
     logArgsError(std::format(templateString, std::forward<Ts>(args)...));
 }
@@ -140,18 +142,18 @@ void logLine(const T &string)
     getGraphicManager()->addTextToAppLogWidget(QString(string));
 }
 
-void logLine(const QString&);
-void logLine(const std::string&string);
+void logLine(const QString &string);
+void logLine(const std::string &string);
 
 template<typename... Ts>
-void logArgsWithCustomMark(Ts&&... args)
+void logArgsWithCustomMark(Ts &&...args)
 {
     logArgs(logCustomDelimiter, args...);
 }
 
-void logSocketInfoData(std::shared_ptr<SocketInfo>);
-void logDBResultUnknownField(std::shared_ptr<PGresult>, int, int);
-void logDBReplyData(std::shared_ptr<DBReplyData>);
-void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget>);
+void logSocketInfoData(std::shared_ptr<SocketInfo> object);
+void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column);
+void logDBReplyData(std::shared_ptr<DBReplyData> object);
+void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);
 
 #endif // LOGGING_HPP

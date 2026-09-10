@@ -29,7 +29,7 @@ public:
     void push(std::size_t, std::string, const std::string &value);
     std::size_t size();
     std::string getValue(std::size_t, std::string);
-    bool findValue(const std::string&, const std::string&);    
+    bool findValue(const std::string&, const std::string &);    
 
 private:
     std::vector<std::map<std::string, std::string>> data_;

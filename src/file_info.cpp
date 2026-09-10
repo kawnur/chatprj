@@ -8,46 +8,45 @@
 
 using namespace std::string_literals;
 
-FileOperator::FileOperator(const std::filesystem::path &path)
-    : filePath_(path), filebuf_(std::filebuf()) {}
+FileOperator::FileOperator(const std::filesystem::path &path) : path_(path), buf_() {}
 
 FileOperator::~FileOperator()
 {
-    if (filebuf_.is_open())
-        filebuf_.close();
+    if (buf_.is_open())
+        buf_.close();
 }
 
-std::filesystem::path FileOperator::getFilePath() const
+std::filesystem::path FileOperator::getPath() const
 {
-    return filePath_;
+    return path_;
 }
 
-std::string FileOperator::getFileMD5Hash() const
+std::string FileOperator::getMD5Hash() const
 {
-    return fileMD5Hash_;
+    return md5Hash_;
 }
 
-bool FileOperator::setFilePath(const std::filesystem::path &filePath)
+bool FileOperator::setPath(const std::filesystem::path &path)
 {
-    if (filebuf_.is_open())
-        filebuf_.close();
+    if (buf_.is_open())
+        buf_.close();
 
-    filePath_ = filePath;
+    path_ = path;
 
     return createFileAndOpen();
 }
 
 std::filebuf *FileOperator::closeFile()
 {
-    return filebuf_.close();
+    return buf_.close();
 }
 
-SenderOperator::SenderOperator(const std::filesystem::path &filePath) : FileOperator(filePath)
+SenderOperator::SenderOperator(const std::filesystem::path &path) : FileOperator(path)
 {
-    fileMD5Hash_ = hashFileMD5(filePath_.string());
+    md5Hash_ = hashFileMD5(path_.string());
 
-    if (!filebuf_.open(filePath_, std::ios::binary | std::ios::in))
-        logTemplateError("file opening error, path: {}", filePath_.string());
+    if (!buf_.open(path_, std::ios::binary | std::ios::in))
+        logTemplateError("file opening error, path: {}", path_.string());
 }
 
 bool SenderOperator::sendFilePart(
@@ -56,7 +55,7 @@ bool SenderOperator::sendFilePart(
     std::stringstream sstream;
     char buffer[MAX_BUFFER_SIZE] = { 0 };
 
-    auto read = filebuf_.sgetn(buffer, MAX_BUFFER_SIZE);
+    auto read = buf_.sgetn(buffer, MAX_BUFFER_SIZE);
     sstream << std::hex << std::setfill('0');
 
     for (std::size_t i = 0; i < read; i++)
@@ -75,8 +74,8 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
 {
     auto sendFileLambda = [=, this]()
     {
-        if (filebuf_.is_open()) {
-            auto length = filebuf_.in_avail();
+        if (buf_.is_open()) {
+            auto length = buf_.in_avail();
             uint32_t iterationNumber = length / MAX_BUFFER_SIZE + 1;
 
             for (uint32_t i = 0; i < iterationNumber; i++) {
@@ -89,19 +88,19 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
 
                 if (!result) {
                     logTemplateError(
-                        "file sending stopped because of error, path: {}", filePath_.string());
+                        "file sending stopped because of error, path: {}", path_.string());
 
                     // close file
-                    std::filebuf *closeResult = filebuf_.close();
+                    std::filebuf *closeResult = buf_.close();
 
                     if (!closeResult)
-                        logTemplateError("file closing error, path: {}", filePath_.string());
+                        logTemplateError("file closing error, path: {}", path_.string());
 
                     // remove file
-                    bool removeResult = std::filesystem::remove(filePath_);
+                    bool removeResult = std::filesystem::remove(path_);
 
                     if (!removeResult)
-                        logTemplateError("file {} did not exist at deletion", filePath_.string());
+                        logTemplateError("file {} did not exist at deletion", path_.string());
 
                     // send message
                     auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
@@ -124,10 +123,10 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
             companion->sendMessage(false, typeEnd, networkId, nullptr);
 
             if (!closeFile())
-                logTemplateError("file closing error, path: {}", filePath_.string());
+                logTemplateError("file closing error, path: {}", path_.string());
         }
         else {
-            logTemplateError("file opening error, path: {}", filePath_.string());
+            logTemplateError("file opening error, path: {}", path_.string());
         }
     };
 
@@ -135,63 +134,61 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
 }
 
 ReceiverOperator::ReceiverOperator(
-    const std::filesystem::path &filePath, const std::string &fileMD5HashFromSender)
-    : FileOperator(filePath)
+    const std::filesystem::path &path, const std::string &md5HashFromSender) : FileOperator(path)
 {
-    fileMD5Hash_ = ""s;
-    fileMD5HashFromSender_ = fileMD5HashFromSender;
+    md5Hash_ = ""s;
+    md5HashFromSender_ = md5HashFromSender;
 
-    if (filePath_ != homePath)
+    if (path_ != path)
         createFileAndOpen();
 }
 
-void ReceiverOperator::receiveFilePart(const std::string &filePart)
+void ReceiverOperator::receiveFilePart(const std::string &value)
 {
-    std::size_t byteSize = filePart.size() / 2;
+    std::size_t byteSize = value.size() / 2;
 
     for (std::size_t i = 0; i < byteSize; i++) {
-        std::string dataString(filePart.begin() + 2  *i, filePart.begin() + 2  *i + 2);
+        std::string dataString(value.begin() + 2  *i, value.begin() + 2  *i + 2);
         uint8_t value = std::stoi(dataString, nullptr, 16);
-        filebuf_.sputc(value);
+        buf_.sputc(value);
     }
 }
 
 bool ReceiverOperator::receiveFile()
 {
     if (!closeFile())
-        logTemplateError("file closing error, path: {}", filePath_.string());
+        logTemplateError("file closing error, path: {}", path_.string());
 
-    fileMD5Hash_ = hashFileMD5(filePath_.string());
+    md5Hash_ = hashFileMD5(path_.string());
 
-    logArgs("fileMD5Hash_:", fileMD5Hash_);
-    logArgs("fileMD5HashFromSender_:", fileMD5HashFromSender_);
+    logArgs("fileMD5Hash_:", md5Hash_);
+    logArgs("md5HashFromSender_:", md5HashFromSender_);
 
-    return (fileMD5Hash_ == fileMD5HashFromSender_);
+    return (md5Hash_ == md5HashFromSender_);
 }
 
 bool ReceiverOperator::createFileAndOpen()
 {
     // create file if it does not exist
-    if (!std::filesystem::exists(filePath_)) {
-        std::ofstream stream(filePath_);
+    if (!std::filesystem::exists(path_)) {
+        std::ofstream stream(path_);
         stream.close();
     }
 
-    auto openResult = filebuf_.open(filePath_, std::ios::binary | std::ios::out);
+    auto openResult = buf_.open(path_, std::ios::binary | std::ios::out);
 
     if (!openResult)
-        logTemplateError("file {} open error", filePath_.string());
+        logTemplateError("file {} open error", path_.string());
 
     return (openResult) ? true : false;
 }
 
-FileOperatorStorage::FileOperatorStorage()
-    : mappingMutex_(std::mutex()), mapping_(std::map<std::string, std::shared_ptr<FileOperator>>()) {}
+FileOperatorStorage::FileOperatorStorage() : mutex_(), mapping_() {}
 
 void FileOperatorStorage::addSenderOperator(
-    const std::string &networkId, const std::filesystem::path &filePath)
+    const std::string &networkId, const std::filesystem::path &path)
 {
-    std::lock_guard<std::mutex> lock(mappingMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     if (mapping_.count(networkId) != 0) {
         logTemplateError("file operator for key {} already exists", networkId);
@@ -199,14 +196,14 @@ void FileOperatorStorage::addSenderOperator(
         return;
     }
 
-    mapping_[networkId] = std::make_shared<SenderOperator>(filePath);
+    mapping_[networkId] = std::make_shared<SenderOperator>(path);
 }
 
 void FileOperatorStorage::addReceiverOperator(
-    const std::string &networkId, const std::string &fileMD5HashFromSender,
-    const std::filesystem::path &filePath)
+    const std::string &networkId, const std::string &md5HashFromSender,
+    const std::filesystem::path &path)
 {
-    std::lock_guard<std::mutex> lock(mappingMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     if (mapping_.count(networkId) != 0) {
         logTemplateError("file operator for key {} already exists", networkId);
@@ -214,12 +211,12 @@ void FileOperatorStorage::addReceiverOperator(
         return;
     }
 
-    mapping_[networkId] = std::make_shared<ReceiverOperator>(filePath, fileMD5HashFromSender);
+    mapping_[networkId] = std::make_shared<ReceiverOperator>(path, md5HashFromSender);
 }
 
 std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(mappingMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     try {
         return mapping_.at(key);
@@ -233,7 +230,7 @@ std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string
 
 bool FileOperatorStorage::removeOperator(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(mappingMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     try {
         bool result = (mapping_.erase(key) == 1) ? true : false;

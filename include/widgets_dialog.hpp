@@ -24,40 +24,40 @@ class Action;
 class Companion;
 class FileAction;
 
-class Dialog : public QDialog {
-
+class Dialog : public QDialog
+{
     Q_OBJECT
 
 public:
     Dialog() = default;
     ~Dialog() = default;
 
-    void setAction(std::shared_ptr<Action> action) { action_ = action; }
     virtual void set() {}
-
-    bool containsDialog() const { return containsDialog_; }
     virtual void showDialog() {}
+
+    void setAction(std::shared_ptr<Action> action) { action_ = action; }
+    bool containsDialog() const { return containsDialog_; }
 
 protected:
     bool containsDialog_ = false;
     std::shared_ptr<Action> action_;
 };
 
-class CompanionDataDialog : public Dialog {
-
+class CompanionDataDialog : public Dialog
+{
     Q_OBJECT
 
 public:
     CompanionDataDialog(ChatActionType, std::shared_ptr<QWidget>, std::shared_ptr<Companion>);
     ~CompanionDataDialog() = default;
 
-    void set() override;
     std::string getNameString();
     std::string getIpAddressString();
     std::string getPortString();
+    void set() override;
 
 private:
-    ChatActionType actionType_;
+    ChatActionType type_;
     std::unique_ptr<QFormLayout> layout_;
     std::unique_ptr<QLabel> nameLabel_;
     std::unique_ptr<QLineEdit> nameEdit_;
@@ -68,8 +68,8 @@ private:
     std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 
-class GroupChatDataDialog : public Dialog {
-
+class GroupChatDataDialog : public Dialog
+{
     Q_OBJECT
 
 public:
@@ -79,14 +79,14 @@ public:
     void set() override;
 
 private:
-    ChatActionType actionType_;
+    ChatActionType type_;
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QLabel> label_;
     std::unique_ptr<QListWidget> list_;
 };
 
-class CreatePasswordDialog : public Dialog {
-
+class CreatePasswordDialog : public Dialog
+{
     Q_OBJECT
 
 public:
@@ -106,8 +106,8 @@ private:
     std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 
-class GetPasswordDialog : public Dialog {
-
+class GetPasswordDialog : public Dialog
+{
     Q_OBJECT
 
 public:
@@ -129,24 +129,26 @@ class TextDialog;
 class ButtonInfo
 {
 public:
-    // ButtonInfo(const QString&, QDialogButtonBox::ButtonRole, void (TextDialog::*)());
-    ButtonInfo(const QString &text, QDialogButtonBox::ButtonRole role, std::function<void(TextDialog &)> function);
+    ButtonInfo(
+        const QString &text, QDialogButtonBox::ButtonRole role,
+        std::function<void(TextDialog  &)> function);
+
     ~ButtonInfo() = default;
 
     QString getText();
     QDialogButtonBox::ButtonRole getRole();
 
     // void (TextDialog::*function_)();
-    std::function<void(TextDialog &)> getFunction();
+    std::function<void(TextDialog  &)> getFunction();
 
 private:
     QString text_;
     QDialogButtonBox::ButtonRole role_;
-    std::function<void(TextDialog &)> function_;
+    std::function<void(TextDialog  &)> function_;
 };
 
-class TextDialog : public Dialog {
-
+class TextDialog : public Dialog
+{
     Q_OBJECT
 
 public:
@@ -172,12 +174,12 @@ private:
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
 };
 
-class FileDialog : public Dialog {
-
+class FileDialog : public Dialog
+{
     Q_OBJECT
 
 public:
-    FileDialog(std::shared_ptr<FileAction>, const QString&);
+    FileDialog(std::shared_ptr<FileAction> action, const QString &title);
     ~FileDialog() = default;
 
     void set();
@@ -187,7 +189,7 @@ public:
 
 private:
     std::shared_ptr<FileAction> action_;
-    std::shared_ptr<QFileDialog> fileDialog_;
+    std::shared_ptr<QFileDialog> dialog_;
 };
 
 template<class T>

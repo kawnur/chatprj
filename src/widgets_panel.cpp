@@ -99,7 +99,7 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
 }
 
 CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string &name)
-    : chatHistoryMutex_(std::mutex())
+    : mutex_()
 {
     chatHistoryScrollArea_ = nullptr;
     chatHistoryWidgetPalette_ = nullptr;
@@ -184,23 +184,23 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-    std::shared_ptr<Message> message, std::shared_ptr<MessageState> messageState)
+    std::shared_ptr<Message> message, std::shared_ptr<MessageState> state)
 {
     {
-        std::lock_guard<std::mutex> lock(chatHistoryMutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 
         std::shared_ptr<MessageWidget> widget = nullptr;
 
         switch (message->getType()) {
         case MessageType::TEXT:
             widget = std::make_shared<TextMessageWidget>(
-                chatHistoryWidget_, companion, messageState, message);
+                chatHistoryWidget_, companion, state, message);
 
             break;
 
         case MessageType::FILE:
             widget = std::make_shared<FileMessageWidget>(
-                chatHistoryWidget_, companion, messageState, message);
+                chatHistoryWidget_, companion, state, message);
 
             break;
         }
@@ -217,7 +217,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
         chatHistoryLayout_->addWidget(widget.get());
 
-        if (messageState->isAntecedent())
+        if (state->isAntecedent())
             sortChatHistoryElements(false);
     }
 
@@ -259,7 +259,7 @@ void CentralPanelWidget::clearChatHistory()
 void CentralPanelWidget::sortChatHistoryElements(bool lock)
 {
     if (lock)
-        std::lock_guard<std::mutex> lockObject(chatHistoryMutex_);
+        std::lock_guard<std::mutex> lockObject(mutex_);
 
     auto list = chatHistoryWidget_->children();
 
@@ -382,8 +382,8 @@ void RightPanelWidget::set()
     appLogWidget_->setParent(this);
 
     connect(
-        this, SIGNAL(addTextToAppLogWidgetSignal(const QString&)),
-        this, SLOT(addTextToAppLogWidgetSlot(const QString&)),
+        this, SIGNAL(addTextToAppLogWidgetSignal(const QString &)),
+        this, SLOT(addTextToAppLogWidgetSlot(const QString &)),
         Qt::QueuedConnection);
 
     appLogWidget_->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -412,7 +412,7 @@ void RightPanelWidget::addTextToAppLogWidgetSlot(const QString &text)
     appLogWidget_->ensureCursorVisible();
 }
 
-void RightPanelWidget::customMenuRequestedSlot(QPoint position)
+void RightPanelWidget::customMenuRequestedSlot(const QPoint &position)
 {
     auto menu = std::make_shared<QMenu>(this);
     auto clearLogAction = std::make_shared<QAction>("Clear log", this);

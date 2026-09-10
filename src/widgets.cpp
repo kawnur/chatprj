@@ -134,17 +134,12 @@ void IndicatorWidget::toggle()
     (isOn_ == true) ? setOff() : setOn();
 }
 
-SocketInfoWidget::SocketInfoWidget()
+SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget &object)
 {
-    logArgs("SocketInfoWidget()");
-}
-
-SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget &si)
-{
-    name_ = si.name_;
-    ipAddress_ = si.ipAddress_;
-    serverPort_ = si.serverPort_;
-    clientPort_ = si.clientPort_;
+    name_ = object.name_;
+    ipAddress_ = object.ipAddress_;
+    serverPort_ = object.serverPort_;
+    clientPort_ = object.clientPort_;
 
     initializeFields();
 }
@@ -263,7 +258,6 @@ void SocketInfoWidget::clientAction()
 {
     bool result = false;
 
-    // auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(shared_from_this());
     auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
@@ -375,7 +369,7 @@ void SocketInfoWidget::changeColor(QColor &color)
     setPalette(*palette_);
 }
 
-void SocketInfoWidget::mousePressEvent(QMouseEvent  *event)
+void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 {
     auto manager = getManager();
 
@@ -385,8 +379,6 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent  *event)
     auto newCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(baseObject);
     manager->resetSelectedCompanion(newCompanion);
 }
-
-void SocketInfoWidget::mouseReleaseEvent(QMouseEvent *event) {}
 
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
@@ -455,7 +447,7 @@ void ShowHideWidget::showInfo()
     getGraphicManager()->showInfo();
 }
 
-void ShowHideWidget::mousePressEvent(QMouseEvent  *event)
+void ShowHideWidget::mousePressEvent(QMouseEvent *event)
 {
     (show_) ? hideInfo() : showInfo();
     show_ = !(show_);
@@ -463,7 +455,7 @@ void ShowHideWidget::mousePressEvent(QMouseEvent  *event)
 
 // void ScrollArea::wheelEvent(std::shared_ptr<QWheelEvent> event)
 // {
-//     logArgs("ScrollArea::wheelEvent");
+//     logArgs(__FUNCTION__);
 // }
 
 WidgetGroup::WidgetGroup(std::shared_ptr<Companion> companion)
@@ -514,10 +506,10 @@ void WidgetGroup::set()
 }
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
-    std::shared_ptr<Message> message, std::shared_ptr<MessageState> messageState)
+    std::shared_ptr<Message> message, std::shared_ptr<MessageState> state)
 {
     centralPanel_->addMessageWidgetToChatHistory(
-        shared_from_this(), companion_, message, messageState);
+        shared_from_this(), companion_, message, state);
 }
 
 void WidgetGroup::clearChatHistory()
@@ -571,11 +563,11 @@ void WidgetGroup::askUserForHistorySendingConfirmation()
     action->set();
 }
 
-void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> messageWidget)
+void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
 {
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
-    auto messageState = companion_->getMappedMessageStateByMessageWidget(true, messageWidget);
+    auto messageState = companion_->getMappedMessageStateByMessageWidget(true, widget);
     bool isAntecedent = messageState->isAntecedent();
 
     logArgs("isAntecedent:", isAntecedent);
@@ -603,9 +595,9 @@ void WidgetGroup::buildChatHistorySlot()
 }
 
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
-    std::shared_ptr<MessageState> messageState, std::shared_ptr<Message> message)
+    std::shared_ptr<MessageState> state, std::shared_ptr<Message> message)
 {
-    bool isAntecedent = messageState->isAntecedent();
+    bool isAntecedent = state->isAntecedent();
 
     if (isAntecedent) {
         std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
@@ -614,7 +606,7 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
     }
 
     centralPanel_->addMessageWidgetToChatHistory(
-        shared_from_this(), companion_, message, messageState);
+        shared_from_this(), companion_, message, state);
 }
 
 void WidgetGroup::askUserForHistorySendingConfirmationSlot()
