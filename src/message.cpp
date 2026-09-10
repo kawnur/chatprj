@@ -2,7 +2,7 @@
 
 Message::Message(
     MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
-    const std::string& time, const std::string& text)
+    const std::string &time, const std::string &text)
     : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
     text_(text) {}
 
@@ -77,7 +77,7 @@ void MessageState::setIsReceived(bool value)
     isReceived_ = value;
 }
 
-void MessageState::setNetworkId(const std::string& networkId)
+void MessageState::setNetworkId(const std::string &networkId)
 {
     networkId_ = networkId;
 }

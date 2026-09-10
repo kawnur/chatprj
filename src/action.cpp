@@ -13,6 +13,13 @@
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
+Action::Action(std::shared_ptr<Dialog> dialog) : dialog_(dialog) {}
+
+std::shared_ptr<Dialog> Action::getDialog()
+{
+    return dialog_;
+}
+
 void Action::set()
 {
     dialog_->setAction(shared_from_this());
@@ -41,37 +48,28 @@ void Action::set()
     }
 }
 
-std::shared_ptr<Dialog> Action::getDialog()
-{
-    return dialog_;
-}
-
-CompanionAction::CompanionAction(ChatActionType actionType, std::shared_ptr<Companion> companion)
-    : actionType_(actionType), companion_(companion), data_(nullptr), Action(nullptr)
+CompanionAction::CompanionAction(ChatActionType type, std::shared_ptr<Companion> companion)
+    : type_(type), companion_(companion), data_(nullptr), Action(nullptr)
 {
     std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
 
-    switch (actionType) {
+    switch (type) {
     case ChatActionType::CREATE:
     case ChatActionType::UPDATE:
-        dialog_ = std::make_shared<CompanionDataDialog>(actionType_, mainWindow, companion_);
+        dialog_ = std::make_shared<CompanionDataDialog>(type_, mainWindow, companion_);
 
     break;
 
     case ChatActionType::DELETE:
         dialog_ = std::make_shared<TextDialog>(
-            mainWindow,
-            DialogType::WARNING,
-            deleteCompanionDialogText,
+            mainWindow, DialogType::WARNING, deleteCompanionDialogText,
             getButtonInfoVector(deleteCompanionButtonText));
 
     break;
 
     case ChatActionType::CLEAR_HISTORY:
         dialog_ = std::make_shared<TextDialog>(
-            mainWindow,
-            DialogType::WARNING,
-            clearCompanionHistoryDialogText,
+            mainWindow, DialogType::WARNING, clearCompanionHistoryDialogText,
             getButtonInfoVector(clearHistoryButtonText));
 
     break;
@@ -80,10 +78,7 @@ CompanionAction::CompanionAction(ChatActionType actionType, std::shared_ptr<Comp
         auto name = companion->getName();
 
         dialog_ = std::make_shared<TextDialog>(
-            mainWindow,
-            DialogType::WARNING,
-            // getArgumentedQString(
-            //     sendChatHistoryToCompanionDialogText, companion->getName()),
+            mainWindow, DialogType::WARNING,
             std::vformat(sendChatHistoryToCompanionDialogText, std::make_format_args(name)),
             getButtonInfoVector(sendChatHistoryButtonText));
 
@@ -91,9 +86,9 @@ CompanionAction::CompanionAction(ChatActionType actionType, std::shared_ptr<Comp
     }
 }
 
-ChatActionType CompanionAction::getActionType() const
+ChatActionType CompanionAction::getType() const
 {
-    return actionType_;
+    return type_;
 }
 
 std::string CompanionAction::getName() const
@@ -134,7 +129,7 @@ void CompanionAction::updateCompanionObjectData()
 // TODO deletion of action objects
 void CompanionAction::sendData()
 {
-    if (actionType_ == ChatActionType::SEND_HISTORY) {
+    if (type_ == ChatActionType::SEND_HISTORY) {
         // TODO if client is disconnected show error dialog
         getManager()->sendChatHistoryToCompanion(companion_);
 
@@ -146,7 +141,7 @@ void CompanionAction::sendData()
     std::string serverPort { "" };
     std::string clientPort;
 
-    switch (actionType_) {
+    switch (type_) {
     case ChatActionType::CREATE:
     case ChatActionType::UPDATE:
     {
@@ -182,26 +177,24 @@ void CompanionAction::sendData()
     getGraphicManager()->sendCompanionDataToManager(cast);
 }
 
-GroupChatAction::GroupChatAction(ChatActionType actionType)
-    : actionType_(actionType), data_(new GroupChatData), Action(nullptr)
+GroupChatAction::GroupChatAction(ChatActionType type)
+    : type_(type), data_(new GroupChatData), Action(nullptr)
 {
     std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
 
-    switch (actionType) {
+    switch (type) {
     case ChatActionType::CREATE:
-        dialog_ = std::make_shared<GroupChatDataDialog>(actionType_, mainWindow);
+        dialog_ = std::make_shared<GroupChatDataDialog>(type_, mainWindow);
 
         break;
     }
 }
 
-void GroupChatAction::sendData() {}
-
-PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)
+PasswordAction::PasswordAction(PasswordActionType type) : Action(nullptr)
 {
-    actionType_ = actionType;
+    type_ = type;
 
-    switch (actionType) {
+    switch (type) {
     case PasswordActionType::CREATE:
         dialog_ = std::make_shared<CreatePasswordDialog>();
 
@@ -216,7 +209,7 @@ PasswordAction::PasswordAction(PasswordActionType actionType) : Action(nullptr)
 
 PasswordAction::~PasswordAction()
 {
-    if (actionType_ == PasswordActionType::GET)
+    if (type_ == PasswordActionType::GET)
         dialog_->close();
 }
 
@@ -227,7 +220,7 @@ std::string PasswordAction::getPassword()
 
 void PasswordAction::sendData()
 {
-    switch (actionType_) {
+    switch (type_) {
     case PasswordActionType::CREATE:
     {
         auto passwordDialog = dynamic_pointer_cast<CreatePasswordDialog>(dialog_);
@@ -289,17 +282,17 @@ void PasswordAction::sendData()
 }
 
 FileAction::FileAction(
-    FileActionType actionType, const std::string& networkId, std::shared_ptr<Companion> companion)
+    FileActionType type, const std::string &networkId, std::shared_ptr<Companion> companion)
     : Action(nullptr)
 {
-    actionType_ = actionType;
+    type_ = type;
     companion_ = companion;
     networkId_ = networkId;
 
     auto windowTitle = getConstantMappingValue(
         "fileDialogTypeQStringRepresentation",
         &fileDialogTypeQStringRepresentation,
-        actionType);
+        type);
 
     // TODO change
     auto cast = dynamic_pointer_cast<std::remove_reference_t<decltype(*this)>>(shared_from_this());
@@ -309,7 +302,7 @@ FileAction::FileAction(
 
 FileActionType FileAction::getType() const
 {
-    return actionType_;
+    return type_;
 }
 
 std::shared_ptr<Companion> FileAction::getCompanion() const
@@ -336,10 +329,10 @@ void FileAction::sendData()
     if (!dialog)
         return;
 
-    switch (actionType_) {
+    switch (type_) {
     case FileActionType::SEND:
     {
-        for (auto& pathQString : dialog->selectedFiles()) {  // one file
+        for (auto &pathQString : dialog->selectedFiles()) {  // one file
             logArgs(pathQString);
 
             auto path = std::filesystem::path(pathQString.toStdString());
@@ -358,7 +351,7 @@ void FileAction::sendData()
 
     case FileActionType::SAVE:
     {
-        // for (auto& pathQString : dialog->selectedFiles())  // one file
+        // for (auto &pathQString : dialog->selectedFiles())  // one file
         // {
         //     logArgs(pathQString);
 

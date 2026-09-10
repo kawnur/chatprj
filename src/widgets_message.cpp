@@ -118,7 +118,7 @@ void MessageWidget::setMessageWidgetAsReceived()
     indicatorPanel_->setReceivedIndicatorOn();
 }
 
-void MessageWidget::mousePressEvent(QMouseEvent * event)
+void MessageWidget::mousePressEvent(QMouseEvent  *event)
 {
     indicatorPanel_->unsetNewMessageLabel();
     emit widgetSelectedSignal(shared_from_this());

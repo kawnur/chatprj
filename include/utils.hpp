@@ -18,13 +18,13 @@ class TextDialog;
 
 std::shared_ptr<GraphicManager> getGraphicManager();
 
-template<typename T> QString getQString(T&& value);
-template<typename... Ts> void logArgsError(Ts&&... args);
-template<typename... Ts> void logArgsException(Ts&&... args);
-template<typename... Ts> void logTemplateError(const std::format_string<Ts...>&, Ts&&...);
+template<typename T> QString getQString(T &&value);
+template<typename... Ts> void logArgsError(Ts &&...args);
+template<typename... Ts> void logArgsException(Ts &&...args);
+template<typename... Ts> void logTemplateError(const std::format_string<Ts...> &, Ts &&...);
 
 template<typename T, typename U>
-U getConstantMappingValue(std::string mapName, const std::map<T, U>* map, const T& key)
+U getConstantMappingValue(std::string mapName, const std::map<T, U> *map, const T &key)
 {
     try {
         return map->at(key);
@@ -32,7 +32,7 @@ U getConstantMappingValue(std::string mapName, const std::map<T, U>* map, const 
     catch(std::out_of_range) {
         logTemplateError("mapping {} key error", mapName);
     }
-    catch(const std::exception& e) {
+    catch(const std::exception &e) {
         logArgsException(e.what());
     }
 
@@ -48,7 +48,7 @@ U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &def
     catch(std::out_of_range) {
         return defaultValue;
     }
-    catch(const std::exception& e) {
+    catch(const std::exception &e) {
         logArgsException(e.what());
     }
 
@@ -61,7 +61,7 @@ void runAndLogException(F func, Ts&&... args)
     try {
         func(args...);
     }
-    catch(const std::exception& e) {
+    catch(const std::exception &e) {
         logArgsException(e.what());
     }
 }
@@ -72,7 +72,7 @@ void runAndHandleException(F func, FH handler, Ts&&... args)
     try {
         func(args...);
     }
-    catch(const std::exception& e) {
+    catch(const std::exception &e) {
         logArgsException(e.what());
         handler(e);
     }
@@ -99,11 +99,11 @@ std::string buildDialogText(std::string&&, const std::vector<std::string>&);
 
 // std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*)());
 std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function);
-// std::vector<ButtonInfo>* createOkButtonInfoVector(void (QDialog::*)());
+// std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog::*)());
 
 void showInfoDialogAndLogInfo(const QString&, void (TextDialog::*)(), std::shared_ptr<QWidget>);
 void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent = nullptr);
-void showWarningDialogAndLogWarning(const QString& message, std::shared_ptr<QWidget> parent = nullptr);
+void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent = nullptr);
 
 // void showErrorDialogAndLogError(const QString&, std::shared_ptr<QWidget> = nullptr);
 // void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
@@ -112,7 +112,7 @@ void showErrorDialogAndLogError(QString &&message);
 void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
 
 // template<typename T>
-// void showErrorDialogAndLogError(std::shared_ptr<QWidget> parent, T&& message) {
+// void showErrorDialogAndLogError(std::shared_ptr<QWidget> parent, T &&message) {
 //     getGraphicManager()->createTextDialogAndShow(
 //         parent, DialogType::ERROR,
 //         getQString(std::forward<T>(message)).toStdString(),

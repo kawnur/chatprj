@@ -184,7 +184,7 @@ std::string GetPasswordDialog::getEditText()
 }
 
 // ButtonInfo::ButtonInfo(
-//     const QString& text, QDialogButtonBox::ButtonRole role, void (TextDialog::*function)())
+//     const QString &text, QDialogButtonBox::ButtonRole role, void (TextDialog::*function)())
 //     : text_(text), role_(role), function_(function) {}
 
 ButtonInfo::ButtonInfo(
@@ -202,7 +202,7 @@ std::function<void(TextDialog &)> ButtonInfo::getFunction()
 }
 
 TextDialog::TextDialog(
-    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string& text,
+    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string &text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 {
     if (parent)
@@ -236,7 +236,7 @@ TextDialog::TextDialog(
 
 void TextDialog::set()
 {
-    // for (auto& info : *buttonsInfo_) {
+    // for (auto &info : *buttonsInfo_) {
     //     std::shared_ptr<QPushButton> button = buttonBox_->addButton(
     //         info.buttonText_, info.buttonRole_);
 
@@ -294,7 +294,7 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString& windowTitle)
+FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString &windowTitle)
 {
     action_ = action;
     containsDialog_ = true;

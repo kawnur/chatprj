@@ -98,7 +98,7 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
         return companionPanelChildren.at(companionPanelChildren.size() - 1)->width();
 }
 
-CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string& name)
+CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string &name)
     : chatHistoryMutex_(std::mutex())
 {
     chatHistoryScrollArea_ = nullptr;
@@ -243,7 +243,7 @@ void CentralPanelWidget::clearChatHistory()
 {
     auto children = chatHistoryWidget_->children();
 
-    for (auto& child : children) {
+    for (auto &child : children) {
         // std::shared_ptr<MessageWidget> messageWidget = dynamic_cast<std::shared_ptr<MessageWidget>>(child);
         auto messageWidget = qobject_cast<MessageWidget *>(child);
 
@@ -286,7 +286,7 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
 
     coutArgsWithSpaceSeparator("AFTER SORTING");
 
-    for (auto& element : list) {
+    for (auto &element : list) {
         auto elementCast = qobject_cast<MessageWidget *>(element);
         auto message = companion_->getMappedMessageByMessageWidget(false, elementCast);
 
@@ -314,7 +314,7 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
             bool condition1 = (type == QEvent::Wheel);
 
             auto keys = (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home);
-            bool condition21 = (eventCast && (eventCast->key() & keys));
+            bool condition21 = (eventCast && (eventCast->key()  &keys));
             bool condition2 = (type == QEvent::KeyPress && condition21);
 
             if (condition1 || condition2) {
@@ -329,7 +329,7 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
     return result;
 }
 
-void CentralPanelWidget::sendMessage(const QString& text)
+void CentralPanelWidget::sendMessage(const QString &text)
 {
     if (!text.isEmpty())
         getGraphicManager()->sendMessage(MessageType::TEXT, companion_, text.toStdString());
@@ -393,7 +393,7 @@ void RightPanelWidget::set()
         this, &RightPanelWidget::customMenuRequestedSlot, Qt::QueuedConnection);
 }
 
-void RightPanelWidget::addTextToAppLogWidget(const QString& text)
+void RightPanelWidget::addTextToAppLogWidget(const QString &text)
 {
     emit addTextToAppLogWidgetSignal(text);
 }
@@ -403,7 +403,7 @@ void RightPanelWidget::clearLogAction()
     appLogWidget_->clear();
 }
 
-void RightPanelWidget::addTextToAppLogWidgetSlot(const QString& text)
+void RightPanelWidget::addTextToAppLogWidgetSlot(const QString &text)
 {
     appLogWidget_->appendPlainText(text);
 

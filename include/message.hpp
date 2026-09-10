@@ -23,7 +23,7 @@ public:
     std::string getText() const;
     bool isMessageFromMe() const;
 
-    friend bool operator<(const Message& message1, const Message& message2)
+    friend bool operator<(const Message &message1, const Message &message2)
     {
         return message1.getId() < message2.getId();
     }

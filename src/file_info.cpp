@@ -8,7 +8,7 @@
 
 using namespace std::string_literals;
 
-FileOperator::FileOperator(const std::filesystem::path& path)
+FileOperator::FileOperator(const std::filesystem::path &path)
     : filePath_(path), filebuf_(std::filebuf()) {}
 
 FileOperator::~FileOperator()
@@ -27,7 +27,7 @@ std::string FileOperator::getFileMD5Hash() const
     return fileMD5Hash_;
 }
 
-bool FileOperator::setFilePath(const std::filesystem::path& filePath)
+bool FileOperator::setFilePath(const std::filesystem::path &filePath)
 {
     if (filebuf_.is_open())
         filebuf_.close();
@@ -42,7 +42,7 @@ std::filebuf *FileOperator::closeFile()
     return filebuf_.close();
 }
 
-SenderOperator::SenderOperator(const std::filesystem::path& filePath) : FileOperator(filePath)
+SenderOperator::SenderOperator(const std::filesystem::path &filePath) : FileOperator(filePath)
 {
     fileMD5Hash_ = hashFileMD5(filePath_.string());
 
@@ -51,7 +51,7 @@ SenderOperator::SenderOperator(const std::filesystem::path& filePath) : FileOper
 }
 
 bool SenderOperator::sendFilePart(
-    std::shared_ptr<Companion> companion, const std::string& networkId)
+    std::shared_ptr<Companion> companion, const std::string &networkId)
 {
     std::stringstream sstream;
     char buffer[MAX_BUFFER_SIZE] = { 0 };
@@ -71,7 +71,7 @@ bool SenderOperator::sendFilePart(
     return result;
 }
 
-void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::string& networkId)
+void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::string &networkId)
 {
     auto sendFileLambda = [=, this]()
     {
@@ -135,7 +135,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
 }
 
 ReceiverOperator::ReceiverOperator(
-    const std::filesystem::path& filePath, const std::string& fileMD5HashFromSender)
+    const std::filesystem::path &filePath, const std::string &fileMD5HashFromSender)
     : FileOperator(filePath)
 {
     fileMD5Hash_ = ""s;
@@ -145,12 +145,12 @@ ReceiverOperator::ReceiverOperator(
         createFileAndOpen();
 }
 
-void ReceiverOperator::receiveFilePart(const std::string& filePart)
+void ReceiverOperator::receiveFilePart(const std::string &filePart)
 {
     std::size_t byteSize = filePart.size() / 2;
 
     for (std::size_t i = 0; i < byteSize; i++) {
-        std::string dataString(filePart.begin() + 2 * i, filePart.begin() + 2 * i + 2);
+        std::string dataString(filePart.begin() + 2  *i, filePart.begin() + 2  *i + 2);
         uint8_t value = std::stoi(dataString, nullptr, 16);
         filebuf_.sputc(value);
     }
@@ -189,7 +189,7 @@ FileOperatorStorage::FileOperatorStorage()
     : mappingMutex_(std::mutex()), mapping_(std::map<std::string, std::shared_ptr<FileOperator>>()) {}
 
 void FileOperatorStorage::addSenderOperator(
-    const std::string& networkId, const std::filesystem::path& filePath)
+    const std::string &networkId, const std::filesystem::path &filePath)
 {
     std::lock_guard<std::mutex> lock(mappingMutex_);
 
@@ -203,8 +203,8 @@ void FileOperatorStorage::addSenderOperator(
 }
 
 void FileOperatorStorage::addReceiverOperator(
-    const std::string& networkId, const std::string& fileMD5HashFromSender,
-    const std::filesystem::path& filePath)
+    const std::string &networkId, const std::string &fileMD5HashFromSender,
+    const std::filesystem::path &filePath)
 {
     std::lock_guard<std::mutex> lock(mappingMutex_);
 
@@ -217,21 +217,21 @@ void FileOperatorStorage::addReceiverOperator(
     mapping_[networkId] = std::make_shared<ReceiverOperator>(filePath, fileMD5HashFromSender);
 }
 
-std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string& key)
+std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string &key)
 {
     std::lock_guard<std::mutex> lock(mappingMutex_);
 
     try {
         return mapping_.at(key);
     }
-    catch(const std::exception& e) {
+    catch(const std::exception &e) {
         logArgsError(e.what());
     }
 
     return nullptr;
 }
 
-bool FileOperatorStorage::removeOperator(const std::string& key)
+bool FileOperatorStorage::removeOperator(const std::string &key)
 {
     std::lock_guard<std::mutex> lock(mappingMutex_);
 
@@ -240,7 +240,7 @@ bool FileOperatorStorage::removeOperator(const std::string& key)
 
         return result;
     }
-    catch(const std::exception& e) {
+    catch(const std::exception &e) {
         logArgsError(e.what());
     }
 

@@ -9,13 +9,13 @@ using boost::asio::ip::tcp;
 class ChatClient
 {
 public:
-    ChatClient(std::string&&, uint16_t&&);
+    ChatClient(std::string &&ipAddress, uint16_t &&port);
     ~ChatClient() = default;
 
+    bool isConnected() const;
     bool connect();
     bool disconnect();
     bool send(std::string);
-    bool isConnected() const;
 
 private:
     bool isConnected_;

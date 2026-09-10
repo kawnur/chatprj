@@ -22,7 +22,7 @@ QString getInitialConnectButtonLabel()
     }
 }
 
-QString getNextConnectButtonLabel(QString& currentLabel)
+QString getNextConnectButtonLabel(QString &currentLabel)
 {
     try {
         if (connectButtonLabels.empty()) {
@@ -139,7 +139,7 @@ SocketInfoWidget::SocketInfoWidget()
     logArgs("SocketInfoWidget()");
 }
 
-SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
+SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget &si)
 {
     name_ = si.name_;
     ipAddress_ = si.ipAddress_;
@@ -150,7 +150,7 @@ SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget& si)
 }
 
 SocketInfoWidget::SocketInfoWidget(
-    std::string& name, std::string& ipAddress, uint16_t& serverPort, uint16_t& clientPort)
+    std::string &name, std::string &ipAddress, uint16_t &serverPort, uint16_t &clientPort)
     : name_(getQString(name)), ipAddress_(getQString(ipAddress)), serverPort_(serverPort),
     clientPort_(clientPort)
 {
@@ -158,7 +158,7 @@ SocketInfoWidget::SocketInfoWidget(
 }
 
 SocketInfoWidget::SocketInfoWidget(
-    std::string&& name, std::string&& ipAddress, uint16_t&& serverPort, uint16_t&& clientPort)
+    std::string &&name, std::string &&ipAddress, uint16_t &&serverPort, uint16_t &&clientPort)
     : name_(getQString(name)), ipAddress_(getQString(ipAddress)), serverPort_(serverPort),
     clientPort_(clientPort)
 {
@@ -346,7 +346,7 @@ void SocketInfoWidget::initializeFields()
         newMessagesIndicator_.get()
     };
 
-    for (auto& widget : widgets)
+    for (auto &widget : widgets)
         layout_->addWidget(widget);
 
     requestHistoryAction_ = std::make_shared<QAction>("Request chat history from companion", this);
@@ -366,7 +366,7 @@ void SocketInfoWidget::initializeFields()
     // connect
 }
 
-void SocketInfoWidget::changeColor(QColor& color)
+void SocketInfoWidget::changeColor(QColor &color)
 {
     palette_ = std::make_unique<QPalette>();
     palette_->setColor(QPalette::Window, color);
@@ -375,7 +375,7 @@ void SocketInfoWidget::changeColor(QColor& color)
     setPalette(*palette_);
 }
 
-void SocketInfoWidget::mousePressEvent(QMouseEvent * event)
+void SocketInfoWidget::mousePressEvent(QMouseEvent  *event)
 {
     auto manager = getManager();
 
@@ -455,7 +455,7 @@ void ShowHideWidget::showInfo()
     getGraphicManager()->showInfo();
 }
 
-void ShowHideWidget::mousePressEvent(QMouseEvent * event)
+void ShowHideWidget::mousePressEvent(QMouseEvent  *event)
 {
     (show_) ? hideInfo() : showInfo();
     show_ = !(show_);

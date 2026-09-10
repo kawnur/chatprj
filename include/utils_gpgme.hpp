@@ -44,7 +44,7 @@ namespace TestGpgme
         return (parameter) ? parameter : "nullptr"s;  // TODO ???
 	}
 
-    void coutKeyInfo(const gpgme_key_t* const);
+    void coutKeyInfo(const gpgme_key_t *const);
     void coutUserIdInfo(gpgme_key_t*);
     void createKey(gpgme_ctx_t*, const char*);
     void listKeys(gpgme_ctx_t*);
@@ -63,7 +63,7 @@ namespace TestGpgme
     void decrypt(gpgme_ctx_t*, gpgme_data_t&, gpgme_data_t&);
     ssize_t readData(gpgme_data_t&, char*, std::size_t);
     void readData1(gpgme_data_t&, std::string&);
-    char* readData2(gpgme_data_t&);
+    char *readData2(gpgme_data_t&);
 }
 
 #endif // UTILS_GPGME_HPP

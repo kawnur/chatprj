@@ -49,12 +49,12 @@ void GraphicManager::setStubWidgets()
 }
 
 void GraphicManager::sendMessage(
-    MessageType type, std::shared_ptr<Companion> companion, const std::string& text)
+    MessageType type, std::shared_ptr<Companion> companion, const std::string &text)
 {
     getManager()->sendMessage(type, companion, nullptr, text);
 }
 
-void GraphicManager::addTextToAppLogWidget(const QString& text)
+void GraphicManager::addTextToAppLogWidget(const QString &text)
 {
     mainWindow_->addTextToAppLogWidget(text);
 }
@@ -91,7 +91,7 @@ void GraphicManager::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBa
 }
 
 void GraphicManager::createTextDialogAndShow(
-    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string& text,
+    std::shared_ptr<QWidget> parent, DialogType dialogType, const std::string &text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonInfo)
 {
     // TODO delete objects for closed dialoges?
@@ -138,7 +138,7 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 
 void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
 {
-    switch (action->getActionType()) {
+    switch (action->getType()) {
     case ChatActionType::CREATE:
         getManager()->createCompanion(action);
 
@@ -162,7 +162,7 @@ void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction>
 }
 
 void GraphicManager::showCompanionInfoDialog(
-    std::shared_ptr<CompanionAction> companionAction, std::string&& header)
+    std::shared_ptr<CompanionAction> companionAction, std::string &&header)
 {
     std::shared_ptr<QWidget> parent = nullptr;
     // void (TextDialog::*function)() = nullptr;
@@ -324,7 +324,7 @@ void GraphicManager::sendFile(std::shared_ptr<Companion> companion)
     action->set();
 }
 
-void GraphicManager::saveFile(const std::string& networkId, std::shared_ptr<Companion> companion)
+void GraphicManager::saveFile(const std::string &networkId, std::shared_ptr<Companion> companion)
 {
     auto action = std::make_shared<FileAction>(FileActionType::SAVE, networkId, companion);
     action->set();

@@ -43,7 +43,7 @@ std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
     // std::shared_ptr<SocketInfoBaseWidget> widget) const
     SocketInfoBaseWidget *widget) const
 {
-    auto findWidget = [&](auto& pair)
+    auto findWidget = [&](auto &pair)
     {
         return pair.second.second->getSocketInfoBase().get() == widget;
     };
@@ -92,7 +92,7 @@ void Manager::set()
 
 void Manager::sendMessage(
     MessageType type, std::shared_ptr<Companion> companion, std::shared_ptr<Action> action,
-    const std::string& text)
+    const std::string &text)
 {
     auto group = getMappedWidgetGroupByCompanion(companion);
 
@@ -158,12 +158,12 @@ void Manager::sendMessage(
     waitForMessageReceptionConfirmation(companion, messageState, message);
 }
 
-void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path& path)
+void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path)
 {
     logArgs("Manager::sendFile");
 }
 
-void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::string& jsonString)
+void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::string &jsonString)
 {
     nlohmann::json jsonData = buildJsonObject(jsonString);
 
@@ -1025,7 +1025,7 @@ std::filesystem::path Manager::getLastOpenedPath()
     return lastOpenedPath_;
 }
 
-void Manager::setLastOpenedPath(const std::filesystem::path& path)
+void Manager::setLastOpenedPath(const std::filesystem::path &path)
 {
     lastOpenedPath_ = path;
 }
@@ -1033,7 +1033,7 @@ void Manager::setLastOpenedPath(const std::filesystem::path& path)
 std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
     std::shared_ptr<WidgetGroup> group) const
 {
-    auto findWidget = [&](auto& pair)
+    auto findWidget = [&](auto &pair)
     {
         return pair.second.second == group;
     };
@@ -1129,7 +1129,7 @@ bool Manager::buildCompanions()
     // std::sort(
     //     companionsData->getData()->begin(),
     //     companionsData->getData()->end(),
-    //     [&](auto& iterator1, auto& iterator2)
+    //     [&](auto &iterator1, auto &iterator2)
     //     {
     //         return iterator1.at("id") < iterator2.at("id");
     //     }
@@ -1197,12 +1197,12 @@ void Manager::buildWidgetGroups()
         // hide companion panel stub widget
         graphicManager->hideCompanionPanelStub();
 
-        for (auto& pair : mapCompanionIdToCompanionInfo_)
+        for (auto &pair : mapCompanionIdToCompanionInfo_)
             createWidgetGroupAndAddToMapping(pair.second.first);
     }
 }
 
-std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string& name)
+std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string &name)
 {
     if (id == 0) {
         logArgsError("companion id == 0");
@@ -1237,7 +1237,7 @@ void Manager::deleteCompanionObject(std::shared_ptr<Companion> companion)
 
 void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion)
 {
-    auto findMapLambda = [&](auto& iterator)
+    auto findMapLambda = [&](auto &iterator)
     {
         return iterator.second.first == companion;
     };
@@ -1480,8 +1480,8 @@ bool Manager::markMessageAsReceived(
 }
 
 std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
-    const std::string& companionName, const std::string& authorName, const std::string& timestamp,
-    const std::string& text, const bool& isSent, const bool& isReceived)
+    const std::string &companionName, const std::string &authorName, const std::string &timestamp,
+    const std::string &text, const bool &isSent, const bool &isReceived)
 {
     const std::string companionIdString("companion_id");
 

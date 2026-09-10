@@ -8,17 +8,17 @@ void endline(int number)
         std::cout << std::endl;
 }
 
-template<> int getSizeAsInt<std::string>(std::string& string)
+template<> int getSizeAsInt<std::string>(std::string &string)
 {
     return (int)string.size();
 }
 
-std::string argForCout(const QString& value)
+std::string argForCout(const QString &value)
 {
     return value.toStdString();
 }
 
-std::string argForCout(const std::string& value)
+std::string argForCout(const std::string &value)
 {
     return value;
 }
@@ -33,23 +33,23 @@ std::string argForCout(const bool value)
     return (value) ? "true" : "false";
 }
 
-void coutVector1(const std::vector<int>& vector)
+void coutVector1(const std::vector<int> &vector)
 {
     std::cout << std::endl;
 
-    for (auto& i : vector)
+    for (auto &i : vector)
         std::cout << i << '\t';
 
     std::cout << std::endl;
 }
 
-void coutVectorAndSum(const std::vector<int>& vector)
+void coutVectorAndSum(const std::vector<int> &vector)
 {
     int sum = 0;
 
     std::cout << std::endl;
 
-    for (auto& i : vector) {
+    for (auto &i : vector) {
         std::cout << i << '\t';
         sum += i;
     }
@@ -58,11 +58,11 @@ void coutVectorAndSum(const std::vector<int>& vector)
     std::cout << std::endl;
 }
 
-void coutVectorWithIndexesHorizontally(const std::vector<int>& vector)
+void coutVectorWithIndexesHorizontally(const std::vector<int> &vector)
 {
     std::cout << std::endl;
 
-    auto compareStringLengths = [&](const int& i, const int& j)
+    auto compareStringLengths = [&](const int &i, const int &j)
     {
         return std::to_string(i).size() < std::to_string(j).size();
     };
@@ -88,7 +88,7 @@ void coutVectorWithIndexesHorizontally(const std::vector<int>& vector)
 }
 
 // array
-void printArray(std::array<int, 10>& array)
+void printArray(std::array<int, 10> &array)
 {
     std::cout << "&a: " << &array << std::endl;
 
@@ -103,7 +103,7 @@ void printArray(std::array<int, 10>& array)
 // tuple
 
 // set
-void printSet(std::set<int>& set)
+void printSet(std::set<int> &set)
 {
     std::cout << std::endl << "&s: " << &set << std::endl;
 
@@ -126,12 +126,12 @@ void coutString(std::string::const_iterator iterator1, std::string::const_iterat
     endline(1);
 }
 
-void coutStringFull(std::string& string)
+void coutStringFull(std::string &string)
 {
     coutString(string.begin(), string.end());
 }
 
-void coutHeader(const std::string& header)
+void coutHeader(const std::string &header)
 {
     char marginSymbol = '#';
     char spaceSymbol = ' ';

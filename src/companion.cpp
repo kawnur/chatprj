@@ -12,18 +12,11 @@
 #include "widgets.hpp"
 #include "widgets_message.hpp"
 
-SocketInfo::SocketInfo(std::string& ipAddress, uint16_t& serverPort, uint16_t& clientPort)
-    : ipAddress_(ipAddress), serverPort_(serverPort), clientPort_(clientPort) {}
-
-SocketInfo::SocketInfo(
-    std::string&& ipAddress, uint16_t&& serverPort, uint16_t&& clientPort)  // TODO ???
-    : ipAddress_(ipAddress), serverPort_(serverPort), clientPort_(clientPort) {}
-
-SocketInfo::SocketInfo(const SocketInfo& si)
+SocketInfo::SocketInfo(const SocketInfo &object)
 {
-    ipAddress_ = si.ipAddress_;
-    serverPort_ = si.serverPort_;
-    clientPort_ = si.clientPort_;
+    ipAddress_ = object.ipAddress_;
+    serverPort_ = object.serverPort_;
+    clientPort_ = object.clientPort_;
 }
 
 std::string SocketInfo::getIpAddress() const
@@ -47,8 +40,8 @@ void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
     clientPort_ = std::stoi(data->getClientPort());
 }
 
-Companion::Companion(int id, const std::string& name)
-    : messagesMutex_(std::mutex()), id_(id), name_(name), socketInfo_(nullptr), client_(nullptr),
+Companion::Companion(int id, const std::string &name)
+    : mutex_(std::mutex()), id_(id), name_(name), socketInfo_(nullptr), client_(nullptr),
     server_(nullptr), messageMapping_(), fileOperatorStorage_(new FileOperatorStorage) {}
 
 int Companion::getId() const
@@ -86,12 +79,12 @@ std::shared_ptr<FileOperatorStorage> Companion::getFileOperatorStorage() const
     return fileOperatorStorage_;
 }
 
-std::string Companion::getFileOperatorFilePathStringByNetworkId(const std::string& networkId)
+std::string Companion::getFileOperatorFilePathStringByNetworkId(const std::string &networkId)
 {
     return fileOperatorStorage_->getOperator(networkId)->getFilePath().string();
 }
 
-bool Companion::removeOperatorFromStorage(const std::string& key)
+bool Companion::removeOperatorFromStorage(const std::string &key)
 {
     return fileOperatorStorage_->removeOperator(key);
 }
@@ -99,14 +92,14 @@ bool Companion::removeOperatorFromStorage(const std::string& key)
 std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessage(
     std::shared_ptr<Message> message)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     // TODO switch to map find method
 
     auto result = std::find_if (
         messageMapping_.begin(),
         messageMapping_.end(),
-        [&](auto& iter){
+        [&](auto &iter){
             return iter.first == message;
         });
 
@@ -116,14 +109,14 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessage(
 std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetByMessage(
     std::shared_ptr<Message> message)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     // TODO switch to map find method
 
     auto result = std::find_if (
         messageMapping_.begin(),
         messageMapping_.end(),
-        [&](auto& iter){
+        [&](auto &iter){
             return iter.first == message;
         });
 
@@ -140,11 +133,11 @@ std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
     bool lock, MessageWidget *widget)
 {
     if (lock)
-        std::lock_guard<std::mutex> lockObject(messagesMutex_);
+        std::lock_guard<std::mutex> lockObject(mutex_);
 
     // TODO switch to map find method
 
-    auto lambda = [&](auto& iter) { return iter.second->getWidget().get() == widget; };
+    auto lambda = [&](auto &iter) { return iter.second->getWidget().get() == widget; };
     auto result = std::find_if (messageMapping_.begin(), messageMapping_.end(), lambda);
 
     return (result == messageMapping_.end()) ? nullptr : result->first;
@@ -154,14 +147,14 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
     bool lock, std::shared_ptr<MessageWidget> widget)
 {
     if (lock)
-        std::lock_guard<std::mutex> lockObject(messagesMutex_);
+        std::lock_guard<std::mutex> lockObject(mutex_);
 
     // TODO switch to map find method
 
     auto result = std::find_if (
         messageMapping_.begin(),
         messageMapping_.end(),
-        [&](auto& iter){
+        [&](auto &iter){
             return iter.second->getWidget() == widget;
         });
 
@@ -170,12 +163,12 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
 
 MessageMappingPair Companion::getMessageMappingPairByMessageId(uint32_t messageId)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     auto result = std::find_if (
         messageMapping_.begin(),
         messageMapping_.end(),
-        [&](auto& iter){
+        [&](auto &iter){
             return iter.first->getId() == messageId;
         });
 
@@ -191,14 +184,14 @@ MessageMappingPair Companion::getMessageMappingPairByMessageId(uint32_t messageI
     return pair;
 }
 
-MessageMappingPair Companion::getMessageMappingPairByNetworkId(const std::string& networkId)
+MessageMappingPair Companion::getMessageMappingPairByNetworkId(const std::string &networkId)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     auto result = std::find_if (
         messageMapping_.begin(),
         messageMapping_.end(),
-        [&](auto& iter){
+        [&](auto &iter){
             return iter.second->getState()->getNetworkId() == networkId;
         });
 
@@ -215,7 +208,7 @@ std::shared_ptr<Message> Companion::getEarliestMessage() const
     auto minPair = std::min_element(
         messageMapping_.begin(),
         messageMapping_.end(),
-        [&](auto& iterator1, auto& iterator2){
+        [&](auto &iterator1, auto &iterator2){
             return iterator1.first->getId() < iterator2.first->getId();
         });
 
@@ -223,11 +216,11 @@ std::shared_ptr<Message> Companion::getEarliestMessage() const
 }
 
 std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
-    MessageType type, uint32_t messageId, uint8_t authorId, const std::string& messageTime,
-    const std::string& messageText, bool isAntecedent, bool isSent, bool isReceived,
+    MessageType type, uint32_t messageId, uint8_t authorId, const std::string &messageTime,
+    const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
     std::string networkId)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     if (networkId.size() == 0)
         networkId = generateNewNetworkId(false);
@@ -250,7 +243,7 @@ std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
 std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
     std::shared_ptr<DBReplyData> messagesData, std::size_t index)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     auto id = getId();
 
@@ -282,7 +275,7 @@ void Companion::setSocketInfo(std::shared_ptr<SocketInfo> socketInfo)
 }
 
 bool Companion::setFileOperatorFilePath(
-    const std::string& networkId, const std::filesystem::path& path)
+    const std::string &networkId, const std::filesystem::path &path)
 {
     return fileOperatorStorage_->getOperator(networkId)->setFilePath(path);
 }
@@ -290,7 +283,7 @@ bool Companion::setFileOperatorFilePath(
 void Companion::setMappedMessageWidget(
     std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     auto result = messageMapping_.find(message);
 
@@ -334,7 +327,8 @@ bool Companion::createClient()
     return created;
 }
 
-bool Companion::connectClient() {
+bool Companion::connectClient()
+{
     return client_->connect();
 }
 
@@ -372,7 +366,7 @@ bool Companion::sendMessage(
 }
 
 bool Companion::sendChatHistory(
-    std::shared_ptr<DBReplyData> data, std::vector<std::string>& keys) const
+    std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys) const
 {
     if (!client_)
         return false;
@@ -404,7 +398,7 @@ bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widget)
     std::shared_ptr<MessageState> state = nullptr;
 
     {
-        std::lock_guard<std::mutex> lock(messagesMutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
 
         try {
             state = messageMapping_.at(message)->getState();
@@ -421,7 +415,7 @@ bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widget)
     return result;
 }
 
-bool Companion::sendFileBlock(const std::string& networkId, const std::string& data)
+bool Companion::sendFileBlock(const std::string &networkId, const std::string &data)
 {
     bool isConnected = client_->isConnected();
 
@@ -448,7 +442,7 @@ void Companion::updateData(std::shared_ptr<CompanionData> data)
 
 std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     auto result = std::find_if (
         messageMapping_.begin(),
@@ -464,9 +458,9 @@ void Companion::addMessageWidgetsToChatHistory()
 {
     auto widgetGroup = getManager()->getMappedWidgetGroupByCompanion(shared_from_this());
 
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-    for (auto& iterator : messageMapping_) {
+    for (auto &iterator : messageMapping_) {
         widgetGroup->addMessageWidgetToCentralPanelChatHistory(
             iterator.first, iterator.second->getState());
     }
@@ -474,7 +468,7 @@ void Companion::addMessageWidgetsToChatHistory()
 
 void Companion::clearMessageMapping()
 {
-    std::lock_guard<std::mutex> lock(messagesMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
 
     messageMapping_.clear();
 }
@@ -482,7 +476,7 @@ void Companion::clearMessageMapping()
 std::string Companion::generateNewNetworkId(bool lock)
 {
     if (lock)
-        std::lock_guard<std::mutex> lockObject(messagesMutex_);
+        std::lock_guard<std::mutex> lockObject(mutex_);
 
     std::string networkId { "" };
 

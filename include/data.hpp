@@ -11,8 +11,8 @@ class CompanionData
 {
 public:
     CompanionData(
-        const std::string&, const std::string&,
-        const std::string&, const std::string&);
+        const std::string &name, const std::string &ipAddress, const std::string &serverPort,
+        const std::string &clientPort);
 
     ~CompanionData() = default;
 

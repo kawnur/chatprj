@@ -42,13 +42,13 @@ QString getQString(std::shared_ptr<T> value)
 }
 
 template<IsArithmetic T>
-QString getQString(T&& value)
+QString getQString(T &&value)
 {
     return QString::fromStdString(std::to_string(std::forward<T>(value)));
 }
 
 template<IsNotArithmetic T>
-QString getQString(T&& value)
+QString getQString(T &&value)
 {
     return QString::fromStdString(std::forward<T>(value));
 }
@@ -67,7 +67,7 @@ QString getQString(QString);
 QString getQString(std::filesystem::path&);
 
 template<typename... Ts>
-QString getArgumentedQString(const QString& templateString, Ts&&... args)
+QString getArgumentedQString(const QString &templateString, Ts&&... args)
 {
     return templateString.arg(getQString(std::forward<Ts>(args))...);
 }
@@ -87,7 +87,7 @@ void logArgs(Ts&&... args)
 }
 
 template<typename... Ts>
-void logArgsWithTemplate(const std::format_string<Ts...>& templateString, Ts&&... args)
+void logArgsWithTemplate(const std::format_string<Ts...> &templateString, Ts&&... args)
 {
     logArgs(std::format(templateString, std::forward<Ts>(args)...));
 }
@@ -117,25 +117,25 @@ void logArgsError(Ts&&... args)
 }
 
 template<typename... Ts>
-void logTemplateInfo(const std::format_string<Ts...>& templateString, Ts&&... args)
+void logTemplateInfo(const std::format_string<Ts...> &templateString, Ts&&... args)
 {
     logArgsInfo(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts>
-void logTemplateWarning(const std::format_string<Ts...>& templateString, Ts&&... args)
+void logTemplateWarning(const std::format_string<Ts...> &templateString, Ts&&... args)
 {
     logArgsWarning(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename... Ts>
-void logTemplateError(const std::format_string<Ts...>& templateString, Ts&&... args)
+void logTemplateError(const std::format_string<Ts...> &templateString, Ts&&... args)
 {
     logArgsError(std::format(templateString, std::forward<Ts>(args)...));
 }
 
 template<typename T>
-void logLine(const T& string)
+void logLine(const T &string)
 {
     getGraphicManager()->addTextToAppLogWidget(QString(string));
 }

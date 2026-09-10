@@ -16,16 +16,17 @@ class ServerSession : public std::enable_shared_from_this<class ServerSession>
 {
 public:
     ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket);
+    ~ServerSession() = default;
 
     void start();
 
 private:
+    void do_read();
+
     std::shared_ptr<Companion> companion_;
     tcp::socket socket_;
     char data_[MAX_BUFFER_SIZE];
     std::string previous_;
-
-    void do_read();
 };
 
 class ChatServer
@@ -38,12 +39,12 @@ public:
     void run();
 
 private:
+    void do_accept();
+
     boost::asio::io_context io_context_;
     uint16_t port_;
     std::shared_ptr<Companion> companion_;
     tcp::acceptor acceptor_;
-
-    void do_accept();
 };
 
 int async_tcp_echo_server();

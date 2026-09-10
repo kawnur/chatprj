@@ -18,7 +18,7 @@
 
 #include "constants.hpp"
 
-void showErrorDialogAndLogError(QString&& message);
+void showErrorDialogAndLogError(QString &&message);
 
 class Action;
 class Companion;
@@ -193,9 +193,9 @@ private:
 template<class T>
 void setButtonBox(
     std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
-    std::vector<ButtonInfo>* infoVector)
+    std::vector<ButtonInfo> *infoVector)
 {
-    for (auto& info : *infoVector) {
+    for (auto &info : *infoVector) {
         auto role = info.getRole();
         auto function = info.getFunction();
         auto button = buttonBox->addButton(info.getText(), role);
@@ -226,7 +226,7 @@ void setButtonBox(
                 buttonBox.get(), signalMap.at(role), dialog, function, Qt::QueuedConnection);
         };
 
-        auto handlerLambda = [&](const std::exception& e)
+        auto handlerLambda = [&](const std::exception &e)
         {
             if (dynamic_cast<std::out_of_range *>(&e))
                 showErrorDialogAndLogError("Unmanaged button role");

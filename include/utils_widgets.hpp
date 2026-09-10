@@ -6,7 +6,7 @@
 
 #include <QString>
 
-void showErrorDialogAndLogError(QString&& message);
+void showErrorDialogAndLogError(QString &&message);
 
 class ButtonInfo;
 

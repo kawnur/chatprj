@@ -19,19 +19,19 @@ using namespace std::string_literals;
 void endline(int);
 
 template<typename T>
-void coutWithManipulators(T&& value, int width)
+void coutWithManipulators(T &&value, int width)
 {
     std::cout << std::left << std::setw(width) << std::setfill(' ') << value;
 }
 
 template<typename T>
-void coutWithManipulatorsLeft(T&& value, int width)
+void coutWithManipulatorsLeft(T &&value, int width)
 {
     std::cout << std::left << std::setw(width) << std::setfill(' ') << value;
 }
 
 template<typename T>
-void coutWithManipulatorsRight(T&& value, int width)
+void coutWithManipulatorsRight(T &&value, int width)
 {
     std::cout << std::right << std::setw(width) << std::setfill(' ') << value;
 }
@@ -44,33 +44,33 @@ void coutArgsWithManipulators(int width, Ts&&... args)
 }
 
 template<typename T>
-int getSizeAsInt(T& parameter)
+int getSizeAsInt(T &parameter)
 {
     return (int)std::to_string(parameter).size();
 }
 
 // TODO does not work with multiple function pointers as params
 template<typename T, typename... Ts>
-void coutContainerArgsResultWithManupulators(std::vector<T>& container, Ts&&... args)
+void coutContainerArgsResultWithManupulators(std::vector<T> &container, Ts&&... args)
 {
-    auto check = [&](T& u1, T& u2) { return getSizeAsInt(u1) < getSizeAsInt(u2); };
+    auto check = [&](T &u1, T &u2) { return getSizeAsInt(u1) < getSizeAsInt(u2); };
 
     auto maxLengthElement = std::max_element(container.begin(), container.end(), check);
 	int width = (int)(maxLengthElement->size());
 
-    for (auto& element : container)
+    for (auto &element : container)
 		coutArgsWithManipulators(width, (args(element), ...));	
 }
 
-template<typename T, std::ios_base& (*alignment)(std::ios_base&), int width, char separator>
-void coutWithManipulators(T&& value)
+template<typename T, std::ios_base &(*alignment)(std::ios_base&), int width, char separator>
+void coutWithManipulators(T &&value)
 {
     std::cout << alignment << std::setw(width)
               << std::setfill(separator) << std::forward<T>(value);
 }
 
 template<typename T>
-std::string argForCout(std::shared_ptr<T> const& value)
+std::string argForCout(std::shared_ptr<T> const &value)
 {
     std::stringstream ss;
     ss << (std::shared_ptr<void>)value;
@@ -78,7 +78,7 @@ std::string argForCout(std::shared_ptr<T> const& value)
 }
 
 template<typename T>
-std::string argForCout(const T& value)
+std::string argForCout(const T &value)
 {
     return std::to_string(value);
 }
@@ -89,25 +89,25 @@ std::string argForCout(const char *value);
 std::string argForCout(const bool value);
 
 template<typename T>
-void coutWithEndl(T&& value)
+void coutWithEndl(T &&value)
 {
     std::cout << argForCout(value) << std::endl;
 }
 
 template<typename T>
-void coutWithTab(T&& value)
+void coutWithTab(T &&value)
 {
     std::cout << argForCout(value) << '\t';
 }
 
 template<typename T>
-void coutWithSpace(T&& value)
+void coutWithSpace(T &&value)
 {
     std::cout << argForCout(value) << ' ';
 }
 
 template<typename T>
-void coutWithoutInterval(T&& value)
+void coutWithoutInterval(T &&value)
 {
     std::cout << argForCout(value);
 }
@@ -133,14 +133,14 @@ void coutArgsWithTabSeparator(Ts&&... args)
 
 // cout vector
 template<typename T>
-void coutVectorInLine(const std::vector<T>& vector)
+void coutVectorInLine(const std::vector<T> &vector)
 {
-    for (auto& item : vector)
+    for (auto &item : vector)
         std::cout << item << ' ';
 }
 
 template<typename T>
-void printVector(T& vector, bool showSize = false, bool showCapacity = false)
+void printVector(T &vector, bool showSize = false, bool showCapacity = false)
 {
 	std::cout << std::endl << "printVector" << std::endl;
 
@@ -159,7 +159,7 @@ void printVector(T& vector, bool showSize = false, bool showCapacity = false)
 }
 
 template<typename T>
-void coutVectorState(T& vector)
+void coutVectorState(T &vector)
 {
 	endline(1);
 	coutWithEndl("coutVectorState");
@@ -180,7 +180,7 @@ void coutVectorState(T& vector)
 }
 
 template<typename T>
-void coutVectorOfVectorsState(T& vector)
+void coutVectorOfVectorsState(T &vector)
 {
 	endline(1);
 	coutWithEndl("coutVectorState");
@@ -210,7 +210,7 @@ void printArray(std::array<int, 10>&);
 
 // tuple
 // template<typename T, std::size_t... I>
-// void printTuple(T&& container)
+// void printTuple(T &&container)
 // {
 //     auto lambda = [](auto container)
 //     {
@@ -225,7 +225,7 @@ void printSet(std::set<int>&);
 
 // map
 template<typename T, typename U>
-void coutMap(std::map<T, U>& map)
+void coutMap(std::map<T, U> &map)
 {
     for (auto it = map.begin(); it != map.end(); it++)
 		coutArgsWithManipulators(15, it->first, it->second);

@@ -11,7 +11,7 @@ std::string getStringFromCharPtr(const char *value)
     return (value) ? std::string(value) : "nullptr"s;
 }
 
-void coutKeyInfo(const gpgme_key_t* const key)
+void coutKeyInfo(const gpgme_key_t *const key)
 {
     // endline(1);
 
@@ -49,9 +49,9 @@ void coutKeyInfo(const gpgme_key_t* const key)
     // endline(1);
 }
 
-void coutUserIdInfo(gpgme_key_t* key)
+void coutUserIdInfo(gpgme_key_t *key)
 {
-    // _gpgme_user_id* uids = (*key)->uids;
+    // _gpgme_user_id *uids = (*key)->uids;
 
     // endline(1);
 
@@ -80,10 +80,10 @@ void coutUserIdInfo(gpgme_key_t* key)
     // endline(1);
 }
 
-void createKey(gpgme_ctx_t* contextPtr, const char* algoName)
+void createKey(gpgme_ctx_t *contextPtr, const char *algoName)
 {
     // create key
-    const char* userId = "user2";
+    const char *userId = "user2";
     unsigned long reserved = 0;
     unsigned long expires = 1000000000;
     gpgme_key_t extrakey = NULL;
@@ -102,10 +102,10 @@ void createKey(gpgme_ctx_t* contextPtr, const char* algoName)
     coutWithEndl(getMappingValueOrDefault(map, key, "key creation: some other error"s));
 }
 
-void listKeys(gpgme_ctx_t* contextPtr)
+void listKeys(gpgme_ctx_t *contextPtr)
 {
     // list keys
-    const char* pattern = NULL;
+    const char *pattern = NULL;
     int secret_only = 0;
 
     int i = 0;
@@ -153,9 +153,9 @@ void listKeys(gpgme_ctx_t* contextPtr)
     coutArgsWithSpaceSeparator("i:", i);
 }
 
-void getKeyByUser(gpgme_ctx_t* contextPtr, gpgme_key_t* keyPtr, const char* name)
+void getKeyByUser(gpgme_ctx_t *contextPtr, gpgme_key_t *keyPtr, const char *name)
 {
-    const char* pattern = NULL;
+    const char *pattern = NULL;
     int secret_only = 0;
 
     auto errorStart = gpgme_op_keylist_start(*contextPtr, pattern, secret_only);
@@ -185,7 +185,7 @@ void getKeyByUser(gpgme_ctx_t* contextPtr, gpgme_key_t* keyPtr, const char* name
     }
 }
 
-void createDataObject(gpgme_data_t* dataPtr)
+void createDataObject(gpgme_data_t *dataPtr)
 {
     auto error = gpgme_data_new(dataPtr);
 
@@ -198,9 +198,9 @@ void createDataObject(gpgme_data_t* dataPtr)
     coutMappingValue(map, error);
 }
 
-void printAsBytesTillNullTerminator(const char* value)
+void printAsBytesTillNullTerminator(const char *value)
 {
-    const char* p = value;
+    const char *p = value;
 
     int i = 0;
 
@@ -213,9 +213,9 @@ void printAsBytesTillNullTerminator(const char* value)
     endline(1);
 }
 
-void printAsBytes(const char* value, std::size_t size)
+void printAsBytes(const char *value, std::size_t size)
 {
-    const char* p = value;
+    const char *p = value;
 
     std::size_t i = 0;
 
@@ -228,9 +228,9 @@ void printAsBytes(const char* value, std::size_t size)
     endline(1);
 }
 
-void printAsChars(const char* value, std::size_t size)
+void printAsChars(const char *value, std::size_t size)
 {
-    const char* p = value;
+    const char *p = value;
 
     std::size_t i = 0;
 
@@ -243,9 +243,9 @@ void printAsChars(const char* value, std::size_t size)
     endline(1);
 }
 
-int getTerminatorPosition(const char* value, ssize_t size)
+int getTerminatorPosition(const char *value, ssize_t size)
 {
-    const char* p = value;
+    const char *p = value;
 
     int i = 0;
 
@@ -261,7 +261,7 @@ int getTerminatorPosition(const char* value, ssize_t size)
     return -1;
 }
 
-void seekSetZero(gpgme_data_t& data)
+void seekSetZero(gpgme_data_t &data)
 {
     auto off = gpgme_data_seek(data, 0, SEEK_SET);
     //		coutArgsWithSpaceSeparator("off:", off);
@@ -271,8 +271,8 @@ void seekSetZero(gpgme_data_t& data)
 }
 
 void encrypt(
-    gpgme_ctx_t* contextPtr, gpgme_key_t* keys, gpgme_encrypt_flags_t& flags, gpgme_data_t& data,
-    gpgme_data_t& dataEncrypt)
+    gpgme_ctx_t *contextPtr, gpgme_key_t *keys, gpgme_encrypt_flags_t &flags, gpgme_data_t &data,
+    gpgme_data_t &dataEncrypt)
 {
     seekSetZero(data);
     seekSetZero(dataEncrypt);
@@ -289,7 +289,7 @@ void encrypt(
     coutMappingValue(map, error);
 }
 
-void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& dataDecrypt)
+void decrypt(gpgme_ctx_t *contextPtr, gpgme_data_t &dataEncrypt, gpgme_data_t &dataDecrypt)
 {
     seekSetZero(dataEncrypt);
     seekSetZero(dataDecrypt);
@@ -307,7 +307,7 @@ void decrypt(gpgme_ctx_t* contextPtr, gpgme_data_t& dataEncrypt, gpgme_data_t& d
     coutMappingValue(map, error);
 }
 
-ssize_t readData(gpgme_data_t& data, char* dataString, std::size_t size)
+ssize_t readData(gpgme_data_t &data, char *dataString, std::size_t size)
 {
     seekSetZero(data);
 
@@ -322,11 +322,11 @@ ssize_t readData(gpgme_data_t& data, char* dataString, std::size_t size)
     return sizeRead;
 }
 
-void readData1(gpgme_data_t& data, std::string& dataString)
+void readData1(gpgme_data_t &data, std::string &dataString)
 {
     seekSetZero(data);
 
-    char* p = new char[2];  // TODO use stack allocation
+    char *p = new char[2];  // TODO use stack allocation
 
     while (true) {
         auto sizeRead = gpgme_data_read(data, p, 1);
@@ -346,15 +346,15 @@ void readData1(gpgme_data_t& data, std::string& dataString)
     delete[] p;
 }
 
-char* readData2(gpgme_data_t& data)
+char *readData2(gpgme_data_t &data)
 {
     seekSetZero(data);
 
     std::size_t blockSize = 10;
     std::size_t bufferSize = blockSize;
     ssize_t sizeRead = blockSize;
-    char* bufferHead = (char*)malloc(bufferSize);
-    char* current = bufferHead;
+    char *bufferHead = (char*)malloc(bufferSize);
+    char *current = bufferHead;
 
     while (true) {
         sizeRead = gpgme_data_read(data, current, blockSize);

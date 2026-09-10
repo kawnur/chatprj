@@ -104,9 +104,9 @@ private:
 
     template<typename T, typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(
-        const bool& logging, std::string &&mark,
+        const bool &logging, std::string &&mark,
         std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, const bool&, const Ts&...),
-        T&& keys, const Ts&... args)
+        T &&keys, const Ts&... args)
     {
         std::shared_ptr<PGresult> dbResult = func(dbConnection_, logging, args...);
 

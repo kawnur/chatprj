@@ -81,7 +81,7 @@ void MainWindow::set()
     setBlurEffect();
 }
 
-void MainWindow::addTextToAppLogWidget(const QString& text)
+void MainWindow::addTextToAppLogWidget(const QString &text)
 {
     rightPanel_->addTextToAppLogWidget(text);
 }

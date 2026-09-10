@@ -6,7 +6,7 @@
 #include "utils_cout.hpp"
 
 template<typename T, typename F, typename... Ts>
-T runMeasureDurationAndReturnResult(F&& func, Ts... params)
+T runMeasureDurationAndReturnResult(F &&func, Ts... params)
 {
     auto begin = std::chrono::high_resolution_clock::now();
 
@@ -22,7 +22,7 @@ T runMeasureDurationAndReturnResult(F&& func, Ts... params)
 }
 
 template<typename F, typename... Ts>
-void runAndMeasureDuration(F&& func, Ts... params)
+void runAndMeasureDuration(F &&func, Ts... params)
 {
     auto begin = std::chrono::high_resolution_clock::now();
 

@@ -5,9 +5,14 @@
 
 using boost::asio::ip::tcp;
 
-ChatClient::ChatClient(std::string&& ipAddress, uint16_t&& port)
+ChatClient::ChatClient(std::string &&ipAddress, uint16_t &&port)
     : isConnected_(false), ipAddress_(ipAddress), port_(port), io_context_(), socket_(io_context_),
     resolver_(io_context_) {}
+
+bool ChatClient::isConnected() const
+{
+    return isConnected_;
+}
 
 bool ChatClient::connect()
 {
@@ -49,7 +54,7 @@ bool ChatClient::send(std::string text)
 {
     bool sent = false;
 
-    auto sendLambda = [&, this](bool& value)
+    auto sendLambda = [&, this](bool &value)
     {
         auto written = boost::asio::write(socket_, boost::asio::buffer(text.data(), text.size()));
         value = true;
@@ -59,9 +64,4 @@ bool ChatClient::send(std::string text)
     // logArgs("client sent message:", text);
 
     return sent;
-}
-
-bool ChatClient::isConnected() const
-{
-    return isConnected_;
 }
