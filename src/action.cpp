@@ -6,6 +6,7 @@
 #include "constants.hpp"
 #include "data.hpp"
 #include "logging.hpp"
+#include "mainwindow.hpp"
 #include "manager.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
@@ -76,12 +77,14 @@ CompanionAction::CompanionAction(ChatActionType actionType, std::shared_ptr<Comp
     break;
 
     case ChatActionType::SEND_HISTORY:
+        auto name = companion->getName();
+
         dialog_ = std::make_shared<TextDialog>(
             mainWindow,
             DialogType::WARNING,
             // getArgumentedQString(
             //     sendChatHistoryToCompanionDialogText, companion->getName()),
-            std::format(sendChatHistoryToCompanionDialogText, companion->getName()),
+            std::vformat(sendChatHistoryToCompanionDialogText, std::make_format_args(name)),
             getButtonInfoVector(sendChatHistoryButtonText));
 
     break;

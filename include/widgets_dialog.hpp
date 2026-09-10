@@ -35,7 +35,7 @@ public:
     void setAction(std::shared_ptr<Action> action) { action_ = action; }
     virtual void set() {}
 
-    bool getContainsDialog() const { return containsDialog_; }
+    bool containsDialog() const { return containsDialog_; }
     virtual void showDialog() {}
 
 protected:

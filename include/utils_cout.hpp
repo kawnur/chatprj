@@ -12,6 +12,10 @@
 
 #include <QString>
 
+#include "utils.hpp"
+
+using namespace std::string_literals;
+
 void endline(int);
 
 template<typename T>
@@ -227,6 +231,15 @@ void coutMap(std::map<T, U>& map)
 		coutArgsWithManipulators(15, it->first, it->second);
 
 	endline(1);
+}
+
+template<typename T, typename U>
+void coutMappingValue(const std::map<T, U> &map, const T &key)
+{
+    auto line = getMappingValueOrDefault(map, key, ""s);
+
+    if (!line.empty())
+        coutWithEndl(line);
 }
 
 // string

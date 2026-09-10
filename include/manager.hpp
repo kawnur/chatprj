@@ -33,13 +33,14 @@ void showInfoDialogAndLogInfo(QString&&, std::shared_ptr<QWidget>);
 void showWarningDialogAndLogWarning(const QString&, std::shared_ptr<QWidget>);
 void showErrorDialogAndLogError(QString &&message);
 
-class Manager : public QObject { // TODO do we need inheritance?
+class Manager : public QObject // TODO do we need inheritance?
+{
 public:
     Manager();
     ~Manager();
 
     std::shared_ptr<Companion> getSelectedCompanion();
-    bool getUserIsAuthenticated();
+    bool userIsAuthenticated();
 
     // std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
     std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *) const;

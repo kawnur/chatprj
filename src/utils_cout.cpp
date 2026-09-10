@@ -1,5 +1,7 @@
 #include "utils_cout.hpp"
 
+using namespace std::string_literals;
+
 void endline(int number)
 {
     for (int i = 0; i < number; i++)
@@ -23,7 +25,7 @@ std::string argForCout(const std::string& value)
 
 std::string argForCout(const char *value)
 {
-    return (value) ? std::string(value) : std::string("0x0");
+    return (value) ? std::string(value) : "0x0"s;
 }
 
 std::string argForCout(const bool value)

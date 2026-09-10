@@ -47,17 +47,17 @@ MessageState::MessageState(
     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
 {}
 
-bool MessageState::getIsAntecedent() const
+bool MessageState::isAntecedent() const
 {
     return isAntecedent_;
 }
 
-bool MessageState::getIsSent() const
+bool MessageState::isSent() const
 {
     return isSent_;
 }
 
-bool MessageState::getIsReceived() const
+bool MessageState::isReceived() const
 {
     return isReceived_;
 }

@@ -2,10 +2,13 @@
 
 #include <QMenu>
 
-// #include "action.hpp"
+#include "action.hpp"
 #include "companion.hpp"
 #include "constants.hpp"
+#include "graphic_manager.hpp"
 #include "logging.hpp"
+#include "mainwindow.hpp"
+#include "manager.hpp"
 #include "message.hpp"
 #include "widgets_panel.hpp"
 
@@ -573,7 +576,7 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> messageWi
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
     auto messageState = companion_->getMappedMessageStateByMessageWidget(true, messageWidget);
-    bool isAntecedent = messageState->getIsAntecedent();
+    bool isAntecedent = messageState->isAntecedent();
 
     logArgs("isAntecedent:", isAntecedent);
 
@@ -602,7 +605,7 @@ void WidgetGroup::buildChatHistorySlot()
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
     std::shared_ptr<MessageState> messageState, std::shared_ptr<Message> message)
 {
-    bool isAntecedent = messageState->getIsAntecedent();
+    bool isAntecedent = messageState->isAntecedent();
 
     if (isAntecedent) {
         std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);

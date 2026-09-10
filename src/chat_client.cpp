@@ -61,7 +61,7 @@ bool ChatClient::send(std::string text)
     return sent;
 }
 
-bool ChatClient::getIsConnected() const
+bool ChatClient::isConnected() const
 {
     return isConnected_;
 }

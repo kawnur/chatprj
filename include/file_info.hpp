@@ -10,7 +10,8 @@
 
 class Companion;
 
-class FileOperator {
+class FileOperator
+{
 public:
     FileOperator(const std::filesystem::path&);
     virtual ~FileOperator();
@@ -28,7 +29,8 @@ protected:
     std::string fileMD5Hash_;
 };
 
-class SenderOperator : public FileOperator {
+class SenderOperator : public FileOperator
+{
 public:
     SenderOperator(const std::filesystem::path&);
     ~SenderOperator() = default;
@@ -37,7 +39,8 @@ public:
     void sendFile(std::shared_ptr<Companion>, const std::string&);
 };
 
-class ReceiverOperator : public FileOperator {
+class ReceiverOperator : public FileOperator
+{
 public:
     ReceiverOperator(const std::filesystem::path&, const std::string&);
     ~ReceiverOperator() = default;
@@ -51,7 +54,8 @@ private:
     bool createFileAndOpen() override;
 };
 
-class FileOperatorStorage {
+class FileOperatorStorage
+{
 public:
     FileOperatorStorage();
     ~FileOperatorStorage() = default;

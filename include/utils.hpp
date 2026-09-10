@@ -12,6 +12,7 @@
 
 #include "logging.hpp"
 
+class DBReplyData;
 class GraphicManager;
 class TextDialog;
 
@@ -30,6 +31,22 @@ U getConstantMappingValue(std::string mapName, const std::map<T, U>* map, const 
     }
     catch(std::out_of_range) {
         logTemplateError("mapping {} key error", mapName);
+    }
+    catch(const std::exception& e) {
+        logArgsException(e.what());
+    }
+
+    return U();
+}
+
+template<typename T, typename U>
+U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &defaultValue)
+{
+    try {
+        return map.at(key);
+    }
+    catch(std::out_of_range) {
+        return defaultValue;
     }
     catch(const std::exception& e) {
         logArgsException(e.what());

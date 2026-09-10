@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "constants.hpp"
+#include "file_info.hpp"
 
 class CentralPanelWidget;
 class ChatClient;
@@ -36,19 +37,20 @@ using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<Messag
 using MessageMappingIterator = MessageMapping::iterator;
 using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 
-class SocketInfo {
+class SocketInfo
+{
 public:
-    SocketInfo() {}
+    SocketInfo() = default;
     SocketInfo(std::string&, uint16_t&, uint16_t&);  // TODO remove
     SocketInfo(std::string&&, uint16_t&&, uint16_t&&);  // TODO remove
 
     template<typename T, typename U, typename P>
-    SocketInfo(T&& ipAddress, U&& serverPort, P&& clientPort) :
-        ipAddress_(std::forward<T>(ipAddress)), serverPort_(std::forward<U>(serverPort)),
+    SocketInfo(T&& ipAddress, U&& serverPort, P&& clientPort)
+        : ipAddress_(std::forward<T>(ipAddress)), serverPort_(std::forward<U>(serverPort)),
         clientPort_(std::forward<P>(clientPort)) {}
 
     SocketInfo(const SocketInfo&);
-    SocketInfo(SocketInfo&&) {}
+    SocketInfo(SocketInfo&&) = default;
     ~SocketInfo() = default;
 
     std::string getIpAddress() const;
@@ -112,10 +114,8 @@ public:
 
     std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message>);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message>);
-
     std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, std::shared_ptr<MessageWidget>);
     std::shared_ptr<Message> getMappedMessageByMessageWidget(bool, MessageWidget *);
-
     std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(bool, std::shared_ptr<MessageWidget>);
     MessageMappingPair getMessageMappingPairByMessageId(uint32_t);
     MessageMappingPair getMessageMappingPairByNetworkId(const std::string&);

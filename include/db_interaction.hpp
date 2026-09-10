@@ -13,7 +13,8 @@
 class Companion;
 class CompanionAction;
 
-class DBReplyData {
+class DBReplyData
+{
 public:
     DBReplyData(int count, ...);
     DBReplyData(const std::vector<std::string>&);
@@ -45,16 +46,23 @@ std::shared_ptr<PGresult> sendDBRequestAndReturnResult(
     std::shared_ptr<PGconn> dbConnection, const bool& logging, const std::string &command);
 
 std::shared_ptr<PGresult> getCompanionsDBResult(std::shared_ptr<PGconn>, const bool&);
-std::shared_ptr<PGresult> getCompanionByNameDBResult(std::shared_ptr<PGconn>, const bool&, const std::string&);
-std::shared_ptr<PGresult> getCompanionAndSocketDBResult(std::shared_ptr<PGconn>, const bool&, const int&);
+
+std::shared_ptr<PGresult> getCompanionByNameDBResult(
+    std::shared_ptr<PGconn>, const bool&, const std::string&);
+
+std::shared_ptr<PGresult> getCompanionAndSocketDBResult(
+    std::shared_ptr<PGconn>, const bool&, const int&);
 
 std::shared_ptr<PGresult> getSocketInfoDBResult(std::shared_ptr<PGconn>, const bool&, const int&);
 
 std::shared_ptr<PGresult> getSocketByIpAddressAndPortDBResult(
     std::shared_ptr<PGconn>, const bool&, const std::string&, const std::string&);
 
-std::shared_ptr<PGresult> getMessagesDBResult(std::shared_ptr<PGconn>, const bool&, const uint8_t&);
-std::shared_ptr<PGresult> getAllMessagesByCompanionIdDBResult(std::shared_ptr<PGconn>, const bool&, const int&);
+std::shared_ptr<PGresult> getMessagesDBResult(
+    std::shared_ptr<PGconn>, const bool&, const uint8_t&);
+
+std::shared_ptr<PGresult> getAllMessagesByCompanionIdDBResult(
+    std::shared_ptr<PGconn>, const bool&, const int&);
 
 std::shared_ptr<PGresult> getEarlyMessagesByMessageIdDBResult(
     std::shared_ptr<PGconn>, const bool&, const int&, const uint32_t&);
@@ -67,11 +75,17 @@ std::shared_ptr<PGresult> getUnsentMessagesByCompanionNameDBResult(
 
 std::shared_ptr<PGresult> getPasswordDBResult(std::shared_ptr<PGconn>, const bool&);
 
-std::shared_ptr<PGresult> setMessageIsSentInDbAndReturn(std::shared_ptr<PGconn>, const bool&, const uint32_t&);
-std::shared_ptr<PGresult> setMessageIsReceivedInDbAndReturn(std::shared_ptr<PGconn>, const bool&, const uint32_t&);
+std::shared_ptr<PGresult> setMessageIsSentInDbAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const uint32_t&);
 
-std::shared_ptr<PGresult> pushCompanionToDBAndReturn(std::shared_ptr<PGconn>, const bool&, const std::string&);
-std::shared_ptr<PGresult> updateCompanionAndReturn(std::shared_ptr<PGconn>, const bool&, const std::string&);
+std::shared_ptr<PGresult> setMessageIsReceivedInDbAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const uint32_t&);
+
+std::shared_ptr<PGresult> pushCompanionToDBAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const std::string&);
+
+std::shared_ptr<PGresult> updateCompanionAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const std::string&);
 
 std::shared_ptr<PGresult> updateCompanionAndSocketAndReturn(
     std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
@@ -90,9 +104,11 @@ std::shared_ptr<PGresult> pushMessageToDBWithAuthorIdAndReturn(
     const std::string&, const std::string&, const std::string&,
     const bool&, const bool&);
 
-std::shared_ptr<PGresult> pushPasswordToDBAndReturn(std::shared_ptr<PGconn>, const bool&, const std::string&);
+std::shared_ptr<PGresult> pushPasswordToDBAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const std::string&);
 
-std::shared_ptr<PGresult> deleteMessagesFromDBAndReturn(std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
+std::shared_ptr<PGresult> deleteMessagesFromDBAndReturn(
+    std::shared_ptr<PGconn>, const bool&, const CompanionAction&);
 
 std::shared_ptr<PGresult> deleteCompanionAndSocketAndReturn(
     std::shared_ptr<PGconn>, const bool&, const CompanionAction&);

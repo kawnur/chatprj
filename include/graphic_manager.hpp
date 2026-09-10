@@ -21,7 +21,8 @@ class SocketInfoBaseWidget;
 class StubWidgetGroup;
 class WidgetGroup;
 
-class GraphicManager {
+class GraphicManager
+{
 public:
     GraphicManager();
     ~GraphicManager() = default;

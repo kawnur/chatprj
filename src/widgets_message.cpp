@@ -19,8 +19,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
     setLayout(layout_.get());
 
     if (isMessageFromMe_) {
-        sentIndicator_ = std::make_shared<IndicatorWidget>(10, messageState->getIsSent());
-        receivedIndicator_ = std::make_shared<IndicatorWidget>(10, messageState->getIsReceived());
+        sentIndicator_ = std::make_shared<IndicatorWidget>(10, messageState->isSent());
+        receivedIndicator_ = std::make_shared<IndicatorWidget>(10, messageState->isReceived());
 
         newMessageLabel_ = nullptr;
 
@@ -31,7 +31,7 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sentIndicator_ = nullptr;
         receivedIndicator_ = nullptr;
 
-        std::string text = (messageState->getIsAntecedent()) ? "NEW" : "";
+        std::string text = (messageState->isAntecedent()) ? "NEW" : "";
 
         std::string textHtml = std::format(
             "<font color=\"{0}\"><b>{1}</b></font>", receivedMessageColor, text);

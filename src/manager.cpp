@@ -1,5 +1,7 @@
 #include "manager.hpp"
 
+#include <thread>
+
 #include "action.hpp"
 #include "application.hpp"
 #include "companion.hpp"
@@ -8,6 +10,8 @@
 #include "message.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
+
+using namespace std::string_literals;
 
 Manager::Manager()
     : initialized_(false), messageStateToMessageMapMutex_(), dbConnection_(nullptr),
@@ -30,7 +34,7 @@ std::shared_ptr<Companion> Manager::getSelectedCompanion()
     return selectedCompanion_;
 }
 
-bool Manager::getUserIsAuthenticated()
+bool Manager::userIsAuthenticated()
 {
     return userIsAuthenticated_;
 }
@@ -95,8 +99,7 @@ void Manager::sendMessage(
     // encrypt message
 
     // add to DB and get timestamp
-    auto tuple = pushMessageToDB(
-        companion->getName(), std::string("me"), std::string("now()"), text, false, false);
+    auto tuple = pushMessageToDB(companion->getName(), "me"s, "now()"s, text, false, false);
 
     uint32_t id = std::get<0>(tuple);
     uint8_t companion_id = std::get<1>(tuple);
@@ -305,7 +308,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
             break;
 
         // message found in managers's mapping
-        if (state->getIsReceived()) {
+        if (state->isReceived()) {
             auto type = NetworkMessageType::RECEIVE_CONFIRMATION;
             auto id = state->getNetworkId();
 
@@ -1353,8 +1356,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(
     }
 
     bool findNameResult = companionIdData->findValue(
-        std::string("id"),
-        std::to_string(companionAction->getCompanionId()));
+        "id"s, std::to_string(companionAction->getCompanionId()));
 
     bool nameExistsAtOtherCompanion =
         (findNameResult && companionIdData->size() > 1) ||
@@ -1380,8 +1382,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(
     }
 
     bool findSocketResult = socketIdData->findValue(
-        std::string("id"),
-        std::to_string(companionAction->getCompanionId()));
+        "id"s, std::to_string(companionAction->getCompanionId()));
 
     bool socketExistsAtOtherCompanion =
         (findSocketResult && socketIdData->size() > 1) ||
@@ -1407,7 +1408,7 @@ void Manager::waitForMessageReceptionConfirmation(
         sleepForMilliseconds(sleepDuration);
 
         while (true) {
-            if (messageState->getIsReceived()) {
+            if (messageState->isReceived()) {
                 return;
             }
             else {

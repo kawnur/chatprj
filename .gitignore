@@ -1,5 +1,6 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
+.swp
 CMakeLists.txt.user
 .qtcreator/
 build/

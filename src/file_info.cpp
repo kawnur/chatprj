@@ -6,6 +6,8 @@
 #include "logging.hpp"
 #include "utils.hpp"
 
+using namespace std::string_literals;
+
 FileOperator::FileOperator(const std::filesystem::path& path)
     : filePath_(path), filebuf_(std::filebuf()) {}
 
@@ -136,7 +138,7 @@ ReceiverOperator::ReceiverOperator(
     const std::filesystem::path& filePath, const std::string& fileMD5HashFromSender)
     : FileOperator(filePath)
 {
-    fileMD5Hash_ = std::string("");
+    fileMD5Hash_ = ""s;
     fileMD5HashFromSender_ = fileMD5HashFromSender;
 
     if (filePath_ != homePath)

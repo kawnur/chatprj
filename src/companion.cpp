@@ -353,7 +353,7 @@ bool Companion::sendMessage(
     if (!client_)
         return false;
 
-    bool isConnected = client_->getIsConnected();
+    bool isConnected = client_->isConnected();
 
     if (!isConnected)
         return false;
@@ -377,7 +377,7 @@ bool Companion::sendChatHistory(
     if (!client_)
         return false;
 
-    bool isConnected = client_->getIsConnected();
+    bool isConnected = client_->isConnected();
 
     if (isConnected)
         return false;
@@ -423,7 +423,7 @@ bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widget)
 
 bool Companion::sendFileBlock(const std::string& networkId, const std::string& data)
 {
-    bool isConnected = client_->getIsConnected();
+    bool isConnected = client_->isConnected();
 
     if (!isConnected)
         return false;

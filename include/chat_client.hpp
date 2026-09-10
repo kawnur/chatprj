@@ -6,7 +6,8 @@
 
 using boost::asio::ip::tcp;
 
-class ChatClient {
+class ChatClient
+{
 public:
     ChatClient(std::string&&, uint16_t&&);
     ~ChatClient() = default;
@@ -14,7 +15,7 @@ public:
     bool connect();
     bool disconnect();
     bool send(std::string);
-    bool getIsConnected() const;
+    bool isConnected() const;
 
 private:
     bool isConnected_;

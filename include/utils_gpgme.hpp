@@ -4,14 +4,19 @@
 #include <memory>
 #include <sys/types.h>  // std::ssize_t
 #include <string.h>
+#include <string>
 
 #include "utils_cout.hpp"
 
-extern "C" {
+using namespace std::string_literals;
+
+extern "C"
+{
 #include <gpgme.h>
 }
 
-namespace TestGpgme {
+namespace TestGpgme
+{
     template<typename T, typename U>
     void coutFuncResult(T (*type)(int), U (*func)(T))
     {
@@ -36,7 +41,7 @@ namespace TestGpgme {
     template<typename T>
     auto getOrString(std::shared_ptr<T> parameter)
     {
-        return (parameter) ? parameter : std::string("nullptr");  // TODO ???
+        return (parameter) ? parameter : "nullptr"s;  // TODO ???
 	}
 
     void coutKeyInfo(const gpgme_key_t* const);

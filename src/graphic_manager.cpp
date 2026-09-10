@@ -10,6 +10,8 @@
 #include "widgets_message.hpp"
 #include "utils.hpp"
 
+using namespace std::string_literals;
+
 GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
 {
     // mapMessageToMessageWidget_(std::map<std::shared_ptr<Message>, std::shared_ptr<MessageWidget>>()) {
@@ -184,9 +186,9 @@ void GraphicManager::showCompanionInfoDialog(
         buildDialogText(
             std::move(header),
             std::vector<std::string> {
-                std::string("name: ") + companionAction->getName(),
-                std::string("ipAddress: ") + companionAction->getIpAddress(),
-                std::string("port: ") + companionAction->getClientPort()
+                std::format("name: {}", companionAction->getName()),
+                std::format("ipAddress: {}", companionAction->getIpAddress()),
+                std::format("port: {}", companionAction->getClientPort()),
             }),
         createOkButtonInfoVector(function));
 }

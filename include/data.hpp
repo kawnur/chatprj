@@ -7,7 +7,8 @@
 
 class Companion;
 
-class CompanionData {
+class CompanionData
+{
 public:
     CompanionData(
         const std::string&, const std::string&,

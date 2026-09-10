@@ -1,13 +1,20 @@
 #include "widgets_panel.hpp"
 
+#include <string>
+#include <thread>
+
 #include <QApplication>
 #include <QMenu>
 #include <QScrollBar>
 
 #include "companion.hpp"
 #include "constants.hpp"
+#include "manager.hpp"
 #include "message.hpp"
 #include "widgets.hpp"
+#include "widgets_message.hpp"
+
+using namespace std::string_literals;
 
 LeftPanelWidget::LeftPanelWidget(std::shared_ptr<QWidget> parent)
 {
@@ -210,7 +217,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
         chatHistoryLayout_->addWidget(widget.get());
 
-        if (messageState->getIsAntecedent())
+        if (messageState->isAntecedent())
             sortChatHistoryElements(false);
     }
 
@@ -261,7 +268,7 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
         auto cast = qobject_cast<MessageWidget *>(item);
         auto message = companion_->getMappedMessageByMessageWidget(false, cast);
 
-        return (message) ? message->getTime() : std::string("");
+        return (message) ? message->getTime() : ""s;
     };
 
     std::sort(

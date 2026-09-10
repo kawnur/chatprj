@@ -24,6 +24,9 @@ class SocketInfoWidget;
 
 std::shared_ptr<GraphicManager> getGraphicManager();
 
+template<typename... Ts>
+void coutArgsWithSpaceSeparator(Ts&&... args);
+
 template<typename T>
 concept IsArithmetic = std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 

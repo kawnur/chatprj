@@ -1,11 +1,11 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
+#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <string>
 
-// #include <QDialogButtonBox>
 #include <QString>
 
 const std::string logDelimiter { "############################" };
@@ -17,22 +17,21 @@ const int numberOfMessagesToGetFromDB = 10;
 
 const bool logDBInteraction = false;
 
-static const char alphanum[] =
-    "0123456789"
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz";
+static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 const uint32_t sleepDurationInitial = 1000;
 const float sleepDurationIncreaseRate = 1.2f;
 
 const std::filesystem::path homePath("~");
 
-enum class MessageType {
+enum class MessageType
+{
     TEXT,
     FILE
 };
 
-enum class NetworkMessageType {
+enum class NetworkMessageType
+{
     NO_ACTION,
     TEXT,
     FILE_PROPOSAL,
@@ -48,13 +47,15 @@ enum class NetworkMessageType {
     CHAT_HISTORY_DATA
 };
 
-enum class DialogType {
+enum class DialogType
+{
     INFO,
     WARNING,
     ERROR
 };
 
-enum class ChatActionType {
+enum class ChatActionType
+{
     CREATE,
     // READ,
     UPDATE,
@@ -63,17 +64,20 @@ enum class ChatActionType {
     SEND_HISTORY
 };
 
-enum class PasswordActionType {
+enum class PasswordActionType
+{
     CREATE,
     GET
 };
 
-enum class FileActionType {
+enum class FileActionType
+{
     SEND,
     SAVE
 };
 
-enum class MainWindowContainerPosition {
+enum class MainWindowContainerPosition
+{
     LEFT,
     CENTRAL,
     RIGHT
@@ -109,7 +113,7 @@ const std::vector<QString> connectButtonLabels {
 
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
-constexpr std::string_view sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
+const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
 const std::string socketInfoStubWidget { "No companion info from DB..." };
 
 // new group chat dialog
