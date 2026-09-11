@@ -14,6 +14,18 @@
 class Companion;
 class CompanionAction;
 
+class DBRequestData
+{
+public:
+    DBRequestData(const std::vector<std::string> &data);
+    ~DBRequestData() = default;
+
+private:
+    std::string logMark_;
+    std::string requestTemplate_;
+    std::vector<std::string> replyKeys_;
+};
+
 class DBReplyData
 {
 public:
