@@ -14,7 +14,7 @@
 using namespace std::string_literals;
 
 Manager::Manager()
-    : initialized_(false), messageStateToMessageMapMutex_(), dbConnection_(nullptr),
+    : /*initialized_(false), */messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false)
 {
     mapCompanionToWidgetGroup_ =
@@ -44,20 +44,21 @@ void Manager::set()
     bool connectedToDB = connectToDb();
     // logArgs("connectedToDB:", connectedToDB);
 
-    if (connectedToDB) {
-        bool companionsBuilt = buildCompanions();
-        logArgs("companionsBuilt:", companionsBuilt);
-
-        if (companionsBuilt)  // TODO rewrite
-            buildWidgetGroups();
-        else
-            logArgsError("problem with companions initialization");
-    }
-    else {
+    if (!connectedToDB) {
         showErrorDialogAndLogError("problem with DB connection");
+
+        return;
     }
 
-    initialized_ = true;
+    bool companionsBuilt = buildCompanions();
+    logArgs("companionsBuilt:", companionsBuilt);
+
+    if (companionsBuilt)  // TODO rewrite
+        buildWidgetGroups();
+    else
+        logArgsError("problem with companions initialization");
+
+    // initialized_ = true;
 }
 
 std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
@@ -1010,10 +1011,10 @@ void Manager::sendChatHistoryToCompanion(std::shared_ptr<Companion> companion)
     bool result = companion->sendChatHistory(messagesData, keys);
 }
 
-bool Manager::isInitialised()
-{
-    return initialized_;
-}
+// bool Manager::isInitialised()
+// {
+//     return initialized_;
+// }
 
 std::filesystem::path Manager::getLastOpenedPath()
 {

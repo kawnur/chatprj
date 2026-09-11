@@ -54,7 +54,7 @@ bool ChatClient::send(std::string text)
 {
     bool sent = false;
 
-    auto sendLambda = [&, this](bool &value)
+    auto sendLambda = [&](bool &value)
     {
         auto written = boost::asio::write(socket_, boost::asio::buffer(text.data(), text.size()));
         value = true;

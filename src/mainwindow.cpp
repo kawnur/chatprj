@@ -4,6 +4,7 @@
 
 #include "graphic_manager.hpp"
 #include "manager.hpp"
+#include "utils.hpp"
 #include "widgets.hpp"
 #include "widgets_panel.hpp"
 
@@ -75,7 +76,6 @@ void MainWindow::set()
     graphicManager->showCentralPanelStub();
 
     showHideWidget_ = std::make_shared<ShowHideWidget>();
-
     addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_);
 
     setBlurEffect();
@@ -89,7 +89,12 @@ void MainWindow::addTextToAppLogWidget(const QString &text)
 void MainWindow::addWidgetToContainerAndSetParentTo(
     MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
 {
-    containerMap.at(position)->addWidgetToLayoutAndSetParentTo(widget);
+    auto lambda = [&]()
+    {
+        containerMap.at(position)->addWidgetToLayoutAndSetParentTo(widget);
+    };
+
+    runAndLogException(lambda);
 }
 
 void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)

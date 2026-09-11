@@ -89,7 +89,7 @@ public:
     void saveFile(const std::string& networkId, std::shared_ptr<Companion> companion);
 
 private:
-    std::mutex messageToMessageWidgetMapMutex_;
+    // std::mutex messageToMessageWidgetMapMutex_;
     std::shared_ptr<StubWidgetGroup> stubWidgets_;
     std::shared_ptr<MainWindow> mainWindow_;
 };

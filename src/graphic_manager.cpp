@@ -12,14 +12,11 @@
 
 using namespace std::string_literals;
 
-GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
+// GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
+GraphicManager::GraphicManager()
 {
-    // mapMessageToMessageWidget_(std::map<std::shared_ptr<Message>, std::shared_ptr<MessageWidget>>()) {
-    // stubWidgets_ = new StubWidgetGroup;
-    // mainWindow_ = new MainWindow;
-
-    // stubWidgets_ = nullptr;
-    // mainWindow_ = nullptr;
+    stubWidgets_ = std::make_shared<StubWidgetGroup>();
+    mainWindow_ = std::make_shared<MainWindow>();
 }
 
 std::shared_ptr<MainWindow> GraphicManager::getMainWindow()
@@ -29,9 +26,6 @@ std::shared_ptr<MainWindow> GraphicManager::getMainWindow()
 
 void GraphicManager::set()
 {
-    stubWidgets_ = std::make_shared<StubWidgetGroup>();
-    mainWindow_ = std::make_shared<MainWindow>();
-
     // stubWidgets_->set();
     mainWindow_->set();
     mainWindow_->show();
@@ -282,8 +276,9 @@ void GraphicManager::getEntrancePassword()
 void GraphicManager::markMessageWidgetAsSent(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
-    auto setLambda = [&, this](){
-        std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
+    auto setLambda = [&]()
+    {
+        // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
 
         try {
             companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsSent();
@@ -299,8 +294,9 @@ void GraphicManager::markMessageWidgetAsSent(
 void GraphicManager::markMessageWidgetAsReceived(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
-    auto setLambda = [&, this](){
-        std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
+    auto setLambda = [&]()
+    {
+        // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
 
         try {
             companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsReceived();

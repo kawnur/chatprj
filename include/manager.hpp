@@ -73,7 +73,7 @@ public:
     void sendUnsentMessages(std::shared_ptr<Companion> companion);
     void requestHistoryFromCompanion(std::shared_ptr<Companion> companion);
     void sendChatHistoryToCompanion(std::shared_ptr<Companion> companion);
-    bool isInitialised();
+    // bool isInitialised();
     std::filesystem::path getLastOpenedPath();
     void setLastOpenedPath(const std::filesystem::path &path);
 
@@ -147,7 +147,7 @@ private:
         return dbData;
     }
 
-    bool initialized_;
+    // bool initialized_;
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;
