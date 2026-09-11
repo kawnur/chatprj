@@ -1,6 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <format>
 #include <functional>
 #include <map>
 #include <string>
@@ -9,14 +10,25 @@
 #include <nlohmann/json.hpp>
 
 #include <QString>
+#include <QWidget>
 
-#include "logging.hpp"
+#include "constants.hpp"
 
+class ButtonInfo;
+class Companion;
+class CompanionAction;
 class DBReplyData;
 class GraphicManager;
+class Message;
 class TextDialog;
 
 std::shared_ptr<GraphicManager> getGraphicManager();
+
+template<typename T, typename... Ts>
+std::string getStringByFormat(T &&formatString, Ts &&...args)
+{
+    return std::vformat(formatString, std::make_format_args(args...));
+}
 
 template<typename T>
 QString getQString(T &&value);
@@ -27,8 +39,8 @@ void logArgsError(Ts &&...args);
 template<typename... Ts>
 void logArgsException(Ts &&...args);
 
-template<typename... Ts>
-void logTemplateError(const std::format_string<Ts...> &templateString, Ts &&...args);
+template<typename T, typename... Ts>
+void logTemplateError(T &&templateString, Ts &&...args);
 
 template<typename T, typename U>
 U getConstantMappingValue(std::string mapName, const std::map<T, U> *map, const T &key)

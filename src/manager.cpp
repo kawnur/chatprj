@@ -7,6 +7,7 @@
 #include "companion.hpp"
 #include "db_interaction.hpp"
 #include "file_info.hpp"
+#include "logging.hpp"
 #include "message.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
@@ -367,10 +368,9 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
             if (!messageGetData->isEmpty()) {
                 showInfoDialogAndLogInfo(
                     getQString(
-                        std::format(
+                        getStringByFormat(
                             "Message with timestamp {0} from companion "
-                            "with id {1} already exists",
-                            timestamp, companionId)));
+                            "with id {1} already exists", timestamp, companionId)));
 
                 continue;
             }

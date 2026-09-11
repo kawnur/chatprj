@@ -1,6 +1,7 @@
 #include "widgets_message.hpp"
 
 #include "companion.hpp"
+#include "logging.hpp"
 #include "message.hpp"
 #include "widgets.hpp"
 
@@ -33,7 +34,7 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
 
         std::string text = (state->isAntecedent()) ? "NEW" : "";
 
-        std::string textHtml = std::format(
+        auto textHtml = getStringByFormat(
             "<font color=\"{0}\"><b>{1}</b></font>", receivedMessageColor, text);
 
         newMessageLabel_ = std::make_shared<QLabel>(getQString(textHtml));
@@ -165,7 +166,7 @@ FileMessageWidget::FileMessageWidget(
             getQString(
                 getFormattedMessageBodyString(
                     sentMessageColor,
-                    std::format("SEND FILE: {}", pathString))));
+                    getStringByFormat("SEND FILE: {}", pathString))));
     }
 
     fileWidget_ = std::make_shared<QWidget>();

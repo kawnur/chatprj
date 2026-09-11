@@ -6,6 +6,8 @@
 
 #include "action.hpp"
 #include "companion.hpp"
+#include "graphic_manager.hpp"
+#include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "utils.hpp"

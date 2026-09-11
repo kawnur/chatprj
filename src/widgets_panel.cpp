@@ -9,8 +9,10 @@
 
 #include "companion.hpp"
 #include "constants.hpp"
+#include "logging.hpp"
 #include "manager.hpp"
 #include "message.hpp"
+#include "utils_cout.hpp"
 #include "widgets.hpp"
 #include "widgets_message.hpp"
 

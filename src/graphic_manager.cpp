@@ -180,9 +180,9 @@ void GraphicManager::showCompanionInfoDialog(
         buildDialogText(
             std::move(header),
             std::vector<std::string> {
-                std::format("name: {}", action->getName()),
-                std::format("ipAddress: {}", action->getIpAddress()),
-                std::format("port: {}", action->getClientPort())
+                getStringByFormat("name: {}", action->getName()),
+                getStringByFormat("ipAddress: {}", action->getIpAddress()),
+                getStringByFormat("port: {}", action->getClientPort())
             }),
         createOkButtonInfoVector(function));
 }

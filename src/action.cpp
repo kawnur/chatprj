@@ -1,7 +1,5 @@
 #include "action.hpp"
 
-#include <format>
-
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
@@ -79,7 +77,7 @@ CompanionAction::CompanionAction(ChatActionType type, std::shared_ptr<Companion>
 
         dialog_ = std::make_shared<TextDialog>(
             mainWindow, DialogType::WARNING,
-            std::vformat(sendChatHistoryToCompanionDialogText, std::make_format_args(name)),
+            getStringByFormat(sendChatHistoryToCompanionDialogText, name),
             getButtonInfoVector(sendChatHistoryButtonText));
 
     break;
@@ -341,7 +339,7 @@ void FileAction::sendData()
 
             getManager()->sendMessage(
                 MessageType::FILE, getCompanion(), shared_from_this(),
-                std::format("SEND FILE: {}", filePath_.filename().string()));
+                getStringByFormat("SEND FILE: {}", filePath_.filename().string()));
 
             getManager()->setLastOpenedPath(path.parent_path());
         }

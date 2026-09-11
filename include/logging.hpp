@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <filesystem>
-#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -15,6 +14,7 @@
 #include <QTime>
 
 #include "graphic_manager.hpp"
+#include "utils.hpp"
 #include "utils_cout.hpp"
 
 class DBReplyData;
@@ -88,10 +88,10 @@ void logArgs(Ts &&...args)
     coutArgsWithSpaceSeparator(text);
 }
 
-template<typename... Ts>
-void logArgsWithTemplate(const std::format_string<Ts...> &templateString, Ts &&...args)
+template<typename T, typename... Ts>
+void logArgsWithTemplate(T &&templateString, Ts &&...args)
 {
-    logArgs(std::format(templateString, std::forward<Ts>(args)...));
+    logArgs(getStringByFormat(templateString, args...));
 }
 
 template<typename... Ts>
@@ -118,22 +118,22 @@ void logArgsError(Ts &&...args)
     logArgs("ERROR:", args...);
 }
 
-template<typename... Ts>
-void logTemplateInfo(const std::format_string<Ts...> &templateString, Ts &&...args)
+template<typename T, typename... Ts>
+void logTemplateInfo(T &&templateString, Ts &&...args)
 {
-    logArgsInfo(std::format(templateString, std::forward<Ts>(args)...));
+    logArgsInfo(getStringByFormat(templateString, args...));
 }
 
-template<typename... Ts>
-void logTemplateWarning(const std::format_string<Ts...> &templateString, Ts &&...args)
+template<typename T, typename... Ts>
+void logTemplateWarning(T &&templateString, Ts &&...args)
 {
-    logArgsWarning(std::format(templateString, std::forward<Ts>(args)...));
+    logArgsWarning(getStringByFormat(templateString, args...));
 }
 
-template<typename... Ts>
-void logTemplateError(const std::format_string<Ts...> &templateString, Ts &&...args)
+template<typename T, typename... Ts>
+void logTemplateError(T &&templateString, Ts &&...args)
 {
-    logArgsError(std::format(templateString, std::forward<Ts>(args)...));
+    logArgsError(getStringByFormat(templateString, args...));
 }
 
 template<typename T>

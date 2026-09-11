@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <filesystem>
-#include <format>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -27,11 +26,11 @@ class MessageState;
 class MessageWidget;
 class WidgetGroup;
 
-template<typename... Ts>
-void logTemplateInfo(const std::format_string<Ts...>&, Ts&&...);
+template<typename T, typename... Ts>
+void logTemplateInfo(T &&templateString, Ts &&...args);
 
-template<typename... Ts>
-void logTemplateError(const std::format_string<Ts...>&, Ts&&...);
+template<typename T, typename... Ts>
+void logTemplateError(T &&templateString, Ts &&...args);
 
 using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 using MessageMappingIterator = MessageMapping::iterator;

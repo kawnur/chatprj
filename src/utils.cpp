@@ -13,6 +13,7 @@
 #include "companion.hpp"
 #include "db_interaction.hpp"
 #include "file_info.hpp"
+#include "logging.hpp"
 #include "message.hpp"
 #include "widgets_dialog.hpp"
 
@@ -104,7 +105,7 @@ std::string buildDialogText(std::string &&header, const std::vector<std::string>
     logArgs("messages.size():", messages.size());
 
     for (auto &message : messages)
-        text += std::format("- {}\n", message);
+        text += getStringByFormat("- {}\n", message);
 
     return text;
 }
@@ -172,7 +173,7 @@ void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> pare
 
 std::string getFormattedMessageBodyString(const std::string &color, const std::string &text)
 {
-    return std::format("<font color=\"{0}\"><br>{1}</font>", color, text);
+    return getStringByFormat("<font color=\"{0}\"><br>{1}</font>", color, text);
 }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
@@ -197,7 +198,7 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
         receiver = companionName;
     }
 
-    std::string header = std::format(
+    auto header = getStringByFormat(
         "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>",
         color, sender, receiver, time);
 
