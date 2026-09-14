@@ -5,7 +5,6 @@
 #include "action.hpp"
 #include "application.hpp"
 #include "companion.hpp"
-#include "db_interaction.hpp"
 #include "file_info.hpp"
 #include "logging.hpp"
 #include "message.hpp"
@@ -15,7 +14,8 @@
 using namespace std::string_literals;
 
 Manager::Manager()
-    : /*initialized_(false), */messageStateToMessageMapMutex_(), dbConnection_(nullptr),
+    : /*initialized_(false), */dbRequester_(logDBInteraction),
+    messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false)
 {
     mapCompanionToWidgetGroup_ =
@@ -212,6 +212,9 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
         }
 
         break;
+
+        default:
+            break;
         }
 
         auto timestamp = jsonData.at("time");
@@ -350,20 +353,12 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
             std::string message = jsonData["messages"][i]["message"];
             uint8_t companionId = companion->getId();
 
-            // check if message from this companion with such timestamp
-            // already exists
+            // check if message from this companion with such timestamp already exists
             auto messageGetData = getDBData(
-                log,
-                "getMessageByCompanionIdAndTimestampDBResult",
-                &getMessageByCompanionIdAndTimestampDBResult,
-                buildStringVector("id"),
-                companionId, timestamp);
+                DBRequestType::GET_MESSAGE_BY_COMPANION_ID_AND_TIMESTAMP, companionId, timestamp);
 
-            if (!messageGetData) {
-                showErrorDialogAndLogError("Error getting data from db");
-
+            if (!messageGetData)
                 return;
-            }
 
             if (!messageGetData->isEmpty()) {
                 showInfoDialogAndLogInfo(
@@ -379,24 +374,11 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
 
             // push message to db
             auto messageAddData = getDBData(
-                logDBInteraction,
-                "pushMessageToDBAndReturn",
-                &pushMessageToDBWithAuthorIdAndReturn,
-                buildStringVector("id", "companion_id", "timestamp_tz"),
-                companion->getName(), std::to_string(authorId), timestamp,
-                idString, message, true, true);
+                DBRequestType::PUSH_MESSAGE_AND_RETURN, companion->getName(),
+                std::to_string(authorId), timestamp, idString, message, true, true);
 
-            if (!messageAddData) {
-                showErrorDialogAndLogError("Error getting data from db");
-
+            if (!messageAddData || messageAddData->isEmpty())
                 return;
-            }
-
-            if (messageAddData->isEmpty()) {
-                showErrorDialogAndLogError("Error pushing chat history to db");
-
-                return;
-            }
         }
 
         // clear chat history widget
@@ -504,6 +486,9 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
     }
 
     break;
+
+    default:
+        break;
     }
 }
 
@@ -520,18 +505,10 @@ void Manager::addEarlyMessages(std::shared_ptr<Companion> companion)
 
     // get messages data
     auto messagesData = getDBData(
-        logDBInteraction,
-        "getEarlyMessagesByMessageIdDBResult",
-        &getEarlyMessagesByMessageIdDBResult,
-        buildStringVector(
-            "id", "companion_id", "author_id", "timestamp_tz", "message", "is_sent", "is_received"),
-        companionId, messageId);
+        DBRequestType::GET_EARLY_MESSAGES_BY_MESSAGE_ID, companionId, messageId);
 
-    if (!messagesData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!messagesData)
         return;
-    }
 
     if (messagesData->isEmpty()) {
         logTemplateWarning(
@@ -614,24 +591,10 @@ void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
     auto clientPortStr = action->getClientPort();
 
     // push companion data to db
-    auto companionIdData = getDBData(
-        logDBInteraction,
-        "pushCompanionToDBAndReturn",
-        &pushCompanionToDBAndReturn,
-        buildStringVector("id"),
-        name);
+    auto companionIdData = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, name);
 
-    if (!companionIdData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionIdData || companionIdData->isEmpty())
         return;
-    }
-
-    if (companionIdData->isEmpty()) {
-        showErrorDialogAndLogError("Empty db reply to new companion pushing");
-
-        return;
-    }
 
     int id = std::stoi(companionIdData->getValue(0, "id"));
 
@@ -639,23 +602,11 @@ void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
     uint16_t serverPort = 5000 + id + 1;  // TODO change
 
     auto socketData = getDBData(
-        logDBInteraction,
-        "pushSocketToDB",
-        &pushSocketToDBAndReturn,
-        buildStringVector("id"),
-        name, ipAddress, std::to_string(serverPort), clientPortStr);
+        DBRequestType::PUSH_SOCKET_AND_RETURN, name, ipAddress, std::to_string(serverPort),
+        clientPortStr);
 
-    if (!socketData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!socketData || socketData->isEmpty())
         return;
-    }
-
-    if (socketData->isEmpty()) {
-        showErrorDialogAndLogError("Empty db reply to new socket pushing");
-
-        return;
-    }
 
     // create Companion object
     auto companion = addCompanionObject(id, name);
@@ -686,23 +637,11 @@ void Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
 
     // update companion data at db
     auto companionIdData = getDBData(
-        logDBInteraction,
-        "updateCompanionAndSocketAndReturn",
-        &updateCompanionAndSocketAndReturn,
-        buildStringVector("id"),
-        *action);
+        DBRequestType::UPDATE_COMPANION_AND_SOCKET_AND_RETURN, action->getName(),
+        action->getCompanionId(), action->getIpAddress(), action->getClientPort());
 
-    if (!companionIdData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionIdData || companionIdData->isEmpty())
         return;
-    }
-
-    if (companionIdData->isEmpty()) {
-        showErrorDialogAndLogError("Empty db reply to companion update");
-
-        return;
-    }
 
     // update Companion and SocketInfo object
     action->updateCompanionObjectData();
@@ -719,17 +658,10 @@ void Manager::deleteCompanion(std::shared_ptr<CompanionAction> action)
 {
     // delete companion chat messages from db
     auto companionIdMessagesData = getDBData(
-        logDBInteraction,
-        "deleteMessagesFromDBAndReturn",
-        &deleteMessagesFromDBAndReturn,
-        buildStringVector("id"),
-        *action);
+        DBRequestType::DELETE_MESSAGES_AND_RETURN, action->getCompanionId());
 
-    if (!companionIdMessagesData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionIdMessagesData)
         return;
-    }
 
     if (companionIdMessagesData->isEmpty()) {
         // no return, may be companion without messages
@@ -738,23 +670,10 @@ void Manager::deleteCompanion(std::shared_ptr<CompanionAction> action)
 
     // delete companion and socket from db
     auto companionIdCompanionData = getDBData(
-        logDBInteraction,
-        "deleteCompanionAndSocketAndReturn",
-        &deleteCompanionAndSocketAndReturn,
-        buildStringVector("id"),
-        *action);
+        DBRequestType::DELETE_COMPANION_AND_SOCKET_AND_RETURN, action->getCompanionId());
 
-    if (!companionIdCompanionData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionIdCompanionData || companionIdCompanionData->isEmpty())
         return;
-    }
-
-    if (companionIdCompanionData->isEmpty()) {
-        showErrorDialogAndLogError("Empty db reply to companion deletion");
-
-        return;
-    }
 
     // delete companion object
     deleteCompanionObject(action->getCompanion());
@@ -773,17 +692,10 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
 {
     // delete companion chat messages from db
     auto companionIdMessagesData = getDBData(
-        logDBInteraction,
-        "deleteMessagesFromDBAndReturn",
-        &deleteMessagesFromDBAndReturn,
-        buildStringVector("companion_id"),
-        *action);
+        DBRequestType::DELETE_MESSAGES_AND_RETURN, action->getCompanionId());
 
-    if (!companionIdMessagesData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionIdMessagesData)
         return;
-    }
 
     if (companionIdMessagesData->isEmpty()) {
         // no return, may be companion without messages
@@ -807,24 +719,10 @@ void Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
         return;
 
     // push password data to db
-    auto passwordIdData = getDBData(
-        logDBInteraction,
-        "pushPasswordToDBAndReturn",
-        &pushPasswordToDBAndReturn,
-        buildStringVector("id"),
-        action->getPassword());
+    auto passwordIdData = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
 
-    if (!passwordIdData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!passwordIdData || passwordIdData->isEmpty())
         return;
-    }
-
-    if (passwordIdData->isEmpty()) {
-        showErrorDialogAndLogError("Empty db reply to new password pushing");
-
-        return;
-    }
 
     // show dialog
     showInfoDialogAndLogInfo(
@@ -837,36 +735,22 @@ void Manager::authenticateUser(std::shared_ptr<PasswordAction> action)
     auto graphicManager = getGraphicManager();
 
     // do we have password in db?
-    auto passwordData = getDBData(
-        logDBInteraction,
-        "getPasswordDBResult",
-        &getPasswordDBResult,
-        buildStringVector("id", "password"));
+    auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
 
-    if (!passwordData) {
-        showErrorDialogAndLogError("Error getting password from db");
+    if (!passwordData || passwordData->isEmpty())
+        return;
+
+    if (passwordData->getValue(0, "password") != action->getPassword()) {
+        showErrorDialogAndLogError("Password is not correct");
 
         return;
     }
 
-    if (passwordData->isEmpty()) {
-        showErrorDialogAndLogError("Db password data is empty");
+    userIsAuthenticated_ = true;
 
-        return;
-    }
-    else {
-        if (passwordData->getValue(0, "password") == action->getPassword()) {
-            userIsAuthenticated_ = true;
+    logArgsInfo("user successfully authenticated");
 
-            logArgsInfo("user successfully authenticated");
-            graphicManager->disableMainWindowBlurEffect();
-        }
-        else {
-            showErrorDialogAndLogError("Password is not correct");
-
-            return;
-        }
-    }
+    graphicManager->disableMainWindowBlurEffect();
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -891,17 +775,10 @@ void Manager::startUserAuthentication()
     graphicManager->enableMainWindowBlurEffect();
 
     // do we have password in db?
-    auto passwordData = getDBData(
-        logDBInteraction,
-        "getPasswordDBResult",
-        &getPasswordDBResult,
-        buildStringVector("id", "password"));
+    auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
 
-    if (!passwordData) {
-        showErrorDialogAndLogError("Error getting password from db");
-
+    if (!passwordData)
         return;
-    }
 
     if (passwordData->isEmpty())
         graphicManager->createEntrancePassword();
@@ -913,25 +790,10 @@ void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
 {
     // get unsent messages from db
     auto messagesData = getDBData(
-        logDBInteraction,
-        "getUnsentMessagesByCompanionNameDBResult",
-        &getUnsentMessagesByCompanionNameDBResult,
-        buildStringVector(
-            "id", "author_id", "companion_id", "timestamp_tz",
-            "message", "is_received"),
-        companion->getName());
+        DBRequestType::GET_UNSENT_MESSAGES_BY_COMPANION_NAME, companion->getName());
 
-    if (!messagesData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!messagesData || messagesData->isEmpty())
         return;
-    }
-
-    if (messagesData->isEmpty()) {
-        logArgsInfo("Empty db reply to unsent messages selection");
-
-        return;
-    }
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
         uint32_t messageId = std::stoi(messagesData->getValue(i, "id"));
@@ -985,28 +847,14 @@ void Manager::sendChatHistoryToCompanion(std::shared_ptr<Companion> companion)
 {
     logArgs(__FUNCTION__);
 
-    std::vector<std::string> keys =
-        buildStringVector("author_id", "timestamp_tz", "message");
+    auto keys = buildStringVector("author_id", "timestamp_tz", "message");
 
     // get messages from db
     auto messagesData = getDBData(
-        logDBInteraction,
-        "getAllMessagesByCompanionIdDBResult",
-        &getAllMessagesByCompanionIdDBResult,
-        keys,
-        companion->getId());
+        DBRequestType::GET_ALL_MESSAGES_BY_COMPANION_ID, companion->getId());
 
-    if (!messagesData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!messagesData || messagesData->isEmpty())
         return;
-    }
-
-    if (messagesData->isEmpty()) {
-        logArgsInfo("Empty db reply to messages selection");
-
-        return;
-    }
 
     bool result = companion->sendChatHistory(messagesData, keys);
 }
@@ -1048,28 +896,10 @@ void Manager::fillCompanionMessageMapping(
     uint8_t companionId = companion->getId();
 
     // get messages data
-    auto messagesData = getDBData(
-        logDBInteraction,
-        "getMessagesDBResult",
-        &getMessagesDBResult,
-        buildStringVector(
-            "id", "companion_id", "author_id",
-            "timestamp_tz", "message", "is_sent", "is_received"),
-        companionId);
+    auto messagesData = getDBData(DBRequestType::GET_MESSAGES, companionId);
 
-    if (!messagesData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
-        // return false;
+    if (!messagesData || messagesData->isEmpty())
         return;
-    }
-
-    if (messagesData->isEmpty()) {
-        logTemplateWarning("no messages in db with companion {}", companion->getName());
-
-        // return false;
-        return;
-    }
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
         auto messageId = std::stoi(messagesData->getValue(i, "id"));
@@ -1113,11 +943,7 @@ bool Manager::buildCompanions()
     bool companionsDataIsOk = true;
 
     // get companion data
-    auto companionsData = getDBData(
-        logDBInteraction,
-        "getCompanionsDBResult",
-        &getCompanionsDBResult,
-        buildStringVector("id", "name"));
+    auto companionsData = getDBData(DBRequestType::GET_COMPANIONS);
 
     if (!companionsData)
         return false;
@@ -1144,22 +970,25 @@ bool Manager::buildCompanions()
         }
 
         // get socket data object
-        auto socketsData = getDBData(
-            logDBInteraction,
-            "getSocketInfoDBResult",
-            &getSocketInfoDBResult,
-            buildStringVector("ipaddress", "server_port", "client_port"),
-            id);
+        // auto socketsData = getDBData(
+        //     logDBInteraction,
+        //     "getSocketInfoDBResult",
+        //     &getSocketInfoDBResult,
+        //     buildStringVector("ipaddress", "server_port", "client_port"),
+        //     id);
 
-        if (socketsData->size() > 0) {
-            // TODO use port number pool
-            auto socketInfo = std::make_shared<SocketInfo>(
-                socketsData->getValue(0, "ipaddress"),
-                std::stoi(socketsData->getValue(0, "server_port")),
-                std::stoi(socketsData->getValue(0, "client_port")));
+        auto socketsData = getDBData(DBRequestType::GET_SOCKET_INFO, id);
 
-            companion->setSocketInfo(socketInfo);
-        }
+        if (!socketsData || socketsData->isEmpty())
+            return false;
+
+        // TODO use port number pool
+        auto socketInfo = std::make_shared<SocketInfo>(
+            socketsData->getValue(0, "ipaddress"),
+            std::stoi(socketsData->getValue(0, "server_port")),
+            std::stoi(socketsData->getValue(0, "client_port")));
+
+        companion->setSocketInfo(socketInfo);
 
         if (companion->getId() > 1) {  // TODO change condition
             fillCompanionMessageMapping(companion, false);
@@ -1291,18 +1120,10 @@ bool Manager::checkCompanionDataForExistanceAtCreation(
     std::shared_ptr<CompanionAction> action)
 {
     // check if companion with such name already exists
-    auto companionIdData = getDBData(
-        logDBInteraction,
-        "getCompanionByNameDBResult",
-        &getCompanionByNameDBResult,
-        buildStringVector("id"),
-        action->getName());
+    auto companionIdData = getDBData(DBRequestType::GET_COMPANION_BY_NAME, action->getName());
 
-    if (!companionIdData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionIdData)
         return false;
-    }
 
     if (!companionIdData->isEmpty()) {
         showErrorDialogAndLogError("Companion with such name already exists");
@@ -1312,18 +1133,11 @@ bool Manager::checkCompanionDataForExistanceAtCreation(
 
     // check if such socket already exists
     auto socketIdData = getDBData(
-        logDBInteraction,
-        "getSocketByIpAddressAndPortDBResult",
-        &getSocketByIpAddressAndPortDBResult,
-        buildStringVector("id"),
-        action->getIpAddress(),
+        DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT, action->getIpAddress(),
         action->getClientPort());
 
-    if (!socketIdData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!socketIdData)
         return false;
-    }
 
     if (!socketIdData->isEmpty()) {
         showErrorDialogAndLogError("Companion with such socket already exists");
@@ -1338,18 +1152,10 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(
     std::shared_ptr<CompanionAction> action)
 {
     // check if companion with such name already exists
-    auto companionData = getDBData(
-        logDBInteraction,
-        "getCompanionByNameDBResult",
-        &getCompanionByNameDBResult,
-        buildStringVector("id"),
-        action->getName());
+    auto companionData = getDBData(DBRequestType::GET_COMPANION_BY_NAME, action->getName());
 
-    if (!companionData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!companionData)
         return false;
-    }
 
     bool findNameResult = companionData->findValue("id"s, std::to_string(action->getCompanionId()));
 
@@ -1363,18 +1169,11 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(
 
     // check if such socket already exists
     auto socketData = getDBData(
-        logDBInteraction,
-        "getSocketByIpAddressAndPortDBResult",
-        &getSocketByIpAddressAndPortDBResult,
-        buildStringVector("id"),
-        action->getIpAddress(),
+        DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT, action->getIpAddress(),
         action->getClientPort());
 
-    if (!socketData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!socketData)
         return false;
-    }
 
     bool findSocketResult = socketData->findValue("id"s, std::to_string(action->getCompanionId()));
 
@@ -1423,18 +1222,10 @@ bool Manager::markMessageAsSent(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
     // mark in db
-    auto messageIdData = getDBData(
-        logDBInteraction,
-        "setMessageInDbAndReturn",
-        &setMessageIsSentInDbAndReturn,
-        buildStringVector("id"),
-        message->getId());
+    auto messageIdData = getDBData(DBRequestType::SET_MESSAGE_IS_SENT_AND_RETURN, message->getId());
 
-    if (!messageIdData) {
-        showErrorDialogAndLogError("Error updating data in db");
-
+    if (!messageIdData)
         return false;
-    }
 
     // mark in widget
     getGraphicManager()->markMessageWidgetAsSent(companion, message);
@@ -1450,23 +1241,10 @@ bool Manager::markMessageAsReceived(
 
     // mark in db
     auto messageIdData = getDBData(
-        logDBInteraction,
-        "setMessageIsReceivedInDbAndReturn",
-        &setMessageIsReceivedInDbAndReturn,
-        buildStringVector("id"),
-        message->getId());
+        DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, message->getId());
 
-    if (!messageIdData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!messageIdData || messageIdData->isEmpty())
         return false;
-    }
-
-    if (messageIdData->isEmpty()) {
-        showErrorDialogAndLogError("Error setting message is_received in Db");
-
-        return false;
-    }
 
     return true;
 }
@@ -1478,24 +1256,11 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     const std::string companionIdString("companion_id");
 
     auto messageData = getDBData(
-        logDBInteraction,
-        "pushMessageToDBAndReturn",
-        &pushMessageToDBAndReturn,
-        buildStringVector("id", "companion_id", "timestamp_tz"),
-        companionName, authorName, timestamp, companionIdString, text,
-        isSent, isReceived);
+        DBRequestType::PUSH_MESSAGE_AND_RETURN, companionName, authorName, timestamp,
+        companionIdString, text, isSent, isReceived);
 
-    if (!messageData) {
-        showErrorDialogAndLogError("Error getting data from db");
-
+    if (!messageData || messageData->isEmpty())
         return std::tuple<uint32_t, uint8_t, std::string>(0, 0, "");
-    }
-
-    if (messageData->isEmpty()) {
-        logArgsError("messageData->isEmpty()");
-
-        return std::tuple<uint32_t, uint8_t, std::string>(0, 0, "");
-    }
 
     uint32_t id = std::stoi(messageData->getValue(0, "id"));
     uint8_t companionId = std::stoi(messageData->getValue(0, "companion_id"));

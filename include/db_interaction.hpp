@@ -5,11 +5,15 @@
 #include <libpq-fe.h>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <QString>
+
+#include "db_constants.hpp"
+#include "logging.hpp"
 
 class Companion;
 class CompanionAction;
@@ -17,8 +21,20 @@ class CompanionAction;
 class DBRequestData
 {
 public:
-    DBRequestData(const std::vector<std::string> &data);
-    ~DBRequestData() = default;
+    DBRequestData(DBRequestType type);
+    ~DBRequestData() { logArgsInfo(__FUNCTION__); }
+
+    std::string getLogMark() const;
+    std::vector<std::string> getReplyKeys() const;
+
+    bool isValid();
+    std::string getReplyKeysString();
+
+    template<typename... Ts>
+    std::string buildCommand(Ts &&...args)
+    {
+        return getStringByFormat(requestTemplate_, getReplyKeysString(), args...);
+    }
 
 private:
     std::string logMark_;
@@ -29,8 +45,8 @@ private:
 class DBReplyData
 {
 public:
-    DBReplyData(int count, ...);
-    DBReplyData(const std::vector<std::string> &keys);
+    DBReplyData(bool log, int count, ...);
+    DBReplyData(bool log, const std::vector<std::string> &keys);
     ~DBReplyData() = default;
 
     std::vector<std::string> buildDataStringVector();
@@ -41,96 +57,75 @@ public:
     void push(std::size_t, std::string, const std::string &value);
     std::size_t size();
     std::string getValue(std::size_t, std::string);
-    bool findValue(const std::string&, const std::string &);    
+    bool findValue(const std::string&, const std::string &);
+
+    int getDataFromResult(std::shared_ptr<PGresult> result, int maxTuples);
 
 private:
+    bool log_;
     std::vector<std::map<std::string, std::string>> data_;
+};
+
+class DBRequester
+{
+public:
+    DBRequester(bool log);
+    ~DBRequester() = default;
+
+    template<typename... Ts>
+    std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
+    {
+        DBRequestData requestData { type };
+
+        if (!requestData.isValid()) {
+            logArgsError("requestData is invalid");
+
+            return nullptr;
+        }
+
+        auto command = requestData.buildCommand(args...);
+        std::shared_ptr<PGresult> dbResult = sendRequestAndReturnResult(command);
+
+        if (log_) {
+            logArgs(logDelimiter);
+            logArgs(requestData.getLogMark());
+            logArgs("dbResult:", dbResult);
+        }
+
+        if (!dbResult) {
+            showErrorDialogAndLogError("Database request error, dbResult is nullptr");
+
+            return nullptr;
+        }
+
+        auto replyData = std::make_shared<DBReplyData>(log_, requestData.getReplyKeys());
+
+        if (replyData->getDataFromResult(dbResult, 0) == -1) {
+            showErrorDialogAndLogError("Error getting data from dbResult");
+
+            return nullptr;
+        }
+
+        if (log_) {
+            // logArgs("dbData->size():", dbData->size());
+            logDBReplyData(replyData);
+            logArgs(logDelimiter);
+        }
+
+        return replyData;
+    }
+
+    std::shared_ptr<PGresult> sendRequestAndReturnResult(const std::string &command);
+
+private:
+    bool log_;
+    std::mutex mutex_;  // ???
+    std::shared_ptr<PGconn> connection_;
 };
 
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
 const char *getValueFromEnvironmentVariableAlt1(std::string &&variableName);
 const char *getPQArg(const std::optional<std::string> &value);
 std::shared_ptr<PGconn> getDBConnection();
-
-std::shared_ptr<PGresult> sendDBRequestAndReturnResult(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &command);
-
-std::shared_ptr<PGresult> getCompanionsDBResult(std::shared_ptr<PGconn> connection, bool log);
-
-std::shared_ptr<PGresult> getCompanionByNameDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &name);
-
-std::shared_ptr<PGresult> getCompanionAndSocketDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const int &id);
-
-std::shared_ptr<PGresult> getSocketInfoDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const int &id);
-
-std::shared_ptr<PGresult> getSocketByIpAddressAndPortDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &ipAddress,
-    const std::string &port);
-
-std::shared_ptr<PGresult> getMessagesDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const uint8_t &companionId);
-
-std::shared_ptr<PGresult> getAllMessagesByCompanionIdDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const int &companionId);
-
-std::shared_ptr<PGresult> getEarlyMessagesByMessageIdDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const int &companionId,
-    const uint32_t &messageId);
-
-std::shared_ptr<PGresult> getMessageByCompanionIdAndTimestampDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const uint8_t &companionId,
-    const std::string &timestamp);
-
-std::shared_ptr<PGresult> getUnsentMessagesByCompanionNameDBResult(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &companionName);
-
-std::shared_ptr<PGresult> getPasswordDBResult(std::shared_ptr<PGconn> connection, bool log);
-
-std::shared_ptr<PGresult> setMessageIsSentInDbAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const uint32_t &messageId);
-
-std::shared_ptr<PGresult> setMessageIsReceivedInDbAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const uint32_t &messageId);
-
-std::shared_ptr<PGresult> pushCompanionToDBAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &companionName);
-
-std::shared_ptr<PGresult> updateCompanionAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &companionName);
-
-std::shared_ptr<PGresult> updateCompanionAndSocketAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const CompanionAction &action);
-
-std::shared_ptr<PGresult> pushSocketToDBAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &companionName,
-    const std::string &ipAddress, const std::string &serverPort, const std::string &clientPort);
-
-std::shared_ptr<PGresult> pushMessageToDBAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &companionName,
-    const std::string &authorName, const std::string &timestamp,
-    const std::string &returningFieldName, const std::string &message, const bool &isSent,
-    const bool &isReceived);
-
-std::shared_ptr<PGresult> pushMessageToDBWithAuthorIdAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &companionName,
-    const std::string &authorIdString, const std::string &timestamp,
-    const std::string &returningFieldName, const std::string &message, const bool &isSent,
-    const bool &isReceived);
-
-std::shared_ptr<PGresult> pushPasswordToDBAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const std::string &password);
-
-std::shared_ptr<PGresult> deleteMessagesFromDBAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const CompanionAction &action);
-
-std::shared_ptr<PGresult> deleteCompanionAndSocketAndReturn(
-    std::shared_ptr<PGconn> connection, bool log, const CompanionAction &action);
-
-int getDataFromDBResult(
-    bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result,
-    int maxTuples);
 
 #endif // DB_INTERACTION_HPP

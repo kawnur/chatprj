@@ -13,11 +13,14 @@
 #include <QWidget>
 
 #include "constants.hpp"
+#include "db_constants.hpp"
+#include "db_interaction.hpp"
 
 class Action;
 class Companion;
 class CompanionAction;
 class DBReplyData;
+class DBRequester;
 class Message;
 class MessageState;
 class PasswordAction;
@@ -109,45 +112,63 @@ private:
         const std::string &timestamp, const std::string &text, const bool &isSent,
         const bool &isReceived);
 
-    // TODO use std::function instead of function ptr
-    template<typename T, typename... Ts>
-    std::shared_ptr<DBReplyData> getDBData(
-        bool log, std::string &&mark,
-        std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, bool, const Ts&...),
-        T &&keys, const Ts&... args)
+    // // TODO use std::function instead of function ptr
+    // template<typename T, typename... Ts>
+    // std::shared_ptr<DBReplyData> getDBData(
+    //     bool log, std::string &&mark,
+    //     std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, bool, const Ts&...),
+    //     T &&keys, const Ts&... args)
+    // {
+    //     std::shared_ptr<PGresult> dbResult = func(dbConnection_, log, args...);
+
+    //     if (log) {
+    //         logArgs(logDelimiter);
+    //         logArgs(mark);
+    //         logArgs("dbResult:", dbResult);
+    //     }
+
+    //     if (!dbResult) {
+    //         showErrorDialogAndLogError("Database request error, dbResult is nullptr");
+
+    //         return nullptr;
+    //     }
+
+    //     auto dbData = std::make_shared<DBReplyData>(std::forward<T>(keys));
+
+    //     if (getDataFromDBResult(log, dbData, dbResult, 0) == -1) {
+    //         showErrorDialogAndLogError("Error getting data from dbResult");
+
+    //         return nullptr;
+    //     }
+
+    //     if (log) {
+    //         // logArgs("dbData->size():", dbData->size());
+    //         logDBReplyData(dbData);
+    //         logArgs(logDelimiter);
+    //     }
+
+    //     return dbData;
+    // }
+
+    template<typename... Ts>
+    std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
     {
-        std::shared_ptr<PGresult> dbResult = func(dbConnection_, log, args...);
+        auto data = dbRequester_.getDBData(type, args...);
 
-        if (log) {
-            logArgs(logDelimiter);
-            logArgs(mark);
-            logArgs("dbResult:", dbResult);
-        }
-
-        if (!dbResult) {
-            showErrorDialogAndLogError("Database request error, dbResult is nullptr");
+        if (!data) {
+            showErrorDialogAndLogError("Error getting data from db");
 
             return nullptr;
         }
 
-        auto dbData = std::make_shared<DBReplyData>(std::forward<T>(keys));
+        if (data->isEmpty())
+            showErrorDialogAndLogError("DB reply is empty");
 
-        if (getDataFromDBResult(log, dbData, dbResult, 0) == -1) {
-            showErrorDialogAndLogError("Error getting data from dbResult");
-
-            return nullptr;
-        }
-
-        if (log) {
-            // logArgs("dbData->size():", dbData->size());
-            logDBReplyData(dbData);
-            logArgs(logDelimiter);
-        }
-
-        return dbData;
+        return data;
     }
 
     // bool initialized_;
+    DBRequester dbRequester_;
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;

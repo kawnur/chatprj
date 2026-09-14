@@ -101,6 +101,12 @@ void logArgsInfo(Ts &&...args)
 }
 
 template<typename... Ts>
+void logArgsDebug(Ts &&...args)
+{
+    logArgs("DEBUG:", args...);
+}
+
+template<typename... Ts>
 void logArgsException(Ts &&...args)
 {
     logArgs("EXCEPTION:", args...);
@@ -122,6 +128,12 @@ template<typename T, typename... Ts>
 void logTemplateInfo(T &&templateString, Ts &&...args)
 {
     logArgsInfo(getStringByFormat(templateString, args...));
+}
+
+template<typename T, typename... Ts>
+void logTemplateDebug(T &&templateString, Ts &&...args)
+{
+    logArgsDebug(getStringByFormat(templateString, args...));
 }
 
 template<typename T, typename... Ts>

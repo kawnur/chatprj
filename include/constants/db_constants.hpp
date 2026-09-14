@@ -31,13 +31,13 @@ enum class DBRequestType
     DELETE_COMPANION_AND_SOCKET_AND_RETURN
 };
 
-std::map<DBRequestType, std::vector<std::string>> dbRequestDataMap {
+static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_MAP {
     {
         DBRequestType::GET_COMPANIONS,
         {
-            "getCompanionsDBResult",            // log mark
+            "getCompanionsDBResult",      // log mark
             "SELECT {} FROM companions",  // request
-            "id", "name"                        // reply data keys
+            "id", "name"                  // reply data keys
         }
     },
     {
@@ -170,7 +170,7 @@ std::map<DBRequestType, std::vector<std::string>> dbRequestDataMap {
         DBRequestType::UPDATE_COMPANION_AND_SOCKET_AND_RETURN,
         {
             "updateCompanionAndSocketAndReturn",
-            "WITH update_name AS (UPDATE companions SET name = '{1}' WHERE id = {0} "  // ???
+            "WITH update_name AS (UPDATE companions SET name = '{1}' WHERE id = {2} "  // ???
             "RETURNING id) UPDATE sockets SET ipaddress = '{3}', client_port = '{4}' "
             "WHERE id IN (SELECT id FROM update_name) RETURNING id",
             "id"
