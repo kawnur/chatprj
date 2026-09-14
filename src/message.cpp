@@ -1,10 +1,31 @@
 #include "message.hpp"
 
+#include "logging.hpp"
+
+bool MessageMetaData::isValid()
+{
+    if (companionId_ == 0 || timestampTz_ == "") {
+        logArgsError("MessageMetaData is invalid, error adding message to db");
+
+        return false;
+    }
+
+    return true;
+}
+
 Message::Message(
-    MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,
-    const std::string &text)
-    : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
-    text_(text) {}
+    MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/
+     const MessageMetaData &meta, const std::string &text)
+    // : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
+    // text_(text) {}
+{
+    type_ = type;
+    id_ = meta.messageId_;
+    companion_id_ = meta.companionId_;
+    author_id_ = meta.authorId_;
+    time_ = meta.timestampTz_;
+    text_ = text;
+}
 
 MessageType Message::getType() const
 {

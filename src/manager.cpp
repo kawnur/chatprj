@@ -5,7 +5,6 @@
 #include "action.hpp"
 #include "application.hpp"
 #include "companion.hpp"
-#include "file_info.hpp"
 #include "logging.hpp"
 #include "message.hpp"
 #include "widgets.hpp"
@@ -16,14 +15,8 @@ using namespace std::string_literals;
 Manager::Manager()
     : /*initialized_(false), */dbRequester_(logDBInteraction),
     messageStateToMessageMapMutex_(), dbConnection_(nullptr),
-    userIsAuthenticated_(false)
-{
-    mapCompanionToWidgetGroup_ =
-        std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>();
-
-    selectedCompanion_ = nullptr;
-    lastOpenedPath_ = homePath;
-}
+    userIsAuthenticated_(false), selectedCompanion_(nullptr), mapCompanionToWidgetGroup_(),
+    lastOpenedPath_(homePath) {}
 
 Manager::~Manager()
 {
@@ -46,6 +39,7 @@ void Manager::set()
     // logArgs("connectedToDB:", connectedToDB);
 
     if (!connectedToDB) {
+        // TODO add dialog with retry button
         showErrorDialogAndLogError("problem with DB connection");
 
         return;
@@ -73,7 +67,7 @@ std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
 
     auto result = std::ranges::find_if(mapCompanionToWidgetGroup_, lambda);
 
-    return result->second.first;
+    return (result == mapCompanionToWidgetGroup_.end()) ? nullptr : result->second.first;
 }
 
 std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(
@@ -81,10 +75,15 @@ std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(
 {
     std::shared_ptr<WidgetGroup> group = nullptr;
 
+    auto id = companion->getId();
+
     try {
-        group = mapCompanionToWidgetGroup_.at(companion->getId()).second;
+        group = mapCompanionToWidgetGroup_.at(id).second;
+    } catch(std::out_of_range) {
+        logTemplateError("mapCompanionToWidgetGroup_ does not conain id {0}", id);
+
+        return nullptr;
     }
-    catch(std::out_of_range) {}
 
     return group;
 }
@@ -95,23 +94,20 @@ void Manager::sendMessage(
 {
     auto group = getMappedWidgetGroupByCompanion(companion);
 
+    if (!group)
+        return;
+
     // encrypt message
 
     // add to DB and get timestamp
-    auto tuple = pushMessageToDB(companion->getName(), "me"s, "now()"s, text, false, false);
+    auto meta = pushMessageToDB(companion->getName(), "me"s, "now()"s, text, false, false);
 
-    uint32_t id = std::get<0>(tuple);
-    uint8_t companion_id = std::get<1>(tuple);
-    std::string timestamp = std::get<2>(tuple);
-
-    if (companion_id == 0 || timestamp == "") {
-        logArgsError("error adding message to db");
-
+    if (!meta.isValid())
         return;
-    }
 
-    auto pair = companion->createMessageAndAddToMapping(
-        type, id, 1, timestamp, text, false, false, false, "");
+    meta.authorId_ = 1;
+
+    auto pair = companion->createMessageAndAddToMapping(type, meta, text, false, false, false, "");
 
     if (!pair.second)
         return;
@@ -219,20 +215,13 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
         auto name = companion->getName();
 
         // add to DB and get timestamp
-        auto tuple = pushMessageToDB(name, name, timestamp, text, false, true);
+        auto meta = pushMessageToDB(name, name, timestamp, text, false, true);
 
-        uint32_t id = std::get<0>(tuple);
-        uint8_t companion_id = std::get<1>(tuple);
-
-        if (companion_id == 0 || timestamp == "") {
-            logArgsError("error adding message to db");
-
+        if (!meta.isValid())
             return;
-        }
 
         auto pair = companion->createMessageAndAddToMapping(
-            messageType, id, companion_id, timestamp, text, isAntecedent, false, true,
-            networkId);
+            messageType, meta, text, isAntecedent, false, true, networkId);
 
         if (pair.second)
             return;
@@ -813,11 +802,12 @@ void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
             // add to companion's messages if needed
             networkId = getRandomString(5);
 
+            MessageMetaData meta(
+                messageId, companion->getId(), 1, messagesData->getValue(i, "timestamp_tz"));
+
             companion->createMessageAndAddToMapping(
                 MessageType::TEXT,
-                messageId,
-                1,
-                messagesData->getValue(i, "timestamp_tz"),
+                meta,
                 messagesData->getValue(i, "message"),
                 false,
                 false,
@@ -1006,7 +996,7 @@ void Manager::buildWidgetGroups()
         // hide companion panel stub widget
         graphicManager->hideCompanionPanelStub();
 
-        for (auto &pair : mapCompanionToWidgetGroup_)
+        for (const auto &pair : mapCompanionToWidgetGroup_)
             createWidgetGroupAndAddToMapping(pair.second.first);
     }
 }
@@ -1015,6 +1005,7 @@ std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string
 {
     if (id == 0) {
         logArgsError("companion id == 0");
+
         return nullptr;
     }
 
@@ -1230,7 +1221,7 @@ bool Manager::markMessageAsReceived(
     return true;
 }
 
-std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
+MessageMetaData Manager::pushMessageToDB(
     const std::string &companionName, const std::string &authorName, const std::string &timestamp,
     const std::string &text, const bool &isSent, const bool &isReceived)
 {
@@ -1241,7 +1232,7 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
         companionIdString, text, isSent, isReceived);
 
     if (!messageData || messageData->isEmpty())
-        return std::tuple<uint32_t, uint8_t, std::string>(0, 0, "");
+        return MessageMetaData(0, 0, 0, "");
 
     uint32_t id = std::stoi(messageData->getValue(0, "id"));
     uint8_t companionId = std::stoi(messageData->getValue(0, "companion_id"));
@@ -1250,7 +1241,7 @@ std::tuple<uint32_t, uint8_t, std::string> Manager::pushMessageToDB(
     if (logDBInteraction)
         logArgsWithTemplate("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
 
-    return std::tuple<uint32_t, uint8_t, std::string>(id, companionId, timestampTz);
+    return MessageMetaData(id, companionId, 0, timestampTz);
 }
 
 std::shared_ptr<Manager> getManager()

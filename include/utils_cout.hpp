@@ -73,12 +73,18 @@ void coutWithManipulators(T &&value)
 }
 
 template<typename T>
-std::string argForCout(const T * const value)
+std::string argForCout(T *&value)
 {
     std::stringstream ss;
     ss << (void *)value;
 
     return ss.str();
+}
+
+template<typename T>
+std::string argForCout(std::shared_ptr<T> value)
+{
+    return argForCout(*value);
 }
 
 template<typename T>

@@ -9,12 +9,24 @@
 
 class MessageWidget;
 
+class MessageMetaData
+{
+public:
+    bool isValid();
+
+    uint32_t messageId_;
+    uint8_t companionId_;
+    uint8_t authorId_;
+    std::string timestampTz_;
+};
+
 class Message
 {
 public:
     Message(
-        MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
-        const std::string &time, const std::string &text);
+        // MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
+        // const std::string &time, const std::string &text);
+        MessageType type, const MessageMetaData &meta, const std::string &text);
 
     ~Message() = default;
 
@@ -78,7 +90,7 @@ public:
 
 private:
     std::shared_ptr<MessageState> state_;
-    std::shared_ptr<MessageWidget> widget_;    
+    std::shared_ptr<MessageWidget> widget_;
 };
 
 #endif // MESSAGE_HPP

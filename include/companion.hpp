@@ -22,6 +22,7 @@ class FileOperatorStorage;
 class FileMessageWidget;
 class Message;
 class MessageInfo;
+class MessageMetaData;
 class MessageState;
 class MessageWidget;
 class WidgetGroup;
@@ -126,8 +127,8 @@ public:
     std::shared_ptr<Message> getEarliestMessage() const;
 
     std::pair<MessageMappingIterator, bool> createMessageAndAddToMapping(
-        MessageType type, uint32_t messageId, uint8_t authorId, const std::string &messageTime,
-        const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
+        MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
+        const MessageMetaData &meta, const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
         std::string networkId);
 
     std::pair<MessageMappingIterator, bool> createMessageAndAddToMapping(

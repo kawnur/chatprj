@@ -22,6 +22,7 @@ class CompanionAction;
 class DBReplyData;
 class DBRequester;
 class Message;
+class MessageMetaData;
 class MessageState;
 class PasswordAction;
 class SocketInfoBaseWidget;
@@ -107,7 +108,7 @@ private:
     bool markMessageAsReceived(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    std::tuple<uint32_t, uint8_t, std::string> pushMessageToDB(
+    MessageMetaData pushMessageToDB(
         const std::string &companionName, const std::string &authorName,
         const std::string &timestamp, const std::string &text, const bool &isSent,
         const bool &isReceived);

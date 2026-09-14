@@ -292,7 +292,7 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
         auto elementCast = qobject_cast<MessageWidget *>(element);
         auto message = companion_->getMappedMessageByMessageWidget(false, elementCast);
 
-        coutArgsWithSpaceSeparator("message:", message);
+        coutArgsWithSpaceSeparator("message:", message.get());
 
         if (message)
             coutArgsWithSpaceSeparator("element message:", message->getText());

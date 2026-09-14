@@ -205,8 +205,8 @@ std::shared_ptr<Message> Companion::getEarliestMessage() const
 }
 
 std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
-    MessageType type, uint32_t messageId, uint8_t authorId, const std::string &messageTime,
-    const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
+    MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
+    const MessageMetaData &meta, const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
     std::string networkId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -219,8 +219,7 @@ std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
     auto messageState = std::make_shared<MessageState>(
         companionId, isAntecedent, isSent, isReceived, networkId);
 
-    auto message = std::make_shared<Message>(
-        type, messageId, companionId, authorId, messageTime, messageText);
+    auto message = std::make_shared<Message>(type, meta, messageText);
 
     auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
 
@@ -242,13 +241,13 @@ std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
         getBoolFromDBValue(messagesData->getValue(index, "is_received")),
         generateNewNetworkId(false));
 
-    auto message = std::make_shared<Message>(
-        MessageType::TEXT,
-        std::stoi(messagesData->getValue(index, "id")),
-        id,
+    MessageMetaData meta(
+        std::stoi(messagesData->getValue(index, "id")), id,
         std::stoi(messagesData->getValue(index, "author_id")),
-        messagesData->getValue(index, "timestamp_tz"),
-        messagesData->getValue(index, "message")
+        messagesData->getValue(index, "timestamp_tz"));
+
+    auto message = std::make_shared<Message>(
+        MessageType::TEXT, meta, messagesData->getValue(index, "message")
     );
 
     auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
