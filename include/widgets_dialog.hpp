@@ -197,30 +197,15 @@ void setButtonBox(
     std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
     std::vector<ButtonInfo> *infoVector)
 {
+    const std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
+        { QDialogButtonBox::AcceptRole, &QDialogButtonBox::accepted },
+        { QDialogButtonBox::RejectRole, &QDialogButtonBox::rejected }
+    };
+
     for (auto &info : *infoVector) {
         auto role = info.getRole();
         auto function = info.getFunction();
         auto button = buttonBox->addButton(info.getText(), role);
-
-        // TODO create mapping and select signal by role
-        // if (role == QDialogButtonBox::AcceptRole) {
-        //     QObject::connect(
-        //         buttonBox.get(), &QDialogButtonBox::accepted,
-        //         dialog, info.function_, Qt::QueuedConnection);
-        // }
-        // else if (role == QDialogButtonBox::RejectRole) {
-        //     QObject::connect(
-        //         buttonBox.get(), &QDialogButtonBox::rejected,
-        //         dialog, info.function_, Qt::QueuedConnection);
-        // }
-        // else {
-        //     showErrorDialogAndLogError("Unmanaged button role");
-        // }
-
-        std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
-            { QDialogButtonBox::AcceptRole, &QDialogButtonBox::accepted },
-            { QDialogButtonBox::RejectRole, &QDialogButtonBox::rejected }
-        };
 
         auto connectLambda = [&]()
         {

@@ -8,12 +8,12 @@
 template<typename T, typename F, typename... Ts>
 T runMeasureDurationAndReturnResult(F &&func, Ts... params)
 {
-    auto begin = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
     auto result = func(params...);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start);
 
     auto elapsedCount = elapsed.count();
     coutArgsWithSpaceSeparator("elapsed:", elapsedCount, "nanoseconds");
@@ -24,12 +24,12 @@ T runMeasureDurationAndReturnResult(F &&func, Ts... params)
 template<typename F, typename... Ts>
 void runAndMeasureDuration(F &&func, Ts... params)
 {
-    auto begin = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
     func(params...);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start);
 
     auto elapsedCount = elapsed.count();
     coutArgsWithSpaceSeparator("elapsed:", elapsedCount, "nanoseconds");

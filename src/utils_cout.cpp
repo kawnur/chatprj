@@ -8,7 +8,7 @@ void endline(int number)
         std::cout << std::endl;
 }
 
-template<> int getSizeAsInt<std::string>(std::string &string)
+template<> int getSizeAsInt<std::string>(const std::string &string)
 {
     return (int)string.size();
 }
@@ -62,12 +62,12 @@ void coutVectorWithIndexesHorizontally(const std::vector<int> &vector)
 {
     std::cout << std::endl;
 
-    auto compareStringLengths = [&](const int &i, const int &j)
+    auto lambda = [&](const int &i, const int &j)
     {
         return std::to_string(i).size() < std::to_string(j).size();
     };
 
-    auto maxElement = std::max_element(vector.begin(), vector.end(), compareStringLengths);
+    auto maxElement = std::ranges::max_element(vector, lambda);
 
     int margin = 2;
     auto width = (int)std::to_string(*maxElement).size() + margin;
@@ -105,14 +105,17 @@ void printArray(std::array<int, 10> &array)
 // set
 void printSet(std::set<int> &set)
 {
-    std::cout << std::endl << "&s: " << &set << std::endl;
+    std::cout << std::endl << "container address: " << &set << std::endl;
 
-    for (std::set<int>::iterator i = set.cbegin(); i != set.cend(); i++) {
-        std::cout << "&(*i): " << &(*i) << '\t';
-        std::cout << " *i: " << *i << std::endl;
-    }
+    auto lambda = [&](const auto &item)
+    {
+        std::cout << "address: " << &item << '\t';
+        std::cout << " value: " << item << std::endl;
+    };
 
-    std::cout << "s.size(): " << set.size() << std::endl;
+    std::ranges::for_each(set, lambda);
+
+    std::cout << "container size: " << set.size() << std::endl;
 }
 
 // map

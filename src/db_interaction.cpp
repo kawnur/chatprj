@@ -142,14 +142,14 @@ std::string DBReplyData::getValue(std::size_t position, std::string key)
 
 bool DBReplyData::findValue(const std::string &key, const std::string &value)
 {
-    auto findLambda = [&](auto &iterator)
+    auto lambda = [&](const auto &iterator)
     {
         return iterator.at(key) == value;
     };
 
-    auto findMapResult = std::find_if (data_.begin(), data_.end(), findLambda);
+    auto result = std::ranges::find_if(data_, lambda);
 
-    return !(findMapResult == data_.end());
+    return !(result == data_.end());
 }
 
 int DBReplyData::getDataFromResult(std::shared_ptr<PGresult> result, int maxTuples)

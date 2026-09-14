@@ -265,7 +265,7 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
 
     auto list = chatHistoryWidget_->children();
 
-    auto lambda = [&](auto item)
+    auto lambda = [&](const auto &item)
     {
         auto cast = qobject_cast<MessageWidget *>(item);
         auto message = companion_->getMappedMessageByMessageWidget(false, cast);
@@ -273,18 +273,18 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
         return (message) ? message->getTime() : ""s;
     };
 
-    std::sort(
-        list.begin(),
-        list.end(),
-        [&](QObject *element1, QObject *element2) {
-            auto res1 = lambda(element1);
-            auto res2 = lambda(element2);
-            bool res = (res1 < res2);
+    auto sortingLambda = [&](QObject *element1, QObject *element2)
+    {
+        auto res1 = lambda(element1);
+        auto res2 = lambda(element2);
+        bool res = (res1 < res2);
 
-            coutArgsWithSpaceSeparator("res1:", res1, "res2:", res2, "res:", res);
+        coutArgsWithSpaceSeparator("res1:", res1, "res2:", res2, "res:", res);
 
-            return res;
-        });
+        return res;
+    };
+
+    std::ranges::sort(list, sortingLambda);
 
     coutArgsWithSpaceSeparator("AFTER SORTING");
 

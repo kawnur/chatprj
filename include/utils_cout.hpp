@@ -1,6 +1,7 @@
 #ifndef UTILS_COUT_HPP
 #define UTILS_COUT_HPP
 
+#include <algorithm>
 #include <iomanip>
 #include <ios>
 #include <iostream>
@@ -16,7 +17,7 @@
 
 using namespace std::string_literals;
 
-void endline(int);
+void endline(int number);
 
 template<typename T>
 void coutWithManipulators(T &&value, int width)
@@ -44,22 +45,24 @@ void coutArgsWithManipulators(int width, Ts &&...args)
 }
 
 template<typename T>
-int getSizeAsInt(T &parameter)
+int getSizeAsInt(const T &parameter)
 {
     return (int)std::to_string(parameter).size();
 }
+
+template<>
+int getSizeAsInt<std::string>(const std::string &string);
 
 // TODO does not work with multiple function pointers as params
 template<typename T, typename... Ts>
 void coutContainerArgsResultWithManupulators(std::vector<T> &container, Ts &&...args)
 {
-    auto check = [&](T &u1, T &u2) { return getSizeAsInt(u1) < getSizeAsInt(u2); };
-
-    auto maxLengthElement = std::max_element(container.begin(), container.end(), check);
+    auto lambda = [&](const T &u1, const T &u2) { return getSizeAsInt(u1) < getSizeAsInt(u2); };
+    auto maxLengthElement = std::ranges::max_element(container, lambda);
 	int width = (int)(maxLengthElement->size());
 
     for (auto &element : container)
-		coutArgsWithManipulators(width, (args(element), ...));	
+        coutArgsWithManipulators(width, (args(element), ...));
 }
 
 template<typename T, std::ios_base &(*alignment)(std::ios_base &), int width, char separator>
@@ -70,10 +73,11 @@ void coutWithManipulators(T &&value)
 }
 
 template<typename T>
-std::string argForCout(std::shared_ptr<T> const &value)
+std::string argForCout(const T * const value)
 {
     std::stringstream ss;
-    ss << (std::shared_ptr<void>)value;
+    ss << (void *)value;
+
     return ss.str();
 }
 
@@ -135,17 +139,15 @@ void coutArgsWithTabSeparator(Ts&&... args)
 template<typename T>
 void coutVectorInLine(const std::vector<T> &vector)
 {
-    for (auto &item : vector)
-        std::cout << item << ' ';
+    std::ranges::for_each(vector, [&](const auto &item){ std::cout << item << ' '; });
 }
 
 template<typename T>
 void printVector(T &vector, bool showSize = false, bool showCapacity = false)
 {
-	std::cout << std::endl << "printVector" << std::endl;
+    std::cout << std::endl << __FUNCTION__ << std::endl;
 
-    for (std::size_t i = 0; i < vector.size(); i++)
-        std::cout << vector.at(i) << " ";
+    std::ranges::for_each(vector, [&](const auto &item){ std::cout << item << ' '; });
 
     endline(1);
 
@@ -159,10 +161,10 @@ void printVector(T &vector, bool showSize = false, bool showCapacity = false)
 }
 
 template<typename T>
-void coutVectorState(T &vector)
+void coutVectorState(const T &vector)
 {
 	endline(1);
-	coutWithEndl("coutVectorState");
+    coutWithEndl(__FUNCTION__);
 
     coutArgsWithSpaceSeparator("vector object address:", &vector);
 
@@ -185,11 +187,15 @@ void coutVectorOfVectorsState(T &vector)
 	endline(1);
 	coutWithEndl("coutVectorState");
 
-    for (auto iter = vector.begin(); iter != vector.end(); iter++) {
-		coutWithTab(&*iter);
-		coutVectorInLine(*iter);
+
+    auto lambda = [&](const auto &item)
+    {
+        coutWithTab(&*item);
+        coutVectorInLine(*item);
 		endline(1);
-	}
+    };
+
+    std::ranges::for_each(vector, lambda);
 
     coutWithTab(&*(vector.end()));
 	coutWithEndl("end");
@@ -227,8 +233,12 @@ void printSet(std::set<int> &set);
 template<typename T, typename U>
 void coutMap(std::map<T, U> &map)
 {
-    for (auto it = map.begin(); it != map.end(); it++)
-		coutArgsWithManipulators(15, it->first, it->second);
+    auto lambda = [&](const auto &item)
+    {
+        coutArgsWithManipulators(15, item->first, item->second);
+    };
+
+    std::ranges::for_each(map, lambda);
 
 	endline(1);
 }

@@ -29,10 +29,7 @@ QString getNextConnectButtonLabel(QString &currentLabel)
             return "";
         }
         else {
-            auto currentIterator = std::find(
-                connectButtonLabels.begin(),
-                connectButtonLabels.end(),
-                currentLabel);
+            auto currentIterator = std::ranges::find(connectButtonLabels, currentLabel);
 
             if (currentIterator == connectButtonLabels.end())
                 return *connectButtonLabels.begin();

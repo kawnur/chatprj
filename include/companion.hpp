@@ -109,6 +109,7 @@ public:
         // logTemplateInfo("file operator for networkId {} deleted", networkId);
     }
 
+    MessageMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
     std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message> message);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message> message);
 

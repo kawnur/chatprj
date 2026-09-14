@@ -66,15 +66,12 @@ std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
     // std::shared_ptr<SocketInfoBaseWidget> widget) const
     SocketInfoBaseWidget *widget) const
 {
-    auto findWidget = [&](auto &pair)
+    auto lambda = [&](const auto &pair)
     {
         return pair.second.second->getSocketInfoBase().get() == widget;
     };
 
-    auto result = std::find_if (
-        mapCompanionToWidgetGroup_.cbegin(),
-        mapCompanionToWidgetGroup_.cend(),
-        findWidget);
+    auto result = std::ranges::find_if(mapCompanionToWidgetGroup_, lambda);
 
     return result->second.first;
 }
@@ -877,15 +874,12 @@ void Manager::setLastOpenedPath(const std::filesystem::path &path)
 std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
     std::shared_ptr<WidgetGroup> group) const
 {
-    auto findWidget = [&](auto &pair)
+    auto lambda = [&](const auto &pair)
     {
         return pair.second.second == group;
     };
 
-    auto result = std::find_if (
-        mapCompanionToWidgetGroup_.cbegin(),
-        mapCompanionToWidgetGroup_.cend(),
-        findWidget);
+    auto result = std::ranges::find_if(mapCompanionToWidgetGroup_, lambda);
 
     return result->second.first;
 }
@@ -906,7 +900,6 @@ void Manager::fillCompanionMessageMapping(
 
         if (containersNotEmpty) {
             auto pair = companion->getMessageMappingPairByMessageId(messageId);
-
             auto info = pair.second;
 
             if (info && info->getState()) {
@@ -948,14 +941,12 @@ bool Manager::buildCompanions()
     if (!companionsData)
         return false;
 
-    // std::sort(
-    //     companionsData->getData()->begin(),
-    //     companionsData->getData()->end(),
-    //     [&](auto &iterator1, auto &iterator2)
-    //     {
-    //         return iterator1.at("id") < iterator2.at("id");
-    //     }
-    // );
+    // auto lambda = [&](auto &iterator1, auto &iterator2)
+    // {
+    //     return iterator1.at("id") < iterator2.at("id");
+    // };
+
+    // std::ranges::sort(companionsData->getData(), lambda);
 
     for (std::size_t index = 0; index < companionsData->size(); index++) {  // TODO switch to iterators
         int id = std::stoi(companionsData->getValue(index, "id"));
@@ -970,13 +961,6 @@ bool Manager::buildCompanions()
         }
 
         // get socket data object
-        // auto socketsData = getDBData(
-        //     logDBInteraction,
-        //     "getSocketInfoDBResult",
-        //     &getSocketInfoDBResult,
-        //     buildStringVector("ipaddress", "server_port", "client_port"),
-        //     id);
-
         auto socketsData = getDBData(DBRequestType::GET_SOCKET_INFO, id);
 
         if (!socketsData || socketsData->isEmpty())
@@ -1062,25 +1046,22 @@ void Manager::deleteCompanionObject(std::shared_ptr<Companion> companion)
 
 void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion)
 {
-    auto findMapLambda = [&](auto &iterator)
+    auto lambda = [&](const auto &iterator)
     {
         return iterator.second.first == companion;
     };
 
     // TODO use range
-    auto findMapResult = std::find_if (
-        mapCompanionToWidgetGroup_.begin(),
-        mapCompanionToWidgetGroup_.end(),
-        findMapLambda);
+    auto result = std::ranges::find_if(mapCompanionToWidgetGroup_, lambda);
 
-    if (findMapResult == mapCompanionToWidgetGroup_.end()) {
+    if (result == mapCompanionToWidgetGroup_.end()) {
         showErrorDialogAndLogError("Companion was not found in mapping at deletion");
     }
     else {
         if (selectedCompanion_ == companion)
             selectedCompanion_ = nullptr;
 
-        mapCompanionToWidgetGroup_.erase(findMapResult);
+        mapCompanionToWidgetGroup_.erase(result);
     }
 }
 
