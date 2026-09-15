@@ -15,7 +15,6 @@
 
 class Companion;
 class Message;
-class MessageState;
 class MessageWidget;
 class SocketInfoBaseWidget;
 class TextEditWidget;
@@ -53,12 +52,11 @@ public:
     void set(std::shared_ptr<Companion> companion);
 
     std::shared_ptr<MessageWidget> buildMessageWidget(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-        std::shared_ptr<MessageState> state);
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
     void addMessageWidgetToChatHistory(
         std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-        std::shared_ptr<Message> message, std::shared_ptr<MessageState> state);
+        std::shared_ptr<Message> message);
 
     void scrollDownChatHistory();
     void clearChatHistory();

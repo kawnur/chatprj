@@ -184,15 +184,14 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
 }
 
 std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<MessageState> state)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
     switch (message->getType()) {
     case MessageType::TEXT:
-        return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, state, message);
+        return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, message);
 
     case MessageType::FILE:
-        return std::make_shared<FileMessageWidget>(chatHistoryWidget_, companion, state, message);
+        return std::make_shared<FileMessageWidget>(chatHistoryWidget_, companion, message);
 
     default:
         logArgsError("message widget building error");
@@ -203,12 +202,12 @@ std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
 
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-    std::shared_ptr<Message> message, std::shared_ptr<MessageState> state)
+    std::shared_ptr<Message> message)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        auto widget = buildMessageWidget(companion, message, state);
+        auto widget = buildMessageWidget(companion, message);
 
         if (!widget)
             return;
@@ -225,7 +224,7 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
 
         chatHistoryLayout_->addWidget(widget.get());
 
-        if (state->isAntecedent())
+        if (message->isAntecedent())
             sortChatHistoryElements(false);
     }
 

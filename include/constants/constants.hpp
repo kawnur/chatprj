@@ -19,19 +19,21 @@ const bool logDBInteraction = false;
 
 static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-const uint32_t sleepDurationInitial = 1000;
-const float sleepDurationIncreaseRate = 1.2f;
+const uint32_t SLEEP_DURATION_INITIAL_MS = 1000;
+const float SLEEP_DURATION_INCREASE_RATE = 1.2f;
 
 const std::filesystem::path homePath("~");
 
 enum class MessageType
 {
+    UNKNOWN,
     TEXT,
     FILE
 };
 
 enum class NetworkMessageType
 {
+    UNKNOWN,
     NO_ACTION,
     TEXT,
     FILE_PROPOSAL,

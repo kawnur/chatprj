@@ -204,29 +204,32 @@ std::shared_ptr<Message> Companion::getEarliestMessage() const
     return minPair->first;
 }
 
-std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
-    MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
-    const MessageMetaData &meta, const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
-    std::string networkId)
+std::shared_ptr<Message> Companion::createMessage(
+    // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
+    // std::shared_ptr<MessageMetaData> meta, const std::string &messageText, bool isAntecedent,
+    // bool isSent, bool isReceived, std::string networkId)
+    std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+    std::shared_ptr<MessageState> state)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (networkId.size() == 0)
-        networkId = generateNetworkId(false);
+    if (state->networkId_.size() == 0)
+        state->networkId_ = generateNetworkId(false);
 
     auto companionId = id_;
 
-    auto messageState = std::make_shared<MessageState>(
-        companionId, isAntecedent, isSent, isReceived, networkId);
+    // auto messageState = std::make_shared<MessageState>(
+    //     companionId, isAntecedent, isSent, isReceived, networkId);
 
-    auto message = std::make_shared<Message>(type, meta, messageText);
-    auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
-    auto result = messageMapping_.emplace(std::make_pair(message, messageInfo));
+    auto message = std::make_shared<Message>(meta, data, state);
+    // auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
+    auto result = messageMapping_.emplace(meta->messageId_, nullptr);
 
-    return result;
+    // return result;
+    return (result.second) ? message : nullptr;
 }
 
-std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
+std::pair<MessageWidgetMappingIterator, bool> Companion::createMessageAndAddToMapping(
     std::shared_ptr<DBReplyData> messagesData, std::size_t index)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -239,10 +242,12 @@ std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
         getBoolFromDBValue(messagesData->getValue(index, "is_received")),
         generateNetworkId(false));
 
-    MessageMetaData meta(
-        std::stoi(messagesData->getValue(index, "id")), id,
-        std::stoi(messagesData->getValue(index, "author_id")),
-        messagesData->getValue(index, "timestamp_tz"));
+    MessageMetaData meta {
+        .messageId_ = (decltype(MessageMetaData::messageId_))std::stoi(messagesData->getValue(index, "id")),
+        .companionId_ = (decltype(MessageMetaData::companionId_))id,
+        .authorId_ = (decltype(MessageMetaData::authorId_))std::stoi(messagesData->getValue(index, "author_id")),
+        .timestampTz_ = messagesData->getValue(index, "timestamp_tz")
+    };
 
     auto message = std::make_shared<Message>(
         MessageType::TEXT, meta, messagesData->getValue(index, "message")
@@ -323,14 +328,15 @@ bool Companion::disconnectClient()
 }
 
 bool Companion::sendMessage(
-    bool isAntecedent, NetworkMessageType type, std::string networkId,
-    std::shared_ptr<Message> message)
+    // bool isAntecedent, NetworkMessageType type, std::string networkId,
+    // std::shared_ptr<Message> message)
+    std::shared_ptr<Message> message, std::shared_ptr<MessageMetaData> meta)
 {
-    if (type == NetworkMessageType::NO_ACTION)
-        return true;
-
-    if (!client_)
+    if (meta->networkMessageType_ == NetworkMessageType::UNKNOWN || !client_)
         return false;
+
+    if (meta->networkMessageType_ == NetworkMessageType::NO_ACTION)
+        return true;
 
     // check client
     bool isConnected = client_->isConnected();
@@ -339,7 +345,7 @@ bool Companion::sendMessage(
         return false;
 
     // build json
-    auto json = buildMessageJSONString(isAntecedent, type, shared_from_this(), networkId, message);
+    auto json = buildMessageJSONString(shared_from_this(), message, meta);
 
     // send json over network
     auto result = client_->send(json);

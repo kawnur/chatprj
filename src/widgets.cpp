@@ -502,10 +502,9 @@ void WidgetGroup::set()
         Qt::QueuedConnection);
 }
 
-void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
-    std::shared_ptr<Message> message, std::shared_ptr<MessageState> state)
+void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message)
 {
-    centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message, state);
+    centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message);
 }
 
 void WidgetGroup::clearChatHistory()
@@ -590,10 +589,9 @@ void WidgetGroup::buildChatHistorySlot()
     companion_->addMessageWidgetsToChatHistory();
 }
 
-void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
-    std::shared_ptr<MessageState> state, std::shared_ptr<Message> message)
+void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(std::shared_ptr<Message> message)
 {
-    bool isAntecedent = state->isAntecedent();
+    bool isAntecedent = message->isAntecedent();
 
     if (isAntecedent) {
         std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
@@ -601,8 +599,7 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
     }
 
-    centralPanel_->addMessageWidgetToChatHistory(
-        shared_from_this(), companion_, message, state);
+    centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message);
 }
 
 void WidgetGroup::askUserForHistorySendingConfirmationSlot()

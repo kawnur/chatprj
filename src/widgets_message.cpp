@@ -6,7 +6,7 @@
 #include "widgets.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
-    bool sentByMe, std::shared_ptr<MessageState> state)
+    bool sentByMe, std::shared_ptr<Message> message)
 {
     sentByMe_ = sentByMe;
 
@@ -20,8 +20,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
     setLayout(layout_.get());
 
     if (sentByMe_) {
-        sent_ = std::make_shared<IndicatorWidget>(10, state->isSent());
-        received_ = std::make_shared<IndicatorWidget>(10, state->isReceived());
+        sent_ = std::make_shared<IndicatorWidget>(10, message->isSent());
+        received_ = std::make_shared<IndicatorWidget>(10, message->isReceived());
 
         newMessageLabel_ = nullptr;
 
@@ -32,7 +32,7 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sent_ = nullptr;
         received_ = nullptr;
 
-        std::string text = (state->isAntecedent()) ? "NEW" : "";
+        std::string text = (message->isAntecedent()) ? "NEW" : "";
 
         auto textHtml = getStringByFormat(
             "<font color=\"{0}\"><b>{1}</b></font>", receivedMessageColor, text);
@@ -62,7 +62,7 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
 
 MessageWidget::MessageWidget(
     std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-    std::shared_ptr<MessageState> state, std::shared_ptr<Message> message)
+    std::shared_ptr<Message> message)
 {
     companion_ = companion;
     message_ = message;
@@ -93,7 +93,7 @@ MessageWidget::MessageWidget(
     headerLabel_ = std::make_shared<QLabel>(getQString(data.first));
     messageLabel_ = std::make_shared<QLabel>(getQString(data.second));
 
-    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(isMessageFromMe_, state);
+    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(isMessageFromMe_, message);
 }
 
 void MessageWidget::setBase(std::shared_ptr<WidgetGroup> group)
@@ -127,8 +127,7 @@ void MessageWidget::mousePressEvent(QMouseEvent *event)
 
 TextMessageWidget::TextMessageWidget(
     std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-    std::shared_ptr<MessageState> state, std::shared_ptr<Message> message)
-    : MessageWidget(parent, companion, state, message)
+    std::shared_ptr<Message> message) : MessageWidget(parent, companion, message)
 {
     if (parent)
         setParent(parent.get());
@@ -145,8 +144,7 @@ void TextMessageWidget::addMembersToLayout()
 
 FileMessageWidget::FileMessageWidget(
     std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-    std::shared_ptr<MessageState> state, std::shared_ptr<Message> message)
-    : MessageWidget(parent, companion, state, message)
+    std::shared_ptr<Message> message) : MessageWidget(parent, companion, message)
 {
     if (parent)
         setParent(parent.get());
@@ -155,12 +153,10 @@ FileMessageWidget::FileMessageWidget(
 
     showButton_ = !isMessageFromMe;
 
-    state_ = state;
-
     // rewrite widget body text for sender's widget
     if (isMessageFromMe) {
         auto pathString = companion->getFileOperatorFilePathStringByNetworkId(
-            state->getNetworkId());
+            message->getNetworkId());
 
         messageLabel_->setText(
             getQString(

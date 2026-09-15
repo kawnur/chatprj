@@ -22,6 +22,7 @@ class CompanionAction;
 class DBReplyData;
 class DBRequester;
 class Message;
+class MessageData;
 class MessageMetaData;
 class MessageState;
 class PasswordAction;
@@ -56,11 +57,22 @@ public:
     std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(
         std::shared_ptr<Companion> companion) const;
 
+    NetworkMessageType defineNetworkMessageType(MessageType type);
+
     void sendMessage(
         MessageType type, std::shared_ptr<Companion> companion, std::shared_ptr<Action> action,
         const std::string &text);
 
     void sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path);
+
+    void receiveTextMessage(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+
+    void receiveFileProposalMessage(std::shared_ptr<Companion> companion);
+    std::shared_ptr<MessageData> buildMessageDataFromJson(const nlohmann::json &jsonData);
+    std::shared_ptr<MessageMetaData> buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
+    std::shared_ptr<MessageState> buildMessageStateFromJson(const nlohmann::json &jsonData);
     void receiveMessage(std::shared_ptr<Companion> companion, const std::string &json);
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
@@ -108,10 +120,12 @@ private:
     void markMessageAsReceived(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    MessageMetaData pushMessageToDB(
-        const std::string &companionName, const std::string &authorName,
-        const std::string &timestamp, const std::string &text, const bool &isSent,
-        const bool &isReceived);
+    std::shared_ptr<MessageMetaData> pushMessageToDB(
+        // const std::string &companionName, const std::string &authorName,
+        // const std::string &timestamp, const std::string &text, const bool &isSent,
+        // const bool &isReceived);
+        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+        std::shared_ptr<MessageState> state);
 
     // // TODO use std::function instead of function ptr
     // template<typename T, typename... Ts>

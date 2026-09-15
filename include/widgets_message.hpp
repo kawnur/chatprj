@@ -12,7 +12,6 @@
 class Companion;
 class IndicatorWidget;
 class Message;
-class MessageState;
 class WidgetGroup;
 
 class MessageIndicatorPanelWidget : public QWidget
@@ -20,7 +19,7 @@ class MessageIndicatorPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageIndicatorPanelWidget(bool sentByMe, std::shared_ptr<MessageState> state);
+    MessageIndicatorPanelWidget(bool sentByMe, std::shared_ptr<Message> message);
     ~MessageIndicatorPanelWidget() = default;
 
     void setSentIndicatorOn();
@@ -42,7 +41,7 @@ class MessageWidget : public QWidget, public std::enable_shared_from_this<Messag
 public:
     MessageWidget(
         std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-        std::shared_ptr<MessageState> state, std::shared_ptr<Message> message);
+        std::shared_ptr<Message> message);
 
     virtual ~MessageWidget() {}
 
@@ -78,7 +77,7 @@ class TextMessageWidget : public MessageWidget
 public:
     TextMessageWidget(
         std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-        std::shared_ptr<MessageState> state, std::shared_ptr<Message> message);
+        std::shared_ptr<Message> message);
 
     ~TextMessageWidget();
 
@@ -93,7 +92,7 @@ class FileMessageWidget : public MessageWidget
 public:
     FileMessageWidget(
         std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-        std::shared_ptr<MessageState> state, std::shared_ptr<Message> message);
+        std::shared_ptr<Message> message);
 
     ~FileMessageWidget() = default;
 
@@ -101,7 +100,6 @@ public:
 
 private:
     bool showButton_;
-    std::shared_ptr<MessageState> state_;
     std::shared_ptr<QWidget> fileWidget_;
     std::shared_ptr<QHBoxLayout> fileWidgetLayout_;
     std::shared_ptr<QPushButton> downloadButton_;

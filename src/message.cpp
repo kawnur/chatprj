@@ -27,6 +27,12 @@ Message::Message(
     text_ = text;
 }
 
+Message::Message(
+    std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+    std::shared_ptr<MessageState> state) : meta_(meta), data_(data), state_(state) {}
+
+Message::~Message() = default;
+
 MessageType Message::getType() const
 {
     return type_;
@@ -62,61 +68,86 @@ bool Message::isMessageFromMe() const
     return (author_id_ != companion_id_);
 }
 
-MessageState::MessageState(
-    uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
-    : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
-{}
-
-bool MessageState::isAntecedent() const
+bool Message::isSent() const
 {
-    return isAntecedent_;
+    return state_->isSent_;
 }
 
-bool MessageState::isSent() const
+bool Message::isReceived() const
 {
-    return isSent_;
+    return state_->isReceived_;
 }
 
-bool MessageState::isReceived() const
+bool Message::isAntecedent() const
 {
-    return isReceived_;
+    return state_->isAntecedent_;
 }
 
-std::string MessageState::getNetworkId() const
+std::string Message::getNetworkId() const
 {
-    return networkId_;
+    return state_->networkId_;
 }
 
-void MessageState::setIsAntecedent(bool value)
-{
-    isAntecedent_ = value;
-}
+// MessageState::MessageState(
+//     uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
+//     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
+// {}
 
-void MessageState::setIsReceived(bool value)
-{
-    isReceived_ = value;
-}
+// bool MessageState::isAntecedent() const
+// {
+//     return isAntecedent_;
+// }
 
-void MessageState::setNetworkId(const std::string &networkId)
-{
-    networkId_ = networkId;
-}
+// bool MessageState::isSent() const
+// {
+//     return isSent_;
+// }
 
-MessageInfo::MessageInfo(
-    std::shared_ptr<MessageState> state, std::shared_ptr<MessageWidget> widget)
-    : state_(state), widget_(widget) {}
+// bool MessageState::isReceived() const
+// {
+//     return isReceived_;
+// }
 
-std::shared_ptr<MessageState> MessageInfo::getState() const
-{
-    return state_;
-}
+// std::string MessageState::getNetworkId() const
+// {
+//     return networkId_;
+// }
 
-std::shared_ptr<MessageWidget> MessageInfo::getWidget() const
-{
-    return widget_;
-}
+// void MessageState::setIsAntecedent(bool value)
+// {
+//     isAntecedent_ = value;
+// }
 
-void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget)
+// void MessageState::setIsReceived(bool value)
+// {
+//     isReceived_ = value;
+// }
+
+// void MessageState::setNetworkId(const std::string &networkId)
+// {
+//     networkId_ = networkId;
+// }
+
+// MessageInfo::MessageInfo(
+//     std::shared_ptr<MessageState> state, std::shared_ptr<MessageWidget> widget)
+//     : state_(state), widget_(widget) {}
+
+// std::shared_ptr<MessageState> MessageInfo::getState() const
+// {
+//     return state_;
+// }
+
+// std::shared_ptr<MessageWidget> MessageInfo::getWidget() const
+// {
+//     return widget_;
+// }
+
+// void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget)
+// {
+//     widget_ = widget;
+// }
+
+bool operator<(const Message &message1, const Message &message2)
 {
-    widget_ = widget;
+    return message1.getId() < message2.getId();
 }

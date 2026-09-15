@@ -3,11 +3,11 @@
 
 #include <cstdint>
 #include <filesystem>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <utility>
 
 #include "constants.hpp"
@@ -21,6 +21,7 @@ class DBReplyData;
 class FileOperatorStorage;
 class FileMessageWidget;
 class Message;
+class MessageData;
 class MessageInfo;
 class MessageMetaData;
 class MessageState;
@@ -33,9 +34,10 @@ void logTemplateInfo(T &&templateString, Ts &&...args);
 template<typename T, typename... Ts>
 void logTemplateError(T &&templateString, Ts &&...args);
 
-using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
-using MessageMappingIterator = MessageMapping::iterator;
-using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
+// using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
+using MessageWidgetMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageWidget>>;
+using MessageWidgetMappingIterator = MessageWidgetMapping::iterator;
+// using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 
 class SocketInfo
 {
@@ -110,7 +112,7 @@ public:
         // logTemplateInfo("file operator for networkId {} deleted", networkId);
     }
 
-    MessageMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
+    MessageWidgetMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
     std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message> message);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message> message);
 
@@ -122,16 +124,18 @@ public:
     std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(
         bool lock, std::shared_ptr<MessageWidget> widget);
 
-    MessageMappingPair getMessageMappingPairByMessageId(uint32_t messageId);
-    MessageMappingPair getMessageMappingPairByNetworkId(const std::string &networkId);
+    // MessageMappingPair getMessageMappingPairByMessageId(uint32_t messageId);
+    // MessageMappingPair getMessageMappingPairByNetworkId(const std::string &networkId);
     std::shared_ptr<Message> getEarliestMessage() const;
 
-    std::pair<MessageMappingIterator, bool> createMessageAndAddToMapping(
-        MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
-        const MessageMetaData &meta, const std::string &messageText, bool isAntecedent, bool isSent, bool isReceived,
-        std::string networkId);
+    std::shared_ptr<Message> createMessage(
+        // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
+        // std::shared_ptr<MessageMetaData> meta, const std::string &messageText, bool isAntecedent,
+        // bool isSent, bool isReceived, std::string networkId);
+        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+        std::shared_ptr<MessageState> state);
 
-    std::pair<MessageMappingIterator, bool> createMessageAndAddToMapping(
+    std::pair<MessageWidgetMappingIterator, bool> createMessageAndAddToMapping(
         std::shared_ptr<DBReplyData> messagesData, std::size_t index);
 
     void setSocketInfo(std::shared_ptr<SocketInfo> socketInfo);
@@ -146,8 +150,9 @@ public:
     bool disconnectClient();
 
     bool sendMessage(
-        bool isAntecedent, NetworkMessageType type, std::string networkId,
-        std::shared_ptr<Message> message);
+        // bool isAntecedent, NetworkMessageType type, std::string networkId,
+        // std::shared_ptr<Message> message);
+        std::shared_ptr<Message> message, std::shared_ptr<MessageMetaData> meta);
 
     bool sendChatHistory(std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys) const;
     bool sendFileRequest(std::shared_ptr<FileMessageWidget> widget);
@@ -167,7 +172,7 @@ private:
     std::shared_ptr<ChatClient> client_;
     std::shared_ptr<ChatServer> server_;
     std::shared_ptr<FileOperatorStorage> fileOperatorStorage_;
-    MessageMapping messageMapping_;
+    MessageWidgetMapping messageMapping_;
 };
 
 #endif // COMPANION_HPP

@@ -208,17 +208,22 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
 }
 
 std::string buildMessageJSONString(
-    bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    const std::string &networkId, std::shared_ptr<Message> message)
+    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
+    // const std::string &networkId, std::shared_ptr<Message> message)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<MessageMetaData> meta)
 {
     using json = nlohmann::json;
 
     json jsonData;
 
+    auto networkId = message->getNetworkId();
+    auto type = meta->networkMessageType_;
+
     jsonData["type"] = type;
     jsonData["id"] = networkId;
     jsonData["companion_id"] = companion->getId();
-    jsonData["antecedent"] = isAntecedent;
+    jsonData["antecedent"] = message->isAntecedent();
 
     switch (type) {
     case NetworkMessageType::TEXT: {
@@ -302,7 +307,7 @@ std::string getRandomString(uint8_t length)
     return result;
 }
 
-void sleepForMilliseconds(uint32_t duration)
+void sleepForMS(uint32_t duration)
 {
     std::this_thread::sleep_for (std::chrono::milliseconds(duration));
 }

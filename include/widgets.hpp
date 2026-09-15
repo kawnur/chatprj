@@ -16,7 +16,6 @@ class CentralPanelWidget;
 class Companion;
 class LeftPanelWidget;
 class Message;
-class MessageState;
 class MessageWidget;
 class RightPanelWidget;
 
@@ -205,10 +204,7 @@ public:
     ~WidgetGroup();
 
     void set();
-
-    void addMessageWidgetToCentralPanelChatHistory(
-        std::shared_ptr<Message> message, std::shared_ptr<MessageState> state);
-
+    void addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message);
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
@@ -218,9 +214,7 @@ public:
     void askUserForHistorySendingConfirmation();
 
 signals:
-    void addMessageWidgetToCentralPanelChatHistorySignal(
-        std::shared_ptr<MessageState> state, std::shared_ptr<Message> message);
-
+    void addMessageWidgetToCentralPanelChatHistorySignal(std::shared_ptr<Message> message);
     void askUserForHistorySendingConfirmationSignal();
     void buildChatHistorySignal();    
 
@@ -229,9 +223,7 @@ public slots:
     void buildChatHistorySlot();
 
 private slots:
-    void addMessageWidgetToCentralPanelChatHistorySlot(
-        std::shared_ptr<MessageState> state, std::shared_ptr<Message> message);
-
+    void addMessageWidgetToCentralPanelChatHistorySlot(std::shared_ptr<Message> message);
     void askUserForHistorySendingConfirmationSlot();
 
 private:

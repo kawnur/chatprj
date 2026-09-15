@@ -5,6 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <thread>
@@ -23,6 +24,7 @@ class CompanionAction;
 class DBReplyData;
 class GraphicManager;
 class Message;
+class MessageMetaData;
 class TextDialog;
 
 std::shared_ptr<GraphicManager> getGraphicManager();
@@ -121,7 +123,7 @@ bool runAndReturnBool(F &&func, Ts&&... args)
 }
 
 template<typename T, typename F, typename... Ts>
-std::optional<T> runAndReturnResult(F &&func, Ts&&... args)
+std::optional<T> runAndReturnOptionalResult(F &&func, Ts&&... args)
 {
     try {
         return func(args...);
@@ -130,6 +132,20 @@ std::optional<T> runAndReturnResult(F &&func, Ts&&... args)
         logArgsException(e.what());
 
         return std::nullopt;
+    }
+}
+
+// TODO get rid of T template parameter
+template<typename T, typename F, typename... Ts>
+std::shared_ptr<T> runAndReturnSharedPtr(F &&func, Ts&&... args)
+{
+    try {
+        return func(args...);
+    }
+    catch(const std::exception &e) {
+        logArgsException(e.what());
+
+        return nullptr;
     }
 }
 
@@ -201,8 +217,10 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
 std::string buildMessageJSONString(
-    bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    const std::string &networkId, std::shared_ptr<Message> message);
+    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
+    // const std::string &networkId, std::shared_ptr<Message> message);
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<MessageMetaData> meta);
 
 std::string buildFileBlockJSONString(
     std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data);
@@ -212,7 +230,7 @@ std::string buildChatHistoryJSONString(
 
 nlohmann::json buildJsonObject(const std::string &jsonString);
 std::string getRandomString(uint8_t length);
-void sleepForMilliseconds(uint32_t duration);
+void sleepForMS(uint32_t duration);
 bool getBoolFromDBValue(const std::string &value);
 std::string hashFileMD5(const std::string &filename);
 
