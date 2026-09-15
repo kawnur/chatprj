@@ -1,7 +1,6 @@
 #include "widgets_panel.hpp"
 
 #include <string>
-#include <thread>
 
 #include <QApplication>
 #include <QMenu>
@@ -184,6 +183,24 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
     chatHistoryScrollArea_->installEventFilter(this);
 }
 
+std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<MessageState> state)
+{
+    switch (message->getType()) {
+    case MessageType::TEXT:
+        return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, state, message);
+
+    case MessageType::FILE:
+        return std::make_shared<FileMessageWidget>(chatHistoryWidget_, companion, state, message);
+
+    default:
+        logArgsError("message widget building error");
+
+        return nullptr;
+    }
+}
+
 void CentralPanelWidget::addMessageWidgetToChatHistory(
     std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
     std::shared_ptr<Message> message, std::shared_ptr<MessageState> state)
@@ -191,28 +208,17 @@ void CentralPanelWidget::addMessageWidgetToChatHistory(
     {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        std::shared_ptr<MessageWidget> widget = nullptr;
+        auto widget = buildMessageWidget(companion, message, state);
 
-        switch (message->getType()) {
-        case MessageType::TEXT:
-            widget = std::make_shared<TextMessageWidget>(
-                chatHistoryWidget_, companion, state, message);
-
-            break;
-
-        case MessageType::FILE:
-            widget = std::make_shared<FileMessageWidget>(
-                chatHistoryWidget_, companion, state, message);
-
-            break;
-        }
+        if (!widget)
+            return;
 
         auto lambda = [=]()
         {
             companion->setMappedMessageWidget(message, widget);
         };
 
-        std::thread(lambda).detach();
+        runInDetachedThread(lambda);
 
         if (widgetGroup)
             widget->setBase(widgetGroup);

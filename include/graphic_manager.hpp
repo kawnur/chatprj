@@ -78,10 +78,10 @@ public:
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
 
-    void markMessageWidgetAsSent(
+    bool markMessageWidgetAsSent(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    void markMessageWidgetAsReceived(
+    bool markMessageWidgetAsReceived(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
     void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);

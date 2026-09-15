@@ -71,7 +71,7 @@ ChatServer::ChatServer(std::shared_ptr<Companion> companion, uint16_t port)
 
 void ChatServer::run()
 {
-    std::thread([this](){ io_context_.run(); }).detach();
+    runInDetachedThread([this](){ io_context_.run(); });
 }
 
 void ChatServer::do_accept()

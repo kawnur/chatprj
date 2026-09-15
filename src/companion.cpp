@@ -212,17 +212,15 @@ std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (networkId.size() == 0)
-        networkId = generateNewNetworkId(false);
+        networkId = generateNetworkId(false);
 
-    auto companionId = getId();
+    auto companionId = id_;
 
     auto messageState = std::make_shared<MessageState>(
         companionId, isAntecedent, isSent, isReceived, networkId);
 
     auto message = std::make_shared<Message>(type, meta, messageText);
-
     auto messageInfo = std::make_shared<MessageInfo>(messageState, nullptr);
-
     auto result = messageMapping_.emplace(std::make_pair(message, messageInfo));
 
     return result;
@@ -233,13 +231,13 @@ std::pair<MessageMappingIterator, bool> Companion::createMessageAndAddToMapping(
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto id = getId();
+    auto id = id_;
 
     auto messageState = std::make_shared<MessageState>(
         id, false,
         getBoolFromDBValue(messagesData->getValue(index, "is_sent")),
         getBoolFromDBValue(messagesData->getValue(index, "is_received")),
-        generateNewNetworkId(false));
+        generateNetworkId(false));
 
     MessageMetaData meta(
         std::stoi(messagesData->getValue(index, "id")), id,
@@ -285,14 +283,14 @@ bool Companion::startServer()
 {
     bool started = false;
 
-    auto startLambda = [this](bool &value)
+    auto lambda = [&]()
     {
         server_ = std::make_shared<ChatServer>(shared_from_this(), socketInfo_->getServerPort());
         server_->run();
-        value = true;
+        started = true;
     };
 
-    runAndLogException(startLambda, started);
+    runAndLogException(lambda);
 
     return started;
 }
@@ -301,16 +299,15 @@ bool Companion::createClient()
 {
     bool created = false;
 
-    auto createLambda = [this](bool &value)
+    auto lambda = [&]()
     {
         client_ = std::make_shared<ChatClient>(
-            socketInfo_->getIpAddress(),
-            socketInfo_->getClientPort());
+            socketInfo_->getIpAddress(), socketInfo_->getClientPort());
 
-        value = true;
+        created = true;
     };
 
-    runAndLogException(createLambda, created);
+    runAndLogException(lambda);
 
     return created;
 }
@@ -335,17 +332,17 @@ bool Companion::sendMessage(
     if (!client_)
         return false;
 
+    // check client
     bool isConnected = client_->isConnected();
 
     if (!isConnected)
         return false;
 
     // build json
-    auto jsonData =
-        buildMessageJSONString(isAntecedent, type, shared_from_this(), networkId, message);
+    auto json = buildMessageJSONString(isAntecedent, type, shared_from_this(), networkId, message);
 
     // send json over network
-    auto result = client_->send(jsonData);
+    auto result = client_->send(json);
 
     if (!result)
         logArgsError("client message sending error");
@@ -461,7 +458,7 @@ void Companion::clearMessageMapping()
     messageMapping_.clear();
 }
 
-std::string Companion::generateNewNetworkId(bool lock)
+std::string Companion::generateNetworkId(bool lock)
 {
     if (lock)
         std::lock_guard<std::mutex> lockObject(mutex_);

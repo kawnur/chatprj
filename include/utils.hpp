@@ -3,8 +3,11 @@
 
 #include <format>
 #include <functional>
+#include <iostream>
 #include <map>
+#include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -75,6 +78,23 @@ U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &def
 }
 
 template<typename F, typename... Ts>
+void runInDetachedThread(F &&func, Ts&&... args)
+{
+    std::thread(func).detach();
+}
+
+template<typename F, typename... Ts>
+void runAndCoutException(F &&func, Ts&&... args)
+{
+    try {
+        func(args...);
+    }
+    catch(const std::exception &e) {
+        std::cout << e.what() << std::endl;
+    }
+}
+
+template<typename F, typename... Ts>
 void runAndLogException(F &&func, Ts&&... args)
 {
     try {
@@ -82,6 +102,34 @@ void runAndLogException(F &&func, Ts&&... args)
     }
     catch(const std::exception &e) {
         logArgsException(e.what());
+    }
+}
+
+template<typename F, typename... Ts>
+bool runAndReturnBool(F &&func, Ts&&... args)
+{
+    try {
+        func(args...);
+
+        return true;
+    }
+    catch(const std::exception &e) {
+        logArgsException(e.what());
+
+        return false;
+    }
+}
+
+template<typename T, typename F, typename... Ts>
+std::optional<T> runAndReturnResult(F &&func, Ts&&... args)
+{
+    try {
+        return func(args...);
+    }
+    catch(const std::exception &e) {
+        logArgsException(e.what());
+
+        return std::nullopt;
     }
 }
 

@@ -158,7 +158,7 @@ public:
     void clearMessageMapping();
 
 private:
-    std::string generateNewNetworkId(bool);
+    std::string generateNetworkId(bool);
 
     std::mutex mutex_;
     int id_;  // TODO change type

@@ -1,7 +1,5 @@
 #include "utils.hpp"
 
-#include <thread>
-
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QHostAddress>
@@ -223,16 +221,14 @@ std::string buildMessageJSONString(
     jsonData["antecedent"] = isAntecedent;
 
     switch (type) {
-    case NetworkMessageType::TEXT:
-    {
+    case NetworkMessageType::TEXT: {
         jsonData["time"] = message->getTime();
         jsonData["text"] = message->getText();
     }
 
     break;
 
-    case NetworkMessageType::FILE_PROPOSAL:
-    {
+    case NetworkMessageType::FILE_PROPOSAL: {
         jsonData["time"] = message->getTime();
         jsonData["text"] = message->getText();
         jsonData["hashMD5"] =
@@ -241,19 +237,12 @@ std::string buildMessageJSONString(
 
     break;
 
-    case NetworkMessageType::RECEIVE_CONFIRMATION:        
+    case NetworkMessageType::RECEIVE_CONFIRMATION:
         jsonData["received"] = 1;
 
     break;
 
-    case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
-    case NetworkMessageType::CHAT_HISTORY_REQUEST:
-    case NetworkMessageType::FILE_REQUEST:
-    case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
-    case NetworkMessageType::FILE_DATA_CHECK_SUCCESS:
-    case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
-    case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
-
+    default:
     break;
     }
 

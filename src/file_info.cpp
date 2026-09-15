@@ -1,7 +1,5 @@
 #include "file_info.hpp"
 
-#include <thread>
-
 #include "companion.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
@@ -72,7 +70,7 @@ bool SenderOperator::sendFilePart(
 
 void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::string &networkId)
 {
-    auto sendFileLambda = [=, this]()
+    auto lambda = [=, this]()
     {
         if (buf_.is_open()) {
             auto length = buf_.in_avail();
@@ -112,7 +110,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
                         companion->removeFileOperator<SenderOperator>(networkId);
                     };
 
-                    std::thread(lambda).detach();
+                    runInDetachedThread(lambda);
 
                     return;
                 }
@@ -130,7 +128,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
         }
     };
 
-    std::thread(sendFileLambda).detach();
+    runInDetachedThread(lambda);
 }
 
 ReceiverOperator::ReceiverOperator(

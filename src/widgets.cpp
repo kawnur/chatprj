@@ -505,8 +505,7 @@ void WidgetGroup::set()
 void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(
     std::shared_ptr<Message> message, std::shared_ptr<MessageState> state)
 {
-    centralPanel_->addMessageWidgetToChatHistory(
-        shared_from_this(), companion_, message, state);
+    centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message, state);
 }
 
 void WidgetGroup::clearChatHistory()

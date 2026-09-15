@@ -31,7 +31,7 @@ public:
     void set();
     void addTextToAppLogWidget(const QString &text);
 
-    void addWidgetToContainerAndSetParentTo(
+    bool addWidgetToContainerAndSetParentTo(
         MainWindowContainerPosition position, std::shared_ptr<QWidget> widget);
 
     void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);

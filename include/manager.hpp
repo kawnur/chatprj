@@ -103,9 +103,9 @@ private:
         std::shared_ptr<Companion> companion, std::shared_ptr<MessageState> state,
         std::shared_ptr<Message> message);
 
-    bool markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    void markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    bool markMessageAsReceived(
+    void markMessageAsReceived(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
     MessageMetaData pushMessageToDB(

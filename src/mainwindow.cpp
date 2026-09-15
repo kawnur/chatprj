@@ -76,7 +76,9 @@ void MainWindow::set()
     graphicManager->showCentralPanelStub();
 
     showHideWidget_ = std::make_shared<ShowHideWidget>();
-    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_);
+
+    if (!addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_))
+        logArgsError("addWidgetToContainerAndSetParentTo error");
 
     setBlurEffect();
 }
@@ -86,7 +88,7 @@ void MainWindow::addTextToAppLogWidget(const QString &text)
     rightPanel_->addTextToAppLogWidget(text);
 }
 
-void MainWindow::addWidgetToContainerAndSetParentTo(
+bool MainWindow::addWidgetToContainerAndSetParentTo(
     MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
 {
     auto lambda = [&]()
@@ -94,7 +96,7 @@ void MainWindow::addWidgetToContainerAndSetParentTo(
         containerMap.at(position)->addWidgetToLayoutAndSetParentTo(widget);
     };
 
-    runAndLogException(lambda);
+    return runAndReturnBool(lambda);
 }
 
 void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)

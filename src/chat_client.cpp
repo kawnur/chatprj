@@ -16,7 +16,7 @@ bool ChatClient::isConnected() const
 
 bool ChatClient::connect()
 {
-    auto connectLambda = [this]()
+    auto lambda = [this]()
     {
         logArgs("ChatClient connects to", ipAddress_, port_);
 
@@ -27,14 +27,14 @@ bool ChatClient::connect()
         isConnected_ = true;
     };
 
-    runAndLogException(connectLambda);
+    runAndLogException(lambda);
 
     return isConnected_;
 }
 
 bool ChatClient::disconnect()
 {
-    auto disconnectLambda = [this]()
+    auto lambda = [this]()
     {
         logArgs("ChatClient disconnects from", ipAddress_, port_);
 
@@ -45,7 +45,7 @@ bool ChatClient::disconnect()
         isConnected_ = false;
     };
 
-    runAndLogException(disconnectLambda);
+    runAndLogException(lambda);
 
     return !isConnected_;
 }
@@ -54,13 +54,13 @@ bool ChatClient::send(std::string text)
 {
     bool sent = false;
 
-    auto sendLambda = [&](bool &value)
+    auto lambda = [&]()
     {
         auto written = boost::asio::write(socket_, boost::asio::buffer(text.data(), text.size()));
-        value = true;
+        sent = true;
     };
 
-    runAndLogException(sendLambda, sent);
+    runAndLogException(lambda);
     // logArgs("client sent message:", text);
 
     return sent;

@@ -1,7 +1,5 @@
 #include "manager.hpp"
 
-#include <thread>
-
 #include "action.hpp"
 #include "application.hpp"
 #include "companion.hpp"
@@ -127,6 +125,7 @@ void Manager::sendMessage(
 
     group->addMessageWidgetToCentralPanelChatHistory(message, messageState);
 
+    // define NetworkMessageType
     NetworkMessageType networkMessageType;
 
     switch (type) {
@@ -167,13 +166,16 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
     std::string networkId;
     bool isAntecedent;
 
-    runAndLogException(
-        [&](){
-            type = jsonData.at("type");
-            companionId = jsonData.at("companion_id");
-            networkId = jsonData.at("id");
-            isAntecedent = jsonData.at("antecedent");
-        });
+    auto lambda = [&]()
+    {
+        type = jsonData.at("type");
+        companionId = jsonData.at("companion_id");
+        networkId = jsonData.at("id");
+        isAntecedent = jsonData.at("antecedent");
+    };
+
+    if (!runAndReturnBool(lambda))
+        logArgsError("error parsing jsonData");
 
     switch (type) {
     // message is data message
@@ -1187,38 +1189,35 @@ void Manager::waitForMessageReceptionConfirmation(
         }
     };
 
-    std::thread(lambda).detach();
+    runInDetachedThread(lambda);
 }
 
-bool Manager::markMessageAsSent(
+void Manager::markMessageAsSent(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
     // mark in db
     auto messageIdData = getDBData(DBRequestType::SET_MESSAGE_IS_SENT_AND_RETURN, message->getId());
 
     if (!messageIdData)
-        return false;
+        return;
 
     // mark in widget
-    getGraphicManager()->markMessageWidgetAsSent(companion, message);
-
-    return true;
+    if (!getGraphicManager()->markMessageWidgetAsSent(companion, message))
+        logArgsError("marking widget as sent error");
 }
 
-bool Manager::markMessageAsReceived(
+void Manager::markMessageAsReceived(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
     // mark in widget
-    getGraphicManager()->markMessageWidgetAsReceived(companion, message);
+    auto result = getGraphicManager()->markMessageWidgetAsReceived(companion, message);
+
+    if (!result)
+        logArgsError("marking wiget as received error");
 
     // mark in db
     auto messageIdData = getDBData(
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, message->getId());
-
-    if (!messageIdData || messageIdData->isEmpty())
-        return false;
-
-    return true;
 }
 
 MessageMetaData Manager::pushMessageToDB(

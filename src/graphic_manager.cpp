@@ -1,5 +1,7 @@
 #include "graphic_manager.hpp"
 
+#include <optional>
+
 #include "action.hpp"
 #include "application.hpp"
 #include "companion.hpp"
@@ -71,7 +73,8 @@ void GraphicManager::showWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> gr
 void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
     MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
 {
-    mainWindow_->addWidgetToContainerAndSetParentTo(position, widget);
+    if (!mainWindow_->addWidgetToContainerAndSetParentTo(position, widget))
+        logArgsError("addWidgetToContainerAndSetParentTo error");
 }
 
 void GraphicManager::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
@@ -273,40 +276,28 @@ void GraphicManager::getEntrancePassword()
     action->set();
 }
 
-void GraphicManager::markMessageWidgetAsSent(
+bool GraphicManager::markMessageWidgetAsSent(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
-    auto setLambda = [&]()
+    auto lambda = [&]()
     {
         // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
-
-        try {
-            companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsSent();
-        }
-        catch(std::out_of_range) {
-            return;
-        }
+        companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsSent();
     };
 
-    runAndLogException(setLambda);
+    return runAndReturnBool(lambda);
 }
 
-void GraphicManager::markMessageWidgetAsReceived(
+bool GraphicManager::markMessageWidgetAsReceived(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
-    auto setLambda = [&]()
+    auto lambda = [&]()
     {
         // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
-
-        try {
-            companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsReceived();
-        }
-        catch(std::out_of_range) {
-            return;
-        }
+        companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsReceived();
     };
 
-    runAndLogException(setLambda);
+    return runAndReturnBool(lambda);
 }
 
 void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group)
