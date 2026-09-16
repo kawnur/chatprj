@@ -22,7 +22,7 @@ static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl
 const uint32_t SLEEP_DURATION_INITIAL_MS = 1000;
 const float SLEEP_DURATION_INCREASE_RATE = 1.2f;
 
-const std::filesystem::path homePath("~");
+const std::filesystem::path HOME_PATH("~");
 
 enum class MessageType
 {

@@ -191,12 +191,14 @@ void showInfoDialogAndLogInfo(
     const QString &message, void (TextDialog::*function)(),
     std::shared_ptr<QWidget> parent = nullptr);
 
+void showInfoDialogAndLogInfo(const std::string &message, std::shared_ptr<QWidget> parent = nullptr);
 void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent = nullptr);
 void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent = nullptr);
 
 // void showErrorDialogAndLogError(const QString&, std::shared_ptr<QWidget> = nullptr);
 // void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
 
+void showErrorDialogAndLogError(std::string &&message);
 void showErrorDialogAndLogError(QString &&message);
 void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
 

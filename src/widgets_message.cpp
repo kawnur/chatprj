@@ -158,11 +158,10 @@ FileMessageWidget::FileMessageWidget(
         auto pathString = companion->getFileOperatorFilePathStringByNetworkId(
             message->getNetworkId());
 
-        messageLabel_->setText(
-            getQString(
-                getFormattedMessageBodyString(
-                    sentMessageColor,
-                    getStringByFormat("SEND FILE: {}", pathString))));
+        auto text = getFormattedMessageBodyString(
+            sentMessageColor, getStringByFormat("SEND FILE: {}", pathString));
+
+        messageLabel_->setText(getQString(text));
     }
 
     fileWidget_ = std::make_shared<QWidget>();

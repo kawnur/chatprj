@@ -23,6 +23,7 @@ class DBReplyData;
 class DBRequester;
 class Message;
 class MessageData;
+class MessageInfo;
 class MessageMetaData;
 class MessageState;
 class PasswordAction;
@@ -36,9 +37,32 @@ template<typename... Ts>
 void logArgs(Ts &&...args);
 
 void logDBReplyData(std::shared_ptr<DBReplyData> object);
-void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent);
+void showInfoDialogAndLogInfo(const std::string &message, std::shared_ptr<QWidget> parent);
 void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent);
-void showErrorDialogAndLogError(QString &&message);
+void showErrorDialogAndLogError(std::string &&message);
+
+template <typename T, typename...Ts>
+std::shared_ptr<T> buildObjectFromJson(const nlohmann::json &data, Ts &&...args)
+{
+    auto object = std::make_shared<T>();
+    auto result = object->setFields(data, args...);
+
+    if (!result)
+        logTemplateError("{}, error parsing jsonData", __FUNCTION__);
+
+    return (result) ? object : nullptr;
+}
+
+template <typename T, typename...Ts>
+bool updateObjectFromJson(std::shared_ptr<T> object, const nlohmann::json &data, Ts &&...args)
+{
+    auto result = object->setFields(data, args...);
+
+    if (!result)
+        logTemplateError("{}, error parsing jsonData", __FUNCTION__);
+
+    return result;
+}
 
 class Manager : public QObject // TODO do we need inheritance?
 {
@@ -69,10 +93,30 @@ public:
         std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
         std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
 
-    void receiveFileProposalMessage(std::shared_ptr<Companion> companion);
+    void receiveFileProposalMessage(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+
+    void receiveConfirmation(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+
+    void receiveConfirmationRequest(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+
+    void reciveChatHistoryRequest(std::shared_ptr<Companion> companion);
+
+    void receiveChatHistoryData(
+        std::shared_ptr<Companion> companion, const nlohmann::json &data);
+
+    void receiveFileRequest(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
+
     std::shared_ptr<MessageData> buildMessageDataFromJson(const nlohmann::json &jsonData);
     std::shared_ptr<MessageMetaData> buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
     std::shared_ptr<MessageState> buildMessageStateFromJson(const nlohmann::json &jsonData);
+    bool pushMessageHistoryToDb(std::shared_ptr<Companion> companion, const nlohmann::json &data);
     void receiveMessage(std::shared_ptr<Companion> companion, const std::string &json);
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
@@ -117,8 +161,9 @@ private:
 
     void markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    void markMessageAsReceived(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    // void markMessageAsReceived(
+    //     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
 
     std::shared_ptr<MessageMetaData> pushMessageToDB(
         // const std::string &companionName, const std::string &authorName,
@@ -171,7 +216,7 @@ private:
         auto data = dbRequester_.getDBData(type, args...);
 
         if (!data) {
-            showErrorDialogAndLogError("Error getting data from db");
+            showErrorDialogAndLogError("DB interaction error");
 
             return nullptr;
         }

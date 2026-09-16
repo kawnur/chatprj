@@ -35,8 +35,9 @@ template<typename T, typename... Ts>
 void logTemplateError(T &&templateString, Ts &&...args);
 
 // using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
-using MessageWidgetMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageWidget>>;
-using MessageWidgetMappingIterator = MessageWidgetMapping::iterator;
+using MessageMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageInfo>>;
+// using MessageWidgetMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageWidget>>;
+// using MessageWidgetMappingIterator = MessageWidgetMapping::iterator;
 // using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 
 class SocketInfo
@@ -125,7 +126,9 @@ public:
         bool lock, std::shared_ptr<MessageWidget> widget);
 
     // MessageMappingPair getMessageMappingPairByMessageId(uint32_t messageId);
+    std::shared_ptr<MessageInfo> getMessageInfoByMessageId(uint32_t messageId);
     // MessageMappingPair getMessageMappingPairByNetworkId(const std::string &networkId);
+    std::shared_ptr<MessageInfo> getMessageInfoByNetworkId(const std::string &networkId);
     std::shared_ptr<Message> getEarliestMessage() const;
 
     std::shared_ptr<Message> createMessage(
@@ -135,7 +138,8 @@ public:
         std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
         std::shared_ptr<MessageState> state);
 
-    std::pair<MessageWidgetMappingIterator, bool> createMessageAndAddToMapping(
+    // std::pair<MessageWidgetMappingIterator, bool> createMessageAndAddToMapping(
+    std::shared_ptr<MessageInfo> createMessageAndAddToMapping(
         std::shared_ptr<DBReplyData> messagesData, std::size_t index);
 
     void setSocketInfo(std::shared_ptr<SocketInfo> socketInfo);
@@ -162,6 +166,10 @@ public:
     void addMessageWidgetsToChatHistory();
     void clearMessageMapping();
 
+    void addReceiverOperator(
+        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageState> state,
+        const std::filesystem::path &path);
+
 private:
     std::string generateNetworkId(bool);
 
@@ -172,7 +180,7 @@ private:
     std::shared_ptr<ChatClient> client_;
     std::shared_ptr<ChatServer> server_;
     std::shared_ptr<FileOperatorStorage> fileOperatorStorage_;
-    MessageWidgetMapping messageMapping_;
+    MessageMapping messageMapping_;
 };
 
 #endif // COMPANION_HPP

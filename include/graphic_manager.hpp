@@ -16,6 +16,7 @@ class Companion;
 class CompanionAction;
 class MainWindow;
 class Message;
+class MessageWidget;
 class PasswordAction;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
@@ -81,8 +82,9 @@ public:
     bool markMessageWidgetAsSent(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    bool markMessageWidgetAsReceived(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    void markMessageWidgetAsReceived(
+        // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+        std::shared_ptr<MessageWidget> widget);
 
     void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
     void sendFile(std::shared_ptr<Companion> companion);

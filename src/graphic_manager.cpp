@@ -288,16 +288,18 @@ bool GraphicManager::markMessageWidgetAsSent(
     return runAndReturnBool(lambda);
 }
 
-bool GraphicManager::markMessageWidgetAsReceived(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+void GraphicManager::markMessageWidgetAsReceived(
+    // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+    std::shared_ptr<MessageWidget> widget)
 {
-    auto lambda = [&]()
-    {
-        // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
-        companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsReceived();
-    };
+    // auto lambda = [&]()
+    // {
+    //     // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
+    //     companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsReceived();
+    // };
 
-    return runAndReturnBool(lambda);
+    // return runAndReturnBool(lambda);
+    widget->setMessageWidgetAsReceived();
 }
 
 void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group)

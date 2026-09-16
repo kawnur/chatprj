@@ -2,6 +2,15 @@
 
 #include "logging.hpp"
 
+MessageMetaData::MessageMetaData(
+    MessageType messageType, NetworkMessageType networkMessageType, uint32_t messageId,
+    uint8_t companionId, const std::string &companionName, uint8_t authorId,
+    const std::string &authorName, const std::string &timestampTz, const std::string &hashMD5,
+    const std::string networkId)
+    : messageType_(messageType), networkMessageType_(networkMessageType), messageId_(messageId),
+    companionId_(companionId), companionName_(companionName), authorId_(authorId),
+    authorName_(authorName), timestampTz_(timestampTz), hashMD5_(hashMD5), networkId_(networkId) {}
+
 bool MessageMetaData::isValid()
 {
     if (companionId_ == 0 || timestampTz_ == "") {
@@ -12,6 +21,8 @@ bool MessageMetaData::isValid()
 
     return true;
 }
+
+MessageData::MessageData(const std::string &text) : text_(text) {}
 
 Message::Message(
     MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/
@@ -40,7 +51,8 @@ MessageType Message::getType() const
 
 uint32_t Message::getId() const
 {
-    return id_;
+    // return id_;
+    return meta_->messageId_;
 }
 
 uint8_t Message::getCompanionId() const
@@ -85,13 +97,31 @@ bool Message::isAntecedent() const
 
 std::string Message::getNetworkId() const
 {
-    return state_->networkId_;
+    return meta_->networkId_;
+}
+
+std::shared_ptr<MessageMetaData> Message::meta() const
+{
+    return meta_;
+}
+
+std::shared_ptr<MessageData> Message::data() const
+{
+    return data_;
+}
+
+std::shared_ptr<MessageState> Message::state() const
+{
+    return state_;
 }
 
 // MessageState::MessageState(
 //     uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
 //     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
 // {}
+
+MessageState::MessageState(bool isAntecedent, bool isSent, bool isReceived)
+    : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived) {}
 
 // bool MessageState::isAntecedent() const
 // {
@@ -128,24 +158,24 @@ std::string Message::getNetworkId() const
 //     networkId_ = networkId;
 // }
 
-// MessageInfo::MessageInfo(
-//     std::shared_ptr<MessageState> state, std::shared_ptr<MessageWidget> widget)
-//     : state_(state), widget_(widget) {}
+MessageInfo::MessageInfo(
+    std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
+    : message_(message), widget_(widget) {}
 
-// std::shared_ptr<MessageState> MessageInfo::getState() const
-// {
-//     return state_;
-// }
+std::shared_ptr<Message> MessageInfo::getMessage() const
+{
+    return message_;
+}
 
-// std::shared_ptr<MessageWidget> MessageInfo::getWidget() const
-// {
-//     return widget_;
-// }
+std::shared_ptr<MessageWidget> MessageInfo::getWidget() const
+{
+    return widget_;
+}
 
-// void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget)
-// {
-//     widget_ = widget;
-// }
+void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget)
+{
+    widget_ = widget;
+}
 
 bool operator<(const Message &message1, const Message &message2)
 {

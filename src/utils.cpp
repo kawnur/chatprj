@@ -127,6 +127,11 @@ void showInfoDialogAndLogInfo(
     logArgsInfo(message);
 }
 
+void showInfoDialogAndLogInfo(std::string &&message, std::shared_ptr<QWidget> parent)
+{
+    showInfoDialogAndLogInfo(getQString(message), parent);
+}
+
 void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent)
 {
     getGraphicManager()->createTextDialogAndShow(
@@ -154,6 +159,10 @@ void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWid
 //     logArgsError(message);
 // }
 
+void showErrorDialogAndLogError(std::string &&message)
+{
+    showErrorDialogAndLogError(getQString(message));
+}
 
 void showErrorDialogAndLogError(QString &&message)
 {
