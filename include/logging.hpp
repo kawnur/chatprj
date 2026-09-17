@@ -27,8 +27,11 @@ std::shared_ptr<GraphicManager> getGraphicManager();
 template<typename... Ts>
 void coutArgsWithSpaceSeparator(Ts&&... args);
 
-template<AssociativeContainer M, typename T, typename U>
-U getMappingValueOrDefault(const M &map, const T &key, U &&defaultValue);
+// template<AssociativeContainer M, typename T, typename U>
+// U getMapValue(const M &map, const T &key, U &&defaultValue);
+
+// template<AssociativeContainer M, typename T, typename U>
+// M::mapped_type getMapValue(const M &map, const T &key, U &&defaultValue);
 
 template<typename T>
 concept IsArithmetic = std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
@@ -43,10 +46,10 @@ QString getQString(std::nullptr_t value);
 QString getQString(const std::filesystem::path &value);
 
 template<typename T>
-QString getQString(std::shared_ptr<T> value)
+QString getQString(T *value)
 {
     std::stringstream ss;
-    ss << (std::shared_ptr<void>)value;
+    ss << (void *)value;
     return QString::fromStdString(ss.str());
 }
 
@@ -98,6 +101,12 @@ void logArgsWithTemplate(T &&templateString, Ts &&...args)
 }
 
 std::string buildLogEntryPrefix(LogType type);
+
+template<typename... Ts>
+void logTypeArgs(LogType type, Ts &&...args)
+{
+    logArgs(buildLogEntryPrefix(type), args...);
+}
 
 template<typename... Ts>
 void logArgsInfo(Ts &&...args)

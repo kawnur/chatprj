@@ -94,16 +94,16 @@ enum class MainWindowContainerPosition
     RIGHT
 };
 
-const std::unordered_map<ChatActionType, QString> companionActionTypeStringRepresentation {
+const std::unordered_map<ChatActionType, std::string> companionActionTypeStringRepresentation {
     { ChatActionType::CREATE, "Add new companion" },
     { ChatActionType::UPDATE, "Edit companion" }
 };
 
-const std::unordered_map<ChatActionType, QString> groupChatActionTypeStringRepresentation {
+const std::unordered_map<ChatActionType, std::string> groupChatActionTypeStringRepresentation {
     { ChatActionType::CREATE, "Add new group chat" }
 };
 
-const std::unordered_map<DialogType, QString> dialogTypeStringRepresentation {
+const std::unordered_map<DialogType, std::string> dialogTypeStringRepresentation {
     { DialogType::INFO, "INFO" },
     { DialogType::WARNING, "WARNING" },
     { DialogType::ERROR, "ERROR" }
@@ -123,7 +123,7 @@ const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPRESENTATION {
     { LogType::ERROR, "ERROR" }
 };
 
-const std::unordered_map<FileActionType, QString> fileDialogTypeQStringRepresentation {
+const std::unordered_map<FileActionType, std::string> fileDialogTypeQStringRepresentation {
     { FileActionType::SEND, "Send file" },
     { FileActionType::SAVE, "Save file" }
 };
@@ -158,7 +158,7 @@ const QString authenticationDialogTitle { "Authentication" };
 const QString authenticationDialogLabel { "Enter password:" };
 
 // info dialogs
-const QString newPasswordCreatedLabel { "New password created" };
+const std::string newPasswordCreatedLabel { "New password created" };
 
 // button text
 const QString okButtonText { "OK" };

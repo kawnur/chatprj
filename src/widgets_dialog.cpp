@@ -16,12 +16,8 @@ CompanionDataDialog::CompanionDataDialog(
     ChatActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
 {
     setParent(parent.get());
-
-    setWindowTitle(
-        getConstantMappingValue(
-            "companionActionTypeStringRepresentation",
-            &companionActionTypeStringRepresentation, type));
-
+    auto title = getMapValue(companionActionTypeStringRepresentation, type, "Companion action"s);
+    setWindowTitle(getQString(title));
     setModal(true);
     setWindowFlag(Qt::Window);
 
@@ -85,12 +81,8 @@ void CompanionDataDialog::set()
 GroupChatDataDialog::GroupChatDataDialog(ChatActionType type, std::shared_ptr<QWidget> parent)
 {
     setParent(parent.get());
-
-    setWindowTitle(
-        getConstantMappingValue(
-            "groupChatActionTypeStringRepresentation",
-            &groupChatActionTypeStringRepresentation, type));
-
+    auto title = getMapValue(groupChatActionTypeStringRepresentation, type, "Group chat action"s);
+    setWindowTitle(getQString(title));
     setModal(true);
     setWindowFlag(Qt::Window);
 
@@ -208,13 +200,7 @@ TextDialog::TextDialog(
 
     setModal(true);
     setWindowFlag(Qt::Window);
-
-    setWindowTitle(
-        getConstantMappingValue(
-            "dialogTypeStringRepresentation",
-            &dialogTypeStringRepresentation,
-            type));
-
+    setWindowTitle(getQString(getMapValue(dialogTypeStringRepresentation, type, "UNKNOWN"s)));
     layout_ = std::make_unique<QVBoxLayout>();
     setLayout(layout_.get());
 
@@ -290,7 +276,7 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString &title)
+FileDialog::FileDialog(std::shared_ptr<FileAction> action, const std::string &title)
 {
     action_ = action;
     containsDialog_ = true;
@@ -298,7 +284,7 @@ FileDialog::FileDialog(std::shared_ptr<FileAction> action, const QString &title)
     dialog_->setFileMode(QFileDialog::AnyFile);
     dialog_->setViewMode(QFileDialog::Detail);
     dialog_->setDirectory(getQString(getManager()->getLastOpenedPath().string()));
-    dialog_->setWindowTitle(title);
+    dialog_->setWindowTitle(getQString(title));
 }
 
 void FileDialog::set()
@@ -316,4 +302,14 @@ void FileDialog::showDialog()
 std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
 {
     return dialog_;
+}
+
+// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function)
+// std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog::*function)())
+{
+    auto vector = std::make_shared<std::vector<ButtonInfo>>();
+    vector->emplace_back(okButtonText, QDialogButtonBox::AcceptRole, function);
+
+    return vector;
 }

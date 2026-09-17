@@ -89,26 +89,26 @@ bool Companion::removeOperatorFromStorage(const std::string &key)
     return fileOperatorStorage_->removeOperator(key);
 }
 
-// MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
-//     std::shared_ptr<Message> message)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-
-//     auto lambda = [&](const auto &iter)
-//     {
-//         return iter.first == message;
-//     };
-
-//     return std::ranges::find_if(messageMapping_, lambda);
-// }
-
-std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessage(
+MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
     std::shared_ptr<Message> message)
 {
-    auto result = getMessageMappingIteratorByMessage(message);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second->getState();
+    auto lambda = [&](const auto &iter)
+    {
+        return iter.second->getMessage() == message;
+    };
+
+    return std::ranges::find_if(messageMapping_, lambda);
 }
+
+// std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessage(
+//     std::shared_ptr<Message> message)
+// {
+//     auto result = getMessageMappingIteratorByMessage(message);
+
+//     return (result == messageMapping_.end()) ? nullptr : result->second->getState();
+// }
 
 std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetByMessage(
     std::shared_ptr<Message> message)
@@ -130,12 +130,10 @@ std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
     if (lock)
         std::lock_guard<std::mutex> lockObject(mutex_);
 
-    // TODO switch to map find method
-
     auto lambda = [&](const auto &iter) { return iter.second->getWidget().get() == widget; };
     auto result = std::ranges::find_if(messageMapping_, lambda);
 
-    return (result == messageMapping_.end()) ? nullptr : result->first;
+    return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
 }
 
 std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
@@ -151,7 +149,7 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
 
     auto result = std::ranges::find_if(messageMapping_, lambda);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second->getState();
+    return (result == messageMapping_.end()) ? nullptr : result->second->getMessage()->state();
 }
 
 // MessageMappingPair Companion::getMessageMappingPairByMessageId(uint32_t messageId)
@@ -188,12 +186,12 @@ std::shared_ptr<Message> Companion::getEarliestMessage() const
 {
     auto lambda = [&](const auto &iterator1, const auto &iterator2)
     {
-        return iterator1.first->getId() < iterator2.first->getId();
+        return iterator1.second->getMessage()->getId() < iterator2.second->getMessage()->getId();
     };
 
-    auto minPair = std::ranges::min_element(messageMapping_, lambda);
+    auto min = std::ranges::min_element(messageMapping_, lambda);
 
-    return minPair->first;
+    return min->second->getMessage();
 }
 
 std::shared_ptr<Message> Companion::createMessage(
@@ -205,10 +203,8 @@ std::shared_ptr<Message> Companion::createMessage(
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (state->networkId_.size() == 0)
-        state->networkId_ = generateNetworkId(false);
-
-    auto companionId = id_;
+    if (meta->networkId_.size() == 0)
+        meta->networkId_ = generateNetworkId(false);
 
     // auto messageState = std::make_shared<MessageState>(
     //     companionId, isAntecedent, isSent, isReceived, networkId);
@@ -379,22 +375,10 @@ bool Companion::sendFileRequest(std::shared_ptr<FileMessageWidget> widget)
     if (!message)
         return false;
 
-    std::shared_ptr<MessageState> state = nullptr;
+    auto meta = std::make_shared<MessageMetaData>();
+    meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
 
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-
-        try {
-            state = messageMapping_.at(message)->getState();
-        }
-        catch(std::out_of_range) {}
-    }
-
-    if (!state)
-        return false;
-
-    bool result = sendMessage(
-        false, NetworkMessageType::FILE_REQUEST, state->getNetworkId(), message);
+    bool result = sendMessage(message, meta);
 
     return result;
 }
@@ -428,14 +412,15 @@ std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iter)
-    {
-        return iter.first->getId() == messageId;
-    };
+    // auto lambda = [&](const auto &iter)
+    // {
+    //     return iter.second->getMessage()->getId() == messageId;
+    // };
 
-    auto result = std::ranges::find_if(messageMapping_, lambda);
+    // auto result = std::ranges::find_if(messageMapping_, lambda);
+    auto result = messageMapping_.find(messageId);
 
-    return (result == messageMapping_.end()) ? nullptr : result->first;
+    return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
 }
 
 void Companion::addMessageWidgetsToChatHistory()
@@ -444,10 +429,8 @@ void Companion::addMessageWidgetsToChatHistory()
 
     std::lock_guard<std::mutex> lock(mutex_);
 
-    for (auto &iterator : messageMapping_) {
-        widgetGroup->addMessageWidgetToCentralPanelChatHistory(
-            iterator.first, iterator.second->getState());
-    }
+    for (auto &iterator : messageMapping_)
+        widgetGroup->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
 }
 
 void Companion::clearMessageMapping()
@@ -458,10 +441,9 @@ void Companion::clearMessageMapping()
 }
 
 void Companion::addReceiverOperator(
-    std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageState> state,
-    const std::filesystem::path &path)
+    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
 {
-    fileOperatorStorage_->addReceiverOperator(state->networkId_, meta->hashMD5_, path);
+    fileOperatorStorage_->addReceiverOperator(meta, path);
 }
 
 std::string Companion::generateNetworkId(bool lock)
@@ -478,7 +460,7 @@ std::string Companion::generateNetworkId(bool lock)
         {
             auto lambdaInternal = [&](const auto &iter)
             {
-                return iter.second->getState()->getNetworkId() == networkId;
+                return iter.second->getMessage()->getNetworkId() == networkId;
             };
 
             auto iterator = std::ranges::find_if(messageMapping_, lambdaInternal);

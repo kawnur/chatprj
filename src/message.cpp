@@ -25,19 +25,19 @@ bool MessageMetaData::isValid()
 MessageData::MessageData(const std::string &text, const std::string &data)
     : text_(text), data_(data) {}
 
-Message::Message(
-    MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/
-     const MessageMetaData &meta, const std::string &text)
-    // : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
-    // text_(text) {}
-{
-    type_ = type;
-    id_ = meta.messageId_;
-    companion_id_ = meta.companionId_;
-    author_id_ = meta.authorId_;
-    time_ = meta.timestampTz_;
-    text_ = text;
-}
+// Message::Message(
+//     MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/
+//      const MessageMetaData &meta, const std::string &text)
+//     // : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
+//     // text_(text) {}
+// {
+//     type_ = type;
+//     id_ = meta.messageId_;
+//     companion_id_ = meta.companionId_;
+//     author_id_ = meta.authorId_;
+//     time_ = meta.timestampTz_;
+//     text_ = text;
+// }
 
 Message::Message(
     std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
@@ -47,7 +47,7 @@ Message::~Message() = default;
 
 MessageType Message::getType() const
 {
-    return type_;
+    return meta_->messageType_;
 }
 
 uint32_t Message::getId() const
@@ -58,27 +58,27 @@ uint32_t Message::getId() const
 
 uint8_t Message::getCompanionId() const
 {
-    return companion_id_;
+    return meta_->companionId_;
 }
 
 uint8_t Message::getAuthorId() const
 {
-    return author_id_;
+    return meta_->authorId_;
 }
 
 std::string Message::getTime() const
 {
-    return time_;
+    return meta_->timestampTz_;
 }
 
 std::string Message::getText() const
 {
-    return text_;
+    return data_->text_;
 }
 
 bool Message::isMessageFromMe() const
 {
-    return (author_id_ != companion_id_);
+    return (meta_->authorId_ != meta_->companionId_);
 }
 
 bool Message::isSent() const

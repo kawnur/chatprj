@@ -98,7 +98,7 @@ void createKey(gpgme_ctx_t *context, const char *algoName)
         { GPG_ERR_NOT_SUPPORTED, "engine does not support the command" }
     };
 
-    coutWithEndl(getMappingValueOrDefault(map, key, "key creation: some other error"s));
+    coutWithEndl(getMapValue(map, key, "key creation: some other error"s));
 }
 
 void listKeys(gpgme_ctx_t *context)

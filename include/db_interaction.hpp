@@ -15,7 +15,7 @@
 
 #include "db_constants.hpp"
 #include "logging.hpp"
-#include "utils.hpp"
+#include "utils_widgets.hpp"
 
 class Companion;
 class CompanionAction;
@@ -91,7 +91,7 @@ public:
         if (log_) {
             logArgs(logDelimiter);
             logArgs(requestData.getLogMark());
-            logArgs("dbResult:", dbResult);
+            logArgs("dbResult:", dbResult.get());
         }
 
         if (!dbResult) {

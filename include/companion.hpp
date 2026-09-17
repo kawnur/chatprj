@@ -38,6 +38,7 @@ void logTemplateError(T &&templateString, Ts &&...args);
 using MessageMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageInfo>>;
 // using MessageWidgetMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageWidget>>;
 // using MessageWidgetMappingIterator = MessageWidgetMapping::iterator;
+using MessageMappingIterator = MessageMapping::iterator;
 // using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 
 class SocketInfo
@@ -113,8 +114,8 @@ public:
         // logTemplateInfo("file operator for networkId {} deleted", networkId);
     }
 
-    // MessageWidgetMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
-    std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message> message);
+    MessageMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
+    // std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message> message);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message> message);
 
     std::shared_ptr<Message> getMappedMessageByMessageWidget(
@@ -167,8 +168,7 @@ public:
     void clearMessageMapping();
 
     void addReceiverOperator(
-        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageState> state,
-        const std::filesystem::path &path);
+        std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
 
 private:
     std::string generateNetworkId(bool);

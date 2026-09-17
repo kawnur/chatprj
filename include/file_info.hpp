@@ -9,6 +9,7 @@
 #include <string>
 
 class Companion;
+class MessageMetaData;
 
 class FileOperator
 {
@@ -63,8 +64,7 @@ public:
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
 
     void addReceiverOperator(
-        const std::string &networkId, const std::string &md5HashFromSender,
-        const std::filesystem::path &path);
+        std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
 
     std::shared_ptr<FileOperator> getOperator(const std::string &key);
 

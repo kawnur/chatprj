@@ -7,6 +7,9 @@
 #include <QString>
 #include <QWidget>
 
+#include "graphic_manager.hpp"
+#include "widgets_dialog.hpp"
+
 class ButtonInfo;
 
 std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString &buttonText);

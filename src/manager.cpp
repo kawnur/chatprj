@@ -111,47 +111,58 @@ void Manager::sendMessage(
     // encrypt message
 
     // add to DB and get timestamp
-    auto meta = pushMessageToDB(companion->getName(), "me"s, "now()"s, text, false, false);
+    auto meta = std::make_shared<MessageMetaData>();
+    meta->companionName_ = companion->getName();
+    meta->authorName_ = "me"s;
+    meta->timestampTz_ = "now()"s;
 
-    if (!meta.isValid())
+    auto data = std::make_shared<MessageData>();
+    data->text_ = text;
+
+    auto state = std::make_shared<MessageState>();
+    state->isSent_ = false;
+    state->isReceived_ = false;
+
+    auto pushMeta = pushMessageToDB(meta, data, state);
+
+    if (!pushMeta->isValid())
         return;
 
-    meta.authorId_ = 1;
+    pushMeta->authorId_ = 1;
+    pushMeta->messageType_ = type;
 
-    auto pair = companion->createMessage(type, meta, text, false, false, false, "");
+    state->isAntecedent_ = false;
 
-    if (!pair.second)
+    auto message = companion->createMessage(pushMeta, data, state);
+
+    if (!message)
         return;
 
     // add to widget
-    auto message = pair.first->first;
-    auto messageState = pair.first->second->getState();
-
     if (type == MessageType::FILE) {
         auto storage = companion->getFileOperatorStorage();
 
         if (!storage)
             return;
 
-        storage->addSenderOperator(messageState->getNetworkId(), action->getPath());
+        storage->addSenderOperator(message->getNetworkId(), action->getPath());
     }
 
-    group->addMessageWidgetToCentralPanelChatHistory(message, messageState);
+    group->addMessageWidgetToCentralPanelChatHistory(message);
 
     // define NetworkMessageType
     auto networkMessageType = defineNetworkMessageType(type);
 
     // TODO move to manager field object
     // send over network
-    bool result = companion->sendMessage(
-        false, networkMessageType, messageState->getNetworkId(), message);
+    bool result = companion->sendMessage(message, message->meta());
 
     // mark message as sent
     if (result)
         markMessageAsSent(companion, message);
 
     // wait for message reception confirmation
-    waitForMessageReceptionConfirmation(companion, messageState, message);
+    waitForMessageReceptionConfirmation(companion, message);
 }
 
 void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path)
@@ -199,7 +210,7 @@ void Manager::receiveFileProposalMessage(
     std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state)
 {
     // create receiver operator
-    companion->addReceiverOperator(meta, state, HOME_PATH);
+    companion->addReceiverOperator(meta, HOME_PATH);
 
     auto name = companion->getName();
 
@@ -876,40 +887,40 @@ void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
         std::string networkId;
 
         if (message) {
-            auto messageState = companion->getMappedMessageStateByMessage(message);
-
-            if (!messageState) {
+            if (!message->state()) {
                 logArgsError(
                     "strange case: unsent message found in companions messages, "
                     "but not found in companion's messageMapping_");
             }
             else {
-                networkId = messageState->getNetworkId();
+                networkId = message->getNetworkId();
             }
         }
         else {
             // add to companion's messages if needed
             networkId = getRandomString(5);
 
-            MessageMetaData meta {
-                .messageId_ = messageId,
-                .companionId_ = (decltype(MessageMetaData::companionId_))companion->getId(),
-                .authorId_ = 1,
-                .timestampTz_ = messagesData->getValue(i, "timestamp_tz")
-            };
+            auto meta = std::make_shared<MessageMetaData>();
+            meta->messageType_ = MessageType::TEXT;
+            meta->messageId_ = messageId;
+            meta->companionId_ = companion->getId();
+            meta->authorId_ = 1;
+            meta->timestampTz_ = messagesData->getValue(i, "timestamp_tz");
+            meta->networkId_ = networkId;
 
-            companion->createMessage(
-                MessageType::TEXT,
-                meta,
-                messagesData->getValue(i, "message"),
-                false,
-                false,
-                getBoolFromDBValue(messagesData->getValue(i, "is_received")),
-                networkId);
+            auto data = std::make_shared<MessageData>();
+            data->text_ = messagesData->getValue(i, "message");
+
+            auto state = std::make_shared<MessageState>();
+            state->isAntecedent_ = true;
+            state->isSent_ = false;
+            state->isReceived_ = getBoolFromDBValue(messagesData->getValue(i, "is_received"));
+
+            message = companion->createMessage(meta, data, state);
         }
 
         // send over network
-        bool result = companion->sendMessage(true, NetworkMessageType::TEXT, networkId, message);
+        bool result = companion->sendMessage(message, message->meta());
 
         // mark message as sent
         if (result)
@@ -919,8 +930,15 @@ void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
 
 void Manager::requestHistoryFromCompanion(std::shared_ptr<Companion> companion)
 {
-    bool result = companion->sendMessage(
-        true, NetworkMessageType::CHAT_HISTORY_REQUEST, "", nullptr);
+    auto meta = std::make_shared<MessageMetaData>();
+    meta->networkMessageType_ = NetworkMessageType::CHAT_HISTORY_REQUEST;
+
+    auto state = std::make_shared<MessageState>();
+    state->isAntecedent_ = true;
+
+    auto message = companion->createMessage(meta, nullptr, state);
+
+    bool result = companion->sendMessage(message, message->meta());
 }
 
 void Manager::sendChatHistoryToCompanion(std::shared_ptr<Companion> companion)
@@ -1253,8 +1271,7 @@ bool Manager::checkCompanionDataForExistanceAtUpdate(
 }
 
 void Manager::waitForMessageReceptionConfirmation(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageState> state,
-    std::shared_ptr<Message> message)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
     auto lambda = [=]()
     {
@@ -1263,13 +1280,15 @@ void Manager::waitForMessageReceptionConfirmation(
         sleepForMS(sleepDuration);
 
         while (true) {
-            if (state->isReceived())
+            if (message->isReceived())
                 return;
 
             // send message reception confirmation request
-            bool result = companion->sendMessage(
-                false, NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST, state->getNetworkId(),
-                message);
+            auto meta = std::make_shared<MessageMetaData>();
+            meta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST;
+            meta->networkId_ = message->getNetworkId();
+
+            bool result = companion->sendMessage(message, meta);
 
             // sleep
             sleepForMS(sleepDuration);
@@ -1322,11 +1341,8 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
         meta->timestampTz_, companionIdString, data->text_, state->isSent_, state->isReceived_);
 
     // TODO get rid of copy constructing
-    if (!messageData || messageData->isEmpty()) {
-        // return std::make_shared<MessageMetaData>(MessageMetaData {
-        //     .messageId_ = 0, .companionId_ = 0, .authorId_ = 0, .timestampTz_ = "" });
+    if (!messageData || messageData->isEmpty())
         return nullptr;
-    }
 
     uint32_t id = std::stoi(messageData->getValue(0, "id"));
     uint8_t companionId = std::stoi(messageData->getValue(0, "companion_id"));
@@ -1336,9 +1352,14 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
         logArgsWithTemplate("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
 
     // TODO get rid of copy constructing
-    return std::make_shared<MessageMetaData>(MessageMetaData {
-        .messageId_ = id, .companionId_ = companionId, .authorId_ = 0,
-        .timestampTz_ = timestampTz });
+    auto result = std::make_shared<MessageMetaData>();
+
+    result->messageId_ = id;
+    result->companionId_ = companionId;
+    result->authorId_ = 0;
+    result->timestampTz_ = timestampTz;
+
+    return result;
 }
 
 std::shared_ptr<Manager> getManager()

@@ -108,80 +108,10 @@ std::string buildDialogText(std::string &&header, const std::vector<std::string>
     return text;
 }
 
-// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function)
-// std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog::*function)())
-{
-    auto vector = std::make_shared<std::vector<ButtonInfo>>();
-    vector->emplace_back(okButtonText, QDialogButtonBox::AcceptRole, function);
-
-    return vector;
-}
-
 LogType getLogTypeByDialogType(DialogType type)
 {
-    return getMappingValueOrDefault(MAP_DIALOG_TYPE_TO_LOG_TYPE, type, LogType::INFO);
+    return getMapValue(MAP_DIALOG_TYPE_TO_LOG_TYPE, type, LogType::INFO);
 }
-
-// void showInfoDialogAndLogInfo(
-//     const QString &message, void (TextDialog::*function)(), std::shared_ptr<QWidget> parent)
-// {
-//     getGraphicManager()->createTextDialogAndShow(
-//         parent, DialogType::INFO, message.toStdString(), createOkButtonInfoVector(function));
-
-//     logArgsInfo(message);
-// }
-
-// void showInfoDialogAndLogInfo(std::string &&message, std::shared_ptr<QWidget> parent)
-// {
-//     showInfoDialogAndLogInfo(getQString(message), parent);
-// }
-
-// void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent)
-// {
-//     getGraphicManager()->createTextDialogAndShow(
-//         parent, DialogType::INFO, message.toStdString(),
-//         createOkButtonInfoVector(&QDialog::accept));
-
-//     logArgsInfo(message);
-// }
-
-// void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent)
-// {
-//     getGraphicManager()->createTextDialogAndShow(
-//         parent, DialogType::WARNING, message.toStdString(),
-//         createOkButtonInfoVector(&QDialog::accept));
-
-//     logArgsWarning(message);
-// }
-
-// void showErrorDialogAndLogError(
-//     const QString &message, std::shared_ptr<QWidget> parent) {
-//     getGraphicManager()->createTextDialogAndShow(
-//         parent, DialogType::ERROR, message.toStdString(),
-//         createOkButtonInfoVector(&QDialog::accept));
-
-//     logArgsError(message);
-// }
-
-// void showErrorDialogAndLogError(std::string &&message)
-// {
-//     showErrorDialogAndLogError(getQString(message));
-// }
-
-// void showErrorDialogAndLogError(QString &&message)
-// {
-//     showErrorDialogAndLogError(std::forward<QString>(message), nullptr);
-// }
-
-// void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent)
-// {
-//     getGraphicManager()->createTextDialogAndShow(
-//         parent, DialogType::ERROR, std::move(message).toStdString(),
-//         createOkButtonInfoVector(&QDialog::accept));
-
-//     logArgsError(message);
-// }
 
 std::string getFormattedMessageBodyString(const std::string &color, const std::string &text)
 {

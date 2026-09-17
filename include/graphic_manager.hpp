@@ -20,6 +20,7 @@ class MessageWidget;
 class PasswordAction;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
+class TextDialog;
 class WidgetGroup;
 
 class GraphicManager

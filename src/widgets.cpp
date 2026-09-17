@@ -563,7 +563,7 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
     auto messageState = companion_->getMappedMessageStateByMessageWidget(true, widget);
-    bool isAntecedent = messageState->isAntecedent();
+    bool isAntecedent = messageState->isAntecedent_;
 
     logArgs("isAntecedent:", isAntecedent);
 
@@ -573,7 +573,7 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
 
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
 
-        messageState->setIsAntecedent(false);
+        messageState->isAntecedent_ = false;
 
         if (antecedentMessagesCounter_ == 0) {
             auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);

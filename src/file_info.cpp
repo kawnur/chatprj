@@ -220,10 +220,11 @@ void FileOperatorStorage::addSenderOperator(
 }
 
 void FileOperatorStorage::addReceiverOperator(
-    const std::string &networkId, const std::string &md5HashFromSender,
-    const std::filesystem::path &path)
+    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+
+    auto networkId = meta->networkId_;
 
     if (mapping_.count(networkId) != 0) {
         logTemplateError("file operator for key {} already exists", networkId);
@@ -231,7 +232,7 @@ void FileOperatorStorage::addReceiverOperator(
         return;
     }
 
-    mapping_[networkId] = std::make_shared<ReceiverOperator>(path, md5HashFromSender);
+    mapping_[networkId] = std::make_shared<ReceiverOperator>(path, meta->hashMD5_);
 }
 
 std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string &key)

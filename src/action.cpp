@@ -1,15 +1,20 @@
 #include "action.hpp"
 
+#include <string>
+
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
+#include "message.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
+
+using namespace std::string_literals;
 
 Action::Action(std::shared_ptr<Dialog> dialog) : dialog_(dialog) {}
 
@@ -231,7 +236,7 @@ void PasswordAction::sendData()
 
         if (text1 == text2) {
             if (text1.size() == 0) {
-                showErrorDialogAndLogError("Empty password is invalid", getDialog());
+                showErrorDialogAndLogError("Empty password is invalid"s, getDialog());
 
                 return;
             }
@@ -245,7 +250,7 @@ void PasswordAction::sendData()
             getGraphicManager()->sendNewPasswordDataToManager(cast);
         }
         else {
-            showErrorDialogAndLogError("Entered passwords are not equal", getDialog());
+            showErrorDialogAndLogError("Entered passwords are not equal"s, getDialog());
         }
     }
 
@@ -261,7 +266,7 @@ void PasswordAction::sendData()
         auto text = passwordDialog->getEditText();
 
         if (text.size() == 0) {
-            showErrorDialogAndLogError("Empty password is invalid", getDialog());
+            showErrorDialogAndLogError("Empty password is invalid"s, getDialog());
 
             return;
         }
@@ -287,10 +292,7 @@ FileAction::FileAction(
     companion_ = companion;
     networkId_ = networkId;
 
-    auto windowTitle = getConstantMappingValue(
-        "fileDialogTypeQStringRepresentation",
-        &fileDialogTypeQStringRepresentation,
-        type);
+    auto windowTitle = getMapValue(fileDialogTypeQStringRepresentation, type, "File action"s);
 
     // TODO change
     auto cast = dynamic_pointer_cast<std::remove_reference_t<decltype(*this)>>(shared_from_this());
@@ -375,8 +377,11 @@ void FileAction::sendData()
 
         if (setResult) {
             // send without saving to db
-            bool result = companion_->sendMessage(
-                false, NetworkMessageType::FILE_REQUEST, networkId_, nullptr);
+            auto meta = std::make_shared<MessageMetaData>();
+            meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
+            meta->networkId_ = networkId_;
+
+            bool result = companion_->sendMessage(nullptr, meta);
 
             getManager()->setLastOpenedPath(filePath_.parent_path());
         }

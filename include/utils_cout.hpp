@@ -252,7 +252,7 @@ void coutMap(std::map<T, U> &map)
 template<typename T, typename U>
 void coutMappingValue(const std::map<T, U> &map, const T &key)
 {
-    auto line = getMappingValueOrDefault(map, key, ""s);
+    auto line = getMapValue(map, key, ""s);
 
     if (!line.empty())
         coutWithEndl(line);

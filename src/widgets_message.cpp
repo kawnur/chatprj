@@ -194,7 +194,6 @@ void FileMessageWidget::addMembersToLayout()
 void FileMessageWidget::saveFileSlot()
 {
     // create file operator for this networkId
-    auto networkId = companion_->getMappedMessageStateByMessage(message_)->getNetworkId();
-
+    auto networkId = message_->getNetworkId();
     getGraphicManager()->saveFile(networkId, companion_);
 }

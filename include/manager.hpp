@@ -163,8 +163,7 @@ private:
     bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> action);
 
     void waitForMessageReceptionConfirmation(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageState> state,
-        std::shared_ptr<Message> message);
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
     void markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 

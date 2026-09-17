@@ -18,6 +18,7 @@
 #include <QString>
 
 #include "constants.hpp"
+#include "graphic_manager.hpp"
 #include "utils.hpp"
 
 using namespace std::string_literals;
@@ -25,6 +26,40 @@ using namespace std::string_literals;
 class Action;
 class Companion;
 class FileAction;
+
+template <typename T, typename F>
+void showDialogAndLog(
+    T &&message, F &&func, DialogType type, std::shared_ptr<QWidget> parent = nullptr)
+{
+    getGraphicManager()->createTextDialogAndShow(
+        parent, type, message, createOkButtonInfoVector(func));
+
+    logTypeArgs(getLogTypeByDialogType(type), message);
+}
+
+template <typename T, typename F>
+void showInfoDialogAndLogInfo(T &&message, F &&func, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, func, DialogType::INFO, parent);
+}
+
+template <typename T>
+void showInfoDialogAndLogInfo(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, &QDialog::accept, DialogType::INFO, parent);
+}
+
+template <typename T>
+void showWarningDialogAndLogWarning(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, &QDialog::accept, DialogType::WARNING, parent);
+}
+
+template <typename T>
+void showErrorDialogAndLogError(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, &QDialog::accept, DialogType::ERROR, parent);
+}
 
 class Dialog : public QDialog
 {
@@ -155,8 +190,8 @@ class TextDialog : public Dialog
 
 public:
     TextDialog(
-        std::shared_ptr<QWidget>, DialogType, const std::string&,
-        std::shared_ptr<std::vector<ButtonInfo>>);
+        std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+        std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo);
 
     ~TextDialog() = default;
 
@@ -181,7 +216,7 @@ class FileDialog : public Dialog
     Q_OBJECT
 
 public:
-    FileDialog(std::shared_ptr<FileAction> action, const QString &title);
+    FileDialog(std::shared_ptr<FileAction> action, const std::string &title);
     ~FileDialog() = default;
 
     void set();
@@ -217,14 +252,14 @@ void setButtonBox(
 
         auto handlerLambda = [&](const std::exception &e)
         {
-            if (dynamic_cast<const std::out_of_range *>(&e)) {
-                // std::string s = /*"Unmanaged button role"s*/;
+            if (dynamic_cast<const std::out_of_range *>(&e))
                 showErrorDialogAndLogError("Unmanaged button role"s);
-            }
         };
 
         runAndHandleException(connectLambda, handlerLambda, role);
     }
 }
+
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function);
 
 #endif // WIDGETS_DIALOG_HPP

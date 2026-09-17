@@ -78,7 +78,7 @@ void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
 std::string buildLogEntryPrefix(LogType type)
 {
     std::string defaultValue = "UNKNOWN"s;
-    auto mark = getMappingValueOrDefault(LOG_TYPE_STRING_REPRESENTATION, type, defaultValue);
+    auto mark = getMapValue(LOG_TYPE_STRING_REPRESENTATION, type, defaultValue);
 
     return getStringByFormat("{}:", mark);
 }
