@@ -11,9 +11,11 @@
 #include <vector>
 
 #include <QString>
+#include <QWidget>
 
 #include "db_constants.hpp"
 #include "logging.hpp"
+#include "utils.hpp"
 
 class Companion;
 class CompanionAction;

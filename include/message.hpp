@@ -64,7 +64,7 @@ class MessageData
 {
 public:
     MessageData() = default;
-    MessageData(const std::string &text);
+    MessageData(const std::string &text, const std::string &data);
     ~MessageData() = default;
 
     template<typename...Ts>
@@ -72,13 +72,15 @@ public:
     {
         const LambdaMap lambdaMap
         {
-            { "text", [&]() { text_ = data.at("text"); } }
+            { "text", [&]() { text_ = data.at("text"); } },
+            { "data", [&]() { data_ = data.at("data"); } }
         };
 
         return setFieldsFromJson(lambdaMap, data, args...);
     };
 
     std::string text_;
+    std::string data_;  // for file transfer
 };
 
 class MessageState

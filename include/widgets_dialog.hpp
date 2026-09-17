@@ -2,6 +2,7 @@
 #define WIDGETS_DIALOG_HPP
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -17,8 +18,9 @@
 #include <QString>
 
 #include "constants.hpp"
+#include "utils.hpp"
 
-void showErrorDialogAndLogError(QString &&message);
+using namespace std::string_literals;
 
 class Action;
 class Companion;
@@ -198,8 +200,8 @@ void setButtonBox(
     std::vector<ButtonInfo> *infoVector)
 {
     const std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
-        { QDialogButtonBox::AcceptRole, &QDialogButtonBox::accepted },
-        { QDialogButtonBox::RejectRole, &QDialogButtonBox::rejected }
+        { QDialogButtonBox::ButtonRole::AcceptRole, &QDialogButtonBox::accepted },
+        { QDialogButtonBox::ButtonRole::RejectRole, &QDialogButtonBox::rejected }
     };
 
     for (auto &info : *infoVector) {
@@ -215,8 +217,10 @@ void setButtonBox(
 
         auto handlerLambda = [&](const std::exception &e)
         {
-            if (dynamic_cast<std::out_of_range *>(&e))
-                showErrorDialogAndLogError("Unmanaged button role");
+            if (dynamic_cast<const std::out_of_range *>(&e)) {
+                // std::string s = /*"Unmanaged button role"s*/;
+                showErrorDialogAndLogError("Unmanaged button role"s);
+            }
         };
 
         runAndHandleException(connectLambda, handlerLambda, role);

@@ -89,18 +89,18 @@ bool Companion::removeOperatorFromStorage(const std::string &key)
     return fileOperatorStorage_->removeOperator(key);
 }
 
-MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
-    std::shared_ptr<Message> message)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
+//     std::shared_ptr<Message> message)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iter)
-    {
-        return iter.first == message;
-    };
+//     auto lambda = [&](const auto &iter)
+//     {
+//         return iter.first == message;
+//     };
 
-    return std::ranges::find_if(messageMapping_, lambda);
-}
+//     return std::ranges::find_if(messageMapping_, lambda);
+// }
 
 std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessage(
     std::shared_ptr<Message> message)
@@ -235,7 +235,7 @@ std::shared_ptr<MessageInfo> Companion::createMessageAndAddToMapping(
         std::stoi(messagesData->getValue(index, "author_id")), "",
         messagesData->getValue(index, "timestamp_tz"), "", generateNetworkId(false));
 
-    auto data = std::make_shared<MessageData>(messagesData->getValue(index, "message"));
+    auto data = std::make_shared<MessageData>(messagesData->getValue(index, "message"), "");
 
     auto state = std::make_shared<MessageState>(
         false,

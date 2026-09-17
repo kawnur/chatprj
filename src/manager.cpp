@@ -336,7 +336,8 @@ void Manager::receiveFileRequest(
 }
 
 void Manager::receiveFileData(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta)
+    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+    std::shared_ptr<MessageData> data)
 {
     logArgs(__FUNCTION__);
 
@@ -344,11 +345,78 @@ void Manager::receiveFileData(
     auto receiver = companion->getFileOperatorByNetworkId<ReceiverOperator>(networkId);
 
     if (receiver)
-        receiver->receiveFilePart(jsonData.at("data"));
+        receiver->receiveFilePart(data->data_);
     else
         logTemplateError("companion has no file operator for networkId = {}", networkId);
 }
 
+void Manager::receiveFileDataCheck(
+    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+    bool success)
+{
+    logArgs(__FUNCTION__, success);
+
+    std::string entryTemplate = (success)
+        ? "file {} received by companion successfully"
+        : "file {} WAS NOT received by companion";
+
+    auto networkId = meta->networkId_;
+
+    logTemplateInfo(
+        entryTemplate, companion->getFileOperatorFilePathStringByNetworkId(networkId));
+
+    companion->removeFileOperator<SenderOperator>(networkId);
+}
+
+void Manager::receiveFileDataTransmissionEnd(
+    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta)
+{
+    logArgs(__FUNCTION__);
+
+    auto networkId = meta->networkId_;
+    auto receiver = companion->getFileOperatorByNetworkId<ReceiverOperator>(networkId);
+
+    if (!receiver) {
+        logTemplateError("companion has no file operator for networkId '{}'", networkId);
+
+        return;
+    }
+
+    auto resultType = (receiver->receiveFile())
+        ? NetworkMessageType::FILE_DATA_CHECK_SUCCESS
+        : NetworkMessageType::FILE_DATA_CHECK_FAILURE;
+
+    if (resultType == NetworkMessageType::FILE_DATA_CHECK_SUCCESS) {
+        logArgs("file received successfully");
+
+        companion->removeFileOperator<ReceiverOperator>(networkId);
+    }
+
+    auto replyMeta = std::make_shared<MessageMetaData>();
+    replyMeta->networkMessageType_ = resultType;
+    replyMeta->networkId_ = networkId;
+
+    auto state = std::make_shared<MessageState>();
+    state->isAntecedent_ = false;
+
+    auto message = std::make_shared<Message>(nullptr, nullptr, state);
+
+    bool result = companion->sendMessage(message, replyMeta);
+}
+
+void Manager::receiveFileDataTransmissionFailure(
+    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta)
+{
+    logArgs(__FUNCTION__);
+
+    auto networkId = meta->networkId_;
+
+    logTemplateInfo(
+        "file {} WAS NOT received by companion",
+        companion->getFileOperatorFilePathStringByNetworkId(networkId));
+
+    companion->removeFileOperator<SenderOperator>(networkId);
+}
 
 std::shared_ptr<MessageData> Manager::buildMessageDataFromJson(const nlohmann::json &data)
 {
@@ -475,73 +543,33 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
 
     break;
 
-    case NetworkMessageType::FILE_DATA:
+    case NetworkMessageType::FILE_DATA: {
+        // add data
+        if (!updateObjectFromJson(data, jsonData, "data"))
+            return;
+
+        receiveFileData(companion, meta, data);
+    }
 
     break;
 
     case NetworkMessageType::FILE_DATA_CHECK_SUCCESS:
-    {
-        logArgs("got NetworkMessageType::FILE_DATA_CHECK_SUCCESS");
-
-        logTemplateInfo(
-            "file {} received by companion successfully",
-            companion->getFileOperatorFilePathStringByNetworkId(networkId));
-
-        companion->removeFileOperator<SenderOperator>(networkId);
-    }
+        receiveFileDataCheck(companion, meta, true);
 
     break;
 
     case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
-    {
-        logArgs("got NetworkMessageType::FILE_DATA_CHECK_FAILURE");
-
-        logTemplateInfo(
-            "file {} WAS NOT received by companion",
-            companion->getFileOperatorFilePathStringByNetworkId(networkId));
-
-        companion->removeFileOperator<SenderOperator>(networkId);
-    }
+        receiveFileDataCheck(companion, meta, false);
 
     break;
 
     case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
-    {
-        logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_END");
-
-        auto receiver = companion->getFileOperatorByNetworkId<ReceiverOperator>(networkId);
-
-        if (!receiver) {
-            logTemplateError("companion has no file operator for networkId = {}", networkId);
-
-            break;
-        }
-
-        auto resultType = (receiver->receiveFile())
-            ? NetworkMessageType::FILE_DATA_CHECK_SUCCESS
-            : NetworkMessageType::FILE_DATA_CHECK_FAILURE;
-
-        if (resultType == NetworkMessageType::FILE_DATA_CHECK_SUCCESS) {
-            logArgs("file received successfully");
-
-            companion->removeFileOperator<ReceiverOperator>(networkId);
-        }
-
-        bool result = companion->sendMessage(false, resultType, networkId, nullptr);
-    }
+        receiveFileDataTransmissionEnd(companion, meta);
 
     break;
 
     case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
-    {
-        logArgs("got NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE");
-
-        logTemplateInfo(
-            "file {} WAS NOT received by companion",
-            companion->getFileOperatorFilePathStringByNetworkId(networkId));
-
-        companion->removeFileOperator<SenderOperator>(networkId);
-    }
+        receiveFileDataTransmissionFailure(companion, meta);
 
     break;
 

@@ -2,6 +2,7 @@
 
 #include "companion.hpp"
 #include "logging.hpp"
+#include "message.hpp"
 #include "utils.hpp"
 
 using namespace std::string_literals;
@@ -70,62 +71,83 @@ bool SenderOperator::sendFilePart(
 
 void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::string &networkId)
 {
+    auto getReplyMeta = [&](NetworkMessageType type)
+    {
+        auto meta = std::make_shared<MessageMetaData>();
+        meta->networkMessageType_ = type;
+        meta->networkId_ = networkId;
+
+        return meta;
+    };
+
+    auto getEmptyMessage = []()
+    {
+        auto state = std::make_shared<MessageState>();
+        state->isAntecedent_ = false;
+
+        auto message = std::make_shared<Message>(nullptr, nullptr, state);
+
+        return message;
+    };
+
     auto lambda = [=, this]()
     {
-        if (buf_.is_open()) {
-            auto length = buf_.in_avail();
-            uint32_t iterationNumber = length / MAX_BUFFER_SIZE + 1;
+        if (!buf_.is_open()) {
+            logTemplateError("file opening error, path: {}", path_.string());
 
-            for (uint32_t i = 0; i < iterationNumber; i++) {
-                if (i % 100 == 0) {
-                    coutArgsWithSpaceSeparator(
-                        logCustomDelimiter, "iteration:", i + 1, "/", iterationNumber);
-                }
+            return;
+        }
 
-                bool result = sendFilePart(companion, networkId);
+        auto length = buf_.in_avail();
+        uint32_t iterationNumber = length / MAX_BUFFER_SIZE + 1;
 
-                if (!result) {
-                    logTemplateError(
-                        "file sending stopped because of error, path: {}", path_.string());
-
-                    // close file
-                    std::filebuf *closeResult = buf_.close();
-
-                    if (!closeResult)
-                        logTemplateError("file closing error, path: {}", path_.string());
-
-                    // remove file
-                    bool removeResult = std::filesystem::remove(path_);
-
-                    if (!removeResult)
-                        logTemplateError("file {} did not exist at deletion", path_.string());
-
-                    // send message
-                    auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
-                    companion->sendMessage(false, type, networkId, nullptr);
-
-                    // remove self
-                    auto lambda = [=]()
-                    {
-                        companion->removeFileOperator<SenderOperator>(networkId);
-                    };
-
-                    runInDetachedThread(lambda);
-
-                    return;
-                }
+        for (uint32_t i = 0; i < iterationNumber; i++) {
+            if (i % 100 == 0) {
+                std::string line { "{0} iteration: {1}/{2}" };
+                coutWithEndl(getStringByFormat(line, logCustomDelimiter, i + 1, iterationNumber));
             }
 
-            // send 'end of transmission' message
-            auto typeEnd = NetworkMessageType::FILE_DATA_TRANSMISSON_END;
-            companion->sendMessage(false, typeEnd, networkId, nullptr);
+            bool result = sendFilePart(companion, networkId);
 
-            if (!closeFile())
+            if (result)
+                continue;
+
+            // hanle error
+            logTemplateError("file sending stopped because of error, path: {}", path_.string());
+
+            // close file
+            std::filebuf *closeResult = buf_.close();
+
+            if (!closeResult)
                 logTemplateError("file closing error, path: {}", path_.string());
+
+            // remove file
+            bool removeResult = std::filesystem::remove(path_);
+
+            if (!removeResult)
+                logTemplateError("file {} did not exist at deletion", path_.string());
+
+            // send message
+            auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
+            companion->sendMessage(getEmptyMessage(), getReplyMeta(type));
+
+            // remove self
+            auto lambda = [=]()
+            {
+                companion->removeFileOperator<SenderOperator>(networkId);
+            };
+
+            runInDetachedThread(lambda);
+
+            return;
         }
-        else {
-            logTemplateError("file opening error, path: {}", path_.string());
-        }
+
+        // send 'end of transmission' message
+        auto typeEnd = NetworkMessageType::FILE_DATA_TRANSMISSON_END;
+        companion->sendMessage(getEmptyMessage(), getReplyMeta(typeEnd));
+
+        if (!closeFile())
+            logTemplateError("file closing error, path: {}", path_.string());
     };
 
     runInDetachedThread(lambda);

@@ -22,7 +22,8 @@ bool MessageMetaData::isValid()
     return true;
 }
 
-MessageData::MessageData(const std::string &text) : text_(text) {}
+MessageData::MessageData(const std::string &text, const std::string &data)
+    : text_(text), data_(data) {}
 
 Message::Message(
     MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/

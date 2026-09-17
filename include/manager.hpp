@@ -15,6 +15,7 @@
 #include "constants.hpp"
 #include "db_constants.hpp"
 #include "db_interaction.hpp"
+#include "utils.hpp"
 
 class Action;
 class Companion;
@@ -32,14 +33,6 @@ class WidgetGroup;
 
 int getDataFromDBResult(
     bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result, int maxTuples);
-
-template<typename... Ts>
-void logArgs(Ts &&...args);
-
-void logDBReplyData(std::shared_ptr<DBReplyData> object);
-void showInfoDialogAndLogInfo(const std::string &message, std::shared_ptr<QWidget> parent);
-void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent);
-void showErrorDialogAndLogError(std::string &&message);
 
 template <typename T, typename...Ts>
 std::shared_ptr<T> buildObjectFromJson(const nlohmann::json &data, Ts &&...args)
@@ -111,6 +104,20 @@ public:
         std::shared_ptr<Companion> companion, const nlohmann::json &data);
 
     void receiveFileRequest(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
+
+    void receiveFileData(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+        std::shared_ptr<MessageData> data);
+
+    void receiveFileDataCheck(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
+        bool success);
+
+    void receiveFileDataTransmissionEnd(
+        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
+
+    void receiveFileDataTransmissionFailure(
         std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
 
     std::shared_ptr<MessageData> buildMessageDataFromJson(const nlohmann::json &jsonData);

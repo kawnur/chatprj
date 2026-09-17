@@ -27,6 +27,9 @@ std::shared_ptr<GraphicManager> getGraphicManager();
 template<typename... Ts>
 void coutArgsWithSpaceSeparator(Ts&&... args);
 
+template<AssociativeContainer M, typename T, typename U>
+U getMappingValueOrDefault(const M &map, const T &key, U &&defaultValue);
+
 template<typename T>
 concept IsArithmetic = std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
 
@@ -94,34 +97,36 @@ void logArgsWithTemplate(T &&templateString, Ts &&...args)
     logArgs(getStringByFormat(templateString, args...));
 }
 
+std::string buildLogEntryPrefix(LogType type);
+
 template<typename... Ts>
 void logArgsInfo(Ts &&...args)
 {
-    logArgs("INFO:", args...);
+    logArgs(buildLogEntryPrefix(LogType::INFO), args...);
 }
 
 template<typename... Ts>
 void logArgsDebug(Ts &&...args)
 {
-    logArgs("DEBUG:", args...);
+    logArgs(buildLogEntryPrefix(LogType::DEBUG), args...);
 }
 
 template<typename... Ts>
 void logArgsException(Ts &&...args)
 {
-    logArgs("EXCEPTION:", args...);
+    logArgs(buildLogEntryPrefix(LogType::EXCEPTION), args...);
 }
 
 template<typename... Ts>
 void logArgsWarning(Ts &&...args)
 {
-    logArgs("WARNING:", args...);
+    logArgs(buildLogEntryPrefix(LogType::WARNING), args...);
 }
 
 template<typename... Ts>
 void logArgsError(Ts &&...args)
 {
-    logArgs("ERROR:", args...);
+    logArgs(buildLogEntryPrefix(LogType::ERROR), args...);
 }
 
 template<typename T, typename... Ts>

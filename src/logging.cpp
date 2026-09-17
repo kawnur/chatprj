@@ -1,8 +1,11 @@
 #include "logging.hpp"
 
 #include "companion.hpp"
+#include "constants.hpp"
 #include "db_interaction.hpp"
 #include "widgets.hpp"
+
+using namespace std::string_literals;
 
 QString getQString(const std::string &value)
 {
@@ -70,4 +73,12 @@ void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
         "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
         object->getName().toStdString(), object->getIpAddress().toStdString(),
         object->getServerPort(), object->getClientPort());
+}
+
+std::string buildLogEntryPrefix(LogType type)
+{
+    std::string defaultValue = "UNKNOWN"s;
+    auto mark = getMappingValueOrDefault(LOG_TYPE_STRING_REPRESENTATION, type, defaultValue);
+
+    return getStringByFormat("{}:", mark);
 }

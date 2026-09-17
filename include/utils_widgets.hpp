@@ -5,8 +5,7 @@
 #include <vector>
 
 #include <QString>
-
-void showErrorDialogAndLogError(QString &&message);
+#include <QWidget>
 
 class ButtonInfo;
 

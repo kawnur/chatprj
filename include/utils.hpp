@@ -13,10 +13,12 @@
 
 #include <nlohmann/json.hpp>
 
+#include <QDialog>
 #include <QString>
 #include <QWidget>
 
 #include "constants.hpp"
+#include "graphic_manager.hpp"
 
 class ButtonInfo;
 class Companion;
@@ -34,6 +36,18 @@ std::string getStringByFormat(T &&formatString, Ts &&...args)
 {
     return std::vformat(formatString, std::make_format_args(args...));
 }
+
+template<typename M>
+concept AssociativeContainer = requires(M m)
+{
+    typename M::key_type;
+    typename M::value_type;
+
+    // TODO add return type requirement
+    // { m.at(std::declval<typename M::key_type>()) } -> std::same_as<typename M::value_type>;
+    // { m.at(std::declval<typename M::key_type>()) } -> std::common_reference_with<typename M::value_type>;
+    m.at(std::declval<typename M::key_type>());
+};
 
 template<typename T>
 QString getQString(T &&value);
@@ -63,8 +77,9 @@ U getConstantMappingValue(std::string mapName, const std::map<T, U> *map, const 
     return U();
 }
 
-template<typename T, typename U>
-U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &defaultValue)
+template<AssociativeContainer M, typename T, typename U>
+// U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &defaultValue)
+U getMappingValueOrDefault(const M &map, const T &key, U &&defaultValue)
 {
     try {
         return map.at(key);
@@ -74,9 +89,9 @@ U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &def
     }
     catch(const std::exception &e) {
         logArgsException(e.what());
-    }
 
-    return U();
+        return U();
+    }
 }
 
 template<typename F, typename... Ts>
@@ -187,20 +202,50 @@ std::string buildDialogText(std::string &&header, const std::vector<std::string>
 std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function);
 // std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog:: *)());
 
-void showInfoDialogAndLogInfo(
-    const QString &message, void (TextDialog::*function)(),
-    std::shared_ptr<QWidget> parent = nullptr);
+LogType getLogTypeByDialogType(DialogType type);
 
-void showInfoDialogAndLogInfo(const std::string &message, std::shared_ptr<QWidget> parent = nullptr);
-void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent = nullptr);
-void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent = nullptr);
+template <typename T, typename F>
+void showDialogAndLog(
+    T &&message, F &&func, DialogType type, std::shared_ptr<QWidget> parent = nullptr)
+{
+    getGraphicManager()->createTextDialogAndShow(
+        parent, type, message, createOkButtonInfoVector(func));
+
+    logArgs(getLogTypeByDialogType(type), message);
+}
+
+template <typename T>
+void showInfoDialogAndLogInfo(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, &QDialog::accept, DialogType::INFO, parent);
+}
+
+template <typename T>
+void showWarningDialogAndLogWarning(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, &QDialog::accept, DialogType::WARNING, parent);
+}
+
+template <typename T>
+void showErrorDialogAndLogError(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+{
+    showDialogAndLog(message, &QDialog::accept, DialogType::ERROR, parent);
+}
+
+// void showInfoDialogAndLogInfo(
+//     const QString &message, void (TextDialog::*function)(),
+//     std::shared_ptr<QWidget> parent = nullptr);
+
+// void showInfoDialogAndLogInfo(const std::string &message, std::shared_ptr<QWidget> parent = nullptr);
+// void showInfoDialogAndLogInfo(QString &&message, std::shared_ptr<QWidget> parent = nullptr);
+// void showWarningDialogAndLogWarning(const QString &message, std::shared_ptr<QWidget> parent = nullptr);
 
 // void showErrorDialogAndLogError(const QString&, std::shared_ptr<QWidget> = nullptr);
 // void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
 
-void showErrorDialogAndLogError(std::string &&message);
-void showErrorDialogAndLogError(QString &&message);
-void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
+// void showErrorDialogAndLogError(std::string &&message);
+// void showErrorDialogAndLogError(QString &&message);
+// void showErrorDialogAndLogError(QString &&message, std::shared_ptr<QWidget> parent);
 
 // template<typename T>
 // void showErrorDialogAndLogError(std::shared_ptr<QWidget> parent, T &&message) {
