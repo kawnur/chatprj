@@ -2,13 +2,24 @@
 # To build run 'docker build -t chatprj --target chatprj --file <this_file_path> /'
 # Build context / is used to copy lib by host abspath
 
-FROM fedora AS chatprj
+# older tag used to match openh264 version
+FROM fedora:42 AS chatprj
 
-RUN mkdir -p /my/app /my/qt /my/boost /my/cmake
+# RUN mkdir -p /my/app /my/qt /my/boost /my/cmake
+RUN mkdir -p /my/app /my/rpm
 
-ADD /home/user/sources/boost/boost_1_76_0/boost_1_76_0.tar.gz /my/boost/
+#ADD /home/user/sources/boost/boost_1_76_0/boost_1_76_0.tar.gz /my/boost/
 
-ADD /home/user/sources/cmake/cmake-3.24.0-linux-x86_64 /my/cmake
+#ADD /home/user/sources/cmake/cmake-3.24.0-linux-x86_64 /my/cmake
+
+#add source dir
+ADD /home/user/sources/rpm /my/rpm
+
+#install openh264
+RUN rpm -i /my/rpm/openh264-2.5.1-1.el10_1.x86_64.rpm
+
+#install qt6
+RUN dnf install -y qt6-qtbase qt6-qtbase-gui qt6-qtbase-postgresql
 
 #install C Development Tools and Libraries
 #RUN sudo dnf groupinstall -y "C Development Tools and Libraries"
@@ -54,24 +65,17 @@ RUN dnf install -y tree
 RUN dnf install -y less
 
 #install cmake
-RUN ln -s /my/cmake/bin/cmake /usr/bin/cmake
+#RUN ln -s /my/cmake/bin/cmake /usr/bin/cmake
+RUN dnf install -y cmake
 
-#install qt6
-RUN dnf install -y qt6-qt3d qt6-qt5compat qt6-qtbase qt6-qtbase-gui \
-qt6-qtbase-mysql qt6-qtbase-postgresql qt6-qtcharts qt6-qtconnectivity \
-qt6-qtdatavis3d qt6-qtdeclarative qt6-qtimageformats qt6-qtlocation \
-qt6-qtlottie qt6-qtmultimedia qt6-qtnetworkauth qt6-qtquick3d \
-qt6-qtquicktimeline qt6-qtremoteobjects qt6-qtscxml qt6-qtsensors \
-qt6-qtserialbus qt6-qtserialport qt6-qtshadertools qt6-qtsvg qt6-qttools \
-qt6-qtvirtualkeyboard qt6-qtwayland qt6-qtwebchannel qt6-qtwebsockets
+#install boost
+#WORKDIR /my/boost/boost_1_76_0
 
-#build and install boost
-WORKDIR /my/boost/boost_1_76_0
+#RUN ./bootstrap.sh --with-libraries=system,thread,date_time,regex,serialization,chrono,atomic
 
-RUN ./bootstrap.sh --with-libraries=system,thread,date_time,regex,serialization,chrono,atomic
-
-RUN ./b2 --with-system --with-thread --with-date_time --with-regex --with-serialization --with-chrono --with-atomic \
---libdir=/usr/lib64 --includedir=/usr/include install
+#RUN ./b2 --with-system --with-thread --with-date_time --with-regex --with-serialization \
+#--with-chrono --with-atomic --libdir=/usr/lib64 --includedir=/usr/include install
+RUN dnf install -y boost-devel
 
 WORKDIR /my/app
 
