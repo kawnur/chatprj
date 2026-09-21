@@ -1,14 +1,13 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <format>
-#include <functional>
 #include <iostream>
-#include <map>
 #include <memory>
 #include <optional>
 #include <string>
 #include <thread>
+#include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -28,21 +27,12 @@ class GraphicManager;
 class Message;
 class MessageMetaData;
 
-// class TextDialog;
-
 std::shared_ptr<GraphicManager> getGraphicManager();
-
-template<typename T, typename... Ts>
-std::string getStringByFormat(T &&formatString, Ts &&...args)
-{
-    return std::vformat(formatString, std::make_format_args(args...));
-}
 
 template<typename M>
 concept AssociativeContainer = requires(M m)
 {
     typename M::key_type;
-    // typename M::value_type;
     typename M::mapped_type;
 
     // TODO add return type requirement
@@ -52,8 +42,88 @@ concept AssociativeContainer = requires(M m)
     m.at(std::declval<typename M::key_type>());
 };
 
+template <typename T>
+struct isOptionalHelper : std::false_type {};
+
+template <typename T>
+struct isOptionalHelper<std::optional<T>> : std::true_type {};
+
+template <typename T>
+concept IsOptional = isOptionalHelper<std::remove_cvref_t<T>>::value;
+
 template<typename T>
-QString getQString(T &&value);
+concept IsArithmetic = std::is_arithmetic_v<std::remove_cvref_t<T>>;
+
+template<typename T>
+concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_cvref_t<T>>;
+
+std::string getString(const char *value);
+std::string getString(const bool &value);
+std::string getString(std::nullptr_t value);
+std::string getString(const std::filesystem::path &value);
+std::string getString(const QString value);
+
+template<typename T>
+std::string getString(T *value)
+{
+    std::stringstream ss;
+    ss << (void *)value;
+
+    return ss.str();
+}
+
+template<IsOptional T>
+std::string getString(T &value)
+{
+    return (value) ? getString(value.value()) : "EMPTY OPTIONAL";
+}
+
+template<IsArithmetic T>
+std::string getString(T &&value)
+{
+    return std::to_string(std::forward<T>(value));
+}
+
+template<IsNotArithmetic T>
+std::string getString(T &&value)
+{
+    if constexpr (std::is_same_v<std::remove_cvref_t<T>, QString>)
+        return value.toStdString();
+    if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+        return value;
+    else
+        return std::to_string(value);
+}
+
+template<typename T>
+QString getQString(T &&value)
+{
+    return QString::fromStdString(getString(value));
+}
+
+template<typename T, typename... Ts>
+std::string getStringByFormat(T &&formatString, Ts &&...args)
+{
+    std::string result { "" };
+
+    auto argsTuple = std::make_tuple(getString(std::forward<Ts>(args))...);
+
+    auto lambda = [&](auto&... params)
+    {
+        auto formatArgs = std::make_format_args(params...);  // std::make_format_args needs lvalue args
+        result = std::vformat(getString(formatString), formatArgs);
+    };
+
+    std::apply(lambda, argsTuple);
+
+    return result;
+}
+
+template<typename... Ts>
+QString getArgumentedQString(const QString &templateString, Ts&&... args)
+{
+    return templateString.arg(getQString(std::forward<Ts>(args))...);
+}
 
 template<typename... Ts>
 void logArgsError(Ts &&...args);

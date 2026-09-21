@@ -219,7 +219,7 @@ public:
     FileDialog(std::shared_ptr<FileAction> action, const std::string &title);
     ~FileDialog() = default;
 
-    void set();
+    void set() override;
     void showDialog() override;
 
     std::shared_ptr<QFileDialog> getFileDialog();
@@ -260,6 +260,7 @@ void setButtonBox(
     }
 }
 
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function);
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
+    std::function<void(TextDialog &)> function);
 
 #endif // WIDGETS_DIALOG_HPP

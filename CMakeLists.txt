@@ -14,8 +14,15 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Widgets)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
 link_libraries(
-    gpgme Boost::thread Qt6::Core Qt6::Gui Qt6::Network Qt6::Widgets
-    pq nlohmann_json::nlohmann_json)
+    gpgme
+    Boost::thread
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Network
+    Qt6::Widgets
+    pq
+    nlohmann_json::nlohmann_json
+)
 
 add_subdirectory(app)
 add_subdirectory(src)

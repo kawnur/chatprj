@@ -1,12 +1,8 @@
 #ifndef LOGGING_HPP
 #define LOGGING_HPP
 
-#include <cstddef>
-#include <filesystem>
 #include <memory>
-#include <optional>
 #include <string>
-#include <type_traits>
 
 #include <libpq-fe.h>
 
@@ -15,7 +11,6 @@
 
 #include "graphic_manager.hpp"
 #include "utils.hpp"
-#include "utils_cout.hpp"
 
 class DBReplyData;
 class GraphicManager;
@@ -27,70 +22,18 @@ std::shared_ptr<GraphicManager> getGraphicManager();
 template<typename... Ts>
 void coutArgsWithSpaceSeparator(Ts&&... args);
 
-// template<AssociativeContainer M, typename T, typename U>
-// U getMapValue(const M &map, const T &key, U &&defaultValue);
-
-// template<AssociativeContainer M, typename T, typename U>
-// M::mapped_type getMapValue(const M &map, const T &key, U &&defaultValue);
-
-template<typename T>
-concept IsArithmetic = std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
-
-template<typename T>
-concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_const_t<std::remove_reference_t<T>>>;
-
-QString getQString(const std::string &value);
-QString getQString(const char *value);
-QString getQString(const bool &value);
-QString getQString(std::nullptr_t value);
-QString getQString(const std::filesystem::path &value);
-
-template<typename T>
-QString getQString(T *value)
-{
-    std::stringstream ss;
-    ss << (void *)value;
-    return QString::fromStdString(ss.str());
-}
-
-template<IsArithmetic T>
-QString getQString(T &&value)
-{
-    return QString::fromStdString(std::to_string(std::forward<T>(value)));
-}
-
-template<IsNotArithmetic T>
-QString getQString(T &&value)
-{
-    if constexpr (std::is_same_v<std::remove_cvref_t<T>, QString>)
-        return std::forward<T>(value);
-    else
-        return QString::fromStdString(std::forward<T>(value));
-}
-
-template<typename T>
-QString getQString(const std::optional<T> &value)
-{
-    return (value) ? getQString(value.value()) : "EMPTY OPTIONAL";
-}
-
-template<typename... Ts>
-QString getArgumentedQString(const QString &templateString, Ts&&... args)
-{
-    return templateString.arg(getQString(std::forward<Ts>(args))...);
-}
+using namespace std::string_literals;
 
 template<typename... Ts>
 void logArgs(Ts &&...args)
 {
     QTime time;
-    QString text("- ");
 
-    text += time.currentTime().toString() + QString(" - ");
+    std::string text = getStringByFormat("- {} - "s, time.currentTime().toString());
 
-    ((text += (getQString(args) + QString(" "))), ...);
+    ((text += (getStringByFormat("{} ", args))), ...);
 
-    getGraphicManager()->addTextToAppLogWidget(text);
+    getGraphicManager()->addTextToAppLogWidget(getQString(text));
     coutArgsWithSpaceSeparator(text);
 }
 

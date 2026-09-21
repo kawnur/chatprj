@@ -5,7 +5,6 @@
 #include "data.hpp"
 #include "db_interaction.hpp"
 #include "file_info.hpp"
-#include "logging.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils.hpp"
@@ -102,14 +101,6 @@ MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
     return std::ranges::find_if(messageMapping_, lambda);
 }
 
-// std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessage(
-//     std::shared_ptr<Message> message)
-// {
-//     auto result = getMessageMappingIteratorByMessage(message);
-
-//     return (result == messageMapping_.end()) ? nullptr : result->second->getState();
-// }
-
 std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetByMessage(
     std::shared_ptr<Message> message)
 {
@@ -152,7 +143,6 @@ std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
     return (result == messageMapping_.end()) ? nullptr : result->second->getMessage()->state();
 }
 
-// MessageMappingPair Companion::getMessageMappingPairByMessageId(uint32_t messageId)
 std::shared_ptr<MessageInfo> Companion::getMessageInfoByMessageId(uint32_t messageId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -167,7 +157,6 @@ std::shared_ptr<MessageInfo> Companion::getMessageInfoByMessageId(uint32_t messa
     return (result == messageMapping_.end()) ? nullptr : result->second;
 }
 
-// MessageMappingPair Companion::getMessageMappingPairByNetworkId(const std::string &networkId)
 std::shared_ptr<MessageInfo> Companion::getMessageInfoByNetworkId(const std::string &networkId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -217,7 +206,6 @@ std::shared_ptr<Message> Companion::createMessage(
     return (result.second) ? message : nullptr;
 }
 
-// std::pair<MessageWidgetMappingIterator, bool> Companion::createMessageAndAddToMapping(
 std::shared_ptr<MessageInfo> Companion::createMessageAndAddToMapping(
     std::shared_ptr<DBReplyData> messagesData, std::size_t index)
 {
@@ -412,12 +400,6 @@ std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    // auto lambda = [&](const auto &iter)
-    // {
-    //     return iter.second->getMessage()->getId() == messageId;
-    // };
-
-    // auto result = std::ranges::find_if(messageMapping_, lambda);
     auto result = messageMapping_.find(messageId);
 
     return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();

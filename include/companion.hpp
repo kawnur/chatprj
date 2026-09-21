@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "constants.hpp"
+#include "logging.hpp"
 #include "file_info.hpp"
 
 class CentralPanelWidget;
@@ -28,18 +28,8 @@ class MessageState;
 class MessageWidget;
 class WidgetGroup;
 
-template<typename T, typename... Ts>
-void logTemplateInfo(T &&templateString, Ts &&...args);
-
-template<typename T, typename... Ts>
-void logTemplateError(T &&templateString, Ts &&...args);
-
-// using MessageMapping = std::map<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 using MessageMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageInfo>>;
-// using MessageWidgetMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageWidget>>;
-// using MessageWidgetMappingIterator = MessageWidgetMapping::iterator;
 using MessageMappingIterator = MessageMapping::iterator;
-// using MessageMappingPair = std::pair<std::shared_ptr<Message>, std::shared_ptr<MessageInfo>>;
 
 class SocketInfo
 {
@@ -115,7 +105,6 @@ public:
     }
 
     MessageMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
-    // std::shared_ptr<MessageState> getMappedMessageStateByMessage(std::shared_ptr<Message> message);
     std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message> message);
 
     std::shared_ptr<Message> getMappedMessageByMessageWidget(
@@ -126,9 +115,7 @@ public:
     std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(
         bool lock, std::shared_ptr<MessageWidget> widget);
 
-    // MessageMappingPair getMessageMappingPairByMessageId(uint32_t messageId);
     std::shared_ptr<MessageInfo> getMessageInfoByMessageId(uint32_t messageId);
-    // MessageMappingPair getMessageMappingPairByNetworkId(const std::string &networkId);
     std::shared_ptr<MessageInfo> getMessageInfoByNetworkId(const std::string &networkId);
     std::shared_ptr<Message> getEarliestMessage() const;
 
@@ -139,7 +126,6 @@ public:
         std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
         std::shared_ptr<MessageState> state);
 
-    // std::pair<MessageWidgetMappingIterator, bool> createMessageAndAddToMapping(
     std::shared_ptr<MessageInfo> createMessageAndAddToMapping(
         std::shared_ptr<DBReplyData> messagesData, std::size_t index);
 

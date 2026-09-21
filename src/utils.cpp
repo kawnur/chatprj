@@ -16,6 +16,30 @@
 #include "widgets_dialog.hpp"
 
 // TODO move all constants to constants.hpp
+std::string getString(const char *value)
+{
+    return std::string(value);
+}
+
+std::string getString(const bool &value)
+{
+    return (value) ? "true"s : "false"s;
+}
+
+std::string getString(std::nullptr_t value)
+{
+    return "nullptr_t"s;
+}
+
+std::string getString(const std::filesystem::path &value)
+{
+    return value.string();
+}
+
+std::string getString(const QString value)
+{
+    return value.toStdString();
+}
 
 bool validateCompanionName(std::vector<std::string> &errors, const std::string &name)
 {

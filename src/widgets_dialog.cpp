@@ -305,8 +305,9 @@ std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
 }
 
 // std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(std::function<void(TextDialog &)> function)
 // std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog::*function)())
+std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
+    std::function<void(TextDialog &)> function)
 {
     auto vector = std::make_shared<std::vector<ButtonInfo>>();
     vector->emplace_back(okButtonText, QDialogButtonBox::AcceptRole, function);

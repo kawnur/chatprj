@@ -4,6 +4,8 @@
 #include "logging.hpp"
 #include "utils.hpp"
 
+using namespace std::string_literals;
+
 DBRequestData::DBRequestData(DBRequestType type) : logMark_(), requestTemplate_(), replyKeys_()
 {
     // get value from mapping
@@ -15,7 +17,7 @@ DBRequestData::DBRequestData(DBRequestType type) : logMark_(), requestTemplate_(
 
     // check value size
     if (size < 3) {
-        logTemplateError("dbRequestDataMap value size {} is less than expected", size);
+        logTemplateError("dbRequestDataMap value size {} is less than expected"s, size);
 
         return;
     }
@@ -245,7 +247,7 @@ const char *getValueFromEnvironmentVariableAlt1(std::string &&variableName)
     return getPQArg(value);
 }
 
-const char  *getPQArg(const std::optional<std::string> &value)
+const char *getPQArg(const std::optional<std::string> &value)
 {
     return (value) ? value.value().data() : nullptr;
 }
@@ -257,10 +259,14 @@ std::shared_ptr<PGconn> getDBConnection()
     std::shared_ptr<PGconn> dbConnection = nullptr;
 
     try {
-        auto dbAddress = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_ADDRESS");
-        auto dbPort = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PORT");
-        auto dbLogin = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_USER");
-        auto dbPassword = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PASSWORD");
+        // auto dbAddress = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_ADDRESS");
+        // auto dbPort = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PORT");
+        // auto dbLogin = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_USER");
+        // auto dbPassword = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PASSWORD");
+        auto dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
+        auto dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
+        auto dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
+        auto dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
 
         for (const auto &value : { dbAddress, dbPort, dbLogin, dbPassword }) {
             if (!value)

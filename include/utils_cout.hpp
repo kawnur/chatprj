@@ -6,7 +6,6 @@
 #include <ios>
 #include <iostream>
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -73,72 +72,46 @@ void coutWithManipulators(T &&value)
 }
 
 template<typename T>
-std::string argForCout(T *&value)
-{
-    std::stringstream ss;
-    ss << (void *)value;
-
-    return ss.str();
-}
-
-template<typename T>
-std::string argForCout(std::shared_ptr<T> value)
-{
-    return argForCout(*value);
-}
-
-template<typename T>
-std::string argForCout(const T &value)
-{
-    return std::to_string(value);
-}
-
-std::string argForCout(const QString &value);
-std::string argForCout(const std::string &value);
-std::string argForCout(const char *value);
-std::string argForCout(const bool value);
-
-template<typename T>
 void coutWithEndl(T &&value)
 {
-    std::cout << argForCout(value) << std::endl;
+    std::cout << getString(value) << std::endl;
 }
 
 template<typename T>
 void coutWithTab(T &&value)
 {
-    std::cout << argForCout(value) << '\t';
+    std::cout << getString(value) << '\t';
 }
 
 template<typename T>
 void coutWithSpace(T &&value)
 {
-    std::cout << argForCout(value) << ' ';
+    std::cout << getString(value) << ' ';
 }
 
 template<typename T>
 void coutWithoutInterval(T &&value)
 {
-    std::cout << argForCout(value);
+    std::cout << getString(value);
 }
 
-template<typename... Ts>
-void coutArgsWithSeparator(char separator, Ts&&... args)
+template<typename T, typename... Ts>
+void coutArgsWithSeparator(T &&separator, Ts&&... args)
 {
-    ((std::cout << argForCout(args) << separator), ...);
+    ((std::cout << getString(args) << separator), ...);
 	endline(1);
 }
 
 template<typename... Ts>
 void coutArgsWithSpaceSeparator(Ts&&... args)
 {
-	coutArgsWithSeparator(' ', args...);
+    coutArgsWithSeparator(" "s, args...);
 }
 
 template<typename... Ts>
 void coutArgsWithTabSeparator(Ts&&... args)
 {
-	coutArgsWithSeparator('\t', args...);
+    coutArgsWithSeparator("\t"s, args...);
 }
 
 // cout vector

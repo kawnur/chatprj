@@ -5,33 +5,6 @@
 #include "db_interaction.hpp"
 #include "widgets.hpp"
 
-using namespace std::string_literals;
-
-QString getQString(const std::string &value)
-{
-    return QString::fromStdString(value);
-}
-
-QString getQString(const char *value)
-{
-    return QString(value);
-}
-
-QString getQString(const bool &value)
-{
-    return (value) ? "true" : "false";
-}
-
-QString getQString(std::nullptr_t value)
-{
-    return "nullptr_t";
-}
-
-QString getQString(std::filesystem::path &value)
-{
-    return QString::fromStdString(value.string());
-}
-
 void logLine(const QString &string)
 {
     getGraphicManager()->addTextToAppLogWidget(string);

@@ -99,7 +99,7 @@ public:
 
     FileActionType getType() const;
     std::shared_ptr<Companion> getCompanion() const;
-    std::filesystem::path getPath() const;
+    std::filesystem::path getPath() const override;
     void sendData() override;
     void defineFilePath();
 

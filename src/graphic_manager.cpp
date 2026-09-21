@@ -155,6 +155,9 @@ void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction>
         getManager()->clearCompanionHistory(action);
 
         break;
+
+    default:
+        break;
     }
 }
 

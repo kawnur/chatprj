@@ -21,7 +21,7 @@ MainWindow::MainWindow()
     bar->setPalette(*menuBarPalette_);
 
     // central widget
-    centralWidget_ = std::shared_ptr<QWidget>();
+    centralWidget_ = std::shared_ptr<QWidget>(new QWidget);
     setCentralWidget(centralWidget_.get());
 
     centralWidgetLayout_ = std::make_unique<QHBoxLayout>(centralWidget_.get());
