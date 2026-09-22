@@ -704,3 +704,11 @@ void MainWindowContainerWidget::addWidgetToLayoutAndSetParentTo(std::shared_ptr<
         widget->setParent(this);
     }
 }
+
+void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
+{
+    logTemplateInfo(
+        "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
+        object->getName().toStdString(), object->getIpAddress().toStdString(),
+        object->getServerPort(), object->getClientPort());
+}

@@ -15,7 +15,11 @@ Manager::Manager()
     : /*initialized_(false), */dbRequester_(logDBInteraction),
     messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false), selectedCompanion_(nullptr), mapCompanionToWidgetGroup_(),
-    lastOpenedPath_(HOME_PATH) {}
+    lastOpenedPath_(HOME_PATH)
+{
+    if (!dbRequester_.isReady())
+        exitUtil(EXIT_FAILURE);
+}
 
 Manager::~Manager()
 {
@@ -34,16 +38,6 @@ bool Manager::userIsAuthenticated()
 
 void Manager::set()
 {
-    bool connectedToDB = connectToDb();
-    // logArgs("connectedToDB:", connectedToDB);
-
-    if (!connectedToDB) {
-        // TODO add dialog with retry button
-        showErrorDialogAndLogError("problem with DB connection");
-
-        return;
-    }
-
     bool companionsBuilt = buildCompanions();
     logArgs("companionsBuilt:", companionsBuilt);
 
@@ -991,7 +985,8 @@ void Manager::fillCompanionMessageMapping(
     uint8_t companionId = companion->getId();
 
     // get messages data
-    auto messagesData = getDBData(DBRequestType::GET_MESSAGES, companionId);
+    auto messagesData = getDBData(
+        DBRequestType::GET_MESSAGES, companionId, NUMBER_OF_MESSAGES_TO_GET_FROM_DB);
 
     if (!messagesData || messagesData->isEmpty())
         return;
@@ -1012,23 +1007,6 @@ void Manager::fillCompanionMessageMapping(
             companion->createMessageAndAddToMapping(messagesData, i);
         }
     }
-}
-
-bool Manager::connectToDb()
-{
-    bool connected = false;
-    dbConnection_ = getDBConnection();
-
-    if (!dbConnection_)
-        return connected;
-
-    ConnStatusType status = PQstatus(dbConnection_.get());
-    // logArgs("DB connection status: ", status);
-
-    if (status == ConnStatusType::CONNECTION_OK)  // TODO raise exception
-        connected = true;
-
-    return connected;
 }
 
 bool Manager::buildCompanions()
@@ -1095,7 +1073,7 @@ void Manager::buildWidgetGroups()
     auto companionsNumber = mapCompanionToWidgetGroup_.size();
     auto childrenSize = graphicManager->getCompanionPanelChildrenSize();
 
-    logArgsWithTemplate("companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
+    logTemplateInfo("companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
 
     if (companionsNumber == 0 && childrenSize == 0) {
         logArgsWarning("strange case, empty sockets panel");
@@ -1349,7 +1327,7 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
     std::string timestampTz { messageData->getValue(0, "timestamp_tz") };
 
     if (logDBInteraction)
-        logArgsWithTemplate("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
+        logTemplateInfo("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
 
     // TODO get rid of copy constructing
     auto result = std::make_shared<MessageMetaData>();

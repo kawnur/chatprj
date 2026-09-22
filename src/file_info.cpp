@@ -4,6 +4,7 @@
 #include "logging.hpp"
 #include "message.hpp"
 #include "utils.hpp"
+#include "utils_cout.hpp"
 
 using namespace std::string_literals;
 

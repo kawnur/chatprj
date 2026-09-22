@@ -12,8 +12,6 @@
 #include "widgets_message.hpp"
 #include "utils.hpp"
 
-using namespace std::string_literals;
-
 // GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
 GraphicManager::GraphicManager()
 {

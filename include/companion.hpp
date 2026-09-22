@@ -169,4 +169,19 @@ private:
     MessageMapping messageMapping_;
 };
 
+bool validateCompanionData(
+    std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action);
+
+std::pair<std::string, std::string> formatMessageHeaderAndBody(
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+
+std::string buildMessageJSONString(
+    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
+    // const std::string &networkId, std::shared_ptr<Message> message);
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<MessageMetaData> meta);
+
+std::string buildFileBlockJSONString(
+    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data);
+
 #endif // COMPANION_HPP

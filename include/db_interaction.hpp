@@ -20,11 +20,29 @@
 class Companion;
 class CompanionAction;
 
+class DBConnectionPrameters
+{
+public:
+    DBConnectionPrameters();
+    ~DBConnectionPrameters() = default;
+
+    bool isValid();
+    void log();
+    std::string getConnectionInfo();
+
+private:
+    std::optional<std::string> address_;
+    std::optional<std::string> port_;
+    std::optional<std::string> login_;
+    std::optional<std::string> password_;
+    std::optional<std::string> dbName_;
+};
+
 class DBRequestData
 {
 public:
     DBRequestData(DBRequestType type);
-    ~DBRequestData() { logArgsInfo(__FUNCTION__); }
+    ~DBRequestData() { /*logArgsInfo(__FUNCTION__);*/ }
 
     std::string getLogMark() const;
     std::vector<std::string> getReplyKeys() const;
@@ -59,9 +77,10 @@ public:
     void push(std::size_t, std::string, const std::string &value);
     std::size_t size();
     std::string getValue(std::size_t, std::string);
-    bool findValue(const std::string&, const std::string &);
+    bool findValue(const std::string&, const std::string &);    
 
     int getDataFromResult(std::shared_ptr<PGresult> result, int maxTuples);
+    void log();
 
 private:
     bool log_;
@@ -75,10 +94,8 @@ public:
     ~DBRequester() = default;
 
     template<typename... Ts>
-    std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
+    std::shared_ptr<DBReplyData> getDBData(DBRequestData &requestData, Ts &&...args)
     {
-        DBRequestData requestData { type };
-
         if (!requestData.isValid()) {
             logArgsError("requestData is invalid");
 
@@ -110,7 +127,7 @@ public:
 
         if (log_) {
             // logArgs("dbData->size():", dbData->size());
-            logDBReplyData(replyData);
+            replyData->log();
             logArgs(logDelimiter);
         }
 
@@ -118,6 +135,7 @@ public:
     }
 
     std::shared_ptr<PGresult> sendRequestAndReturnResult(const std::string &command);
+    bool isReady();
 
 private:
     bool log_;
@@ -126,8 +144,12 @@ private:
 };
 
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
-const char *getValueFromEnvironmentVariableAlt1(std::string &&variableName);
 const char *getPQArg(const std::optional<std::string> &value);
 std::shared_ptr<PGconn> getDBConnection();
+
+std::string buildChatHistoryJSONString(
+    std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys);
+
+bool getConnectionStatus(std::shared_ptr<PGconn> connection);
 
 #endif // DB_INTERACTION_HPP

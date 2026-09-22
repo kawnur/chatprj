@@ -1,5 +1,6 @@
 #include "companion.hpp"
 
+#include "action.hpp"
 #include "chat_client.hpp"
 #include "chat_server.hpp"
 #include "data.hpp"
@@ -456,4 +457,113 @@ std::string Companion::generateNetworkId(bool lock)
     }
 
     return networkId;
+}
+
+bool validateCompanionData(
+    std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action)
+{
+    bool nameValidationResult = validateCompanionName(errors, action->getName());
+    bool ipAddressValidationResult = validateIpAddress(errors, action->getIpAddress());
+    bool portValidationResult = validatePort(errors, action->getClientPort());
+
+    bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
+
+    logArgs("validateCompanionData result:", result);
+
+    return result;
+}
+
+std::pair<std::string, std::string> formatMessageHeaderAndBody(
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+{
+    auto companionName = companion->getName();
+    auto companionId = message->getCompanionId();
+    auto authorId = message->getAuthorId();
+    auto time = message->getTime();
+    auto text = message->getText();
+
+    std::string color, sender, receiver;
+
+    if (companionId == authorId) {
+        color = receivedMessageColor;
+        sender = companionName;
+        receiver = "Me";
+    }
+    else {
+        color = sentMessageColor;
+        sender = "Me";
+        receiver = companionName;
+    }
+
+    auto header = getStringByFormat(
+        "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>",
+        color, sender, receiver, time);
+
+    std::string body = getFormattedMessageBodyString(color, text);
+
+    std::pair<std::string, std::string> data (header, body);
+
+    return data;
+}
+
+std::string buildMessageJSONString(
+    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
+    // const std::string &networkId, std::shared_ptr<Message> message)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<MessageMetaData> meta)
+{
+    using json = nlohmann::json;
+
+    json jsonData;
+
+    auto networkId = message->getNetworkId();
+    auto type = meta->networkMessageType_;
+
+    jsonData["type"] = type;
+    jsonData["id"] = networkId;
+    jsonData["companion_id"] = companion->getId();
+    jsonData["antecedent"] = message->isAntecedent();
+
+    switch (type) {
+    case NetworkMessageType::TEXT: {
+        jsonData["time"] = message->getTime();
+        jsonData["text"] = message->getText();
+    }
+
+    break;
+
+    case NetworkMessageType::FILE_PROPOSAL: {
+        jsonData["time"] = message->getTime();
+        jsonData["text"] = message->getText();
+        jsonData["hashMD5"] =
+            companion->getFileOperatorStorage()->getOperator(networkId)->getMD5Hash();
+    }
+
+    break;
+
+    case NetworkMessageType::RECEIVE_CONFIRMATION:
+        jsonData["received"] = 1;
+
+        break;
+
+    default:
+        break;
+    }
+
+    return jsonData.dump();
+}
+
+std::string buildFileBlockJSONString(
+    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data)
+{
+    using json = nlohmann::json;
+
+    json jsonData;
+
+    jsonData["type"] = NetworkMessageType::FILE_DATA;
+    jsonData["id"] = networkId;
+    jsonData["companion_id"] = companion->getId();
+    jsonData["data"] = data;
+
+    return jsonData.dump();
 }

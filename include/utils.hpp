@@ -272,34 +272,15 @@ std::vector<std::string> buildStringVector(const Ts &...args)
 bool validateCompanionName(std::vector<std::string> &errors, const std::string &name);
 bool validateIpAddress(std::vector<std::string> &errors, const std::string &ipAddress);
 bool validatePort(std::vector<std::string> &errors, const std::string &port);
-
-bool validateCompanionData(
-    std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action);
-
 bool validatePassword(std::vector<std::string> &errors, const std::string &password);
 std::string buildDialogText(std::string &&header, const std::vector<std::string> &messages);
 LogType getLogTypeByDialogType(DialogType type);
 std::string getFormattedMessageBodyString(const std::string &color, const std::string &text);
-
-std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-
-std::string buildMessageJSONString(
-    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    // const std::string &networkId, std::shared_ptr<Message> message);
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<MessageMetaData> meta);
-
-std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data);
-
-std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys);
-
 nlohmann::json buildJsonObject(const std::string &jsonString);
 std::string getRandomString(uint8_t length);
 void sleepForMS(uint32_t duration);
 bool getBoolFromDBValue(const std::string &value);
 std::string hashFileMD5(const std::string &filename);
+void exitUtil(int result);
 
 #endif // UTILS_HPP

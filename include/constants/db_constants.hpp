@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+const std::string DB_CONNECTION_INFO_TEMPLATE { "dbname={0} user={1} password={2} host={3}" };
+
 enum class DBRequestType
 {
     GET_COMPANIONS,

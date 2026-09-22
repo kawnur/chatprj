@@ -236,7 +236,7 @@ void PasswordAction::sendData()
 
         if (text1 == text2) {
             if (text1.size() == 0) {
-                showErrorDialogAndLogError("Empty password is invalid"s, getDialog());
+                showErrorDialogAndLogError("Empty password is invalid", getDialog());
 
                 return;
             }
@@ -250,7 +250,7 @@ void PasswordAction::sendData()
             getGraphicManager()->sendNewPasswordDataToManager(cast);
         }
         else {
-            showErrorDialogAndLogError("Entered passwords are not equal"s, getDialog());
+            showErrorDialogAndLogError("Entered passwords are not equal", getDialog());
         }
     }
 
@@ -266,7 +266,7 @@ void PasswordAction::sendData()
         auto text = passwordDialog->getEditText();
 
         if (text.size() == 0) {
-            showErrorDialogAndLogError("Empty password is invalid"s, getDialog());
+            showErrorDialogAndLogError("Empty password is invalid", getDialog());
 
             return;
         }

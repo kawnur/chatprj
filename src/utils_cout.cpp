@@ -2,8 +2,6 @@
 
 #include "logging.hpp"
 
-using namespace std::string_literals;
-
 void endline(int number)
 {
     for (int i = 0; i < number; i++)

@@ -1,6 +1,7 @@
 #include "widgets_message.hpp"
 
 #include "companion.hpp"
+#include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "message.hpp"
 #include "widgets.hpp"

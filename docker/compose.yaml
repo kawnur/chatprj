@@ -14,6 +14,7 @@ services:
             CHATAPP_DB_PORT: $CHATAPP_CLIENT_DB_PORT_INNER
             CHATAPP_DB_USER: $CHATAPP_DB_POSTGRES_USER
             CHATAPP_DB_PASSWORD: $CHATAPP_DB_POSTGRES_PASSWORD
+            CHATAPP_DB_NAME: $CHATAPP_DB_POSTGRES_DBNAME
             CLIENT_NAME: client1
         image: chatprj
         networks:
@@ -103,7 +104,7 @@ services:
 
     client1_db:
         image: chatprj_db
-        command: "sleep infinity"
+        # command: "sleep infinity"
         user: root
         networks:
             my-bridge-network:
@@ -111,8 +112,6 @@ services:
         environment:
             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
-#        ports:
-#            - $CHATAPP_CLIENT_DB_PORT_OUTER:$CHATAPP_CLIENT_DB_PORT_INNER
         volumes:
             - chatapp_volume1:/var/lib/postgresql/data
             - type: bind
@@ -132,9 +131,6 @@ services:
 #         environment:
 #             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
 #             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
-# #        ports:
-# #            - "5434:5432"
-# #            - $CHATAPP_CLIENT_DB_PORT_OUTER:$CHATAPP_CLIENT_DB_PORT_INNER
 #         volumes:
 #             - chatapp_volume2:/var/lib/postgresql/data
 #             - type: bind
@@ -154,9 +150,6 @@ services:
 #         environment:
 #             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
 #             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
-#     #        ports:
-#     #            - "5434:5432"
-#     #            - $CHATAPP_CLIENT_DB_PORT_OUTER:$CHATAPP_CLIENT_DB_PORT_INNER
 #         volumes:
 #             - chatapp_volume3:/var/lib/postgresql/data
 #             - type: bind

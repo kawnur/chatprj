@@ -274,4 +274,6 @@ private:
     std::unique_ptr<QVBoxLayout> layout_;
 };
 
+void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);
+
 #endif // WIDGETS_HPP

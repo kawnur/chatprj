@@ -325,7 +325,7 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
             bool condition2 = (type == QEvent::KeyPress && condition21);
 
             if (condition1 || condition2) {
-                logArgsWithTemplate(
+                logTemplateInfo(
                     "scroll bar minimum event type {}", std::to_string(event->type()));
 
                 getManager()->addEarlyMessages(companion_);

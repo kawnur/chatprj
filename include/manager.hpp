@@ -150,7 +150,6 @@ private:
         std::shared_ptr<WidgetGroup> group) const;
 
     void fillCompanionMessageMapping(std::shared_ptr<Companion> companion, bool containersNotEmpty);
-    bool connectToDb();
     bool buildCompanions();
     void buildWidgetGroups();
     std::shared_ptr<Companion> addCompanionObject(int id, const std::string &name);
@@ -219,16 +218,20 @@ private:
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
     {
-        auto data = dbRequester_.getDBData(type, args...);
+        DBRequestData requestData { type };
+        auto data = dbRequester_.getDBData(requestData, args...);
 
         if (!data) {
-            showErrorDialogAndLogError("DB interaction error");
+            auto entry = getStringByFormat("{}, DB interaction error", requestData.getLogMark());
+            showErrorDialogAndLogError(entry);
 
             return nullptr;
         }
 
-        if (data->isEmpty())
-            showErrorDialogAndLogError("DB reply is empty");
+        if (data->isEmpty()) {
+            auto entry = getStringByFormat("{}, DB reply is empty", requestData.getLogMark());
+            showWarningDialogAndLogWarning(entry);
+        }
 
         return data;
     }

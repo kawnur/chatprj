@@ -76,7 +76,7 @@ void ChatServer::run()
 
 void ChatServer::do_accept()
 {
-    logArgs("ChatServer starts on", port_);
+    logArgs("ChatServer starts on port", port_);
 
     auto lambda = [this](boost::system::error_code ec, tcp::socket socket)
     {

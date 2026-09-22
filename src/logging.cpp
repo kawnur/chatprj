@@ -1,26 +1,6 @@
 #include "logging.hpp"
 
-#include "companion.hpp"
 #include "constants.hpp"
-#include "db_interaction.hpp"
-#include "widgets.hpp"
-
-void logLine(const QString &string)
-{
-    getGraphicManager()->addTextToAppLogWidget(string);
-}
-
-void logLine(const std::string &string)
-{
-    getGraphicManager()->addTextToAppLogWidget(getQString(string));
-}
-
-void logSocketInfoData(std::shared_ptr<SocketInfo> object)
-{
-    logArgsWithTemplate(
-        "ipAddress: {0}, serverPort_: {1}, clientPort_: {2}",
-        object->getIpAddress(), object->getServerPort(), object->getClientPort());
-}
 
 void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column)
 {
@@ -30,28 +10,12 @@ void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int colu
     logArgsError("unknown field name:", logMark);
 }
 
-void logDBReplyData(std::shared_ptr<DBReplyData> object)
-{
-    logArgs(logDelimiter);
-
-    for (auto &element : object->buildDataStringVector())
-        logArgs(element);
-
-    logArgs(logDelimiter);
-}
-
-void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
-{
-    logArgsWithTemplate(
-        "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
-        object->getName().toStdString(), object->getIpAddress().toStdString(),
-        object->getServerPort(), object->getClientPort());
-}
-
 std::string buildLogEntryPrefix(LogType type)
 {
+    auto time = getString(QTime().currentTime().toString());
+
     std::string defaultValue = "UNKNOWN"s;
     auto mark = getMapValue(LOG_TYPE_STRING_REPRESENTATION, type, defaultValue);
 
-    return getStringByFormat("{}:", mark);
+    return getStringByFormat("[{0} {1}]", time, mark);
 }

@@ -10,10 +10,11 @@
 
 const std::string logDelimiter { "############################" };
 const std::string logCustomDelimiter { "?????????????????????????" };
+const std::string EXIT_LOG_ENTRY { "Exit..." };
 
 const std::size_t MAX_BUFFER_SIZE = 1024;
 
-const int numberOfMessagesToGetFromDB = 10;
+const int NUMBER_OF_MESSAGES_TO_GET_FROM_DB = 10;
 
 const bool logDBInteraction = false;
 
@@ -116,11 +117,11 @@ const std::unordered_map<DialogType, LogType> MAP_DIALOG_TYPE_TO_LOG_TYPE {
 };
 
 const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPRESENTATION {
-    { LogType::INFO, "INFO" },
-    { LogType::DEBUG, "DEBUG" },
-    { LogType::EXCEPTION, "EXCEPTION" },
-    { LogType::WARNING, "WARNING" },
-    { LogType::ERROR, "ERROR" }
+    { LogType::INFO,      "INF" },
+    { LogType::DEBUG,     "DEB" },
+    { LogType::EXCEPTION, "EXC" },
+    { LogType::WARNING,   "WRN" },
+    { LogType::ERROR,     "ERR" }
 };
 
 const std::unordered_map<FileActionType, std::string> fileDialogTypeQStringRepresentation {

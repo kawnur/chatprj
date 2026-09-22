@@ -11,6 +11,7 @@
 
 #include "graphic_manager.hpp"
 #include "utils.hpp"
+#include "utils_cout.hpp"
 
 class DBReplyData;
 class GraphicManager;
@@ -22,14 +23,10 @@ std::shared_ptr<GraphicManager> getGraphicManager();
 template<typename... Ts>
 void coutArgsWithSpaceSeparator(Ts&&... args);
 
-using namespace std::string_literals;
-
 template<typename... Ts>
 void logArgs(Ts &&...args)
 {
-    QTime time;
-
-    std::string text = getStringByFormat("- {} - "s, time.currentTime().toString());
+    std::string text { "" };
 
     ((text += (getStringByFormat("{} ", args))), ...);
 
@@ -105,24 +102,12 @@ void logTemplateError(T &&templateString, Ts &&...args)
     logArgsError(getStringByFormat(templateString, args...));
 }
 
-template<typename T>
-void logLine(const T &string)
-{
-    getGraphicManager()->addTextToAppLogWidget(QString(string));
-}
-
-void logLine(const QString &string);
-void logLine(const std::string &string);
-
 template<typename... Ts>
 void logArgsWithCustomMark(Ts &&...args)
 {
     logArgs(logCustomDelimiter, args...);
 }
 
-void logSocketInfoData(std::shared_ptr<SocketInfo> object);
 void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column);
-void logDBReplyData(std::shared_ptr<DBReplyData> object);
-void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);
 
 #endif // LOGGING_HPP

@@ -1,10 +1,38 @@
 #include "db_interaction.hpp"
 
-#include "action.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
 
-using namespace std::string_literals;
+DBConnectionPrameters::DBConnectionPrameters()
+{
+    address_ = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
+    port_ = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
+    login_ = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
+    password_ = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
+    dbName_ = getValueFromEnvironmentVariable("CHATAPP_DB_NAME");
+}
+
+bool DBConnectionPrameters::isValid()
+{
+    for (auto &value : { address_, port_, login_, password_, dbName_ }) {
+        if (!value)
+            return false;
+    }
+
+    return true;
+}
+
+void DBConnectionPrameters::log()
+{
+    logTemplateInfo(
+        "DB connection params; address: {0}, port: {1}, dbName: {2}, login: {3}, password: {4}",
+        address_, port_, dbName_, login_, std::string(password_->size(), '*'));
+}
+
+std::string DBConnectionPrameters::getConnectionInfo()
+{
+    return getStringByFormat(DB_CONNECTION_INFO_TEMPLATE, dbName_, login_, password_, address_);
+}
 
 DBRequestData::DBRequestData(DBRequestType type) : logMark_(), requestTemplate_(), replyKeys_()
 {
@@ -17,7 +45,7 @@ DBRequestData::DBRequestData(DBRequestType type) : logMark_(), requestTemplate_(
 
     // check value size
     if (size < 3) {
-        logTemplateError("dbRequestDataMap value size {} is less than expected"s, size);
+        logTemplateError("dbRequestDataMap value size {} is less than expected", size);
 
         return;
     }
@@ -47,8 +75,8 @@ bool DBRequestData::isValid()
     bool replyKeysIsNotEmpty = (!replyKeys_.empty());
 
     logTemplateDebug(
-        "{0}, logMarkIsNotEmpty: {1}, requestTemplateIsNotEmpty: {2}, replyKeysIsNotEmpty: {3}",
-        __FUNCTION__, logMarkIsNotEmpty, requestTemplateIsNotEmpty, replyKeysIsNotEmpty);
+        "{0}, {1}, fields not empty, logMark: {2}, requestTemplate: {3}, replyKeys: {4}",
+        Q_FUNC_INFO, logMark_, logMarkIsNotEmpty, requestTemplateIsNotEmpty, replyKeysIsNotEmpty);
 
     return logMarkIsNotEmpty && requestTemplateIsNotEmpty && replyKeysIsNotEmpty;
 }
@@ -162,7 +190,7 @@ int DBReplyData::getDataFromResult(std::shared_ptr<PGresult> result, int maxTupl
     int nfields = PQnfields(result.get());
 
     if (log_)
-        logArgsWithTemplate("ntuples: {0}, nfields: {1}", ntuples, nfields);
+        logTemplateInfo("ntuples: {0}, nfields: {1}", ntuples, nfields);
 
     if (ntuples == 0) {
         clear();
@@ -204,9 +232,22 @@ int DBReplyData::getDataFromResult(std::shared_ptr<PGresult> result, int maxTupl
     return dataIsOk;
 }
 
+void DBReplyData::log()
+{
+    logArgs(logDelimiter);
+
+    for (auto &element : buildDataStringVector())
+        logArgs(element);
+
+    logArgs(logDelimiter);
+}
+
 DBRequester::DBRequester(bool log) : log_(log), mutex_()
 {
     connection_ = getDBConnection();
+
+    if (!connection_)
+        logTemplateError("{}, no DB connection", __FUNCTION__);
 }
 
 std::shared_ptr<PGresult> DBRequester::sendRequestAndReturnResult(const std::string &command)
@@ -227,24 +268,22 @@ std::shared_ptr<PGresult> DBRequester::sendRequestAndReturnResult(const std::str
     return result;
 }
 
+bool DBRequester::isReady()
+{
+    return (connection_) ? true : false;
+}
+
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName)
 {
     auto value = std::getenv(variableName.data());
 
     if (!value) {
-        logArgsError("Did not find environment variable", variableName);
+        logTemplateError("environment variable {} not found", variableName);
 
         return std::nullopt;
     }
 
     return std::string(value);
-}
-
-const char *getValueFromEnvironmentVariableAlt1(std::string &&variableName)
-{
-    auto value = getValueFromEnvironmentVariable(std::forward<std::string>(variableName));
-
-    return getPQArg(value);
 }
 
 const char *getPQArg(const std::optional<std::string> &value)
@@ -256,47 +295,53 @@ std::shared_ptr<PGconn> getDBConnection()
 {
     // TODO make connection to db secure
 
-    std::shared_ptr<PGconn> dbConnection = nullptr;
+    // get params
+    DBConnectionPrameters parameters {};
 
-    try {
-        // auto dbAddress = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_ADDRESS");
-        // auto dbPort = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PORT");
-        // auto dbLogin = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_USER");
-        // auto dbPassword = getValueFromEnvironmentVariableAlt1("CHATAPP_DB_PASSWORD");
-        auto dbAddress = getValueFromEnvironmentVariable("CHATAPP_DB_ADDRESS");
-        auto dbPort = getValueFromEnvironmentVariable("CHATAPP_DB_PORT");
-        auto dbLogin = getValueFromEnvironmentVariable("CHATAPP_DB_USER");
-        auto dbPassword = getValueFromEnvironmentVariable("CHATAPP_DB_PASSWORD");
+    if (!parameters.isValid())
+        return nullptr;
 
-        for (const auto &value : { dbAddress, dbPort, dbLogin, dbPassword }) {
-            if (!value)
-                return nullptr;
-        }
+    parameters.log();
 
-        // TODO create formatters
-        logArgsWithTemplate(
-            "DB connection; address: {0}, port: {1}, login: {2}, password: {3}",
-            dbAddress, dbPort, dbLogin, dbPassword);
+    // create connection
+    auto info = parameters.getConnectionInfo();
+    auto connection = std::shared_ptr<PGconn>(PQconnectdb(info.data()), PQfinish);
 
-        // create connection
-        std::string infoTemplate { "dbname={0} user={1} password={2} host={3}" };
-        const char *dbName = "postgres";  // TODO add var
+    return (getConnectionStatus(connection)) ? connection : nullptr;
+}
 
-        auto info = getStringByFormat(infoTemplate, dbName, dbLogin, dbPassword, dbAddress);
-        dbConnection = std::shared_ptr<PGconn>(PQconnectdb(info.data()), PQfinish);
+std::string buildChatHistoryJSONString(
+    std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys)
+{
+    using json = nlohmann::json;
 
-        // check connection status
-        ConnStatusType status = PQstatus(dbConnection.get());
-        std::string mark = (status == 0) ? "OK" : "?";
+    json jsonData;
 
-        logArgsWithTemplate("DB connection status: {0} {1}", std::to_string(status), mark);
+    jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
+    jsonData["messages"] = {};
 
-        if (status == ConnStatusType::CONNECTION_BAD)  // TODO raise exception
-            logArgsError("DB connection status: CONNECTION_BAD");
-    }
-    catch(const std::exception &e) {
-        logArgsException(e.what());
+    for (std::size_t i = 0; i < data->size(); i++) {  // TODO switch to iterators
+        for (auto &key : keys)
+            jsonData["messages"][i][key] = data->getValue(i, key);
     }
 
-    return dbConnection;
+    std::string result = jsonData.dump();
+
+    return result;
+}
+
+bool getConnectionStatus(std::shared_ptr<PGconn> connection)
+{
+    ConnStatusType status = PQstatus(connection.get());
+    std::string mark = (status == 0) ? "OK" : "?";
+
+    logTemplateInfo("DB connection status: {0} {1}", std::to_string(status), mark);
+
+    if (status == ConnStatusType::CONNECTION_BAD) {
+        logArgsError("DB connection status: CONNECTION_BAD");
+
+        return false;
+    }
+
+    return true;
 }
