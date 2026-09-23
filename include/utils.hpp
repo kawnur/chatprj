@@ -19,6 +19,8 @@
 
 #include "constants.hpp"
 
+using namespace std::string_literals;
+
 class ButtonInfo;
 class Companion;
 class CompanionAction;
@@ -58,7 +60,6 @@ template<typename T>
 concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_cvref_t<T>>;
 
 std::string getString(const char *value);
-std::string getString(const bool &value);
 std::string getString(std::nullptr_t value);
 std::string getString(const std::filesystem::path &value);
 std::string getString(const QString value);
@@ -81,7 +82,10 @@ std::string getString(T &value)
 template<IsArithmetic T>
 std::string getString(T &&value)
 {
-    return std::to_string(std::forward<T>(value));
+    if constexpr (std::is_same_v<std::remove_cvref_t<T>, bool>)
+        return (value) ? "true"s : "false"s;
+    else
+        return std::to_string(std::forward<T>(value));
 }
 
 template<IsNotArithmetic T>
@@ -89,8 +93,10 @@ std::string getString(T &&value)
 {
     if constexpr (std::is_same_v<std::remove_cvref_t<T>, QString>)
         return value.toStdString();
-    if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
         return value;
+    // else if constexpr (std::is_same_v<std::remove_cvref_t<T>, bool>)
+    //     return (value) ? "true"s : "false"s;
     else
         return std::to_string(value);
 }

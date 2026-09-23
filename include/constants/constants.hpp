@@ -16,7 +16,7 @@ const std::size_t MAX_BUFFER_SIZE = 1024;
 
 const int NUMBER_OF_MESSAGES_TO_GET_FROM_DB = 10;
 
-const bool logDBInteraction = false;
+const bool LOG_DB_INTERACTION = true;
 
 static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 

@@ -7,11 +7,15 @@
 #include <QGraphicsBlurEffect>
 #include <QHBoxLayout>
 #include <QMainWindow>
+#include <QMenu>
+#include <QObject>
 #include <QSplitter>
 #include <QString>
 #include <QWidget>
 
 #include "constants.hpp"
+#include "graphic_manager.hpp"
+#include "logging.hpp"
 
 class CentralPanelWidget;
 class LeftPanelWidget;

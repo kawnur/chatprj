@@ -192,28 +192,29 @@ void MainWindow::createMenu()
 {
     auto *bar = menuBar();
 
-    QMenu *fileMenu = bar->addMenu("File");
-    auto exitAction = std::make_shared<QAction>("Exit", this);
-    fileMenu->addAction(exitAction.get());
+    QMenu* fileMenu = bar->addMenu("File");
+    QAction* exitAction = new QAction("Exit", this);
+    fileMenu->addAction(exitAction);
 
     connect(
-        exitAction.get(), &QAction::triggered, this, &QCoreApplication::quit, Qt::QueuedConnection);
+        exitAction, &QAction::triggered,
+        this, &QCoreApplication::quit, Qt::QueuedConnection);
 
-    QMenu *companionMenu = bar->addMenu("Companion");
-    auto addCompanionAction = std::make_shared<QAction>("Add new companion", this);
-    companionMenu->addAction(addCompanionAction.get());
-
-    connect(
-        addCompanionAction.get(), &QAction::triggered, this, &MainWindow::createCompanion,
-        Qt::QueuedConnection);
-
-    QMenu *groupChatMenu = bar->addMenu("Group chat");
-    auto addGroupChatAction = std::make_shared<QAction>("Add new group chat", this);
-    groupChatMenu->addAction(addGroupChatAction.get());
+    QMenu* companionMenu = bar->addMenu("Companion");
+    QAction* addCompanionAction = new QAction("Add new companion", this);
+    companionMenu->addAction(addCompanionAction);
 
     connect(
-        addGroupChatAction.get(), &QAction::triggered, this, &MainWindow::createGroupChat,
-        Qt::QueuedConnection);
+        addCompanionAction, &QAction::triggered,
+        this, &MainWindow::createCompanion, Qt::QueuedConnection);
+
+    QMenu* groupChatMenu = bar->addMenu("Group chat");
+    QAction* addGroupChatAction = new QAction("Add new group chat", this);
+    groupChatMenu->addAction(addGroupChatAction);
+
+    connect(
+        addGroupChatAction, &QAction::triggered,
+        this, &MainWindow::createGroupChat, Qt::QueuedConnection);
 }
 
 void MainWindow::setBlurEffect()

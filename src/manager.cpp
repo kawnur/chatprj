@@ -12,7 +12,7 @@
 using namespace std::string_literals;
 
 Manager::Manager()
-    : /*initialized_(false), */dbRequester_(logDBInteraction),
+    : /*initialized_(false), */dbRequester_(LOG_DB_INTERACTION),
     messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false), selectedCompanion_(nullptr), mapCompanionToWidgetGroup_(),
     lastOpenedPath_(HOME_PATH)
@@ -119,7 +119,7 @@ void Manager::sendMessage(
 
     auto pushMeta = pushMessageToDB(meta, data, state);
 
-    if (!pushMeta->isValid())
+    if (!pushMeta || !pushMeta->isValid())
         return;
 
     pushMeta->authorId_ = 1;
@@ -146,6 +146,7 @@ void Manager::sendMessage(
 
     // define NetworkMessageType
     auto networkMessageType = defineNetworkMessageType(type);
+    message->meta()->networkMessageType_ = networkMessageType;
 
     // TODO move to manager field object
     // send over network
@@ -156,7 +157,7 @@ void Manager::sendMessage(
         markMessageAsSent(companion, message);
 
     // wait for message reception confirmation
-    waitForMessageReceptionConfirmation(companion, message);
+    // waitForMessageReceptionConfirmation(companion, message);  // TODO uncomment
 }
 
 void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path)
@@ -184,7 +185,8 @@ void Manager::receiveTextMessage(
     replyMeta->messageType_ = MessageType::TEXT;
     replyMeta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION;
 
-    auto message = companion->createMessage(meta, data, state);
+    // auto message = companion->createMessage(meta, data, state);
+    auto message = companion->createMessage(replyMeta, data, state);
 
     if (!message)
         return;
@@ -430,7 +432,7 @@ std::shared_ptr<MessageData> Manager::buildMessageDataFromJson(const nlohmann::j
 
 std::shared_ptr<MessageMetaData> Manager::buildMessageMetaDataFromJson(const nlohmann::json &data)
 {
-    return buildObjectFromJson<MessageMetaData>(data, "type", "companion_id", "id");
+    return buildObjectFromJson<MessageMetaData>(data, "type", "companion_id", "id", "time");
 }
 
 std::shared_ptr<MessageState> Manager::buildMessageStateFromJson(const nlohmann::json &data)
@@ -1097,11 +1099,6 @@ std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string
         return nullptr;
     }
 
-    // auto result = mapCompanionIdToCompanionInfo_.emplace(
-    //     std::make_pair(
-    //         id,
-    //         std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>(new Companion(id, name), nullptr)));
-
     auto companion = std::make_shared<Companion>(id, name);
     std::shared_ptr<WidgetGroup> group = nullptr;
     auto value = std::pair(companion, group);
@@ -1316,7 +1313,7 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
 
     auto messageData = getDBData(
         DBRequestType::PUSH_MESSAGE_AND_RETURN, meta->companionName_, meta->authorName_,
-        meta->timestampTz_, companionIdString, data->text_, state->isSent_, state->isReceived_);
+        meta->timestampTz_, data->text_, state->isSent_, state->isReceived_);
 
     // TODO get rid of copy constructing
     if (!messageData || messageData->isEmpty())
@@ -1326,7 +1323,7 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
     uint8_t companionId = std::stoi(messageData->getValue(0, "companion_id"));
     std::string timestampTz { messageData->getValue(0, "timestamp_tz") };
 
-    if (logDBInteraction)
+    if (LOG_DB_INTERACTION)
         logTemplateInfo("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
 
     // TODO get rid of copy constructing

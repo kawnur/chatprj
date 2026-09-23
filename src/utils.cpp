@@ -18,11 +18,6 @@ std::string getString(const char *value)
     return std::string(value);
 }
 
-std::string getString(const bool &value)
-{
-    return (value) ? "true"s : "false"s;
-}
-
 std::string getString(std::nullptr_t value)
 {
     return "nullptr_t"s;

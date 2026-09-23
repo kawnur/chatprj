@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "utils.hpp"
+#include "utils_cout.hpp"
 
 class MessageWidget;
 
@@ -17,9 +18,17 @@ bool setFieldsFromJson(const LambdaMap &lambdaMap, const nlohmann::json &data, T
 {
     bool result = true;
 
-    ([&]{ result &= runAndReturnBool(lambdaMap.at(args)); }, ...);
+    ([&](){ result &= runAndReturnBool(lambdaMap.at(args)); }(), ...);
 
     return result;
+};
+
+template<typename...Ts>
+bool setFieldsFromJsonAlt1(const LambdaMap &lambdaMap, const nlohmann::json &data, Ts &&...args)
+{
+    ([&](){ coutArgsWithSpaceSeparator("args", args); runAndLogException(lambdaMap.at(args)); }(), ...);
+
+    return true;
 };
 
 class MessageMetaData
@@ -40,7 +49,8 @@ public:
         {
             { "type", [&]() { networkMessageType_ = data.at("type"); } },
             { "companion_id", [&]() { companionId_ = data.at("companion_id"); } },
-            { "id", [&]() { networkId_ = data.at("text"); } }
+            { "time", [&]() { timestampTz_ = data.at("time"); } },
+            { "id", [&]() { networkId_ = data.at("id"); } }
         };
 
         return setFieldsFromJson(lambdaMap, data, args...);
@@ -76,7 +86,7 @@ public:
             { "data", [&]() { data_ = data.at("data"); } }
         };
 
-        return setFieldsFromJson(lambdaMap, data, args...);
+        return setFieldsFromJsonAlt1(lambdaMap, data, args...);
     };
 
     std::string text_;

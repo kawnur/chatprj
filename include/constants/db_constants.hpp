@@ -191,11 +191,11 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         DBRequestType::PUSH_MESSAGE_AND_RETURN,
         {
             "pushMessageAndReturn",
-            "INSERT INTO messages "
+            "INSERT INTO companion_messages "
             "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
             "VALUES ((SELECT id FROM companions WHERE name = '{1}'), "
             "(SELECT id FROM companions WHERE name = '{2}'), '{3}', '{4}', {5}, {6}) "
-            "RETURNING id, %7, timestamp_tz",  // ???
+            "RETURNING id, companion_id, timestamp_tz",  // ???
             "id", "companion_id", "timestamp_tz"
         }
     },
@@ -203,7 +203,7 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         DBRequestType::PUSH_MESSAGE_WITH_AUTHOR_ID_AND_RETURN,
         {
             "pushMessageWithAuthorIdAndReturn",
-            "INSERT INTO messages "
+            "INSERT INTO companion_messages "
             "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
             "VALUES ((SELECT id FROM companions WHERE name = '{1}'), {2}, '{3}', '{4}', {5}, {6}) "
             "RETURNING id, %7, timestamp_tz",
