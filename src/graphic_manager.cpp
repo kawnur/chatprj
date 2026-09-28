@@ -134,10 +134,13 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
 {
     switch (action->getType()) {
-    case ChatActionType::CREATE:
-        getManager()->createCompanion(action);
+    case ChatActionType::CREATE: {
+        // getManager()->createCompanion(action);
+        auto lambda = [](auto action) { return getManager()->createCompanion(action); };
+        getManager()->performAction(lambda, action);
+    }
 
-        break;
+    break;
 
     case ChatActionType::UPDATE:
         getManager()->updateCompanion(action);

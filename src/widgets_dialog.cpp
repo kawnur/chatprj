@@ -6,11 +6,18 @@
 
 #include "action.hpp"
 #include "companion.hpp"
+#include "data.hpp"
 #include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "utils.hpp"
+
+void Dialog::actionSlot()
+{
+    action_->act();
+    // wrapper_->act();
+}
 
 CompanionDataDialog::CompanionDataDialog(
     ChatActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
@@ -71,11 +78,18 @@ void CompanionDataDialog::set()
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
-        action_.get(), &Action::sendData, Qt::QueuedConnection);
+        // action_.get(), &Action::sendData, Qt::QueuedConnection);
+        this, &Dialog::actionSlot, Qt::QueuedConnection);
 
     connect(
         buttonBox_.get(), &QDialogButtonBox::rejected,
         this, &QDialog::reject, Qt::QueuedConnection);
+}
+
+std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
+{
+    return std::make_shared<CompanionData>(
+        getNameString(), getIpAddressString(), ""s, getPortString());
 }
 
 GroupChatDataDialog::GroupChatDataDialog(ChatActionType type, std::shared_ptr<QWidget> parent)
@@ -128,7 +142,8 @@ void CreatePasswordDialog::set()
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
-        action_.get(), &Action::sendData, Qt::QueuedConnection);
+        // action_.get(), &Action::sendData, Qt::QueuedConnection);
+        this, &Dialog::actionSlot, Qt::QueuedConnection);
 }
 
 std::string CreatePasswordDialog::getFirstEditText()
@@ -166,7 +181,8 @@ void GetPasswordDialog::set()
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
-        action_.get(), &Action::sendData, Qt::QueuedConnection);
+        // action_.get(), &Action::sendData, Qt::QueuedConnection);
+        this, &Dialog::actionSlot, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText()
@@ -262,7 +278,7 @@ void TextDialog::closeSelfAndParentDialog()
 void TextDialog::acceptAction()
 {
     close();
-    action_->sendData();
+    action_->act();
 }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()
@@ -291,7 +307,8 @@ void FileDialog::set()
 {
     connect(
         dialog_.get(), &QFileDialog::accepted,
-        action_.get(), &Action::sendData, Qt::QueuedConnection);
+        // action_.get(), &Action::sendData, Qt::QueuedConnection);
+        this, &Dialog::actionSlot, Qt::QueuedConnection);
 }
 
 void FileDialog::showDialog()

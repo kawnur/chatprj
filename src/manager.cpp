@@ -139,7 +139,13 @@ void Manager::sendMessage(
         if (!storage)
             return;
 
-        storage->addSenderOperator(message->getNetworkId(), action->getPath());
+        // TODO modify
+        auto actionCast = std::dynamic_pointer_cast<FileAction>(action);
+
+        if (!action)
+            logArgsError("action cast error");
+        else
+            storage->addSenderOperator(message->getNetworkId(), actionCast->getPath());
     }
 
     group->addMessageWidgetToCentralPanelChatHistory(message);
@@ -157,7 +163,7 @@ void Manager::sendMessage(
         markMessageAsSent(companion, message);
 
     // wait for message reception confirmation
-    // waitForMessageReceptionConfirmation(companion, message);  // TODO uncomment
+    waitForMessageReceptionConfirmation(companion, message);
 }
 
 void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path)
@@ -662,11 +668,13 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // T
     }
 }
 
-void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+// void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 {
     // data validation and checking
     if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
-        return;
+        // return;
+        return false;
 
     auto name = action->getName();
     auto ipAddress = action->getIpAddress();
@@ -676,7 +684,8 @@ void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
     auto companionIdData = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, name);
 
     if (!companionIdData || companionIdData->isEmpty())
-        return;
+        // return;
+        return false;
 
     int id = std::stoi(companionIdData->getValue(0, "id"));
 
@@ -688,18 +697,20 @@ void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
         clientPortStr);
 
     if (!socketData || socketData->isEmpty())
-        return;
+        // return;
+        return false;
 
-    // create Companion object
+    // create companion object
     auto companion = addCompanionObject(id, name);
 
     if (!companion) {
         logArgsError("companion is nullptr");
 
-        return;
+        // return;
+        return false;
     }
 
-    // create SocketInfo object
+    // create socketInfo object
     auto socketInfo = std::make_shared<SocketInfo>(ipAddress, serverPort, std::stoi(clientPortStr));
 
     companion->setSocketInfo(socketInfo);
@@ -709,6 +720,8 @@ void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 
     // show info dialog
     getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
+
+    return true;
 }
 
 void Manager::updateCompanion(std::shared_ptr<CompanionAction> action)

@@ -86,7 +86,7 @@ public:
             { "data", [&]() { data_ = data.at("data"); } }
         };
 
-        return setFieldsFromJsonAlt1(lambdaMap, data, args...);
+        return setFieldsFromJson(lambdaMap, data, args...);
     };
 
     std::string text_;

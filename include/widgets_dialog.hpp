@@ -24,7 +24,9 @@
 using namespace std::string_literals;
 
 class Action;
+// class DialogWrapper;
 class Companion;
+class CompanionData;
 class FileAction;
 
 template <typename T, typename F>
@@ -71,13 +73,20 @@ public:
 
     virtual void set() {}
     virtual void showDialog() {}
+    virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
 
     void setAction(std::shared_ptr<Action> action) { action_ = action; }
+    // void setWrapper(std::shared_ptr<DialogWrapper> wrapper) { wrapper_ = wrapper; }
     bool containsDialog() const { return containsDialog_; }
+
+// protected slots:
+public slots:
+    void actionSlot();
 
 protected:
     bool containsDialog_ = false;
     std::shared_ptr<Action> action_;
+    // std::shared_ptr<DialogWrapper> wrapper_;
 };
 
 class CompanionDataDialog : public Dialog
@@ -92,6 +101,8 @@ public:
     std::string getIpAddressString();
     std::string getPortString();
     void set() override;
+
+    std::shared_ptr<CompanionData> getCompanionData() override;
 
 private:
     ChatActionType type_;

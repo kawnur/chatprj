@@ -63,6 +63,15 @@ public:
     Manager();
     ~Manager();
 
+    template<typename F, typename T>
+    void performAction(F &&func, std::shared_ptr<T> action)
+    {
+        bool result = func(action);
+
+        if (!result)
+            action->failed();
+    }
+
     std::shared_ptr<Companion> getSelectedCompanion();
     bool userIsAuthenticated();
     void set();
@@ -127,7 +136,10 @@ public:
     void receiveMessage(std::shared_ptr<Companion> companion, const std::string &json);
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
-    void createCompanion(std::shared_ptr<CompanionAction> action);
+
+    // void createCompanion(std::shared_ptr<CompanionAction> action);
+    bool createCompanion(std::shared_ptr<CompanionAction> action);
+
     void updateCompanion(std::shared_ptr<CompanionAction> action);
     void deleteCompanion(std::shared_ptr<CompanionAction> action);
     void clearChatHistory(std::shared_ptr<Companion> companion);
