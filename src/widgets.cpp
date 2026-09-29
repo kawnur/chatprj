@@ -1,12 +1,9 @@
 #include "widgets.hpp"
 
-#include <QMenu>
-
 #include "action.hpp"
 #include "companion.hpp"
 #include "constants.hpp"
 #include "graphic_manager.hpp"
-#include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "message.hpp"
@@ -375,26 +372,36 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 
     auto newCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(baseObject);
     manager->resetSelectedCompanion(newCompanion);
+
+    QWidget::mousePressEvent(event);
 }
 
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
-    auto menu = std::make_shared<QMenu>(this);
+    // auto menu = std::make_shared<Menu>(this);
+    // auto menu = std::make_shared<Menu>();
+    auto menu = new Menu();
 
     menu->addAction(requestHistoryAction_.get());
 
-    auto clearHistoryAction = std::make_shared<QAction>("Clear chat history", this);
-    menu->addAction(clearHistoryAction.get());
+    // auto clearHistoryAction = std::make_shared<QAction>("Clear chat history", this);
+    // menu->addAction(clearHistoryAction.get());
+    auto clearHistoryAction = new QAction("Clear chat history", this);
+    menu->addAction(clearHistoryAction);
 
     connect(
-        clearHistoryAction.get(), &QAction::triggered,
+        // clearHistoryAction.get(), &QAction::triggered,
+        clearHistoryAction, &QAction::triggered,
         this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
 
-    auto deleteCompanionAction = std::make_shared<QAction>("Delete companion", this);
-    menu->addAction(deleteCompanionAction.get());
+    // auto deleteCompanionAction = std::make_shared<QAction>("Delete companion", this);
+    // menu->addAction(deleteCompanionAction.get());
+    auto deleteCompanionAction = new QAction("Delete companion", this);
+    menu->addAction(deleteCompanionAction);
 
     connect(
-        deleteCompanionAction.get(), &QAction::triggered,
+        // deleteCompanionAction.get(), &QAction::triggered,
+        deleteCompanionAction, &QAction::triggered,
         this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
 
     menu->popup(mapToGlobal(position));

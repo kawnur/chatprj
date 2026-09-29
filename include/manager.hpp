@@ -64,12 +64,17 @@ public:
     ~Manager();
 
     template<typename F, typename T>
-    void performAction(F &&func, std::shared_ptr<T> action)
+    // bool performAction(F &&func, std::shared_ptr<T> action)
+    bool performAction(F &&func, std::shared_ptr<T> wrapper)
     {
-        bool result = func(action);
+        // bool result = func(action);
+        bool result = func(wrapper);
 
         if (!result)
-            action->failed();
+            // action->failed();
+            wrapper->failed();
+
+        return result;
     }
 
     std::shared_ptr<Companion> getSelectedCompanion();
@@ -137,9 +142,15 @@ public:
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
 
+    // void performCompanionAction(std::shared_ptr<CompanionAction> action);
+    void performCompanionAction(std::shared_ptr<ActionWrapperBase> wrapper);
+
+    bool createCompanion();
     // void createCompanion(std::shared_ptr<CompanionAction> action);
     bool createCompanion(std::shared_ptr<CompanionAction> action);
+    bool createCompanion(std::shared_ptr<ActionWrapperBase> wrapper);
 
+    // void updateCompanion(std::shared_ptr<CompanionAction> action);
     void updateCompanion(std::shared_ptr<CompanionAction> action);
     void deleteCompanion(std::shared_ptr<CompanionAction> action);
     void clearChatHistory(std::shared_ptr<Companion> companion);
@@ -248,6 +259,9 @@ private:
         return data;
     }
 
+    void setCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper);
+    void checkAndResetCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper);
+
     // bool initialized_;
     DBRequester dbRequester_;
     std::mutex messageStateToMessageMapMutex_;
@@ -259,6 +273,8 @@ private:
         mapCompanionToWidgetGroup_;
 
     std::filesystem::path lastOpenedPath_;
+
+    std::shared_ptr<ActionWrapperBase> currentAction_;
 };
 
 std::shared_ptr<Manager> getManager();

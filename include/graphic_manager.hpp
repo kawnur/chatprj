@@ -62,7 +62,7 @@ public:
     void clearCompanionHistory(std::shared_ptr<Companion> companion);
     void clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup);
     void deleteCompanion(std::shared_ptr<Companion> companion);
-    void sendCompanionDataToManager(std::shared_ptr<CompanionAction> action);
+    // void sendCompanionDataToManager(std::shared_ptr<CompanionAction> action);
     void showCompanionInfoDialog(std::shared_ptr<CompanionAction> action, std::string &&header);
     void sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action);
     void sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action);

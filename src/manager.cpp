@@ -1,8 +1,10 @@
 #include "manager.hpp"
 
 #include "action.hpp"
+#include "action_wrapper.hpp"
 #include "application.hpp"
 #include "companion.hpp"
+#include "functional"
 #include "logging.hpp"
 #include "message.hpp"
 #include "utils.hpp"
@@ -15,11 +17,7 @@ Manager::Manager()
     : /*initialized_(false), */dbRequester_(LOG_DB_INTERACTION),
     messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false), selectedCompanion_(nullptr), mapCompanionToWidgetGroup_(),
-    lastOpenedPath_(HOME_PATH)
-{
-    if (!dbRequester_.isReady())
-        exitUtil(EXIT_FAILURE);
-}
+    lastOpenedPath_(HOME_PATH) {}
 
 Manager::~Manager()
 {
@@ -38,6 +36,9 @@ bool Manager::userIsAuthenticated()
 
 void Manager::set()
 {
+    // if (!dbRequester_.isReady())
+    //     exitUtil(EXIT_FAILURE);
+
     bool companionsBuilt = buildCompanions();
     logArgs("companionsBuilt:", companionsBuilt);
 
@@ -134,18 +135,18 @@ void Manager::sendMessage(
 
     // add to widget
     if (type == MessageType::FILE) {
-        auto storage = companion->getFileOperatorStorage();
+        // auto storage = companion->getFileOperatorStorage();
 
-        if (!storage)
-            return;
+        // if (!storage)
+        //     return;
 
-        // TODO modify
-        auto actionCast = std::dynamic_pointer_cast<FileAction>(action);
+        // // TODO modify
+        // auto actionCast = std::dynamic_pointer_cast<FileAction>(action);
 
-        if (!action)
-            logArgsError("action cast error");
-        else
-            storage->addSenderOperator(message->getNetworkId(), actionCast->getPath());
+        // if (!action)
+        //     logArgsError("action cast error");
+        // else
+        //     storage->addSenderOperator(message->getNetworkId(), actionCast->getPath());
     }
 
     group->addMessageWidgetToCentralPanelChatHistory(message);
@@ -668,9 +669,86 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // T
     }
 }
 
-// void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
-bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+// void Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
+void Manager::performCompanionAction(std::shared_ptr<ActionWrapperBase> wrapper)
 {
+    // logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+
+    // std::function<bool(std::shared_ptr<CompanionAction>)> lambda;
+    std::function<bool(std::shared_ptr<ActionWrapperBase>)> lambda;
+
+    auto action = wrapper->getAction();
+
+    switch (action->getType()) {
+    case ChatActionType::CREATE:
+        // lambda = [=, this](auto action) { return createCompanion(action); };
+        lambda = [=, this](auto wrapper) { return createCompanion(wrapper); };
+
+    break;
+
+    case ChatActionType::UPDATE:
+        // lambda = [=]() { return updateCompanion(action); };
+
+        break;
+
+    case ChatActionType::DELETE:
+        // lambda = [=]() { return deleteCompanion(action); };
+
+        break;
+
+    case ChatActionType::CLEAR_HISTORY:
+        // lambda = [=]() { return clearCompanionHistory(action); };
+
+        break;
+
+    default:
+        break;
+    }
+
+    // bool result = performAction(lambda, action);
+    bool result = performAction(lambda, wrapper);
+
+    if (result)
+        checkAndResetCurrentAction(wrapper);
+
+    // logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+}
+
+bool Manager::createCompanion()
+{
+    // auto action = std::make_shared<CompanionAction>(ChatActionType::CREATE, nullptr);
+    using Wrapper = ActionWrapper<CompanionAction, ChatActionType, std::shared_ptr<Companion>>;
+    auto wrapper = std::make_shared<Wrapper>(ChatActionType::CREATE, nullptr);
+    // logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+
+    setCurrentAction(std::dynamic_pointer_cast<ActionWrapperBase>(wrapper));
+
+    // action->set();
+    wrapper->set();
+
+    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper.use_count());
+
+    return true;
+
+    // open dialog
+    // get companion data
+    // validate companion data
+    // push companion data to db
+    // push socket data to db
+    // create companion object
+    // create socketInfo object
+    // add companion and widget group to mapping
+    // show info dialog
+
+}
+
+// void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+// bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+bool Manager::createCompanion(std::shared_ptr<ActionWrapperBase> wrapper)
+{
+    auto action = std::dynamic_pointer_cast<CompanionAction>(wrapper->getAction());
+
+    logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
     // data validation and checking
     if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
         // return;
@@ -720,6 +798,8 @@ bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 
     // show info dialog
     getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
+
+    logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
 
     return true;
 }
@@ -809,43 +889,43 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
 
 void Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
 {
-    // data validation and checking
-    if (!(passwordDataValidation(action)))
-        return;
+    // // data validation and checking
+    // if (!(passwordDataValidation(action)))
+    //     return;
 
-    // push password data to db
-    auto passwordIdData = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
+    // // push password data to db
+    // auto passwordIdData = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
 
-    if (!passwordIdData || passwordIdData->isEmpty())
-        return;
+    // if (!passwordIdData || passwordIdData->isEmpty())
+    //     return;
 
-    // show dialog
-    showInfoDialogAndLogInfo(
-        newPasswordCreatedLabel, &TextDialog::unsetMainWindowBlurAndCloseDialogs,
-        action->getDialog());
+    // // show dialog
+    // showInfoDialogAndLogInfo(
+    //     newPasswordCreatedLabel, &TextDialog::unsetMainWindowBlurAndCloseDialogs,
+    //     action->getDialog());
 }
 
 void Manager::authenticateUser(std::shared_ptr<PasswordAction> action)
 {
-    auto graphicManager = getGraphicManager();
+    // auto graphicManager = getGraphicManager();
 
-    // do we have password in db?
-    auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
+    // // do we have password in db?
+    // auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
 
-    if (!passwordData || passwordData->isEmpty())
-        return;
+    // if (!passwordData || passwordData->isEmpty())
+    //     return;
 
-    if (passwordData->getValue(0, "password") != action->getPassword()) {
-        showErrorDialogAndLogError("Password is not correct");
+    // if (passwordData->getValue(0, "password") != action->getPassword()) {
+    //     showErrorDialogAndLogError("Password is not correct");
 
-        return;
-    }
+    //     return;
+    // }
 
-    userIsAuthenticated_ = true;
+    // userIsAuthenticated_ = true;
 
-    logArgsInfo("user successfully authenticated");
+    // logArgsInfo("user successfully authenticated");
 
-    graphicManager->disableMainWindowBlurEffect();
+    // graphicManager->disableMainWindowBlurEffect();
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -1171,15 +1251,15 @@ bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> action)
 
 bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> action)
 {
-    std::vector<std::string> validationErrors {};
+    // std::vector<std::string> validationErrors {};
 
-    bool validationResult = validatePassword(validationErrors, action->getPassword());
+    // bool validationResult = validatePassword(validationErrors, action->getPassword());
 
-    if (!validationResult) {
-        showErrorDialogAndLogError(buildDialogText("Error messages:\n\n", validationErrors));
+    // if (!validationResult) {
+    //     showErrorDialogAndLogError(buildDialogText("Error messages:\n\n", validationErrors));
 
-        return false;
-    }
+    //     return false;
+    // }
 
     return true;
 }
@@ -1348,6 +1428,27 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
     result->timestampTz_ = timestampTz;
 
     return result;
+}
+
+void Manager::setCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper)
+{
+    currentAction_ = wrapper;
+}
+
+void Manager::checkAndResetCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper)
+{
+    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper.use_count());
+
+    if (currentAction_ != wrapper) {
+        logArgsError(Q_FUNC_INFO, "action mismatch");
+
+        return;
+    }
+
+    currentAction_.reset();
+    wrapper->method1();
+
+    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper.use_count());
 }
 
 std::shared_ptr<Manager> getManager()

@@ -5,6 +5,7 @@
 #include <QHostAddress>
 
 #include "action.hpp"
+#include "action_wrapper.hpp"
 #include "companion.hpp"
 #include "data.hpp"
 #include "graphic_manager.hpp"
@@ -13,10 +14,22 @@
 #include "manager.hpp"
 #include "utils.hpp"
 
+// void Dialog::setAction(std::shared_ptr<Action> action)
+// {
+//     logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+//     action_ = action;
+//     logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+// }
+
+void Dialog::setWrapper(std::shared_ptr<ActionWrapperBase> wrapper)
+{
+    wrapper_ = wrapper;
+}
+
 void Dialog::actionSlot()
 {
-    action_->act();
-    // wrapper_->act();
+    close();
+    wrapper_->act();
 }
 
 CompanionDataDialog::CompanionDataDialog(
@@ -84,6 +97,15 @@ void CompanionDataDialog::set()
     connect(
         buttonBox_.get(), &QDialogButtonBox::rejected,
         this, &QDialog::reject, Qt::QueuedConnection);
+}
+
+void CompanionDataDialog::method1()
+{
+    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper_.use_count());
+
+    wrapper_.reset();
+
+    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper_.use_count());
 }
 
 std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
@@ -278,7 +300,8 @@ void TextDialog::closeSelfAndParentDialog()
 void TextDialog::acceptAction()
 {
     close();
-    action_->act();
+    // action_->act();
+    wrapper_->act();
 }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()

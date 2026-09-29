@@ -9,8 +9,11 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QMenu>
 #include <QPushButton>
 #include <QTextEdit>
+
+#include "logging.hpp"
 
 class CentralPanelWidget;
 class Companion;
@@ -77,6 +80,13 @@ public:
     virtual void setNewMessagesIndicatorOff() {}
 
     void initializeFields();  // non-virtual because is called from constructor
+};
+
+class Menu : public QMenu
+{
+public:
+    Menu() = default;
+    ~Menu() { logArgsInfo(Q_FUNC_INFO); }
 };
 
 class SocketInfoWidget : public SocketInfoBaseWidget

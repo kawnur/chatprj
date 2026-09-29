@@ -98,14 +98,15 @@ void GraphicManager::createTextDialogAndShow(
 
 void GraphicManager::createCompanion()
 {
-    auto action = std::make_shared<CompanionAction>(ChatActionType::CREATE, nullptr);
-    action->set();
+    // auto action = std::make_shared<CompanionAction>(ChatActionType::CREATE, nullptr);
+    // action->set();
+    getManager()->createCompanion();
 }
 
 void GraphicManager::createGroupChat()
 {
-    auto action = std::make_shared<GroupChatAction>(ChatActionType::CREATE);
-    action->set();
+    // auto action = std::make_shared<GroupChatAction>(ChatActionType::CREATE);
+    // action->set();
 }
 
 void GraphicManager::updateCompanion(std::shared_ptr<Companion> companion)
@@ -131,36 +132,36 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
     action->set();
 }
 
-void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
-{
-    switch (action->getType()) {
-    case ChatActionType::CREATE: {
-        // getManager()->createCompanion(action);
-        auto lambda = [](auto action) { return getManager()->createCompanion(action); };
-        getManager()->performAction(lambda, action);
-    }
+// void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
+// {
+//     switch (action->getType()) {
+//     case ChatActionType::CREATE: {
+//         // getManager()->createCompanion(action);
+//         auto lambda = [](auto action) { return getManager()->createCompanion(action); };
+//         getManager()->performAction(lambda, action);
+//     }
 
-    break;
+//     break;
 
-    case ChatActionType::UPDATE:
-        getManager()->updateCompanion(action);
+//     case ChatActionType::UPDATE:
+//         getManager()->updateCompanion(action);
 
-        break;
+//         break;
 
-    case ChatActionType::DELETE:
-        getManager()->deleteCompanion(action);
+//     case ChatActionType::DELETE:
+//         getManager()->deleteCompanion(action);
 
-        break;
+//         break;
 
-    case ChatActionType::CLEAR_HISTORY:
-        getManager()->clearCompanionHistory(action);
+//     case ChatActionType::CLEAR_HISTORY:
+//         getManager()->clearCompanionHistory(action);
 
-        break;
+//         break;
 
-    default:
-        break;
-    }
-}
+//     default:
+//         break;
+//     }
+// }
 
 void GraphicManager::showCompanionInfoDialog(
     std::shared_ptr<CompanionAction> action, std::string &&header)
@@ -170,28 +171,28 @@ void GraphicManager::showCompanionInfoDialog(
     std::function<void(TextDialog  &)> function;
     // void (QDialog::*function)() = nullptr;
 
-    auto formDialog = action->getDialog();
+    // auto formDialog = action->getDialog();
 
-    if (formDialog) {
-        parent = formDialog;
-        function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
-    }
-    else {
-        // function = &TextDialog::closeSelf;
-        function = [](TextDialog &dialog) { dialog.closeSelf(); };
-    }
+    // if (formDialog) {
+    //     parent = formDialog;
+    //     function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
+    // }
+    // else {
+    //     // function = &TextDialog::closeSelf;
+    //     function = [](TextDialog &dialog) { dialog.closeSelf(); };
+    // }
 
-    createTextDialogAndShow(
-        parent,
-        DialogType::INFO,
-        buildDialogText(
-            std::move(header),
-            std::vector<std::string> {
-                getStringByFormat("name: {}", action->getName()),
-                getStringByFormat("ipAddress: {}", action->getIpAddress()),
-                getStringByFormat("port: {}", action->getClientPort())
-            }),
-        createOkButtonInfoVector(function));
+    // createTextDialogAndShow(
+    //     parent,
+    //     DialogType::INFO,
+    //     buildDialogText(
+    //         std::move(header),
+    //         std::vector<std::string> {
+    //             getStringByFormat("name: {}", action->getName()),
+    //             getStringByFormat("ipAddress: {}", action->getIpAddress()),
+    //             getStringByFormat("port: {}", action->getClientPort())
+    //         }),
+    //     createOkButtonInfoVector(function));
 }
 
 void GraphicManager::sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action)
@@ -260,8 +261,8 @@ void GraphicManager::showInfo()
 
 void GraphicManager::createEntrancePassword()
 {
-    auto action = std::make_shared<PasswordAction>(PasswordActionType::CREATE);
-    action->set();
+    // auto action = std::make_shared<PasswordAction>(PasswordActionType::CREATE);
+    // action->set();
 }
 
 void GraphicManager::enableMainWindowBlurEffect()
@@ -276,8 +277,8 @@ void GraphicManager::disableMainWindowBlurEffect()
 
 void GraphicManager::getEntrancePassword()
 {
-    auto action = std::make_shared<PasswordAction>(PasswordActionType::GET);
-    action->set();
+    // auto action = std::make_shared<PasswordAction>(PasswordActionType::GET);
+    // action->set();
 }
 
 bool GraphicManager::markMessageWidgetAsSent(
@@ -313,14 +314,14 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<Widge
 
 void GraphicManager::sendFile(std::shared_ptr<Companion> companion)
 {
-    auto action = std::make_shared<FileAction>(FileActionType::SEND, "", companion);
-    action->set();
+    // auto action = std::make_shared<FileAction>(FileActionType::SEND, "", companion);
+    // action->set();
 }
 
 void GraphicManager::saveFile(const std::string &networkId, std::shared_ptr<Companion> companion)
 {
-    auto action = std::make_shared<FileAction>(FileActionType::SAVE, networkId, companion);
-    action->set();
+    // auto action = std::make_shared<FileAction>(FileActionType::SAVE, networkId, companion);
+    // action->set();
 }
 
 std::shared_ptr<GraphicManager> getGraphicManager()

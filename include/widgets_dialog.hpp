@@ -23,8 +23,8 @@
 
 using namespace std::string_literals;
 
-class Action;
-// class DialogWrapper;
+// class Action;
+class ActionWrapperBase;
 class Companion;
 class CompanionData;
 class FileAction;
@@ -74,9 +74,10 @@ public:
     virtual void set() {}
     virtual void showDialog() {}
     virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
+    virtual void method1() {}
 
-    void setAction(std::shared_ptr<Action> action) { action_ = action; }
-    // void setWrapper(std::shared_ptr<DialogWrapper> wrapper) { wrapper_ = wrapper; }
+    // void setAction(std::shared_ptr<Action> action);
+    void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
     bool containsDialog() const { return containsDialog_; }
 
 // protected slots:
@@ -85,8 +86,8 @@ public slots:
 
 protected:
     bool containsDialog_ = false;
-    std::shared_ptr<Action> action_;
-    // std::shared_ptr<DialogWrapper> wrapper_;
+    // std::shared_ptr<Action> action_;
+    std::shared_ptr<ActionWrapperBase> wrapper_;
 };
 
 class CompanionDataDialog : public Dialog
@@ -101,6 +102,7 @@ public:
     std::string getIpAddressString();
     std::string getPortString();
     void set() override;
+    void method1() override;
 
     std::shared_ptr<CompanionData> getCompanionData() override;
 

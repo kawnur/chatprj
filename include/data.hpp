@@ -21,6 +21,8 @@ public:
     std::string getServerPort() const;
     std::string getClientPort() const;
 
+    void log();
+
 private:
     std::string name_;
     std::string ipAddress_;
