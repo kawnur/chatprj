@@ -1,6 +1,7 @@
 #include "file_info.hpp"
 
 #include "companion.hpp"
+#include "constants.hpp"
 #include "logging.hpp"
 #include "message.hpp"
 #include "utils.hpp"
@@ -170,7 +171,7 @@ void ReceiverOperator::receiveFilePart(const std::string &value)
 
     for (std::size_t i = 0; i < byteSize; i++) {
         std::string dataString(value.begin() + 2  *i, value.begin() + 2  *i + 2);
-        uint8_t value = std::stoi(dataString, nullptr, 16);
+        uint8_t value = getIntFromString(DATA_BAD_VALUE, dataString, nullptr, 16);
         buf_.sputc(value);
     }
 }

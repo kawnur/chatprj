@@ -64,15 +64,11 @@ public:
     ~Manager();
 
     template<typename F, typename T>
-    // bool performAction(F &&func, std::shared_ptr<T> action)
-    bool performAction(F &&func, std::shared_ptr<T> wrapper)
+    bool performAction(F &&func, std::shared_ptr<T> action)
     {
-        // bool result = func(action);
-        bool result = func(wrapper);
+        bool result = func(action);
 
-        if (!result)
-            // action->failed();
-            wrapper->failed();
+        checkAndResetCurrentAction(action);
 
         return result;
     }
@@ -142,13 +138,16 @@ public:
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
 
-    // void performCompanionAction(std::shared_ptr<CompanionAction> action);
-    void performCompanionAction(std::shared_ptr<ActionWrapperBase> wrapper);
+    void performCompanionAction(std::shared_ptr<CompanionAction> action);
 
     bool createCompanion();
+
+    std::optional<int> pushCompanionToDbAndReturnId(std::shared_ptr<CompanionAction> action);
+    uint16_t getServerPortByCompanionId(const std::optional<int> &id);
+    bool pushSocketToDb(std::shared_ptr<CompanionAction> action, const std::optional<int> &id);
+
     // void createCompanion(std::shared_ptr<CompanionAction> action);
     bool createCompanion(std::shared_ptr<CompanionAction> action);
-    bool createCompanion(std::shared_ptr<ActionWrapperBase> wrapper);
 
     // void updateCompanion(std::shared_ptr<CompanionAction> action);
     void updateCompanion(std::shared_ptr<CompanionAction> action);
@@ -254,13 +253,15 @@ private:
         if (data->isEmpty()) {
             auto entry = getStringByFormat("{}, DB reply is empty", requestData.getLogMark());
             showWarningDialogAndLogWarning(entry);
+
+            return nullptr;
         }
 
         return data;
     }
 
-    void setCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper);
-    void checkAndResetCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper);
+    void setCurrentAction(std::shared_ptr<Action> action);
+    void checkAndResetCurrentAction(std::shared_ptr<Action> action);
 
     // bool initialized_;
     DBRequester dbRequester_;
@@ -273,8 +274,7 @@ private:
         mapCompanionToWidgetGroup_;
 
     std::filesystem::path lastOpenedPath_;
-
-    std::shared_ptr<ActionWrapperBase> currentAction_;
+    std::shared_ptr<Action> currentAction_;
 };
 
 std::shared_ptr<Manager> getManager();

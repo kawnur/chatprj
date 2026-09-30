@@ -3,6 +3,7 @@
 #include "action.hpp"
 #include "chat_client.hpp"
 #include "chat_server.hpp"
+#include "constants.hpp"
 #include "data.hpp"
 #include "db_interaction.hpp"
 #include "file_info.hpp"
@@ -11,6 +12,13 @@
 #include "utils.hpp"
 #include "widgets.hpp"
 #include "widgets_message.hpp"
+
+SocketInfo::SocketInfo(std::shared_ptr<CompanionData> data)
+{
+    ipAddress_ = data->getIpAddress();
+    serverPort_ = getIntFromString(PORT_BAD_VALUE, data->getServerPort());
+    clientPort_ = getIntFromString(PORT_BAD_VALUE, data->getClientPort());
+}
 
 SocketInfo::SocketInfo(const SocketInfo &object)
 {
@@ -37,7 +45,7 @@ uint16_t SocketInfo::getClientPort() const
 void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
 {
     ipAddress_ = data->getIpAddress();
-    clientPort_ = std::stoi(data->getClientPort());
+    clientPort_ = getIntFromString(PORT_BAD_VALUE, data->getClientPort());
 }
 
 Companion::Companion(int id, const std::string &name)
@@ -216,8 +224,8 @@ std::shared_ptr<MessageInfo> Companion::createMessageAndAddToMapping(
 
     auto meta = std::make_shared<MessageMetaData>(
         MessageType::TEXT, NetworkMessageType::UNKNOWN,
-        std::stoi(messagesData->getValue(index, "id")), id, name_,
-        std::stoi(messagesData->getValue(index, "author_id")), "",
+        getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "id")), id, name_,
+        getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "author_id")), "",
         messagesData->getValue(index, "timestamp_tz"), "", generateNetworkId(false));
 
     auto data = std::make_shared<MessageData>(messagesData->getValue(index, "message"), "");

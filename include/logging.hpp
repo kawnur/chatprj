@@ -9,7 +9,7 @@
 #include <QString>
 #include <QTime>
 
-#include "graphic_manager.hpp"
+// #include "graphic_manager.hpp"
 #include "utils.hpp"
 #include "utils_cout.hpp"
 
@@ -30,7 +30,7 @@ void logArgs(Ts &&...args)
 
     ((text += (getStringByFormat("{} ", args))), ...);
 
-    getGraphicManager()->addTextToAppLogWidget(getQString(text));
+    // getGraphicManager()->addTextToAppLogWidget(getQString(text));
     coutArgsWithSpaceSeparator(text);
 }
 

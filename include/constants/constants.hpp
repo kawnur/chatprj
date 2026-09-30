@@ -25,6 +25,10 @@ const float SLEEP_DURATION_INCREASE_RATE = 1.2f;
 
 const std::filesystem::path HOME_PATH("~");
 
+const int PORT_BAD_VALUE = 0;
+const int ID_BAD_VALUE = -1;
+const int DATA_BAD_VALUE = 0;
+
 enum class MessageType
 {
     UNKNOWN,

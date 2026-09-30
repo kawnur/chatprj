@@ -63,6 +63,7 @@ bool validatePort(std::vector<std::string> &errors, const std::string &port)
     bool result = false;
     std::string errorMessage { "port number must be greater than 0 and lower than 65536" };
 
+    // TODO use util
     try {
         long long portNumber = std::stoll(port, nullptr, 10);
 

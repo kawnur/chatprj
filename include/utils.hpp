@@ -237,6 +237,27 @@ std::optional<T> runAndReturnOptionalResult(F &&func, Ts&&... args)
     }
 }
 
+template<typename T, typename F, typename... Ts>
+T runAndReturnResultOrDefaultValue(F &&func, const T &defaultValue, Ts &&...args)
+{
+    try {
+        return func(args...);
+    }
+    catch(const std::exception &e) {
+        logArgsException(e.what());
+
+        return defaultValue;
+    }
+}
+
+template<typename...Ts>
+int getIntFromString(const int &defaultValue, Ts &&...args)
+{
+    auto lambda = [&](auto &&...args) { return std::stoi(args...); };
+
+    return runAndReturnResultOrDefaultValue<int>(lambda, defaultValue, args...);
+}
+
 // TODO get rid of T template parameter
 template<typename T, typename F, typename... Ts>
 std::shared_ptr<T> runAndReturnSharedPtr(F &&func, Ts&&... args)

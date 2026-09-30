@@ -92,7 +92,7 @@ void GraphicManager::createTextDialogAndShow(
     // TODO delete objects for closed dialoges?
     auto dialog = std::make_shared<TextDialog>(parent, type, text, buttonInfo);
 
-    dialog->set();
+    // dialog->set();
     dialog->show();
 }
 

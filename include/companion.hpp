@@ -41,6 +41,7 @@ public:
         : ipAddress_(std::forward<T>(ipAddress)), serverPort_(std::forward<U>(serverPort)),
         clientPort_(std::forward<P>(clientPort)) {}
 
+    SocketInfo(std::shared_ptr<CompanionData> data);
     SocketInfo(const SocketInfo &object);
     SocketInfo(SocketInfo &&object) = default;
     ~SocketInfo() = default;

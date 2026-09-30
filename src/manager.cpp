@@ -453,7 +453,9 @@ bool Manager::pushMessageHistoryToDb(
     // TODO wrap in util
 
     for (std::size_t i = 0; i < data["messages"].size(); i++) {
-        uint8_t authorId = std::stoi(data["messages"][i]["author_id"].get<std::string>());
+        uint8_t authorId =
+            getIntFromString(ID_BAD_VALUE, data["messages"][i]["author_id"].get<std::string>());
+
         authorId = (authorId == 1) ? companion->getId() : 1;
         std::string timestamp = data["messages"][i]["timestamp_tz"];
         std::string text = data["messages"][i]["message"];
@@ -669,20 +671,13 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // T
     }
 }
 
-// void Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
-void Manager::performCompanionAction(std::shared_ptr<ActionWrapperBase> wrapper)
+void Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
 {
-    // logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
-
-    // std::function<bool(std::shared_ptr<CompanionAction>)> lambda;
-    std::function<bool(std::shared_ptr<ActionWrapperBase>)> lambda;
-
-    auto action = wrapper->getAction();
+    std::function<bool(std::shared_ptr<CompanionAction>)> lambda;
 
     switch (action->getType()) {
     case ChatActionType::CREATE:
-        // lambda = [=, this](auto action) { return createCompanion(action); };
-        lambda = [=, this](auto wrapper) { return createCompanion(wrapper); };
+        lambda = [=, this](auto action) { return createCompanion(action); };
 
     break;
 
@@ -705,28 +700,16 @@ void Manager::performCompanionAction(std::shared_ptr<ActionWrapperBase> wrapper)
         break;
     }
 
-    // bool result = performAction(lambda, action);
-    bool result = performAction(lambda, wrapper);
-
-    if (result)
-        checkAndResetCurrentAction(wrapper);
-
-    // logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+    bool result = performAction(lambda, action);
 }
 
 bool Manager::createCompanion()
 {
-    // auto action = std::make_shared<CompanionAction>(ChatActionType::CREATE, nullptr);
-    using Wrapper = ActionWrapper<CompanionAction, ChatActionType, std::shared_ptr<Companion>>;
-    auto wrapper = std::make_shared<Wrapper>(ChatActionType::CREATE, nullptr);
-    // logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+    auto action = std::make_shared<CompanionAction>(ChatActionType::CREATE, nullptr);
 
-    setCurrentAction(std::dynamic_pointer_cast<ActionWrapperBase>(wrapper));
+    setCurrentAction(std::dynamic_pointer_cast<Action>(action));
 
-    // action->set();
-    wrapper->set();
-
-    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper.use_count());
+    action->set();
 
     return true;
 
@@ -742,54 +725,61 @@ bool Manager::createCompanion()
 
 }
 
-// void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
-// bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
-bool Manager::createCompanion(std::shared_ptr<ActionWrapperBase> wrapper)
+std::optional<int> Manager::pushCompanionToDbAndReturnId(std::shared_ptr<CompanionAction> action)
 {
-    auto action = std::dynamic_pointer_cast<CompanionAction>(wrapper->getAction());
+    auto data = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, action->getName());
 
-    logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
+    if (!data)
+        return std::nullopt;
+
+    auto result = getIntFromString(ID_BAD_VALUE, data->getValue(0, "id"));
+
+    return (result == ID_BAD_VALUE) ? std::nullopt : std::optional<int>(result);
+}
+
+uint16_t Manager::getServerPortByCompanionId(const std::optional<int> &id)
+{
+    uint16_t serverPort = 5000 + id.value() + 1;  // TODO change
+
+    return serverPort;
+}
+
+bool Manager::pushSocketToDb(std::shared_ptr<CompanionAction> action, const std::optional<int> &id)
+{
+    auto data = getDBData(
+        DBRequestType::PUSH_SOCKET_AND_RETURN, action->getName(), action->getIpAddress(),
+        getServerPortByCompanionId(id), action->getClientPort());
+
+    return (data) ? true : false;
+}
+
+// void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+{
+    // TODO move to validator
     // data validation and checking
     if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
         // return;
         return false;
 
-    auto name = action->getName();
-    auto ipAddress = action->getIpAddress();
-    auto clientPortStr = action->getClientPort();
-
     // push companion data to db
-    auto companionIdData = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, name);
+    auto id = pushCompanionToDbAndReturnId(action);
 
-    if (!companionIdData || companionIdData->isEmpty())
-        // return;
+    if (!id)
         return false;
 
-    int id = std::stoi(companionIdData->getValue(0, "id"));
-
     // push socket data to db
-    uint16_t serverPort = 5000 + id + 1;  // TODO change
-
-    auto socketData = getDBData(
-        DBRequestType::PUSH_SOCKET_AND_RETURN, name, ipAddress, std::to_string(serverPort),
-        clientPortStr);
-
-    if (!socketData || socketData->isEmpty())
-        // return;
+    if (!pushSocketToDb(action, id))
         return false;
 
     // create companion object
-    auto companion = addCompanionObject(id, name);
+    auto companion = addCompanionObject(id.value(), action->getName());
 
-    if (!companion) {
-        logArgsError("companion is nullptr");
-
-        // return;
+    if (!companion)
         return false;
-    }
 
     // create socketInfo object
-    auto socketInfo = std::make_shared<SocketInfo>(ipAddress, serverPort, std::stoi(clientPortStr));
+    auto socketInfo = std::make_shared<SocketInfo>(action->getCompanionData());
 
     companion->setSocketInfo(socketInfo);
 
@@ -798,8 +788,6 @@ bool Manager::createCompanion(std::shared_ptr<ActionWrapperBase> wrapper)
 
     // show info dialog
     getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
-
-    logArgsInfo(Q_FUNC_INFO, "action.use_count():", action.use_count());
 
     return true;
 }
@@ -971,7 +959,7 @@ void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
         return;
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
-        uint32_t messageId = std::stoi(messagesData->getValue(i, "id"));
+        uint32_t messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
         auto message = companion->findMessage(messageId);
         std::string networkId;
 
@@ -1087,7 +1075,7 @@ void Manager::fillCompanionMessageMapping(
         return;
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
-        auto messageId = std::stoi(messagesData->getValue(i, "id"));
+        auto messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
 
         if (containersNotEmpty) {
             auto info = companion->getMessageInfoByMessageId(messageId);
@@ -1122,7 +1110,7 @@ bool Manager::buildCompanions()
     // std::ranges::sort(companionsData->getData(), lambda);
 
     for (std::size_t index = 0; index < companionsData->size(); index++) {  // TODO switch to iterators
-        int id = std::stoi(companionsData->getValue(index, "id"));
+        int id = getIntFromString(ID_BAD_VALUE, companionsData->getValue(index, "id"));
 
         // create companion object
         auto companion = addCompanionObject(id, companionsData->getValue(index, "name"));
@@ -1142,8 +1130,8 @@ bool Manager::buildCompanions()
         // TODO use port number pool
         auto socketInfo = std::make_shared<SocketInfo>(
             socketsData->getValue(0, "ipaddress"),
-            std::stoi(socketsData->getValue(0, "server_port")),
-            std::stoi(socketsData->getValue(0, "client_port")));
+            getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "server_port")),
+            getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "client_port")));
 
         companion->setSocketInfo(socketInfo);
 
@@ -1197,7 +1185,13 @@ std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string
     auto value = std::pair(companion, group);
     auto result = mapCompanionToWidgetGroup_.emplace(id, value);
 
-    return (result.second) ? result.first->second.first : nullptr;
+    if (!result.second) {
+        logArgsError("companion is nullptr");
+
+        return nullptr;
+    }
+
+    return result.first->second.first;
 }
 
 void Manager::createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion)
@@ -1412,8 +1406,8 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
     if (!messageData || messageData->isEmpty())
         return nullptr;
 
-    uint32_t id = std::stoi(messageData->getValue(0, "id"));
-    uint8_t companionId = std::stoi(messageData->getValue(0, "companion_id"));
+    uint32_t id = getIntFromString(ID_BAD_VALUE, messageData->getValue(0, "id"));
+    uint8_t companionId = getIntFromString(ID_BAD_VALUE, messageData->getValue(0, "companion_id"));
     std::string timestampTz { messageData->getValue(0, "timestamp_tz") };
 
     if (LOG_DB_INTERACTION)
@@ -1430,25 +1424,21 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
     return result;
 }
 
-void Manager::setCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper)
+void Manager::setCurrentAction(std::shared_ptr<Action> action)
 {
-    currentAction_ = wrapper;
+    currentAction_ = action;
 }
 
-void Manager::checkAndResetCurrentAction(std::shared_ptr<ActionWrapperBase> wrapper)
+void Manager::checkAndResetCurrentAction(std::shared_ptr<Action> action)
 {
-    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper.use_count());
-
-    if (currentAction_ != wrapper) {
+    if (currentAction_ != action) {
         logArgsError(Q_FUNC_INFO, "action mismatch");
 
         return;
     }
 
-    currentAction_.reset();
-    wrapper->method1();
-
-    logArgsInfo(Q_FUNC_INFO, "wrapper.use_count():", wrapper.use_count());
+    // currentAction_.reset();
+    currentAction_ = nullptr;
 }
 
 std::shared_ptr<Manager> getManager()
