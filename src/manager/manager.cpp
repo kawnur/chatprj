@@ -14,7 +14,7 @@
 using namespace std::string_literals;
 
 Manager::Manager()
-    : /*initialized_(false), */dbRequester_(LOG_DB_INTERACTION),
+    : /*initialized_(false), */dbRequester_(LOG_DB_INTERACTION), validator_(),
     messageStateToMessageMapMutex_(), dbConnection_(nullptr),
     userIsAuthenticated_(false), selectedCompanion_(nullptr), mapCompanionToWidgetGroup_(),
     lastOpenedPath_(HOME_PATH) {}
@@ -765,6 +765,10 @@ std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<Companion
     // if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
     //     return;
     //     return false;
+    auto validationResult = validator_.validate<CompanionAction>(action);
+
+    if (!validationResult->status())
+        return validationResult;
 
     // push companion data to db
     auto idResult = pushCompanionToDbAndReturnId(action);
@@ -798,19 +802,14 @@ std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<Companion
     // add companion and widget group to mapping
     createWidgetGroupAndAddToMapping(companion);
 
-    // show info dialog
-    // getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
-    // // post-action
-    // action->postAct();
-
     return std::make_shared<ActionResult>(true, ""s);
 }
 
 void Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
 {
     // data validation and checking
-    if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtUpdate(action)))
-        return;
+    // if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtUpdate(action)))
+    //     return;
 
     // update companion data at db
     auto companionIdData = getDBData(
@@ -1272,35 +1271,35 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> c
     }
 }
 
-bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> action)
-{
-    std::vector<std::string> validationErrors {};
+// bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> action)
+// {
+//     std::vector<std::string> validationErrors {};
 
-    bool validationResult = validateCompanionData(validationErrors, action);
+//     bool validationResult = validateCompanionData(validationErrors, action);
 
-    if (!validationResult) {
-        showErrorDialogAndLogError(buildDialogText("Error messages:\n\n", validationErrors));
+//     if (!validationResult) {
+//         showErrorDialogAndLogError(buildTextAsUnorderedListWithHeader("Error messages", validationErrors));
 
-        return false;
-    }
+//         return false;
+//     }
 
-    return true;
-}
+//     return true;
+// }
 
-bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> action)
-{
-    // std::vector<std::string> validationErrors {};
+// bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> action)
+// {
+//     std::vector<std::string> validationErrors {};
 
-    // bool validationResult = validatePassword(validationErrors, action->getPassword());
+//     bool validationResult = validatePassword(validationErrors, action->getPassword());
 
-    // if (!validationResult) {
-    //     showErrorDialogAndLogError(buildDialogText("Error messages:\n\n", validationErrors));
+//     if (!validationResult) {
+//         showErrorDialogAndLogError(buildTextAsUnorderedListWithHeader("Error messages", validationErrors));
 
-    //     return false;
-    // }
+//         return false;
+//     }
 
-    return true;
-}
+//     return true;
+// }
 
 bool Manager::checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> action)
 {

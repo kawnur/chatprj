@@ -173,8 +173,8 @@ private:
     MessageMapping messageMapping_;
 };
 
-bool validateCompanionData(
-    std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action);
+// bool validateCompanionData(
+//     std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action);
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);

@@ -167,14 +167,14 @@ void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
             { "port: {}", data_->getClientPort() }
         };
 
-        header = "New companion added:";
+        header = "New companion added";
         fillMessages(messages, lines);
     } else {
-        header = "Companion addition error:";
+        header = "Companion addition error";
         messages.push_back(result->definition());
     }
 
-    text = buildDialogText(header, messages);
+    text = buildTextAsUnorderedListWithHeader(header, messages);
     infoDialog_->setText(text);
 }
 

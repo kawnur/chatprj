@@ -472,19 +472,19 @@ std::string Companion::generateNetworkId(bool lock)
     return networkId;
 }
 
-bool validateCompanionData(
-    std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action)
-{
-    bool nameValidationResult = validateCompanionName(errors, action->getName());
-    bool ipAddressValidationResult = validateIpAddress(errors, action->getIpAddress());
-    bool portValidationResult = validatePort(errors, action->getClientPort());
+// bool validateCompanionData(
+//     std::vector<std::string> &errors, std::shared_ptr<CompanionAction> action)
+// {
+//     bool nameValidationResult = validateCompanionName(errors, action->getName());
+//     bool ipAddressValidationResult = validateIpAddress(errors, action->getIpAddress());
+//     bool portValidationResult = validatePort(errors, action->getClientPort());
 
-    bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
+//     bool result = nameValidationResult && ipAddressValidationResult && portValidationResult;
 
-    logArgs("validateCompanionData result:", result);
+//     logArgs("validateCompanionData result:", result);
 
-    return result;
-}
+//     return result;
+// }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)

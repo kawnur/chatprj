@@ -16,6 +16,7 @@
 #include "constants.hpp"
 #include "db_constants.hpp"
 #include "db_interaction.hpp"
+#include "validator.hpp"
 #include "utils.hpp"
 
 class Action;
@@ -36,6 +37,7 @@ class MessageState;
 class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
+// class Validator;
 
 using CompanionResult = ActionSharedValueResult<Companion>;
 
@@ -187,8 +189,8 @@ private:
     void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion);
     void deleteCompanionObject(std::shared_ptr<Companion> companion);
     void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
-    bool companionDataValidation(std::shared_ptr<CompanionAction> action);
-    bool passwordDataValidation(std::shared_ptr<PasswordAction> action);
+    // bool companionDataValidation(std::shared_ptr<CompanionAction> action);
+    // bool passwordDataValidation(std::shared_ptr<PasswordAction> action);
     bool checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> action);
     bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> action);
 
@@ -288,6 +290,7 @@ private:
 
     // bool initialized_;
     DBRequester dbRequester_;
+    Validator validator_;
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;

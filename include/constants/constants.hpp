@@ -34,6 +34,10 @@ const std::string DB_REPLY_EMPTY { "DB reply is empty" };
 const std::string VALUE_BUILDING_ERROR { "Value building error" };
 const std::string POINTER_CASTING_ERROR { "Pointer casting error" };
 
+// validation
+const std::size_t COMPANION_NAME_SIZE_LIMIT = 30;
+const std::size_t PASSWORD_SIZE_LIMIT = 30;
+
 enum class MessageType
 {
     UNKNOWN,
