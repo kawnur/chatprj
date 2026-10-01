@@ -151,7 +151,10 @@ public:
     bool sendFileBlock(const std::string &networkId, const std::string &data);
     void updateData(std::shared_ptr<CompanionData> data);
     std::shared_ptr<Message> findMessage(uint32_t messageId);
+
     void addMessageWidgetsToChatHistory();
+    void addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group);
+
     void clearMessageMapping();
 
     void addReceiverOperator(

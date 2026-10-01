@@ -85,25 +85,22 @@ std::string CompanionDataDialog::getPortString()
     return portEdit_->text().toStdString();
 }
 
-// void CompanionDataDialog::set()
 void CompanionDataDialog::set(std::shared_ptr<Action> action)
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
-        // action_.get(), &Action::sendData, Qt::QueuedConnection);
-        // action_.get(), &Action::act, Qt::QueuedConnection);
         action.get(), &Action::act, Qt::QueuedConnection);
-        // this, &Dialog::actionSlot, Qt::QueuedConnection);
 
     connect(
         buttonBox_.get(), &QDialogButtonBox::rejected,
-        this, &QDialog::reject, Qt::QueuedConnection);
-}
+        action.get(), &Action::endAct, Qt::QueuedConnection);
 
-// void CompanionDataDialog::method1()
-// {
-//     wrapper_.reset();
-// }
+    // close button
+    connect(
+        this, &QDialog::rejected,
+        action.get(), &Action::endAct, Qt::QueuedConnection);
+
+}
 
 std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
 {
@@ -130,7 +127,6 @@ GroupChatDataDialog::GroupChatDataDialog(ChatActionType type, std::shared_ptr<QW
     layout_->addWidget(list_.get());
 }
 
-// void GroupChatDataDialog::set() {}
 void GroupChatDataDialog::set(std::shared_ptr<Action> action) {}
 
 CreatePasswordDialog::CreatePasswordDialog()
@@ -163,9 +159,7 @@ void CreatePasswordDialog::set(std::shared_ptr<Action> action)
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
-        // action_.get(), &Action::act, Qt::QueuedConnection);
         action.get(), &Action::act, Qt::QueuedConnection);
-        // this, &Dialog::actionSlot, Qt::QueuedConnection);
 }
 
 std::string CreatePasswordDialog::getFirstEditText()
@@ -199,14 +193,11 @@ GetPasswordDialog::GetPasswordDialog()
     layout_->addWidget(buttonBox_.get());
 }
 
-// void GetPasswordDialog::set()
 void GetPasswordDialog::set(std::shared_ptr<Action> action)
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
-        // action_.get(), &Action::act, Qt::QueuedConnection);
         action.get(), &Action::act, Qt::QueuedConnection);
-        // this, &Dialog::actionSlot, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText()
@@ -224,6 +215,11 @@ QString ButtonInfo::getText()
     return text_;
 }
 
+QDialogButtonBox::ButtonRole ButtonInfo::getRole()
+{
+    return role_;
+}
+
 std::function<void(TextDialog  &)> ButtonInfo::getFunction()
 {
     return function_;
@@ -233,14 +229,24 @@ TextDialog::TextDialog(
     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 {
+    // parent
     if (parent)
         setParent(parent.get());
     else
         setParent(getGraphicManager()->getMainWindow().get());
 
+    // modality
     setModal(true);
+
+    // flags
     setWindowFlag(Qt::Window);
+    // setWindowFlags(windowFlags() & Qt::CustomizeWindowHint & ~Qt::WindowCloseButtonHint);
+    // setWindowFlags(windowFlags() & ~Qt::WindowCloseButtonHint);
+
+    // title
     setWindowTitle(getQString(getMapValue(dialogTypeStringRepresentation, type, "UNKNOWN"s)));
+
+    // set fields
     layout_ = std::make_unique<QVBoxLayout>();
     setLayout(layout_.get());
 
@@ -250,34 +256,32 @@ TextDialog::TextDialog(
     layout_->addWidget(textEdit_.get());
 
     // set button box
-    buttonBox_ = std::make_unique<QDialogButtonBox>();
+    buttonBox_ = std::make_shared<QDialogButtonBox>();
     layout_->addWidget(buttonBox_.get());
 
     buttonsInfo_ = buttonsInfo;
 }
 
-// void TextDialog::set()
 void TextDialog::set(std::shared_ptr<Action> action)
 {
-    // for (auto &info : *buttonsInfo_) {
-    //     std::shared_ptr<QPushButton> button = buttonBox_->addButton(
-    //         info.buttonText_, info.buttonRole_);
+    for (auto &info : *buttonsInfo_) {
+        auto role = info.getRole();
+        auto function = info.getFunction();
+        buttons_.emplace_back(buttonBox_->addButton(info.getText(), role));
+    }
 
-    //     // TODO create mapping and select signal by role
-    //     if (info.buttonRole_ == QDialogButtonBox::AcceptRole) {
-    //         connect(
-    //             buttonBox_, &QDialogButtonBox::accepted,
-    //             this, info.function_, Qt::QueuedConnection);
-    //     }
-    //     else if (info.buttonRole_ == QDialogButtonBox::RejectRole) {
-    //         connect(
-    //             buttonBox_, &QDialogButtonBox::rejected,
-    //             this, info.function_, Qt::QueuedConnection);
-    //     }
-    //     else {
-    //         showErrorDialogAndLogError("Unmanaged button role");
-    //     }
-    // }
+    connect(
+        buttonBox_.get(), &QDialogButtonBox::accepted,
+        action.get(), &Action::endAct, Qt::QueuedConnection);
+
+    connect(
+        buttonBox_.get(), &QDialogButtonBox::rejected,
+        action.get(), &Action::endAct, Qt::QueuedConnection);
+
+    // close button
+    connect(
+        this, &QDialog::rejected,
+        action.get(), &Action::endAct, Qt::QueuedConnection);
 }
 
 void TextDialog::closeSelf()
@@ -305,6 +309,11 @@ void TextDialog::acceptAction()
     close();
     // action_->act();
     // wrapper_->act();
+}
+
+void TextDialog::setText(const std::string &text)
+{
+    textEdit_->setPlainText(getQString(text));
 }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()

@@ -12,12 +12,18 @@
 #include <QString>
 #include <QWidget>
 
+#include "action.hpp"
 #include "constants.hpp"
 #include "db_constants.hpp"
 #include "db_interaction.hpp"
 #include "utils.hpp"
 
 class Action;
+class ActionResult;
+
+template<typename T>
+class ActionSharedValueResult;
+
 class Companion;
 class CompanionAction;
 class DBReplyData;
@@ -30,6 +36,8 @@ class MessageState;
 class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
+
+using CompanionResult = ActionSharedValueResult<Companion>;
 
 int getDataFromDBResult(
     bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result, int maxTuples);
@@ -64,11 +72,10 @@ public:
     ~Manager();
 
     template<typename F, typename T>
-    bool performAction(F &&func, std::shared_ptr<T> action)
+    std::shared_ptr<ActionResult> performAction(F &&func, std::shared_ptr<T> action)
     {
-        bool result = func(action);
-
-        checkAndResetCurrentAction(action);
+        auto result = func(action);
+        action->postAct(result);
 
         return result;
     }
@@ -138,16 +145,16 @@ public:
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
 
-    void performCompanionAction(std::shared_ptr<CompanionAction> action);
+    std::shared_ptr<ActionResult> performCompanionAction(std::shared_ptr<CompanionAction> action);
 
     bool createCompanion();
 
-    std::optional<int> pushCompanionToDbAndReturnId(std::shared_ptr<CompanionAction> action);
-    uint16_t getServerPortByCompanionId(const std::optional<int> &id);
-    bool pushSocketToDb(std::shared_ptr<CompanionAction> action, const std::optional<int> &id);
+    std::shared_ptr<ActionResult> pushCompanionToDbAndReturnId(
+        std::shared_ptr<CompanionAction> action);
 
-    // void createCompanion(std::shared_ptr<CompanionAction> action);
-    bool createCompanion(std::shared_ptr<CompanionAction> action);
+    uint16_t getServerPortByCompanionId(int id);
+    std::shared_ptr<ActionResult> pushSocketToDb(std::shared_ptr<CompanionAction> action, int id);
+    std::shared_ptr<ActionResult> createCompanion(std::shared_ptr<CompanionAction> action);
 
     // void updateCompanion(std::shared_ptr<CompanionAction> action);
     void updateCompanion(std::shared_ptr<CompanionAction> action);
@@ -165,6 +172,7 @@ public:
     // bool isInitialised();
     std::filesystem::path getLastOpenedPath();
     void setLastOpenedPath(const std::filesystem::path &path);
+    void endAction(std::shared_ptr<Action> action);
 
 private:
 
@@ -175,6 +183,7 @@ private:
     bool buildCompanions();
     void buildWidgetGroups();
     std::shared_ptr<Companion> addCompanionObject(int id, const std::string &name);
+    std::shared_ptr<CompanionResult> getCompanionAdditionResult(int id, const std::string &name);
     void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion);
     void deleteCompanionObject(std::shared_ptr<Companion> companion);
     void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
@@ -244,20 +253,34 @@ private:
         auto data = dbRequester_.getDBData(requestData, args...);
 
         if (!data) {
-            auto entry = getStringByFormat("{}, DB interaction error", requestData.getLogMark());
+            auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_NULL);
             showErrorDialogAndLogError(entry);
 
             return nullptr;
         }
 
         if (data->isEmpty()) {
-            auto entry = getStringByFormat("{}, DB reply is empty", requestData.getLogMark());
+            auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_EMPTY);
             showWarningDialogAndLogWarning(entry);
 
-            return nullptr;
+            // return nullptr;
         }
 
         return data;
+    }
+
+    template<typename... Ts>
+    std::shared_ptr<ActionResult> getActionResult(Ts &&...args)
+    {
+        auto data = getDBData(args...);
+
+        if (!data)
+            return std::make_shared<ActionResult>(false, DB_REPLY_NULL);
+
+        if (data->isEmpty())
+            return std::make_shared<ActionResult>(false, DB_REPLY_EMPTY);
+
+        return std::make_shared<ActionResult>(true, ""s);
     }
 
     void setCurrentAction(std::shared_ptr<Action> action);

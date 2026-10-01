@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "logging.hpp"
+
 class Companion;
 
 class CompanionData
@@ -14,7 +16,7 @@ public:
         const std::string &name, const std::string &ipAddress, const std::string &serverPort,
         const std::string &clientPort);
 
-    ~CompanionData() = default;
+    ~CompanionData() { logArgsInfo(Q_FUNC_INFO); }
 
     std::string getName() const;
     std::string getIpAddress() const;

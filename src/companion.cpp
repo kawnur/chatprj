@@ -416,12 +416,17 @@ std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
 
 void Companion::addMessageWidgetsToChatHistory()
 {
-    auto widgetGroup = getManager()->getMappedWidgetGroupByCompanion(shared_from_this());
+    auto group = getManager()->getMappedWidgetGroupByCompanion(shared_from_this());
 
+    addMessageWidgetsToChatHistory(group);
+}
+
+void Companion::addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group)
+{
     std::lock_guard<std::mutex> lock(mutex_);
 
     for (auto &iterator : messageMapping_)
-        widgetGroup->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
+        group->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
 }
 
 void Companion::clearMessageMapping()

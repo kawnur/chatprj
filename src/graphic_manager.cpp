@@ -163,37 +163,37 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 //     }
 // }
 
-void GraphicManager::showCompanionInfoDialog(
-    std::shared_ptr<CompanionAction> action, std::string &&header)
-{
-    std::shared_ptr<QWidget> parent = nullptr;
-    // void (TextDialog::*function)() = nullptr;
-    std::function<void(TextDialog  &)> function;
-    // void (QDialog::*function)() = nullptr;
+// void GraphicManager::showCompanionInfoDialog(
+//     std::shared_ptr<CompanionAction> action, std::string &&header)
+// {
+//     std::shared_ptr<QWidget> parent = nullptr;
+//     // void (TextDialog::*function)() = nullptr;
+//     std::function<void(TextDialog  &)> function;
+//     // void (QDialog::*function)() = nullptr;
 
-    // auto formDialog = action->getDialog();
+//     auto formDialog = action->getDialog();
 
-    // if (formDialog) {
-    //     parent = formDialog;
-    //     function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
-    // }
-    // else {
-    //     // function = &TextDialog::closeSelf;
-    //     function = [](TextDialog &dialog) { dialog.closeSelf(); };
-    // }
+//     if (formDialog) {
+//         parent = formDialog;
+//         function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
+//     }
+//     else {
+//         // function = &TextDialog::closeSelf;
+//         function = [](TextDialog &dialog) { dialog.closeSelf(); };
+//     }
 
-    // createTextDialogAndShow(
-    //     parent,
-    //     DialogType::INFO,
-    //     buildDialogText(
-    //         std::move(header),
-    //         std::vector<std::string> {
-    //             getStringByFormat("name: {}", action->getName()),
-    //             getStringByFormat("ipAddress: {}", action->getIpAddress()),
-    //             getStringByFormat("port: {}", action->getClientPort())
-    //         }),
-    //     createOkButtonInfoVector(function));
-}
+//     createTextDialogAndShow(
+//         parent,
+//         DialogType::INFO,
+//         buildDialogText(
+//             std::move(header),
+//             std::vector<std::string> {
+//                 getStringByFormat("name: {}", action->getName()),
+//                 getStringByFormat("ipAddress: {}", action->getIpAddress()),
+//                 getStringByFormat("port: {}", action->getClientPort())
+//             }),
+//         createOkButtonInfoVector(function));
+// }
 
 void GraphicManager::sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action)
 {

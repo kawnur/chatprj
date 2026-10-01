@@ -10,6 +10,7 @@
 #include "manager.hpp"
 #include "widgets_dialog.hpp"
 
+class ActionResult;
 class Companion;
 class CompanionData;
 class GroupChatData;
@@ -25,13 +26,19 @@ public:
     virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
     void setDialog(std::shared_ptr<Action> action);
 
+    virtual void buildDataDialog() {}
+    virtual void buildInfoDialog() {}
+
     virtual void set() {}
     virtual void act() {}
+    virtual void postAct(std::shared_ptr<ActionResult> result) {}
+    virtual void endAct() {}
 
     virtual ChatActionType getType() { return ChatActionType::UNKNOWN; }
 
 protected:
-    std::shared_ptr<Dialog> dialog_;
+    std::shared_ptr<Dialog> dataDialog_;
+    std::shared_ptr<TextDialog> infoDialog_;
 };
 
 class RegularAction : public Action
@@ -53,6 +60,9 @@ public:
     CompanionAction(ChatActionType type, std::shared_ptr<Companion> companion);
     ~CompanionAction();
 
+    void buildDataDialog() override;
+    void buildInfoDialog() override;
+
     ChatActionType getType() override;
     std::string getName() const;
     std::string getIpAddress() const;
@@ -65,9 +75,12 @@ public:
     void set() override;
 
     void updateCompanionObjectData();
+    void updateInfoDialog(std::shared_ptr<ActionResult> result);
 
 public slots:
     void act() override;
+    void postAct(std::shared_ptr<ActionResult> result) override;
+    void endAct() override;
 
 private:
     ChatActionType type_;
@@ -128,5 +141,8 @@ private:
     std::shared_ptr<Companion> companion_;
     std::string networkId_;
 };
+
+void fillMessages(
+    std::vector<std::string> &messages, std::vector<std::pair<std::string, std::string>> lines);
 
 #endif // ACTION_HPP

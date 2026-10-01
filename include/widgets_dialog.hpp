@@ -15,6 +15,7 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPlainTextEdit>
+#include <QPushButton>
 #include <QString>
 
 #include "constants.hpp"
@@ -76,7 +77,7 @@ public:
     virtual void set(std::shared_ptr<Action> action) {}
     virtual void showDialog() {}
     virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
-    virtual void method1() {}
+    // virtual void method1() {}
 
     // void setAction(std::shared_ptr<Action> action);
     // void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
@@ -195,12 +196,12 @@ public:
     QDialogButtonBox::ButtonRole getRole();
 
     // void (TextDialog::*function_)();
-    std::function<void(TextDialog  &)> getFunction();
+    std::function<void(TextDialog &)> getFunction();
 
 private:
     QString text_;
     QDialogButtonBox::ButtonRole role_;
-    std::function<void(TextDialog  &)> function_;
+    std::function<void(TextDialog &)> function_;
 };
 
 class TextDialog : public Dialog
@@ -219,6 +220,7 @@ public:
     void closeSelf();
     void closeSelfAndParentDialog();
     void acceptAction();
+    void setText(const std::string &text);
 
 public slots:
     void unsetMainWindowBlurAndCloseDialogs();
@@ -227,8 +229,10 @@ public slots:
 private:
     std::unique_ptr<QPlainTextEdit> textEdit_;
     std::unique_ptr<QVBoxLayout> layout_;
-    std::unique_ptr<QDialogButtonBox> buttonBox_;
+    // std::unique_ptr<QDialogButtonBox> buttonBox_;
+    std::shared_ptr<QDialogButtonBox> buttonBox_;
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
+    std::vector<std::unique_ptr<QPushButton>> buttons_;
 };
 
 class FileDialog : public Dialog
@@ -250,36 +254,37 @@ private:
     std::shared_ptr<QFileDialog> dialog_;
 };
 
-template<class T>
-void setButtonBox(
-    std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
-    std::vector<ButtonInfo> *infoVector)
-{
-    const std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
-        { QDialogButtonBox::ButtonRole::AcceptRole, &QDialogButtonBox::accepted },
-        { QDialogButtonBox::ButtonRole::RejectRole, &QDialogButtonBox::rejected }
-    };
+// template<class T>
+// void setButtonBox(
+//     std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
+//     std::vector<ButtonInfo> *infoVector, std::vector<std::unique_ptr<QPushButton>> &buttons)
+// {
+//     const std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
+//         { QDialogButtonBox::ButtonRole::AcceptRole, &QDialogButtonBox::accepted },
+//         { QDialogButtonBox::ButtonRole::RejectRole, &QDialogButtonBox::rejected }
+//     };
 
-    for (auto &info : *infoVector) {
-        auto role = info.getRole();
-        auto function = info.getFunction();
-        auto button = buttonBox->addButton(info.getText(), role);
+//     for (auto &info : *infoVector) {
+//         auto role = info.getRole();
+//         auto function = info.getFunction();
+//         // auto button = buttonBox->addButton(info.getText(), role);
+//         buttons.emplace_back(buttonBox->addButton(info.getText(), role));
 
-        auto connectLambda = [&]()
-        {
-            QObject::connect(
-                buttonBox.get(), signalMap.at(role), dialog, function, Qt::QueuedConnection);
-        };
+//         auto connectLambda = [&]()
+//         {
+//             QObject::connect(
+//                 buttonBox.get(), signalMap.at(role), dialog, function, Qt::QueuedConnection);
+//         };
 
-        auto handlerLambda = [&](const std::exception &e)
-        {
-            if (dynamic_cast<const std::out_of_range *>(&e))
-                showErrorDialogAndLogError("Unmanaged button role"s);
-        };
+//         auto handlerLambda = [&](const std::exception &e)
+//         {
+//             if (dynamic_cast<const std::out_of_range *>(&e))
+//                 showErrorDialogAndLogError("Unmanaged button role"s);
+//         };
 
-        runAndHandleException(connectLambda, handlerLambda, role);
-    }
-}
+//         runAndHandleException(connectLambda, handlerLambda, role);
+//     }
+// }
 
 std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
     std::function<void(TextDialog &)> function);

@@ -29,6 +29,11 @@ const int PORT_BAD_VALUE = 0;
 const int ID_BAD_VALUE = -1;
 const int DATA_BAD_VALUE = 0;
 
+const std::string DB_REPLY_NULL { "DB interaction error" };
+const std::string DB_REPLY_EMPTY { "DB reply is empty" };
+const std::string VALUE_BUILDING_ERROR { "Value building error" };
+const std::string POINTER_CASTING_ERROR { "Pointer casting error" };
+
 enum class MessageType
 {
     UNKNOWN,

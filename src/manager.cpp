@@ -1,6 +1,6 @@
 #include "manager.hpp"
 
-#include "action.hpp"
+#include "action_result.hpp"
 #include "action_wrapper.hpp"
 #include "application.hpp"
 #include "companion.hpp"
@@ -671,9 +671,9 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // T
     }
 }
 
-void Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
+std::shared_ptr<ActionResult> Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
 {
-    std::function<bool(std::shared_ptr<CompanionAction>)> lambda;
+    std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> lambda;
 
     switch (action->getType()) {
     case ChatActionType::CREATE:
@@ -700,7 +700,7 @@ void Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
         break;
     }
 
-    bool result = performAction(lambda, action);
+    return performAction(lambda, action);
 }
 
 bool Manager::createCompanion()
@@ -725,71 +725,85 @@ bool Manager::createCompanion()
 
 }
 
-std::optional<int> Manager::pushCompanionToDbAndReturnId(std::shared_ptr<CompanionAction> action)
+std::shared_ptr<ActionResult> Manager::pushCompanionToDbAndReturnId(std::shared_ptr<CompanionAction> action)
 {
     auto data = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, action->getName());
 
     if (!data)
-        return std::nullopt;
+        return std::make_shared<ActionResult>(false, DB_REPLY_NULL);
+
+    if (data->isEmpty())
+        return std::make_shared<ActionResult>(false, DB_REPLY_EMPTY);
 
     auto result = getIntFromString(ID_BAD_VALUE, data->getValue(0, "id"));
 
-    return (result == ID_BAD_VALUE) ? std::nullopt : std::optional<int>(result);
+    if (result == ID_BAD_VALUE)
+        return std::make_shared<ActionResult>(false, VALUE_BUILDING_ERROR);
+    else
+        return std::make_shared<ActionValueResult<int>>(result, true, ""s);
 }
 
-uint16_t Manager::getServerPortByCompanionId(const std::optional<int> &id)
+uint16_t Manager::getServerPortByCompanionId(int id)
 {
-    uint16_t serverPort = 5000 + id.value() + 1;  // TODO change
+    uint16_t serverPort = 5000 + id + 1;  // TODO change
 
     return serverPort;
 }
 
-bool Manager::pushSocketToDb(std::shared_ptr<CompanionAction> action, const std::optional<int> &id)
+std::shared_ptr<ActionResult> Manager::pushSocketToDb(
+    std::shared_ptr<CompanionAction> action, int id)
 {
-    auto data = getDBData(
+    return getActionResult(
         DBRequestType::PUSH_SOCKET_AND_RETURN, action->getName(), action->getIpAddress(),
         getServerPortByCompanionId(id), action->getClientPort());
-
-    return (data) ? true : false;
 }
 
-// void Manager::createCompanion(std::shared_ptr<CompanionAction> action)
-bool Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 {
     // TODO move to validator
     // data validation and checking
-    if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
-        // return;
-        return false;
+    // if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
+    //     return;
+    //     return false;
 
     // push companion data to db
-    auto id = pushCompanionToDbAndReturnId(action);
+    auto idResult = pushCompanionToDbAndReturnId(action);
 
-    if (!id)
-        return false;
+    if (!idResult->status())
+        return idResult;
 
     // push socket data to db
-    if (!pushSocketToDb(action, id))
-        return false;
+    auto cast = std::dynamic_pointer_cast<ActionValueResult<int>>(idResult);
+
+    if (!cast)
+        return std::make_shared<ActionResult>(false, POINTER_CASTING_ERROR);
+
+    auto id = cast->value();
+    auto pushSocketResult = pushSocketToDb(action, id);
+
+    if (!pushSocketResult->status())
+        return pushSocketResult;
 
     // create companion object
-    auto companion = addCompanionObject(id.value(), action->getName());
+    auto companionResult = getCompanionAdditionResult(id, action->getName());
 
-    if (!companion)
-        return false;
+    if (!companionResult->status())
+        return companionResult;
 
     // create socketInfo object
     auto socketInfo = std::make_shared<SocketInfo>(action->getCompanionData());
-
+    auto companion = companionResult->value();
     companion->setSocketInfo(socketInfo);
 
     // add companion and widget group to mapping
     createWidgetGroupAndAddToMapping(companion);
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
+    // getGraphicManager()->showCompanionInfoDialog(action, "New companion added:\n\n");
+    // // post-action
+    // action->postAct();
 
-    return true;
+    return std::make_shared<ActionResult>(true, ""s);
 }
 
 void Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
@@ -814,7 +828,7 @@ void Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
     widgetGroup->getSocketInfoBase()->update();
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(action, "Companion updated:\n\n");
+    // getGraphicManager()->showCompanionInfoDialog(action, "Companion updated:\n\n");
 }
 
 void Manager::deleteCompanion(std::shared_ptr<CompanionAction> action)
@@ -842,7 +856,7 @@ void Manager::deleteCompanion(std::shared_ptr<CompanionAction> action)
     deleteCompanionObject(action->getCompanion());
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(action, "Companion deleted:\n\n");
+    // getGraphicManager()->showCompanionInfoDialog(action, "Companion deleted:\n\n");
 }
 
 void Manager::clearChatHistory(std::shared_ptr<Companion> companion)
@@ -872,7 +886,7 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
     clearChatHistory(action->getCompanion());
 
     // show info dialog
-    getGraphicManager()->showCompanionInfoDialog(action, "Companion chat history cleared:\n\n");
+    // getGraphicManager()->showCompanionInfoDialog(action, "Companion chat history cleared:\n\n");
 }
 
 void Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
@@ -1049,6 +1063,11 @@ void Manager::setLastOpenedPath(const std::filesystem::path &path)
     lastOpenedPath_ = path;
 }
 
+void Manager::endAction(std::shared_ptr<Action> action)
+{
+    checkAndResetCurrentAction(action);
+}
+
 std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
     std::shared_ptr<WidgetGroup> group) const
 {
@@ -1194,12 +1213,37 @@ std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string
     return result.first->second.first;
 }
 
+std::shared_ptr<CompanionResult> Manager::getCompanionAdditionResult(
+    int id, const std::string &name)
+{
+    if (id == 0) {
+        auto entry = "companion id == 0"s;
+        logArgsError(entry);  // TODO move logging to action
+
+        return std::make_shared<CompanionResult>(nullptr, false, entry);
+    }
+
+    auto companion = std::make_shared<Companion>(id, name);
+    std::shared_ptr<WidgetGroup> group = nullptr;
+    auto value = std::pair(companion, group);
+    auto result = mapCompanionToWidgetGroup_.emplace(id, value);
+
+    if (!result.second) {
+        auto entry = "companion is nullptr"s;
+        logArgsError(entry);
+
+        return std::make_shared<CompanionResult>(nullptr, false, entry);
+    }
+
+    return std::make_shared<CompanionResult>(companion, true, ""s);
+}
+
 void Manager::createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion)
 {
-    auto widgetGroup = std::make_shared<WidgetGroup>(companion);
-    widgetGroup->set();
-    mapCompanionToWidgetGroup_[companion->getId()].second = widgetGroup;
-    companion->addMessageWidgetsToChatHistory();
+    auto group = std::make_shared<WidgetGroup>(companion);
+    group->set();
+    mapCompanionToWidgetGroup_[companion->getId()].second = group;
+    companion->addMessageWidgetsToChatHistory(group);
 }
 
 void Manager::deleteCompanionObject(std::shared_ptr<Companion> companion)
@@ -1258,8 +1302,7 @@ bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> action)
     return true;
 }
 
-bool Manager::checkCompanionDataForExistanceAtCreation(
-    std::shared_ptr<CompanionAction> action)
+bool Manager::checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> action)
 {
     // check if companion with such name already exists
     auto companionIdData = getDBData(DBRequestType::GET_COMPANION_BY_NAME, action->getName());

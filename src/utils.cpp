@@ -96,12 +96,12 @@ bool validatePassword(std::vector<std::string> &errors, const std::string &passw
     return result;
 }
 
-std::string buildDialogText(std::string &&header, const std::vector<std::string> &messages)
+std::string buildDialogText(const std::string &header, const std::vector<std::string> &messages)
 {
     if (messages.empty())
         return "";
 
-    std::string text(header);
+    auto text = getStringByFormat("{}\n\n", header);
 
     logArgs("messages.size():", messages.size());
 
