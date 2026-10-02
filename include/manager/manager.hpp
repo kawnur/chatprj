@@ -13,10 +13,11 @@
 #include <QWidget>
 
 #include "action.hpp"
+#include "action_result.hpp"
 #include "constants.hpp"
+#include "data_checker.hpp"
 #include "db_constants.hpp"
 #include "db_interaction.hpp"
-#include "validator.hpp"
 #include "utils.hpp"
 
 class Action;
@@ -149,7 +150,19 @@ public:
 
     std::shared_ptr<ActionResult> performCompanionAction(std::shared_ptr<CompanionAction> action);
 
-    bool createCompanion();
+    template<typename... Ts>
+    void initAction(ChatActionType type, Ts &&...args)
+    {
+        auto action = std::make_shared<CompanionAction>(type, args...);
+        setCurrentAction(std::dynamic_pointer_cast<Action>(action));
+        action->set();
+    }
+
+    void createCompanion();
+    void updateCompanion(std::shared_ptr<Companion> companion);
+
+    std::shared_ptr<ActionResult> getActionResultByCompanionIdDBData(
+        std::shared_ptr<DBReplyData> data);
 
     std::shared_ptr<ActionResult> pushCompanionToDbAndReturnId(
         std::shared_ptr<CompanionAction> action);
@@ -162,7 +175,8 @@ public:
     std::shared_ptr<ActionResult> createCompanion(std::shared_ptr<CompanionAction> action);
 
     // void updateCompanion(std::shared_ptr<CompanionAction> action);
-    void updateCompanion(std::shared_ptr<CompanionAction> action);
+    std::shared_ptr<ActionResult> updateCompanionInDbAndReturnId(std::shared_ptr<CompanionAction> action);
+    std::shared_ptr<ActionResult> updateCompanion(std::shared_ptr<CompanionAction> action);
     void deleteCompanion(std::shared_ptr<CompanionAction> action);
     void clearChatHistory(std::shared_ptr<Companion> companion);
     void clearCompanionHistory(std::shared_ptr<CompanionAction> action);
@@ -216,10 +230,29 @@ private:
     void deleteCompanionObject(std::shared_ptr<Companion> companion);
     void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
 
+    // template<typename F>
+    // std::shared_ptr<ActionResult> checkCompanionDataForExistance(
+    //     F &&func, std::shared_ptr<CompanionAction> action)
+    // {
+    //     DataChecker checker(action);
+
+    //     auto result = func();
+
+    //     // auto result = checker.checkCompanionDataForExistanceAtCreation();
+    //     // checker.coutErrorsState();
+
+    //     if (result)
+    //         return std::make_shared<ActionResult>(true, ""s);
+    //     else
+    //         return std::make_shared<ActionResult>(false, checker.moveErrors());
+    // }
+
+
     std::shared_ptr<ActionResult> checkCompanionDataForExistanceAtCreation(
         std::shared_ptr<CompanionAction> action);
 
-    bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> action);
+    std::shared_ptr<ActionResult> checkCompanionDataForExistanceAtUpdate(
+        std::shared_ptr<CompanionAction> action);
 
     void waitForMessageReceptionConfirmation(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
@@ -256,7 +289,7 @@ private:
 
     // bool initialized_;
     DBRequester dbRequester_;
-    Validator validator_;
+    // Validator validator_;
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;

@@ -34,6 +34,13 @@ const std::string DB_REPLY_EMPTY { "DB reply is empty" };
 const std::string VALUE_BUILDING_ERROR { "Value building error" };
 const std::string POINTER_CASTING_ERROR { "Pointer casting error" };
 
+const QString ME_NAME { "me" };
+
+const uint8_t CONNECTION_STATE_INDICATOR_WIDGET_SIZE = 15;
+const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
+
+const QString SOCKET_INFO_WIDGET_EDIT_BUTTON_LABEL { "Edit" };
+
 // validation
 const std::size_t COMPANION_NAME_SIZE_LIMIT = 30;
 const std::size_t PASSWORD_SIZE_LIMIT = 30;
@@ -112,6 +119,18 @@ enum class MainWindowContainerPosition
 const std::unordered_map<ChatActionType, std::string> companionActionTypeStringRepresentation {
     { ChatActionType::CREATE, "Add new companion" },
     { ChatActionType::UPDATE, "Edit companion" }
+};
+
+const std::string COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Companion action" };
+
+const std::unordered_map<ChatActionType, std::string> COMPANION_ACTION_INFO_DIALOG_SUCCESS_HEADER_MAP {
+    { ChatActionType::CREATE, "New companion added" },
+    { ChatActionType::UPDATE, "Companion edited" }
+};
+
+const std::unordered_map<ChatActionType, std::string> COMPANION_ACTION_INFO_DIALOG_FAIL_HEADER_MAP {
+    { ChatActionType::CREATE, "Companion addition error" },
+    { ChatActionType::UPDATE, "Companion edition error" }
 };
 
 const std::unordered_map<ChatActionType, std::string> groupChatActionTypeStringRepresentation {

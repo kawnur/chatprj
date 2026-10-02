@@ -98,8 +98,6 @@ void GraphicManager::createTextDialogAndShow(
 
 void GraphicManager::createCompanion()
 {
-    // auto action = std::make_shared<CompanionAction>(ChatActionType::CREATE, nullptr);
-    // action->set();
     getManager()->createCompanion();
 }
 
@@ -111,8 +109,7 @@ void GraphicManager::createGroupChat()
 
 void GraphicManager::updateCompanion(std::shared_ptr<Companion> companion)
 {
-    auto action = std::make_shared<CompanionAction>(ChatActionType::UPDATE, companion);
-    action->set();
+    getManager()->updateCompanion(companion);
 }
 
 void GraphicManager::clearCompanionHistory(std::shared_ptr<Companion> companion)

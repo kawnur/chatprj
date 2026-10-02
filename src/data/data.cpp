@@ -27,6 +27,11 @@ std::string CompanionData::getClientPort() const
     return clientPort_;
 }
 
+void CompanionData::setName(const std::string &name)
+{
+    name_ = name;
+}
+
 void CompanionData::setServerPort(uint16_t port)
 {
     serverPort_ = getString(port);
@@ -40,3 +45,13 @@ void CompanionData::log()
 }
 
 GroupChatData::GroupChatData() : members_() {}
+
+bool compareCompanionData(
+    std::shared_ptr<CompanionData> data1, std::shared_ptr<CompanionData> data2)
+{
+    // do not check serverPort
+
+    return (data1->getName() == data2->getName())
+           && (data1->getIpAddress() == data2->getIpAddress())
+           && (data1->getClientPort() == data2->getClientPort());
+}

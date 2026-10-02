@@ -22,6 +22,8 @@ public:
     std::string getIpAddress() const;
     std::string getServerPort() const;
     std::string getClientPort() const;
+
+    void setName(const std::string &name);
     void setServerPort(uint16_t port);
 
     void log();
@@ -41,5 +43,8 @@ public:
 private:
     std::vector<std::shared_ptr<Companion>> members_;
 };
+
+bool compareCompanionData(
+    std::shared_ptr<CompanionData> data1, std::shared_ptr<CompanionData> data2);
 
 #endif // DATA_HPP

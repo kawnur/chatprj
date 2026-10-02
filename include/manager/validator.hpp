@@ -41,4 +41,12 @@ template<>
 std::shared_ptr<ActionResult> Validator::validate<PasswordAction>(
     std::shared_ptr<PasswordAction> action);
 
+template<typename T>
+std::shared_ptr<ActionResult> validateActionData(std::shared_ptr<T> action)
+{
+    Validator validator {};
+
+    return validator.validate<T>(action);
+}
+
 #endif // VALIDATOR_HPP

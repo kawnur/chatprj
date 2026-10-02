@@ -49,6 +49,7 @@ public:
     std::string getIpAddress() const;
     uint16_t getServerPort() const;
     uint16_t getClientPort() const;
+    std::shared_ptr<CompanionData> getData();
 
     void updateData(std::shared_ptr<CompanionData> data);
 
@@ -75,6 +76,7 @@ public:
     std::string getSocketIpAddress() const;
     uint16_t getSocketServerPort() const;
     uint16_t getSocketClientPort() const;
+    std::shared_ptr<CompanionData> getData();
     std::shared_ptr<FileOperatorStorage> getFileOperatorStorage() const;
     std::string getFileOperatorFilePathStringByNetworkId(const std::string &networkId);
     bool removeOperatorFromStorage(const std::string &key);

@@ -42,6 +42,12 @@ uint16_t SocketInfo::getClientPort() const
     return clientPort_;
 }
 
+std::shared_ptr<CompanionData> SocketInfo::getData()
+{
+    return std::make_shared<CompanionData>(
+        ""s, ipAddress_, getString(serverPort_), getString(clientPort_));
+}
+
 void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
 {
     ipAddress_ = data->getIpAddress();
@@ -80,6 +86,14 @@ uint16_t Companion::getSocketServerPort() const
 uint16_t Companion::getSocketClientPort() const
 {
     return socketInfo_->getClientPort();
+}
+
+std::shared_ptr<CompanionData> Companion::getData()
+{
+    auto data = socketInfo_->getData();
+    data->setName(name_);
+
+    return data;
 }
 
 std::shared_ptr<FileOperatorStorage> Companion::getFileOperatorStorage() const

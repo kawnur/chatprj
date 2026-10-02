@@ -75,9 +75,10 @@ std::string CompanionDataDialog::getNameString()
 std::string CompanionDataDialog::getIpAddressString()
 {
     auto ipAddressFromWidget = ipAddressEdit_->text().toStdString();  // TODO change
-    QHostAddress hostAddress { getQString(ipAddressFromWidget) };
+    // QHostAddress hostAddress { getQString(ipAddressFromWidget) };
 
-    return hostAddress.toString().toStdString();
+    // return hostAddress.toString().toStdString();
+    return ipAddressFromWidget;
 }
 
 std::string CompanionDataDialog::getPortString()

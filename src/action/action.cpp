@@ -154,6 +154,21 @@ void CompanionAction::updateCompanionObjectData()
     companion_->updateData(data_);
 }
 
+std::string CompanionAction::getInfoDialogHeader(const auto &map)
+{
+    return getMapValue(map, type_, COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER);
+}
+
+std::string CompanionAction::getInfoDialogSuccessHeader()
+{
+    return getInfoDialogHeader(COMPANION_ACTION_INFO_DIALOG_SUCCESS_HEADER_MAP);
+}
+
+std::string CompanionAction::getInfoDialogFailHeader()
+{
+    return getInfoDialogHeader(COMPANION_ACTION_INFO_DIALOG_FAIL_HEADER_MAP);
+}
+
 void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
 {
     std::string text {};
@@ -167,10 +182,10 @@ void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
             { "port: {}", data_->getClientPort() }
         };
 
-        header = "New companion added";
+        header = getInfoDialogSuccessHeader();
         fillMessages(messages, lines);
     } else {
-        header = "Companion addition error";
+        header = getInfoDialogFailHeader();
         messages.push_back(result->definition());
     }
 
@@ -178,7 +193,6 @@ void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
     infoDialog_->setText(text);
 }
 
-// TODO deletion of action objects
 void CompanionAction::act()
 {
     if (type_ == ChatActionType::SEND_HISTORY) {
@@ -461,7 +475,6 @@ void FileAction::defineFilePath()
     filePath_ = std::filesystem::path(result.toStdString());
     act();
 }
-
 
 void fillMessages(
     std::vector<std::string> &messages, std::vector<std::pair<std::string, std::string>> lines)

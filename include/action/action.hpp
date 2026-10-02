@@ -75,6 +75,11 @@ public:
     void set() override;
 
     void updateCompanionObjectData();
+
+    std::string getInfoDialogHeader(const auto &map);
+    std::string getInfoDialogSuccessHeader();
+    std::string getInfoDialogFailHeader();
+
     void updateInfoDialog(std::shared_ptr<ActionResult> result);
 
 public slots:
