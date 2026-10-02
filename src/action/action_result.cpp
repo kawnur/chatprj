@@ -1,7 +1,16 @@
 #include "action_result.hpp"
 
 ActionResult::ActionResult(bool status, const std::string &definition)
-    : status_(status), definition_(definition) {}
+    : status_(status), definitions_()
+{
+    definitions_.push_back(definition);
+}
+
+ActionResult::ActionResult(bool status, std::string &&definition)
+    : status_(status), definitions_()
+{
+    definitions_.push_back(definition);
+}
 
 ActionResult::~ActionResult() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -12,5 +21,10 @@ bool ActionResult::status() const
 
 std::string ActionResult::definition() const
 {
-    return definition_;
+    if (definitions_.empty())
+        return ""s;
+    else if (definitions_.size() == 1)
+        return definitions_.at(0);
+    else
+        return buildTextAsUnorderedList(definitions_);
 }

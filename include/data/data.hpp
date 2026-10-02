@@ -22,6 +22,7 @@ public:
     std::string getIpAddress() const;
     std::string getServerPort() const;
     std::string getClientPort() const;
+    void setServerPort(uint16_t port);
 
     void log();
 

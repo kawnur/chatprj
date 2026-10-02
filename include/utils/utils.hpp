@@ -300,6 +300,7 @@ std::vector<std::string> buildStringVector(const Ts &...args)
 // bool validateIpAddress(std::vector<std::string> &errors, const std::string &ipAddress);
 // bool validatePort(std::vector<std::string> &errors, const std::string &port);
 // bool validatePassword(std::vector<std::string> &errors, const std::string &password);
+std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
 std::string buildTextAsUnorderedListWithHeader(const std::string &header, const std::vector<std::string> &messages);
 LogType getLogTypeByDialogType(DialogType type);
 std::string getFormattedMessageBodyString(const std::string &color, const std::string &text);

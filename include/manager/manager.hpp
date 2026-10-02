@@ -155,7 +155,10 @@ public:
         std::shared_ptr<CompanionAction> action);
 
     uint16_t getServerPortByCompanionId(int id);
-    std::shared_ptr<ActionResult> pushSocketToDb(std::shared_ptr<CompanionAction> action, int id);
+
+    std::shared_ptr<ActionResult> pushSocketToDb(
+        std::shared_ptr<CompanionAction> action, int serverPort);
+
     std::shared_ptr<ActionResult> createCompanion(std::shared_ptr<CompanionAction> action);
 
     // void updateCompanion(std::shared_ptr<CompanionAction> action);
@@ -175,78 +178,6 @@ public:
     std::filesystem::path getLastOpenedPath();
     void setLastOpenedPath(const std::filesystem::path &path);
     void endAction(std::shared_ptr<Action> action);
-
-private:
-
-    std::shared_ptr<Companion> getMappedCompanionByWidgetGroup(
-        std::shared_ptr<WidgetGroup> group) const;
-
-    void fillCompanionMessageMapping(std::shared_ptr<Companion> companion, bool containersNotEmpty);
-    bool buildCompanions();
-    void buildWidgetGroups();
-    std::shared_ptr<Companion> addCompanionObject(int id, const std::string &name);
-    std::shared_ptr<CompanionResult> getCompanionAdditionResult(int id, const std::string &name);
-    void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion);
-    void deleteCompanionObject(std::shared_ptr<Companion> companion);
-    void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
-    // bool companionDataValidation(std::shared_ptr<CompanionAction> action);
-    // bool passwordDataValidation(std::shared_ptr<PasswordAction> action);
-    bool checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> action);
-    bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> action);
-
-    void waitForMessageReceptionConfirmation(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-
-    void markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-
-    // void markMessageAsReceived(
-    //     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-    void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
-
-    std::shared_ptr<MessageMetaData> pushMessageToDB(
-        // const std::string &companionName, const std::string &authorName,
-        // const std::string &timestamp, const std::string &text, const bool &isSent,
-        // const bool &isReceived);
-        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-        std::shared_ptr<MessageState> state);
-
-    // // TODO use std::function instead of function ptr
-    // template<typename T, typename... Ts>
-    // std::shared_ptr<DBReplyData> getDBData(
-    //     bool log, std::string &&mark,
-    //     std::shared_ptr<PGresult>(*func)(std::shared_ptr<PGconn>, bool, const Ts&...),
-    //     T &&keys, const Ts&... args)
-    // {
-    //     std::shared_ptr<PGresult> dbResult = func(dbConnection_, log, args...);
-
-    //     if (log) {
-    //         logArgs(logDelimiter);
-    //         logArgs(mark);
-    //         logArgs("dbResult:", dbResult);
-    //     }
-
-    //     if (!dbResult) {
-    //         showErrorDialogAndLogError("Database request error, dbResult is nullptr");
-
-    //         return nullptr;
-    //     }
-
-    //     auto dbData = std::make_shared<DBReplyData>(std::forward<T>(keys));
-
-    //     if (getDataFromDBResult(log, dbData, dbResult, 0) == -1) {
-    //         showErrorDialogAndLogError("Error getting data from dbResult");
-
-    //         return nullptr;
-    //     }
-
-    //     if (log) {
-    //         // logArgs("dbData->size():", dbData->size());
-    //         logDBReplyData(dbData);
-    //         logArgs(logDelimiter);
-    //     }
-
-    //     return dbData;
-    // }
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
@@ -270,6 +201,41 @@ private:
 
         return data;
     }
+
+private:
+
+    std::shared_ptr<Companion> getMappedCompanionByWidgetGroup(
+        std::shared_ptr<WidgetGroup> group) const;
+
+    void fillCompanionMessageMapping(std::shared_ptr<Companion> companion, bool containersNotEmpty);
+    bool buildCompanions();
+    void buildWidgetGroups();
+    std::shared_ptr<Companion> addCompanionObject(int id, const std::string &name);
+    std::shared_ptr<CompanionResult> getCompanionAdditionResult(int id, const std::string &name);
+    void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion);
+    void deleteCompanionObject(std::shared_ptr<Companion> companion);
+    void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
+
+    std::shared_ptr<ActionResult> checkCompanionDataForExistanceAtCreation(
+        std::shared_ptr<CompanionAction> action);
+
+    bool checkCompanionDataForExistanceAtUpdate(std::shared_ptr<CompanionAction> action);
+
+    void waitForMessageReceptionConfirmation(
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+
+    void markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+
+    // void markMessageAsReceived(
+    //     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
+
+    std::shared_ptr<MessageMetaData> pushMessageToDB(
+        // const std::string &companionName, const std::string &authorName,
+        // const std::string &timestamp, const std::string &text, const bool &isSent,
+        // const bool &isReceived);
+        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+        std::shared_ptr<MessageState> state);
 
     template<typename... Ts>
     std::shared_ptr<ActionResult> getActionResult(Ts &&...args)

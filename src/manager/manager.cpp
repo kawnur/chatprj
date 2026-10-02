@@ -4,6 +4,8 @@
 #include "action_wrapper.hpp"
 #include "application.hpp"
 #include "companion.hpp"
+#include "data.hpp"
+#include "data_checker.hpp"
 #include "functional"
 #include "logging.hpp"
 #include "message.hpp"
@@ -751,24 +753,26 @@ uint16_t Manager::getServerPortByCompanionId(int id)
 }
 
 std::shared_ptr<ActionResult> Manager::pushSocketToDb(
-    std::shared_ptr<CompanionAction> action, int id)
+    std::shared_ptr<CompanionAction> action, int serverPort)
 {
     return getActionResult(
         DBRequestType::PUSH_SOCKET_AND_RETURN, action->getName(), action->getIpAddress(),
-        getServerPortByCompanionId(id), action->getClientPort());
+        serverPort, action->getClientPort());
 }
 
 std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 {
-    // TODO move to validator
-    // data validation and checking
-    // if (!(companionDataValidation(action) && checkCompanionDataForExistanceAtCreation(action)))
-    //     return;
-    //     return false;
+    // data validation
     auto validationResult = validator_.validate<CompanionAction>(action);
 
     if (!validationResult->status())
         return validationResult;
+
+    // data checking
+    auto checkResult = checkCompanionDataForExistanceAtCreation(action);
+
+    if (!checkResult->status())
+        return checkResult;
 
     // push companion data to db
     auto idResult = pushCompanionToDbAndReturnId(action);
@@ -783,7 +787,8 @@ std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<Companion
         return std::make_shared<ActionResult>(false, POINTER_CASTING_ERROR);
 
     auto id = cast->value();
-    auto pushSocketResult = pushSocketToDb(action, id);
+    auto serverPort = getServerPortByCompanionId(id);
+    auto pushSocketResult = pushSocketToDb(action, serverPort);
 
     if (!pushSocketResult->status())
         return pushSocketResult;
@@ -794,8 +799,12 @@ std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<Companion
     if (!companionResult->status())
         return companionResult;
 
+    // update data
+    auto data = action->getCompanionData();
+    data->setServerPort(serverPort);
+
     // create socketInfo object
-    auto socketInfo = std::make_shared<SocketInfo>(action->getCompanionData());
+    auto socketInfo = std::make_shared<SocketInfo>(data);
     auto companion = companionResult->value();
     companion->setSocketInfo(socketInfo);
 
@@ -1271,65 +1280,17 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> c
     }
 }
 
-// bool Manager::companionDataValidation(std::shared_ptr<CompanionAction> action)
-// {
-//     std::vector<std::string> validationErrors {};
-
-//     bool validationResult = validateCompanionData(validationErrors, action);
-
-//     if (!validationResult) {
-//         showErrorDialogAndLogError(buildTextAsUnorderedListWithHeader("Error messages", validationErrors));
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// bool Manager::passwordDataValidation(std::shared_ptr<PasswordAction> action)
-// {
-//     std::vector<std::string> validationErrors {};
-
-//     bool validationResult = validatePassword(validationErrors, action->getPassword());
-
-//     if (!validationResult) {
-//         showErrorDialogAndLogError(buildTextAsUnorderedListWithHeader("Error messages", validationErrors));
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-bool Manager::checkCompanionDataForExistanceAtCreation(std::shared_ptr<CompanionAction> action)
+std::shared_ptr<ActionResult> Manager::checkCompanionDataForExistanceAtCreation(
+    std::shared_ptr<CompanionAction> action)
 {
-    // check if companion with such name already exists
-    auto companionIdData = getDBData(DBRequestType::GET_COMPANION_BY_NAME, action->getName());
+    DataChecker checker(action);
+    auto result = checker.checkCompanionDataForExistanceAtCreation();
+    // checker.coutErrorsState();
 
-    if (!companionIdData)
-        return false;
-
-    if (!companionIdData->isEmpty()) {
-        showErrorDialogAndLogError("Companion with such name already exists");
-
-        return false;
-    }
-
-    // check if such socket already exists
-    auto socketIdData = getDBData(
-        DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT, action->getIpAddress(),
-        action->getClientPort());
-
-    if (!socketIdData)
-        return false;
-
-    if (!socketIdData->isEmpty()) {
-        showErrorDialogAndLogError("Companion with such socket already exists");
-
-        return false;
-    }
-
-    return true;
+    if (result)
+        return std::make_shared<ActionResult>(true, ""s);
+    else
+        return std::make_shared<ActionResult>(false, checker.moveErrors());
 }
 
 bool Manager::checkCompanionDataForExistanceAtUpdate(

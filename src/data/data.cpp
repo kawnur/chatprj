@@ -27,6 +27,11 @@ std::string CompanionData::getClientPort() const
     return clientPort_;
 }
 
+void CompanionData::setServerPort(uint16_t port)
+{
+    serverPort_ = getString(port);
+}
+
 void CompanionData::log()
 {
     std::string entry { "name: {0}, ipAddress: {1}, serverPort: {2}, clientPort: {3}" };

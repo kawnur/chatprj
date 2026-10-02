@@ -8,7 +8,17 @@
 class ActionResult
 {
 public:
+    // TODO add container concept
     ActionResult(bool status, const std::string &definition);
+    ActionResult(bool status, std::string &&definition);
+
+    template<typename T>
+    ActionResult(bool status, T &&definitions) : status_(status)
+    {
+        definitions_ = std::forward<T>(definitions);
+        // coutVectorState(definitions_);
+    }
+
     virtual ~ActionResult();
 
     bool status() const;
@@ -16,7 +26,7 @@ public:
 
 protected:
     bool status_;
-    std::string definition_;
+    std::vector<std::string> definitions_;
 };
 
 template<typename T>

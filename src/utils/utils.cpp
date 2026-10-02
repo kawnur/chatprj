@@ -96,6 +96,21 @@ std::string getString(const QString value)
 //     return result;
 // }
 
+std::string buildTextAsUnorderedList(const std::vector<std::string> &messages)
+{
+    if (messages.empty())
+        return "";
+
+    auto text = ""s;
+
+    logArgs("messages.size():", messages.size());
+
+    for (auto &message : messages)
+        text += getStringByFormat("- {}\n", message);
+
+    return text;
+}
+
 std::string buildTextAsUnorderedListWithHeader(
     const std::string &header, const std::vector<std::string> &messages)
 {
@@ -103,11 +118,7 @@ std::string buildTextAsUnorderedListWithHeader(
         return "";
 
     auto text = getStringByFormat("{}:\n\n", header);
-
-    logArgs("messages.size():", messages.size());
-
-    for (auto &message : messages)
-        text += getStringByFormat("- {}\n", message);
+    text += buildTextAsUnorderedList(messages);
 
     return text;
 }

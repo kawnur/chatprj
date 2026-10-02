@@ -32,7 +32,7 @@ bool Validator::validateIpAddress(const std::string &ipAddress)
 bool Validator::validatePort(const std::string &port)
 {
     bool result = false;
-    auto entryTemplate = "port number {0} must be greater than 0 and lower than 65536"s;
+    auto entryTemplate = "port number '{0}' must be greater than 0 and lower than 65536"s;
     auto entry = getStringByFormat(entryTemplate, port);
 
     try {
@@ -69,7 +69,7 @@ bool Validator::validateStringByLength(
     bool result = (size <= limit);
 
     if (!result) {
-        auto entryTemplate = "{0} length {1} is greater than {2}"s;
+        auto entryTemplate = "'{0}' length '{1}' is greater than '{2}'"s;
         auto entry = getStringByFormat(entryTemplate, mark, size, limit);
         errors_.push_back(entry);
     }
