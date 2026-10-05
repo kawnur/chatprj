@@ -18,7 +18,7 @@
 
 using namespace std::string_literals;
 
-Action::Action() {}
+Action::Action(ActionType type) : type_(type) {}
 
 Action::~Action() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -28,7 +28,27 @@ void Action::setDialog(std::shared_ptr<Action> action)
     infoDialog_->set(action);
 }
 
-RegularAction::RegularAction() : Action() {}
+ActionType Action::getType()
+{
+    return type_;
+}
+
+std::string Action::getInfoDialogHeader(const auto &map)
+{
+    return getMapValue(map, type_, ACTION_INFO_DIALOG_DEFAULT_HEADER);
+}
+
+std::string Action::getInfoDialogSuccessHeader()
+{
+    return getInfoDialogHeader(ACTION_SUCCESS_HEADER_MAP);
+}
+
+std::string Action::getInfoDialogFailHeader()
+{
+    return getInfoDialogHeader(ACTION_FAIL_HEADER_MAP);
+}
+
+RegularAction::RegularAction(ActionType type) : Action(type) {}
 
 RegularAction::~RegularAction() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -39,11 +59,7 @@ void RegularAction::set()
 }
 
 CompanionAction::CompanionAction(ActionType type, std::shared_ptr<Companion> companion)
-    : type_(type), companion_(companion), data_(nullptr), RegularAction()
-{
-    buildDataDialog();
-    buildInfoDialog();
-}
+    : companion_(companion), data_(nullptr), RegularAction(type) {}
 
 CompanionAction::~CompanionAction() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -96,12 +112,6 @@ void CompanionAction::buildInfoDialog()
         dataDialog_, DialogType::INFO, ""s, createOkButtonInfoVector(function));
 }
 
-// ActionType CompanionAction::getType() const
-ActionType CompanionAction::getType()
-{
-    return type_;
-}
-
 std::string CompanionAction::getName() const
 {
     return data_->getName();
@@ -137,8 +147,12 @@ std::shared_ptr<Companion> CompanionAction::getCompanion() const
     return companion_;
 }
 
+// TODO change
 void CompanionAction::set()
 {
+    buildDataDialog();
+    buildInfoDialog();
+
     auto cast = dynamic_pointer_cast<Action>(shared_from_this());
 
     if (!cast)
@@ -152,21 +166,6 @@ void CompanionAction::set()
 void CompanionAction::updateCompanionObjectData()
 {
     companion_->updateData(data_);
-}
-
-std::string CompanionAction::getInfoDialogHeader(const auto &map)
-{
-    return getMapValue(map, type_, COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER);
-}
-
-std::string CompanionAction::getInfoDialogSuccessHeader()
-{
-    return getInfoDialogHeader(COMPANION_ACTION_SUCCESS_HEADER_MAP);
-}
-
-std::string CompanionAction::getInfoDialogFailHeader()
-{
-    return getInfoDialogHeader(COMPANION_ACTION_FAIL_HEADER_MAP);
 }
 
 void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
@@ -196,6 +195,7 @@ void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
 
 void CompanionAction::act()
 {
+    // TODO move inside switch
     if (type_ == ActionType::SEND_HISTORY) {
         // TODO if client is disconnected show error dialog
         getManager()->sendChatHistoryToCompanion(companion_);
@@ -231,7 +231,7 @@ void CompanionAction::act()
 
     data_->log();
 
-    getManager()->performCompanionAction(shared_from_this());
+    getManager()->performAction(shared_from_this());
 }
 
 void CompanionAction::postAct(std::shared_ptr<ActionResult> result)
@@ -245,8 +245,7 @@ void CompanionAction::endAct()
     getManager()->endAction(shared_from_this());
 }
 
-GroupChatAction::GroupChatAction(ActionType type)
-    : type_(type), data_(new GroupChatData), RegularAction()
+GroupChatAction::GroupChatAction(ActionType type) : data_(new GroupChatData), RegularAction(type)
 {
     std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
 
@@ -261,11 +260,14 @@ GroupChatAction::GroupChatAction(ActionType type)
     }
 }
 
-PasswordAction::PasswordAction(ActionType type) : RegularAction()
+PasswordAction::PasswordAction(ActionType type) : RegularAction(type)
 {
-    type_ = type;
+    buildDataDialog();
+}
 
-    switch (type) {
+void PasswordAction::buildDataDialog()
+{
+    switch (type_) {
     case ActionType::CREATE_PASSWORD:
         dataDialog_ = std::make_shared<CreatePasswordDialog>();
 
@@ -281,10 +283,15 @@ PasswordAction::PasswordAction(ActionType type) : RegularAction()
     }
 }
 
+void PasswordAction::buildInfoDialog()
+{
+
+}
+
 PasswordAction::~PasswordAction()
 {
-    if (type_ == ActionType::GET_PASSWORD)
-        dataDialog_->close();
+    // if (type_ == ActionType::GET_PASSWORD)
+    //     dataDialog_->close();
 }
 
 std::string PasswordAction::getPassword()
@@ -292,18 +299,52 @@ std::string PasswordAction::getPassword()
     return password_;
 }
 
+void PasswordAction::set()
+{
+    buildDataDialog();
+    buildInfoDialog();
+
+    auto cast = dynamic_pointer_cast<Action>(shared_from_this());
+
+    if (!cast)
+        logArgsError("action cast error");
+
+    setDialog(cast);
+
+    dataDialog_->show();
+}
+
+void PasswordAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
+{
+    std::string text {};
+    std::string header {};
+    auto messages = std::vector<std::string> {};
+
+    if (result->status()) {
+        header = getInfoDialogSuccessHeader();
+    } else {
+        infoDialog_->setDialogType(DialogType::ERROR);
+        header = getInfoDialogFailHeader();
+        messages.push_back(result->definition());
+    }
+
+    text = buildTextAsUnorderedListWithHeader(header, messages);
+    infoDialog_->setText(text);
+}
+
 void PasswordAction::act()
 {
     switch (type_) {
-    case ActionType::CREATE_PASSWORD:
-    {
-        auto passwordDialog = dynamic_pointer_cast<CreatePasswordDialog>(dataDialog_);
+    case ActionType::CREATE_PASSWORD: {
+        // auto passwordDialog = dynamic_pointer_cast<CreatePasswordDialog>(dataDialog_);
 
-        if (!passwordDialog)
-            break;
+        // if (!passwordDialog)
+        //     break;
 
-        auto text1 = passwordDialog->getFirstEditText();
-        auto text2 = passwordDialog->getSecondEditText();
+        // auto text1 = passwordDialog->getFirstEditText();
+        // auto text2 = passwordDialog->getSecondEditText();
+        auto text1 = dataDialog_->getFirstEditText();
+        auto text2 = dataDialog_->getSecondEditText();
 
         if (text1 == text2) {
             if (text1.size() == 0) {
@@ -325,8 +366,7 @@ void PasswordAction::act()
 
     break;
 
-    case ActionType::GET_PASSWORD:
-    {
+    case ActionType::GET_PASSWORD: {
         auto passwordDialog = dynamic_pointer_cast<GetPasswordDialog>(dataDialog_);
 
         if (!passwordDialog)
@@ -353,16 +393,26 @@ void PasswordAction::act()
     }
 }
 
+void PasswordAction::postAct(std::shared_ptr<ActionResult> result)
+{
+    updateInfoDialog(result);
+    infoDialog_->show();
+}
+
+void PasswordAction::endAct()
+{
+    getManager()->endAction(shared_from_this());
+}
+
 FileAction::FileAction(
     ActionType type, const std::string &networkId, std::shared_ptr<Companion> companion)
-    : Action()
+    : Action(type)
 {
-    type_ = type;
     companion_ = companion;
     networkId_ = networkId;
 
-    auto windowTitle = getMapValue(fileDialogTypeQStringRepresentation, type, "File action"s);
-    dataDialog_ = std::make_shared<FileDialog>(shared_from_this(), windowTitle);
+    // auto windowTitle = getMapValue(fileDialogTypeQStringRepresentation, type, "File action"s);
+    // dataDialog_ = std::make_shared<FileDialog>(shared_from_this(), windowTitle);
 }
 
 std::shared_ptr<Companion> FileAction::getCompanion() const

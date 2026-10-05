@@ -32,7 +32,8 @@
 
 Dialog::Dialog()
     : dialogType_(DialogType::INFO), actionType_(ActionType::UNKNOWN), containsDialog_(false),
-    dataMap_(DATA_STUB), infoMap_(INFO_STUB), defaultTitle_() {}
+    dataMap_(ACTION_TITLE_MAP), infoMap_(INFO_STUB),
+    defaultTitle_(getQString(ACTION_INFO_DIALOG_DEFAULT_HEADER)) {}
 
 void Dialog::setTitleAsData()
 {
@@ -56,8 +57,6 @@ CompanionDataDialog::CompanionDataDialog(
     ActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
     : Dialog()
 {
-    dataMap_ = COMPANION_ACTION_TITLE_MAP;
-    defaultTitle_ = getQString(COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER);
     setTitleAsData();
 
     setParent(parent.get());
@@ -136,8 +135,6 @@ std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
 
 GroupChatDataDialog::GroupChatDataDialog(ActionType type, std::shared_ptr<QWidget> parent)
 {
-    dataMap_ = GROUP_ACTION_TITLE_MAP;
-    defaultTitle_ = getQString(GROUP_ACTION_INFO_DIALOG_DEFAULT_HEADER);
     setTitleAsData();
 
     setParent(parent.get());
@@ -160,8 +157,6 @@ void GroupChatDataDialog::set(std::shared_ptr<Action> action) {}
 CreatePasswordDialog::CreatePasswordDialog()
 {
     actionType_ = ActionType::CREATE_PASSWORD;
-    dataMap_ = PASSWORD_ACTION_TITLE_MAP;
-    defaultTitle_ = getQString(PASSWORD_ACTION_INFO_DIALOG_DEFAULT_HEADER);
     setTitleAsData();
 
     setParent(getGraphicManager()->getMainWindow().get());
@@ -206,8 +201,6 @@ std::string CreatePasswordDialog::getSecondEditText()
 GetPasswordDialog::GetPasswordDialog()
 {
     actionType_ = ActionType::GET_PASSWORD;
-    dataMap_ = PASSWORD_ACTION_TITLE_MAP;
-    defaultTitle_ = getQString(PASSWORD_ACTION_INFO_DIALOG_DEFAULT_HEADER);
     setTitleAsData();
 
     setParent(getGraphicManager()->getMainWindow().get());

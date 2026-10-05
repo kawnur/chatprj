@@ -80,6 +80,8 @@ public:
     virtual void showDialog() {}
     virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
     // virtual void method1() {}
+    virtual std::string getFirstEditText() { return ""s; }
+    virtual std::string getSecondEditText() { return ""s; }
 
     // void setAction(std::shared_ptr<Action> action);
     // void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
@@ -163,8 +165,8 @@ public:
 
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
-    std::string getFirstEditText();
-    std::string getSecondEditText();
+    std::string getFirstEditText() override;
+    std::string getSecondEditText() override;
 
 private:
     std::unique_ptr<QFormLayout> layout_;

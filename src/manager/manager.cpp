@@ -673,49 +673,64 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // T
     }
 }
 
-std::shared_ptr<ActionResult> Manager::performCompanionAction(std::shared_ptr<CompanionAction> action)
+// std::shared_ptr<ActionResult> Manager::performAction(std::shared_ptr<Action> action)
+// {
+//     std::function<std::shared_ptr<ActionResult>(std::shared_ptr<Action>)> lambda;
+
+//     switch (action->getType()) {
+//     case ActionType::CREATE_COMPANION:
+//         lambda = [=, this](auto action) { return createCompanion(action); };
+
+//     break;
+
+//     case ActionType::UPDATE_COMPANION:
+//         lambda = [=, this](auto action) { return updateCompanion(action); };
+
+//         break;
+
+//     case ActionType::DELETE_COMPANION:
+//         // lambda = [=, this]() { return deleteCompanion(action); };
+
+//         break;
+
+//     case ActionType::CLEAR_HISTORY:
+//         // lambda = [=, this]() { return clearCompanionHistory(action); };
+
+//         break;
+
+//     default:
+//         break;
+//     }
+
+//     return performActionAndCallPostAct(lambda, action);
+// }
+
+void Manager::initCompanionCreation()
 {
-    std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> lambda;
-
-    switch (action->getType()) {
-    case ActionType::CREATE_COMPANION:
-        lambda = [=, this](auto action) { return createCompanion(action); };
-
-    break;
-
-    case ActionType::UPDATE_COMPANION:
-        lambda = [=, this](auto action) { return updateCompanion(action); };
-
-        break;
-
-    case ActionType::DELETE_COMPANION:
-        // lambda = [=]() { return deleteCompanion(action); };
-
-        break;
-
-    case ActionType::CLEAR_HISTORY:
-        // lambda = [=]() { return clearCompanionHistory(action); };
-
-        break;
-
-    default:
-        break;
-    }
-
-    return performAction(lambda, action);
+    initAction<CompanionAction>(ActionType::CREATE_COMPANION, nullptr);
 }
 
-void Manager::createCompanion()
+void Manager::initCompanionUpdate(std::shared_ptr<Companion> companion)
 {
-    initAction(ActionType::CREATE_COMPANION, nullptr);
+    initAction<CompanionAction>(ActionType::UPDATE_COMPANION, companion);
 }
 
-void Manager::updateCompanion(std::shared_ptr<Companion> companion)
+void Manager::initCompanionDeletion(std::shared_ptr<Companion> companion)
 {
-    initAction(ActionType::UPDATE_COMPANION, companion);
+    initAction<CompanionAction>(ActionType::DELETE_COMPANION, companion);
 }
 
-std::shared_ptr<ActionResult> Manager::getActionResultByCompanionIdDBData(
+void Manager::initEntrancePasswordCreation()
+{
+    initAction<PasswordAction>(ActionType::CREATE_PASSWORD);
+}
+
+void Manager::initEntrancePasswordReception()
+{
+    initAction<PasswordAction>(ActionType::GET_PASSWORD);
+}
+
+std::shared_ptr<ActionResult> Manager::getActionResultByIdDBData(
     std::shared_ptr<DBReplyData> data)
 {
     if (!data)
@@ -737,7 +752,7 @@ std::shared_ptr<ActionResult> Manager::pushCompanionToDbAndReturnId(
 {
     auto data = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, action->getName());
 
-    return getActionResultByCompanionIdDBData(data);
+    return getActionResultByIdDBData(data);
 }
 
 uint16_t Manager::getServerPortByCompanionId(int id)
@@ -817,7 +832,7 @@ std::shared_ptr<ActionResult> Manager::updateCompanionInDbAndReturnId(
         DBRequestType::UPDATE_COMPANION_AND_SOCKET_AND_RETURN, action->getName(),
         action->getCompanionId(), action->getIpAddress(), action->getClientPort());
 
-    return getActionResultByCompanionIdDBData(data);
+    return getActionResultByIdDBData(data);
 }
 
 std::shared_ptr<ActionResult> Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
@@ -916,45 +931,57 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
     // getGraphicManager()->showCompanionInfoDialog(action, "Companion chat history cleared:\n\n");
 }
 
-void Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
+std::shared_ptr<ActionResult> Manager::pushPasswordToDbAndReturnId(
+    std::shared_ptr<PasswordAction> action)
 {
-    // // data validation and checking
-    // if (!(passwordDataValidation(action)))
-    //     return;
+    auto data = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
 
-    // // push password data to db
-    // auto passwordIdData = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
+    return getActionResultByIdDBData(data);
+}
 
-    // if (!passwordIdData || passwordIdData->isEmpty())
-    //     return;
+std::shared_ptr<ActionResult> Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
+{
+    // data validation
+    auto validationResult = validateActionData<PasswordAction>(action);
+
+    if (!validationResult->status())
+        return validationResult;
+
+    // push password data to db
+    auto idResult = pushPasswordToDbAndReturnId(action);
+
+    if (!idResult->status())
+        return idResult;
 
     // // show dialog
     // showInfoDialogAndLogInfo(
     //     newPasswordCreatedLabel, &TextDialog::unsetMainWindowBlurAndCloseDialogs,
     //     action->getDialog());
+
+    return std::make_shared<ActionResult>(true, ""s);
 }
 
 void Manager::authenticateUser(std::shared_ptr<PasswordAction> action)
 {
-    // auto graphicManager = getGraphicManager();
+    auto graphicManager = getGraphicManager();
 
-    // // do we have password in db?
-    // auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
+    // do we have password in db?
+    auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
 
-    // if (!passwordData || passwordData->isEmpty())
-    //     return;
+    if (!passwordData || passwordData->isEmpty())
+        return;
 
-    // if (passwordData->getValue(0, "password") != action->getPassword()) {
-    //     showErrorDialogAndLogError("Password is not correct");
+    if (passwordData->getValue(0, "password") != action->getPassword()) {
+        showErrorDialogAndLogError("Password is not correct");
 
-    //     return;
-    // }
+        return;
+    }
 
-    // userIsAuthenticated_ = true;
+    userIsAuthenticated_ = true;
 
-    // logArgsInfo("user successfully authenticated");
+    logArgsInfo("user successfully authenticated");
 
-    // graphicManager->disableMainWindowBlurEffect();
+    graphicManager->disableMainWindowBlurEffect();
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -985,9 +1012,11 @@ void Manager::startUserAuthentication()
         return;
 
     if (passwordData->isEmpty())
-        graphicManager->createEntrancePassword();
+        // graphicManager->createEntrancePassword();
+        initEntrancePasswordCreation();
     else
-        graphicManager->getEntrancePassword();
+        // graphicManager->getEntrancePassword();
+        initEntrancePasswordReception();
 }
 
 void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
@@ -1422,6 +1451,45 @@ void Manager::checkAndResetCurrentAction(std::shared_ptr<Action> action)
 
     // currentAction_.reset();
     currentAction_ = nullptr;
+}
+
+template<>
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> Manager::getActionLambda(std::shared_ptr<CompanionAction> action)
+{
+    // std::function<std::shared_ptr<ActionResult>(std::shared_ptr<Action>)> lambda;
+
+    switch (action->getType()) {
+    case ActionType::CREATE_COMPANION:
+        // lambda = [=, this](auto action) { return createCompanion(action); };
+        return [=, this](auto action) { return createCompanion(action); };
+
+        break;
+
+    case ActionType::UPDATE_COMPANION:
+        // lambda = [=, this](auto action) { return updateCompanion(action); };
+        return [=, this](auto action) { return updateCompanion(action); };
+
+        break;
+
+    case ActionType::DELETE_COMPANION:
+        // lambda = [=, this]() { return deleteCompanion(action); };
+
+        break;
+
+    case ActionType::CLEAR_HISTORY:
+        // lambda = [=, this]() { return clearCompanionHistory(action); };
+
+        break;
+
+    default:
+        break;
+    }
+}
+
+template<>
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)> Manager::getActionLambda(std::shared_ptr<PasswordAction> action)
+{
+
 }
 
 std::shared_ptr<Manager> getManager()

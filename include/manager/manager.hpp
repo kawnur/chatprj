@@ -73,7 +73,7 @@ public:
     ~Manager();
 
     template<typename F, typename T>
-    std::shared_ptr<ActionResult> performAction(F &&func, std::shared_ptr<T> action)
+    std::shared_ptr<ActionResult> performActionAndCallPostAct(F &&func, std::shared_ptr<T> action)
     {
         auto result = func(action);
         action->postAct(result);
@@ -146,20 +146,32 @@ public:
     void addEarlyMessages(std::shared_ptr<Companion> companion);
     void resetSelectedCompanion(std::shared_ptr<Companion> companion);
 
-    std::shared_ptr<ActionResult> performCompanionAction(std::shared_ptr<CompanionAction> action);
+    template<typename T>
+    std::function<std::shared_ptr<ActionResult>(std::shared_ptr<T>)> getActionLambda(std::shared_ptr<T> action);
 
-    template<typename... Ts>
+    template<typename T>
+    std::shared_ptr<ActionResult> performAction(std::shared_ptr<T> action)
+    {
+        auto lambda = getActionLambda<T>(action);
+
+        return performActionAndCallPostAct(lambda, action);
+    }
+
+    template<typename T, typename... Ts>
     void initAction(ActionType type, Ts &&...args)
     {
-        auto action = std::make_shared<CompanionAction>(type, args...);
+        auto action = std::make_shared<T>(type, args...);
         setCurrentAction(std::dynamic_pointer_cast<Action>(action));  // TODO check cast
         action->set();
     }
 
-    void createCompanion();
-    void updateCompanion(std::shared_ptr<Companion> companion);
+    void initCompanionCreation();
+    void initCompanionUpdate(std::shared_ptr<Companion> companion);
+    void initCompanionDeletion(std::shared_ptr<Companion> companion);
+    void initEntrancePasswordCreation();
+    void initEntrancePasswordReception();
 
-    std::shared_ptr<ActionResult> getActionResultByCompanionIdDBData(
+    std::shared_ptr<ActionResult> getActionResultByIdDBData(
         std::shared_ptr<DBReplyData> data);
 
     std::shared_ptr<ActionResult> pushCompanionToDbAndReturnId(
@@ -178,7 +190,11 @@ public:
     void deleteCompanion(std::shared_ptr<CompanionAction> action);
     void clearChatHistory(std::shared_ptr<Companion> companion);
     void clearCompanionHistory(std::shared_ptr<CompanionAction> action);
-    void createUserPassword(std::shared_ptr<PasswordAction> action);
+
+    std::shared_ptr<ActionResult> pushPasswordToDbAndReturnId(
+        std::shared_ptr<PasswordAction> action);
+
+    std::shared_ptr<ActionResult> createUserPassword(std::shared_ptr<PasswordAction> action);
     void authenticateUser(std::shared_ptr<PasswordAction> action);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
@@ -299,6 +315,12 @@ private:
     std::filesystem::path lastOpenedPath_;
     std::shared_ptr<Action> currentAction_;
 };
+
+template<>
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> Manager::getActionLambda(std::shared_ptr<CompanionAction> action);
+
+template<>
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)> Manager::getActionLambda(std::shared_ptr<PasswordAction> action);
 
 std::shared_ptr<Manager> getManager();
 

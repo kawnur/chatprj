@@ -20,7 +20,7 @@ class Action : public QObject
     Q_OBJECT
 
 public:
-    Action();
+    Action(ActionType type);
     virtual ~Action();
 
     virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
@@ -34,9 +34,13 @@ public:
     virtual void postAct(std::shared_ptr<ActionResult> result) {}
     virtual void endAct() {}
 
-    virtual ActionType getType() { return ActionType::UNKNOWN; }
+    ActionType getType();
+    std::string getInfoDialogHeader(const auto &map);
+    std::string getInfoDialogSuccessHeader();
+    std::string getInfoDialogFailHeader();
 
 protected:
+    ActionType type_;
     std::shared_ptr<Dialog> dataDialog_;
     std::shared_ptr<TextDialog> infoDialog_;
 };
@@ -46,7 +50,7 @@ class RegularAction : public Action
     Q_OBJECT
 
 public:
-    RegularAction();
+    RegularAction(ActionType type);
     virtual ~RegularAction();
 
     void set() override;
@@ -57,13 +61,13 @@ class CompanionAction : public RegularAction, public std::enable_shared_from_thi
     Q_OBJECT
 
 public:
+    // CompanionAction(ActionType type, std::shared_ptr<Companion> companion = nullptr);
     CompanionAction(ActionType type, std::shared_ptr<Companion> companion);
     ~CompanionAction();
 
     void buildDataDialog() override;
     void buildInfoDialog() override;
 
-    ActionType getType() override;
     std::string getName() const;
     std::string getIpAddress() const;
     std::string getServerPort() const;
@@ -75,11 +79,6 @@ public:
     void set() override;
 
     void updateCompanionObjectData();
-
-    std::string getInfoDialogHeader(const auto &map);
-    std::string getInfoDialogSuccessHeader();
-    std::string getInfoDialogFailHeader();
-
     void updateInfoDialog(std::shared_ptr<ActionResult> result);
 
 public slots:
@@ -88,7 +87,6 @@ public slots:
     void endAct() override;
 
 private:
-    ActionType type_;
     std::shared_ptr<CompanionData> data_;
     std::shared_ptr<Companion> companion_;
 };
@@ -102,7 +100,6 @@ public:
     ~GroupChatAction() = default;
 
 private:
-    ActionType type_;
     std::shared_ptr<GroupChatData> data_;
 };
 
@@ -114,11 +111,18 @@ public:
     PasswordAction(ActionType type);
     ~PasswordAction();
 
+    void buildDataDialog() override;
+    void buildInfoDialog() override;
+
     std::string getPassword();
+
+    void set() override;
+    void updateInfoDialog(std::shared_ptr<ActionResult> result);
     void act() override;
+    void postAct(std::shared_ptr<ActionResult> result) override;
+    void endAct() override;
 
 private:
-    ActionType type_;
     std::string password_;
 };
 

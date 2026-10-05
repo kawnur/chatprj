@@ -98,7 +98,7 @@ void GraphicManager::createTextDialogAndShow(
 
 void GraphicManager::createCompanion()
 {
-    getManager()->createCompanion();
+    getManager()->initCompanionCreation();
 }
 
 void GraphicManager::createGroupChat()
@@ -109,7 +109,7 @@ void GraphicManager::createGroupChat()
 
 void GraphicManager::updateCompanion(std::shared_ptr<Companion> companion)
 {
-    getManager()->updateCompanion(companion);
+    getManager()->initCompanionUpdate(companion);
 }
 
 void GraphicManager::clearCompanionHistory(std::shared_ptr<Companion> companion)
@@ -258,8 +258,7 @@ void GraphicManager::showInfo()
 
 void GraphicManager::createEntrancePassword()
 {
-    // auto action = std::make_shared<PasswordAction>(PasswordActionType::CREATE);
-    // action->set();
+    getManager()->initEntrancePasswordCreation();
 }
 
 void GraphicManager::enableMainWindowBlurEffect()
@@ -274,8 +273,7 @@ void GraphicManager::disableMainWindowBlurEffect()
 
 void GraphicManager::getEntrancePassword()
 {
-    // auto action = std::make_shared<PasswordAction>(PasswordActionType::GET);
-    // action->set();
+    getManager()->initEntrancePasswordReception();
 }
 
 bool GraphicManager::markMessageWidgetAsSent(

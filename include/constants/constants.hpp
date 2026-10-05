@@ -90,7 +90,6 @@ enum class ActionType
 {
     UNKNOWN,
     CREATE_COMPANION,
-    // READ,
     UPDATE_COMPANION,
     DELETE_COMPANION,
     CREATE_GROUP,
@@ -115,9 +114,20 @@ using DataDialogTitleMap = std::unordered_map<ActionType, QString>;
 
 // action type to first line of info dialog text mapping
 using InfoDialogHeaderMap = std::unordered_map<ActionType, std::string>;
+using RequestDialogHeaderMap = std::unordered_map<ActionType, std::string>;
 
 const InfoDialogTitleMap INFO_STUB {};
 const DataDialogTitleMap DATA_STUB {};
+
+const DataDialogTitleMap ACTION_TITLE_MAP {
+    { ActionType::CREATE_COMPANION, "Add new companion" },
+    { ActionType::UPDATE_COMPANION, "Edit companion" },
+    { ActionType::CREATE_GROUP, "Add new group chat" },
+    { ActionType::CREATE_PASSWORD, "Create new password" },
+    { ActionType::GET_PASSWORD, "Authentication" },
+    { ActionType::SEND_FILE, "Send file" },
+    { ActionType::SAVE_FILE, "Save file" }
+};
 
 const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
     { DialogType::INFO, "INFO" },
@@ -125,37 +135,16 @@ const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
     { DialogType::ERROR, "ERROR" }
 };
 
-const DataDialogTitleMap COMPANION_ACTION_TITLE_MAP {
-    { ActionType::CREATE_COMPANION, "Add new companion" },
-    { ActionType::UPDATE_COMPANION, "Edit companion" }
-};
-
-const DataDialogTitleMap GROUP_ACTION_TITLE_MAP {
-    { ActionType::CREATE_GROUP, "Add new group chat" }
-};
-
-const DataDialogTitleMap PASSWORD_ACTION_TITLE_MAP {
-    { ActionType::CREATE_PASSWORD, "Create new password" },
-    { ActionType::GET_PASSWORD, "Authentication" }
-};
-
-const std::unordered_map<ActionType, std::string> fileDialogTypeQStringRepresentation {
-    { ActionType::SEND_FILE, "Send file" },
-    { ActionType::SAVE_FILE, "Save file" }
-};
-
-const std::string COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Companion action" };
-const std::string GROUP_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Group action" };
-const std::string PASSWORD_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Password action" };
-const std::string FILE_ACTION_INFO_DIALOG_DEFAULT_HEADER { "File action" };
+const std::string ACTION_INFO_DIALOG_DEFAULT_HEADER { "Action" };
 const std::string INFO_DIALOG_DEFAULT_HEADER { "Info dialog" };
 
-const InfoDialogHeaderMap COMPANION_ACTION_SUCCESS_HEADER_MAP {
+const InfoDialogHeaderMap ACTION_SUCCESS_HEADER_MAP {
     { ActionType::CREATE_COMPANION, "New companion added" },
-    { ActionType::UPDATE_COMPANION, "Companion edited" }
+    { ActionType::UPDATE_COMPANION, "Companion edited" },
+    { ActionType::CREATE_PASSWORD, "New password created" }
 };
 
-const InfoDialogHeaderMap COMPANION_ACTION_FAIL_HEADER_MAP {
+const InfoDialogHeaderMap ACTION_FAIL_HEADER_MAP {
     { ActionType::CREATE_COMPANION, "Companion addition error" },
     { ActionType::UPDATE_COMPANION, "Companion edition error" }
 };
@@ -198,7 +187,7 @@ const QString newPasswordDialogSecondLabel { "Reenter password:" };
 const QString getPasswordDialogLabel { "Enter password:" };
 
 // info dialogs
-const std::string newPasswordCreatedLabel { "New password created" };
+// const std::string newPasswordCreatedLabel { "New password created" };
 
 // button text
 const QString okButtonText { "OK" };
