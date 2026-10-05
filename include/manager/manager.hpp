@@ -15,7 +15,6 @@
 #include "action.hpp"
 #include "action_result.hpp"
 #include "constants.hpp"
-#include "data_checker.hpp"
 #include "db_constants.hpp"
 #include "db_interaction.hpp"
 #include "utils.hpp"
@@ -38,7 +37,6 @@ class MessageState;
 class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
-// class Validator;
 
 using CompanionResult = ActionSharedValueResult<Companion>;
 
@@ -151,10 +149,10 @@ public:
     std::shared_ptr<ActionResult> performCompanionAction(std::shared_ptr<CompanionAction> action);
 
     template<typename... Ts>
-    void initAction(ChatActionType type, Ts &&...args)
+    void initAction(ActionType type, Ts &&...args)
     {
         auto action = std::make_shared<CompanionAction>(type, args...);
-        setCurrentAction(std::dynamic_pointer_cast<Action>(action));
+        setCurrentAction(std::dynamic_pointer_cast<Action>(action));  // TODO check cast
         action->set();
     }
 

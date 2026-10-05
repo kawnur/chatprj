@@ -114,7 +114,7 @@ void GraphicManager::updateCompanion(std::shared_ptr<Companion> companion)
 
 void GraphicManager::clearCompanionHistory(std::shared_ptr<Companion> companion)
 {
-    auto action = std::make_shared<CompanionAction>(ChatActionType::CLEAR_HISTORY, companion);
+    auto action = std::make_shared<CompanionAction>(ActionType::CLEAR_HISTORY, companion);
     action->set();
 }
 
@@ -125,7 +125,7 @@ void GraphicManager::clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup)
 
 void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 {
-    auto action = std::make_shared<CompanionAction>(ChatActionType::DELETE, companion);
+    auto action = std::make_shared<CompanionAction>(ActionType::DELETE_COMPANION, companion);
     action->set();
 }
 

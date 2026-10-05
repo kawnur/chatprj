@@ -25,6 +25,8 @@
 
 using namespace std::string_literals;
 
+// using DataDialogTitleMap = std::unordered_map<ActionType, QString>;
+
 class Action;
 // class ActionWrapperBase;
 class Companion;
@@ -70,7 +72,7 @@ class Dialog : public QDialog
     Q_OBJECT
 
 public:
-    Dialog() = default;
+    Dialog();
     virtual ~Dialog() { logArgsInfo(Q_FUNC_INFO); }
 
     // virtual void set() {}
@@ -82,13 +84,24 @@ public:
     // void setAction(std::shared_ptr<Action> action);
     // void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
     bool containsDialog() const { return containsDialog_; }
+    void setDialogType(DialogType type);
 
 // protected slots:
 public slots:
     // void actionSlot();
 
 protected:
-    bool containsDialog_ = false;
+    void setTitleAsData();
+    void setTitleAsInfo();
+
+    DialogType dialogType_;
+    ActionType actionType_;
+    bool containsDialog_;
+    // const DataDialogTitleMap &dataMap_;
+    // const InfoDialogTitleMap &infoMap_;
+    std::reference_wrapper<const DataDialogTitleMap> dataMap_;
+    std::reference_wrapper<const InfoDialogTitleMap> infoMap_;
+    QString defaultTitle_;
     // std::shared_ptr<Action> action_;
     // std::shared_ptr<ActionWrapperBase> wrapper_;
 };
@@ -98,7 +111,7 @@ class CompanionDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    CompanionDataDialog(ChatActionType, std::shared_ptr<QWidget>, std::shared_ptr<Companion>);
+    CompanionDataDialog(ActionType, std::shared_ptr<QWidget>, std::shared_ptr<Companion>);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     std::string getNameString();
@@ -111,7 +124,7 @@ public:
     std::shared_ptr<CompanionData> getCompanionData() override;
 
 private:
-    ChatActionType type_;
+    ActionType type_;
     std::unique_ptr<QFormLayout> layout_;
     std::unique_ptr<QLabel> nameLabel_;
     std::unique_ptr<QLineEdit> nameEdit_;
@@ -127,14 +140,14 @@ class GroupChatDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    GroupChatDataDialog(ChatActionType, std::shared_ptr<QWidget>);
+    GroupChatDataDialog(ActionType, std::shared_ptr<QWidget>);
     ~GroupChatDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
 
 private:
-    ChatActionType type_;
+    ActionType type_;
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QLabel> label_;
     std::unique_ptr<QListWidget> list_;

@@ -9,6 +9,7 @@
 #include "manager.hpp"
 
 class CompanionAction;
+class DBReplyData;
 class Manager;
 
 std::shared_ptr<Manager> getManager();

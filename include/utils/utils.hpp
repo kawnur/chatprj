@@ -2,6 +2,7 @@
 #define UTILS_HPP
 
 #include <iostream>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -157,10 +158,18 @@ void logTemplateError(T &&templateString, Ts &&...args);
 // }
 
 template<AssociativeContainer M, typename T, typename U>
+typename M::mapped_type getMapValue(
+    const std::reference_wrapper<const M> &wrapper, const T &key, const U &defaultValue)
+{
+    return getMapValue(wrapper.get(), key, defaultValue);
+}
+
+template<AssociativeContainer M, typename T, typename U>
 // U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &defaultValue)
 // U getMapValue(const M &map, const T &key, U &&defaultValue)
 // std::optional<M::mapped_type> getMapValue(const M &map, const T &key, U &&defaultValue)
-typename M::mapped_type getMapValue(const M &map, const T &key, U &&defaultValue)
+// typename M::mapped_type getMapValue(const M &map, const T &key, U &&defaultValue)
+typename M::mapped_type getMapValue(const M &map, const T &key, const U &defaultValue)
 {
     try {
         // return U(map.at(key));

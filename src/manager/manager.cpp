@@ -4,6 +4,7 @@
 #include "application.hpp"
 #include "companion.hpp"
 #include "data.hpp"
+#include "data_checker.hpp"
 #include "functional"
 #include "logging.hpp"
 #include "message.hpp"
@@ -677,22 +678,22 @@ std::shared_ptr<ActionResult> Manager::performCompanionAction(std::shared_ptr<Co
     std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> lambda;
 
     switch (action->getType()) {
-    case ChatActionType::CREATE:
+    case ActionType::CREATE_COMPANION:
         lambda = [=, this](auto action) { return createCompanion(action); };
 
     break;
 
-    case ChatActionType::UPDATE:
+    case ActionType::UPDATE_COMPANION:
         lambda = [=, this](auto action) { return updateCompanion(action); };
 
         break;
 
-    case ChatActionType::DELETE:
+    case ActionType::DELETE_COMPANION:
         // lambda = [=]() { return deleteCompanion(action); };
 
         break;
 
-    case ChatActionType::CLEAR_HISTORY:
+    case ActionType::CLEAR_HISTORY:
         // lambda = [=]() { return clearCompanionHistory(action); };
 
         break;
@@ -706,12 +707,12 @@ std::shared_ptr<ActionResult> Manager::performCompanionAction(std::shared_ptr<Co
 
 void Manager::createCompanion()
 {
-    initAction(ChatActionType::CREATE, nullptr);
+    initAction(ActionType::CREATE_COMPANION, nullptr);
 }
 
 void Manager::updateCompanion(std::shared_ptr<Companion> companion)
 {
-    initAction(ChatActionType::UPDATE, companion);
+    initAction(ActionType::UPDATE_COMPANION, companion);
 }
 
 std::shared_ptr<ActionResult> Manager::getActionResultByCompanionIdDBData(
@@ -821,6 +822,7 @@ std::shared_ptr<ActionResult> Manager::updateCompanionInDbAndReturnId(
 
 std::shared_ptr<ActionResult> Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
 {
+    // TODO check new data before data dialog is closed
     // check if data was modified
     auto oldData = action->getCompanion()->getData();
     auto newData = action->getCompanionData();

@@ -7,7 +7,7 @@
 #include <QObject>
 
 #include "constants.hpp"
-#include "manager.hpp"
+// #include "manager.hpp"
 #include "widgets_dialog.hpp"
 
 class ActionResult;
@@ -34,7 +34,7 @@ public:
     virtual void postAct(std::shared_ptr<ActionResult> result) {}
     virtual void endAct() {}
 
-    virtual ChatActionType getType() { return ChatActionType::UNKNOWN; }
+    virtual ActionType getType() { return ActionType::UNKNOWN; }
 
 protected:
     std::shared_ptr<Dialog> dataDialog_;
@@ -57,13 +57,13 @@ class CompanionAction : public RegularAction, public std::enable_shared_from_thi
     Q_OBJECT
 
 public:
-    CompanionAction(ChatActionType type, std::shared_ptr<Companion> companion);
+    CompanionAction(ActionType type, std::shared_ptr<Companion> companion);
     ~CompanionAction();
 
     void buildDataDialog() override;
     void buildInfoDialog() override;
 
-    ChatActionType getType() override;
+    ActionType getType() override;
     std::string getName() const;
     std::string getIpAddress() const;
     std::string getServerPort() const;
@@ -88,7 +88,7 @@ public slots:
     void endAct() override;
 
 private:
-    ChatActionType type_;
+    ActionType type_;
     std::shared_ptr<CompanionData> data_;
     std::shared_ptr<Companion> companion_;
 };
@@ -98,11 +98,11 @@ class GroupChatAction : public RegularAction
     Q_OBJECT
 
 public:
-    GroupChatAction(ChatActionType type);
+    GroupChatAction(ActionType type);
     ~GroupChatAction() = default;
 
 private:
-    ChatActionType type_;
+    ActionType type_;
     std::shared_ptr<GroupChatData> data_;
 };
 
@@ -111,14 +111,14 @@ class PasswordAction : public RegularAction, public std::enable_shared_from_this
     Q_OBJECT
 
 public:
-    PasswordAction(PasswordActionType type);
+    PasswordAction(ActionType type);
     ~PasswordAction();
 
     std::string getPassword();
     void act() override;
 
 private:
-    PasswordActionType type_;
+    ActionType type_;
     std::string password_;
 };
 
@@ -127,10 +127,7 @@ class FileAction : public Action, public std::enable_shared_from_this<FileAction
     Q_OBJECT
 
 public:
-    FileAction(
-        FileActionType type, const std::string &networkId,
-        std::shared_ptr<Companion> companion);
-
+    FileAction(ActionType type, const std::string &networkId, std::shared_ptr<Companion> companion);
     ~FileAction() = default;
 
     std::shared_ptr<Companion> getCompanion() const;
@@ -141,7 +138,7 @@ public:
     void defineFilePath();
 
 private:
-    FileActionType type_;
+    ActionType type_;
     std::filesystem::path filePath_;
     std::shared_ptr<Companion> companion_;
     std::string networkId_;

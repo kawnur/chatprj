@@ -839,7 +839,7 @@ void WidgetGroup::messageAdded()
 
 void WidgetGroup::askUserForHistorySendingConfirmation()
 {
-    auto action = std::make_unique<CompanionAction>(ChatActionType::SEND_HISTORY, companion_);
+    auto action = std::make_unique<CompanionAction>(ActionType::SEND_HISTORY, companion_);
     action->set();
 }
 

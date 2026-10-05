@@ -16,7 +16,7 @@ const std::size_t MAX_BUFFER_SIZE = 1024;
 
 const int NUMBER_OF_MESSAGES_TO_GET_FROM_DB = 10;
 
-const bool LOG_DB_INTERACTION = false;
+const bool LOG_DB_INTERACTION = true;
 
 static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -86,27 +86,20 @@ enum class DialogType
     ERROR
 };
 
-enum class ChatActionType
+enum class ActionType
 {
     UNKNOWN,
-    CREATE,
+    CREATE_COMPANION,
     // READ,
-    UPDATE,
-    DELETE,
+    UPDATE_COMPANION,
+    DELETE_COMPANION,
+    CREATE_GROUP,
     CLEAR_HISTORY,
-    SEND_HISTORY
-};
-
-enum class PasswordActionType
-{
-    CREATE,
-    GET
-};
-
-enum class FileActionType
-{
-    SEND,
-    SAVE
+    SEND_HISTORY,
+    CREATE_PASSWORD,
+    GET_PASSWORD,
+    SEND_FILE,
+    SAVE_FILE
 };
 
 enum class MainWindowContainerPosition
@@ -116,31 +109,55 @@ enum class MainWindowContainerPosition
     RIGHT
 };
 
-const std::unordered_map<ChatActionType, std::string> companionActionTypeStringRepresentation {
-    { ChatActionType::CREATE, "Add new companion" },
-    { ChatActionType::UPDATE, "Edit companion" }
-};
+// dialog type to dialog window title mapping
+using InfoDialogTitleMap = std::unordered_map<DialogType, QString>;
+using DataDialogTitleMap = std::unordered_map<ActionType, QString>;
 
-const std::string COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Companion action" };
+// action type to first line of info dialog text mapping
+using InfoDialogHeaderMap = std::unordered_map<ActionType, std::string>;
 
-const std::unordered_map<ChatActionType, std::string> COMPANION_ACTION_INFO_DIALOG_SUCCESS_HEADER_MAP {
-    { ChatActionType::CREATE, "New companion added" },
-    { ChatActionType::UPDATE, "Companion edited" }
-};
+const InfoDialogTitleMap INFO_STUB {};
+const DataDialogTitleMap DATA_STUB {};
 
-const std::unordered_map<ChatActionType, std::string> COMPANION_ACTION_INFO_DIALOG_FAIL_HEADER_MAP {
-    { ChatActionType::CREATE, "Companion addition error" },
-    { ChatActionType::UPDATE, "Companion edition error" }
-};
-
-const std::unordered_map<ChatActionType, std::string> groupChatActionTypeStringRepresentation {
-    { ChatActionType::CREATE, "Add new group chat" }
-};
-
-const std::unordered_map<DialogType, std::string> dialogTypeStringRepresentation {
+const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
     { DialogType::INFO, "INFO" },
     { DialogType::WARNING, "WARNING" },
     { DialogType::ERROR, "ERROR" }
+};
+
+const DataDialogTitleMap COMPANION_ACTION_TITLE_MAP {
+    { ActionType::CREATE_COMPANION, "Add new companion" },
+    { ActionType::UPDATE_COMPANION, "Edit companion" }
+};
+
+const DataDialogTitleMap GROUP_ACTION_TITLE_MAP {
+    { ActionType::CREATE_GROUP, "Add new group chat" }
+};
+
+const DataDialogTitleMap PASSWORD_ACTION_TITLE_MAP {
+    { ActionType::CREATE_PASSWORD, "Create new password" },
+    { ActionType::GET_PASSWORD, "Authentication" }
+};
+
+const std::unordered_map<ActionType, std::string> fileDialogTypeQStringRepresentation {
+    { ActionType::SEND_FILE, "Send file" },
+    { ActionType::SAVE_FILE, "Save file" }
+};
+
+const std::string COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Companion action" };
+const std::string GROUP_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Group action" };
+const std::string PASSWORD_ACTION_INFO_DIALOG_DEFAULT_HEADER { "Password action" };
+const std::string FILE_ACTION_INFO_DIALOG_DEFAULT_HEADER { "File action" };
+const std::string INFO_DIALOG_DEFAULT_HEADER { "Info dialog" };
+
+const InfoDialogHeaderMap COMPANION_ACTION_SUCCESS_HEADER_MAP {
+    { ActionType::CREATE_COMPANION, "New companion added" },
+    { ActionType::UPDATE_COMPANION, "Companion edited" }
+};
+
+const InfoDialogHeaderMap COMPANION_ACTION_FAIL_HEADER_MAP {
+    { ActionType::CREATE_COMPANION, "Companion addition error" },
+    { ActionType::UPDATE_COMPANION, "Companion edition error" }
 };
 
 const std::unordered_map<DialogType, LogType> MAP_DIALOG_TYPE_TO_LOG_TYPE {
@@ -149,17 +166,12 @@ const std::unordered_map<DialogType, LogType> MAP_DIALOG_TYPE_TO_LOG_TYPE {
     { DialogType::ERROR, LogType::ERROR }
 };
 
-const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPRESENTATION {
+const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPR {
     { LogType::INFO,      "INF" },
     { LogType::DEBUG,     "DEB" },
     { LogType::EXCEPTION, "EXC" },
     { LogType::WARNING,   "WRN" },
     { LogType::ERROR,     "ERR" }
-};
-
-const std::unordered_map<FileActionType, std::string> fileDialogTypeQStringRepresentation {
-    { FileActionType::SEND, "Send file" },
-    { FileActionType::SAVE, "Save file" }
 };
 
 const QString connectButtonConnectLabel { "Connect" };
@@ -179,17 +191,11 @@ const std::string socketInfoStubWidget { "No companion info from DB..." };
 const QString newGroupChatDialogLabel { "Choose companions to add to new group chat" };
 
 // new password dialog
-const QString newPasswordDialogTitle { "New password creation" };
 const QString newPasswordDialogFirstLabel { "Enter password:" };
 const QString newPasswordDialogSecondLabel { "Reenter password:" };
 
 // get password dialog
-const QString getPasswordDialogTitle { "Authentication" };
 const QString getPasswordDialogLabel { "Enter password:" };
-
-// authentication dialog
-const QString authenticationDialogTitle { "Authentication" };
-const QString authenticationDialogLabel { "Enter password:" };
 
 // info dialogs
 const std::string newPasswordCreatedLabel { "New password created" };

@@ -30,12 +30,37 @@
 //     wrapper_->act();
 // }
 
-CompanionDataDialog::CompanionDataDialog(
-    ChatActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
+Dialog::Dialog()
+    : dialogType_(DialogType::INFO), actionType_(ActionType::UNKNOWN), containsDialog_(false),
+    dataMap_(DATA_STUB), infoMap_(INFO_STUB), defaultTitle_() {}
+
+void Dialog::setTitleAsData()
 {
+    auto title = getMapValue(dataMap_, actionType_, defaultTitle_);
+    setWindowTitle(title);
+}
+
+void Dialog::setTitleAsInfo()
+{
+    auto title = getMapValue(infoMap_, dialogType_, defaultTitle_);
+    setWindowTitle(title);
+}
+
+void Dialog::setDialogType(DialogType type)
+{
+    dialogType_ = type;
+    setTitleAsInfo();
+}
+
+CompanionDataDialog::CompanionDataDialog(
+    ActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
+    : Dialog()
+{
+    dataMap_ = COMPANION_ACTION_TITLE_MAP;
+    defaultTitle_ = getQString(COMPANION_ACTION_INFO_DIALOG_DEFAULT_HEADER);
+    setTitleAsData();
+
     setParent(parent.get());
-    auto title = getMapValue(companionActionTypeStringRepresentation, type, "Companion action"s);
-    setWindowTitle(getQString(title));
     setModal(true);
     setWindowFlag(Qt::Window);
 
@@ -53,7 +78,7 @@ CompanionDataDialog::CompanionDataDialog(
     portLabel_ = std::make_unique<QLabel>("Port");
     portEdit_ = std::make_unique<QLineEdit>();
 
-    if (type_ == ChatActionType::UPDATE && companion) {
+    if (type_ == ActionType::UPDATE_COMPANION && companion) {
         nameEdit_->setText(getQString(companion->getName()));
         ipAddressEdit_->setText(getQString(companion->getSocketInfo()->getIpAddress()));
         portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->getClientPort())));
@@ -74,11 +99,11 @@ std::string CompanionDataDialog::getNameString()
 
 std::string CompanionDataDialog::getIpAddressString()
 {
-    auto ipAddressFromWidget = ipAddressEdit_->text().toStdString();  // TODO change
-    // QHostAddress hostAddress { getQString(ipAddressFromWidget) };
+    // result format is db-compliant
+    auto ipAddressFromWidget = ipAddressEdit_->text();
+    QHostAddress hostAddress { ipAddressFromWidget };
 
-    // return hostAddress.toString().toStdString();
-    return ipAddressFromWidget;
+    return hostAddress.toString().toStdString();
 }
 
 std::string CompanionDataDialog::getPortString()
@@ -109,11 +134,13 @@ std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
         getNameString(), getIpAddressString(), ""s, getPortString());
 }
 
-GroupChatDataDialog::GroupChatDataDialog(ChatActionType type, std::shared_ptr<QWidget> parent)
+GroupChatDataDialog::GroupChatDataDialog(ActionType type, std::shared_ptr<QWidget> parent)
 {
+    dataMap_ = GROUP_ACTION_TITLE_MAP;
+    defaultTitle_ = getQString(GROUP_ACTION_INFO_DIALOG_DEFAULT_HEADER);
+    setTitleAsData();
+
     setParent(parent.get());
-    auto title = getMapValue(groupChatActionTypeStringRepresentation, type, "Group chat action"s);
-    setWindowTitle(getQString(title));
     setModal(true);
     setWindowFlag(Qt::Window);
 
@@ -132,7 +159,10 @@ void GroupChatDataDialog::set(std::shared_ptr<Action> action) {}
 
 CreatePasswordDialog::CreatePasswordDialog()
 {
-    setWindowTitle(newPasswordDialogTitle);
+    actionType_ = ActionType::CREATE_PASSWORD;
+    dataMap_ = PASSWORD_ACTION_TITLE_MAP;
+    defaultTitle_ = getQString(PASSWORD_ACTION_INFO_DIALOG_DEFAULT_HEADER);
+    setTitleAsData();
 
     setParent(getGraphicManager()->getMainWindow().get());
 
@@ -175,7 +205,10 @@ std::string CreatePasswordDialog::getSecondEditText()
 
 GetPasswordDialog::GetPasswordDialog()
 {
-    setWindowTitle(getPasswordDialogTitle);
+    actionType_ = ActionType::GET_PASSWORD;
+    dataMap_ = PASSWORD_ACTION_TITLE_MAP;
+    defaultTitle_ = getQString(PASSWORD_ACTION_INFO_DIALOG_DEFAULT_HEADER);
+    setTitleAsData();
 
     setParent(getGraphicManager()->getMainWindow().get());
 
@@ -230,6 +263,12 @@ TextDialog::TextDialog(
     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 {
+    // title
+    dialogType_ = DialogType::INFO;
+    infoMap_ = DIALOG_TYPE_STRING_REPR_MAP;
+    defaultTitle_ = getQString(INFO_DIALOG_DEFAULT_HEADER);
+    setTitleAsInfo();
+
     // parent
     if (parent)
         setParent(parent.get());
@@ -243,9 +282,6 @@ TextDialog::TextDialog(
     setWindowFlag(Qt::Window);
     // setWindowFlags(windowFlags() & Qt::CustomizeWindowHint & ~Qt::WindowCloseButtonHint);
     // setWindowFlags(windowFlags() & ~Qt::WindowCloseButtonHint);
-
-    // title
-    setWindowTitle(getQString(getMapValue(dialogTypeStringRepresentation, type, "UNKNOWN"s)));
 
     // set fields
     layout_ = std::make_unique<QVBoxLayout>();

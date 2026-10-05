@@ -15,7 +15,7 @@ std::string buildLogEntryPrefix(LogType type)
     auto time = getString(QTime().currentTime().toString());
 
     std::string defaultValue = "UNKNOWN"s;
-    auto mark = getMapValue(LOG_TYPE_STRING_REPRESENTATION, type, defaultValue);
+    auto mark = getMapValue(LOG_TYPE_STRING_REPR, type, defaultValue);
 
     return getStringByFormat("[{0} {1}]", time, mark);
 }
