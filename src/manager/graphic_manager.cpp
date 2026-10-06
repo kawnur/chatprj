@@ -85,16 +85,16 @@ void GraphicManager::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBa
     mainWindow_->removeWidgetFromCompanionPanel(widget);
 }
 
-void GraphicManager::createTextDialogAndShow(
-    std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-    std::shared_ptr<std::vector<ButtonInfo>> buttonInfo)
-{
-    // TODO delete objects for closed dialoges?
-    auto dialog = std::make_shared<TextDialog>(parent, type, text, buttonInfo);
+// void GraphicManager::createTextDialogAndShow(
+//     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+//     std::shared_ptr<std::vector<ButtonInfo>> buttonInfo)
+// {
+//     // TODO delete objects for closed dialoges?
+//     auto dialog = std::make_shared<TextDialog>(parent, type, text, buttonInfo);
 
-    // dialog->set();
-    dialog->show();
-}
+//     // dialog->set();
+//     dialog->show();
+// }
 
 void GraphicManager::createCompanion()
 {

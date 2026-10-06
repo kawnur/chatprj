@@ -12,7 +12,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils.hpp"
-#include "utils_widgets.hpp"
+// #include "utils_widgets.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
@@ -74,27 +74,33 @@ void CompanionAction::buildDataDialog()
 
         break;
 
-    case ActionType::DELETE_COMPANION:
-        dataDialog_ = std::make_shared<TextDialog>(
-            mainWindow, DialogType::WARNING, deleteCompanionDialogText,
-            getButtonInfoVector(Button::DELETE_COMPANION));
+    case ActionType::DELETE_COMPANION: {
+        std::initializer_list<ButtonInfo> list {
+            { ButtonType::DELETE_COMPANION, [](TextDialog &dialog) { dialog.acceptAction(); } }
+        };
 
-        break;
+        dataDialog_ = std::make_shared<TextDialog>(
+            nullptr, DialogType::WARNING, deleteCompanionDialogText,
+            // getButtonInfoVector(ButtonType::DELETE_COMPANION));
+            list);
+    }
+
+    break;
 
     case ActionType::CLEAR_HISTORY:
-        dataDialog_ = std::make_shared<TextDialog>(
-            mainWindow, DialogType::WARNING, clearCompanionHistoryDialogText,
-            getButtonInfoVector(Button::CLEAR_HISTORY));
+        // dataDialog_ = std::make_shared<TextDialog>(
+        //     mainWindow, DialogType::WARNING, clearCompanionHistoryDialogText,
+        //     getButtonInfoVector(ButtonType::CLEAR_HISTORY));
 
         break;
 
     case ActionType::SEND_HISTORY: {
-        auto name = companion_->getName();
+        // auto name = companion_->getName();
 
-        dataDialog_ = std::make_shared<TextDialog>(
-            mainWindow, DialogType::WARNING,
-            getStringByFormat(sendChatHistoryToCompanionDialogText, name),
-            getButtonInfoVector(Button::SEND_HISTORY));
+        // dataDialog_ = std::make_shared<TextDialog>(
+        //     mainWindow, DialogType::WARNING,
+        //     getStringByFormat(sendChatHistoryToCompanionDialogText, name),
+        //     getButtonInfoVector(ButtonType::SEND_HISTORY));
     }
 
     break;
@@ -108,8 +114,11 @@ void CompanionAction::buildInfoDialog()
 {
     auto function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
 
+    std::initializer_list<ButtonInfo> list { { ButtonType::OK, function } };
+
     infoDialog_ = std::make_shared<TextDialog>(
-        dataDialog_, DialogType::INFO, ""s, createOkButtonInfoVector(function));
+        // dataDialog_, DialogType::INFO, ""s, createOkButtonInfoVector(function));
+        dataDialog_, DialogType::INFO, ""s, list);
 }
 
 std::string CompanionAction::getName() const
@@ -291,8 +300,12 @@ void PasswordAction::buildInfoDialog()
         dialog.closeSelfAndParentDialog();
     };
 
+    std::string text = ""s;
+    std::initializer_list<ButtonInfo> list { { ButtonType::OK, function } };
+
     infoDialog_ = std::make_shared<TextDialog>(
-        dataDialog_, DialogType::INFO, ""s, createOkButtonInfoVector(function));
+        // dataDialog_, DialogType::INFO, ""s, createOkButtonInfoVector(function));
+        dataDialog_, DialogType::INFO, text, list);
 }
 
 PasswordAction::~PasswordAction()
@@ -356,7 +369,7 @@ void PasswordAction::act()
         if (text1 == text2) {
             if (text1.size() == 0) {
                 // showErrorDialogAndLogError("Empty password is invalid", getDialog());
-                showErrorDialogAndLogError("Empty password is invalid", dataDialog_);
+                // showErrorDialogAndLogError("Empty password is invalid", dataDialog_);
 
                 return;
             }
@@ -367,7 +380,7 @@ void PasswordAction::act()
         }
         else {
             // showErrorDialogAndLogError("Entered passwords are not equal", getDialog());
-            showErrorDialogAndLogError("Entered passwords are not equal", dataDialog_);
+            // showErrorDialogAndLogError("Entered passwords are not equal", dataDialog_);
         }
     }
 
@@ -383,7 +396,7 @@ void PasswordAction::act()
 
         if (text.size() == 0) {
             // showErrorDialogAndLogError("Empty password is invalid", getDialog());
-            showErrorDialogAndLogError("Empty password is invalid", dataDialog_);
+            // showErrorDialogAndLogError("Empty password is invalid", dataDialog_);
 
             return;
         }

@@ -75,7 +75,7 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoB
     qsizetype index = companionPanelChildren.indexOf(widget.get());
 
     if (index == -1) {
-        showErrorDialogAndLogError("SocketInfoBaseWidget was not found in companion panel");
+        // showErrorDialogAndLogError("SocketInfoBaseWidget was not found in companion panel");
     } else if (index == 0) {
 
     } else if (index > 0) {

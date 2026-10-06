@@ -3,20 +3,25 @@
 #include "constants.hpp"
 #include "widgets_dialog.hpp"
 
-std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(Button value)
+// std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(ButtonType value)
+// {
+//     auto vector = std::make_shared<std::vector<ButtonInfo>>();
+
+//     // auto text = getButtonText(value);
+//     // auto cancelText = getButtonText(Button::CANCEL);
+
+//     vector->emplace_back(value, QDialogButtonBox::AcceptRole, &TextDialog::acceptAction);
+//     vector->emplace_back(ButtonType::CANCEL, QDialogButtonBox::RejectRole, &TextDialog::reject);
+
+//     return vector;
+// }
+
+QString getButtonText(ButtonType value)
 {
-    auto vector = std::make_shared<std::vector<ButtonInfo>>();
-
-    // auto text = getButtonText(value);
-    // auto cancelText = getButtonText(Button::CANCEL);
-
-    vector->emplace_back(value, QDialogButtonBox::AcceptRole, &TextDialog::acceptAction);
-    vector->emplace_back(Button::CANCEL, QDialogButtonBox::RejectRole, &TextDialog::reject);
-
-    return vector;
+    return getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, DEFAULT_BUTTON_TEXT);
 }
 
-QString getButtonText(Button value)
+QDialogButtonBox::ButtonRole getButtonRole(ButtonType type)
 {
-    return getMapValue(BUTTON_ROLE_TO_TEXT_MAP, value, DEFAULT_BUTTON_TEXT);
+    return getMapValue(BUTTON_TYPE_TO_ROLE_MAP, type, DEFAULT_BUTTON_ROLE);
 }

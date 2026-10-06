@@ -112,7 +112,7 @@ public:
         }
 
         if (!dbResult) {
-            showErrorDialogAndLogError("Database request error, dbResult is nullptr");
+            // showErrorDialogAndLogError("Database request error, dbResult is nullptr");
 
             return nullptr;
         }
@@ -120,7 +120,7 @@ public:
         auto replyData = std::make_shared<DBReplyData>(log_, requestData.getReplyKeys());
 
         if (replyData->getDataFromResult(dbResult, 0) == -1) {
-            showErrorDialogAndLogError("Error getting data from dbResult");
+            // showErrorDialogAndLogError("Error getting data from dbResult");
 
             return nullptr;
         }

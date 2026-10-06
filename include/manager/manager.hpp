@@ -215,14 +215,14 @@ public:
 
         if (!data) {
             auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_NULL);
-            showErrorDialogAndLogError(entry);
+            // showErrorDialogAndLogError(entry);
 
             return nullptr;
         }
 
         if (data->isEmpty()) {
             auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_EMPTY);
-            showWarningDialogAndLogWarning(entry);
+            // showWarningDialogAndLogWarning(entry);
 
             // return nullptr;
         }

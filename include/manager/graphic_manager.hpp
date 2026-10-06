@@ -52,9 +52,9 @@ public:
     void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
     void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
 
-    void createTextDialogAndShow(
-        std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-        std::shared_ptr<std::vector<ButtonInfo>> buttonInfo);
+    // void createTextDialogAndShow(
+    //     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+    //     std::shared_ptr<std::vector<ButtonInfo>> buttonInfo);
 
     void createCompanion();
     void createGroupChat();

@@ -9,21 +9,21 @@
 #include "message.hpp"
 #include "widgets_panel.hpp"
 
-Button getInitialConnectButton()
+ButtonType getInitialConnectButton()
 {
     try {
-        return CONNECT_BUTTONS.empty() ? Button::UNKNOWN : CONNECT_BUTTONS.at(0);
+        return CONNECT_BUTTONS.empty() ? ButtonType::UNKNOWN : CONNECT_BUTTONS.at(0);
     }
     catch(...) {
-        return Button::UNKNOWN;
+        return ButtonType::UNKNOWN;
     }
 }
 
-Button getNextConnectButton(Button current)
+ButtonType getNextConnectButton(ButtonType current)
 {
     try {
         if (CONNECT_BUTTONS.empty())
-            return Button::UNKNOWN;
+            return ButtonType::UNKNOWN;
 
         auto currentIterator = std::ranges::find(CONNECT_BUTTONS, current);
 
@@ -38,9 +38,46 @@ Button getNextConnectButton(Button current)
         return *nextIterator;
     }
     catch (...) {
-        return Button::UNKNOWN;
+        return ButtonType::UNKNOWN;
     }
 }
+
+Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
+
+Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
+
+ButtonInfo::ButtonInfo(ButtonType type, std::function<void(TextDialog  &)> function)
+    : type_(type), function_(function) {}
+
+ButtonInfo::~ButtonInfo() { logArgsInfo(Q_FUNC_INFO); }
+
+ButtonType ButtonInfo::type() const
+{
+    return type_;
+}
+
+std::function<void(TextDialog &)> ButtonInfo::function() const
+{
+    return function_;
+}
+
+ButtonBox::ButtonBox(const std::initializer_list<ButtonInfo> &list) : QDialogButtonBox()
+{
+    for (const auto &info : list) {
+        auto type = info.type();
+        auto role = getButtonRole(type);
+        auto function = info.function();
+        auto button = addButton(getButtonText(type), role);
+
+        // connect(button, &QPushButton::clicked, function, Qt::QueuedConnection);
+
+        connect(button, &QPushButton::clicked, []() {
+            qDebug() << "Button was clicked!";
+        });
+    }
+}
+
+ButtonBox::~ButtonBox() { logArgsInfo(Q_FUNC_INFO); }
 
 TextEditWidget::TextEditWidget()
 {
@@ -580,7 +617,7 @@ void SocketInfoWidget::buildFields()
     ipAddress_ = std::make_shared<QLabel>();
     serverPort_ = std::make_shared<QLabel>();
     clientPort_ = std::make_shared<QLabel>();
-    edit_ = std::make_shared<QPushButton>(getButtonText(Button::EDIT));
+    edit_ = std::make_shared<QPushButton>(getButtonText(ButtonType::EDIT));
     connectButton_ = getInitialConnectButton();
     connect_ = std::make_shared<QPushButton>(getButtonText(connectButton_));
 

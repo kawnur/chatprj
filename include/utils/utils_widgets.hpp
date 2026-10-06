@@ -12,7 +12,8 @@
 
 class ButtonInfo;
 
-std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(Button value);
-QString getButtonText(Button value);
+// std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(ButtonType value);
+QString getButtonText(ButtonType value);
+QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
 
 #endif // UTILS_WIDGETS_HPP

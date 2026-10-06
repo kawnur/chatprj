@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 
+#include <QDialogButtonBox>
 #include <QString>
 
 const std::string logDelimiter { "############################" };
@@ -180,7 +181,7 @@ const QString getPasswordDialogLabel { "Enter password:" };
 // const std::string newPasswordCreatedLabel { "New password created" };
 
 // button text
-enum class Button
+enum class ButtonType
 {
     OK,
     CANCEL,
@@ -190,26 +191,35 @@ enum class Button
     DELETE_COMPANION,
     CONNECT,
     DISCONNECT,
+    DOWNLOAD_FILE,
     UNKNOWN
 };
 
-const std::vector<Button> CONNECT_BUTTONS {
-    Button::CONNECT,  // initial
-    Button::DISCONNECT
+const std::vector<ButtonType> CONNECT_BUTTONS {
+    ButtonType::CONNECT,  // initial
+    ButtonType::DISCONNECT
 };
 
 const QString DEFAULT_BUTTON_TEXT { "OK" };
 
-const std::unordered_map<Button, QString> BUTTON_ROLE_TO_TEXT_MAP {
-    { Button::OK, "OK" },
-    { Button::CANCEL, "Cancel" },
-    { Button::EDIT, "Edit" },
-    { Button::CLEAR_HISTORY, "Clear history" },
-    { Button::SEND_HISTORY, "Send history" },
-    { Button::DELETE_COMPANION, "Delete companion" },
-    { Button::CONNECT, "Connect" },
-    { Button::DISCONNECT, "Disconnect" },
-    { Button::UNKNOWN, "_" }
+const std::unordered_map<ButtonType, QString> BUTTON_TYPE_TO_TEXT_MAP {
+    { ButtonType::OK, "OK" },
+    { ButtonType::CANCEL, "Cancel" },
+    { ButtonType::EDIT, "Edit" },
+    { ButtonType::CLEAR_HISTORY, "Clear history" },
+    { ButtonType::SEND_HISTORY, "Send history" },
+    { ButtonType::DELETE_COMPANION, "Delete companion" },
+    { ButtonType::CONNECT, "Connect" },
+    { ButtonType::DISCONNECT, "Disconnect" },
+    { ButtonType::DOWNLOAD_FILE, "Download file" },
+    { ButtonType::UNKNOWN, "_" }
+};
+
+const QDialogButtonBox::ButtonRole DEFAULT_BUTTON_ROLE = QDialogButtonBox::NoRole;
+
+const std::unordered_map<ButtonType, QDialogButtonBox::ButtonRole> BUTTON_TYPE_TO_ROLE_MAP {
+    { ButtonType::OK, QDialogButtonBox::AcceptRole },
+    { ButtonType::CANCEL, QDialogButtonBox::RejectRole }
 };
 
 // colors

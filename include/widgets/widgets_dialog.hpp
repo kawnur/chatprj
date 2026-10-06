@@ -29,43 +29,44 @@ using namespace std::string_literals;
 
 class Action;
 // class ActionWrapperBase;
+class ButtonBox;
 class Companion;
 class CompanionData;
 class FileAction;
 
-template <typename T, typename F>
-void showDialogAndLog(
-    T &&message, F &&func, DialogType type, std::shared_ptr<QWidget> parent = nullptr)
-{
-    getGraphicManager()->createTextDialogAndShow(
-        parent, type, message, createOkButtonInfoVector(func));
+// template <typename T, typename F>
+// void showDialogAndLog(
+//     T &&message, F &&func, DialogType type, std::shared_ptr<QWidget> parent = nullptr)
+// {
+//     getGraphicManager()->createTextDialogAndShow(
+//         parent, type, message, createOkButtonInfoVector(func));
 
-    logTypeArgs(getLogTypeByDialogType(type), message);
-}
+//     logTypeArgs(getLogTypeByDialogType(type), message);
+// }
 
-template <typename T, typename F>
-void showInfoDialogAndLogInfo(T &&message, F &&func, std::shared_ptr<QWidget> parent = nullptr)
-{
-    showDialogAndLog(message, func, DialogType::INFO, parent);
-}
+// template <typename T, typename F>
+// void showInfoDialogAndLogInfo(T &&message, F &&func, std::shared_ptr<QWidget> parent = nullptr)
+// {
+//     showDialogAndLog(message, func, DialogType::INFO, parent);
+// }
 
-template <typename T>
-void showInfoDialogAndLogInfo(T &&message, std::shared_ptr<QWidget> parent = nullptr)
-{
-    showDialogAndLog(message, &QDialog::accept, DialogType::INFO, parent);
-}
+// template <typename T>
+// void showInfoDialogAndLogInfo(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+// {
+//     showDialogAndLog(message, &QDialog::accept, DialogType::INFO, parent);
+// }
 
-template <typename T>
-void showWarningDialogAndLogWarning(T &&message, std::shared_ptr<QWidget> parent = nullptr)
-{
-    showDialogAndLog(message, &QDialog::accept, DialogType::WARNING, parent);
-}
+// template <typename T>
+// void showWarningDialogAndLogWarning(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+// {
+//     showDialogAndLog(message, &QDialog::accept, DialogType::WARNING, parent);
+// }
 
-template <typename T>
-void showErrorDialogAndLogError(T &&message, std::shared_ptr<QWidget> parent = nullptr)
-{
-    showDialogAndLog(message, &QDialog::accept, DialogType::ERROR, parent);
-}
+// template <typename T>
+// void showErrorDialogAndLogError(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+// {
+//     showDialogAndLog(message, &QDialog::accept, DialogType::ERROR, parent);
+// }
 
 class Dialog : public QDialog
 {
@@ -198,37 +199,20 @@ private:
 
 class TextDialog;
 
-class ButtonInfo
-{
-public:
-    ButtonInfo(
-        Button value, QDialogButtonBox::ButtonRole role,
-        std::function<void(TextDialog &)> function);
-
-    ~ButtonInfo() = default;
-
-    QString getText();
-    QDialogButtonBox::ButtonRole getRole();
-
-    // void (TextDialog::*function_)();
-    std::function<void(TextDialog &)> getFunction();
-
-private:
-    Button value_;
-    QDialogButtonBox::ButtonRole role_;
-    std::function<void(TextDialog &)> function_;
-};
-
 class TextDialog : public Dialog
 {
     Q_OBJECT
 
 public:
+    // TextDialog(
+    //     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+    //     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo);
     TextDialog(
-        std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-        std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo);
+        // std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+        std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
+        const std::initializer_list<ButtonInfo> &buttonsInfo);
 
-    ~TextDialog() { logArgsInfo(Q_FUNC_INFO); }
+    ~TextDialog();
 
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
@@ -245,9 +229,10 @@ private:
     std::unique_ptr<QPlainTextEdit> textEdit_;
     std::unique_ptr<QVBoxLayout> layout_;
     // std::unique_ptr<QDialogButtonBox> buttonBox_;
-    std::shared_ptr<QDialogButtonBox> buttonBox_;
-    std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
-    std::vector<std::unique_ptr<QPushButton>> buttons_;
+    // std::shared_ptr<QDialogButtonBox> buttonBox_;
+    std::unique_ptr<ButtonBox> buttonBox_;
+    // std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
+    // std::vector<std::unique_ptr<QPushButton>> buttons_;
 };
 
 class FileDialog : public Dialog
@@ -301,7 +286,7 @@ private:
 //     }
 // }
 
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
-    std::function<void(TextDialog &)> function);
+// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
+//     std::function<void(TextDialog &)> function);
 
 #endif // WIDGETS_DIALOG_HPP

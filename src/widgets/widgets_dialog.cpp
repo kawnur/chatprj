@@ -13,6 +13,7 @@
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "utils.hpp"
+#include "widgets.hpp"
 
 // void Dialog::setAction(std::shared_ptr<Action> action)
 // {
@@ -237,32 +238,16 @@ std::string GetPasswordDialog::getEditText()
     return edit_->text().toStdString();
 }
 
-ButtonInfo::ButtonInfo(
-    Button value, QDialogButtonBox::ButtonRole role,
-    std::function<void(TextDialog  &)> function)
-    : value_(value), role_(role), function_(function) {}
-
-QString ButtonInfo::getText()
-{
-    return getButtonText(value_);
-}
-
-QDialogButtonBox::ButtonRole ButtonInfo::getRole()
-{
-    return role_;
-}
-
-std::function<void(TextDialog  &)> ButtonInfo::getFunction()
-{
-    return function_;
-}
-
+// TextDialog::TextDialog(
+//     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+//     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 TextDialog::TextDialog(
-    std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-    std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
+    // std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
+    std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
+    const std::initializer_list<ButtonInfo> &buttonsInfo)
 {
     // title
-    dialogType_ = DialogType::INFO;
+    dialogType_ = type;
     infoMap_ = DIALOG_TYPE_STRING_REPR_MAP;
     defaultTitle_ = getQString(INFO_DIALOG_DEFAULT_HEADER);
     setTitleAsInfo();
@@ -291,32 +276,35 @@ TextDialog::TextDialog(
     layout_->addWidget(textEdit_.get());
 
     // set button box
-    buttonBox_ = std::make_shared<QDialogButtonBox>();
+    // buttonBox_ = std::make_shared<QDialogButtonBox>();
+    buttonBox_ = std::make_unique<ButtonBox>(buttonsInfo);
     layout_->addWidget(buttonBox_.get());
 
-    buttonsInfo_ = buttonsInfo;
+    // buttonsInfo_ = buttonsInfo;
 }
+
+TextDialog::~TextDialog() { logArgsInfo(Q_FUNC_INFO); }
 
 void TextDialog::set(std::shared_ptr<Action> action)
 {
-    for (auto &info : *buttonsInfo_) {
-        auto role = info.getRole();
-        auto function = info.getFunction();
-        buttons_.emplace_back(buttonBox_->addButton(info.getText(), role));
-    }
+    // for (auto &info : *buttonsInfo_) {
+    //     auto role = info.getRole();
+    //     auto function = info.getFunction();
+    //     buttons_.emplace_back(buttonBox_->addButton(info.getText(), role));
+    // }
 
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::accepted,
-        action.get(), &Action::endAct, Qt::QueuedConnection);
+    // connect(
+    //     buttonBox_.get(), &QDialogButtonBox::accepted,
+    //     action.get(), &Action::endAct, Qt::QueuedConnection);
 
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::rejected,
-        action.get(), &Action::endAct, Qt::QueuedConnection);
+    // connect(
+    //     buttonBox_.get(), &QDialogButtonBox::rejected,
+    //     action.get(), &Action::endAct, Qt::QueuedConnection);
 
-    // close button
-    connect(
-        this, &QDialog::rejected,
-        action.get(), &Action::endAct, Qt::QueuedConnection);
+    // // close button
+    // connect(
+    //     this, &QDialog::rejected,
+    //     action.get(), &Action::endAct, Qt::QueuedConnection);
 }
 
 void TextDialog::closeSelf()
@@ -394,11 +382,11 @@ std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
 
 // std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
 // std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog::*function)())
-std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
-    std::function<void(TextDialog &)> function)
-{
-    auto vector = std::make_shared<std::vector<ButtonInfo>>();
-    vector->emplace_back(Button::OK, QDialogButtonBox::AcceptRole, function);
+// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
+//     std::function<void(TextDialog &)> function)
+// {
+//     auto vector = std::make_shared<std::vector<ButtonInfo>>();
+//     vector->emplace_back(ButtonType::OK, QDialogButtonBox::AcceptRole, function);
 
-    return vector;
-}
+//     return vector;
+// }

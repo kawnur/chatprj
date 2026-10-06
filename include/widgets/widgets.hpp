@@ -21,9 +21,49 @@ class LeftPanelWidget;
 class Message;
 class MessageWidget;
 class RightPanelWidget;
+class TextDialog;
 
-Button getInitialConnectButton();
-Button getNextConnectButton(Button current);
+ButtonType getInitialConnectButton();
+ButtonType getNextConnectButton(ButtonType current);
+
+class Button : public QPushButton
+{
+    Q_OBJECT
+
+public:
+    Button(ButtonType type);
+    ~Button();
+
+private:
+    ButtonType type_;
+};
+
+class ButtonInfo
+{
+public:
+    ButtonInfo(ButtonType type, std::function<void(TextDialog &)> function);
+    ~ButtonInfo();
+
+    ButtonType type() const;
+    std::function<void(TextDialog &)> function() const;
+
+private:
+    ButtonType type_;
+    std::function<void(TextDialog &)> function_;
+};
+
+class ButtonBox :public QDialogButtonBox
+{
+    Q_OBJECT
+
+public:
+    ButtonBox(const std::initializer_list<ButtonInfo> &list);
+    ~ButtonBox();
+
+private:
+    // std::vector<Button> buttons;
+
+};
 
 class TextEditWidget : public QTextEdit
 {
@@ -231,7 +271,7 @@ private:
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
     std::shared_ptr<QPushButton> edit_;
-    Button connectButton_;
+    ButtonType connectButton_;
     std::shared_ptr<QPushButton> connect_;
     std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QAction> requestHistory_;

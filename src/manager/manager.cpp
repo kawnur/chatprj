@@ -474,7 +474,7 @@ bool Manager::pushMessageHistoryToDb(
             auto entryTemplate =
                 "Message with timestamp {0} from companion with id {1} already exists";
 
-            showInfoDialogAndLogInfo(getStringByFormat(entryTemplate, timestamp, companionId));
+            // showInfoDialogAndLogInfo(getStringByFormat(entryTemplate, timestamp, companionId));
 
             continue;
         }
@@ -972,7 +972,7 @@ void Manager::authenticateUser(std::shared_ptr<PasswordAction> action)
         return;
 
     if (passwordData->getValue(0, "password") != action->getPassword()) {
-        showErrorDialogAndLogError("Password is not correct");
+        // showErrorDialogAndLogError("Password is not correct");
 
         return;
     }
@@ -1318,7 +1318,7 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> c
     auto result = std::ranges::find_if(mapCompanionToWidgetGroup_, lambda);
 
     if (result == mapCompanionToWidgetGroup_.end()) {
-        showErrorDialogAndLogError("Companion was not found in mapping at deletion");
+        // showErrorDialogAndLogError("Companion was not found in mapping at deletion");
     }
     else {
         if (selectedCompanion_ == companion)

@@ -4,6 +4,7 @@
 #include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "message.hpp"
+#include "utils_widgets.hpp"
 #include "widgets.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
@@ -167,7 +168,9 @@ FileMessageWidget::FileMessageWidget(
     fileWidgetLayout_ = std::make_shared<QHBoxLayout>();
     fileWidget_->setLayout(fileWidgetLayout_.get());
 
-    downloadButton_ = (showButton_) ? std::make_shared<QPushButton>("Download file") : nullptr;
+    downloadButton_ = (showButton_)
+        ? std::make_shared<QPushButton>(getButtonText(ButtonType::DOWNLOAD_FILE))
+        : nullptr;
 }
 
 void FileMessageWidget::set(std::shared_ptr<WidgetGroup> group)
