@@ -34,10 +34,8 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         received_ = nullptr;
 
         std::string text = (message->isAntecedent()) ? "NEW" : "";
-
-        auto textHtml = getStringByFormat(
-            "<font color=\"{0}\"><b>{1}</b></font>", receivedMessageColor, text);
-
+        auto color = getWidgetColor(Widget::MESSAGE_RECEIVED);
+        auto textHtml = getStringByFormat("<font color=\"{0}\"><b>{1}</b></font>", color, text);
         newMessageLabel_ = std::make_shared<QLabel>(getQString(textHtml));
         newMessageLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
 
@@ -78,7 +76,7 @@ MessageWidget::MessageWidget(
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     palette_ = std::make_shared<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(messageWidgetBackGroundColor));
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::MESSAGE)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 
@@ -160,7 +158,7 @@ FileMessageWidget::FileMessageWidget(
             message->getNetworkId());
 
         auto text = getFormattedMessageBodyString(
-            sentMessageColor, getStringByFormat("SEND FILE: {}", pathString));
+            getHTMLColor(Widget::MESSAGE_SENT), getStringByFormat("SEND FILE: {}", pathString));
 
         messageLabel_->setText(getQString(text));
     }

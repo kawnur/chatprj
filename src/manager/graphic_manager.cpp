@@ -192,10 +192,10 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 //         createOkButtonInfoVector(function));
 // }
 
-void GraphicManager::sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action)
-{
-    getManager()->createUserPassword(action);
-}
+// void GraphicManager::sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action)
+// {
+//     getManager()->createUserPassword(action);
+// }
 
 void GraphicManager::sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action)
 {

@@ -39,8 +39,6 @@ const QString ME_NAME { "me" };
 const uint8_t CONNECTION_STATE_INDICATOR_WIDGET_SIZE = 15;
 const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
 
-const QString SOCKET_INFO_WIDGET_EDIT_BUTTON_LABEL { "Edit" };
-
 // validation
 const std::size_t COMPANION_NAME_SIZE_LIMIT = 30;
 const std::size_t PASSWORD_SIZE_LIMIT = 30;
@@ -163,14 +161,6 @@ const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPR {
     { LogType::ERROR,     "ERR" }
 };
 
-const QString connectButtonConnectLabel { "Connect" };
-const QString connectButtonDisconnectLabel { "Disconnect" };
-
-const std::vector<QString> connectButtonLabels {
-    connectButtonConnectLabel,  // initial
-    connectButtonDisconnectLabel
-};
-
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
@@ -190,24 +180,70 @@ const QString getPasswordDialogLabel { "Enter password:" };
 // const std::string newPasswordCreatedLabel { "New password created" };
 
 // button text
-const QString okButtonText { "OK" };
-const QString cancelButtonText { "Cancel" };
-const QString clearHistoryButtonText { "Clear history" };
-const QString deleteCompanionButtonText { "Delete companion" };
-const QString sendChatHistoryButtonText { "Send chat history" };
+enum class Button
+{
+    OK,
+    CANCEL,
+    EDIT,
+    CLEAR_HISTORY,
+    SEND_HISTORY,
+    DELETE_COMPANION,
+    CONNECT,
+    DISCONNECT,
+    UNKNOWN
+};
+
+const std::vector<Button> CONNECT_BUTTONS {
+    Button::CONNECT,  // initial
+    Button::DISCONNECT
+};
+
+const QString DEFAULT_BUTTON_TEXT { "OK" };
+
+const std::unordered_map<Button, QString> BUTTON_ROLE_TO_TEXT_MAP {
+    { Button::OK, "OK" },
+    { Button::CANCEL, "Cancel" },
+    { Button::EDIT, "Edit" },
+    { Button::CLEAR_HISTORY, "Clear history" },
+    { Button::SEND_HISTORY, "Send history" },
+    { Button::DELETE_COMPANION, "Delete companion" },
+    { Button::CONNECT, "Connect" },
+    { Button::DISCONNECT, "Disconnect" },
+    { Button::UNKNOWN, "_" }
+};
 
 // colors
-const uint32_t mainWindowMenuBarBackgroundColor = 0x777777;
-const uint32_t leftPanelBackgroundColor = 0xc9c9c9;
-const uint32_t companionNameLabelBackgroundColor = 0xa4a4a4;
-const uint32_t indicatorMeColor = 0x6a6a6a;
-const uint32_t showHideWidgetBackGroundColor = 0x7a7a7a;
-const uint32_t messageWidgetBackGroundColor = 0xd1d1d1;
-const uint32_t buttonPanelBackGroundColor = 0x898989;
-const uint32_t textEditBackgroundColor = 0xe1e1e1;
-const uint32_t newMessageEditColor = 0xdcdc07;
-const uint32_t appLogBackgroundColor = 0xcccaca;
-const std::string sentMessageColor = "#115e00";
-const std::string receivedMessageColor = "#00115e";
+enum class Widget
+{
+    MAIN_WINDOW_MENU,
+    LEFT_PANEL,
+    COMPANION_NAME_LABEL,
+    SHOW_HIDE,
+    MESSAGE,
+    MESSAGE_SENT,
+    MESSAGE_RECEIVED,
+    BUTTON_PANEL,
+    TEXT_EDIT,
+    APP_LOG,
+    INDICATOR_ME,
+    NEW_MESSAGE_EDIT
+};
+
+const uint32_t DEFAULT_WIDGET_COLOR = 0x000000;  // black
+
+const std::unordered_map<Widget, uint32_t> WIDGET_COLOR_MAP {
+    { Widget::MAIN_WINDOW_MENU, 0x777777 },
+    { Widget::LEFT_PANEL, 0xc9c9c9 },
+    { Widget::COMPANION_NAME_LABEL, 0xa4a4a4 },
+    { Widget::SHOW_HIDE, 0x7a7a7a },
+    { Widget::MESSAGE, 0xd1d1d1 },
+    { Widget::MESSAGE_SENT, 0x115e00 },
+    { Widget::MESSAGE_RECEIVED, 0x00115e },
+    { Widget::BUTTON_PANEL, 0x898989 },
+    { Widget::TEXT_EDIT, 0xe1e1e1 },
+    { Widget::APP_LOG, 0xcccaca },
+    { Widget::INDICATOR_ME, 0x6a6a6a },
+    { Widget::NEW_MESSAGE_EDIT, 0xdcdc07 }
+};
 
 #endif // CONSTANTS_HPP

@@ -512,12 +512,12 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
     std::string color, sender, receiver;
 
     if (companionId == authorId) {
-        color = receivedMessageColor;
+        color = getHTMLColor(Widget::MESSAGE_RECEIVED);
         sender = companionName;
         receiver = "Me";
     }
     else {
-        color = sentMessageColor;
+        color = getHTMLColor(Widget::MESSAGE_SENT);
         sender = "Me";
         receiver = companionName;
     }

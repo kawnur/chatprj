@@ -317,10 +317,12 @@ private:
 };
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> Manager::getActionLambda(std::shared_ptr<CompanionAction> action);
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)>
+Manager::getActionLambda(std::shared_ptr<CompanionAction> action);
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)> Manager::getActionLambda(std::shared_ptr<PasswordAction> action);
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)>
+Manager::getActionLambda(std::shared_ptr<PasswordAction> action);
 
 std::shared_ptr<Manager> getManager();
 

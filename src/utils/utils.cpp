@@ -33,68 +33,15 @@ std::string getString(const QString value)
     return value.toStdString();
 }
 
-// bool validateCompanionName(std::vector<std::string> &errors, const std::string &name)
-// {
-//     bool result = (name.size() <= 30);
+uint32_t getWidgetColor(Widget value)
+{
+    return getMapValue(WIDGET_COLOR_MAP, value, DEFAULT_WIDGET_COLOR);
+}
 
-//     if (!result)
-//         errors.emplace_back("companion name length is greater than 30");
-
-//     logArgs("validateCompanionName result:", result);
-
-//     return result;
-// }
-
-// bool validateIpAddress(std::vector<std::string> &errors, const std::string &ipAddress)
-// {
-//     QHostAddress address { getQString(ipAddress) };
-//     bool result = !(address.isNull());
-
-//     if (!result)
-//         errors.emplace_back("companion ipaddress is invalid");
-
-//     logArgs("validateIpAddress result:", result);
-
-//     return result;
-// }
-
-// bool validatePort(std::vector<std::string> &errors, const std::string &port)
-// {
-//     bool result = false;
-//     std::string errorMessage { "port number must be greater than 0 and lower than 65536" };
-
-//     // TODO use util
-//     try {
-//         long long portNumber = std::stoll(port, nullptr, 10);
-
-//         result = (portNumber >= 0) && (portNumber <= 65535);
-
-//         if (!result)
-//             errors.emplace_back(errorMessage);
-//     }
-//     catch(std::out_of_range) {
-//         errors.push_back(errorMessage + ", port is too big, std::out_of_range");
-//     }
-//     catch(std::invalid_argument) {
-//         errors.push_back(errorMessage + ", port is invalid, std::invalid_argument");
-//     }
-
-//     logArgs("validatePort result:", result);
-
-//     return result;
-// }
-
-// bool validatePassword(std::vector<std::string> &errors, const std::string &password)
-// {
-//     bool result = (password.size() <= 30);
-
-//     if (!result)
-//         errors.emplace_back("password length is greater than 30");
-
-//     logArgs("validatePassword result:", result);
-
-//     return result;
-// }
+std::string getHTMLColor(Widget value)
+{
+    return std::format("#{:06x}", getWidgetColor(value));
+}
 
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages)
 {

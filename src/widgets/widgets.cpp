@@ -9,45 +9,43 @@
 #include "message.hpp"
 #include "widgets_panel.hpp"
 
-QString getInitialConnectButtonLabel()
+Button getInitialConnectButton()
 {
     try {
-        return connectButtonLabels.empty() ? "_" : connectButtonLabels.at(0);
+        return CONNECT_BUTTONS.empty() ? Button::UNKNOWN : CONNECT_BUTTONS.at(0);
     }
     catch(...) {
-        return "_?_";
+        return Button::UNKNOWN;
     }
 }
 
-QString getNextConnectButtonLabel(QString &currentLabel)
+Button getNextConnectButton(Button current)
 {
     try {
-        if (connectButtonLabels.empty()) {
-            return "";
-        }
-        else {
-            auto currentIterator = std::ranges::find(connectButtonLabels, currentLabel);
+        if (CONNECT_BUTTONS.empty())
+            return Button::UNKNOWN;
 
-            if (currentIterator == connectButtonLabels.end())
-                return *connectButtonLabels.begin();
+        auto currentIterator = std::ranges::find(CONNECT_BUTTONS, current);
 
-            auto nextIterator = currentIterator + 1;
+        if (currentIterator == CONNECT_BUTTONS.end())
+            return *CONNECT_BUTTONS.begin();
 
-            if (nextIterator == connectButtonLabels.end())
-                nextIterator = connectButtonLabels.begin();
+        auto nextIterator = currentIterator + 1;
 
-            return *nextIterator;
-        }
+        if (nextIterator == CONNECT_BUTTONS.end())
+            nextIterator = CONNECT_BUTTONS.begin();
+
+        return *nextIterator;
     }
-    catch(...) {
-        return "_?_";
+    catch (...) {
+        return Button::UNKNOWN;
     }
 }
 
 TextEditWidget::TextEditWidget()
 {
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Base, QColor(textEditBackgroundColor));
+    palette_->setColor(QPalette::Base, QColor(getWidgetColor(Widget::TEXT_EDIT)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 }
@@ -84,7 +82,7 @@ IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
     isOn_ = isOn;
     onColor_ = QColor(QColorConstants::DarkGreen);
     offColor_ = QColor(QColorConstants::DarkRed);
-    meColor_ = QColor(indicatorMeColor);
+    meColor_ = QColor(getWidgetColor(Widget::INDICATOR_ME));
 
     palette_ = std::make_shared<QPalette>();
     palette_->setColor(QPalette::Window, (isOn_) ? onColor_ : offColor_);
@@ -532,8 +530,6 @@ void SocketInfoWidget::clientAction()
     auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
-    QString currentText = connect_->text();
-
     if (isConnected_) {
         result = companion->disconnectClient();
     }
@@ -542,20 +538,21 @@ void SocketInfoWidget::clientAction()
         getManager()->sendUnsentMessages(companion);
     }
 
-    if (result) {
-        // change value
-        isConnected_ = !(isConnected_);
+    if (!result)
+        return;
 
-        // change connect button text
-        QString nextText = getNextConnectButtonLabel(currentText);
-        connect_->setText(nextText);
+    // change value
+    isConnected_ = !(isConnected_);
 
-        // change indicator color
-        state_->toggle();
+    // change connect button text
+    connectButton_ = getNextConnectButton(connectButton_);
+    connect_->setText(getButtonText(connectButton_));
 
-        // set context menu action enabled
-        requestHistory_->setDisabled(requestHistory_->isEnabled());
-    }
+    // change indicator color
+    state_->toggle();
+
+    // set context menu action enabled
+    requestHistory_->setDisabled(requestHistory_->isEnabled());
 }
 
 void SocketInfoWidget::buildFields()
@@ -583,8 +580,9 @@ void SocketInfoWidget::buildFields()
     ipAddress_ = std::make_shared<QLabel>();
     serverPort_ = std::make_shared<QLabel>();
     clientPort_ = std::make_shared<QLabel>();
-    edit_ = std::make_shared<QPushButton>(SOCKET_INFO_WIDGET_EDIT_BUTTON_LABEL);
-    connect_ = std::make_shared<QPushButton>(getInitialConnectButtonLabel());
+    edit_ = std::make_shared<QPushButton>(getButtonText(Button::EDIT));
+    connectButton_ = getInitialConnectButton();
+    connect_ = std::make_shared<QPushButton>(getButtonText(connectButton_));
 
     connect(
         edit_.get(), &QPushButton::clicked,
@@ -712,7 +710,7 @@ ShowHideWidget::ShowHideWidget()
     label_->setText("Show / Hide");
 
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(showHideWidgetBackGroundColor));
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::SHOW_HIDE)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 

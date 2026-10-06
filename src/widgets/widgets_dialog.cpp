@@ -225,6 +225,11 @@ void GetPasswordDialog::set(std::shared_ptr<Action> action)
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
         action.get(), &Action::act, Qt::QueuedConnection);
+
+    // close button
+    connect(
+        this, &QDialog::rejected,
+        action.get(), &Action::endAct, Qt::QueuedConnection);
 }
 
 std::string GetPasswordDialog::getEditText()
@@ -233,13 +238,13 @@ std::string GetPasswordDialog::getEditText()
 }
 
 ButtonInfo::ButtonInfo(
-    const QString &text, QDialogButtonBox::ButtonRole role,
+    Button value, QDialogButtonBox::ButtonRole role,
     std::function<void(TextDialog  &)> function)
-    : text_(text), role_(role), function_(function) {}
+    : value_(value), role_(role), function_(function) {}
 
 QString ButtonInfo::getText()
 {
-    return text_;
+    return getButtonText(value_);
 }
 
 QDialogButtonBox::ButtonRole ButtonInfo::getRole()
@@ -393,7 +398,7 @@ std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
     std::function<void(TextDialog &)> function)
 {
     auto vector = std::make_shared<std::vector<ButtonInfo>>();
-    vector->emplace_back(okButtonText, QDialogButtonBox::AcceptRole, function);
+    vector->emplace_back(Button::OK, QDialogButtonBox::AcceptRole, function);
 
     return vector;
 }

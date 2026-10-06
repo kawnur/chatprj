@@ -12,6 +12,7 @@
 
 class ButtonInfo;
 
-std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(const QString &buttonText);
+std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(Button value);
+QString getButtonText(Button value);
 
 #endif // UTILS_WIDGETS_HPP

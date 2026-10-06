@@ -1454,7 +1454,8 @@ void Manager::checkAndResetCurrentAction(std::shared_ptr<Action> action)
 }
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> Manager::getActionLambda(std::shared_ptr<CompanionAction> action)
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)>
+Manager::getActionLambda(std::shared_ptr<CompanionAction> action)
 {
     // std::function<std::shared_ptr<ActionResult>(std::shared_ptr<Action>)> lambda;
 
@@ -1487,9 +1488,19 @@ std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)> M
 }
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)> Manager::getActionLambda(std::shared_ptr<PasswordAction> action)
+std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)>
+Manager::getActionLambda(std::shared_ptr<PasswordAction> action)
 {
+    switch (action->getType()) {
+    case ActionType::CREATE_PASSWORD:
+        return [=, this](auto action) { return createUserPassword(action); };
 
+    case ActionType::GET_PASSWORD:
+        // return [=, this](auto action) { return updateCompanion(action); };
+
+    default:
+        std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)>();
+    }
 }
 
 std::shared_ptr<Manager> getManager()

@@ -30,7 +30,7 @@ LeftPanelWidget::LeftPanelWidget(std::shared_ptr<QWidget> parent)
     setLayout(layout_.get());
 
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(leftPanelBackgroundColor));
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::LEFT_PANEL)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 
@@ -116,7 +116,8 @@ CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const st
     companionNameLabel_ = std::make_unique<QLabel>(getQString(name));
     // companionNameLabel_->setStyleSheet("border-bottom: 1px solid black");
     companionNameLabelPalette_ = std::make_unique<QPalette>();
-    companionNameLabelPalette_->setColor(QPalette::Window, QColor(companionNameLabelBackgroundColor));
+    auto color = QColor(getWidgetColor(Widget::COMPANION_NAME_LABEL));
+    companionNameLabelPalette_->setColor(QPalette::Window, color);
     companionNameLabel_->setAutoFillBackground(true);
     companionNameLabel_->setPalette(*companionNameLabelPalette_);
 
@@ -152,7 +153,7 @@ CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const st
     buttonPanelLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     buttonPanelWidget_->setLayout(buttonPanelLayout_.get());
     buttonPanelPalette_ = std::make_unique<QPalette>();
-    buttonPanelPalette_->setColor(QPalette::Window, QColor(buttonPanelBackGroundColor));
+    buttonPanelPalette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::BUTTON_PANEL)));
     chatHistoryWidget_->setPalette(*buttonPanelPalette_);
     sendFileButton_ = std::make_unique<QPushButton>("Send file");
     buttonPanelLayout_->addWidget(sendFileButton_.get());
@@ -368,7 +369,7 @@ RightPanelWidget::RightPanelWidget(std::shared_ptr<QWidget> parent)
     appLogWidget_->setPlainText("");
 
     appLogWidgetPalette_ = std::make_unique<QPalette>();
-    appLogWidgetPalette_->setColor(QPalette::Base, QColor(appLogBackgroundColor));
+    appLogWidgetPalette_->setColor(QPalette::Base, QColor(getWidgetColor(Widget::APP_LOG)));
     appLogWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
     appLogWidget_->setAutoFillBackground(true);
     appLogWidget_->setPalette(*appLogWidgetPalette_);

@@ -202,8 +202,8 @@ class ButtonInfo
 {
 public:
     ButtonInfo(
-        const QString &text, QDialogButtonBox::ButtonRole role,
-        std::function<void(TextDialog  &)> function);
+        Button value, QDialogButtonBox::ButtonRole role,
+        std::function<void(TextDialog &)> function);
 
     ~ButtonInfo() = default;
 
@@ -214,7 +214,7 @@ public:
     std::function<void(TextDialog &)> getFunction();
 
 private:
-    QString text_;
+    Button value_;
     QDialogButtonBox::ButtonRole role_;
     std::function<void(TextDialog &)> function_;
 };

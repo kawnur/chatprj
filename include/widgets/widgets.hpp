@@ -22,8 +22,8 @@ class Message;
 class MessageWidget;
 class RightPanelWidget;
 
-QString getInitialConnectButtonLabel();
-QString getNextConnectButtonLabel(QString &currentLabel);
+Button getInitialConnectButton();
+Button getNextConnectButton(Button current);
 
 class TextEditWidget : public QTextEdit
 {
@@ -231,6 +231,7 @@ private:
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
     std::shared_ptr<QPushButton> edit_;
+    Button connectButton_;
     std::shared_ptr<QPushButton> connect_;
     std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QAction> requestHistory_;

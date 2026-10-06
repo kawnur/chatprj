@@ -77,14 +77,14 @@ void CompanionAction::buildDataDialog()
     case ActionType::DELETE_COMPANION:
         dataDialog_ = std::make_shared<TextDialog>(
             mainWindow, DialogType::WARNING, deleteCompanionDialogText,
-            getButtonInfoVector(deleteCompanionButtonText));
+            getButtonInfoVector(Button::DELETE_COMPANION));
 
         break;
 
     case ActionType::CLEAR_HISTORY:
         dataDialog_ = std::make_shared<TextDialog>(
             mainWindow, DialogType::WARNING, clearCompanionHistoryDialogText,
-            getButtonInfoVector(clearHistoryButtonText));
+            getButtonInfoVector(Button::CLEAR_HISTORY));
 
         break;
 
@@ -94,7 +94,7 @@ void CompanionAction::buildDataDialog()
         dataDialog_ = std::make_shared<TextDialog>(
             mainWindow, DialogType::WARNING,
             getStringByFormat(sendChatHistoryToCompanionDialogText, name),
-            getButtonInfoVector(sendChatHistoryButtonText));
+            getButtonInfoVector(Button::SEND_HISTORY));
     }
 
     break;
@@ -285,7 +285,14 @@ void PasswordAction::buildDataDialog()
 
 void PasswordAction::buildInfoDialog()
 {
+    auto function = [](TextDialog &dialog)
+    {
+        getGraphicManager()->disableMainWindowBlurEffect();
+        dialog.closeSelfAndParentDialog();
+    };
 
+    infoDialog_ = std::make_shared<TextDialog>(
+        dataDialog_, DialogType::INFO, ""s, createOkButtonInfoVector(function));
 }
 
 PasswordAction::~PasswordAction()
@@ -356,7 +363,7 @@ void PasswordAction::act()
 
             password_ = text1;
 
-            getGraphicManager()->sendNewPasswordDataToManager(shared_from_this());
+            // getGraphicManager()->sendNewPasswordDataToManager(shared_from_this());
         }
         else {
             // showErrorDialogAndLogError("Entered passwords are not equal", getDialog());
@@ -391,6 +398,8 @@ void PasswordAction::act()
     default:
         break;
     }
+
+    getManager()->performAction(shared_from_this());
 }
 
 void PasswordAction::postAct(std::shared_ptr<ActionResult> result)

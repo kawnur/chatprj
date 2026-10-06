@@ -303,12 +303,10 @@ std::vector<std::string> buildStringVector(const Ts &...args)
     return result;
 }
 
-// data validation
+// color
+uint32_t getWidgetColor(Widget value);
+std::string getHTMLColor(Widget value);
 
-// bool validateCompanionName(std::vector<std::string> &errors, const std::string &name);
-// bool validateIpAddress(std::vector<std::string> &errors, const std::string &ipAddress);
-// bool validatePort(std::vector<std::string> &errors, const std::string &port);
-// bool validatePassword(std::vector<std::string> &errors, const std::string &password);
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
 std::string buildTextAsUnorderedListWithHeader(const std::string &header, const std::vector<std::string> &messages);
 LogType getLogTypeByDialogType(DialogType type);
