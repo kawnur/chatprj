@@ -296,7 +296,7 @@ void TextDialog::closeSelfAndParentDialog()
 
     auto cast = qobject_cast<QWidget *>(parentWidget);
 
-    if (cast)
+    if (cast && cast != getGraphicManager()->getMainWindow().get())
         cast->close();
 }
 

@@ -222,7 +222,7 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         DBRequestType::DELETE_MESSAGES_AND_RETURN,
         {
             "deleteMessagesAndReturn",
-            "DELETE FROM companion_messages WHERE companion_id = {0} RETURNING companion_id",
+            "DELETE FROM companion_messages WHERE companion_id = {1} RETURNING companion_id",
             "companion_id"
         }
     },
@@ -230,7 +230,7 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         DBRequestType::DELETE_COMPANION_AND_SOCKET_AND_RETURN,
         {
             "deleteCompanionAndSocketAndReturn",
-            "WITH delete_socket AS (DELETE FROM sockets WHERE id = {0} RETURNING id) "
+            "WITH delete_socket AS (DELETE FROM sockets WHERE id = {1} RETURNING id) "
             "DELETE FROM companions WHERE id IN (SELECT id FROM delete_socket) RETURNING id",
             "id"
         }

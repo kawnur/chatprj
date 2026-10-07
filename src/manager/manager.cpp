@@ -26,7 +26,7 @@ Manager::~Manager()
     // free(dbConnection_);
 }
 
-std::shared_ptr<Companion> Manager::getSelectedCompanion()
+CompanionPtr Manager::getSelectedCompanion()
 {
     return selectedCompanion_;
 }
@@ -52,9 +52,7 @@ void Manager::set()
     // initialized_ = true;
 }
 
-std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
-    // std::shared_ptr<SocketInfoBaseWidget> widget) const
-    SocketInfoBaseWidget *widget) const
+CompanionPtr Manager::getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const
 {
     auto lambda = [&](const auto &pair)
     {
@@ -66,8 +64,7 @@ std::shared_ptr<Companion> Manager::getMappedCompanionBySocketInfoBaseWidget(
     return (result == mapCompanionToWidgetGroup_.end()) ? nullptr : result->second.first;
 }
 
-std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(
-    std::shared_ptr<Companion> companion) const
+std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(CompanionPtr companion) const
 {
     std::shared_ptr<WidgetGroup> group = nullptr;
 
@@ -97,8 +94,7 @@ NetworkMessageType Manager::defineNetworkMessageType(MessageType type)
 }
 
 void Manager::sendMessage(
-    MessageType type, std::shared_ptr<Companion> companion, std::shared_ptr<Action> action,
-    const std::string &text)
+    MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text)
 {
     auto group = getMappedWidgetGroupByCompanion(companion);
 
@@ -169,14 +165,13 @@ void Manager::sendMessage(
     waitForMessageReceptionConfirmation(companion, message);
 }
 
-void Manager::sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path)
+void Manager::sendFile(CompanionPtr companion, const std::filesystem::path &path)
 {
     logArgs(__FUNCTION__);
 }
 
 void Manager::receiveTextMessage(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-    std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state)
+    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     auto name = companion->getName();
 
@@ -211,8 +206,7 @@ void Manager::receiveTextMessage(
 }
 
 void Manager::receiveFileProposalMessage(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-    std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state)
+    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     // create receiver operator
     companion->addReceiverOperator(meta, HOME_PATH);
@@ -249,8 +243,7 @@ void Manager::receiveFileProposalMessage(
 }
 
 void Manager::receiveConfirmation(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-    std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state)
+    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     if (state->isReceived_) {  // successfully received
         // mark message as received
@@ -273,8 +266,7 @@ void Manager::receiveConfirmation(
 }
 
 void Manager::receiveConfirmationRequest(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-    std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state)
+    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     // search for message in managers's mapping
     auto info = companion->getMessageInfoByNetworkId(meta->networkId_);
@@ -311,15 +303,14 @@ void Manager::receiveConfirmationRequest(
     }
 }
 
-void Manager::reciveChatHistoryRequest(std::shared_ptr<Companion> companion)
+void Manager::reciveChatHistoryRequest(CompanionPtr companion)
 {
     logTemplateInfo("got history request from {}", companion->getName());
 
     emit getMappedWidgetGroupByCompanion(companion)->askUserForHistorySendingConfirmationSignal();
 }
 
-void Manager::receiveChatHistoryData(
-    std::shared_ptr<Companion> companion, const nlohmann::json &data)
+void Manager::receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data)
 {
     logTemplateInfo("got chat history from {}", companion->getName());
 
@@ -337,8 +328,7 @@ void Manager::receiveChatHistoryData(
     emit getMappedWidgetGroupByCompanion(companion)->buildChatHistorySignal();
 }
 
-void Manager::receiveFileRequest(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta)
+void Manager::receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta)
 {
     logArgs(__FUNCTION__);
 
@@ -351,9 +341,7 @@ void Manager::receiveFileRequest(
         logTemplateError("companion has no file operator for networkId = {}", networkId);
 }
 
-void Manager::receiveFileData(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-    std::shared_ptr<MessageData> data)
+void Manager::receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data)
 {
     logArgs(__FUNCTION__);
 
@@ -366,9 +354,7 @@ void Manager::receiveFileData(
         logTemplateError("companion has no file operator for networkId = {}", networkId);
 }
 
-void Manager::receiveFileDataCheck(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-    bool success)
+void Manager::receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta, bool success)
 {
     logArgs(__FUNCTION__, success);
 
@@ -384,8 +370,7 @@ void Manager::receiveFileDataCheck(
     companion->removeFileOperator<SenderOperator>(networkId);
 }
 
-void Manager::receiveFileDataTransmissionEnd(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta)
+void Manager::receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta)
 {
     logArgs(__FUNCTION__);
 
@@ -420,8 +405,7 @@ void Manager::receiveFileDataTransmissionEnd(
     bool result = companion->sendMessage(message, replyMeta);
 }
 
-void Manager::receiveFileDataTransmissionFailure(
-    std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta)
+void Manager::receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta)
 {
     logArgs(__FUNCTION__);
 
@@ -434,23 +418,22 @@ void Manager::receiveFileDataTransmissionFailure(
     companion->removeFileOperator<SenderOperator>(networkId);
 }
 
-std::shared_ptr<MessageData> Manager::buildMessageDataFromJson(const nlohmann::json &data)
+MessageDataPtr Manager::buildMessageDataFromJson(const nlohmann::json &data)
 {
     return buildObjectFromJson<MessageData>(data, "text");
 }
 
-std::shared_ptr<MessageMetaData> Manager::buildMessageMetaDataFromJson(const nlohmann::json &data)
+MessageMetaDataPtr Manager::buildMessageMetaDataFromJson(const nlohmann::json &data)
 {
     return buildObjectFromJson<MessageMetaData>(data, "type", "companion_id", "id", "time");
 }
 
-std::shared_ptr<MessageState> Manager::buildMessageStateFromJson(const nlohmann::json &data)
+MessageStatePtr Manager::buildMessageStateFromJson(const nlohmann::json &data)
 {
     return buildObjectFromJson<MessageState>(data, "antecedent");
 }
 
-bool Manager::pushMessageHistoryToDb(
-    std::shared_ptr<Companion> companion, const nlohmann::json &data)
+bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data)
 {
     // TODO wrap in util
 
@@ -493,7 +476,7 @@ bool Manager::pushMessageHistoryToDb(
     return true;
 }
 
-void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::string &json)
+void Manager::receiveMessage(CompanionPtr companion, const std::string &json)
 {
     nlohmann::json jsonData = buildJsonObject(json);
 
@@ -596,7 +579,7 @@ void Manager::receiveMessage(std::shared_ptr<Companion> companion, const std::st
     }
 }
 
-void Manager::addEarlyMessages(std::shared_ptr<Companion> companion)
+void Manager::addEarlyMessages(CompanionPtr companion)
 {
     if (companion)
         return;
@@ -640,7 +623,7 @@ void Manager::addEarlyMessages(std::shared_ptr<Companion> companion)
     widgetGroup->sortChatHistoryElements();
 }
 
-void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // TODO rewrite
+void Manager::resetSelectedCompanion(CompanionPtr companion)  // TODO rewrite
 {
     auto graphicManager = getGraphicManager();
 
@@ -673,9 +656,9 @@ void Manager::resetSelectedCompanion(std::shared_ptr<Companion> companion)  // T
     }
 }
 
-// std::shared_ptr<ActionResult> Manager::performAction(std::shared_ptr<Action> action)
+// ActionResultPtr Manager::performAction(ActionPtr action)
 // {
-//     std::function<std::shared_ptr<ActionResult>(std::shared_ptr<Action>)> lambda;
+//     std::function<ActionResultPtr(ActionPtr)> lambda;
 
 //     switch (action->getType()) {
 //     case ActionType::CREATE_COMPANION:
@@ -710,12 +693,12 @@ void Manager::initCompanionCreation()
     initAction<CompanionAction>(ActionType::CREATE_COMPANION, nullptr);
 }
 
-void Manager::initCompanionUpdate(std::shared_ptr<Companion> companion)
+void Manager::initCompanionUpdate(CompanionPtr companion)
 {
     initAction<CompanionAction>(ActionType::UPDATE_COMPANION, companion);
 }
 
-void Manager::initCompanionDeletion(std::shared_ptr<Companion> companion)
+void Manager::initCompanionDeletion(CompanionPtr companion)
 {
     initAction<CompanionAction>(ActionType::DELETE_COMPANION, companion);
 }
@@ -730,14 +713,18 @@ void Manager::initEntrancePasswordReception()
     initAction<PasswordAction>(ActionType::GET_PASSWORD);
 }
 
-std::shared_ptr<ActionResult> Manager::getActionResultByIdDBData(
-    std::shared_ptr<DBReplyData> data)
+ActionResultPtr Manager::getActionResultByIdDBData(
+    std::shared_ptr<DBReplyData> data, bool allowEmptyResult)
 {
     if (!data)
         return std::make_shared<ActionResult>(false, DB_REPLY_NULL);
 
-    if (data->isEmpty())
-        return std::make_shared<ActionResult>(false, DB_REPLY_EMPTY);
+    if (data->isEmpty()) {
+        if (allowEmptyResult)
+            return std::make_shared<ActionResult>(true, ""s);
+        else
+            return std::make_shared<ActionResult>(false, DB_REPLY_EMPTY);
+    }
 
     auto result = getIntFromString(ID_BAD_VALUE, data->getValue(0, "id"));
 
@@ -747,8 +734,7 @@ std::shared_ptr<ActionResult> Manager::getActionResultByIdDBData(
         return std::make_shared<ActionValueResult<int>>(result, true, ""s);
 }
 
-std::shared_ptr<ActionResult> Manager::pushCompanionToDbAndReturnId(
-    std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::pushCompanionToDbAndReturnId(CompanionActionPtr action)
 {
     auto data = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, action->getName());
 
@@ -762,15 +748,14 @@ uint16_t Manager::getServerPortByCompanionId(int id)
     return serverPort;
 }
 
-std::shared_ptr<ActionResult> Manager::pushSocketToDb(
-    std::shared_ptr<CompanionAction> action, int serverPort)
+ActionResultPtr Manager::pushSocketToDb(CompanionActionPtr action, int serverPort)
 {
     return getActionResult(
         DBRequestType::PUSH_SOCKET_AND_RETURN, action->getName(), action->getIpAddress(),
         serverPort, action->getClientPort());
 }
 
-std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::createCompanion(CompanionActionPtr action)
 {
     // data validation
     auto validationResult = validateActionData<CompanionAction>(action);
@@ -824,8 +809,7 @@ std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<Companion
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-std::shared_ptr<ActionResult> Manager::updateCompanionInDbAndReturnId(
-    std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::updateCompanionInDbAndReturnId(CompanionActionPtr action)
 {
     auto data = getDBData(
         DBRequestType::UPDATE_COMPANION_AND_SOCKET_AND_RETURN, action->getName(),
@@ -834,7 +818,7 @@ std::shared_ptr<ActionResult> Manager::updateCompanionInDbAndReturnId(
     return getActionResultByIdDBData(data);
 }
 
-std::shared_ptr<ActionResult> Manager::updateCompanion(std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
 {
     // TODO check new data before data dialog is closed
     // check if data was modified
@@ -872,41 +856,48 @@ std::shared_ptr<ActionResult> Manager::updateCompanion(std::shared_ptr<Companion
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::deleteCompanion(std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action)
 {
-    // delete companion chat messages from db
-    auto companionIdMessagesData = getDBData(
-        DBRequestType::DELETE_MESSAGES_AND_RETURN, action->getCompanionId());
+    auto data = getDBData(DBRequestType::DELETE_MESSAGES_AND_RETURN, action->getCompanionId());
 
-    if (!companionIdMessagesData)
-        return;
+    return getActionResultByIdDBData(data, true);
+}
 
-    if (companionIdMessagesData->isEmpty()) {
-        // no return, may be companion without messages
-        // showWarningDialogAndLogWarning("Empty db reply to companion messages deletion");
-    }
-
-    // delete companion and socket from db
-    auto companionIdCompanionData = getDBData(
+ActionResultPtr Manager::deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action)
+{
+    auto data = getDBData(
         DBRequestType::DELETE_COMPANION_AND_SOCKET_AND_RETURN, action->getCompanionId());
 
-    if (!companionIdCompanionData || companionIdCompanionData->isEmpty())
-        return;
+    return getActionResultByIdDBData(data);
+}
+
+ActionResultPtr Manager::deleteCompanion(CompanionActionPtr action)
+{
+    // delete companion chat messages from db
+    auto deleteMessagesResult = deleteCompanionMessagesFromDbAndReturnId(action);
+
+    if (!deleteMessagesResult->status())
+        return deleteMessagesResult;
+
+    // delete companion and socket from db
+    auto deleteCompanionAndSocketResult = deleteCompanionAndSocketFromDbAndReturnId(action);
+
+    if (!deleteCompanionAndSocketResult->status())
+        return deleteCompanionAndSocketResult;
 
     // delete companion object
     deleteCompanionObject(action->getCompanion());
 
-    // show info dialog
-    // getGraphicManager()->showCompanionInfoDialog(action, "Companion deleted:\n\n");
+    return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::clearChatHistory(std::shared_ptr<Companion> companion)
+void Manager::clearChatHistory(CompanionPtr companion)
 {
     auto widgetGroup = getMappedWidgetGroupByCompanion(companion);
     getGraphicManager()->clearChatHistory(widgetGroup);
 }
 
-void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
+void Manager::clearCompanionHistory(CompanionActionPtr action)
 {
     // delete companion chat messages from db
     auto companionIdMessagesData = getDBData(
@@ -930,15 +921,14 @@ void Manager::clearCompanionHistory(std::shared_ptr<CompanionAction> action)
     // getGraphicManager()->showCompanionInfoDialog(action, "Companion chat history cleared:\n\n");
 }
 
-std::shared_ptr<ActionResult> Manager::pushPasswordToDbAndReturnId(
-    std::shared_ptr<PasswordAction> action)
+ActionResultPtr Manager::pushPasswordToDbAndReturnId(PasswordActionPtr action)
 {
     auto data = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
 
     return getActionResultByIdDBData(data);
 }
 
-std::shared_ptr<ActionResult> Manager::createUserPassword(std::shared_ptr<PasswordAction> action)
+ActionResultPtr Manager::createUserPassword(PasswordActionPtr action)
 {
     // data validation
     auto validationResult = validateActionData<PasswordAction>(action);
@@ -952,35 +942,22 @@ std::shared_ptr<ActionResult> Manager::createUserPassword(std::shared_ptr<Passwo
     if (!idResult->status())
         return idResult;
 
-    // // show dialog
-    // showInfoDialogAndLogInfo(
-    //     newPasswordCreatedLabel, &TextDialog::unsetMainWindowBlurAndCloseDialogs,
-    //     action->getDialog());
-
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::authenticateUser(std::shared_ptr<PasswordAction> action)
+ActionResultPtr Manager::authenticateUser(PasswordActionPtr action)
 {
     auto graphicManager = getGraphicManager();
 
-    // do we have password in db?
-    auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
+    // data checking
+    auto checkResult = checkPasswordForExistanceAtAuthentication(action);
 
-    if (!passwordData || passwordData->isEmpty())
-        return;
-
-    if (passwordData->getValue(0, "password") != action->getPassword()) {
-        // showErrorDialogAndLogError("Password is not correct");
-
-        return;
-    }
+    if (!checkResult->status())
+        return checkResult;
 
     userIsAuthenticated_ = true;
 
-    logArgsInfo("user successfully authenticated");
-
-    graphicManager->disableMainWindowBlurEffect();
+    return std::make_shared<ActionResult>(true, ""s);
 }
 
 void Manager::hideSelectedCompanionCentralPanel()
@@ -1011,14 +988,12 @@ void Manager::startUserAuthentication()
         return;
 
     if (passwordData->isEmpty())
-        // graphicManager->createEntrancePassword();
         initEntrancePasswordCreation();
     else
-        // graphicManager->getEntrancePassword();
         initEntrancePasswordReception();
 }
 
-void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
+void Manager::sendUnsentMessages(CompanionPtr companion)
 {
     // get unsent messages from db
     auto messagesData = getDBData(
@@ -1074,7 +1049,7 @@ void Manager::sendUnsentMessages(std::shared_ptr<Companion> companion)
     }
 }
 
-void Manager::requestHistoryFromCompanion(std::shared_ptr<Companion> companion)
+void Manager::requestHistoryFromCompanion(CompanionPtr companion)
 {
     auto meta = std::make_shared<MessageMetaData>();
     meta->networkMessageType_ = NetworkMessageType::CHAT_HISTORY_REQUEST;
@@ -1087,7 +1062,7 @@ void Manager::requestHistoryFromCompanion(std::shared_ptr<Companion> companion)
     bool result = companion->sendMessage(message, message->meta());
 }
 
-void Manager::sendChatHistoryToCompanion(std::shared_ptr<Companion> companion)
+void Manager::sendChatHistoryToCompanion(CompanionPtr companion)
 {
     logArgs(__FUNCTION__);
 
@@ -1118,13 +1093,12 @@ void Manager::setLastOpenedPath(const std::filesystem::path &path)
     lastOpenedPath_ = path;
 }
 
-void Manager::endAction(std::shared_ptr<Action> action)
+void Manager::endAction(ActionPtr action)
 {
     checkAndResetCurrentAction(action);
 }
 
-std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
-    std::shared_ptr<WidgetGroup> group) const
+CompanionPtr Manager::getMappedCompanionByWidgetGroup(std::shared_ptr<WidgetGroup> group) const
 {
     auto lambda = [&](const auto &pair)
     {
@@ -1136,8 +1110,7 @@ std::shared_ptr<Companion> Manager::getMappedCompanionByWidgetGroup(
     return result->second.first;
 }
 
-void Manager::fillCompanionMessageMapping(
-    std::shared_ptr<Companion> companion, bool containersNotEmpty)
+void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
 {
     uint8_t companionId = companion->getId();
 
@@ -1155,7 +1128,7 @@ void Manager::fillCompanionMessageMapping(
             auto info = companion->getMessageInfoByMessageId(messageId);
 
             if (info && info->getMessage()->state()) {
-                // companion->addMessage(const_cast<std::shared_ptr<Message>>(pair.second));
+                // companion->addMessage(const_cast<MessagePtr>(pair.second));
             } else {
                 companion->createMessageAndAddToMapping(messagesData, i);
             }
@@ -1246,7 +1219,7 @@ void Manager::buildWidgetGroups()
     }
 }
 
-std::shared_ptr<Companion> Manager::addCompanionObject(int id, const std::string &name)
+CompanionPtr Manager::addCompanionObject(int id, const std::string &name)
 {
     if (id == 0) {
         logArgsError("companion id == 0");
@@ -1293,7 +1266,7 @@ std::shared_ptr<CompanionResult> Manager::getCompanionAdditionResult(
     return std::make_shared<CompanionResult>(companion, true, ""s);
 }
 
-void Manager::createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion)
+void Manager::createWidgetGroupAndAddToMapping(CompanionPtr companion)
 {
     auto group = std::make_shared<WidgetGroup>(companion);
     group->set();
@@ -1301,12 +1274,12 @@ void Manager::createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> compan
     companion->addMessageWidgetsToChatHistory(group);
 }
 
-void Manager::deleteCompanionObject(std::shared_ptr<Companion> companion)
+void Manager::deleteCompanionObject(CompanionPtr companion)
 {
     deleteWidgetGroupAndDeleteFromMapping(companion);
 }
 
-void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion)
+void Manager::deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion)
 {
     auto lambda = [&](const auto &iterator)
     {
@@ -1327,24 +1300,28 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> c
     }
 }
 
-std::shared_ptr<ActionResult> Manager::checkCompanionDataForExistanceAtCreation(
-    std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::checkCompanionDataForExistanceAtCreation(CompanionActionPtr action)
 {
     auto lambda = [](auto &checker) { return checker.checkCompanionDataForExistanceAtCreation(); };
 
-    return checkCompanionDataForExistance(lambda, action);
+    return checkDataForExistance(lambda, action);
 }
 
-std::shared_ptr<ActionResult> Manager::checkCompanionDataForExistanceAtUpdate(
-    std::shared_ptr<CompanionAction> action)
+ActionResultPtr Manager::checkCompanionDataForExistanceAtUpdate(CompanionActionPtr action)
 {
     auto lambda = [](auto &checker) { return checker.checkCompanionDataForExistanceAtUpdate(); };
 
-    return checkCompanionDataForExistance(lambda, action);
+    return checkDataForExistance(lambda, action);
 }
 
-void Manager::waitForMessageReceptionConfirmation(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+ActionResultPtr Manager::checkPasswordForExistanceAtAuthentication(PasswordActionPtr action)
+{
+    auto lambda = [](auto &checker) { return checker.checkPasswordForExistanceAtAuthentication(); };
+
+    return checkDataForExistance(lambda, action);
+}
+
+void Manager::waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message)
 {
     auto lambda = [=]()
     {
@@ -1372,8 +1349,7 @@ void Manager::waitForMessageReceptionConfirmation(
     runInDetachedThread(lambda);
 }
 
-void Manager::markMessageAsSent(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
 {
     // mark in db
     auto messageIdData = getDBData(DBRequestType::SET_MESSAGE_IS_SENT_AND_RETURN, message->getId());
@@ -1387,7 +1363,7 @@ void Manager::markMessageAsSent(
 }
 
 void Manager::markMessageAsReceived(
-    // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+    // CompanionPtr companion, MessagePtr message)
     std::shared_ptr<MessageInfo> info)
 {
     // mark in widget
@@ -1401,11 +1377,10 @@ void Manager::markMessageAsReceived(
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->getMessage()->getId());
 }
 
-std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
+MessageMetaDataPtr Manager::pushMessageToDB(
     // const std::string &companionName, const std::string &authorName, const std::string &timestamp,
     // const std::string &text, const bool &isSent, const bool &isReceived)
-    std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-    std::shared_ptr<MessageState> state)
+    MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     const std::string companionIdString("companion_id");
 
@@ -1435,12 +1410,12 @@ std::shared_ptr<MessageMetaData> Manager::pushMessageToDB(
     return result;
 }
 
-void Manager::setCurrentAction(std::shared_ptr<Action> action)
+void Manager::setCurrentAction(ActionPtr action)
 {
     currentAction_ = action;
 }
 
-void Manager::checkAndResetCurrentAction(std::shared_ptr<Action> action)
+void Manager::checkAndResetCurrentAction(ActionPtr action)
 {
     if (currentAction_ != action) {
         logArgsError(Q_FUNC_INFO, "action mismatch");
@@ -1453,52 +1428,40 @@ void Manager::checkAndResetCurrentAction(std::shared_ptr<Action> action)
 }
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)>
-Manager::getActionLambda(std::shared_ptr<CompanionAction> action)
+std::function<ActionResultPtr(CompanionActionPtr)>
+Manager::getActionLambda(CompanionActionPtr action)
 {
-    // std::function<std::shared_ptr<ActionResult>(std::shared_ptr<Action>)> lambda;
-
     switch (action->getType()) {
     case ActionType::CREATE_COMPANION:
-        // lambda = [=, this](auto action) { return createCompanion(action); };
         return [=, this](auto action) { return createCompanion(action); };
 
-        break;
-
     case ActionType::UPDATE_COMPANION:
-        // lambda = [=, this](auto action) { return updateCompanion(action); };
         return [=, this](auto action) { return updateCompanion(action); };
 
-        break;
-
     case ActionType::DELETE_COMPANION:
-        // lambda = [=, this]() { return deleteCompanion(action); };
-
-        break;
+        return [=, this](auto action) { return deleteCompanion(action); };
 
     case ActionType::CLEAR_HISTORY:
         // lambda = [=, this]() { return clearCompanionHistory(action); };
 
-        break;
-
     default:
-        break;
+        return std::function<ActionResultPtr(CompanionActionPtr)>();
     }
 }
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)>
-Manager::getActionLambda(std::shared_ptr<PasswordAction> action)
+std::function<ActionResultPtr(PasswordActionPtr)>
+Manager::getActionLambda(PasswordActionPtr action)
 {
     switch (action->getType()) {
     case ActionType::CREATE_PASSWORD:
         return [=, this](auto action) { return createUserPassword(action); };
 
     case ActionType::GET_PASSWORD:
-        // return [=, this](auto action) { return updateCompanion(action); };
+        return [=, this](auto action) { return authenticateUser(action); };
 
     default:
-        std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)>();
+        return std::function<ActionResultPtr(PasswordActionPtr)>();
     }
 }
 

@@ -30,9 +30,17 @@ public:
     // virtual void buildInfoDialog() {}
 
     virtual void set() {}
+    virtual void preAct() {}
     virtual void act() {}
     virtual void postAct(std::shared_ptr<ActionResult> result) {}
     virtual void endAct() {}
+
+    virtual std::string getName() { return ""s; }
+    virtual std::string getIpAddress() { return ""s; }
+    virtual std::string getServerPort() { return ""s; }
+    virtual std::string getClientPort() { return ""s; }
+    virtual int getCompanionId() { return ID_BAD_VALUE; }
+    virtual std::string getPassword() { return ""s; }
 
     ActionType getType();
     std::string getInfoDialogHeader(const auto &map);
@@ -40,7 +48,6 @@ public:
     std::string getInfoDialogFailHeader();
     // void initInfoDialog(std::initializer_list<ButtonInfo> list);
     void buildInfoDialog();
-    void updateInfoDialogAndShow();
 
     void updateInfoDialogAndShow(
         DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
@@ -78,11 +85,11 @@ public:
     void buildDataDialog() override;
     // void buildInfoDialog() override;
 
-    std::string getName() const;
-    std::string getIpAddress() const;
-    std::string getServerPort() const;
-    std::string getClientPort() const;
-    int getCompanionId() const;
+    std::string getName() override;
+    std::string getIpAddress() override;
+    std::string getServerPort() override;
+    std::string getClientPort() override;
+    int getCompanionId() override;
     std::shared_ptr<CompanionData> getCompanionData() const;
     std::shared_ptr<Companion> getCompanion() const;
 
@@ -92,6 +99,7 @@ public:
     void updateInfoDialog(std::shared_ptr<ActionResult> result);
 
 public slots:
+    void preAct() override;
     void act() override;
     void postAct(std::shared_ptr<ActionResult> result) override;
     void endAct() override;
@@ -124,9 +132,10 @@ public:
     void buildDataDialog() override;
     // void buildInfoDialog() override;
 
-    std::string getPassword();
+    std::string getPassword() override;
 
     void set() override;
+    void preAct() override;
     void updateInfoDialog(std::shared_ptr<ActionResult> result);
     void act() override;
     void postAct(std::shared_ptr<ActionResult> result) override;

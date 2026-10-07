@@ -125,8 +125,7 @@ void GraphicManager::clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup)
 
 void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 {
-    auto action = std::make_shared<CompanionAction>(ActionType::DELETE_COMPANION, companion);
-    action->set();
+    getManager()->initCompanionDeletion(companion);
 }
 
 // void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
@@ -197,10 +196,10 @@ void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
 //     getManager()->createUserPassword(action);
 // }
 
-void GraphicManager::sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action)
-{
-    getManager()->authenticateUser(action);
-}
+// void GraphicManager::sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action)
+// {
+//     getManager()->authenticateUser(action);
+// }
 
 void GraphicManager::hideCompanionPanelStub()
 {

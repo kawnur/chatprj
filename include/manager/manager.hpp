@@ -38,7 +38,16 @@ class PasswordAction;
 class SocketInfoBaseWidget;
 class WidgetGroup;
 
+using CompanionPtr = std::shared_ptr<Companion>;
 using CompanionResult = ActionSharedValueResult<Companion>;
+using ActionResultPtr = std::shared_ptr<ActionResult>;
+using ActionPtr = std::shared_ptr<Action>;
+using CompanionActionPtr = std::shared_ptr<CompanionAction>;
+using PasswordActionPtr = std::shared_ptr<PasswordAction>;
+using MessagePtr = std::shared_ptr<Message>;
+using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;
+using MessageDataPtr = std::shared_ptr<MessageData>;
+using MessageStatePtr = std::shared_ptr<MessageState>;
 
 int getDataFromDBResult(
     bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result, int maxTuples);
@@ -73,7 +82,7 @@ public:
     ~Manager();
 
     template<typename F, typename T>
-    std::shared_ptr<ActionResult> performActionAndCallPostAct(F &&func, std::shared_ptr<T> action)
+    ActionResultPtr performActionAndCallPostAct(F &&func, std::shared_ptr<T> action)
     {
         auto result = func(action);
         action->postAct(result);
@@ -81,76 +90,52 @@ public:
         return result;
     }
 
-    std::shared_ptr<Companion> getSelectedCompanion();
+    CompanionPtr getSelectedCompanion();
     bool userIsAuthenticated();
     void set();
 
-    // std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
-    std::shared_ptr<Companion> getMappedCompanionBySocketInfoBaseWidget(
-        SocketInfoBaseWidget *widget) const;
-
-    std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(
-        std::shared_ptr<Companion> companion) const;
-
+    // CompanionPtr getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
+    CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
+    std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
     NetworkMessageType defineNetworkMessageType(MessageType type);
 
     void sendMessage(
-        MessageType type, std::shared_ptr<Companion> companion, std::shared_ptr<Action> action,
-        const std::string &text);
+        MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
-    void sendFile(std::shared_ptr<Companion> companion, const std::filesystem::path &path);
+    void sendFile(CompanionPtr companion, const std::filesystem::path &path);
 
     void receiveTextMessage(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     void receiveFileProposalMessage(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     void receiveConfirmation(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     void receiveConfirmationRequest(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-        std::shared_ptr<MessageData> data, std::shared_ptr<MessageState> state);
+        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
-    void reciveChatHistoryRequest(std::shared_ptr<Companion> companion);
-
-    void receiveChatHistoryData(
-        std::shared_ptr<Companion> companion, const nlohmann::json &data);
-
-    void receiveFileRequest(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
-
-    void receiveFileData(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-        std::shared_ptr<MessageData> data);
-
-    void receiveFileDataCheck(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta,
-        bool success);
-
-    void receiveFileDataTransmissionEnd(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
-
-    void receiveFileDataTransmissionFailure(
-        std::shared_ptr<Companion> companion, std::shared_ptr<MessageMetaData> meta);
-
-    std::shared_ptr<MessageData> buildMessageDataFromJson(const nlohmann::json &jsonData);
-    std::shared_ptr<MessageMetaData> buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
-    std::shared_ptr<MessageState> buildMessageStateFromJson(const nlohmann::json &jsonData);
-    bool pushMessageHistoryToDb(std::shared_ptr<Companion> companion, const nlohmann::json &data);
-    void receiveMessage(std::shared_ptr<Companion> companion, const std::string &json);
-    void addEarlyMessages(std::shared_ptr<Companion> companion);
-    void resetSelectedCompanion(std::shared_ptr<Companion> companion);
+    void reciveChatHistoryRequest(CompanionPtr companion);
+    void receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data);
+    void receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta);
+    void receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data);
+    void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta, bool success);
+    void receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta);
+    void receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta);
+    MessageDataPtr buildMessageDataFromJson(const nlohmann::json &jsonData);
+    MessageMetaDataPtr buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
+    MessageStatePtr buildMessageStateFromJson(const nlohmann::json &jsonData);
+    bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
+    void receiveMessage(CompanionPtr companion, const std::string &json);
+    void addEarlyMessages(CompanionPtr companion);
+    void resetSelectedCompanion(CompanionPtr companion);
 
     template<typename T>
-    std::function<std::shared_ptr<ActionResult>(std::shared_ptr<T>)> getActionLambda(std::shared_ptr<T> action);
+    std::function<ActionResultPtr(std::shared_ptr<T>)> getActionLambda(std::shared_ptr<T> action);
 
     template<typename T>
-    std::shared_ptr<ActionResult> performAction(std::shared_ptr<T> action)
+    ActionResultPtr performAction(std::shared_ptr<T> action)
     {
         auto lambda = getActionLambda<T>(action);
 
@@ -166,46 +151,32 @@ public:
     }
 
     void initCompanionCreation();
-    void initCompanionUpdate(std::shared_ptr<Companion> companion);
-    void initCompanionDeletion(std::shared_ptr<Companion> companion);
+    void initCompanionUpdate(CompanionPtr companion);
+    void initCompanionDeletion(CompanionPtr companion);
     void initEntrancePasswordCreation();
     void initEntrancePasswordReception();
 
-    std::shared_ptr<ActionResult> getActionResultByIdDBData(
-        std::shared_ptr<DBReplyData> data);
+    ActionResultPtr createCompanion(CompanionActionPtr action);
 
-    std::shared_ptr<ActionResult> pushCompanionToDbAndReturnId(
-        std::shared_ptr<CompanionAction> action);
+    // void updateCompanion(CompanionActionPtr action);
 
-    uint16_t getServerPortByCompanionId(int id);
-
-    std::shared_ptr<ActionResult> pushSocketToDb(
-        std::shared_ptr<CompanionAction> action, int serverPort);
-
-    std::shared_ptr<ActionResult> createCompanion(std::shared_ptr<CompanionAction> action);
-
-    // void updateCompanion(std::shared_ptr<CompanionAction> action);
-    std::shared_ptr<ActionResult> updateCompanionInDbAndReturnId(std::shared_ptr<CompanionAction> action);
-    std::shared_ptr<ActionResult> updateCompanion(std::shared_ptr<CompanionAction> action);
-    void deleteCompanion(std::shared_ptr<CompanionAction> action);
-    void clearChatHistory(std::shared_ptr<Companion> companion);
-    void clearCompanionHistory(std::shared_ptr<CompanionAction> action);
-
-    std::shared_ptr<ActionResult> pushPasswordToDbAndReturnId(
-        std::shared_ptr<PasswordAction> action);
-
-    std::shared_ptr<ActionResult> createUserPassword(std::shared_ptr<PasswordAction> action);
-    void authenticateUser(std::shared_ptr<PasswordAction> action);
+    ActionResultPtr updateCompanion(CompanionActionPtr action);
+    ActionResultPtr deleteCompanion(CompanionActionPtr action);
+    void clearChatHistory(CompanionPtr companion);
+    void clearCompanionHistory(CompanionActionPtr action);
+    ActionResultPtr pushPasswordToDbAndReturnId(PasswordActionPtr action);
+    ActionResultPtr createUserPassword(PasswordActionPtr action);
+    ActionResultPtr authenticateUser(PasswordActionPtr action);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
-    void sendUnsentMessages(std::shared_ptr<Companion> companion);
-    void requestHistoryFromCompanion(std::shared_ptr<Companion> companion);
-    void sendChatHistoryToCompanion(std::shared_ptr<Companion> companion);
+    void sendUnsentMessages(CompanionPtr companion);
+    void requestHistoryFromCompanion(CompanionPtr companion);
+    void sendChatHistoryToCompanion(CompanionPtr companion);
     // bool isInitialised();
     std::filesystem::path getLastOpenedPath();
     void setLastOpenedPath(const std::filesystem::path &path);
-    void endAction(std::shared_ptr<Action> action);
+    void endAction(ActionPtr action);
 
     template<typename... Ts>
     std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
@@ -231,22 +202,28 @@ public:
     }
 
 private:
+    ActionResultPtr getActionResultByIdDBData(
+        std::shared_ptr<DBReplyData> data, bool allowEmptyResult = false);
 
-    std::shared_ptr<Companion> getMappedCompanionByWidgetGroup(
-        std::shared_ptr<WidgetGroup> group) const;
-
-    void fillCompanionMessageMapping(std::shared_ptr<Companion> companion, bool containersNotEmpty);
+    ActionResultPtr pushCompanionToDbAndReturnId(CompanionActionPtr action);
+    uint16_t getServerPortByCompanionId(int id);
+    ActionResultPtr pushSocketToDb(CompanionActionPtr action, int serverPort);
+    ActionResultPtr updateCompanionInDbAndReturnId(CompanionActionPtr action);
+    ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action);
+    ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action);
+    CompanionPtr getMappedCompanionByWidgetGroup(std::shared_ptr<WidgetGroup> group) const;
+    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
     bool buildCompanions();
     void buildWidgetGroups();
-    std::shared_ptr<Companion> addCompanionObject(int id, const std::string &name);
+    CompanionPtr addCompanionObject(int id, const std::string &name);
     std::shared_ptr<CompanionResult> getCompanionAdditionResult(int id, const std::string &name);
-    void createWidgetGroupAndAddToMapping(std::shared_ptr<Companion> companion);
-    void deleteCompanionObject(std::shared_ptr<Companion> companion);
-    void deleteWidgetGroupAndDeleteFromMapping(std::shared_ptr<Companion> companion);
+    void createWidgetGroupAndAddToMapping(CompanionPtr companion);
+    void deleteCompanionObject(CompanionPtr companion);
+    void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
 
     // template<typename F>
-    // std::shared_ptr<ActionResult> checkCompanionDataForExistance(
-    //     F &&func, std::shared_ptr<CompanionAction> action)
+    // ActionResultPtr checkCompanionDataForExistance(
+    //     F &&func, CompanionActionPtr action)
     // {
     //     DataChecker checker(action);
 
@@ -262,30 +239,24 @@ private:
     // }
 
 
-    std::shared_ptr<ActionResult> checkCompanionDataForExistanceAtCreation(
-        std::shared_ptr<CompanionAction> action);
-
-    std::shared_ptr<ActionResult> checkCompanionDataForExistanceAtUpdate(
-        std::shared_ptr<CompanionAction> action);
-
-    void waitForMessageReceptionConfirmation(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-
-    void markMessageAsSent(std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    ActionResultPtr checkCompanionDataForExistanceAtCreation(CompanionActionPtr action);
+    ActionResultPtr checkCompanionDataForExistanceAtUpdate(CompanionActionPtr action);
+    ActionResultPtr checkPasswordForExistanceAtAuthentication(PasswordActionPtr action);
+    void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
+    void markMessageAsSent(CompanionPtr companion, MessagePtr message);
 
     // void markMessageAsReceived(
-    //     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    //     CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
 
-    std::shared_ptr<MessageMetaData> pushMessageToDB(
+    MessageMetaDataPtr pushMessageToDB(
         // const std::string &companionName, const std::string &authorName,
         // const std::string &timestamp, const std::string &text, const bool &isSent,
         // const bool &isReceived);
-        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-        std::shared_ptr<MessageState> state);
+        MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     template<typename... Ts>
-    std::shared_ptr<ActionResult> getActionResult(Ts &&...args)
+    ActionResultPtr getActionResult(Ts &&...args)
     {
         auto data = getDBData(args...);
 
@@ -298,8 +269,8 @@ private:
         return std::make_shared<ActionResult>(true, ""s);
     }
 
-    void setCurrentAction(std::shared_ptr<Action> action);
-    void checkAndResetCurrentAction(std::shared_ptr<Action> action);
+    void setCurrentAction(ActionPtr action);
+    void checkAndResetCurrentAction(ActionPtr action);
 
     // bool initialized_;
     DBRequester dbRequester_;
@@ -307,22 +278,22 @@ private:
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;
-    std::shared_ptr<Companion> selectedCompanion_;
+    CompanionPtr selectedCompanion_;
 
-    std::map<int, std::pair<std::shared_ptr<Companion>, std::shared_ptr<WidgetGroup>>>
+    std::map<int, std::pair<CompanionPtr, std::shared_ptr<WidgetGroup>>>
         mapCompanionToWidgetGroup_;
 
     std::filesystem::path lastOpenedPath_;
-    std::shared_ptr<Action> currentAction_;
+    ActionPtr currentAction_;
 };
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<CompanionAction>)>
-Manager::getActionLambda(std::shared_ptr<CompanionAction> action);
+std::function<ActionResultPtr(CompanionActionPtr)>
+Manager::getActionLambda(CompanionActionPtr action);
 
 template<>
-std::function<std::shared_ptr<ActionResult>(std::shared_ptr<PasswordAction>)>
-Manager::getActionLambda(std::shared_ptr<PasswordAction> action);
+std::function<ActionResultPtr(PasswordActionPtr)>
+Manager::getActionLambda(PasswordActionPtr action);
 
 std::shared_ptr<Manager> getManager();
 

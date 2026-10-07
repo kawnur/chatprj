@@ -17,7 +17,8 @@ std::shared_ptr<Manager> getManager();
 class DataChecker
 {
 public:
-    DataChecker(std::shared_ptr<CompanionAction> action);
+    // DataChecker(std::shared_ptr<CompanionAction> action);
+    DataChecker(std::shared_ptr<Action> action);
     ~DataChecker() = default;
 
     template<typename... Ts>
@@ -34,7 +35,7 @@ public:
     }
 
     template<typename... Ts>
-    bool checkDataForExistanceAtCreation(
+    bool checkDataForExistance(
         DBRequestType type, const std::string &entryTemplate, Ts &&...args)
     {
         if (!status_)
@@ -55,7 +56,7 @@ public:
     }
 
     template<typename... Ts>
-    bool checkDataForExistanceAtUpdate(
+    bool checkIdDataForExistance(
         DBRequestType type, const std::string &entryTemplate, int id, Ts &&...args)
     {
         if (!status_)
@@ -78,6 +79,37 @@ public:
         return true;
     }
 
+    template<typename... Ts>
+    bool checkPasswordDataForExistance(
+        DBRequestType type, const std::string &emptyDataEntryTemplate,
+        const std::string &noMatchEntryTemplate, const std::string &password, Ts &&...args)
+    {
+        if (!status_)
+            return false;
+
+        auto data = getDBData(type, args...);
+
+        if (!data)
+            return false;
+
+        if (data->isEmpty()) {
+            errors_.push_back(getStringByFormat(emptyDataEntryTemplate, args...));
+
+            return false;
+        }
+
+        auto result = data->getValue(0, "password");
+        bool match = (result == password);
+
+        if (!match) {
+            errors_.push_back(getStringByFormat(noMatchEntryTemplate, args...));
+
+            return false;
+        }
+
+        return true;
+    }
+
     std::vector<std::string> errors() const;
     std::vector<std::string> &&moveErrors();
     void coutErrorsState();
@@ -90,15 +122,19 @@ public:
     bool checkCompanionSocketForExistanceAtUpdate();
     bool checkCompanionDataForExistanceAtUpdate();
 
+    bool checkPasswordForExistanceAtAuthentication();
 private:
     bool status_;
-    std::shared_ptr<CompanionAction> action_;
+    // std::shared_ptr<CompanionAction> action_;
+    std::shared_ptr<Action> action_;
     std::vector<std::string> errors_;
 };
 
 template<typename F>
-std::shared_ptr<ActionResult> checkCompanionDataForExistance(
-    F &&func, std::shared_ptr<CompanionAction> action)
+// std::shared_ptr<ActionResult> checkCompanionDataForExistance(
+//     F &&func, std::shared_ptr<CompanionAction> action)
+std::shared_ptr<ActionResult> checkDataForExistance(
+    F &&func, std::shared_ptr<Action> action)
 {
     DataChecker checker(action);
 

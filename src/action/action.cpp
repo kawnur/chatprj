@@ -24,8 +24,11 @@ Action::~Action() { logArgsInfo(Q_FUNC_INFO); }
 
 void Action::setDialog(std::shared_ptr<Action> action)
 {
-    dataDialog_->set(action);
-    infoDialog_->set(action);
+    if (dataDialog_)
+        dataDialog_->set(action);
+
+    if (infoDialog_)
+        infoDialog_->set(action);
 }
 
 ActionType Action::getType()
@@ -96,15 +99,15 @@ void CompanionAction::buildDataDialog()
         break;
 
     case ActionType::DELETE_COMPANION: {
-        std::initializer_list<ButtonInfo> list {
-            // { ButtonType::DELETE_COMPANION, [](TextDialog &dialog) { dialog.acceptAction(); } }
-            { ButtonType::DELETE_COMPANION, [this]() { infoDialog_->acceptAction(); } }
-        };
+        // std::initializer_list<ButtonInfo> list {
+        //     // { ButtonType::DELETE_COMPANION, [](TextDialog &dialog) { dialog.acceptAction(); } }
+        //     { ButtonType::DELETE_COMPANION, [this]() { infoDialog_->acceptAction(); } }
+        // };
 
-        dataDialog_ = std::make_shared<TextDialog>(
-            nullptr, DialogType::WARNING, deleteCompanionDialogText,
-            // getButtonInfoVector(ButtonType::DELETE_COMPANION));
-            list);
+        // dataDialog_ = std::make_shared<TextDialog>(
+        //     nullptr, DialogType::WARNING, deleteCompanionDialogText,
+        //     // getButtonInfoVector(ButtonType::DELETE_COMPANION));
+        //     list);
     }
 
     break;
@@ -137,27 +140,27 @@ void CompanionAction::buildDataDialog()
 //     initInfoDialog({ getOKButtonInfo([this]() { infoDialog_->closeSelfAndParentDialog(); }) });
 // }
 
-std::string CompanionAction::getName() const
+std::string CompanionAction::getName()
 {
     return data_->getName();
 }
 
-std::string CompanionAction::getIpAddress() const
+std::string CompanionAction::getIpAddress()
 {
     return data_->getIpAddress();
 }
 
-std::string CompanionAction::getServerPort() const
+std::string CompanionAction::getServerPort()
 {
     return data_->getServerPort();
 }
 
-std::string CompanionAction::getClientPort() const
+std::string CompanionAction::getClientPort()
 {
     return data_->getClientPort();
 }
 
-int CompanionAction::getCompanionId() const
+int CompanionAction::getCompanionId()
 {
     return companion_->getId();
 }
@@ -184,8 +187,7 @@ void CompanionAction::set()
         logArgsError("action cast error");
 
     setDialog(cast);
-
-    dataDialog_->show();
+    preAct();
 }
 
 void CompanionAction::updateCompanionObjectData()
@@ -224,6 +226,40 @@ void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
     infoDialog_->update(type, text, list);
 }
 
+void CompanionAction::preAct()
+{
+    switch (type_) {
+    case ActionType::CREATE_COMPANION:
+    case ActionType::UPDATE_COMPANION:
+        dataDialog_->show();
+
+    break;
+
+    case ActionType::DELETE_COMPANION: {
+        auto list = { getOKButtonInfo([this]() { act(); }) };
+        updateInfoDialogAndShow(DialogType::WARNING, deleteCompanionDialogText, list);
+    }
+
+    break;
+    case ActionType::CLEAR_HISTORY:
+        // data_ = std::make_shared<CompanionData>(
+        //     companion_->getName(), companion_->getSocketIpAddress(), ""s,
+        //     std::to_string(companion_->getSocketClientPort()));
+
+        break;
+
+    case ActionType::SEND_HISTORY:
+        // // TODO if client is disconnected show error dialog
+        // getManager()->sendChatHistoryToCompanion(companion_);
+
+        break;
+
+    default:
+        break;
+    }
+
+}
+
 void CompanionAction::act()
 {
     switch (type_) {
@@ -234,15 +270,14 @@ void CompanionAction::act()
         if (!cast)
             break;
 
-        // check dialog data
         auto name = cast->getNameString();
         auto address = cast->getIpAddressString();
         auto port = cast->getPortString();
 
+        // check dialog data
         for (const auto &item : { name, address, port }) {
             if (item.empty()) {
-                // update info dialog and show
-                updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELDS_DIALOG_TEXT);
+                updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
 
                 return;
             }
@@ -359,7 +394,11 @@ void PasswordAction::set()
         logArgsError("action cast error");
 
     setDialog(cast);
+    preAct();
+}
 
+void PasswordAction::preAct()
+{
     dataDialog_->show();
 }
 
@@ -370,22 +409,28 @@ void PasswordAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
     std::string text {};
     std::string header {};
     auto messages = std::vector<std::string> {};
+    std::function<void()> function;
 
     if (result->status()) {
         type = DialogType::INFO;
         text = getInfoDialogSuccessHeader();
+
+        function = [this]()
+        {
+            getGraphicManager()->disableMainWindowBlurEffect();
+            infoDialog_->closeSelfAndParentDialog();
+        };
     } else {
         type = DialogType::ERROR;
         header = getInfoDialogFailHeader();
         messages.push_back(result->definition());
         text = buildTextAsUnorderedListWithHeader(header, messages);
-    }
 
-    auto function = [this]()
-    {
-        getGraphicManager()->disableMainWindowBlurEffect();
-        infoDialog_->closeSelfAndParentDialog();
-    };
+        function = [this]()
+        {
+            infoDialog_->closeSelfAndParentDialog();
+        };
+    }
 
     auto list = { getOKButtonInfo(function) };
     infoDialog_->update(type, text, list);
@@ -403,7 +448,7 @@ void PasswordAction::act()
         if (text1 != text2)
             errorText = PASSWORDS_ARE_NOT_EQUAL_DIALOG_TEXT;
         else if (text1.size() == 0)
-            errorText = EMPTY_FIELDS_DIALOG_TEXT;
+            errorText = EMPTY_FIELD_DIALOG_TEXT;
 
         if (!errorText.empty()) {
             updateInfoDialogToErrorWithCloseSelfAndShow(errorText);
@@ -417,23 +462,15 @@ void PasswordAction::act()
     break;
 
     case ActionType::GET_PASSWORD: {
-        auto passwordDialog = dynamic_pointer_cast<GetPasswordDialog>(dataDialog_);
-
-        if (!passwordDialog)
-            break;
-
-        auto text = passwordDialog->getEditText();
+        auto text = dataDialog_->getEditText();
 
         if (text.size() == 0) {
-            // showErrorDialogAndLogError("Empty password is invalid", getDialog());
-            // showErrorDialogAndLogError("Empty password is invalid", dataDialog_);
+            updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
 
             return;
         }
 
         password_ = text;
-
-        getGraphicManager()->sendExistingPasswordDataToManager(shared_from_this());
     }
 
     break;

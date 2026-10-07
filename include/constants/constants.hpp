@@ -144,12 +144,17 @@ const std::string INFO_DIALOG_DEFAULT_HEADER { "Info dialog" };
 const InfoDialogHeaderMap ACTION_SUCCESS_HEADER_MAP {
     { ActionType::CREATE_COMPANION, "New companion added" },
     { ActionType::UPDATE_COMPANION, "Companion edited" },
-    { ActionType::CREATE_PASSWORD, "New password created" }
+    { ActionType::DELETE_COMPANION, "Companion deleted" },
+    { ActionType::CREATE_PASSWORD, "New password created" },
+    { ActionType::GET_PASSWORD, "User successfully authenticated" }
 };
 
 const InfoDialogHeaderMap ACTION_FAIL_HEADER_MAP {
     { ActionType::CREATE_COMPANION, "Companion addition error" },
-    { ActionType::UPDATE_COMPANION, "Companion edition error" }
+    { ActionType::UPDATE_COMPANION, "Companion edition error" },
+    { ActionType::DELETE_COMPANION, "Companion deletion error" },
+    { ActionType::CREATE_PASSWORD, "Password creation error" },
+    { ActionType::GET_PASSWORD, "User authentication error" }
 };
 
 const std::unordered_map<DialogType, LogType> MAP_DIALOG_TYPE_TO_LOG_TYPE {
@@ -169,7 +174,7 @@ const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPR {
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
-const std::string EMPTY_FIELDS_DIALOG_TEXT { "Fields must have data" };
+const std::string EMPTY_FIELD_DIALOG_TEXT { "Empty field" };
 const std::string PASSWORDS_ARE_NOT_EQUAL_DIALOG_TEXT { "Passwords are not equal" };
 const std::string socketInfoStubWidget { "No companion info from DB..." };
 

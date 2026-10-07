@@ -65,7 +65,7 @@ public:
     // void sendCompanionDataToManager(std::shared_ptr<CompanionAction> action);
     // void showCompanionInfoDialog(std::shared_ptr<CompanionAction> action, std::string &&header);
     // void sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action);
-    void sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action);
+    // void sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action);
     void hideCompanionPanelStub();
     void hideCentralPanelStub();
     void showCentralPanelStub();
