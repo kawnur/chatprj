@@ -26,30 +26,31 @@ class TextDialog;
 ButtonType getInitialConnectButton();
 ButtonType getNextConnectButton(ButtonType current);
 
-class Button : public QPushButton
-{
-    Q_OBJECT
+// class Button : public QPushButton
+// {
+//     Q_OBJECT
 
-public:
-    Button(ButtonType type);
-    ~Button();
+// public:
+//     Button(ButtonType type);
+//     ~Button();
 
-private:
-    ButtonType type_;
-};
+// private:
+//     ButtonType type_;
+// };
 
 class ButtonInfo
 {
 public:
-    ButtonInfo(ButtonType type, std::function<void(TextDialog &)> function);
+    ButtonInfo();
+    ButtonInfo(ButtonType type, std::function<void()> function);
     ~ButtonInfo();
 
     ButtonType type() const;
-    std::function<void(TextDialog &)> function() const;
+    std::function<void()> function() const;
 
 private:
     ButtonType type_;
-    std::function<void(TextDialog &)> function_;
+    std::function<void()> function_;
 };
 
 class ButtonBox :public QDialogButtonBox

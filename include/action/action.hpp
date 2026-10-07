@@ -27,7 +27,7 @@ public:
     void setDialog(std::shared_ptr<Action> action);
 
     virtual void buildDataDialog() {}
-    virtual void buildInfoDialog() {}
+    // virtual void buildInfoDialog() {}
 
     virtual void set() {}
     virtual void act() {}
@@ -38,6 +38,16 @@ public:
     std::string getInfoDialogHeader(const auto &map);
     std::string getInfoDialogSuccessHeader();
     std::string getInfoDialogFailHeader();
+    // void initInfoDialog(std::initializer_list<ButtonInfo> list);
+    void buildInfoDialog();
+    void updateInfoDialogAndShow();
+
+    void updateInfoDialogAndShow(
+        DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
+
+    void updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text);
+
+    std::initializer_list<ButtonInfo> getOkButtonInfoCloseSelfAndParent();
 
 protected:
     ActionType type_;
@@ -66,7 +76,7 @@ public:
     ~CompanionAction();
 
     void buildDataDialog() override;
-    void buildInfoDialog() override;
+    // void buildInfoDialog() override;
 
     std::string getName() const;
     std::string getIpAddress() const;
@@ -112,7 +122,7 @@ public:
     ~PasswordAction();
 
     void buildDataDialog() override;
-    void buildInfoDialog() override;
+    // void buildInfoDialog() override;
 
     std::string getPassword();
 

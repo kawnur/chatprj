@@ -58,7 +58,7 @@ private:
     void keyPressEvent(QKeyEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void createMenu();
-    void setBlurEffect();
+    void initBlurEffect();
 
     // left panel
     std::shared_ptr<MainWindowContainerWidget> leftContainerWidget_;

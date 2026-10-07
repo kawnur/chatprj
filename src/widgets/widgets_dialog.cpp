@@ -238,13 +238,9 @@ std::string GetPasswordDialog::getEditText()
     return edit_->text().toStdString();
 }
 
-// TextDialog::TextDialog(
-//     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-//     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo)
 TextDialog::TextDialog(
-    // std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
     std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
-    const std::initializer_list<ButtonInfo> &buttonsInfo)
+    std::initializer_list<ButtonInfo> buttonsInfo)
 {
     // title
     dialogType_ = type;
@@ -276,36 +272,13 @@ TextDialog::TextDialog(
     layout_->addWidget(textEdit_.get());
 
     // set button box
-    // buttonBox_ = std::make_shared<QDialogButtonBox>();
     buttonBox_ = std::make_unique<ButtonBox>(buttonsInfo);
     layout_->addWidget(buttonBox_.get());
-
-    // buttonsInfo_ = buttonsInfo;
 }
 
 TextDialog::~TextDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-void TextDialog::set(std::shared_ptr<Action> action)
-{
-    // for (auto &info : *buttonsInfo_) {
-    //     auto role = info.getRole();
-    //     auto function = info.getFunction();
-    //     buttons_.emplace_back(buttonBox_->addButton(info.getText(), role));
-    // }
-
-    // connect(
-    //     buttonBox_.get(), &QDialogButtonBox::accepted,
-    //     action.get(), &Action::endAct, Qt::QueuedConnection);
-
-    // connect(
-    //     buttonBox_.get(), &QDialogButtonBox::rejected,
-    //     action.get(), &Action::endAct, Qt::QueuedConnection);
-
-    // // close button
-    // connect(
-    //     this, &QDialog::rejected,
-    //     action.get(), &Action::endAct, Qt::QueuedConnection);
-}
+// void TextDialog::set(std::shared_ptr<Action> action) {}
 
 void TextDialog::closeSelf()
 {
@@ -338,6 +311,33 @@ void TextDialog::setText(const std::string &text)
 {
     textEdit_->setPlainText(getQString(text));
 }
+
+void TextDialog::update(
+    DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list)
+{
+    updateType(type);
+    setText(text);
+    updateButtonBox(list);
+}
+
+void TextDialog::updateType(DialogType type)
+{
+    if (dialogType_ != type) {
+        dialogType_ = type;
+        setTitleAsInfo();
+    }
+}
+
+void TextDialog::updateButtonBox(std::initializer_list<ButtonInfo> list)
+{
+    buttonBox_ = std::make_unique<ButtonBox>(list);
+    layout_->addWidget(buttonBox_.get());
+}
+
+// void TextDialog::closeEvent(QCloseEvent *event)
+// {
+//     event->ignore();
+// }
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 {

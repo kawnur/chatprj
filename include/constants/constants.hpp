@@ -82,7 +82,8 @@ enum class DialogType
 {
     INFO,
     WARNING,
-    ERROR
+    ERROR,
+    UNKNOWN
 };
 
 enum class ActionType
@@ -106,6 +107,8 @@ enum class MainWindowContainerPosition
     CENTRAL,
     RIGHT
 };
+
+const uint8_t BLUR_RADIUS = 30;
 
 // dialog type to dialog window title mapping
 using InfoDialogTitleMap = std::unordered_map<DialogType, QString>;
@@ -131,7 +134,8 @@ const DataDialogTitleMap ACTION_TITLE_MAP {
 const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
     { DialogType::INFO, "INFO" },
     { DialogType::WARNING, "WARNING" },
-    { DialogType::ERROR, "ERROR" }
+    { DialogType::ERROR, "ERROR" },
+    { DialogType::UNKNOWN, "UNKNOWN" }
 };
 
 const std::string ACTION_INFO_DIALOG_DEFAULT_HEADER { "Action" };
@@ -165,6 +169,8 @@ const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPR {
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
+const std::string EMPTY_FIELDS_DIALOG_TEXT { "Fields must have data" };
+const std::string PASSWORDS_ARE_NOT_EQUAL_DIALOG_TEXT { "Passwords are not equal" };
 const std::string socketInfoStubWidget { "No companion info from DB..." };
 
 // new group chat dialog

@@ -13,6 +13,7 @@
 class ButtonInfo;
 
 // std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(ButtonType value);
+ButtonInfo getOKButtonInfo(const std::function<void()> &function);
 QString getButtonText(ButtonType value);
 QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
 

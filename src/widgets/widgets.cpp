@@ -42,11 +42,13 @@ ButtonType getNextConnectButton(ButtonType current)
     }
 }
 
-Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
+// Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
 
-Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
+// Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
 
-ButtonInfo::ButtonInfo(ButtonType type, std::function<void(TextDialog  &)> function)
+ButtonInfo::ButtonInfo(): type_(ButtonType::UNKNOWN), function_() {}
+
+ButtonInfo::ButtonInfo(ButtonType type, std::function<void()> function)
     : type_(type), function_(function) {}
 
 ButtonInfo::~ButtonInfo() { logArgsInfo(Q_FUNC_INFO); }
@@ -56,7 +58,7 @@ ButtonType ButtonInfo::type() const
     return type_;
 }
 
-std::function<void(TextDialog &)> ButtonInfo::function() const
+std::function<void()> ButtonInfo::function() const
 {
     return function_;
 }
@@ -65,15 +67,9 @@ ButtonBox::ButtonBox(const std::initializer_list<ButtonInfo> &list) : QDialogBut
 {
     for (const auto &info : list) {
         auto type = info.type();
-        auto role = getButtonRole(type);
-        auto function = info.function();
-        auto button = addButton(getButtonText(type), role);
+        auto button = addButton(getButtonText(type), getButtonRole(type));
 
-        // connect(button, &QPushButton::clicked, function, Qt::QueuedConnection);
-
-        connect(button, &QPushButton::clicked, []() {
-            qDebug() << "Button was clicked!";
-        });
+        connect(button, &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
     }
 }
 

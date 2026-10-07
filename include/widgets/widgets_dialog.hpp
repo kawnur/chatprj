@@ -204,22 +204,24 @@ class TextDialog : public Dialog
     Q_OBJECT
 
 public:
-    // TextDialog(
-    //     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-    //     std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo);
     TextDialog(
-        // std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
         std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
-        const std::initializer_list<ButtonInfo> &buttonsInfo);
+        std::initializer_list<ButtonInfo> buttonsInfo);
 
     ~TextDialog();
 
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    // void set(std::shared_ptr<Action> action) override;
     void closeSelf();
     void closeSelfAndParentDialog();
     void acceptAction();
     void setText(const std::string &text);
+
+    void update(DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
+    void updateType(DialogType type);
+    void updateButtonBox(std::initializer_list<ButtonInfo> list);
+
+    // void closeEvent(QCloseEvent *event) override;
 
 public slots:
     void unsetMainWindowBlurAndCloseDialogs();
@@ -228,11 +230,7 @@ public slots:
 private:
     std::unique_ptr<QPlainTextEdit> textEdit_;
     std::unique_ptr<QVBoxLayout> layout_;
-    // std::unique_ptr<QDialogButtonBox> buttonBox_;
-    // std::shared_ptr<QDialogButtonBox> buttonBox_;
     std::unique_ptr<ButtonBox> buttonBox_;
-    // std::shared_ptr<std::vector<ButtonInfo>> buttonsInfo_;
-    // std::vector<std::unique_ptr<QPushButton>> buttons_;
 };
 
 class FileDialog : public Dialog

@@ -80,7 +80,7 @@ void MainWindow::set()
     if (!addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_))
         logArgsError("addWidgetToContainerAndSetParentTo error");
 
-    setBlurEffect();
+    initBlurEffect();
 }
 
 void MainWindow::addTextToAppLogWidget(const QString &text)
@@ -156,10 +156,10 @@ void MainWindow::enableBlurEffect()
 void MainWindow::disableBlurEffect()
 {
     enableWidgetsForShowHide();
-    setGraphicsEffect(nullptr);
+    // setGraphicsEffect(nullptr);
 
     // // setGraphicsEffect deletes previous effect object
-    setBlurEffect();
+    initBlurEffect();
 }
 
 void MainWindow::createCompanion()
@@ -217,8 +217,8 @@ void MainWindow::createMenu()
         this, &MainWindow::createGroupChat, Qt::QueuedConnection);
 }
 
-void MainWindow::setBlurEffect()
+void MainWindow::initBlurEffect()
 {
     blurEffect_ = std::make_shared<QGraphicsBlurEffect>();
-    blurEffect_->setBlurRadius(30);
+    blurEffect_->setBlurRadius(BLUR_RADIUS);
 }

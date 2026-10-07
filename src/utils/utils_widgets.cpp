@@ -1,7 +1,8 @@
 #include "utils_widgets.hpp"
 
 #include "constants.hpp"
-#include "widgets_dialog.hpp"
+#include "widgets.hpp"
+// #include "widgets_dialog.hpp"
 
 // std::shared_ptr<std::vector<ButtonInfo>> getButtonInfoVector(ButtonType value)
 // {
@@ -15,6 +16,11 @@
 
 //     return vector;
 // }
+
+ButtonInfo getOKButtonInfo(const std::function<void()> &function)
+{
+    return ButtonInfo(ButtonType::OK, function);
+}
 
 QString getButtonText(ButtonType value)
 {

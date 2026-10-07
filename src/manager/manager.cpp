@@ -773,7 +773,6 @@ std::shared_ptr<ActionResult> Manager::pushSocketToDb(
 std::shared_ptr<ActionResult> Manager::createCompanion(std::shared_ptr<CompanionAction> action)
 {
     // data validation
-    // auto validationResult = validator_.validate<CompanionAction>(action);
     auto validationResult = validateActionData<CompanionAction>(action);
 
     if (!validationResult->status())
