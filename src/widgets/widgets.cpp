@@ -856,9 +856,12 @@ void WidgetGroup::messageAdded()
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
     // set new message indicator on if socket info widget is not selected
+    if (antecedentMessagesCounter_ <= 0)
+        return;
+
     auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
 
-    if (cast && antecedentMessagesCounter_ > 0)
+    if (cast)
         cast->setNewMessagesIndicatorOn();
 }
 
@@ -910,7 +913,9 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(std::shared_ptr<
 
     if (isAntecedent) {
         std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+
         ++antecedentMessagesCounter_;
+
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
     }
 

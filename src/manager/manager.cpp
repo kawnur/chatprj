@@ -133,18 +133,18 @@ void Manager::sendMessage(
 
     // add to widget
     if (type == MessageType::FILE) {
-        // auto storage = companion->getFileOperatorStorage();
+        auto storage = companion->getFileOperatorStorage();
 
-        // if (!storage)
-        //     return;
+        if (!storage)
+            return;
 
-        // // TODO modify
-        // auto actionCast = std::dynamic_pointer_cast<FileAction>(action);
+        // TODO modify
+        auto cast = std::dynamic_pointer_cast<FileAction>(action);
 
-        // if (!action)
-        //     logArgsError("action cast error");
-        // else
-        //     storage->addSenderOperator(message->getNetworkId(), actionCast->getPath());
+        if (!cast)
+            logArgsError("action cast error");
+        else
+            storage->addSenderOperator(message->getNetworkId(), cast->getPath());
     }
 
     group->addMessageWidgetToCentralPanelChatHistory(message);
@@ -365,7 +365,7 @@ void Manager::receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr me
     auto networkId = meta->networkId_;
 
     logTemplateInfo(
-        entryTemplate, companion->getFileOperatorFilePathStringByNetworkId(networkId));
+        entryTemplate, companion->getFilePathString(networkId));
 
     companion->removeFileOperator<SenderOperator>(networkId);
 }
@@ -413,7 +413,7 @@ void Manager::receiveFileDataTransmissionFailure(CompanionPtr companion, Message
 
     logTemplateInfo(
         "file {} WAS NOT received by companion",
-        companion->getFileOperatorFilePathStringByNetworkId(networkId));
+        companion->getFilePathString(networkId));
 
     companion->removeFileOperator<SenderOperator>(networkId);
 }
@@ -718,14 +718,14 @@ void Manager::initEntrancePasswordReception()
     initAction<PasswordAction>(ActionType::GET_PASSWORD);
 }
 
-void Manager::initFileSend()
+void Manager::initFileSend(std::shared_ptr<Companion> companion)
 {
-    initAction<FileAction>(ActionType::SEND_FILE);
+    initAction<FileAction>(ActionType::SEND_FILE, ""s, companion);
 }
 
-void Manager::initFileReception()
+void Manager::initFileReception(const std::string &networkId, std::shared_ptr<Companion> companion)
 {
-    initAction<FileAction>(ActionType::SAVE_FILE);
+    initAction<FileAction>(ActionType::SAVE_FILE, networkId, companion);
 }
 
 ActionResultPtr Manager::getActionResultByKeyDBData(
@@ -1478,10 +1478,10 @@ Manager::getActionLambda(FileActionPtr action)
 {
     switch (action->getType()) {
     case ActionType::SEND_FILE:
-        return [=, this](auto action) { return createUserPassword(action); };
+        // return [=, this](auto action) { return createUserPassword(action); };
 
     case ActionType::SAVE_FILE:
-        return [=, this](auto action) { return authenticateUser(action); };
+        // return [=, this](auto action) { return authenticateUser(action); };
 
     default:
         return std::function<ActionResultPtr(FileActionPtr)>();

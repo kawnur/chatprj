@@ -307,7 +307,12 @@ std::string getHTMLColor(Widget value);
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
 std::string buildTextAsUnorderedListWithHeader(const std::string &header, const std::vector<std::string> &messages);
 LogType getLogTypeByDialogType(DialogType type);
-std::string getFormattedMessageBodyString(const std::string &color, const std::string &text);
+
+std::string getHTMLHeader(
+    const std::string &color, const std::string &sender, const std::string &receiver,
+    const std::string &time);
+
+std::string getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
 nlohmann::json buildJsonObject(const std::string &jsonString);
 std::string getRandomString(uint8_t length);
 void sleepForMS(uint32_t duration);

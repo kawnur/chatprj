@@ -78,7 +78,7 @@ public:
     uint16_t getSocketClientPort() const;
     std::shared_ptr<CompanionData> getData();
     std::shared_ptr<FileOperatorStorage> getFileOperatorStorage() const;
-    std::string getFileOperatorFilePathStringByNetworkId(const std::string &networkId);
+    std::string getFilePathString(const std::string &networkId);
     bool removeOperatorFromStorage(const std::string &key);
 
     template<typename T>

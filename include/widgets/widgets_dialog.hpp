@@ -84,6 +84,7 @@ public:
     virtual std::string getFirstEditText() { return ""s; }
     virtual std::string getSecondEditText() { return ""s; }
     virtual std::string getEditText() { return ""s; }
+    virtual QStringList selectedFiles() { return QStringList(); }
 
     // void setAction(std::shared_ptr<Action> action);
     // void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
@@ -239,17 +240,19 @@ class FileDialog : public Dialog
     Q_OBJECT
 
 public:
-    FileDialog(std::shared_ptr<FileAction> action, const std::string &title);
-    ~FileDialog() { logArgsInfo(Q_FUNC_INFO); }
+    // FileDialog(std::shared_ptr<FileAction> action, const std::string &title);
+    FileDialog(ActionType type);
+    ~FileDialog();
 
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
     void showDialog() override;
 
     std::shared_ptr<QFileDialog> getFileDialog();
+    QStringList selectedFiles() override;
 
 private:
-    std::shared_ptr<FileAction> action_;
+    // std::shared_ptr<FileAction> action_;
     std::shared_ptr<QFileDialog> dialog_;
 };
 

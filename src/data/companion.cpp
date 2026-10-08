@@ -101,7 +101,7 @@ std::shared_ptr<FileOperatorStorage> Companion::getFileOperatorStorage() const
     return fileOperatorStorage_;
 }
 
-std::string Companion::getFileOperatorFilePathStringByNetworkId(const std::string &networkId)
+std::string Companion::getFilePathString(const std::string &networkId)
 {
     return fileOperatorStorage_->getOperator(networkId)->getPath().string();
 }
@@ -522,15 +522,10 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
         receiver = companionName;
     }
 
-    auto header = getStringByFormat(
-        "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>",
-        color, sender, receiver, time);
+    auto header = getHTMLHeader(color, sender, receiver, time);
+    auto body = getHTMLBody(color, text, true, false);
 
-    std::string body = getFormattedMessageBodyString(color, text);
-
-    std::pair<std::string, std::string> data (header, body);
-
-    return data;
+    return std::pair<std::string, std::string>(header, body);
 }
 
 std::string buildMessageJSONString(
@@ -550,18 +545,20 @@ std::string buildMessageJSONString(
     jsonData["id"] = networkId;
     jsonData["companion_id"] = companion->getId();
     jsonData["antecedent"] = message->isAntecedent();
+    jsonData["time"] = message->getTime();
+    jsonData["text"] = message->getText();
 
     switch (type) {
     case NetworkMessageType::TEXT: {
-        jsonData["time"] = message->getTime();
-        jsonData["text"] = message->getText();
+        // jsonData["time"] = message->getTime();
+        // jsonData["text"] = message->getText();
     }
 
     break;
 
     case NetworkMessageType::FILE_PROPOSAL: {
-        jsonData["time"] = message->getTime();
-        jsonData["text"] = message->getText();
+        // jsonData["time"] = message->getTime();
+        // jsonData["text"] = message->getText();
         jsonData["hashMD5"] =
             companion->getFileOperatorStorage()->getOperator(networkId)->getMD5Hash();
     }

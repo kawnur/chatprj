@@ -75,9 +75,24 @@ LogType getLogTypeByDialogType(DialogType type)
     return getMapValue(MAP_DIALOG_TYPE_TO_LOG_TYPE, type, LogType::INFO);
 }
 
-std::string getFormattedMessageBodyString(const std::string &color, const std::string &text)
+std::string getHTMLHeader(
+    const std::string &color, const std::string &sender, const std::string &receiver,
+    const std::string &time)
 {
-    return getStringByFormat("<font color=\"{0}\"><br>{1}</font>", color, text);
+    auto headerTemplate = "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>"s;
+
+    return getStringByFormat(headerTemplate, color, sender, receiver, time);
+}
+
+std::string getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold)
+{
+    auto breakSub = (_break) ? "<br>"s : ""s;
+    auto boldOpen = (bold) ? "<b>"s : ""s;
+    auto boldClose = (bold) ? "</b>"s : ""s;
+
+    auto textSub = getStringByFormat("{0}{1}{2}{3}", breakSub, boldOpen, text, boldClose);
+
+    return getStringByFormat("<font color=\"{0}\">{1}</font>", color, textSub);
 }
 
 nlohmann::json buildJsonObject(const std::string &jsonString)

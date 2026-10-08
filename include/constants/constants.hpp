@@ -70,6 +70,23 @@ enum class NetworkMessageType
     CHAT_HISTORY_DATA
 };
 
+const std::unordered_map<NetworkMessageType, MessageType> NETWORK_MESSAGE_TYPE_TO_MESSAGE_TYPE_MAP {
+    { NetworkMessageType::UNKNOWN, MessageType::UNKNOWN },
+    { NetworkMessageType::NO_ACTION, MessageType::TEXT },
+    { NetworkMessageType::TEXT, MessageType::TEXT },
+    { NetworkMessageType::FILE_PROPOSAL, MessageType::FILE },
+    { NetworkMessageType::FILE_REQUEST, MessageType::FILE },
+    { NetworkMessageType::FILE_DATA, MessageType::FILE },
+    { NetworkMessageType::FILE_DATA_CHECK_SUCCESS, MessageType::FILE },
+    { NetworkMessageType::FILE_DATA_CHECK_FAILURE, MessageType::FILE },
+    { NetworkMessageType::FILE_DATA_TRANSMISSON_END, MessageType::FILE },
+    { NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE, MessageType::FILE },
+    { NetworkMessageType::RECEIVE_CONFIRMATION, MessageType::TEXT },
+    { NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST, MessageType::TEXT },
+    { NetworkMessageType::CHAT_HISTORY_REQUEST, MessageType::TEXT },
+    { NetworkMessageType::CHAT_HISTORY_DATA, MessageType::TEXT }
+};
+
 enum class LogType
 {
     INFO,

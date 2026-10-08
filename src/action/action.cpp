@@ -469,9 +469,7 @@ FileAction::~FileAction() { logArgsInfo(Q_FUNC_INFO); }
 
 void FileAction::buildDataDialog()
 {
-    auto windowTitle = getMapValue(fileDialogTypeQStringRepresentation, type, "File action"s);
-    dataDialog_ = std::make_shared<FileDialog>(shared_from_this(), windowTitle);
-
+    dataDialog_ = std::make_shared<FileDialog>(type_);
 }
 
 std::shared_ptr<Companion> FileAction::getCompanion() const
@@ -503,45 +501,46 @@ void FileAction::preAct()
     switch (type_) {
     case ActionType::SEND_FILE:
         dataDialog_->showDialog();
-        break;
+
+    break;
+
     case ActionType::SAVE_FILE:
         defineFilePath();
-        break;
+
+    break;
+
     default:
         logArgsError("unknown action type");
-        break;
+
+    break;
     }
 }
 
 void FileAction::act()
 {
-    logArgs(__FUNCTION__);
+    // auto cast = dynamic_pointer_cast<FileDialog>(dataDialog_);
 
-    auto cast = dynamic_pointer_cast<FileDialog>(dataDialog_);
+    // if (!cast)
+    //     return;
 
-    if (!cast)
-        return;
+    // auto dialog = cast->getFileDialog();
 
-    auto dialog = cast->getFileDialog();
-
-    if (!dialog)
-        return;
+    // if (!dialog)
+    //     return;
 
     switch (type_) {
     case ActionType::SEND_FILE:
     {
-        for (const auto &pathQString : dialog->selectedFiles()) {  // one file
-            logArgs(pathQString);
+        for (const auto &path : dataDialog_->selectedFiles()) {  // one file
+            filePath_ = std::filesystem::path(getString(path));
 
-            auto path = std::filesystem::path(pathQString.toStdString());
-
-            filePath_ = path;  // TODO ???
-
+            // getManager()->sendMessage(
+            //     MessageType::FILE, companion_, shared_from_this(),
+            //     getStringByFormat("SEND FILE: {}", filePath_.filename().string()));
             getManager()->sendMessage(
-                MessageType::FILE, getCompanion(), shared_from_this(),
-                getStringByFormat("SEND FILE: {}", filePath_.filename().string()));
+                MessageType::FILE, companion_, shared_from_this(), filePath_.filename().string());
 
-            getManager()->setLastOpenedPath(path.parent_path());
+            getManager()->setLastOpenedPath(filePath_.parent_path());
         }
     }
 

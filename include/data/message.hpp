@@ -50,13 +50,18 @@ public:
             { "type", [&]() { networkMessageType_ = data.at("type"); } },
             { "companion_id", [&]() { companionId_ = data.at("companion_id"); } },
             { "time", [&]() { timestampTz_ = data.at("time"); } },
-            { "id", [&]() { networkId_ = data.at("id"); } }
+            { "id", [&]() { networkId_ = data.at("id"); } },
+            { "hashMD5", [&]() { hashMD5_ = data.at("hashMD5"); } }
         };
 
-        return setFieldsFromJson(lambdaMap, data, args...);
+        bool result = setFieldsFromJson(lambdaMap, data, args...);
+        setMessageType();
+
+        return result;
     };
 
     bool isValid();
+    void setMessageType();
 
     MessageType messageType_;
     NetworkMessageType networkMessageType_;

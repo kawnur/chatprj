@@ -353,24 +353,28 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog(std::shared_ptr<FileAction> action, const std::string &title)
+// FileDialog::FileDialog(std::shared_ptr<FileAction> action, const std::string &title)
+FileDialog::FileDialog(ActionType type)
 {
-    action_ = action;
+    // title
+    actionType_ = type;
+    setTitleAsData();
+
     containsDialog_ = true;
     dialog_ = std::make_shared<QFileDialog>();
     dialog_->setFileMode(QFileDialog::AnyFile);
     dialog_->setViewMode(QFileDialog::Detail);
     dialog_->setDirectory(getQString(getManager()->getLastOpenedPath().string()));
-    dialog_->setWindowTitle(getQString(title));
+    // dialog_->setWindowTitle(getQString(title));
 }
 
-// void FileDialog::set()
+FileDialog::~FileDialog() { logArgsInfo(Q_FUNC_INFO); }
+
 void FileDialog::set(std::shared_ptr<Action> action)
 {
-    // connect(
-    //     dialog_.get(), &QFileDialog::accepted,
-    //     action_.get(), &Action::act, Qt::QueuedConnection);
-    //     // this, &Dialog::actionSlot, Qt::QueuedConnection);
+    connect(
+        dialog_.get(), &QFileDialog::accepted,
+        action.get(), &Action::act, Qt::QueuedConnection);
 }
 
 void FileDialog::showDialog()
@@ -381,6 +385,11 @@ void FileDialog::showDialog()
 std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
 {
     return dialog_;
+}
+
+QStringList FileDialog::selectedFiles()
+{
+    return dialog_->selectedFiles();
 }
 
 // std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())

@@ -157,8 +157,8 @@ public:
     void initCompanionHistoryClearing(CompanionPtr companion);
     void initEntrancePasswordCreation();
     void initEntrancePasswordReception();
-    void initFileSend();
-    void initFileReception();
+    void initFileSend(std::shared_ptr<Companion> companion);
+    void initFileReception(const std::string &networkId, std::shared_ptr<Companion> companion);
 
     ActionResultPtr createCompanion(CompanionActionPtr action);
 

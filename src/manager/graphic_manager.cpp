@@ -307,14 +307,12 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<Widge
 
 void GraphicManager::sendFile(std::shared_ptr<Companion> companion)
 {
-    // auto action = std::make_shared<FileAction>(FileActionType::SEND, "", companion);
-    // action->set();
+    getManager()->initFileSend(companion);
 }
 
 void GraphicManager::saveFile(const std::string &networkId, std::shared_ptr<Companion> companion)
 {
-    // auto action = std::make_shared<FileAction>(FileActionType::SAVE, networkId, companion);
-    // action->set();
+    getManager()->initFileReception(networkId, companion);
 }
 
 std::shared_ptr<GraphicManager> getGraphicManager()

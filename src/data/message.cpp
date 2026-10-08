@@ -1,5 +1,6 @@
 #include "message.hpp"
 
+#include "constants.hpp"
 #include "logging.hpp"
 
 MessageMetaData::MessageMetaData(
@@ -20,6 +21,12 @@ bool MessageMetaData::isValid()
     }
 
     return true;
+}
+
+void MessageMetaData::setMessageType()
+{
+    messageType_ = getMapValue(
+        NETWORK_MESSAGE_TYPE_TO_MESSAGE_TYPE_MAP, networkMessageType_, MessageType::UNKNOWN);
 }
 
 MessageData::MessageData(const std::string &text, const std::string &data)
