@@ -11,35 +11,29 @@
 
 ButtonType getInitialConnectButton()
 {
-    try {
-        return CONNECT_BUTTONS.empty() ? ButtonType::UNKNOWN : CONNECT_BUTTONS.at(0);
-    }
-    catch(...) {
-        return ButtonType::UNKNOWN;
-    }
+    return runAndReturnDefault([]() { return CONNECT_BUTTONS.at(0); }, ButtonType::UNKNOWN);
 }
 
-ButtonType getNextConnectButton(ButtonType current)
+ButtonType getNextConnectButton(ButtonType currentValue)
 {
-    try {
-        if (CONNECT_BUTTONS.empty())
-            return ButtonType::UNKNOWN;
+    auto lambda = [&](const auto &container) {
+        auto current = std::ranges::find(container, currentValue);
 
-        auto currentIterator = std::ranges::find(CONNECT_BUTTONS, current);
+        if (current == container.end()) {
+            auto entry = getStringByFormat("current type '{}' not found in container", currentValue);
 
-        if (currentIterator == CONNECT_BUTTONS.end())
-            return *CONNECT_BUTTONS.begin();
+            throw std::runtime_error(entry);
+        }
 
-        auto nextIterator = currentIterator + 1;
+        auto next = current + 1;
 
-        if (nextIterator == CONNECT_BUTTONS.end())
-            nextIterator = CONNECT_BUTTONS.begin();
+        if (next == container.end())
+            next = container.begin();
 
-        return *nextIterator;
-    }
-    catch (...) {
-        return ButtonType::UNKNOWN;
-    }
+        return *next;
+    };
+
+    return runAndReturnDefault(lambda, ButtonType::UNKNOWN, CONNECT_BUTTONS);
 }
 
 // Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}

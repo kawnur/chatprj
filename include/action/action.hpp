@@ -7,7 +7,6 @@
 #include <QObject>
 
 #include "constants.hpp"
-// #include "manager.hpp"
 #include "widgets_dialog.hpp"
 
 class ActionResult;
@@ -78,7 +77,6 @@ class CompanionAction : public RegularAction, public std::enable_shared_from_thi
     Q_OBJECT
 
 public:
-    // CompanionAction(ActionType type, std::shared_ptr<Companion> companion = nullptr);
     CompanionAction(ActionType type, std::shared_ptr<Companion> companion);
     ~CompanionAction();
 
@@ -130,8 +128,6 @@ public:
     ~PasswordAction();
 
     void buildDataDialog() override;
-    // void buildInfoDialog() override;
-
     std::string getPassword() override;
 
     void set() override;
@@ -151,17 +147,17 @@ class FileAction : public Action, public std::enable_shared_from_this<FileAction
 
 public:
     FileAction(ActionType type, const std::string &networkId, std::shared_ptr<Companion> companion);
-    ~FileAction() = default;
+    ~FileAction();
 
+    void buildDataDialog() override;
     std::shared_ptr<Companion> getCompanion() const;
     std::filesystem::path getPath() const;
     void set() override;
-
+    void preAct() override;
     void act() override;
     void defineFilePath();
 
 private:
-    ActionType type_;
     std::filesystem::path filePath_;
     std::shared_ptr<Companion> companion_;
     std::string networkId_;

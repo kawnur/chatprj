@@ -96,8 +96,8 @@ std::string getString(T &&value)
         return value.toStdString();
     else if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
         return value;
-    // else if constexpr (std::is_same_v<std::remove_cvref_t<T>, bool>)
-    //     return (value) ? "true"s : "false"s;
+    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, ButtonType>)
+        return getString(getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, NOT_FOUND));
     else
         return std::to_string(value);
 }
@@ -140,22 +140,6 @@ void logArgsException(Ts &&...args);
 
 template<typename T, typename... Ts>
 void logTemplateError(T &&templateString, Ts &&...args);
-
-// template<typename T, typename U>
-// U getConstantMappingValue(std::string mapName, const std::map<T, U> &map, const T &key)
-// {
-//     try {
-//         return map->at(key);
-//     }
-//     catch(std::out_of_range) {
-//         logTemplateError("mapping {} key error", mapName);
-//     }
-//     catch(const std::exception &e) {
-//         logArgsException(e.what());
-//     }
-
-//     return U();
-// }
 
 template<AssociativeContainer M, typename T, typename U>
 typename M::mapped_type getMapValue(
@@ -243,6 +227,19 @@ std::optional<T> runAndReturnOptionalResult(F &&func, Ts&&... args)
         logArgsException(e.what());
 
         return std::nullopt;
+    }
+}
+
+template<typename T, typename F, typename... Ts>
+T runAndReturnDefault(F &&func, const T &defaultValue, Ts&&... args)
+{
+    try {
+        return func(args...);
+    }
+    catch(const std::exception &e) {
+        logArgsException(e.what());
+
+        return defaultValue;
     }
 }
 

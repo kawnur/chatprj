@@ -98,20 +98,7 @@ void CompanionAction::buildDataDialog()
 
         break;
 
-    case ActionType::DELETE_COMPANION: {
-        // std::initializer_list<ButtonInfo> list {
-        //     // { ButtonType::DELETE_COMPANION, [](TextDialog &dialog) { dialog.acceptAction(); } }
-        //     { ButtonType::DELETE_COMPANION, [this]() { infoDialog_->acceptAction(); } }
-        // };
-
-        // dataDialog_ = std::make_shared<TextDialog>(
-        //     nullptr, DialogType::WARNING, deleteCompanionDialogText,
-        //     // getButtonInfoVector(ButtonType::DELETE_COMPANION));
-        //     list);
-    }
-
-    break;
-
+    case ActionType::DELETE_COMPANION:
     case ActionType::CLEAR_HISTORY:
         // dataDialog_ = std::make_shared<TextDialog>(
         //     mainWindow, DialogType::WARNING, clearCompanionHistoryDialogText,
@@ -236,17 +223,17 @@ void CompanionAction::preAct()
     break;
 
     case ActionType::DELETE_COMPANION: {
-        auto list = { getOKButtonInfo([this]() { act(); }) };
+        auto list = { getOKButtonInfo([this]() { act(); }), getCancelButtonInfo([this]() { endAct(); }) };
         updateInfoDialogAndShow(DialogType::WARNING, deleteCompanionDialogText, list);
     }
 
     break;
-    case ActionType::CLEAR_HISTORY:
-        // data_ = std::make_shared<CompanionData>(
-        //     companion_->getName(), companion_->getSocketIpAddress(), ""s,
-        //     std::to_string(companion_->getSocketClientPort()));
+    case ActionType::CLEAR_HISTORY: {
+        auto list = { getOKButtonInfo([this]() { act(); }), getCancelButtonInfo([this]() { endAct(); }) };
+        updateInfoDialogAndShow(DialogType::WARNING, clearCompanionHistoryDialogText, list);
+    }
 
-        break;
+    break;
 
     case ActionType::SEND_HISTORY:
         // // TODO if client is disconnected show error dialog
@@ -257,7 +244,6 @@ void CompanionAction::preAct()
     default:
         break;
     }
-
 }
 
 void CompanionAction::act()
@@ -338,10 +324,9 @@ GroupChatAction::GroupChatAction(ActionType type) : data_(new GroupChatData), Re
     }
 }
 
-PasswordAction::PasswordAction(ActionType type) : RegularAction(type)
-{
-    buildDataDialog();
-}
+PasswordAction::PasswordAction(ActionType type) : RegularAction(type) {}
+
+PasswordAction::~PasswordAction() { logArgsInfo(Q_FUNC_INFO); }
 
 void PasswordAction::buildDataDialog()
 {
@@ -359,23 +344,6 @@ void PasswordAction::buildDataDialog()
     default:
         break;
     }
-}
-
-// void PasswordAction::buildInfoDialog()
-// {
-//     auto function = [this]()
-//     {
-//         getGraphicManager()->disableMainWindowBlurEffect();
-//         infoDialog_->closeSelfAndParentDialog();
-//     };
-
-//     initInfoDialog({ getOKButtonInfo(function) });
-// }
-
-PasswordAction::~PasswordAction()
-{
-    // if (type_ == ActionType::GET_PASSWORD)
-    //     dataDialog_->close();
 }
 
 std::string PasswordAction::getPassword()
@@ -495,13 +463,15 @@ void PasswordAction::endAct()
 
 FileAction::FileAction(
     ActionType type, const std::string &networkId, std::shared_ptr<Companion> companion)
-    : Action(type)
-{
-    companion_ = companion;
-    networkId_ = networkId;
+    : Action(type), companion_(companion), networkId_(networkId) {}
 
-    // auto windowTitle = getMapValue(fileDialogTypeQStringRepresentation, type, "File action"s);
-    // dataDialog_ = std::make_shared<FileDialog>(shared_from_this(), windowTitle);
+FileAction::~FileAction() { logArgsInfo(Q_FUNC_INFO); }
+
+void FileAction::buildDataDialog()
+{
+    auto windowTitle = getMapValue(fileDialogTypeQStringRepresentation, type, "File action"s);
+    dataDialog_ = std::make_shared<FileDialog>(shared_from_this(), windowTitle);
+
 }
 
 std::shared_ptr<Companion> FileAction::getCompanion() const
@@ -516,8 +486,20 @@ std::filesystem::path FileAction::getPath() const
 
 void FileAction::set()
 {
-    setDialog(std::dynamic_pointer_cast<Action>(shared_from_this()));
+    buildDataDialog();
+    buildInfoDialog();
 
+    auto cast = dynamic_pointer_cast<Action>(shared_from_this());
+
+    if (!cast)
+        logArgsError("action cast error");
+
+    setDialog(cast);
+    preAct();
+}
+
+void FileAction::preAct()
+{
     switch (type_) {
     case ActionType::SEND_FILE:
         dataDialog_->showDialog();

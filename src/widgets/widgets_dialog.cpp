@@ -278,7 +278,10 @@ TextDialog::TextDialog(
 
 TextDialog::~TextDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-// void TextDialog::set(std::shared_ptr<Action> action) {}
+void TextDialog::set(std::shared_ptr<Action> action)
+{
+    connect(this, &QDialog::rejected, action.get(), &Action::endAct, Qt::QueuedConnection);
+}
 
 void TextDialog::closeSelf()
 {

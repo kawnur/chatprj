@@ -36,6 +36,7 @@ const std::string VALUE_BUILDING_ERROR { "Value building error" };
 const std::string POINTER_CASTING_ERROR { "Pointer casting error" };
 
 const QString ME_NAME { "me" };
+const QString NOT_FOUND { "NOT FOUND" };
 
 const uint8_t CONNECTION_STATE_INDICATOR_WIDGET_SIZE = 15;
 const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
@@ -145,6 +146,7 @@ const InfoDialogHeaderMap ACTION_SUCCESS_HEADER_MAP {
     { ActionType::CREATE_COMPANION, "New companion added" },
     { ActionType::UPDATE_COMPANION, "Companion edited" },
     { ActionType::DELETE_COMPANION, "Companion deleted" },
+    { ActionType::CLEAR_HISTORY, "Chat history cleared" },
     { ActionType::CREATE_PASSWORD, "New password created" },
     { ActionType::GET_PASSWORD, "User successfully authenticated" }
 };
@@ -153,6 +155,7 @@ const InfoDialogHeaderMap ACTION_FAIL_HEADER_MAP {
     { ActionType::CREATE_COMPANION, "Companion addition error" },
     { ActionType::UPDATE_COMPANION, "Companion edition error" },
     { ActionType::DELETE_COMPANION, "Companion deletion error" },
+    { ActionType::CLEAR_HISTORY, "Chat history clearing error" },
     { ActionType::CREATE_PASSWORD, "Password creation error" },
     { ActionType::GET_PASSWORD, "User authentication error" }
 };

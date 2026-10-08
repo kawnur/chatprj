@@ -165,16 +165,20 @@ std::size_t DBReplyData::size()
     return data_.size();
 }
 
-std::string DBReplyData::getValue(std::size_t position, std::string key)
+std::string DBReplyData::getValue(std::size_t position, const std::string &key)
 {
-    return data_.at(position).at(key);
+    return runAndReturnDefault([&]() { return data_.at(position).at(key); }, ""s);
 }
 
 bool DBReplyData::findValue(const std::string &key, const std::string &value)
 {
     auto lambda = [&](const auto &iterator)
     {
-        return iterator.at(key) == value;
+        try {
+            return iterator.at(key) == value;
+        } catch (...) {
+            return false;
+        }
     };
 
     auto result = std::ranges::find_if(data_, lambda);

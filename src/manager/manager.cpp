@@ -703,6 +703,11 @@ void Manager::initCompanionDeletion(CompanionPtr companion)
     initAction<CompanionAction>(ActionType::DELETE_COMPANION, companion);
 }
 
+void Manager::initCompanionHistoryClearing(CompanionPtr companion)
+{
+    initAction<CompanionAction>(ActionType::CLEAR_HISTORY, companion);
+}
+
 void Manager::initEntrancePasswordCreation()
 {
     initAction<PasswordAction>(ActionType::CREATE_PASSWORD);
@@ -713,9 +718,20 @@ void Manager::initEntrancePasswordReception()
     initAction<PasswordAction>(ActionType::GET_PASSWORD);
 }
 
-ActionResultPtr Manager::getActionResultByIdDBData(
-    std::shared_ptr<DBReplyData> data, bool allowEmptyResult)
+void Manager::initFileSend()
 {
+    initAction<FileAction>(ActionType::SEND_FILE);
+}
+
+void Manager::initFileReception()
+{
+    initAction<FileAction>(ActionType::SAVE_FILE);
+}
+
+ActionResultPtr Manager::getActionResultByKeyDBData(
+    std::shared_ptr<DBReplyData> data, const std::string &key, bool allowEmptyResult)
+{
+    // TODO define db schema as code and switch from string field names to enum values
     if (!data)
         return std::make_shared<ActionResult>(false, DB_REPLY_NULL);
 
@@ -726,7 +742,7 @@ ActionResultPtr Manager::getActionResultByIdDBData(
             return std::make_shared<ActionResult>(false, DB_REPLY_EMPTY);
     }
 
-    auto result = getIntFromString(ID_BAD_VALUE, data->getValue(0, "id"));
+    auto result = getIntFromString(ID_BAD_VALUE, data->getValue(0, key));
 
     if (result == ID_BAD_VALUE)
         return std::make_shared<ActionResult>(false, VALUE_BUILDING_ERROR);
@@ -738,7 +754,7 @@ ActionResultPtr Manager::pushCompanionToDbAndReturnId(CompanionActionPtr action)
 {
     auto data = getDBData(DBRequestType::PUSH_COMPANION_AND_RETURN, action->getName());
 
-    return getActionResultByIdDBData(data);
+    return getActionResultByKeyDBData(data, "id");
 }
 
 uint16_t Manager::getServerPortByCompanionId(int id)
@@ -815,7 +831,7 @@ ActionResultPtr Manager::updateCompanionInDbAndReturnId(CompanionActionPtr actio
         DBRequestType::UPDATE_COMPANION_AND_SOCKET_AND_RETURN, action->getName(),
         action->getCompanionId(), action->getIpAddress(), action->getClientPort());
 
-    return getActionResultByIdDBData(data);
+    return getActionResultByKeyDBData(data, "id");
 }
 
 ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
@@ -860,7 +876,7 @@ ActionResultPtr Manager::deleteCompanionMessagesFromDbAndReturnId(CompanionActio
 {
     auto data = getDBData(DBRequestType::DELETE_MESSAGES_AND_RETURN, action->getCompanionId());
 
-    return getActionResultByIdDBData(data, true);
+    return getActionResultByKeyDBData(data, "companion_id", true);
 }
 
 ActionResultPtr Manager::deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action)
@@ -868,7 +884,7 @@ ActionResultPtr Manager::deleteCompanionAndSocketFromDbAndReturnId(CompanionActi
     auto data = getDBData(
         DBRequestType::DELETE_COMPANION_AND_SOCKET_AND_RETURN, action->getCompanionId());
 
-    return getActionResultByIdDBData(data);
+    return getActionResultByKeyDBData(data, "id");
 }
 
 ActionResultPtr Manager::deleteCompanion(CompanionActionPtr action)
@@ -897,19 +913,13 @@ void Manager::clearChatHistory(CompanionPtr companion)
     getGraphicManager()->clearChatHistory(widgetGroup);
 }
 
-void Manager::clearCompanionHistory(CompanionActionPtr action)
+ActionResultPtr Manager::clearCompanionHistory(CompanionActionPtr action)
 {
     // delete companion chat messages from db
-    auto companionIdMessagesData = getDBData(
-        DBRequestType::DELETE_MESSAGES_AND_RETURN, action->getCompanionId());
+    auto deleteMessagesResult = deleteCompanionMessagesFromDbAndReturnId(action);
 
-    if (!companionIdMessagesData)
-        return;
-
-    if (companionIdMessagesData->isEmpty()) {
-        // no return, may be companion without messages
-        // showWarningDialogAndLogWarning("Empty db reply to companion messages deletion");
-    }
+    if (!deleteMessagesResult->status())
+        return deleteMessagesResult;
 
     // clear companion's message mapping
     action->getCompanion()->clearMessageMapping();
@@ -917,15 +927,14 @@ void Manager::clearCompanionHistory(CompanionActionPtr action)
     // clear chat history widget
     clearChatHistory(action->getCompanion());
 
-    // show info dialog
-    // getGraphicManager()->showCompanionInfoDialog(action, "Companion chat history cleared:\n\n");
+    return std::make_shared<ActionResult>(true, ""s);
 }
 
 ActionResultPtr Manager::pushPasswordToDbAndReturnId(PasswordActionPtr action)
 {
     auto data = getDBData(DBRequestType::PUSH_PASSWORD_AND_RETURN, action->getPassword());
 
-    return getActionResultByIdDBData(data);
+    return getActionResultByKeyDBData(data, "id");
 }
 
 ActionResultPtr Manager::createUserPassword(PasswordActionPtr action)
@@ -1378,8 +1387,6 @@ void Manager::markMessageAsReceived(
 }
 
 MessageMetaDataPtr Manager::pushMessageToDB(
-    // const std::string &companionName, const std::string &authorName, const std::string &timestamp,
-    // const std::string &text, const bool &isSent, const bool &isReceived)
     MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     const std::string companionIdString("companion_id");
@@ -1442,7 +1449,7 @@ Manager::getActionLambda(CompanionActionPtr action)
         return [=, this](auto action) { return deleteCompanion(action); };
 
     case ActionType::CLEAR_HISTORY:
-        // lambda = [=, this]() { return clearCompanionHistory(action); };
+        return [=, this](auto action) { return clearCompanionHistory(action); };
 
     default:
         return std::function<ActionResultPtr(CompanionActionPtr)>();
@@ -1462,6 +1469,22 @@ Manager::getActionLambda(PasswordActionPtr action)
 
     default:
         return std::function<ActionResultPtr(PasswordActionPtr)>();
+    }
+}
+
+template<>
+std::function<ActionResultPtr(FileActionPtr)>
+Manager::getActionLambda(FileActionPtr action)
+{
+    switch (action->getType()) {
+    case ActionType::SEND_FILE:
+        return [=, this](auto action) { return createUserPassword(action); };
+
+    case ActionType::SAVE_FILE:
+        return [=, this](auto action) { return authenticateUser(action); };
+
+    default:
+        return std::function<ActionResultPtr(FileActionPtr)>();
     }
 }
 

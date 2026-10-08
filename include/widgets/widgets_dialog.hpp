@@ -212,7 +212,7 @@ public:
     ~TextDialog();
 
     // void set() override;
-    // void set(std::shared_ptr<Action> action) override;
+    void set(std::shared_ptr<Action> action) override;
     void closeSelf();
     void closeSelfAndParentDialog();
     void acceptAction();

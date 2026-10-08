@@ -44,6 +44,7 @@ using ActionResultPtr = std::shared_ptr<ActionResult>;
 using ActionPtr = std::shared_ptr<Action>;
 using CompanionActionPtr = std::shared_ptr<CompanionAction>;
 using PasswordActionPtr = std::shared_ptr<PasswordAction>;
+using FileActionPtr = std::shared_ptr<FileAction>;
 using MessagePtr = std::shared_ptr<Message>;
 using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;
 using MessageDataPtr = std::shared_ptr<MessageData>;
@@ -153,8 +154,11 @@ public:
     void initCompanionCreation();
     void initCompanionUpdate(CompanionPtr companion);
     void initCompanionDeletion(CompanionPtr companion);
+    void initCompanionHistoryClearing(CompanionPtr companion);
     void initEntrancePasswordCreation();
     void initEntrancePasswordReception();
+    void initFileSend();
+    void initFileReception();
 
     ActionResultPtr createCompanion(CompanionActionPtr action);
 
@@ -163,7 +167,7 @@ public:
     ActionResultPtr updateCompanion(CompanionActionPtr action);
     ActionResultPtr deleteCompanion(CompanionActionPtr action);
     void clearChatHistory(CompanionPtr companion);
-    void clearCompanionHistory(CompanionActionPtr action);
+    ActionResultPtr clearCompanionHistory(CompanionActionPtr action);
     ActionResultPtr pushPasswordToDbAndReturnId(PasswordActionPtr action);
     ActionResultPtr createUserPassword(PasswordActionPtr action);
     ActionResultPtr authenticateUser(PasswordActionPtr action);
@@ -202,8 +206,8 @@ public:
     }
 
 private:
-    ActionResultPtr getActionResultByIdDBData(
-        std::shared_ptr<DBReplyData> data, bool allowEmptyResult = false);
+    ActionResultPtr getActionResultByKeyDBData(
+        std::shared_ptr<DBReplyData> data, const std::string &key, bool allowEmptyResult = false);
 
     ActionResultPtr pushCompanionToDbAndReturnId(CompanionActionPtr action);
     uint16_t getServerPortByCompanionId(int id);
@@ -221,24 +225,6 @@ private:
     void deleteCompanionObject(CompanionPtr companion);
     void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
 
-    // template<typename F>
-    // ActionResultPtr checkCompanionDataForExistance(
-    //     F &&func, CompanionActionPtr action)
-    // {
-    //     DataChecker checker(action);
-
-    //     auto result = func();
-
-    //     // auto result = checker.checkCompanionDataForExistanceAtCreation();
-    //     // checker.coutErrorsState();
-
-    //     if (result)
-    //         return std::make_shared<ActionResult>(true, ""s);
-    //     else
-    //         return std::make_shared<ActionResult>(false, checker.moveErrors());
-    // }
-
-
     ActionResultPtr checkCompanionDataForExistanceAtCreation(CompanionActionPtr action);
     ActionResultPtr checkCompanionDataForExistanceAtUpdate(CompanionActionPtr action);
     ActionResultPtr checkPasswordForExistanceAtAuthentication(PasswordActionPtr action);
@@ -250,9 +236,6 @@ private:
     void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
 
     MessageMetaDataPtr pushMessageToDB(
-        // const std::string &companionName, const std::string &authorName,
-        // const std::string &timestamp, const std::string &text, const bool &isSent,
-        // const bool &isReceived);
         MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     template<typename... Ts>
@@ -274,7 +257,6 @@ private:
 
     // bool initialized_;
     DBRequester dbRequester_;
-    // Validator validator_;
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;
@@ -294,6 +276,10 @@ Manager::getActionLambda(CompanionActionPtr action);
 template<>
 std::function<ActionResultPtr(PasswordActionPtr)>
 Manager::getActionLambda(PasswordActionPtr action);
+
+template<>
+std::function<ActionResultPtr(FileActionPtr)>
+Manager::getActionLambda(FileActionPtr action);
 
 std::shared_ptr<Manager> getManager();
 

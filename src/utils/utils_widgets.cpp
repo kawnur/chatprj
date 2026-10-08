@@ -22,6 +22,11 @@ ButtonInfo getOKButtonInfo(const std::function<void()> &function)
     return ButtonInfo(ButtonType::OK, function);
 }
 
+ButtonInfo getCancelButtonInfo(const std::function<void()> &function)
+{
+    return ButtonInfo(ButtonType::CANCEL, function);
+}
+
 QString getButtonText(ButtonType value)
 {
     return getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, DEFAULT_BUTTON_TEXT);

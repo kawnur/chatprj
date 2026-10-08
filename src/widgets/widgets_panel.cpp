@@ -72,7 +72,7 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoB
     auto companionPanelChildren =
         companionPanel_->findChildren<SocketInfoBaseWidget *>(Qt::FindDirectChildrenOnly);
 
-    qsizetype index = companionPanelChildren.indexOf(widget.get());
+    auto index = companionPanelChildren.indexOf(widget.get());
 
     if (index == -1) {
         // showErrorDialogAndLogError("SocketInfoBaseWidget was not found in companion panel");
@@ -90,13 +90,10 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoB
 int LeftPanelWidget::getLastCompanionPanelChildWidth()
 {
     // TODO get rid of children mechanism usage
-    auto companionPanelChildren =
+    auto children =
         companionPanel_->findChildren<SocketInfoBaseWidget *>(Qt::FindDirectChildrenOnly);
 
-    if (companionPanelChildren.size() == 0)
-        return -1;
-    else
-        return companionPanelChildren.at(companionPanelChildren.size() - 1)->width();
+    return runAndReturnDefault([&]() { return children.at(children.size() - 1)->width(); }, -1);
 }
 
 CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string &name)

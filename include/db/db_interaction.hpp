@@ -76,7 +76,7 @@ public:
     std::size_t count(std::size_t, std::string);
     void push(std::size_t, std::string, const std::string &value);
     std::size_t size();
-    std::string getValue(std::size_t, std::string);
+    std::string getValue(std::size_t position, const std::string &key);
     bool findValue(const std::string&, const std::string &);    
 
     int getDataFromResult(std::shared_ptr<PGresult> result, int maxTuples);
