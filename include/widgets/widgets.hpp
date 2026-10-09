@@ -80,7 +80,10 @@ private:
     void keyPressEvent(QKeyEvent *event);
 
 signals:
-    void send(const QString &);
+    void sendSignal(const QString &text);
+
+public slots:
+    void sendSlot();
 };
 
 class IndicatorWidget : public QWidget

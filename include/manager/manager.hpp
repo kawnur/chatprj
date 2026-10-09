@@ -17,6 +17,7 @@
 #include "constants.hpp"
 #include "db_constants.hpp"
 #include "db_interaction.hpp"
+#include "message_handler.hpp"
 #include "utils.hpp"
 
 class Action;
@@ -32,6 +33,7 @@ class DBRequester;
 class Message;
 class MessageData;
 class MessageInfo;
+class MessageHandler;
 class MessageMetaData;
 class MessageState;
 class PasswordAction;
@@ -54,18 +56,6 @@ int getDataFromDBResult(
     bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result, int maxTuples);
 
 template <typename T, typename...Ts>
-std::shared_ptr<T> buildObjectFromJson(const nlohmann::json &data, Ts &&...args)
-{
-    auto object = std::make_shared<T>();
-    auto result = object->setFields(data, args...);
-
-    if (!result)
-        logTemplateError("{}, error parsing jsonData", __FUNCTION__);
-
-    return (result) ? object : nullptr;
-}
-
-template <typename T, typename...Ts>
 bool updateObjectFromJson(std::shared_ptr<T> object, const nlohmann::json &data, Ts &&...args)
 {
     auto result = object->setFields(data, args...);
@@ -76,7 +66,8 @@ bool updateObjectFromJson(std::shared_ptr<T> object, const nlohmann::json &data,
     return result;
 }
 
-class Manager : public QObject // TODO do we need inheritance?
+// class Manager : public QObject // TODO do we need inheritance?
+class Manager : public QObject, public std::enable_shared_from_this<Manager>
 {
 public:
     Manager();
@@ -98,35 +89,12 @@ public:
     // CompanionPtr getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
     CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
     std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
-    NetworkMessageType defineNetworkMessageType(MessageType type);
 
-    void sendMessage(
-        MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
+    // void sendMessage(
+    //     MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
     void sendFile(CompanionPtr companion, const std::filesystem::path &path);
 
-    void receiveTextMessage(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveFileProposalMessage(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveConfirmation(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveConfirmationRequest(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void reciveChatHistoryRequest(CompanionPtr companion);
-    void receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data);
-    void receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta);
-    void receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data);
-    void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta, bool success);
-    void receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta);
-    void receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta);
-    MessageDataPtr buildMessageDataFromJson(const nlohmann::json &jsonData);
-    MessageMetaDataPtr buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
-    MessageStatePtr buildMessageStateFromJson(const nlohmann::json &jsonData);
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
     void receiveMessage(CompanionPtr companion, const std::string &json);
     void addEarlyMessages(CompanionPtr companion);
@@ -205,6 +173,22 @@ public:
         return data;
     }
 
+    void sendMessage(
+        MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
+
+    MessageMetaDataPtr pushMessageToDB(
+        MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
+
+    void markMessageAsSent(CompanionPtr companion, MessagePtr message);
+
+    // void markMessageAsReceived(
+    //     CompanionPtr companion, MessagePtr message);
+    void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
+
+    void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
+    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
+
 private:
     ActionResultPtr getActionResultByKeyDBData(
         std::shared_ptr<DBReplyData> data, const std::string &key, bool allowEmptyResult = false);
@@ -216,7 +200,6 @@ private:
     ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action);
     ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action);
     CompanionPtr getMappedCompanionByWidgetGroup(std::shared_ptr<WidgetGroup> group) const;
-    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
     bool buildCompanions();
     void buildWidgetGroups();
     CompanionPtr addCompanionObject(int id, const std::string &name);
@@ -228,15 +211,6 @@ private:
     ActionResultPtr checkCompanionDataForExistanceAtCreation(CompanionActionPtr action);
     ActionResultPtr checkCompanionDataForExistanceAtUpdate(CompanionActionPtr action);
     ActionResultPtr checkPasswordForExistanceAtAuthentication(PasswordActionPtr action);
-    void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
-    void markMessageAsSent(CompanionPtr companion, MessagePtr message);
-
-    // void markMessageAsReceived(
-    //     CompanionPtr companion, MessagePtr message);
-    void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
-
-    MessageMetaDataPtr pushMessageToDB(
-        MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     template<typename... Ts>
     ActionResultPtr getActionResult(Ts &&...args)
@@ -257,6 +231,7 @@ private:
 
     // bool initialized_;
     DBRequester dbRequester_;
+    MessageHandler messageHandler_;
     std::mutex messageStateToMessageMapMutex_;
     std::shared_ptr<PGconn> dbConnection_;
     bool userIsAuthenticated_;

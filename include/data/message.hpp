@@ -18,7 +18,7 @@ bool setFieldsFromJson(const LambdaMap &lambdaMap, const nlohmann::json &data, T
 {
     bool result = true;
 
-    ([&](){ result &= runAndReturnBool(lambdaMap.at(args)); }(), ...);
+    ([&]() { result &= runAndReturnBool(lambdaMap.at(args)); }(), ...);
 
     return result;
 };
@@ -48,7 +48,7 @@ public:
         const LambdaMap lambdaMap
         {
             { "type", [&]() { networkMessageType_ = data.at("type"); } },
-            { "companion_id", [&]() { companionId_ = data.at("companion_id"); } },
+            // { "companion_id", [&]() { companionId_ = data.at("companion_id"); } },
             { "time", [&]() { timestampTz_ = data.at("time"); } },
             { "id", [&]() { networkId_ = data.at("id"); } },
             { "hashMD5", [&]() { hashMD5_ = data.at("hashMD5"); } }

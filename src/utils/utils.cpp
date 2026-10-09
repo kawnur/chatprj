@@ -174,3 +174,15 @@ void exitUtil(int result)
 
     std::exit(result);
 }
+
+NetworkMessageType defineNetworkMessageType(MessageType type)
+{
+    switch (type) {
+    case MessageType::TEXT:
+        return NetworkMessageType::TEXT;
+    case MessageType::FILE:
+        return NetworkMessageType::FILE_PROPOSAL;
+    default:
+        return NetworkMessageType::UNKNOWN;
+    }
+}

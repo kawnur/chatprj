@@ -320,4 +320,7 @@ bool getBoolFromDBValue(const std::string &value);
 std::string hashFileMD5(const std::string &filename);
 void exitUtil(int result);
 
+NetworkMessageType defineNetworkMessageType(MessageType type);
+
+
 #endif // UTILS_HPP

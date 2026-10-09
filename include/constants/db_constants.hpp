@@ -140,7 +140,7 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         DBRequestType::SET_MESSAGE_IS_SENT_AND_RETURN,
         {
             "setMessageIsSentAndReturn",
-            "UPDATE messages SET is_sent = 'true' WHERE id = {0} RETURNING id",
+            "UPDATE messages SET is_sent = 'true' WHERE id = {1} RETURNING id",
             "id"
         }
     },
@@ -148,7 +148,7 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN,
         {
             "setMessageIsReceivedAndReturn",
-            "UPDATE messages SET is_received = 'true' WHERE id = {0} RETURNING id",
+            "UPDATE messages SET is_received = 'true' WHERE id = {1} RETURNING id",
             "id"
         }
     },

@@ -152,7 +152,8 @@ CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const st
     buttonPanelPalette_ = std::make_unique<QPalette>();
     buttonPanelPalette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::BUTTON_PANEL)));
     chatHistoryWidget_->setPalette(*buttonPanelPalette_);
-    sendFileButton_ = std::make_unique<QPushButton>("Send file");
+    sendFileButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_FILE));
+    sendTextButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_TEXT));
     buttonPanelLayout_->addWidget(sendFileButton_.get());
 
     layout_->addWidget(buttonPanelWidget_.get());
@@ -171,12 +172,16 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
     companion_ = companion;
 
     connect(
-        textEdit_.get(), &TextEditWidget::send,
+        textEdit_.get(), &TextEditWidget::sendSignal,
         this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
 
     connect(
         sendFileButton_.get(), &QPushButton::clicked,
         this, &CentralPanelWidget::sendFileSlot, Qt::QueuedConnection);
+
+    connect(
+        sendTextButton_.get(), &QPushButton::clicked,
+        textEdit_.get(), &TextEditWidget::sendSlot, Qt::QueuedConnection);
 
     chatHistoryScrollArea_->installEventFilter(this);
 }

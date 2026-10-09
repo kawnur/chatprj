@@ -223,6 +223,8 @@ enum class ButtonType
     CONNECT,
     DISCONNECT,
     DOWNLOAD_FILE,
+    SEND_FILE,
+    SEND_TEXT,
     UNKNOWN
 };
 
@@ -243,6 +245,8 @@ const std::unordered_map<ButtonType, QString> BUTTON_TYPE_TO_TEXT_MAP {
     { ButtonType::CONNECT, "Connect" },
     { ButtonType::DISCONNECT, "Disconnect" },
     { ButtonType::DOWNLOAD_FILE, "Download file" },
+    { ButtonType::SEND_FILE, "Send file" },
+    { ButtonType::SEND_TEXT, "Send text" },
     { ButtonType::UNKNOWN, "_" }
 };
 

@@ -88,6 +88,7 @@ private:
     std::unique_ptr<QHBoxLayout> buttonPanelLayout_;
     std::unique_ptr<QPalette> buttonPanelPalette_;
     std::unique_ptr<QPushButton> sendFileButton_;
+    std::unique_ptr<QPushButton> sendTextButton_;
 
     std::unique_ptr<TextEditWidget> textEdit_;
     std::unique_ptr<QPalette> textEditPalette_;

@@ -87,8 +87,7 @@ void TextEditWidget::keyPressEvent(QKeyEvent *event)
 
     if (event->type() == QEvent::KeyPress && event->key() == Qt::Key_Return) {
         if (event->modifiers() == Qt::NoModifier) {
-            send(toPlainText());
-            setText("");
+            sendSlot();
         }
         else if (event->modifiers() == Qt::ControlModifier) {
             QKeyEvent eventEmulated = QKeyEvent(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
@@ -98,6 +97,13 @@ void TextEditWidget::keyPressEvent(QKeyEvent *event)
     else {
         QTextEdit::keyPressEvent(event);
     }
+}
+
+void TextEditWidget::sendSlot()
+{
+    auto text = toPlainText();
+    setText("");
+    emit sendSignal(text);
 }
 
 IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)

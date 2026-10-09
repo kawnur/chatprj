@@ -543,7 +543,7 @@ std::string buildMessageJSONString(
 
     jsonData["type"] = type;
     jsonData["id"] = networkId;
-    jsonData["companion_id"] = companion->getId();
+    // jsonData["companion_id"] = companion->getId();
     jsonData["antecedent"] = message->isAntecedent();
     jsonData["time"] = message->getTime();
     jsonData["text"] = message->getText();
@@ -566,7 +566,8 @@ std::string buildMessageJSONString(
     break;
 
     case NetworkMessageType::RECEIVE_CONFIRMATION:
-        jsonData["received"] = 1;
+        // jsonData["received"] = 1;
+        jsonData["received"] = true;
 
         break;
 
