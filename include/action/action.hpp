@@ -41,7 +41,7 @@ public:
     virtual int getCompanionId() { return ID_BAD_VALUE; }
     virtual std::string getPassword() { return ""s; }
 
-    ActionType getType();
+    ActionType type();
     std::string getInfoDialogHeader(const auto &map);
     std::string getInfoDialogSuccessHeader();
     std::string getInfoDialogFailHeader();

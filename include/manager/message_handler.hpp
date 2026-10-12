@@ -10,43 +10,24 @@
 #include "logging.hpp"
 
 class Action;
-// class ActionResult;
-
-// template<typename T>
-// class ActionSharedValueResult;
-
 class Companion;
-// class CompanionAction;
-// class DBReplyData;
-// class DBRequester;
 class Manager;
-// class Message;
 class MessageData;
-// class MessageInfo;
-// class MessageHandler;
 class MessageMetaData;
 class MessageState;
-// class PasswordAction;
-// class SocketInfoBaseWidget;
-// class WidgetGroup;
 
 using CompanionPtr = std::shared_ptr<Companion>;
-// using CompanionResult = ActionSharedValueResult<Companion>;
-// using ActionResultPtr = std::shared_ptr<ActionResult>;
 using ActionPtr = std::shared_ptr<Action>;
-// using CompanionActionPtr = std::shared_ptr<CompanionAction>;
-// using PasswordActionPtr = std::shared_ptr<PasswordAction>;
-// using FileActionPtr = std::shared_ptr<FileAction>;
-// using MessagePtr = std::shared_ptr<Message>;
 using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;
 using MessageDataPtr = std::shared_ptr<MessageData>;
 using MessageStatePtr = std::shared_ptr<MessageState>;
 
-template <typename T, typename...Ts>
-std::shared_ptr<T> buildObjectFromJson(const nlohmann::json &data, Ts &&...args)
+template <typename T>
+std::shared_ptr<T> buildObjectFromJson(
+    CompanionPtr companion, const nlohmann::json &data)
 {
     auto object = std::make_shared<T>();
-    auto result = object->setFields(data, args...);
+    auto result = object->setFields(companion, data);
 
     if (!result)
         logTemplateError("{}, error parsing jsonData", __FUNCTION__);
@@ -57,8 +38,8 @@ std::shared_ptr<T> buildObjectFromJson(const nlohmann::json &data, Ts &&...args)
 class MessageHandler
 {
 public:
-    MessageHandler() {}
-    ~MessageHandler() {}
+    MessageHandler() = default;
+    ~MessageHandler() = default;
 
     void setManager(std::shared_ptr<Manager> manager);
 
@@ -87,9 +68,9 @@ public:
     void receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta);
 
-    MessageDataPtr buildMessageDataFromJson(const nlohmann::json &jsonData);
-    MessageMetaDataPtr buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
-    MessageStatePtr buildMessageStateFromJson(const nlohmann::json &jsonData);
+    // MessageDataPtr buildMessageDataFromJson(const nlohmann::json &jsonData);
+    // MessageMetaDataPtr buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
+    // MessageStatePtr buildMessageStateFromJson(const nlohmann::json &jsonData);
 
 
 

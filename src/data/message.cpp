@@ -1,7 +1,61 @@
 #include "message.hpp"
 
+#include "companion.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
+
+PriorityTask::PriorityTask(
+    uint8_t priority, const std::string &key, std::function<void ()> function, bool isMandatory)
+    : priority_(priority), isMandatory_(isMandatory), key_(key), func_(function) {}
+
+PriorityTask::~PriorityTask() { logArgsInfo(Q_FUNC_INFO); }
+
+uint8_t PriorityTask::priority() const
+{
+    return priority_;
+}
+
+std::string PriorityTask::key() const
+{
+    return key_;
+}
+
+std::function<void ()> PriorityTask::func() const
+{
+    return func_;
+}
+
+bool PriorityTask::isMandatory() const
+{
+    return isMandatory_;
+}
+
+PriorityTaskQueueWrapper::PriorityTaskQueueWrapper(const std::vector<PriorityTask> &tasks)
+{
+    auto comparator = [](const auto &item1, const auto &item2)
+    {
+        return item1.priority() < item2.priority();
+    };
+
+    queue_ = PriorityTaskQueue(comparator, tasks);
+}
+
+PriorityTaskQueueWrapper::~PriorityTaskQueueWrapper() { logArgsInfo(Q_FUNC_INFO); }
+
+bool PriorityTaskQueueWrapper::runTasksAndReturnResult()
+{
+    bool result = true;
+
+    while (!queue_.empty()) {
+        auto item = queue_.top();
+        auto func = item.func();
+        bool itemResult = (item.isMandatory()) ? runAndReturnBool(func) : runAndReturnTrue(func);
+        result &= itemResult;
+        queue_.pop();
+    }
+
+    return result;
+}
 
 MessageMetaData::MessageMetaData(
     MessageType messageType, NetworkMessageType networkMessageType, uint32_t messageId,
@@ -12,6 +66,40 @@ MessageMetaData::MessageMetaData(
     companionId_(companionId), companionName_(companionName), authorId_(authorId),
     authorName_(authorName), timestampTz_(timestampTz), hashMD5_(hashMD5), networkId_(networkId) {}
 
+bool MessageMetaData::setFields(CompanionPtr companion, const nlohmann::json &data)
+{
+    std::vector<PriorityTask> taskVector
+        {
+            { 1, "type", [&]() { networkMessageType_ = data.at("type"); } },
+            { 1, "companion_id", [&]() { companionId_ = companion->getId(); } },
+            {
+                0, "author_id",
+                [&]()
+                {
+                    if (networkMessageType_ == NetworkMessageType::TEXT)
+                        authorId_ = companionId_;
+                }
+            },
+            {
+                0, "messageType",
+                [&]()
+                {
+                    messageType_ = getMapValue(
+                        NETWORK_MESSAGE_TYPE_TO_MESSAGE_TYPE_MAP, networkMessageType_,
+                        MessageType::UNKNOWN);
+                }
+            },
+            { 0, "time", [&]() { timestampTz_ = data.at("time"); } },
+            { 0, "id", [&]() { networkId_ = data.at("id"); } },
+            { 0, "hashMD5", [&]() { hashMD5_ = data.at("hashMD5"); }, false }
+        };
+
+    PriorityTaskQueueWrapper wrapper(taskVector);
+    bool result = wrapper.runTasksAndReturnResult();
+
+    return result;
+}
+
 bool MessageMetaData::isValid()
 {
     if (companionId_ == 0 || timestampTz_ == "") {
@@ -21,12 +109,6 @@ bool MessageMetaData::isValid()
     }
 
     return true;
-}
-
-void MessageMetaData::setMessageType()
-{
-    messageType_ = getMapValue(
-        NETWORK_MESSAGE_TYPE_TO_MESSAGE_TYPE_MAP, networkMessageType_, MessageType::UNKNOWN);
 }
 
 MessageData::MessageData(const std::string &text, const std::string &data)
@@ -45,6 +127,20 @@ MessageData::MessageData(const std::string &text, const std::string &data)
 //     time_ = meta.timestampTz_;
 //     text_ = text;
 // }
+
+bool MessageData::setFields(CompanionPtr companion, const nlohmann::json &data)
+{
+    std::vector<PriorityTask> taskVector
+        {
+            { 0, "text", [&]() { text_ = data.at("text"); } },
+            { 0, "data", [&]() { data_ = data.at("data"); }, false }
+        };
+
+    PriorityTaskQueueWrapper wrapper(taskVector);
+    bool result = wrapper.runTasksAndReturnResult();
+
+    return result;
+}
 
 Message::Message(
     std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
@@ -165,6 +261,20 @@ MessageState::MessageState(bool isAntecedent, bool isSent, bool isReceived)
 // {
 //     networkId_ = networkId;
 // }
+
+bool MessageState::setFields(CompanionPtr companion, const nlohmann::json &data)
+{
+    std::vector<PriorityTask> taskVector
+        {
+            { 0, "antecedent", [&]() { isAntecedent_ = data.at("antecedent"); } },
+            { 0, "received", [&]() { isReceived_ = data.at("received"); }, false }
+        };
+
+    PriorityTaskQueueWrapper wrapper(taskVector);
+    bool result = wrapper.runTasksAndReturnResult();
+
+    return result;
+}
 
 MessageInfo::MessageInfo(
     std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)

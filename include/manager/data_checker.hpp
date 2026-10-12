@@ -17,7 +17,6 @@ std::shared_ptr<Manager> getManager();
 class DataChecker
 {
 public:
-    // DataChecker(std::shared_ptr<CompanionAction> action);
     DataChecker(std::shared_ptr<Action> action);
     ~DataChecker() = default;
 
@@ -123,30 +122,14 @@ public:
     bool checkCompanionDataForExistanceAtUpdate();
 
     bool checkPasswordForExistanceAtAuthentication();
+    bool check();
 private:
+
     bool status_;
-    // std::shared_ptr<CompanionAction> action_;
     std::shared_ptr<Action> action_;
     std::vector<std::string> errors_;
 };
 
-template<typename F>
-// std::shared_ptr<ActionResult> checkCompanionDataForExistance(
-//     F &&func, std::shared_ptr<CompanionAction> action)
-std::shared_ptr<ActionResult> checkDataForExistance(
-    F &&func, std::shared_ptr<Action> action)
-{
-    DataChecker checker(action);
-
-    auto result = func(checker);
-
-    // auto result = checker.checkCompanionDataForExistanceAtCreation();
-    // checker.coutErrorsState();
-
-    if (result)
-        return std::make_shared<ActionResult>(true, ""s);
-    else
-        return std::make_shared<ActionResult>(false, checker.moveErrors());
-}
+std::shared_ptr<ActionResult> checkDataForExistance(std::shared_ptr<Action> action);
 
 #endif // DATA_CHECKER_HPP

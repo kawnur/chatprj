@@ -313,7 +313,7 @@ ActionResultPtr Manager::createCompanion(CompanionActionPtr action)
         return validationResult;
 
     // data checking
-    auto checkResult = checkCompanionDataForExistanceAtCreation(action);
+    auto checkResult = checkDataForExistance(action);
 
     if (!checkResult->status())
         return checkResult;
@@ -384,7 +384,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
         return validationResult;
 
     // data checking
-    auto checkResult = checkCompanionDataForExistanceAtUpdate(action);
+    auto checkResult = checkDataForExistance(action);
 
     if (!checkResult->status())
         return checkResult;
@@ -492,7 +492,7 @@ ActionResultPtr Manager::authenticateUser(PasswordActionPtr action)
     auto graphicManager = getGraphicManager();
 
     // data checking
-    auto checkResult = checkPasswordForExistanceAtAuthentication(action);
+    auto checkResult = checkDataForExistance(action);
 
     if (!checkResult->status())
         return checkResult;
@@ -848,27 +848,6 @@ void Manager::deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion)
     }
 }
 
-ActionResultPtr Manager::checkCompanionDataForExistanceAtCreation(CompanionActionPtr action)
-{
-    auto lambda = [](auto &checker) { return checker.checkCompanionDataForExistanceAtCreation(); };
-
-    return checkDataForExistance(lambda, action);
-}
-
-ActionResultPtr Manager::checkCompanionDataForExistanceAtUpdate(CompanionActionPtr action)
-{
-    auto lambda = [](auto &checker) { return checker.checkCompanionDataForExistanceAtUpdate(); };
-
-    return checkDataForExistance(lambda, action);
-}
-
-ActionResultPtr Manager::checkPasswordForExistanceAtAuthentication(PasswordActionPtr action)
-{
-    auto lambda = [](auto &checker) { return checker.checkPasswordForExistanceAtAuthentication(); };
-
-    return checkDataForExistance(lambda, action);
-}
-
 void Manager::waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message)
 {
     auto lambda = [=]()
@@ -977,7 +956,7 @@ template<>
 std::function<ActionResultPtr(CompanionActionPtr)>
 Manager::getActionLambda(CompanionActionPtr action)
 {
-    switch (action->getType()) {
+    switch (action->type()) {
     case ActionType::CREATE_COMPANION:
         return [=, this](auto action) { return createCompanion(action); };
 
@@ -999,7 +978,7 @@ template<>
 std::function<ActionResultPtr(PasswordActionPtr)>
 Manager::getActionLambda(PasswordActionPtr action)
 {
-    switch (action->getType()) {
+    switch (action->type()) {
     case ActionType::CREATE_PASSWORD:
         return [=, this](auto action) { return createUserPassword(action); };
 
@@ -1015,7 +994,7 @@ template<>
 std::function<ActionResultPtr(FileActionPtr)>
 Manager::getActionLambda(FileActionPtr action)
 {
-    switch (action->getType()) {
+    switch (action->type()) {
     case ActionType::SEND_FILE:
         // return [=, this](auto action) { return createUserPassword(action); };
 

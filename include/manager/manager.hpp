@@ -58,12 +58,13 @@ int getDataFromDBResult(
 template <typename T, typename...Ts>
 bool updateObjectFromJson(std::shared_ptr<T> object, const nlohmann::json &data, Ts &&...args)
 {
-    auto result = object->setFields(data, args...);
+    // auto result = object->setFields(data, args...);
 
-    if (!result)
-        logTemplateError("{}, error parsing jsonData", __FUNCTION__);
+    // if (!result)
+    //     logTemplateError("{}, error parsing jsonData", __FUNCTION__);
 
-    return result;
+    // return result;
+    return true;
 }
 
 // class Manager : public QObject // TODO do we need inheritance?
@@ -90,11 +91,7 @@ public:
     CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
     std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
 
-    // void sendMessage(
-    //     MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
-
     void sendFile(CompanionPtr companion, const std::filesystem::path &path);
-
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
     void receiveMessage(CompanionPtr companion, const std::string &json);
     void addEarlyMessages(CompanionPtr companion);
@@ -207,10 +204,6 @@ private:
     void createWidgetGroupAndAddToMapping(CompanionPtr companion);
     void deleteCompanionObject(CompanionPtr companion);
     void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
-
-    ActionResultPtr checkCompanionDataForExistanceAtCreation(CompanionActionPtr action);
-    ActionResultPtr checkCompanionDataForExistanceAtUpdate(CompanionActionPtr action);
-    ActionResultPtr checkPasswordForExistanceAtAuthentication(PasswordActionPtr action);
 
     template<typename... Ts>
     ActionResultPtr getActionResult(Ts &&...args)

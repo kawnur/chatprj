@@ -217,6 +217,17 @@ bool runAndReturnBool(F &&func, Ts&&... args)
     }
 }
 
+template<typename F, typename... Ts>
+bool runAndReturnTrue(F &&func, Ts&&... args)
+{
+    try {
+        func(args...);
+    }
+    catch(const std::exception &e) {}
+
+    return true;
+}
+
 template<typename T, typename F, typename... Ts>
 std::optional<T> runAndReturnOptionalResult(F &&func, Ts&&... args)
 {

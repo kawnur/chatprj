@@ -31,7 +31,7 @@ void Action::setDialog(std::shared_ptr<Action> action)
         infoDialog_->set(action);
 }
 
-ActionType Action::getType()
+ActionType Action::type()
 {
     return type_;
 }

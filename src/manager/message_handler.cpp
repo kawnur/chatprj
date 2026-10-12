@@ -86,7 +86,7 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     nlohmann::json jsonData = buildJsonObject(json);
 
     // build meta
-    auto meta = buildMessageMetaDataFromJson(jsonData);
+    auto meta = buildObjectFromJson<MessageMetaData>(companion, jsonData);
 
     if (!meta)
         return;
@@ -94,13 +94,13 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     meta->companionId_ = companion->getId();
 
     // build data
-    auto data = buildMessageDataFromJson(jsonData);
+    auto data = buildObjectFromJson<MessageData>(companion, jsonData);
 
     if (!data)
         return;
 
     // build state
-    auto state = buildMessageStateFromJson(jsonData);
+    auto state = buildObjectFromJson<MessageState>(companion, jsonData);
 
     if (!state)
         return;
@@ -442,17 +442,17 @@ void MessageHandler::receiveFileDataTransmissionFailure(
     companion->removeFileOperator<SenderOperator>(networkId);
 }
 
-MessageDataPtr MessageHandler::buildMessageDataFromJson(const nlohmann::json &data)
-{
-    return buildObjectFromJson<MessageData>(data, "text");
-}
+// MessageDataPtr MessageHandler::buildMessageDataFromJson(const nlohmann::json &data)
+// {
+//     return buildObjectFromJson<MessageData>(data, "text");
+// }
 
-MessageMetaDataPtr MessageHandler::buildMessageMetaDataFromJson(const nlohmann::json &data)
-{
-    return buildObjectFromJson<MessageMetaData>(data, "type", "id", "time");
-}
+// MessageMetaDataPtr MessageHandler::buildMessageMetaDataFromJson(const nlohmann::json &data)
+// {
+//     return buildObjectFromJson<MessageMetaData>(data, "type", "id", "time");
+// }
 
-MessageStatePtr MessageHandler::buildMessageStateFromJson(const nlohmann::json &data)
-{
-    return buildObjectFromJson<MessageState>(data, "antecedent");
-}
+// MessageStatePtr MessageHandler::buildMessageStateFromJson(const nlohmann::json &data)
+// {
+//     return buildObjectFromJson<MessageState>(data, "antecedent");
+// }

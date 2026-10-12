@@ -3,32 +3,52 @@
 
 #include <cstdint>
 #include <memory>
+#include <queue>
 #include <string>
-#include <unordered_map>
 
 #include "utils.hpp"
-#include "utils_cout.hpp"
 
+class Companion;
 class MessageWidget;
 
-using LambdaMap = std::unordered_map<std::string, std::function<void()>>;
+using CompanionPtr = std::shared_ptr<Companion>;
 
-template<typename...Ts>
-bool setFieldsFromJson(const LambdaMap &lambdaMap, const nlohmann::json &data, Ts &&...args)
+class PriorityTask
 {
-    bool result = true;
+public:
+    PriorityTask(
+        uint8_t priority, const std::string &key, std::function<void()> function,
+        bool isMandatory = true);
 
-    ([&]() { result &= runAndReturnBool(lambdaMap.at(args)); }(), ...);
+    ~PriorityTask();
 
-    return result;
+    uint8_t priority() const;
+    std::string key() const;
+    std::function<void()> func() const;
+    bool isMandatory() const;
+
+private:
+    uint8_t priority_;
+    std::string key_;
+    std::function<void()> func_;
+    bool isMandatory_;
 };
 
-template<typename...Ts>
-bool setFieldsFromJsonAlt1(const LambdaMap &lambdaMap, const nlohmann::json &data, Ts &&...args)
-{
-    ([&](){ coutArgsWithSpaceSeparator("args", args); runAndLogException(lambdaMap.at(args)); }(), ...);
+using PriorityTaskComparator = std::function<bool(const PriorityTask&, const PriorityTask&)>;
 
-    return true;
+using PriorityTaskQueue =
+    std::priority_queue<PriorityTask, std::vector<PriorityTask>, PriorityTaskComparator>;
+
+class PriorityTaskQueueWrapper
+{
+public:
+    PriorityTaskQueueWrapper(const std::vector<PriorityTask> &tasks);
+    ~PriorityTaskQueueWrapper();
+
+    bool runTasksAndReturnResult();
+
+private:
+    PriorityTaskQueue queue_;
 };
 
 class MessageMetaData
@@ -42,26 +62,8 @@ public:
         const std::string &authorName, const std::string &timestampTz, const std::string &hashMD5,
         const std::string networkId);
 
-    template<typename...Ts>
-    bool setFields(const nlohmann::json &data, Ts &&...args)
-    {
-        const LambdaMap lambdaMap
-        {
-            { "type", [&]() { networkMessageType_ = data.at("type"); } },
-            // { "companion_id", [&]() { companionId_ = data.at("companion_id"); } },
-            { "time", [&]() { timestampTz_ = data.at("time"); } },
-            { "id", [&]() { networkId_ = data.at("id"); } },
-            { "hashMD5", [&]() { hashMD5_ = data.at("hashMD5"); } }
-        };
-
-        bool result = setFieldsFromJson(lambdaMap, data, args...);
-        setMessageType();
-
-        return result;
-    };
-
+    bool setFields(CompanionPtr companion, const nlohmann::json &data);
     bool isValid();
-    void setMessageType();
 
     MessageType messageType_;
     NetworkMessageType networkMessageType_;
@@ -82,17 +84,7 @@ public:
     MessageData(const std::string &text, const std::string &data);
     ~MessageData() = default;
 
-    template<typename...Ts>
-    bool setFields(const nlohmann::json &data, Ts &&...args)
-    {
-        const LambdaMap lambdaMap
-        {
-            { "text", [&]() { text_ = data.at("text"); } },
-            { "data", [&]() { data_ = data.at("data"); } }
-        };
-
-        return setFieldsFromJson(lambdaMap, data, args...);
-    };
+    bool setFields(CompanionPtr companion, const nlohmann::json &data);
 
     std::string text_;
     std::string data_;  // for file transfer
@@ -118,17 +110,19 @@ public:
     //     void setIsReceived(bool);
     //     void setNetworkId(const std::string &);
 
-    template<typename...Ts>
-    bool setFields(const nlohmann::json &data, Ts &&...args)
-    {
-        const LambdaMap lambdaMap
-            {
-                { "antecedent", [&]() { isAntecedent_ = data.at("antecedent"); } },
-                { "received", [&]() { isReceived_ = data.at("received"); } }
-            };
+    bool setFields(CompanionPtr companion, const nlohmann::json &data);
 
-        return setFieldsFromJson(lambdaMap, data, args...);
-    };
+    // template<typename...Ts>
+    // bool setFields(const nlohmann::json &data, Ts &&...args)
+    // {
+    //     const LambdaMap lambdaMap
+    //         {
+    //             { "antecedent", [&]() { isAntecedent_ = data.at("antecedent"); } },
+    //             { "received", [&]() { isReceived_ = data.at("received"); } }
+    //         };
+
+    //     return setFieldsFromJson(lambdaMap, data, args...);
+    // };
 
     // private:
     bool isAntecedent_;

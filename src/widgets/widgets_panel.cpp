@@ -155,6 +155,7 @@ CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const st
     sendFileButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_FILE));
     sendTextButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_TEXT));
     buttonPanelLayout_->addWidget(sendFileButton_.get());
+    buttonPanelLayout_->addWidget(sendTextButton_.get());
 
     layout_->addWidget(buttonPanelWidget_.get());
 

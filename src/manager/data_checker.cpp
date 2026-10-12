@@ -1,6 +1,7 @@
 #include "data_checker.hpp"
 
-// DataChecker::DataChecker(std::shared_ptr<CompanionAction> action)
+#include "action.hpp"
+
 DataChecker::DataChecker(std::shared_ptr<Action> action)
     : status_(true), action_(action), errors_() {}
 
@@ -75,4 +76,33 @@ bool DataChecker::checkPasswordForExistanceAtAuthentication()
     return checkPasswordDataForExistance(
         DBRequestType::GET_PASSWORD, "password was not set"s, "password is incorrect"s,
         action_->getPassword());
+}
+
+bool DataChecker::check()
+{
+    switch (action_->type()) {
+    case ActionType::CREATE_COMPANION:
+        return checkCompanionDataForExistanceAtCreation();
+
+    case ActionType::UPDATE_COMPANION:
+        return checkCompanionDataForExistanceAtUpdate();
+
+    case ActionType::GET_PASSWORD:
+        return checkPasswordForExistanceAtAuthentication();
+
+    default:
+        return false;
+    }
+}
+
+std::shared_ptr<ActionResult> checkDataForExistance(std::shared_ptr<Action> action)
+{
+    DataChecker checker(action);
+
+    auto result = checker.check();
+
+    if (result)
+        return std::make_shared<ActionResult>(true, ""s);
+    else
+        return std::make_shared<ActionResult>(false, checker.moveErrors());
 }
