@@ -18,10 +18,10 @@ public:
 
     ~CompanionData() { logArgsInfo(Q_FUNC_INFO); }
 
-    std::string getName() const;
-    std::string getIpAddress() const;
-    std::string getServerPort() const;
-    std::string getClientPort() const;
+    std::string name() const;
+    std::string ipAddress() const;
+    std::string serverPort() const;
+    std::string clientPort() const;
 
     void setName(const std::string &name);
     void setServerPort(uint16_t port);

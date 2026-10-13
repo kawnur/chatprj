@@ -41,6 +41,8 @@ const QString NOT_FOUND { "NOT FOUND" };
 const uint8_t CONNECTION_STATE_INDICATOR_WIDGET_SIZE = 15;
 const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
 
+const std::size_t NETWORK_ID_SIZE = 5;
+
 // validation
 const std::size_t COMPANION_NAME_SIZE_LIMIT = 30;
 const std::size_t PASSWORD_SIZE_LIMIT = 30;

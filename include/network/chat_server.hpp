@@ -10,12 +10,13 @@
 
 using boost::asio::ip::tcp;
 
-class Companion;
+// class Companion;
 
 class ServerSession : public std::enable_shared_from_this<class ServerSession>
 {
 public:
-    ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket);
+    // ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket);
+    ServerSession(int companionId, tcp::socket socket);
     ~ServerSession() = default;
 
     void start();
@@ -23,7 +24,8 @@ public:
 private:
     void do_read();
 
-    std::shared_ptr<Companion> companion_;
+    // std::shared_ptr<Companion> companion_;
+    int companionId_;
     tcp::socket socket_;
     char data_[MAX_BUFFER_SIZE];
     std::string previous_;
@@ -33,7 +35,8 @@ class ChatServer
 {
 public:
     // TODO what if port is blocked?
-    ChatServer(std::shared_ptr<Companion> companion, uint16_t port);
+    // ChatServer(std::shared_ptr<Companion> companion, uint16_t port);
+    ChatServer(int companionId, uint16_t port);
     ~ChatServer() = default;
 
     void run();
@@ -43,7 +46,8 @@ private:
 
     boost::asio::io_context io_context_;
     uint16_t port_;
-    std::shared_ptr<Companion> companion_;
+    // std::shared_ptr<Companion> companion_;
+    int companionId_;
     tcp::acceptor acceptor_;
 };
 

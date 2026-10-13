@@ -246,74 +246,6 @@ void DBReplyData::log()
     logArgs(logDelimiter);
 }
 
-DBRequester::DBRequester(bool log) : log_(log), mutex_()
-{
-    connection_ = getDBConnection();
-
-    if (!connection_)
-        logTemplateError("{}, no DB connection", __FUNCTION__);
-}
-
-std::shared_ptr<PGresult> DBRequester::sendRequestAndReturnResult(const std::string &command)
-{
-    if (log_)
-        logArgs(command);
-
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    auto lambda = [](PGresult *result)
-    {
-        if (result)
-            PQclear(result);
-    };
-
-    std::shared_ptr<PGresult> result(PQexec(connection_.get(), command.data()), lambda);
-
-    return result;
-}
-
-bool DBRequester::isReady()
-{
-    return (connection_) ? true : false;
-}
-
-std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName)
-{
-    auto value = std::getenv(variableName.data());
-
-    if (!value) {
-        logTemplateError("environment variable {} not found", variableName);
-
-        return std::nullopt;
-    }
-
-    return std::string(value);
-}
-
-const char *getPQArg(const std::optional<std::string> &value)
-{
-    return (value) ? value.value().data() : nullptr;
-}
-
-std::shared_ptr<PGconn> getDBConnection()
-{
-    // TODO make connection to db secure
-
-    // get params
-    DBConnectionPrameters parameters {};
-
-    if (!parameters.isValid())
-        return nullptr;
-
-    parameters.log();
-
-    // create connection
-    auto info = parameters.getConnectionInfo();
-    auto connection = std::shared_ptr<PGconn>(PQconnectdb(info.data()), PQfinish);
-
-    return (getConnectionStatus(connection)) ? connection : nullptr;
-}
-
 std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys)
 {
@@ -332,20 +264,4 @@ std::string buildChatHistoryJSONString(
     std::string result = jsonData.dump();
 
     return result;
-}
-
-bool getConnectionStatus(std::shared_ptr<PGconn> connection)
-{
-    ConnStatusType status = PQstatus(connection.get());
-    std::string mark = (status == 0) ? "OK" : "?";
-
-    logTemplateInfo("DB connection status: {0} {1}", std::to_string(status), mark);
-
-    if (status == ConnStatusType::CONNECTION_BAD) {
-        logArgsError("DB connection status: CONNECTION_BAD");
-
-        return false;
-    }
-
-    return true;
 }

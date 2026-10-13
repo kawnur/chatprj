@@ -2,23 +2,12 @@
 #define DB_INTERACTION_HPP
 
 #include <libpq-events.h>
-#include <libpq-fe.h>
-#include <map>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
 
-#include <QString>
-#include <QWidget>
-
 #include "db_constants.hpp"
-#include "logging.hpp"
-#include "utils_widgets.hpp"
-
-class Companion;
-class CompanionAction;
 
 class DBConnectionPrameters
 {
@@ -87,69 +76,7 @@ private:
     std::vector<std::map<std::string, std::string>> data_;
 };
 
-class DBRequester
-{
-public:
-    DBRequester(bool log);
-    ~DBRequester() = default;
-
-    template<typename... Ts>
-    std::shared_ptr<DBReplyData> getDBData(DBRequestData &requestData, Ts &&...args)
-    {
-        if (!requestData.isValid()) {
-            logArgsError("requestData is invalid");
-
-            return nullptr;
-        }
-
-        auto command = requestData.buildCommand(args...);
-        std::shared_ptr<PGresult> dbResult = sendRequestAndReturnResult(command);
-
-        if (log_) {
-            logArgs(logDelimiter);
-            logArgs(requestData.getLogMark());
-            logArgs("dbResult:", dbResult.get());
-        }
-
-        if (!dbResult) {
-            // showErrorDialogAndLogError("Database request error, dbResult is nullptr");
-
-            return nullptr;
-        }
-
-        auto replyData = std::make_shared<DBReplyData>(log_, requestData.getReplyKeys());
-
-        if (replyData->getDataFromResult(dbResult, 0) == -1) {
-            // showErrorDialogAndLogError("Error getting data from dbResult");
-
-            return nullptr;
-        }
-
-        if (log_) {
-            // logArgs("dbData->size():", dbData->size());
-            replyData->log();
-            logArgs(logDelimiter);
-        }
-
-        return replyData;
-    }
-
-    std::shared_ptr<PGresult> sendRequestAndReturnResult(const std::string &command);
-    bool isReady();
-
-private:
-    bool log_;
-    std::mutex mutex_;  // ???
-    std::shared_ptr<PGconn> connection_;
-};
-
-std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
-const char *getPQArg(const std::optional<std::string> &value);
-std::shared_ptr<PGconn> getDBConnection();
-
 std::string buildChatHistoryJSONString(
     std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys);
-
-bool getConnectionStatus(std::shared_ptr<PGconn> connection);
 
 #endif // DB_INTERACTION_HPP

@@ -96,9 +96,9 @@ template<>
 std::shared_ptr<ActionResult> Validator::validate<CompanionAction>(
     std::shared_ptr<CompanionAction> action)
 {
-    bool nameResult = validateCompanionName(action->getName());
-    bool ipAddressResult = validateIpAddress(action->getIpAddress());
-    bool portResult = validatePort(action->getClientPort());
+    bool nameResult = validateCompanionName(action->name());
+    bool ipAddressResult = validateIpAddress(action->ipAddress());
+    bool portResult = validatePort(action->clientPort());
 
     bool result = nameResult && ipAddressResult && portResult;
 
@@ -111,7 +111,7 @@ template<>
 std::shared_ptr<ActionResult> Validator::validate<PasswordAction>(
     std::shared_ptr<PasswordAction> action)
 {
-    bool result = validatePassword(action->getPassword());
+    bool result = validatePassword(action->password());
 
     logArgs("companion data validation result:", result);
 

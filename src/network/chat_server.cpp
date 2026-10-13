@@ -5,8 +5,10 @@
 
 using boost::asio::ip::tcp;
 
-ServerSession::ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket)
-    : companion_(companion), socket_(std::move(socket)) {}
+// ServerSession::ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket)
+//     : companion_(companion), socket_(std::move(socket)) {}
+ServerSession::ServerSession(int companionId, tcp::socket socket)
+    : companionId_(companionId), socket_(std::move(socket)) {}
 
 void ServerSession::start()
 {
@@ -47,7 +49,7 @@ void ServerSession::do_read()
                         closeCounter = 0;
                         previous_ = "";
 
-                        getManager()->receiveMessage(companion_, message);
+                        getManager()->receiveMessage(companionId_, message);
                     }
                 }
             }
@@ -62,8 +64,10 @@ void ServerSession::do_read()
     socket_.async_read_some(boost::asio::buffer(data_, MAX_BUFFER_SIZE), lambda);
 }
 
-ChatServer::ChatServer(std::shared_ptr<Companion> companion, uint16_t port)
-    : companion_(companion), port_(port), io_context_(),
+// ChatServer::ChatServer(std::shared_ptr<Companion> companion, uint16_t port)
+//     : companion_(companion), port_(port), io_context_(),
+ChatServer::ChatServer(int companionId, uint16_t port)
+    : companionId_(companionId), port_(port), io_context_(),
     acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
 {
     do_accept();
@@ -81,7 +85,7 @@ void ChatServer::do_accept()
     auto lambda = [this](boost::system::error_code ec, tcp::socket socket)
     {
         if (!ec)
-            std::make_shared<ServerSession>(companion_, std::move(socket))->start();
+            std::make_shared<ServerSession>(companionId_, std::move(socket))->start();
 
         do_accept();
     };

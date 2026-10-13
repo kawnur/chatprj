@@ -26,7 +26,7 @@ bool DataChecker::checkCompanionNameForExistanceAtCreation()
 
     return checkDataForExistance(
         DBRequestType::GET_COMPANION_BY_NAME, "companion with name '{}' already exists"s,
-        action_->getName());
+        action_->name());
 }
 
 bool DataChecker::checkCompanionSocketForExistanceAtCreation()
@@ -35,8 +35,8 @@ bool DataChecker::checkCompanionSocketForExistanceAtCreation()
 
     return checkDataForExistance(
         DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT,
-        "companion with address '{0}' and port '{1}' already exists"s, action_->getIpAddress(),
-        action_->getClientPort());
+        "companion with address '{0}' and port '{1}' already exists"s, action_->ipAddress(),
+        action_->clientPort());
 }
 
 bool DataChecker::checkCompanionDataForExistanceAtCreation()
@@ -51,7 +51,7 @@ bool DataChecker::checkCompanionNameForExistanceAtUpdate()
 
     return checkIdDataForExistance(
         DBRequestType::GET_COMPANION_BY_NAME, "companion with name '{}' already exists"s,
-        action_->getCompanionId(), action_->getName());
+        action_->companionId(), action_->name());
 }
 
 bool DataChecker::checkCompanionSocketForExistanceAtUpdate()
@@ -60,8 +60,8 @@ bool DataChecker::checkCompanionSocketForExistanceAtUpdate()
 
     return checkIdDataForExistance(
         DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT,
-        "companion with address '{0}' and port '{1}' already exists"s, action_->getCompanionId(),
-        action_->getIpAddress(), action_->getClientPort());
+        "companion with address '{0}' and port '{1}' already exists"s, action_->companionId(),
+        action_->ipAddress(), action_->clientPort());
 }
 
 bool DataChecker::checkCompanionDataForExistanceAtUpdate()
@@ -75,7 +75,7 @@ bool DataChecker::checkPasswordForExistanceAtAuthentication()
 {
     return checkPasswordDataForExistance(
         DBRequestType::GET_PASSWORD, "password was not set"s, "password is incorrect"s,
-        action_->getPassword());
+        action_->password());
 }
 
 bool DataChecker::check()

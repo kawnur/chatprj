@@ -79,9 +79,9 @@ CompanionDataDialog::CompanionDataDialog(
     portEdit_ = std::make_unique<QLineEdit>();
 
     if (type_ == ActionType::UPDATE_COMPANION && companion) {
-        nameEdit_->setText(getQString(companion->getName()));
-        ipAddressEdit_->setText(getQString(companion->getSocketInfo()->getIpAddress()));
-        portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->getClientPort())));
+        nameEdit_->setText(getQString(companion->name()));
+        ipAddressEdit_->setText(getQString(companion->getSocketInfo()->ipAddress()));
+        portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->clientPort())));
     }
 
     layout_->addRow(nameLabel_.get(), nameEdit_.get());

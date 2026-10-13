@@ -8,7 +8,7 @@ PriorityTask::PriorityTask(
     uint8_t priority, const std::string &key, std::function<void ()> function, bool isMandatory)
     : priority_(priority), isMandatory_(isMandatory), key_(key), func_(function) {}
 
-PriorityTask::~PriorityTask() { logArgsInfo(Q_FUNC_INFO); }
+PriorityTask::~PriorityTask() { logArgsInfo(Q_FUNC_INFO, key_); }
 
 uint8_t PriorityTask::priority() const
 {
@@ -71,7 +71,7 @@ bool MessageMetaData::setFields(CompanionPtr companion, const nlohmann::json &da
     std::vector<PriorityTask> taskVector
         {
             { 1, "type", [&]() { networkMessageType_ = data.at("type"); } },
-            { 1, "companion_id", [&]() { companionId_ = companion->getId(); } },
+            { 1, "companion_id", [&]() { companionId_ = companion->id(); } },
             {
                 0, "author_id",
                 [&]()

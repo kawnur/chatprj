@@ -3,6 +3,7 @@
 #include "companion.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
+#include "manager.hpp"
 #include "message.hpp"
 #include "utils.hpp"
 #include "utils_cout.hpp"
@@ -65,7 +66,7 @@ bool SenderOperator::sendFilePart(
 
     std::string resultString = sstream.str();
 
-    bool result = companion->sendFileBlock(networkId, resultString);
+    bool result = getManager()->sendFileBlock(companion, networkId, resultString);
     // coutWithEndl(resultString);
 
     return result;
@@ -131,7 +132,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
 
             // send message
             auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
-            companion->sendMessage(getEmptyMessage(), getReplyMeta(type));
+            getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(type));
 
             // remove self
             auto lambda = [=]()
@@ -146,7 +147,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
 
         // send 'end of transmission' message
         auto typeEnd = NetworkMessageType::FILE_DATA_TRANSMISSON_END;
-        companion->sendMessage(getEmptyMessage(), getReplyMeta(typeEnd));
+        getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(typeEnd));
 
         if (!closeFile())
             logTemplateError("file closing error, path: {}", path_.string());

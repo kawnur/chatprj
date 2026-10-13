@@ -12,6 +12,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils_cout.hpp"
+#include "utils_widgets.hpp"
 #include "widgets.hpp"
 #include "widgets_message.hpp"
 

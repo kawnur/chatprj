@@ -23,8 +23,8 @@ class MessageWidget;
 class RightPanelWidget;
 class TextDialog;
 
-ButtonType getInitialConnectButton();
-ButtonType getNextConnectButton(ButtonType current);
+ButtonType getInitialConnectButtonType();
+ButtonType getNextConnectButtonType(ButtonType current);
 
 // class Button : public QPushButton
 // {
@@ -275,7 +275,7 @@ private:
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
     std::shared_ptr<QPushButton> edit_;
-    ButtonType connectButton_;
+    ButtonType connectButtonType_;
     std::shared_ptr<QPushButton> connect_;
     std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QAction> requestHistory_;

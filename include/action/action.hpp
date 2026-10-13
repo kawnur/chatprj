@@ -34,12 +34,12 @@ public:
     virtual void postAct(std::shared_ptr<ActionResult> result) {}
     virtual void endAct() {}
 
-    virtual std::string getName() { return ""s; }
-    virtual std::string getIpAddress() { return ""s; }
-    virtual std::string getServerPort() { return ""s; }
-    virtual std::string getClientPort() { return ""s; }
-    virtual int getCompanionId() { return ID_BAD_VALUE; }
-    virtual std::string getPassword() { return ""s; }
+    virtual std::string name() { return ""s; }
+    virtual std::string ipAddress() { return ""s; }
+    virtual std::string serverPort() { return ""s; }
+    virtual std::string clientPort() { return ""s; }
+    virtual int companionId() { return ID_BAD_VALUE; }
+    virtual std::string password() { return ""s; }
 
     ActionType type();
     std::string getInfoDialogHeader(const auto &map);
@@ -83,11 +83,11 @@ public:
     void buildDataDialog() override;
     // void buildInfoDialog() override;
 
-    std::string getName() override;
-    std::string getIpAddress() override;
-    std::string getServerPort() override;
-    std::string getClientPort() override;
-    int getCompanionId() override;
+    std::string name() override;
+    std::string ipAddress() override;
+    std::string serverPort() override;
+    std::string clientPort() override;
+    int companionId() override;
     std::shared_ptr<CompanionData> getCompanionData() const;
     std::shared_ptr<Companion> getCompanion() const;
 
@@ -128,7 +128,7 @@ public:
     ~PasswordAction();
 
     void buildDataDialog() override;
-    std::string getPassword() override;
+    std::string password() override;
 
     void set() override;
     void preAct() override;

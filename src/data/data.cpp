@@ -7,22 +7,22 @@ CompanionData::CompanionData(
     const std::string &clientPort)
     : name_(name), ipAddress_(ipAddress), serverPort_(serverPort), clientPort_(clientPort) {}
 
-std::string CompanionData::getName() const
+std::string CompanionData::name() const
 {
     return name_;
 }
 
-std::string CompanionData::getIpAddress() const
+std::string CompanionData::ipAddress() const
 {
     return ipAddress_;
 }
 
-std::string CompanionData::getServerPort() const
+std::string CompanionData::serverPort() const
 {
     return serverPort_;
 }
 
-std::string CompanionData::getClientPort() const
+std::string CompanionData::clientPort() const
 {
     return clientPort_;
 }
@@ -51,7 +51,7 @@ bool compareCompanionData(
 {
     // do not check serverPort
 
-    return (data1->getName() == data2->getName())
-           && (data1->getIpAddress() == data2->getIpAddress())
-           && (data1->getClientPort() == data2->getClientPort());
+    return (data1->name() == data2->name())
+           && (data1->ipAddress() == data2->ipAddress())
+           && (data1->clientPort() == data2->clientPort());
 }

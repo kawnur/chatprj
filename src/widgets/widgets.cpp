@@ -7,14 +7,15 @@
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "message.hpp"
+#include "utils_widgets.hpp"
 #include "widgets_panel.hpp"
 
-ButtonType getInitialConnectButton()
+ButtonType getInitialConnectButtonType()
 {
     return runAndReturnDefault([]() { return CONNECT_BUTTONS.at(0); }, ButtonType::UNKNOWN);
 }
 
-ButtonType getNextConnectButton(ButtonType currentValue)
+ButtonType getNextConnectButtonType(ButtonType currentValue)
 {
     auto lambda = [&](const auto &container) {
         auto current = std::ranges::find(container, currentValue);
@@ -469,7 +470,7 @@ SocketInfoWidget::SocketInfoWidget(std::shared_ptr<Companion> companion)
 
     companion_ = companion;
     name_->setText(getQString(companion->getName()));
-    ipAddress_->setText(getQString(companion->getSocketInfo()->getIpAddress()));
+    ipAddress_->setText(getQString(companion->getSocketInfo()->ipAddress()));
     serverPort_->setText(getQString(companion->getSocketInfo()->getServerPort()));
     clientPort_->setText(getQString(companion->getSocketInfo()->getClientPort()));
 
@@ -578,8 +579,8 @@ void SocketInfoWidget::clientAction()
     isConnected_ = !(isConnected_);
 
     // change connect button text
-    connectButton_ = getNextConnectButton(connectButton_);
-    connect_->setText(getButtonText(connectButton_));
+    connectButtonType_ = getNextConnectButtonType(connectButtonType_);
+    connect_->setText(getButtonText(connectButtonType_));
 
     // change indicator color
     state_->toggle();
@@ -614,8 +615,8 @@ void SocketInfoWidget::buildFields()
     serverPort_ = std::make_shared<QLabel>();
     clientPort_ = std::make_shared<QLabel>();
     edit_ = std::make_shared<QPushButton>(getButtonText(ButtonType::EDIT));
-    connectButton_ = getInitialConnectButton();
-    connect_ = std::make_shared<QPushButton>(getButtonText(connectButton_));
+    connectButtonType_ = getInitialConnectButtonType();
+    connect_ = std::make_shared<QPushButton>(getButtonText(connectButtonType_));
 
     connect(
         edit_.get(), &QPushButton::clicked,

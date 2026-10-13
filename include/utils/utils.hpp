@@ -325,13 +325,15 @@ std::string getHTMLHeader(
 
 std::string getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
 nlohmann::json buildJsonObject(const std::string &jsonString);
-std::string getRandomString(uint8_t length);
+std::string getNetworkId();
+std::string getRandomString(std::size_t length);
 void sleepForMS(uint32_t duration);
 bool getBoolFromDBValue(const std::string &value);
 std::string hashFileMD5(const std::string &filename);
 void exitUtil(int result);
 
 NetworkMessageType defineNetworkMessageType(MessageType type);
+std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
 
 
 #endif // UTILS_HPP

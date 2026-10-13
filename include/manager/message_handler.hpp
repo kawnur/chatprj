@@ -18,6 +18,7 @@ class MessageState;
 
 using CompanionPtr = std::shared_ptr<Companion>;
 using ActionPtr = std::shared_ptr<Action>;
+using MessagePtr = std::shared_ptr<Message>;
 using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;
 using MessageDataPtr = std::shared_ptr<MessageData>;
 using MessageStatePtr = std::shared_ptr<MessageState>;
@@ -46,6 +47,20 @@ public:
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
+    bool sendMessageByNetwork(
+        CompanionPtr companion, std::shared_ptr<Message> message,
+        std::shared_ptr<MessageMetaData> meta);
+
+    bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
+
+    bool sendChatHistoryByNetwork(
+        CompanionPtr companion, std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys);
+
+    bool sendFileBlockByNetwork(
+        CompanionPtr companion, const std::string &networkId, const std::string &data);
+
+    void sendFile(CompanionPtr companion, const std::filesystem::path &path);
+
     void receiveMessage(CompanionPtr companion, const std::string &json);
 
     void receiveTextMessage(
@@ -64,13 +79,22 @@ public:
     void receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data);
     void receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data);
-    void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta, bool success);
+    void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta);
 
     // MessageDataPtr buildMessageDataFromJson(const nlohmann::json &jsonData);
     // MessageMetaDataPtr buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
     // MessageStatePtr buildMessageStateFromJson(const nlohmann::json &jsonData);
+
+    void addEarlyMessages(CompanionPtr companion);
+    void sendUnsentMessages(CompanionPtr companion);
+    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
+
+    void requestHistoryFromCompanion(CompanionPtr companion);
+    void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
+
+
 
 
 

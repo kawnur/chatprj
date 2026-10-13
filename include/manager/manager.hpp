@@ -15,9 +15,11 @@
 #include "action.hpp"
 #include "action_result.hpp"
 #include "constants.hpp"
-#include "db_constants.hpp"
-#include "db_interaction.hpp"
+// #include "db_constants.hpp"
+// #include "db_interaction.hpp"
+#include "db_operator.hpp"
 #include "message_handler.hpp"
+#include "network_manager.hpp"
 #include "utils.hpp"
 
 class Action;
@@ -28,8 +30,7 @@ class ActionSharedValueResult;
 
 class Companion;
 class CompanionAction;
-class DBReplyData;
-class DBRequester;
+// class DBOperator;
 class Message;
 class MessageData;
 class MessageInfo;
@@ -55,24 +56,18 @@ using MessageStatePtr = std::shared_ptr<MessageState>;
 int getDataFromDBResult(
     bool log, std::shared_ptr<DBReplyData> data, std::shared_ptr<PGresult> result, int maxTuples);
 
-template <typename T, typename...Ts>
-bool updateObjectFromJson(std::shared_ptr<T> object, const nlohmann::json &data, Ts &&...args)
-{
-    // auto result = object->setFields(data, args...);
-
-    // if (!result)
-    //     logTemplateError("{}, error parsing jsonData", __FUNCTION__);
-
-    // return result;
-    return true;
-}
-
 // class Manager : public QObject // TODO do we need inheritance?
 class Manager : public QObject, public std::enable_shared_from_this<Manager>
 {
 public:
     Manager();
     ~Manager();
+
+    template<typename... Ts>
+    std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
+    {
+        return dbOperator_.getDBData(type, args...);
+    }
 
     template<typename F, typename T>
     ActionResultPtr performActionAndCallPostAct(F &&func, std::shared_ptr<T> action)
@@ -88,13 +83,15 @@ public:
     void set();
 
     // CompanionPtr getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
+    CompanionPtr getMappedCompanionById(int id) const;
     CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
     std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
 
-    void sendFile(CompanionPtr companion, const std::filesystem::path &path);
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
-    void receiveMessage(CompanionPtr companion, const std::string &json);
-    void addEarlyMessages(CompanionPtr companion);
+
+    // void receiveMessage(CompanionPtr companion, const std::string &json);
+    void receiveMessage(int companionId, const std::string &json);
+
     void resetSelectedCompanion(CompanionPtr companion);
 
     template<typename T>
@@ -139,39 +136,19 @@ public:
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
-    void sendUnsentMessages(CompanionPtr companion);
-    void requestHistoryFromCompanion(CompanionPtr companion);
+    // void requestHistoryFromCompanion(CompanionPtr companion);
     void sendChatHistoryToCompanion(CompanionPtr companion);
     // bool isInitialised();
     std::filesystem::path getLastOpenedPath();
     void setLastOpenedPath(const std::filesystem::path &path);
     void endAction(ActionPtr action);
 
-    template<typename... Ts>
-    std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
-    {
-        DBRequestData requestData { type };
-        auto data = dbRequester_.getDBData(requestData, args...);
-
-        if (!data) {
-            auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_NULL);
-            // showErrorDialogAndLogError(entry);
-
-            return nullptr;
-        }
-
-        if (data->isEmpty()) {
-            auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_EMPTY);
-            // showWarningDialogAndLogWarning(entry);
-
-            // return nullptr;
-        }
-
-        return data;
-    }
-
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
+
+    bool sendMessage(
+        CompanionPtr companion, std::shared_ptr<Message> message,
+        std::shared_ptr<MessageMetaData> meta);
 
     MessageMetaDataPtr pushMessageToDB(
         MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
@@ -182,9 +159,14 @@ public:
     //     CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
 
-    void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
+    // void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
     void addMessageWidget(CompanionPtr companion, MessagePtr message);
-    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
+    void addEarlyMessages(CompanionPtr companion);
+    void sendUnsentMessages(CompanionPtr companion);
+    std::shared_ptr<NetworkEntity> getNetworkEntity(int id);
+
+    bool sendFileBlock(
+        CompanionPtr companion, const std::string &networkId, const std::string &data);
 
 private:
     ActionResultPtr getActionResultByKeyDBData(
@@ -200,7 +182,11 @@ private:
     bool buildCompanions();
     void buildWidgetGroups();
     CompanionPtr addCompanionObject(int id, const std::string &name);
-    std::shared_ptr<CompanionResult> getCompanionAdditionResult(int id, const std::string &name);
+    std::shared_ptr<CompanionResult> addCompanionToManagerMap(int id, const std::string &name);
+
+    std::shared_ptr<ActionResult> addCompanionToNetworkManagerMap(
+        int id, std::shared_ptr<CompanionData> data);
+
     void createWidgetGroupAndAddToMapping(CompanionPtr companion);
     void deleteCompanionObject(CompanionPtr companion);
     void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
@@ -222,16 +208,15 @@ private:
     void setCurrentAction(ActionPtr action);
     void checkAndResetCurrentAction(ActionPtr action);
 
-    // bool initialized_;
-    DBRequester dbRequester_;
+    DBOperator dbOperator_;
     MessageHandler messageHandler_;
     std::mutex messageStateToMessageMapMutex_;
-    std::shared_ptr<PGconn> dbConnection_;
+    NetworkManager networkManager_;
     bool userIsAuthenticated_;
     CompanionPtr selectedCompanion_;
 
     std::map<int, std::pair<CompanionPtr, std::shared_ptr<WidgetGroup>>>
-        mapCompanionToWidgetGroup_;
+        companionAndWidgetGroupMap_;
 
     std::filesystem::path lastOpenedPath_;
     ActionPtr currentAction_;

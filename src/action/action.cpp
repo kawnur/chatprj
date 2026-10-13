@@ -12,7 +12,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils.hpp"
-// #include "utils_widgets.hpp"
+#include "utils_widgets.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
@@ -51,10 +51,8 @@ std::string Action::getInfoDialogFailHeader()
     return getInfoDialogHeader(ACTION_FAIL_HEADER_MAP);
 }
 
-// void Action::initInfoDialog(std::initializer_list<ButtonInfo> list)
 void Action::buildInfoDialog()
 {
-    // infoDialog_ = std::make_shared<TextDialog>(dataDialog_, DialogType::INFO, ""s, list);
     auto list = { ButtonInfo() };
     infoDialog_ = std::make_shared<TextDialog>(dataDialog_, DialogType::INFO, ""s, list);
 }
@@ -96,25 +94,6 @@ void CompanionAction::buildDataDialog()
     case ActionType::UPDATE_COMPANION:
         dataDialog_ = std::make_shared<CompanionDataDialog>(type_, mainWindow, companion_);
 
-        break;
-
-    case ActionType::DELETE_COMPANION:
-    case ActionType::CLEAR_HISTORY:
-        // dataDialog_ = std::make_shared<TextDialog>(
-        //     mainWindow, DialogType::WARNING, clearCompanionHistoryDialogText,
-        //     getButtonInfoVector(ButtonType::CLEAR_HISTORY));
-
-        break;
-
-    case ActionType::SEND_HISTORY: {
-        // auto name = companion_->getName();
-
-        // dataDialog_ = std::make_shared<TextDialog>(
-        //     mainWindow, DialogType::WARNING,
-        //     getStringByFormat(sendChatHistoryToCompanionDialogText, name),
-        //     getButtonInfoVector(ButtonType::SEND_HISTORY));
-    }
-
     break;
 
     default:
@@ -122,34 +101,29 @@ void CompanionAction::buildDataDialog()
     }
 }
 
-// void CompanionAction::buildInfoDialog()
-// {
-//     initInfoDialog({ getOKButtonInfo([this]() { infoDialog_->closeSelfAndParentDialog(); }) });
-// }
-
-std::string CompanionAction::getName()
+std::string CompanionAction::name()
 {
-    return data_->getName();
+    return data_->name();
 }
 
-std::string CompanionAction::getIpAddress()
+std::string CompanionAction::ipAddress()
 {
-    return data_->getIpAddress();
+    return data_->ipAddress();
 }
 
-std::string CompanionAction::getServerPort()
+std::string CompanionAction::serverPort()
 {
-    return data_->getServerPort();
+    return data_->serverPort();
 }
 
-std::string CompanionAction::getClientPort()
+std::string CompanionAction::clientPort()
 {
-    return data_->getClientPort();
+    return data_->clientPort();
 }
 
-int CompanionAction::getCompanionId()
+int CompanionAction::companionId()
 {
-    return companion_->getId();
+    return companion_->id();
 }
 
 std::shared_ptr<CompanionData> CompanionAction::getCompanionData() const
@@ -194,9 +168,9 @@ void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
         type = DialogType::INFO;
 
         std::vector<std::pair<std::string, std::string>> lines {
-            { "name: {}", data_->getName() },
-            { "ipAddress: {}", data_->getIpAddress() },
-            { "port: {}", data_->getClientPort() }
+            { "name: {}", data_->name() },
+            { "ipAddress: {}", data_->ipAddress() },
+            { "port: {}", data_->clientPort() }
         };
 
         header = getInfoDialogSuccessHeader();
@@ -278,7 +252,7 @@ void CompanionAction::act()
     case ActionType::DELETE_COMPANION:
     case ActionType::CLEAR_HISTORY:
         data_ = std::make_shared<CompanionData>(
-            companion_->getName(), companion_->getSocketIpAddress(), ""s,
+            companion_->name(), companion_->getSocketIpAddress(), ""s,
             std::to_string(companion_->getSocketClientPort()));
 
     break;
@@ -346,7 +320,7 @@ void PasswordAction::buildDataDialog()
     }
 }
 
-std::string PasswordAction::getPassword()
+std::string PasswordAction::password()
 {
     return password_;
 }
@@ -578,7 +552,7 @@ void FileAction::act()
             meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
             meta->networkId_ = networkId_;
 
-            bool result = companion_->sendMessage(nullptr, meta);
+            bool result = getManager()->sendMessage(companion_, nullptr, meta);
 
             getManager()->setLastOpenedPath(filePath_.parent_path());
         }

@@ -102,7 +102,12 @@ nlohmann::json buildJsonObject(const std::string &jsonString)
     return jsonData;
 }
 
-std::string getRandomString(uint8_t length)
+std::string getNetworkId()
+{
+    return getRandomString(NETWORK_ID_SIZE);
+}
+
+std::string getRandomString(std::size_t length)
 {
     std::string result(length, '_');
     std::size_t baseSize = sizeof(alphanum);
@@ -185,4 +190,17 @@ NetworkMessageType defineNetworkMessageType(MessageType type)
     default:
         return NetworkMessageType::UNKNOWN;
     }
+}
+
+std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName)
+{
+    auto value = std::getenv(variableName.data());
+
+    if (!value) {
+        logTemplateError("environment variable {} not found", variableName);
+
+        return std::nullopt;
+    }
+
+    return std::string(value);
 }
