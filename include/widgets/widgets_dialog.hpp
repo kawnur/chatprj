@@ -81,9 +81,9 @@ public:
     virtual void showDialog() {}
     virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
     // virtual void method1() {}
-    virtual std::string getFirstEditText() { return ""s; }
-    virtual std::string getSecondEditText() { return ""s; }
-    virtual std::string getEditText() { return ""s; }
+    virtual std::string firstEditText() { return ""s; }
+    virtual std::string secondEditText() { return ""s; }
+    virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() { return QStringList(); }
 
     // void setAction(std::shared_ptr<Action> action);
@@ -119,9 +119,9 @@ public:
     CompanionDataDialog(ActionType, std::shared_ptr<QWidget>, std::shared_ptr<Companion>);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    std::string getNameString();
-    std::string getIpAddressString();
-    std::string getPortString();
+    std::string name();
+    std::string ipAddress();
+    std::string port();
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
     // void method1() override;
@@ -168,8 +168,8 @@ public:
 
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
-    std::string getFirstEditText() override;
-    std::string getSecondEditText() override;
+    std::string firstEditText() override;
+    std::string secondEditText() override;
 
 private:
     std::unique_ptr<QFormLayout> layout_;
@@ -190,7 +190,7 @@ public:
 
     // void set() override;
     void set(std::shared_ptr<Action> action) override;
-    std::string getEditText() override;
+    std::string editText() override;
 
 private:
     std::unique_ptr<QFormLayout> layout_;

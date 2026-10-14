@@ -158,7 +158,7 @@ FileMessageWidget::FileMessageWidget(
     // rewrite widget body text for sender's widget
     if (isMessageFromMe) {
         auto color = getHTMLColor(Widget::MESSAGE_SENT);
-        auto path = companion->getFilePathString(message->getNetworkId());
+        auto path = getGraphicManager()->getFilePathString(message->getNetworkId());
         auto text = getHTMLBody(color, getStringByFormat("SEND FILE: {}", path), true, false);
 
         messageLabel_->setText(getQString(text));

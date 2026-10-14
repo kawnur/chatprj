@@ -53,18 +53,13 @@ void MessageHandler::sendMessage(
 
     // add to widget
     if (type == MessageType::FILE) {
-        auto storage = companion->getFileOperatorStorage();
-
-        if (!storage)
-            return;
-
         // TODO modify
         auto cast = std::dynamic_pointer_cast<FileAction>(action);
 
         if (!cast)
-            logArgsError("action cast error");
+            logArgsError("file action cast error");
         else
-            storage->addSenderOperator(message->getNetworkId(), cast->getPath());
+            manager_->addSenderOperator(message->getNetworkId(), cast->getPath());
     }
 
     group->addMessageWidgetToCentralPanelChatHistory(message);
@@ -102,7 +97,7 @@ bool MessageHandler::sendMessageByNetwork(
 
 bool MessageHandler::sendJsonByNetwork(CompanionPtr companion, const std::string &json)
 {
-    auto networkEntity = getManager()->getNetworkEntity(companion->id());
+    auto networkEntity = manager_->getNetworkEntity(companion->id());
 
     if (!networkEntity)
         return false;
@@ -243,7 +238,6 @@ void MessageHandler::receiveTextMessage(
     pushMeta->authorId_ = meta->authorId_;
     pushMeta->authorName_ = meta->authorName_;
 
-    // auto message = companion->createMessage(meta, data, state);
     auto message = companion->createMessage(pushMeta, data, state);
 
     if (!message)
@@ -263,7 +257,7 @@ void MessageHandler::receiveFileProposalMessage(
     CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     // create receiver operator
-    companion->addReceiverOperator(meta, HOME_PATH);
+    manager_->addReceiverOperator(meta, HOME_PATH);
 
     // update message info
     auto name = companion->name();
@@ -394,7 +388,7 @@ void MessageHandler::receiveFileRequest(CompanionPtr companion, MessageMetaDataP
     logArgs(__FUNCTION__);
 
     auto networkId = meta->networkId_;
-    auto sender = companion->getFileOperatorByNetworkId<SenderOperator>(networkId);
+    auto sender = manager_->getFileOperator<SenderOperator>(networkId);
 
     if (sender)
         sender->sendFile(companion, networkId);
@@ -407,7 +401,7 @@ void MessageHandler::receiveFileData(CompanionPtr companion, MessageMetaDataPtr 
     logArgs(__FUNCTION__);
 
     auto networkId = meta->networkId_;
-    auto receiver = companion->getFileOperatorByNetworkId<ReceiverOperator>(networkId);
+    auto receiver = manager_->getFileOperator<ReceiverOperator>(networkId);
 
     if (receiver)
         receiver->receiveFilePart(data->data_);
@@ -427,9 +421,9 @@ void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessageMetaDat
 
     auto networkId = meta->networkId_;
 
-    logTemplateInfo(entryTemplate, companion->getFilePathString(networkId));
+    logTemplateInfo(entryTemplate, manager_->getFilePathString(networkId));
 
-    companion->removeFileOperator<SenderOperator>(networkId);
+    manager_->removeFileOperator<SenderOperator>(networkId);
 }
 
 void MessageHandler::receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta)
@@ -437,7 +431,7 @@ void MessageHandler::receiveFileDataTransmissionEnd(CompanionPtr companion, Mess
     logArgs(__FUNCTION__);
 
     auto networkId = meta->networkId_;
-    auto receiver = companion->getFileOperatorByNetworkId<ReceiverOperator>(networkId);
+    auto receiver = manager_->getFileOperator<ReceiverOperator>(networkId);
 
     if (!receiver) {
         logTemplateError("companion has no file operator for networkId '{}'", networkId);
@@ -452,7 +446,7 @@ void MessageHandler::receiveFileDataTransmissionEnd(CompanionPtr companion, Mess
     if (resultType == NetworkMessageType::FILE_DATA_CHECK_SUCCESS) {
         logArgs("file received successfully");
 
-        companion->removeFileOperator<ReceiverOperator>(networkId);
+        manager_->removeFileOperator<ReceiverOperator>(networkId);
     }
 
     auto replyMeta = std::make_shared<MessageMetaData>();
@@ -474,27 +468,10 @@ void MessageHandler::receiveFileDataTransmissionFailure(
 
     auto networkId = meta->networkId_;
 
-    logTemplateInfo(
-        "file {} WAS NOT received by companion",
-        companion->getFilePathString(networkId));
+    logTemplateInfo("companion did not receive file '{}'", manager_->getFilePathString(networkId));
 
-    companion->removeFileOperator<SenderOperator>(networkId);
+    manager_->removeFileOperator<SenderOperator>(networkId);
 }
-
-// MessageDataPtr MessageHandler::buildMessageDataFromJson(const nlohmann::json &data)
-// {
-//     return buildObjectFromJson<MessageData>(data, "text");
-// }
-
-// MessageMetaDataPtr MessageHandler::buildMessageMetaDataFromJson(const nlohmann::json &data)
-// {
-//     return buildObjectFromJson<MessageMetaData>(data, "type", "id", "time");
-// }
-
-// MessageStatePtr MessageHandler::buildMessageStateFromJson(const nlohmann::json &data)
-// {
-//     return buildObjectFromJson<MessageState>(data, "antecedent");
-// }
 
 void MessageHandler::addEarlyMessages(CompanionPtr companion)
 {
@@ -640,7 +617,7 @@ void MessageHandler::requestHistoryFromCompanion(CompanionPtr companion)
 
 void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message)
 {
-    auto lambda = [=]()
+    auto lambda = [=, this]()
     {
         auto sleepDuration = SLEEP_DURATION_INITIAL_MS;
 

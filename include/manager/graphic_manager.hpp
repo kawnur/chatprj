@@ -90,6 +90,7 @@ public:
     void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
     void sendFile(std::shared_ptr<Companion> companion);
     void saveFile(const std::string& networkId, std::shared_ptr<Companion> companion);
+    std::string getFilePathString(const std::string &networkId);
 
 private:
     // std::mutex messageToMessageWidgetMapMutex_;

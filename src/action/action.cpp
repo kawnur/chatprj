@@ -230,9 +230,9 @@ void CompanionAction::act()
         if (!cast)
             break;
 
-        auto name = cast->getNameString();
-        auto address = cast->getIpAddressString();
-        auto port = cast->getPortString();
+        auto name = cast->name();
+        auto address = cast->ipAddress();
+        auto port = cast->port();
 
         // check dialog data
         for (const auto &item : { name, address, port }) {
@@ -251,9 +251,7 @@ void CompanionAction::act()
 
     case ActionType::DELETE_COMPANION:
     case ActionType::CLEAR_HISTORY:
-        data_ = std::make_shared<CompanionData>(
-            companion_->name(), companion_->getSocketIpAddress(), ""s,
-            std::to_string(companion_->getSocketClientPort()));
+        data_ = getManager()->getCompanionData(companion_);
 
     break;
 
@@ -382,8 +380,8 @@ void PasswordAction::act()
 {
     switch (type_) {
     case ActionType::CREATE_PASSWORD: {
-        auto text1 = dataDialog_->getFirstEditText();
-        auto text2 = dataDialog_->getSecondEditText();
+        auto text1 = dataDialog_->firstEditText();
+        auto text2 = dataDialog_->secondEditText();
 
         auto errorText = ""s;
 
@@ -404,7 +402,7 @@ void PasswordAction::act()
     break;
 
     case ActionType::GET_PASSWORD: {
-        auto text = dataDialog_->getEditText();
+        auto text = dataDialog_->editText();
 
         if (text.size() == 0) {
             updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
@@ -502,19 +500,18 @@ void FileAction::act()
     // if (!dialog)
     //     return;
 
+    auto manager = getManager();
+
     switch (type_) {
     case ActionType::SEND_FILE:
     {
         for (const auto &path : dataDialog_->selectedFiles()) {  // one file
             filePath_ = std::filesystem::path(getString(path));
 
-            // getManager()->sendMessage(
-            //     MessageType::FILE, companion_, shared_from_this(),
-            //     getStringByFormat("SEND FILE: {}", filePath_.filename().string()));
-            getManager()->sendMessage(
+            manager->sendMessage(
                 MessageType::FILE, companion_, shared_from_this(), filePath_.filename().string());
 
-            getManager()->setLastOpenedPath(filePath_.parent_path());
+            manager->setLastOpenedPath(filePath_.parent_path());
         }
     }
 
@@ -544,17 +541,16 @@ void FileAction::act()
         // }
 
         // set file path for file operator
-        bool setResult = companion_->setFileOperatorFilePath(networkId_, filePath_);
+        // bool setResult = companion_->setFileOperatorFilePath(networkId_, filePath_);
+        bool setResult = manager->setFileOperatorFilePath(networkId_, filePath_);
 
         if (setResult) {
             // send without saving to db
             auto meta = std::make_shared<MessageMetaData>();
             meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
             meta->networkId_ = networkId_;
-
-            bool result = getManager()->sendMessage(companion_, nullptr, meta);
-
-            getManager()->setLastOpenedPath(filePath_.parent_path());
+            bool result = manager->sendMessage(companion_, nullptr, meta);
+            manager->setLastOpenedPath(filePath_.parent_path());
         }
         else {
             logTemplateError("error saving file, path: {}", filePath_.string());

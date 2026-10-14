@@ -3,6 +3,7 @@
 #include "action.hpp"
 #include "companion.hpp"
 #include "constants.hpp"
+#include "data.hpp"
 #include "graphic_manager.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
@@ -469,30 +470,27 @@ SocketInfoWidget::SocketInfoWidget(std::shared_ptr<Companion> companion)
     buildFields();
 
     companion_ = companion;
-    name_->setText(getQString(companion->getName()));
-    ipAddress_->setText(getQString(companion->getSocketInfo()->ipAddress()));
-    serverPort_->setText(getQString(companion->getSocketInfo()->getServerPort()));
-    clientPort_->setText(getQString(companion->getSocketInfo()->getClientPort()));
 
+    setFieldsFromCompanionData();
     setFields();
 }
 
-QString SocketInfoWidget::getName() const
+QString SocketInfoWidget::name() const
 {
     return name_->text();
 }
 
-QString SocketInfoWidget::getIpAddress() const
+QString SocketInfoWidget::ipAddress() const
 {
     return ipAddress_->text();
 }
 
-QString SocketInfoWidget::getServerPort() const
+QString SocketInfoWidget::serverPort() const
 {
     return serverPort_->text();
 }
 
-QString SocketInfoWidget::getClientPort() const
+QString SocketInfoWidget::clientPort() const
 {
     return clientPort_->text();
 }
@@ -521,10 +519,11 @@ void SocketInfoWidget::unselect()
 
 void SocketInfoWidget::updateFields()
 {
-    name_->setText(getQString(companion_->getName()));
-    ipAddress_->setText(getQString(companion_->getSocketIpAddress()));
-    clientPort_->setText(getQString(companion_->getSocketClientPort()));
-    clientPort_->setText(getQString(companion_->getSocketClientPort()));
+    // name_->setText(getQString(companion_->getName()));
+    // ipAddress_->setText(getQString(companion_->getSocketIpAddress()));
+    // clientPort_->setText(getQString(companion_->getSocketClientPort()));
+    // clientPort_->setText(getQString(companion_->getSocketClientPort()));
+    setFieldsFromCompanionData();
 }
 
 void SocketInfoWidget::setNewMessagesIndicatorOn()
@@ -560,15 +559,15 @@ void SocketInfoWidget::deleteCompanionAction()
 void SocketInfoWidget::clientAction()
 {
     bool result = false;
-
-    auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(this);
+    auto manager = getManager();
+    auto companion = manager->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
     if (isConnected_) {
-        result = companion->disconnectClient();
+        result = manager->disconnectClient(companion);
     }
     else {
-        result = companion->connectClient();
+        result = manager->connectClient(companion);
         getManager()->sendUnsentMessages(companion);
     }
 
@@ -661,6 +660,18 @@ void SocketInfoWidget::setFields()
         state_->setMe();
         edit_->hide();
         connect_->hide();
+    }
+}
+
+void SocketInfoWidget::setFieldsFromCompanionData()
+{
+    name_->setText(getQString(companion_->name()));
+    auto data = getManager()->getCompanionData(companion_);
+
+    if (data) {
+        ipAddress_->setText(getQString(data->ipAddress()));
+        serverPort_->setText(getQString(data->serverPort()));
+        clientPort_->setText(getQString(data->clientPort()));
     }
 }
 
@@ -777,13 +788,13 @@ WidgetGroup::WidgetGroup(std::shared_ptr<Companion> companion)
 {
     antecedentMessagesCounter_ = 0;
     auto graphicManager = getGraphicManager();
-    auto socketInfo = companion_->getSocketInfo();
+    // auto socketInfo = companion_->getSocketInfo();
     auto widget = std::make_shared<SocketInfoWidget>(companion_);
     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
     graphicManager->addWidgetToCompanionPanel(socketInfoBase_);
 
     centralPanel_ = std::make_shared<CentralPanelWidget>(
-        getGraphicManager()->getMainWindow(), companion_->getName());
+        getGraphicManager()->getMainWindow(), companion_->name());
 
     // centralPanel_ = new CentralPanelWidget(nullptr, companion_->getName());
 
@@ -1036,6 +1047,6 @@ void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
 {
     logTemplateInfo(
         "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
-        object->getName().toStdString(), object->getIpAddress().toStdString(),
-        object->getServerPort(), object->getClientPort());
+        object->name().toStdString(), object->ipAddress().toStdString(),
+        object->serverPort(), object->clientPort());
 }

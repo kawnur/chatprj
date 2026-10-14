@@ -58,12 +58,12 @@ DBRequestData::DBRequestData(DBRequestType type) : logMark_(), requestTemplate_(
         replyKeys_.push_back(value.at(i));
 }
 
-std::string DBRequestData::getLogMark() const
+std::string DBRequestData::logMark() const
 {
     return logMark_;
 }
 
-std::vector<std::string> DBRequestData::getReplyKeys() const
+std::vector<std::string> DBRequestData::replyKeys() const
 {
     return replyKeys_;
 }

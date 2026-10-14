@@ -18,12 +18,12 @@ FileOperator::~FileOperator()
         buf_.close();
 }
 
-std::filesystem::path FileOperator::getPath() const
+std::filesystem::path FileOperator::path() const
 {
     return path_;
 }
 
-std::string FileOperator::getMD5Hash() const
+std::string FileOperator::md5Hash() const
 {
     return md5Hash_;
 }
@@ -137,7 +137,7 @@ void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::s
             // remove self
             auto lambda = [=]()
             {
-                companion->removeFileOperator<SenderOperator>(networkId);
+                getManager()->removeFileOperator<SenderOperator>(networkId);
             };
 
             runInDetachedThread(lambda);
@@ -206,64 +206,64 @@ bool ReceiverOperator::createFileAndOpen()
     return (openResult) ? true : false;
 }
 
-FileOperatorStorage::FileOperatorStorage() : mutex_(), mapping_() {}
+// FileOperatorStorage::FileOperatorStorage() : mutex_(), mapping_() {}
 
-void FileOperatorStorage::addSenderOperator(
-    const std::string &networkId, const std::filesystem::path &path)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// void FileOperatorStorage::addSenderOperator(
+//     const std::string &networkId, const std::filesystem::path &path)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (mapping_.count(networkId) != 0) {
-        logTemplateError("file operator for key {} already exists", networkId);
+//     if (mapping_.count(networkId) != 0) {
+//         logTemplateError("file operator for key {} already exists", networkId);
 
-        return;
-    }
+//         return;
+//     }
 
-    mapping_[networkId] = std::make_shared<SenderOperator>(path);
-}
+//     mapping_[networkId] = std::make_shared<SenderOperator>(path);
+// }
 
-void FileOperatorStorage::addReceiverOperator(
-    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// void FileOperatorStorage::addReceiverOperator(
+//     std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto networkId = meta->networkId_;
+//     auto networkId = meta->networkId_;
 
-    if (mapping_.count(networkId) != 0) {
-        logTemplateError("file operator for key {} already exists", networkId);
+//     if (mapping_.count(networkId) != 0) {
+//         logTemplateError("file operator for key {} already exists", networkId);
 
-        return;
-    }
+//         return;
+//     }
 
-    mapping_[networkId] = std::make_shared<ReceiverOperator>(path, meta->hashMD5_);
-}
+//     mapping_[networkId] = std::make_shared<ReceiverOperator>(path, meta->hashMD5_);
+// }
 
-std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string &key)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string &key)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    try {
-        return mapping_.at(key);
-    }
-    catch(const std::exception &e) {
-        logArgsError(e.what());
-    }
+//     try {
+//         return mapping_.at(key);
+//     }
+//     catch(const std::exception &e) {
+//         logArgsError(e.what());
+//     }
 
-    return nullptr;
-}
+//     return nullptr;
+// }
 
-bool FileOperatorStorage::removeOperator(const std::string &key)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// bool FileOperatorStorage::removeOperator(const std::string &key)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    try {
-        bool result = (mapping_.erase(key) == 1) ? true : false;
+//     try {
+//         bool result = (mapping_.erase(key) == 1) ? true : false;
 
-        return result;
-    }
-    catch(const std::exception &e) {
-        logArgsError(e.what());
-    }
+//         return result;
+//     }
+//     catch(const std::exception &e) {
+//         logArgsError(e.what());
+//     }
 
-    return false;
-}
+//     return false;
+// }

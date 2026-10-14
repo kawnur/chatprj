@@ -232,10 +232,10 @@ public:
     SocketInfoWidget(std::shared_ptr<Companion> companion);
     ~SocketInfoWidget() = default;
 
-    QString getName() const;
-    QString getIpAddress() const;
-    QString getServerPort() const;
-    QString getClientPort() const;
+    QString name() const;
+    QString ipAddress() const;
+    QString serverPort() const;
+    QString clientPort() const;
 
     bool isStub() override;
     bool isSelected();
@@ -254,6 +254,7 @@ public slots:
 
 private:
     void buildFields();
+    void setFieldsFromCompanionData();
     void setFields();
     void changeColor(QColor &color);
     void mousePressEvent(QMouseEvent *event) override;

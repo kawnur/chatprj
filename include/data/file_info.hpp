@@ -3,13 +3,15 @@
 
 #include <filesystem>
 #include <fstream>
-#include <map>
+// #include <map>
 #include <memory>
-#include <mutex>
+// #include <mutex>
 #include <string>
 
 class Companion;
 class MessageMetaData;
+
+// TODO rename to file_operator.hpp
 
 class FileOperator
 {
@@ -19,8 +21,8 @@ public:
 
     virtual bool createFileAndOpen() { return false; }
 
-    std::filesystem::path getPath() const;
-    std::string getMD5Hash() const;
+    std::filesystem::path path() const;
+    std::string md5Hash() const;
     bool setPath(const std::filesystem::path &path);
     std::filebuf *closeFile();
 
@@ -55,24 +57,24 @@ private:
     std::string md5HashFromSender_;
 };
 
-class FileOperatorStorage
-{
-public:
-    FileOperatorStorage();
-    ~FileOperatorStorage() = default;
+// class FileOperatorStorage
+// {
+// public:
+//     FileOperatorStorage();
+//     ~FileOperatorStorage() = default;
 
-    void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
+//     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
 
-    void addReceiverOperator(
-        std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
+//     void addReceiverOperator(
+//         std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
 
-    std::shared_ptr<FileOperator> getOperator(const std::string &key);
+//     std::shared_ptr<FileOperator> getOperator(const std::string &key);
 
-    bool removeOperator(const std::string &key);
+//     bool removeOperator(const std::string &key);
 
-private:
-    std::mutex mutex_;
-    std::map<std::string, std::shared_ptr<FileOperator>> mapping_;
-};
+// private:
+//     std::mutex mutex_;
+//     std::map<std::string, std::shared_ptr<FileOperator>> mapping_;
+// };
 
 #endif // FILE_INFO_HPP

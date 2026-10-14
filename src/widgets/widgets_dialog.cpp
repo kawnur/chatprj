@@ -79,9 +79,13 @@ CompanionDataDialog::CompanionDataDialog(
     portEdit_ = std::make_unique<QLineEdit>();
 
     if (type_ == ActionType::UPDATE_COMPANION && companion) {
-        nameEdit_->setText(getQString(companion->name()));
-        ipAddressEdit_->setText(getQString(companion->getSocketInfo()->ipAddress()));
-        portEdit_->setText(getQString(std::to_string(companion->getSocketInfo()->clientPort())));
+        auto data = getManager()->getCompanionData(companion);
+
+        if (data) {
+            nameEdit_->setText(getQString(companion->name()));
+            ipAddressEdit_->setText(getQString(data->ipAddress()));
+            portEdit_->setText(getQString(data->clientPort()));
+        }
     }
 
     layout_->addRow(nameLabel_.get(), nameEdit_.get());
@@ -92,12 +96,12 @@ CompanionDataDialog::CompanionDataDialog(
     layout_->addWidget(buttonBox_.get());
 }
 
-std::string CompanionDataDialog::getNameString()
+std::string CompanionDataDialog::name()
 {
     return nameEdit_->text().toStdString();
 }
 
-std::string CompanionDataDialog::getIpAddressString()
+std::string CompanionDataDialog::ipAddress()
 {
     // result format is db-compliant
     auto ipAddressFromWidget = ipAddressEdit_->text();
@@ -106,7 +110,7 @@ std::string CompanionDataDialog::getIpAddressString()
     return hostAddress.toString().toStdString();
 }
 
-std::string CompanionDataDialog::getPortString()
+std::string CompanionDataDialog::port()
 {
     return portEdit_->text().toStdString();
 }
@@ -131,7 +135,7 @@ void CompanionDataDialog::set(std::shared_ptr<Action> action)
 std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
 {
     return std::make_shared<CompanionData>(
-        getNameString(), getIpAddressString(), ""s, getPortString());
+        name(), ipAddress(), ""s, port());
 }
 
 GroupChatDataDialog::GroupChatDataDialog(ActionType type, std::shared_ptr<QWidget> parent)
@@ -189,12 +193,12 @@ void CreatePasswordDialog::set(std::shared_ptr<Action> action)
         action.get(), &Action::act, Qt::QueuedConnection);
 }
 
-std::string CreatePasswordDialog::getFirstEditText()
+std::string CreatePasswordDialog::firstEditText()
 {
     return firstEdit_->text().toStdString();
 }
 
-std::string CreatePasswordDialog::getSecondEditText()
+std::string CreatePasswordDialog::secondEditText()
 {
     return secondEdit_->text().toStdString();
 }
@@ -233,7 +237,7 @@ void GetPasswordDialog::set(std::shared_ptr<Action> action)
         action.get(), &Action::endAct, Qt::QueuedConnection);
 }
 
-std::string GetPasswordDialog::getEditText()
+std::string GetPasswordDialog::editText()
 {
     return edit_->text().toStdString();
 }

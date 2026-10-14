@@ -24,14 +24,14 @@ public:
         auto data = getReplyData(requestData, args...);
 
         if (!data) {
-            auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_NULL);
+            auto entry = getStringByFormat("{0}, {1}", requestData.logMark(), DB_REPLY_NULL);
             // showErrorDialogAndLogError(entry);
 
             return nullptr;
         }
 
         if (data->isEmpty()) {
-            auto entry = getStringByFormat("{0}, {1}", requestData.getLogMark(), DB_REPLY_EMPTY);
+            auto entry = getStringByFormat("{0}, {1}", requestData.logMark(), DB_REPLY_EMPTY);
             // showWarningDialogAndLogWarning(entry);
 
             // return nullptr;
@@ -54,7 +54,7 @@ public:
 
         if (log_) {
             logArgs(logDelimiter);
-            logArgs(requestData.getLogMark());
+            logArgs(requestData.logMark());
             logArgs("dbResult:", dbResult.get());
         }
 
@@ -64,7 +64,7 @@ public:
             return nullptr;
         }
 
-        auto replyData = std::make_shared<DBReplyData>(log_, requestData.getReplyKeys());
+        auto replyData = std::make_shared<DBReplyData>(log_, requestData.replyKeys());
 
         if (replyData->getDataFromResult(dbResult, 0) == -1) {
             // showErrorDialogAndLogError("Error getting data from dbResult");

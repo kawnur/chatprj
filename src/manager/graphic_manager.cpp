@@ -315,6 +315,11 @@ void GraphicManager::saveFile(const std::string &networkId, std::shared_ptr<Comp
     getManager()->initFileReception(networkId, companion);
 }
 
+std::string GraphicManager::getFilePathString(const std::string &networkId)
+{
+    return getManager()->getFilePathString(networkId);
+}
+
 std::shared_ptr<GraphicManager> getGraphicManager()
 {
     QCoreApplication *coreApp = QCoreApplication::instance();

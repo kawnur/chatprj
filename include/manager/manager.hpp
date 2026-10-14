@@ -18,6 +18,7 @@
 // #include "db_constants.hpp"
 // #include "db_interaction.hpp"
 #include "db_operator.hpp"
+#include "file_manager.hpp"
 #include "message_handler.hpp"
 #include "network_manager.hpp"
 #include "utils.hpp"
@@ -127,6 +128,7 @@ public:
     // void updateCompanion(CompanionActionPtr action);
 
     ActionResultPtr updateCompanion(CompanionActionPtr action);
+    void updateSocketInfo(int id, std::shared_ptr<CompanionData> data);
     ActionResultPtr deleteCompanion(CompanionActionPtr action);
     void clearChatHistory(CompanionPtr companion);
     ActionResultPtr clearCompanionHistory(CompanionActionPtr action);
@@ -136,7 +138,7 @@ public:
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
-    // void requestHistoryFromCompanion(CompanionPtr companion);
+    void requestHistoryFromCompanion(CompanionPtr companion);
     void sendChatHistoryToCompanion(CompanionPtr companion);
     // bool isInitialised();
     std::filesystem::path getLastOpenedPath();
@@ -167,6 +169,35 @@ public:
 
     bool sendFileBlock(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
+
+    std::shared_ptr<CompanionData> getCompanionData(CompanionPtr companion);
+    // std::string getIpAddress(CompanionPtr companion);
+    // uint16_t getServerPort(CompanionPtr companion);
+    // uint16_t getClientPort(CompanionPtr companion);
+
+    bool connectClient(CompanionPtr companion);
+    bool disconnectClient(CompanionPtr companion);
+
+    void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
+
+    void addReceiverOperator(
+        std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
+
+    template<typename T>
+    std::shared_ptr<T> getFileOperator(const std::string &networkId)
+    {
+        return fileManager_.getFileOperator<T>(networkId);
+    }
+
+    template<typename T>
+    void removeFileOperator(const std::string &networkId)
+    {
+        fileManager_.removeFileOperator<T>(networkId);
+    }
+
+    std::string getFilePathString(const std::string &networkId);
+    bool setFileOperatorFilePath(const std::string &networkId, const std::filesystem::path &path);
+    std::string getFileOperatorMD5Hash(const std::string &networkId);
 
 private:
     ActionResultPtr getActionResultByKeyDBData(
@@ -210,6 +241,7 @@ private:
 
     DBOperator dbOperator_;
     MessageHandler messageHandler_;
+    FileManager fileManager_;
     std::mutex messageStateToMessageMapMutex_;
     NetworkManager networkManager_;
     bool userIsAuthenticated_;

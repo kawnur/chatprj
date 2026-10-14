@@ -6,15 +6,18 @@
 #include "chat_client.hpp"
 #include "chat_server.hpp"
 
+class CompanionData;
+
 class SocketInfo
 {
 public:
     SocketInfo() = default;
 
-    template<typename T, typename U, typename P>
+    // template<typename T, typename U, typename P>
     // SocketInfo(T &&ipAddress, U &&serverPort, P &&clientPort)
         // : ipAddress_(std::forward<T>(ipAddress)), serverPort_(std::forward<U>(serverPort)),
         // clientPort_(std::forward<P>(clientPort)) {}
+    template<typename T, typename U>
     SocketInfo(T &&ipAddress, U &&port)
         : ipAddress_(std::forward<T>(ipAddress)), port_(std::forward<U>(port)) {}
 
@@ -29,7 +32,7 @@ public:
     uint16_t port() const;
     // std::shared_ptr<CompanionData> getData();
 
-    // void updateData(std::shared_ptr<CompanionData> data);
+    void updateData(std::shared_ptr<CompanionData> data);
 
 private:
     std::string ipAddress_;
@@ -45,7 +48,11 @@ public:
         int companionId, std::shared_ptr<SocketInfo> clientSocket,
         std::shared_ptr<SocketInfo> serverSocket);
 
-    ~NetworkEntity();
+    ~NetworkEntity() = default;
+
+    std::string ipAddress();
+    uint16_t clientPort();
+    uint16_t serverPort();
 
     bool start();
     bool startServer();
@@ -54,6 +61,13 @@ public:
     bool disconnectClient();
 
     bool sendJsonViaClient(const std::string &json);
+    void updateClientSocketInfo(std::shared_ptr<CompanionData> data);
+
+    int companionId() const;
+    std::shared_ptr<SocketInfo> clientSocket() const;
+    std::shared_ptr<SocketInfo> serverSocket() const;
+    std::shared_ptr<ChatClient> client() const;
+    std::shared_ptr<ChatServer> server() const;
 
 private:
     int companionId_;

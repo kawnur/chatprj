@@ -9,13 +9,16 @@ class ActionResult
 {
 public:
     // TODO add container concept
-    ActionResult(bool status, const std::string &definition);
-    ActionResult(bool status, std::string &&definition);
+    // ActionResult(bool status, const std::string &definition);
+    // ActionResult(bool status, std::string &&definition);
 
     template<typename T>
-    ActionResult(bool status, T &&definitions) : status_(status)
+    ActionResult(bool status, T &&value) : status_(status)
     {
-        definitions_ = std::forward<T>(definitions);
+        if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+            definitions_.push_back(value);
+        else
+            definitions_ = std::forward<T>(value);
         // coutVectorState(definitions_);
     }
 

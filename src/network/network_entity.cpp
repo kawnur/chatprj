@@ -1,5 +1,6 @@
 #include "network_entity.hpp"
 
+#include "data.hpp"
 #include "utils.hpp"
 
 // SocketInfo::SocketInfo(std::shared_ptr<CompanionData> data)
@@ -43,11 +44,11 @@ uint16_t SocketInfo::port() const
 //         ""s, ipAddress_, getString(serverPort_), getString(clientPort_));
 // }
 
-// void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
-// {
-//     ipAddress_ = data->getIpAddress();
-//     clientPort_ = getIntFromString(PORT_BAD_VALUE, data->getClientPort());
-// }
+void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
+{
+    ipAddress_ = data->ipAddress();
+    port_ = getIntFromString(PORT_BAD_VALUE, data->clientPort());
+}
 
 // NetworkEntity::NetworkEntity(int companionId)
 //     : companionId_(companionId), client_(nullptr), server_(nullptr) {}
@@ -57,6 +58,21 @@ NetworkEntity::NetworkEntity(
     std::shared_ptr<SocketInfo> serverSocket)
     : companionId_(companionId), clientSocket_(clientSocket), serverSocket_(serverSocket),
     client_(nullptr), server_(nullptr) {}
+
+std::string NetworkEntity::ipAddress()
+{
+    return clientSocket_->ipAddress();
+}
+
+uint16_t NetworkEntity::clientPort()
+{
+    return clientSocket_->port();
+}
+
+uint16_t NetworkEntity::serverPort()
+{
+    return serverSocket_->port();
+}
 
 bool NetworkEntity::start()
 {
@@ -130,4 +146,34 @@ bool NetworkEntity::sendJsonViaClient(const std::string &json)
         logArgsError("client message sending error");
 
     return result;
+}
+
+void NetworkEntity::updateClientSocketInfo(std::shared_ptr<CompanionData> data)
+{
+    clientSocket_->updateData(data);
+}
+
+int NetworkEntity::companionId() const
+{
+    return companionId_;
+}
+
+std::shared_ptr<SocketInfo> NetworkEntity::clientSocket() const
+{
+    return clientSocket_;
+}
+
+std::shared_ptr<SocketInfo> NetworkEntity::serverSocket() const
+{
+    return serverSocket_;
+}
+
+std::shared_ptr<ChatClient> NetworkEntity::client() const
+{
+    return client_;
+}
+
+std::shared_ptr<ChatServer> NetworkEntity::server() const
+{
+    return server_;
 }

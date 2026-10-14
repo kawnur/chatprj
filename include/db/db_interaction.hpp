@@ -33,8 +33,8 @@ public:
     DBRequestData(DBRequestType type);
     ~DBRequestData() { /*logArgsInfo(__FUNCTION__);*/ }
 
-    std::string getLogMark() const;
-    std::vector<std::string> getReplyKeys() const;
+    std::string logMark() const;
+    std::vector<std::string> replyKeys() const;
 
     bool isValid();
     std::string getReplyKeysString();

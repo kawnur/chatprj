@@ -1,16 +1,16 @@
 #include "action_result.hpp"
 
-ActionResult::ActionResult(bool status, const std::string &definition)
-    : status_(status), definitions_()
-{
-    definitions_.push_back(definition);
-}
+// ActionResult::ActionResult(bool status, const std::string &definition)
+//     : status_(status), definitions_()
+// {
+//     definitions_.push_back(definition);
+// }
 
-ActionResult::ActionResult(bool status, std::string &&definition)
-    : status_(status), definitions_()
-{
-    definitions_.push_back(definition);
-}
+// ActionResult::ActionResult(bool status, std::string &&definition)
+//     : status_(status), definitions_()
+// {
+//     definitions_.push_back(definition);
+// }
 
 ActionResult::~ActionResult() { logArgsInfo(Q_FUNC_INFO); }
 

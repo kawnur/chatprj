@@ -5,8 +5,6 @@
 
 using boost::asio::ip::tcp;
 
-// ServerSession::ServerSession(std::shared_ptr<Companion> companion, tcp::socket socket)
-//     : companion_(companion), socket_(std::move(socket)) {}
 ServerSession::ServerSession(int companionId, tcp::socket socket)
     : companionId_(companionId), socket_(std::move(socket)) {}
 
@@ -64,8 +62,6 @@ void ServerSession::do_read()
     socket_.async_read_some(boost::asio::buffer(data_, MAX_BUFFER_SIZE), lambda);
 }
 
-// ChatServer::ChatServer(std::shared_ptr<Companion> companion, uint16_t port)
-//     : companion_(companion), port_(port), io_context_(),
 ChatServer::ChatServer(int companionId, uint16_t port)
     : companionId_(companionId), port_(port), io_context_(),
     acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))

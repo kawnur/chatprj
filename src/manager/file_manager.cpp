@@ -1,0 +1,89 @@
+#include "file_manager.hpp"
+
+#include "file_info.hpp"
+#include "logging.hpp"
+#include "message.hpp"
+
+FileManager::FileManager() : mutex_(), map_() {}
+
+void FileManager::addSenderOperator(
+    const std::string &networkId, const std::filesystem::path &path)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (map_.count(networkId) != 0) {
+        logTemplateError("file operator for key {} already exists", networkId);
+
+        return;
+    }
+
+    map_[networkId] = std::make_shared<SenderOperator>(path);
+}
+
+void FileManager::addReceiverOperator(
+    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    auto networkId = meta->networkId_;
+
+    if (map_.count(networkId) != 0) {
+        logTemplateError("file operator for key {} already exists", networkId);
+
+        return;
+    }
+
+    map_[networkId] = std::make_shared<ReceiverOperator>(path, meta->hashMD5_);
+}
+
+std::shared_ptr<FileOperator> FileManager::getOperator(const std::string &key)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    try {
+        return map_.at(key);
+    }
+    catch(const std::exception &e) {
+        logArgsError(e.what());
+    }
+
+    return nullptr;
+}
+
+bool FileManager::removeOperator(const std::string &key)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    try {
+        bool result = (map_.erase(key) == 1) ? true : false;
+
+        return result;
+    }
+    catch(const std::exception &e) {
+        logArgsError(e.what());
+    }
+
+    return false;
+}
+
+std::string FileManager::getFilePathString(const std::string &networkId)
+{
+    auto _operator = getOperator(networkId);
+
+    return (_operator) ? _operator->path().string() : ""s;
+}
+
+bool FileManager::setFileOperatorFilePath(
+    const std::string &networkId, const std::filesystem::path &path)
+{
+    auto _operator = getOperator(networkId);
+
+    return (_operator) ? _operator->setPath(path) : false;
+}
+
+std::string FileManager::getFileOperatorMD5Hash(const std::string &networkId)
+{
+    auto _operator = getOperator(networkId);
+
+    return (_operator) ? _operator->md5Hash() : ""s;
+}

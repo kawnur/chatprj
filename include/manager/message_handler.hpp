@@ -82,22 +82,12 @@ public:
     void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta);
-
-    // MessageDataPtr buildMessageDataFromJson(const nlohmann::json &jsonData);
-    // MessageMetaDataPtr buildMessageMetaDataFromJson(const nlohmann::json &jsonData);
-    // MessageStatePtr buildMessageStateFromJson(const nlohmann::json &jsonData);
-
     void addEarlyMessages(CompanionPtr companion);
     void sendUnsentMessages(CompanionPtr companion);
     void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
 
     void requestHistoryFromCompanion(CompanionPtr companion);
     void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
-
-
-
-
-
 
 private:
     std::shared_ptr<Manager> manager_;

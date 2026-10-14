@@ -9,6 +9,7 @@
 #include "logging.hpp"
 #include "message.hpp"
 #include "message_handler.hpp"
+#include "network_entity.hpp"
 #include "utils.hpp"
 #include "validator.hpp"
 #include "widgets.hpp"
@@ -17,7 +18,7 @@
 using namespace std::string_literals;
 
 Manager::Manager()
-    : messageHandler_(), networkManager_(), messageStateToMessageMapMutex_(),
+    : messageHandler_(), fileManager_(), networkManager_(), messageStateToMessageMapMutex_(),
     userIsAuthenticated_(false), selectedCompanion_(nullptr), companionAndWidgetGroupMap_(),
     lastOpenedPath_(HOME_PATH) {}
 
@@ -338,9 +339,10 @@ ActionResultPtr Manager::updateCompanionInDbAndReturnId(CompanionActionPtr actio
 
 ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
 {
-    // TODO check new data before data dialog is closed
+    // TODO check new data before data dialog is closed, move to Action::act
     // check if data was modified
-    auto oldData = action->getCompanion()->getData();
+    // auto oldData = action->getCompanion()->getData();
+    auto oldData = networkManager_.getCompanionData(action->getCompanion());
     auto newData = action->getCompanionData();
 
     if (compareCompanionData(oldData, newData))
@@ -372,6 +374,11 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     widgetGroup->updateSocketInfoWidget();
 
     return std::make_shared<ActionResult>(true, ""s);
+}
+
+void Manager::updateSocketInfo(int id, std::shared_ptr<CompanionData> data)
+{
+    networkManager_.updateSocketInfo(id, data);
 }
 
 ActionResultPtr Manager::deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action)
@@ -504,8 +511,8 @@ void Manager::startUserAuthentication()
         initEntrancePasswordReception();
 }
 
-// void Manager::requestHistoryFromCompanion(CompanionPtr companion)
-// {
+void Manager::requestHistoryFromCompanion(CompanionPtr companion)
+{
 //     auto meta = std::make_shared<MessageMetaData>();
 //     meta->networkMessageType_ = NetworkMessageType::CHAT_HISTORY_REQUEST;
 
@@ -515,7 +522,9 @@ void Manager::startUserAuthentication()
 //     auto message = companion->createMessage(meta, nullptr, state);
 
 //     bool result = companion->sendMessage(message, message->meta());
-// }
+
+    messageHandler_.requestHistoryFromCompanion(companion);
+}
 
 void Manager::sendChatHistoryToCompanion(CompanionPtr companion)
 {
@@ -605,18 +614,13 @@ bool Manager::buildCompanions()
             return false;
 
         // TODO use port number pool
-        // auto socketInfo = std::make_shared<SocketInfo>(
-        //     socketsData->getValue(0, "ipaddress"),
-        //     getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "server_port")),
-        //     getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "client_port")));
-        auto clientSocket = std::make_shared<SocketInfo>(
-            socketsData->getValue(0, "ipaddress"),
-            getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "client_port")));
+        auto ipAddress = socketsData->getValue(0, "ipaddress");
+        auto clientPort = getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "client_port"));
+
+        auto clientSocket = std::make_shared<SocketInfo>(ipAddress, clientPort);
 
         auto serverSocket = std::make_shared<SocketInfo>(
             ""s, getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "server_port")));
-
-        // companion->setSocketInfo(socketInfo);
 
         auto entityResult = networkManager_.addToMap(id, clientSocket, serverSocket);
 
@@ -629,12 +633,6 @@ bool Manager::buildCompanions()
         messageHandler_.fillCompanionMessageMapping(companion, false);
 
         bool started = (*entityResult.first).second->start();
-
-        // if (!companion->startServer())
-        //     logArgsError("problem with server start for companion id", id);
-
-        // if (!companion->createClient())
-        //     logArgsError("problem with client creation for companion id", id);
     }
 
     return result;
@@ -780,6 +778,48 @@ bool Manager::sendFileBlock(
     CompanionPtr companion, const std::string &networkId, const std::string &data)
 {
     return messageHandler_.sendFileBlockByNetwork(companion, networkId, data);
+}
+
+std::shared_ptr<CompanionData> Manager::getCompanionData(CompanionPtr companion)
+{
+    return networkManager_.getCompanionData(companion);
+}
+
+bool Manager::connectClient(CompanionPtr companion)
+{
+    return networkManager_.connectClient(companion);
+}
+
+bool Manager::disconnectClient(CompanionPtr companion)
+{
+    return networkManager_.disconnectClient(companion);
+}
+
+void Manager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
+{
+    fileManager_.addSenderOperator(networkId, path);
+}
+
+void Manager::addReceiverOperator(
+    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
+{
+    fileManager_.addReceiverOperator(meta, path);
+}
+
+std::string Manager::getFilePathString(const std::string &networkId)
+{
+    return fileManager_.getFilePathString(networkId);
+}
+
+bool Manager::setFileOperatorFilePath(
+    const std::string &networkId, const std::filesystem::path &path)
+{
+    return fileManager_.setFileOperatorFilePath(networkId, path);
+}
+
+std::string Manager::getFileOperatorMD5Hash(const std::string &networkId)
+{
+    return fileManager_.getFileOperatorMD5Hash(networkId);
 }
 
 // void Manager::waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message)
