@@ -98,6 +98,11 @@ MessageWidget::MessageWidget(
     indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(isMessageFromMe_, message);
 }
 
+std::shared_ptr<Message> MessageWidget::message()
+{
+    return message_;
+}
+
 void MessageWidget::setBase(std::shared_ptr<WidgetGroup> group)
 {
     addMembersToLayout();
@@ -111,12 +116,12 @@ void MessageWidget::setBase(std::shared_ptr<WidgetGroup> group)
     set(group);
 }
 
-void MessageWidget::setMessageWidgetAsSent()
+void MessageWidget::setSent()
 {
     indicatorPanel_->setSentIndicatorOn();
 }
 
-void MessageWidget::setMessageWidgetAsReceived()
+void MessageWidget::setReceived()
 {
     indicatorPanel_->setReceivedIndicatorOn();
 }
@@ -198,4 +203,32 @@ void FileMessageWidget::saveFileSlot()
     // create file operator for this networkId
     auto networkId = message_->getNetworkId();
     getGraphicManager()->saveFile(networkId, companion_);
+}
+
+std::pair<std::string, std::string> formatMessageHeaderAndBody(
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+{
+    auto companionName = companion->name();
+    auto companionId = message->getCompanionId();
+    auto authorId = message->getAuthorId();
+    auto time = message->getTime();
+    auto text = message->getText();
+
+    std::string color, sender, receiver;
+
+    if (companionId == authorId) {
+        color = getHTMLColor(Widget::MESSAGE_RECEIVED);
+        sender = companionName;
+        receiver = "Me";
+    }
+    else {
+        color = getHTMLColor(Widget::MESSAGE_SENT);
+        sender = "Me";
+        receiver = companionName;
+    }
+
+    auto header = getHTMLHeader(color, sender, receiver, time);
+    auto body = getHTMLBody(color, text, true, false);
+
+    return std::pair<std::string, std::string>(header, body);
 }

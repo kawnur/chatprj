@@ -148,33 +148,33 @@ Message::Message(
 
 Message::~Message() = default;
 
-MessageType Message::getType() const
+MessageType Message::type() const
 {
     return meta_->messageType_;
 }
 
-uint32_t Message::getId() const
+uint32_t Message::id() const
 {
     // return id_;
     return meta_->messageId_;
 }
 
-uint8_t Message::getCompanionId() const
+uint8_t Message::companionId() const
 {
     return meta_->companionId_;
 }
 
-uint8_t Message::getAuthorId() const
+uint8_t Message::authorId() const
 {
     return meta_->authorId_;
 }
 
-std::string Message::getTime() const
+std::string Message::time() const
 {
     return meta_->timestampTz_;
 }
 
-std::string Message::getText() const
+std::string Message::text() const
 {
     return data_->text_;
 }
@@ -199,7 +199,7 @@ bool Message::isAntecedent() const
     return state_->isAntecedent_;
 }
 
-std::string Message::getNetworkId() const
+std::string Message::networkId() const
 {
     return meta_->networkId_;
 }
@@ -280,12 +280,12 @@ MessageInfo::MessageInfo(
     std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
     : message_(message), widget_(widget) {}
 
-std::shared_ptr<Message> MessageInfo::getMessage() const
+std::shared_ptr<Message> MessageInfo::message() const
 {
     return message_;
 }
 
-std::shared_ptr<MessageWidget> MessageInfo::getWidget() const
+std::shared_ptr<MessageWidget> MessageInfo::widget() const
 {
     return widget_;
 }
@@ -297,5 +297,5 @@ void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget)
 
 bool operator<(const Message &message1, const Message &message2)
 {
-    return message1.getId() < message2.getId();
+    return message1.id() < message2.id();
 }

@@ -145,17 +145,17 @@ public:
 
     ~Message();
 
-    MessageType getType() const;
-    uint32_t getId() const;
-    uint8_t getCompanionId() const;
-    uint8_t getAuthorId() const;
-    std::string getTime() const;
-    std::string getText() const;
+    MessageType type() const;
+    uint32_t id() const;
+    uint8_t companionId() const;
+    uint8_t authorId() const;
+    std::string time() const;
+    std::string text() const;
     bool isMessageFromMe() const;
     bool isSent() const;
     bool isReceived() const;
     bool isAntecedent() const;
-    std::string getNetworkId() const;
+    std::string networkId() const;
 
     friend bool operator<(const Message &message1, const Message &message2);
 
@@ -181,8 +181,8 @@ public:
     MessageInfo(std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget);
     ~MessageInfo() = default;
 
-    std::shared_ptr<Message> getMessage() const;
-    std::shared_ptr<MessageWidget> getWidget() const;
+    std::shared_ptr<Message> message() const;
+    std::shared_ptr<MessageWidget> widget() const;
 
     void setWidget(std::shared_ptr<MessageWidget> widget);
 

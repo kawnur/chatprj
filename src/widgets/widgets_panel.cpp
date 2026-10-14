@@ -191,7 +191,7 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
 std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
-    switch (message->getType()) {
+    switch (message->type()) {
     case MessageType::TEXT:
         return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, message);
 
@@ -278,9 +278,10 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
     auto lambda = [&](const auto &item)
     {
         auto cast = qobject_cast<MessageWidget *>(item);
-        auto message = companion_->getMappedMessageByMessageWidget(false, cast);
+        // auto message = companion_->getMappedMessageByMessageWidget(false, cast);
+        auto message = cast->message();
 
-        return (message) ? message->getTime() : ""s;
+        return (message) ? message->time() : ""s;
     };
 
     auto sortingLambda = [&](QObject *element1, QObject *element2)
@@ -299,16 +300,17 @@ void CentralPanelWidget::sortChatHistoryElements(bool lock)
     coutArgsWithSpaceSeparator("AFTER SORTING");
 
     for (auto &element : list) {
-        auto elementCast = qobject_cast<MessageWidget *>(element);
-        auto message = companion_->getMappedMessageByMessageWidget(false, elementCast);
+        auto cast = qobject_cast<MessageWidget *>(element);
+        // auto message = companion_->getMappedMessageByMessageWidget(false, cast);
+        auto message = cast->message();
 
         coutArgsWithSpaceSeparator("message:", message.get());
 
         if (message)
-            coutArgsWithSpaceSeparator("element message:", message->getText());
+            coutArgsWithSpaceSeparator("element message:", message->text());
 
-        chatHistoryLayout_->removeWidget(elementCast);
-        chatHistoryLayout_->addWidget(elementCast);
+        chatHistoryLayout_->removeWidget(cast);
+        chatHistoryLayout_->addWidget(cast);
     }
 }
 

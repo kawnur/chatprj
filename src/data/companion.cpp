@@ -12,7 +12,7 @@
 #include "widgets_message.hpp"
 
 Companion::Companion(int id, const std::string &name)
-    : mutex_(std::mutex()), id_(id), name_(name), messageMapping_() {}
+    : /*mutex_(std::mutex()), */id_(id), name_(name)/*, messageMapping_()*/ {}
 
 int Companion::id() const
 {
@@ -24,153 +24,153 @@ std::string Companion::name() const
     return name_;
 }
 
-MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
-    std::shared_ptr<Message> message)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// MessageMappingIterator Companion::getMessageMappingIteratorByMessage(
+//     std::shared_ptr<Message> message)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iter)
-    {
-        return iter.second->getMessage() == message;
-    };
+//     auto lambda = [&](const auto &iter)
+//     {
+//         return iter.second->getMessage() == message;
+//     };
 
-    return std::ranges::find_if(messageMapping_, lambda);
-}
+//     return std::ranges::find_if(messageMapping_, lambda);
+// }
 
-std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetByMessage(
-    std::shared_ptr<Message> message)
-{
-    auto result = getMessageMappingIteratorByMessage(message);
+// std::shared_ptr<MessageWidget> Companion::getMappedMessageWidgetByMessage(
+//     std::shared_ptr<Message> message)
+// {
+//     auto result = getMessageMappingIteratorByMessage(message);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second->getWidget();
-}
+//     return (result == messageMapping_.end()) ? nullptr : result->second->getWidget();
+// }
 
-std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
-    bool lock, std::shared_ptr<MessageWidget> widget)
-{
-    return getMappedMessageByMessageWidget(lock, widget.get());
-}
+// std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
+//     bool lock, std::shared_ptr<MessageWidget> widget)
+// {
+//     return getMappedMessageByMessageWidget(lock, widget.get());
+// }
 
-std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
-    bool lock, MessageWidget *widget)
-{
-    if (lock)
-        std::lock_guard<std::mutex> lockObject(mutex_);
+// std::shared_ptr<Message> Companion::getMappedMessageByMessageWidget(
+//     bool lock, MessageWidget *widget)
+// {
+//     if (lock)
+//         std::lock_guard<std::mutex> lockObject(mutex_);
 
-    auto lambda = [&](const auto &iter) { return iter.second->getWidget().get() == widget; };
-    auto result = std::ranges::find_if(messageMapping_, lambda);
+//     auto lambda = [&](const auto &iter) { return iter.second->getWidget().get() == widget; };
+//     auto result = std::ranges::find_if(messageMapping_, lambda);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
-}
+//     return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
+// }
 
-std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
-    bool lock, std::shared_ptr<MessageWidget> widget)
-{
-    if (lock)
-        std::lock_guard<std::mutex> lockObject(mutex_);
+// std::shared_ptr<MessageState> Companion::getMappedMessageStateByMessageWidget(
+//     bool lock, std::shared_ptr<MessageWidget> widget)
+// {
+//     if (lock)
+//         std::lock_guard<std::mutex> lockObject(mutex_);
 
-    auto lambda = [&](const auto &iter)
-    {
-        return iter.second->getWidget() == widget;
-    };
+//     auto lambda = [&](const auto &iter)
+//     {
+//         return iter.second->getWidget() == widget;
+//     };
 
-    auto result = std::ranges::find_if(messageMapping_, lambda);
+//     auto result = std::ranges::find_if(messageMapping_, lambda);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second->getMessage()->state();
-}
+//     return (result == messageMapping_.end()) ? nullptr : result->second->getMessage()->state();
+// }
 
-std::shared_ptr<MessageInfo> Companion::getMessageInfoByMessageId(uint32_t messageId)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// std::shared_ptr<MessageInfo> Companion::getMessageInfoByMessageId(uint32_t messageId)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iter)
-    {
-        return iter.second->getMessage()->getId() == messageId;
-    };
+//     auto lambda = [&](const auto &iter)
+//     {
+//         return iter.second->getMessage()->getId() == messageId;
+//     };
 
-    auto result = std::ranges::find_if(messageMapping_, lambda);
+//     auto result = std::ranges::find_if(messageMapping_, lambda);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second;
-}
+//     return (result == messageMapping_.end()) ? nullptr : result->second;
+// }
 
-std::shared_ptr<MessageInfo> Companion::getMessageInfoByNetworkId(const std::string &networkId)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// std::shared_ptr<MessageInfo> Companion::getMessageInfoByNetworkId(const std::string &networkId)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iter)
-    {
-        return iter.second->getMessage()->getNetworkId() == networkId;
-    };
+//     auto lambda = [&](const auto &iter)
+//     {
+//         return iter.second->getMessage()->getNetworkId() == networkId;
+//     };
 
-    auto result = std::ranges::find_if(messageMapping_, lambda);
+//     auto result = std::ranges::find_if(messageMapping_, lambda);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second;
-}
+//     return (result == messageMapping_.end()) ? nullptr : result->second;
+// }
 
-std::shared_ptr<Message> Companion::getEarliestMessage() const
-{
-    auto lambda = [&](const auto &iterator1, const auto &iterator2)
-    {
-        return iterator1.second->getMessage()->getId() < iterator2.second->getMessage()->getId();
-    };
+// std::shared_ptr<Message> Companion::getEarliestMessage() const
+// {
+//     auto lambda = [&](const auto &iterator1, const auto &iterator2)
+//     {
+//         return iterator1.second->getMessage()->getId() < iterator2.second->getMessage()->getId();
+//     };
 
-    auto min = std::ranges::min_element(messageMapping_, lambda);
+//     auto min = std::ranges::min_element(messageMapping_, lambda);
 
-    return min->second->getMessage();
-}
+//     return min->second->getMessage();
+// }
 
-std::shared_ptr<Message> Companion::createMessage(
-    // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
-    // std::shared_ptr<MessageMetaData> meta, const std::string &messageText, bool isAntecedent,
-    // bool isSent, bool isReceived, std::string networkId)
-    std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-    std::shared_ptr<MessageState> state)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// std::shared_ptr<Message> Companion::createMessage(
+//     // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
+//     // std::shared_ptr<MessageMetaData> meta, const std::string &messageText, bool isAntecedent,
+//     // bool isSent, bool isReceived, std::string networkId)
+//     std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+//     std::shared_ptr<MessageState> state)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (meta->networkId_.size() == 0)
-        meta->networkId_ = generateNetworkId(false);
+//     if (meta->networkId_.size() == 0)
+//         meta->networkId_ = generateNetworkId(false);
 
-    // auto messageState = std::make_shared<MessageState>(
-    //     companionId, isAntecedent, isSent, isReceived, networkId);
+//     // auto messageState = std::make_shared<MessageState>(
+//     //     companionId, isAntecedent, isSent, isReceived, networkId);
 
-    auto message = std::make_shared<Message>(meta, data, state);
-    auto info = std::make_shared<MessageInfo>(message, nullptr);
-    auto result = messageMapping_.emplace(meta->messageId_, info);
+//     auto message = std::make_shared<Message>(meta, data, state);
+//     auto info = std::make_shared<MessageInfo>(message, nullptr);
+//     auto result = messageMapping_.emplace(meta->messageId_, info);
 
-    // return result;
-    return (result.second) ? message : nullptr;
-}
+//     // return result;
+//     return (result.second) ? message : nullptr;
+// }
 
-std::shared_ptr<MessageInfo> Companion::createMessageAndAddToMapping(
-    std::shared_ptr<DBReplyData> messagesData, std::size_t index)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// std::shared_ptr<MessageInfo> Companion::createMessageAndAddToMapping(
+//     std::shared_ptr<DBReplyData> messagesData, std::size_t index)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto id = id_;
+//     auto id = id_;
 
-    auto meta = std::make_shared<MessageMetaData>(
-        MessageType::TEXT, NetworkMessageType::UNKNOWN,
-        getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "id")), id, name_,
-        getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "author_id")), "",
-        messagesData->getValue(index, "timestamp_tz"), "", generateNetworkId(false));
+//     auto meta = std::make_shared<MessageMetaData>(
+//         MessageType::TEXT, NetworkMessageType::UNKNOWN,
+//         getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "id")), id, name_,
+//         getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "author_id")), "",
+//         messagesData->getValue(index, "timestamp_tz"), "", generateNetworkId(false));
 
-    auto data = std::make_shared<MessageData>(messagesData->getValue(index, "message"), "");
+//     auto data = std::make_shared<MessageData>(messagesData->getValue(index, "message"), "");
 
-    auto state = std::make_shared<MessageState>(
-        false,
-        getBoolFromDBValue(messagesData->getValue(index, "is_sent")),
-        getBoolFromDBValue(messagesData->getValue(index, "is_received")));
+//     auto state = std::make_shared<MessageState>(
+//         false,
+//         getBoolFromDBValue(messagesData->getValue(index, "is_sent")),
+//         getBoolFromDBValue(messagesData->getValue(index, "is_received")));
 
-    auto message = std::make_shared<Message>(meta, data, state);
-    auto info = std::make_shared<MessageInfo>(message, nullptr);
-    auto result = messageMapping_.emplace(std::make_pair(message->getId(), info));
+//     auto message = std::make_shared<Message>(meta, data, state);
+//     auto info = std::make_shared<MessageInfo>(message, nullptr);
+//     auto result = messageMapping_.emplace(std::make_pair(message->getId(), info));
 
-    if (!result.second)
-        logArgsError("message info map emplacing error");
+//     if (!result.second)
+//         logArgsError("message info map emplacing error");
 
-    return (result.second) ? info : nullptr;
-}
+//     return (result.second) ? info : nullptr;
+// }
 
 void Companion::setMappedMessageWidget(
     std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
@@ -192,14 +192,14 @@ void Companion::updateData(std::shared_ptr<CompanionData> data)
     getManager()->updateSocketInfo(id_, data);
 }
 
-std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// std::shared_ptr<Message> Companion::findMessage(uint32_t messageId)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto result = messageMapping_.find(messageId);
+//     auto result = messageMapping_.find(messageId);
 
-    return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
-}
+//     return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
+// }
 
 void Companion::addMessageWidgetsToChatHistory()
 {
@@ -216,131 +216,39 @@ void Companion::addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> grou
         group->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
 }
 
-void Companion::clearMessageMapping()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// void Companion::clearMessageMapping()
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    messageMapping_.clear();
-}
+//     messageMapping_.clear();
+// }
 
-std::string Companion::generateNetworkId(bool lock)
-{
-    if (lock)
-        std::lock_guard<std::mutex> lockObject(mutex_);
+// std::string Companion::generateNetworkId(bool lock)
+// {
+//     if (lock)
+//         std::lock_guard<std::mutex> lockObject(mutex_);
 
-    std::string networkId { "" };
+//     std::string networkId { "" };
 
-    if (networkId.size() == 0) {  // TODO ???
-        networkId = getNetworkId();
+//     if (networkId.size() == 0) {  // TODO ???
+//         networkId = getNetworkId();
 
-        auto lambda = [&]()
-        {
-            auto lambdaInternal = [&](const auto &iter)
-            {
-                return iter.second->getMessage()->getNetworkId() == networkId;
-            };
+//         auto lambda = [&]()
+//         {
+//             auto lambdaInternal = [&](const auto &iter)
+//             {
+//                 return iter.second->getMessage()->getNetworkId() == networkId;
+//             };
 
-            auto iterator = std::ranges::find_if(messageMapping_, lambdaInternal);
+//             auto iterator = std::ranges::find_if(messageMapping_, lambdaInternal);
 
-            return !(iterator == messageMapping_.end());
-        };
+//             return !(iterator == messageMapping_.end());
+//         };
 
-        // loop while generated key is not unique
-        while (lambda())
-            networkId = getNetworkId();
-    }
+//         // loop while generated key is not unique
+//         while (lambda())
+//             networkId = getNetworkId();
+//     }
 
-    return networkId;
-}
-
-std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
-{
-    auto companionName = companion->name();
-    auto companionId = message->getCompanionId();
-    auto authorId = message->getAuthorId();
-    auto time = message->getTime();
-    auto text = message->getText();
-
-    std::string color, sender, receiver;
-
-    if (companionId == authorId) {
-        color = getHTMLColor(Widget::MESSAGE_RECEIVED);
-        sender = companionName;
-        receiver = "Me";
-    }
-    else {
-        color = getHTMLColor(Widget::MESSAGE_SENT);
-        sender = "Me";
-        receiver = companionName;
-    }
-
-    auto header = getHTMLHeader(color, sender, receiver, time);
-    auto body = getHTMLBody(color, text, true, false);
-
-    return std::pair<std::string, std::string>(header, body);
-}
-
-std::string buildMessageJSONString(
-    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    // const std::string &networkId, std::shared_ptr<Message> message)
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<MessageMetaData> meta)
-{
-    using json = nlohmann::json;
-
-    json jsonData;
-
-    auto networkId = message->getNetworkId();
-    auto type = meta->networkMessageType_;
-
-    jsonData["type"] = type;
-    jsonData["id"] = networkId;
-    // jsonData["companion_id"] = companion->getId();
-    jsonData["antecedent"] = message->isAntecedent();
-    jsonData["time"] = message->getTime();
-    jsonData["text"] = message->getText();
-
-    switch (type) {
-    case NetworkMessageType::TEXT: {
-        // jsonData["time"] = message->getTime();
-        // jsonData["text"] = message->getText();
-    }
-
-    break;
-
-    case NetworkMessageType::FILE_PROPOSAL: {
-        // jsonData["time"] = message->getTime();
-        // jsonData["text"] = message->getText();
-        jsonData["hashMD5"] = getManager()->getFileOperatorMD5Hash(networkId);
-    }
-
-    break;
-
-    case NetworkMessageType::RECEIVE_CONFIRMATION:
-        // jsonData["received"] = 1;
-        jsonData["received"] = message->isSent();
-
-        break;
-
-    default:
-        break;
-    }
-
-    return jsonData.dump();
-}
-
-std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data)
-{
-    using json = nlohmann::json;
-
-    json jsonData;
-
-    jsonData["type"] = NetworkMessageType::FILE_DATA;
-    jsonData["id"] = networkId;
-    jsonData["companion_id"] = companion->id();
-    jsonData["data"] = data;
-
-    return jsonData.dump();
-}
+//     return networkId;
+// }

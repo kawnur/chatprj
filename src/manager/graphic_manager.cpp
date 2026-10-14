@@ -7,6 +7,7 @@
 #include "companion.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
+#include "message.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 #include "widgets_message.hpp"
@@ -274,21 +275,28 @@ void GraphicManager::getEntrancePassword()
     getManager()->initEntrancePasswordReception();
 }
 
-bool GraphicManager::markMessageWidgetAsSent(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+bool GraphicManager::setMessageWidgetAsSent(
+    // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+    std::shared_ptr<MessageInfo> info)
 {
-    auto lambda = [&]()
-    {
-        // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
-        companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsSent();
-    };
+    // auto lambda = [&]()
+    // {
+    //     // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
+    //     companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsSent();
+    // };
 
-    return runAndReturnBool(lambda);
+    // return runAndReturnBool(lambda);
+    auto widget = info->widget();
+
+    if (widget)
+        widget->setSent();
+    else
+        logArgsError("marking widget as sent error");
 }
 
-void GraphicManager::markMessageWidgetAsReceived(
+void GraphicManager::setMessageWidgetAsReceived(
     // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
-    std::shared_ptr<MessageWidget> widget)
+    std::shared_ptr<MessageInfo> info)
 {
     // auto lambda = [&]()
     // {
@@ -297,7 +305,12 @@ void GraphicManager::markMessageWidgetAsReceived(
     // };
 
     // return runAndReturnBool(lambda);
-    widget->setMessageWidgetAsReceived();
+    auto widget = info->widget();
+
+    if (widget)
+        widget->setSent();
+    else
+        logArgsError("marking widget as received error");
 }
 
 void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group)

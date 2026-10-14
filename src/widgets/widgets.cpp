@@ -9,6 +9,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils_widgets.hpp"
+#include "widgets_message.hpp"
 #include "widgets_panel.hpp"
 
 ButtonType getInitialConnectButtonType()
@@ -898,7 +899,12 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
 {
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
-    auto messageState = companion_->getMappedMessageStateByMessageWidget(true, widget);
+    // auto messageState = companion_->getMappedMessageStateByMessageWidget(true, widget);
+    auto messageState = widget->message()->state();
+
+    if (!messageState)
+        return;
+
     bool isAntecedent = messageState->isAntecedent_;
 
     logArgs("isAntecedent:", isAntecedent);

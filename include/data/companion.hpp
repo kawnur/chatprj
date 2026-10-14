@@ -27,8 +27,8 @@ class MessageState;
 class MessageWidget;
 class WidgetGroup;
 
-using MessageMapping = std::unordered_map<uint32_t, std::shared_ptr<MessageInfo>>;
-using MessageMappingIterator = MessageMapping::iterator;
+using MessageMap = std::unordered_map<uint32_t, std::shared_ptr<MessageInfo>>;
+using MessageMappingIterator = MessageMap::iterator;
 
 class Companion : public std::enable_shared_from_this<Companion>
 {
@@ -44,65 +44,47 @@ public:
     int id() const;
     std::string name() const;
 
-    MessageMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
-    std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message> message);
+    // MessageMappingIterator getMessageMappingIteratorByMessage(std::shared_ptr<Message> message);
+    // std::shared_ptr<MessageWidget> getMappedMessageWidgetByMessage(std::shared_ptr<Message> message);
 
-    std::shared_ptr<Message> getMappedMessageByMessageWidget(
-        bool lock, std::shared_ptr<MessageWidget> widget);
+    // std::shared_ptr<Message> getMappedMessageByMessageWidget(
+    //     bool lock, std::shared_ptr<MessageWidget> widget);
 
-    std::shared_ptr<Message> getMappedMessageByMessageWidget(bool lock, MessageWidget *widget);
+    // std::shared_ptr<Message> getMappedMessageByMessageWidget(bool lock, MessageWidget *widget);
 
-    std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(
-        bool lock, std::shared_ptr<MessageWidget> widget);
+    // std::shared_ptr<MessageState> getMappedMessageStateByMessageWidget(
+    //     bool lock, std::shared_ptr<MessageWidget> widget);
 
-    std::shared_ptr<MessageInfo> getMessageInfoByMessageId(uint32_t messageId);
-    std::shared_ptr<MessageInfo> getMessageInfoByNetworkId(const std::string &networkId);
-    std::shared_ptr<Message> getEarliestMessage() const;
+    // std::shared_ptr<MessageInfo> getMessageInfoByMessageId(uint32_t messageId);
+    // std::shared_ptr<MessageInfo> getMessageInfoByNetworkId(const std::string &networkId);
+    // std::shared_ptr<Message> getEarliestMessage() const;
 
-    std::shared_ptr<Message> createMessage(
-        // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
-        // std::shared_ptr<MessageMetaData> meta, const std::string &messageText, bool isAntecedent,
-        // bool isSent, bool isReceived, std::string networkId);
-        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-        std::shared_ptr<MessageState> state);
+    // std::shared_ptr<Message> createMessage(
+    //     // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
+    //     // std::shared_ptr<MessageMetaData> meta, const std::string &messageText, bool isAntecedent,
+    //     // bool isSent, bool isReceived, std::string networkId);
+    //     std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
+    //     std::shared_ptr<MessageState> state);
 
-    std::shared_ptr<MessageInfo> createMessageAndAddToMapping(
-        std::shared_ptr<DBReplyData> messagesData, std::size_t index);
+    // std::shared_ptr<MessageInfo> createMessageAndAddToMapping(
+    //     std::shared_ptr<DBReplyData> messagesData, std::size_t index);
 
     void setMappedMessageWidget(
         std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget);
 
     void updateData(std::shared_ptr<CompanionData> data);
-    std::shared_ptr<Message> findMessage(uint32_t messageId);
+    // std::shared_ptr<Message> findMessage(uint32_t messageId);
 
     void addMessageWidgetsToChatHistory();
     void addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group);
-
-    void clearMessageMapping();
-
-    void addReceiverOperator(
-        std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
-
-    std::string generateNetworkId(bool);
+    // void clearMessageMapping();
+    // std::string generateNetworkId(bool);
 
 private:
-
-    std::mutex mutex_;
+    // std::mutex mutex_;
     int id_;  // TODO change type
     std::string name_;
-    MessageMapping messageMapping_;
+    // MessageMap messageMapping_;
 };
-
-std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-
-std::string buildMessageJSONString(
-    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    // const std::string &networkId, std::shared_ptr<Message> message);
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<MessageMetaData> meta);
-
-std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data);
 
 #endif // COMPANION_HPP

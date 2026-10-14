@@ -853,7 +853,7 @@ std::string Manager::getFileOperatorMD5Hash(const std::string &networkId)
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
 {
     // mark in db
-    auto messageIdData = getDBData(DBRequestType::SET_MESSAGE_IS_SENT_AND_RETURN, message->getId());
+    auto messageIdData = getDBData(DBRequestType::SET_MESSAGE_IS_SENT_AND_RETURN, message->id());
 
     if (!messageIdData)
         return;
@@ -861,9 +861,14 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
     // update message
     message->state()->isSent_ = true;
 
+    // get message info
+    auto info = messageHandler_.getMessageInfo(companion, message);
+
+    if (!info)
+        return;
+
     // mark in widget
-    if (!getGraphicManager()->markMessageWidgetAsSent(companion, message))
-        logArgsError("marking widget as sent error");
+    getGraphicManager()->setMessageWidgetAsSent(info);
 }
 
 void Manager::markMessageAsReceived(
@@ -871,14 +876,14 @@ void Manager::markMessageAsReceived(
     std::shared_ptr<MessageInfo> info)
 {
     // mark in widget
-    getGraphicManager()->markMessageWidgetAsReceived(info->getWidget());
+    getGraphicManager()->setMessageWidgetAsReceived(info);
 
     // if (!result)
     //     logArgsError("marking wiget as received error");
 
     // mark in db
     auto result = getDBData(
-        DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->getMessage()->getId());
+        DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->message()->id());
 }
 
 MessageMetaDataPtr Manager::pushMessageToDB(

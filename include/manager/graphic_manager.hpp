@@ -16,6 +16,7 @@ class Companion;
 class CompanionAction;
 class MainWindow;
 class Message;
+class MessageInfo;
 class MessageWidget;
 class PasswordAction;
 class SocketInfoBaseWidget;
@@ -80,12 +81,13 @@ public:
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
 
-    bool markMessageWidgetAsSent(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-
-    void markMessageWidgetAsReceived(
+    bool setMessageWidgetAsSent(
         // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
-        std::shared_ptr<MessageWidget> widget);
+        std::shared_ptr<MessageInfo> info);
+
+    void setMessageWidgetAsReceived(
+        // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+        std::shared_ptr<MessageInfo> info);
 
     void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
     void sendFile(std::shared_ptr<Companion> companion);

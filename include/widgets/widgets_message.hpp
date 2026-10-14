@@ -45,11 +45,13 @@ public:
 
     virtual ~MessageWidget() {}
 
+    std::shared_ptr<Message> message();
+
     virtual void set(std::shared_ptr<WidgetGroup>) {}
 
     void setBase(std::shared_ptr<WidgetGroup> group);
-    void setMessageWidgetAsSent();
-    void setMessageWidgetAsReceived();
+    void setSent();
+    void setReceived();
 
 signals:
     void widgetSelectedSignal(std::shared_ptr<MessageWidget> widget);
@@ -109,5 +111,8 @@ private:
 private slots:
     void saveFileSlot();
 };
+
+std::pair<std::string, std::string> formatMessageHeaderAndBody(
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
 #endif // WIDGETS_MESSAGE_HPP
