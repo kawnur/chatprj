@@ -149,14 +149,9 @@ typename M::mapped_type getMapValue(
 }
 
 template<AssociativeContainer M, typename T, typename U>
-// U getMappingValueOrDefault(const std::map<T, U> &map, const T &key, const U &defaultValue)
-// U getMapValue(const M &map, const T &key, U &&defaultValue)
-// std::optional<M::mapped_type> getMapValue(const M &map, const T &key, U &&defaultValue)
-// typename M::mapped_type getMapValue(const M &map, const T &key, U &&defaultValue)
 typename M::mapped_type getMapValue(const M &map, const T &key, const U &defaultValue)
 {
     try {
-        // return U(map.at(key));
         return map.at(key);
     }
     catch(std::out_of_range) {
@@ -167,10 +162,7 @@ typename M::mapped_type getMapValue(const M &map, const T &key, const U &default
     catch(const std::exception &e) {
         logArgsException(e.what());
 
-        // return M::mapped_type(U());
         return (typename M::mapped_type)(std::remove_reference_t<U>());
-        // return std::nullopt;
-        // return U();
     }
 }
 
@@ -316,7 +308,10 @@ uint32_t getWidgetColor(Widget value);
 std::string getHTMLColor(Widget value);
 
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
-std::string buildTextAsUnorderedListWithHeader(const std::string &header, const std::vector<std::string> &messages);
+
+std::string buildTextAsUnorderedListWithHeader(
+    const std::string &header, const std::vector<std::string> &messages);
+
 LogType getLogTypeByDialogType(DialogType type);
 
 std::string getHTMLHeader(
@@ -334,6 +329,5 @@ void exitUtil(int result);
 
 NetworkMessageType defineNetworkMessageType(MessageType type);
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
-
 
 #endif // UTILS_HPP

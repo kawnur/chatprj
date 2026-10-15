@@ -1,19 +1,13 @@
 #include "graphic_manager.hpp"
 
-#include <optional>
-
-#include "action.hpp"
 #include "application.hpp"
-#include "companion.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 #include "widgets.hpp"
-#include "widgets_dialog.hpp"
 #include "widgets_message.hpp"
 #include "utils.hpp"
 
-// GraphicManager::GraphicManager() : messageToMessageWidgetMapMutex_(std::mutex())
 GraphicManager::GraphicManager()
 {
     stubWidgets_ = std::make_shared<StubWidgetGroup>();
@@ -43,8 +37,7 @@ void GraphicManager::setStubWidgets()
     stubWidgets_->set();
 }
 
-void GraphicManager::sendMessage(
-    MessageType type, CompanionPtr companion, const std::string &text)
+void GraphicManager::sendMessage(MessageType type, CompanionPtr companion, const std::string &text)
 {
     getManager()->sendMessage(type, companion, nullptr, text);
 }
@@ -86,17 +79,6 @@ void GraphicManager::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBa
     mainWindow_->removeWidgetFromCompanionPanel(widget);
 }
 
-// void GraphicManager::createTextDialogAndShow(
-//     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-//     std::shared_ptr<std::vector<ButtonInfo>> buttonInfo)
-// {
-//     // TODO delete objects for closed dialoges?
-//     auto dialog = std::make_shared<TextDialog>(parent, type, text, buttonInfo);
-
-//     // dialog->set();
-//     dialog->show();
-// }
-
 void GraphicManager::createCompanion()
 {
     getManager()->initCompanionCreation();
@@ -127,79 +109,6 @@ void GraphicManager::deleteCompanion(CompanionPtr companion)
 {
     getManager()->initCompanionDeletion(companion);
 }
-
-// void GraphicManager::sendCompanionDataToManager(std::shared_ptr<CompanionAction> action)
-// {
-//     switch (action->getType()) {
-//     case ChatActionType::CREATE: {
-//         // getManager()->createCompanion(action);
-//         auto lambda = [](auto action) { return getManager()->createCompanion(action); };
-//         getManager()->performAction(lambda, action);
-//     }
-
-//     break;
-
-//     case ChatActionType::UPDATE:
-//         getManager()->updateCompanion(action);
-
-//         break;
-
-//     case ChatActionType::DELETE:
-//         getManager()->deleteCompanion(action);
-
-//         break;
-
-//     case ChatActionType::CLEAR_HISTORY:
-//         getManager()->clearCompanionHistory(action);
-
-//         break;
-
-//     default:
-//         break;
-//     }
-// }
-
-// void GraphicManager::showCompanionInfoDialog(
-//     std::shared_ptr<CompanionAction> action, std::string &&header)
-// {
-//     std::shared_ptr<QWidget> parent = nullptr;
-//     // void (TextDialog::*function)() = nullptr;
-//     std::function<void(TextDialog  &)> function;
-//     // void (QDialog::*function)() = nullptr;
-
-//     auto formDialog = action->getDialog();
-
-//     if (formDialog) {
-//         parent = formDialog;
-//         function = [](TextDialog &dialog) { dialog.closeSelfAndParentDialog(); };
-//     }
-//     else {
-//         // function = &TextDialog::closeSelf;
-//         function = [](TextDialog &dialog) { dialog.closeSelf(); };
-//     }
-
-//     createTextDialogAndShow(
-//         parent,
-//         DialogType::INFO,
-//         buildDialogText(
-//             std::move(header),
-//             std::vector<std::string> {
-//                 getStringByFormat("name: {}", action->getName()),
-//                 getStringByFormat("ipAddress: {}", action->getIpAddress()),
-//                 getStringByFormat("port: {}", action->getClientPort())
-//             }),
-//         createOkButtonInfoVector(function));
-// }
-
-// void GraphicManager::sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action)
-// {
-//     getManager()->createUserPassword(action);
-// }
-
-// void GraphicManager::sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action)
-// {
-//     getManager()->authenticateUser(action);
-// }
 
 void GraphicManager::hideCompanionPanelStub()
 {
@@ -299,8 +208,8 @@ void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message
     if (!group)
         return;
 
-    // emit group->addMessageWidgetSignal(message);
-    group->addMessageWidget(message);
+    emit group->addMessageWidgetSignal(message);
+    // group->addMessageWidget(message);
 }
 
 bool GraphicManager::setMessageWidgetAsSent(

@@ -3,13 +3,10 @@
 
 #include <filesystem>
 #include <fstream>
-// #include <map>
 #include <memory>
-// #include <mutex>
 #include <string>
 
 class Companion;
-class MessageMetaData;
 
 // TODO rename to file_operator.hpp
 
@@ -56,25 +53,5 @@ private:
 
     std::string md5HashFromSender_;
 };
-
-// class FileOperatorStorage
-// {
-// public:
-//     FileOperatorStorage();
-//     ~FileOperatorStorage() = default;
-
-//     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
-
-//     void addReceiverOperator(
-//         std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
-
-//     std::shared_ptr<FileOperator> getOperator(const std::string &key);
-
-//     bool removeOperator(const std::string &key);
-
-// private:
-//     std::mutex mutex_;
-//     std::map<std::string, std::shared_ptr<FileOperator>> mapping_;
-// };
 
 #endif // FILE_INFO_HPP

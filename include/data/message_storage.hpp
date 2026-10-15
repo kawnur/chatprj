@@ -26,7 +26,6 @@ public:
     MessageInfoPtr getMessageInfoByNetworkId(const std::string &networkId);
     MessagePtr getEarliestMessage();
     bool updateAndInsert(MessageInfoPtr info);
-    // void addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group);
     void clear();
     std::string generateNetworkId(bool);
     bool setMessageWidget(int id, MessageWidgetPtr widget);

@@ -13,31 +13,21 @@ class SocketInfo
 public:
     SocketInfo() = default;
 
-    // template<typename T, typename U, typename P>
-    // SocketInfo(T &&ipAddress, U &&serverPort, P &&clientPort)
-        // : ipAddress_(std::forward<T>(ipAddress)), serverPort_(std::forward<U>(serverPort)),
-        // clientPort_(std::forward<P>(clientPort)) {}
     template<typename T, typename U>
     SocketInfo(T &&ipAddress, U &&port)
         : ipAddress_(std::forward<T>(ipAddress)), port_(std::forward<U>(port)) {}
 
-    // SocketInfo(std::shared_ptr<CompanionData> data);
     SocketInfo(const SocketInfo &object);
     SocketInfo(SocketInfo &&object) = default;
     ~SocketInfo() = default;
 
     std::string ipAddress() const;
-    // uint16_t getServerPort() const;
-    // uint16_t getClientPort() const;
     uint16_t port() const;
-    // std::shared_ptr<CompanionData> getData();
 
     void updateData(std::shared_ptr<CompanionData> data);
 
 private:
     std::string ipAddress_;
-    // uint16_t serverPort_;  // port number to open server at
-    // uint16_t clientPort_;  // port number to connect with client to
     uint16_t port_;
 };
 

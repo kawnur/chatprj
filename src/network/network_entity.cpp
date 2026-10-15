@@ -3,18 +3,9 @@
 #include "data.hpp"
 #include "utils.hpp"
 
-// SocketInfo::SocketInfo(std::shared_ptr<CompanionData> data)
-// {
-//     ipAddress_ = data->getIpAddress();
-//     serverPort_ = getIntFromString(PORT_BAD_VALUE, data->getServerPort());
-//     clientPort_ = getIntFromString(PORT_BAD_VALUE, data->getClientPort());
-// }
-
 SocketInfo::SocketInfo(const SocketInfo &object)
 {
     ipAddress_ = object.ipAddress_;
-    // serverPort_ = object.serverPort_;
-    // clientPort_ = object.clientPort_;
     port_ = object.port_;
 }
 
@@ -23,35 +14,16 @@ std::string SocketInfo::ipAddress() const
     return ipAddress_;
 }
 
-// uint16_t SocketInfo::getServerPort() const
-// {
-//     return serverPort_;
-// }
-
-// uint16_t SocketInfo::getClientPort() const
-// {
-//     return clientPort_;
-// }
-
 uint16_t SocketInfo::port() const
 {
     return port_;
 }
-
-// std::shared_ptr<CompanionData> SocketInfo::getData()
-// {
-//     return std::make_shared<CompanionData>(
-//         ""s, ipAddress_, getString(serverPort_), getString(clientPort_));
-// }
 
 void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
 {
     ipAddress_ = data->ipAddress();
     port_ = getIntFromString(PORT_BAD_VALUE, data->clientPort());
 }
-
-// NetworkEntity::NetworkEntity(int companionId)
-//     : companionId_(companionId), client_(nullptr), server_(nullptr) {}
 
 NetworkEntity::NetworkEntity(
     int companionId, std::shared_ptr<SocketInfo> clientSocket,

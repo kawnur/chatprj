@@ -1,5 +1,6 @@
 #include "widgets_panel.hpp"
 
+#include <memory>
 #include <string>
 
 #include <QApplication>
@@ -242,6 +243,18 @@ void CentralPanelWidget::addMessageWidget(
     //     widgetGroup->messageAdded();
 
     scrollDownChatHistory();
+
+    auto count = chatHistoryLayout_->count();
+
+    for (int i = 0; i < count; ++i) {
+        auto item = chatHistoryLayout_->itemAt(i);
+
+        auto cast = dynamic_cast<MessageWidget *>(item->widget());
+
+        logArgsInfo(item, "#", cast->messageLabel()->text(), "#");
+    }
+
+    logArgsInfo(".");
 }
 
 void CentralPanelWidget::scrollDownChatHistory()

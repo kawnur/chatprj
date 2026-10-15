@@ -162,310 +162,6 @@ void IndicatorWidget::toggle()
     (isOn_ == true) ? setOff() : setOn();
 }
 
-// SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget &object)
-// {
-//     name_ = object.name_;
-//     ipAddress_ = object.ipAddress_;
-//     serverPort_ = object.serverPort_;
-//     clientPort_ = object.clientPort_;
-
-//     initializeFields();
-// }
-
-// SocketInfoWidget::SocketInfoWidget(
-//     std::string &name, std::string &ipAddress, uint16_t &serverPort, uint16_t &clientPort)
-//     : name_(getQString(name)), ipAddress_(getQString(ipAddress)), serverPort_(serverPort),
-//     clientPort_(clientPort)
-// {
-//     initializeFields();
-// }
-
-// SocketInfoWidget::SocketInfoWidget(
-//     std::string &&name, std::string &&ipAddress, uint16_t &&serverPort, uint16_t &&clientPort)
-//     : name_(getQString(name)), ipAddress_(getQString(ipAddress)), serverPort_(serverPort),
-//     clientPort_(clientPort)
-// {
-//     initializeFields();
-// }
-
-// SocketInfoWidget::SocketInfoWidget(std::shared_ptr<Companion> companion)
-//     : companion_(companion), name_(getQString(companion->getName())),
-//     ipAddress_(getQString(companion->getSocketInfo()->getIpAddress())),
-//     serverPort_(companion->getSocketInfo()->getServerPort()),
-//     clientPort_(companion->getSocketInfo()->getClientPort())
-// {
-//     initializeFields();
-// }
-
-// QString SocketInfoWidget::getName() const
-// {
-//     return name_;
-// }
-
-// QString SocketInfoWidget::getIpAddress() const
-// {
-//     return ipAddress_;
-// }
-
-// uint16_t SocketInfoWidget::getServerPort() const
-// {
-//     return serverPort_;
-// }
-
-// uint16_t SocketInfoWidget::getClientPort() const
-// {
-//     return clientPort_;
-// }
-
-// bool SocketInfoWidget::isStub()
-// {
-//     return false;
-// }
-
-// bool SocketInfoWidget::isSelected()
-// {
-//     return isSelected_;
-// }
-
-// void SocketInfoWidget::select()
-// {
-//     isSelected_ = true;
-//     changeColor(selectedColor_);
-// }
-
-// void SocketInfoWidget::unselect()
-// {
-//     isSelected_ = false;
-//     changeColor(unselectedColor_);
-// }
-
-// void SocketInfoWidget::updateFields()
-// {
-//     name_ = getQString(companion_->getName());
-//     nameLabel_->setText(name_);
-
-//     ipAddress_ = getQString(companion_->getSocketIpAddress());
-
-//     ipAddressLabel_->setText(ipAddress_);
-//     clientPort_ = companion_->getSocketClientPort();
-
-//     clientPortLabel_->setText(getQString(std::to_string(clientPort_)));
-// }
-
-// void SocketInfoWidget::setNewMessagesIndicatorOn()
-// {
-//     newMessagesIndicator_->setOn();
-// }
-
-// void SocketInfoWidget::setNewMessagesIndicatorOff()
-// {
-//     newMessagesIndicator_->setOff();
-// }
-
-// void SocketInfoWidget::requestHistoryFromCompanionAction()
-// {
-//     getManager()->requestHistoryFromCompanion(companion_);
-// }
-
-// void SocketInfoWidget::updateCompanionAction()
-// {
-//     getGraphicManager()->updateCompanion(companion_);
-// }
-
-// void SocketInfoWidget::clearHistoryAction()
-// {
-//     getGraphicManager()->clearCompanionHistory(companion_);
-// }
-
-// void SocketInfoWidget::deleteCompanionAction()
-// {
-//     getGraphicManager()->deleteCompanion(companion_);
-// }
-
-// void SocketInfoWidget::clientAction()
-// {
-//     bool result = false;
-
-//     auto companion = getManager()->getMappedCompanionBySocketInfoBaseWidget(this);
-
-//     // TODO change to states
-//     QString currentText = connectButton_->text();
-
-//     if (isConnected_) {
-//         result = companion->disconnectClient();
-//     }
-//     else {
-//         result = companion->connectClient();
-//         getManager()->sendUnsentMessages(companion);
-//     }
-
-//     if (result) {
-//         // change value
-//         isConnected_ = !(isConnected_);
-
-//         // change connect button text
-//         QString nextText = getNextConnectButtonLabel(currentText);
-//         connectButton_->setText(nextText);
-
-//         // change indicator color
-//         connectionStateIndicator_->toggle();
-
-//         // set context menu action enabled
-//         requestHistoryAction_->setDisabled(requestHistoryAction_->isEnabled());
-//     }
-// }
-
-// void SocketInfoWidget::initializeFields()
-// {
-//     isSelected_ = false;
-//     isConnected_ = false;
-
-//     selectedColor_ = QColor(QColorConstants::DarkGray);
-//     unselectedColor_ = QColor(QColorConstants::Gray);
-//     palette_ = std::make_unique<QPalette>();
-//     palette_->setColor(QPalette::Window, unselectedColor_);
-//     setAutoFillBackground(true);
-//     setPalette(*palette_);
-
-//     layout_ = std::make_unique<QHBoxLayout>();
-//     setLayout(layout_.get());
-//     connectionStateIndicator_ = std::make_unique<IndicatorWidget>(15, false);
-//     nameLabel_ = std::make_unique<QLabel>(name_);
-//     ipAddressLabel_ = std::make_unique<QLabel>(ipAddress_);
-
-//     QString serverPortQString = getQString(std::to_string(serverPort_));
-//     QString clientPortQString = getQString(std::to_string(clientPort_));
-
-//     serverPortLabel_ = std::make_unique<QLabel>(serverPortQString);
-//     clientPortLabel_ = std::make_unique<QLabel>(clientPortQString);
-//     editButton_ = std::make_unique<QPushButton>("Edit");
-//     connectButton_ = std::make_unique<QPushButton>(getInitialConnectButtonLabel());
-
-//     connect(
-//         editButton_.get(), &QPushButton::clicked,
-//         this, &SocketInfoWidget::updateCompanionAction, Qt::QueuedConnection);
-
-//     connect(
-//         connectButton_.get(), &QPushButton::clicked,
-//         this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
-
-//     if (name_ == "me") {  // TODO ???
-//         connectionStateIndicator_->setMe();
-//         editButton_->hide();
-//         connectButton_->hide();
-//     }
-
-//     newMessagesIndicator_ = std::make_unique<IndicatorWidget>(7, false);
-
-//     //    toggleIndicatorButton_ = new QPushButton("Toggle Indicator", this);
-//     //    connect(
-//     //                toggleIndicatorButton_, &QPushButton::pressed,
-//     //                indicator_, &IndicatorWidget::toggle);
-
-//     std::initializer_list<QWidget *> widgets {
-//         connectionStateIndicator_.get(), nameLabel_.get(), ipAddressLabel_.get(),
-//         serverPortLabel_.get(), clientPortLabel_.get(), editButton_.get(), connectButton_.get(),
-//         newMessagesIndicator_.get()
-//     };
-
-//     for (auto &widget : widgets)
-//         layout_->addWidget(widget);
-
-//     requestHistoryAction_ = std::make_shared<QAction>("Request chat history from companion", this);
-//     requestHistoryAction_->setDisabled(true);
-
-//     connect(
-//         requestHistoryAction_.get(), &QAction::triggered,
-//         this, &SocketInfoWidget::requestHistoryFromCompanionAction,
-//         Qt::QueuedConnection);
-
-//     setContextMenuPolicy(Qt::CustomContextMenu);
-
-//     connect(
-//         this, &QWidget::customContextMenuRequested,
-//         this, &SocketInfoWidget::customMenuRequestedSlot, Qt::QueuedConnection);
-
-//     // connect
-// }
-
-// void SocketInfoWidget::changeColor(QColor &color)
-// {
-//     palette_ = std::make_unique<QPalette>();
-//     palette_->setColor(QPalette::Window, color);
-
-//     setAutoFillBackground(true);
-//     setPalette(*palette_);
-// }
-
-// void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
-// {
-//     auto manager = getManager();
-
-//     // auto baseObject = dynamic_pointer_cast<SocketInfoBaseWidget>(shared_from_this());
-//     auto baseObject = qobject_cast<SocketInfoBaseWidget *>(this);
-
-//     auto newCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(baseObject);
-//     manager->resetSelectedCompanion(newCompanion);
-
-//     QWidget::mousePressEvent(event);
-// }
-
-// void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
-// {
-//     // auto menu = std::make_shared<Menu>(this);
-//     // auto menu = std::make_shared<Menu>();
-//     auto menu = new Menu();
-
-//     menu->addAction(requestHistoryAction_.get());
-
-//     // auto clearHistoryAction = std::make_shared<QAction>("Clear chat history", this);
-//     // menu->addAction(clearHistoryAction.get());
-//     auto clearHistoryAction = new QAction("Clear chat history", this);
-//     menu->addAction(clearHistoryAction);
-
-//     connect(
-//         // clearHistoryAction.get(), &QAction::triggered,
-//         clearHistoryAction, &QAction::triggered,
-//         this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
-
-//     // auto deleteCompanionAction = std::make_shared<QAction>("Delete companion", this);
-//     // menu->addAction(deleteCompanionAction.get());
-//     auto deleteCompanionAction = new QAction("Delete companion", this);
-//     menu->addAction(deleteCompanionAction);
-
-//     connect(
-//         // deleteCompanionAction.get(), &QAction::triggered,
-//         deleteCompanionAction, &QAction::triggered,
-//         this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
-
-//     menu->popup(mapToGlobal(position));
-// }
-// SocketInfoWidget::SocketInfoWidget(const SocketInfoWidget &object)
-// {
-//     buildFields();
-
-//     name_ = object.name_;
-//     ipAddress_ = object.ipAddress_;
-//     serverPort_ = object.serverPort_;
-//     clientPort_ = object.clientPort_;
-// }
-
-// SocketInfoWidget::SocketInfoWidget(
-//     std::string &name, std::string &ipAddress, uint16_t &serverPort, uint16_t &clientPort)
-//     : name_(getQString(name)), ipAddress_(getQString(ipAddress)), serverPort_(serverPort),
-//     clientPort_(clientPort)
-// {
-//     initializeFields();
-// }
-
-// SocketInfoWidget::SocketInfoWidget(
-//     std::string &&name, std::string &&ipAddress, uint16_t &&serverPort, uint16_t &&clientPort)
-//     : name_(getQString(name)), ipAddress_(getQString(ipAddress)), serverPort_(serverPort),
-//     clientPort_(clientPort)
-// {
-//     buildFields();
-// }
-
 SocketInfoWidget::SocketInfoWidget(std::shared_ptr<Companion> companion)
 {
     buildFields();
@@ -520,10 +216,6 @@ void SocketInfoWidget::unselect()
 
 void SocketInfoWidget::updateFields()
 {
-    // name_->setText(getQString(companion_->getName()));
-    // ipAddress_->setText(getQString(companion_->getSocketIpAddress()));
-    // clientPort_->setText(getQString(companion_->getSocketClientPort()));
-    // clientPort_->setText(getQString(companion_->getSocketClientPort()));
     setFieldsFromCompanionData();
 }
 
@@ -689,7 +381,6 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 {
     auto manager = getManager();
 
-    // auto baseObject = dynamic_pointer_cast<SocketInfoBaseWidget>(shared_from_this());
     auto baseObject = qobject_cast<SocketInfoBaseWidget *>(this);
 
     auto newCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(baseObject);
@@ -700,29 +391,21 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
-    // auto menu = std::make_shared<Menu>(this);
-    // auto menu = std::make_shared<Menu>();
     auto menu = new Menu();
 
     menu->addAction(requestHistory_.get());
 
-    // auto clearHistoryAction = std::make_shared<QAction>("Clear chat history", this);
-    // menu->addAction(clearHistoryAction.get());
     auto clearHistoryAction = new QAction("Clear chat history", this);
     menu->addAction(clearHistoryAction);
 
     connect(
-        // clearHistoryAction.get(), &QAction::triggered,
         clearHistoryAction, &QAction::triggered,
         this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
 
-    // auto deleteCompanionAction = std::make_shared<QAction>("Delete companion", this);
-    // menu->addAction(deleteCompanionAction.get());
     auto deleteCompanionAction = new QAction("Delete companion", this);
     menu->addAction(deleteCompanionAction);
 
     connect(
-        // deleteCompanionAction.get(), &QAction::triggered,
         deleteCompanionAction, &QAction::triggered,
         this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
 
@@ -789,15 +472,12 @@ WidgetGroup::WidgetGroup(std::shared_ptr<Companion> companion)
 {
     antecedentMessagesCounter_ = 0;
     auto graphicManager = getGraphicManager();
-    // auto socketInfo = companion_->getSocketInfo();
     auto widget = std::make_shared<SocketInfoWidget>(companion_);
     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
     graphicManager->addWidgetToCompanionPanel(socketInfoBase_);
 
     centralPanel_ = std::make_shared<CentralPanelWidget>(
         getGraphicManager()->getMainWindow(), companion_->name());
-
-    // centralPanel_ = new CentralPanelWidget(nullptr, companion_->getName());
 
     centralPanel_->set(companion_);
 
@@ -815,10 +495,10 @@ WidgetGroup::~WidgetGroup()
 
 void WidgetGroup::set()
 {
-    // connect(
-    //     this, &WidgetGroup::addMessageWidgetSignal,
-    //     this, &WidgetGroup::addMessageWidgetSlot,
-    //     Qt::QueuedConnection);
+    connect(
+        this, &WidgetGroup::addMessageWidgetSignal,
+        this, &WidgetGroup::addMessageWidgetSlot,
+        Qt::QueuedConnection);
 
     connect(
         this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
@@ -830,11 +510,6 @@ void WidgetGroup::set()
     //     this, &WidgetGroup::buildChatHistorySlot,
     //     Qt::QueuedConnection);
 }
-
-// void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message)
-// {
-//     centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message);
-// }
 
 void WidgetGroup::clearChatHistory()
 {
@@ -899,7 +574,6 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
 {
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
-    // auto messageState = companion_->getMappedMessageStateByMessageWidget(true, widget);
     auto messageState = widget->message()->state();
 
     if (!messageState)
@@ -931,8 +605,7 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
 //     companion_->addMessageWidgetsToChatHistory();
 // }
 
-// void WidgetGroup::addMessageWidgetSlot(std::shared_ptr<Message> message)
-void WidgetGroup::addMessageWidget(std::shared_ptr<Message> message)
+void WidgetGroup::addMessageWidgetSlot(std::shared_ptr<Message> message)
 {
     bool isAntecedent = message->isAntecedent();
 
@@ -957,7 +630,6 @@ void WidgetGroup::addMessageWidget(std::shared_ptr<Message> message)
 
     widget->setBase(shared_from_this());
 
-    // centralPanel_->addMessageWidget(shared_from_this(), companion_, message);
     centralPanel_->addMessageWidget(widget, isAntecedent);
 
     messageAdded();

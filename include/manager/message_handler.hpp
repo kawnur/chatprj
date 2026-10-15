@@ -61,9 +61,6 @@ public:
         CompanionPtr companion, std::shared_ptr<DBReplyData> messagesData, std::size_t index);
 
     std::shared_ptr<Message> createMessage(
-        // MessageType type, /*uint32_t messageId, uint8_t authorId, const std::string &messageTime,*/
-        // MessageMetaDataPtr meta, const std::string &messageText, bool isAntecedent,
-        // bool isSent, bool isReceived, std::string networkId);
         CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data,
         MessageStatePtr state);
 
@@ -124,8 +121,6 @@ private:
 };
 
 std::string buildMessageJSONString(
-    // bool isAntecedent, NetworkMessageType type, std::shared_ptr<Companion> companion,
-    // const std::string &networkId, std::shared_ptr<Message> message);
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
     MessageMetaDataPtr meta);
 

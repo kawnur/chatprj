@@ -5,7 +5,6 @@
 
 #include "message.hpp"
 #include "utils.hpp"
-// #include "widgets.hpp"
 
 CompanionMessageStorage::CompanionMessageStorage() : mutex_(), map_() {}
 
@@ -59,14 +58,6 @@ bool CompanionMessageStorage::updateAndInsert(MessageInfoPtr info)
 
     return result.second;
 }
-
-// void CompanionMessageStorage::addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-
-//     for (auto &iterator : map_)
-//         group->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
-// }
 
 void CompanionMessageStorage::clear()
 {

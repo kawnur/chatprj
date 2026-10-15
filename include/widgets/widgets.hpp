@@ -134,101 +134,11 @@ public:
     ~Menu() { logArgsInfo(Q_FUNC_INFO); }
 };
 
-// class SocketInfoWidget : public SocketInfoBaseWidget
-// {
-//     Q_OBJECT
-
-// public:
-//     SocketInfoWidget() = default;
-//     SocketInfoWidget(const SocketInfoWidget &object);
-//     SocketInfoWidget(SocketInfoWidget &&) = default;
-
-//     SocketInfoWidget(
-//         std::string &name, std::string &ipAddress, uint16_t &serverPort, uint16_t &clientPort);
-
-//     SocketInfoWidget(
-//         std::string &&name, std::string &&ipAddress, uint16_t &&serverPort, uint16_t &&clientPort);
-
-//     SocketInfoWidget(std::shared_ptr<Companion> companion);
-//     ~SocketInfoWidget() = default;
-
-//     QString getName() const;
-//     QString getIpAddress() const;
-//     uint16_t getServerPort() const;
-//     uint16_t getClientPort() const;
-
-//     bool isStub() override;
-//     bool isSelected();
-//     void select();
-//     void unselect();
-//     void updateFields() override;
-//     void setNewMessagesIndicatorOn();
-//     void setNewMessagesIndicatorOff() override;
-
-// public slots:
-//     void requestHistoryFromCompanionAction();
-//     void updateCompanionAction();
-//     void clearHistoryAction();
-//     void deleteCompanionAction();
-//     void clientAction();
-
-// private:
-//     void initializeFields();
-//     void changeColor(QColor &color);
-//     void mousePressEvent(QMouseEvent *event) override;
-
-//     bool isSelected_;
-//     bool isConnected_;
-//     std::shared_ptr<Companion> companion_;
-//     QString name_;
-//     QString ipAddress_;
-//     uint16_t serverPort_;
-//     uint16_t clientPort_;
-//     QColor selectedColor_;
-//     QColor unselectedColor_;
-//     std::unique_ptr<QPalette> palette_;
-//     std::unique_ptr<QHBoxLayout> layout_;
-//     std::unique_ptr<IndicatorWidget> connectionStateIndicator_;
-//     std::unique_ptr<QLabel> nameLabel_;
-//     std::unique_ptr<QLabel> ipAddressLabel_;
-//     std::unique_ptr<QLabel> serverPortLabel_;
-//     std::unique_ptr<QLabel> clientPortLabel_;
-//     std::unique_ptr<QPushButton> editButton_;
-//     std::unique_ptr<QPushButton> connectButton_;
-//     std::unique_ptr<IndicatorWidget> newMessagesIndicator_;
-//     std::shared_ptr<QAction> requestHistoryAction_;
-
-// private slots:
-//     void customMenuRequestedSlot(QPoint position);
-// };
 class SocketInfoWidget : public SocketInfoBaseWidget
 {
     Q_OBJECT
 
 public:
-    // SocketInfoWidget() = default;
-    // SocketInfoWidget(const SocketInfoWidget &object);
-    // SocketInfoWidget(SocketInfoWidget &&) = default;
-
-    // SocketInfoWidget(
-    //     std::string &name, std::string &ipAddress, uint16_t &serverPort, uint16_t &clientPort);
-
-    // SocketInfoWidget(
-    //     std::string &&name, std::string &&ipAddress, uint16_t &&serverPort, uint16_t &&clientPort);
-
-
-    // template<typename T, typename U, typename V, typename W>
-    // SocketInfoWidget(
-    //     T &&name, U &&ipAddress, V &&serverPort, W &&clientPort)
-    // {
-    //     buildFields();
-
-    //     name_ = getQString(std::forward<T>(name));
-    //     ipAddress_ = getQString(std::forward<U>(ipAddress));
-    //     serverPort_ = std::forward<V>(serverPort);
-    //     clientPort_ = std::forward<W>(clientPort);
-    // }
-
     SocketInfoWidget(std::shared_ptr<Companion> companion);
     ~SocketInfoWidget() = default;
 
@@ -262,10 +172,6 @@ private:
     bool isSelected_;
     bool isConnected_;
     std::shared_ptr<Companion> companion_;
-    // QString name_;
-    // QString ipAddress_;
-    // uint16_t serverPort_;
-    // uint16_t clientPort_;
     QColor selected_;
     QColor unselected_;
     std::shared_ptr<QPalette> palette_;
@@ -342,7 +248,6 @@ public:
     ~WidgetGroup();
 
     void set();
-    // void addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message);
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
@@ -352,10 +257,8 @@ public:
     void askUserForHistorySendingConfirmation();
     void updateSocketInfoWidget();
 
-    void addMessageWidget(std::shared_ptr<Message> message);
-
 signals:
-    // void addMessageWidgetSignal(std::shared_ptr<Message> message);
+    void addMessageWidgetSignal(std::shared_ptr<Message> message);
     void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
@@ -364,7 +267,7 @@ public slots:
     // void buildChatHistorySlot();
 
 private slots:
-    // void addMessageWidgetSlot(std::shared_ptr<Message> message);
+    void addMessageWidgetSlot(std::shared_ptr<Message> message);
     void askUserForHistorySendingConfirmationSlot();
 
 private:

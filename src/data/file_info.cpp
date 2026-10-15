@@ -1,12 +1,9 @@
 #include "file_info.hpp"
 
-#include "companion.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
 #include "manager.hpp"
 #include "message.hpp"
-#include "utils.hpp"
-#include "utils_cout.hpp"
 
 using namespace std::string_literals;
 
@@ -205,65 +202,3 @@ bool ReceiverOperator::createFileAndOpen()
 
     return (openResult) ? true : false;
 }
-
-// FileOperatorStorage::FileOperatorStorage() : mutex_(), mapping_() {}
-
-// void FileOperatorStorage::addSenderOperator(
-//     const std::string &networkId, const std::filesystem::path &path)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-
-//     if (mapping_.count(networkId) != 0) {
-//         logTemplateError("file operator for key {} already exists", networkId);
-
-//         return;
-//     }
-
-//     mapping_[networkId] = std::make_shared<SenderOperator>(path);
-// }
-
-// void FileOperatorStorage::addReceiverOperator(
-//     std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-
-//     auto networkId = meta->networkId_;
-
-//     if (mapping_.count(networkId) != 0) {
-//         logTemplateError("file operator for key {} already exists", networkId);
-
-//         return;
-//     }
-
-//     mapping_[networkId] = std::make_shared<ReceiverOperator>(path, meta->hashMD5_);
-// }
-
-// std::shared_ptr<FileOperator> FileOperatorStorage::getOperator(const std::string &key)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-
-//     try {
-//         return mapping_.at(key);
-//     }
-//     catch(const std::exception &e) {
-//         logArgsError(e.what());
-//     }
-
-//     return nullptr;
-// }
-
-// bool FileOperatorStorage::removeOperator(const std::string &key)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
-
-//     try {
-//         bool result = (mapping_.erase(key) == 1) ? true : false;
-
-//         return result;
-//     }
-//     catch(const std::exception &e) {
-//         logArgsError(e.what());
-//     }
-
-//     return false;
-// }

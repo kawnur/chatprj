@@ -9,9 +9,6 @@ class ActionResult
 {
 public:
     // TODO add container concept
-    // ActionResult(bool status, const std::string &definition);
-    // ActionResult(bool status, std::string &&definition);
-
     template<typename T>
     ActionResult(bool status, T &&value) : status_(status)
     {

@@ -126,6 +126,11 @@ void MessageWidget::setReceived()
     indicatorPanel_->setReceivedIndicatorOn();
 }
 
+std::shared_ptr<QLabel> MessageWidget::messageLabel()
+{
+    return messageLabel_;
+}
+
 void MessageWidget::mousePressEvent(QMouseEvent *event)
 {
     indicatorPanel_->unsetNewMessageLabel();

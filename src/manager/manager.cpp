@@ -91,12 +91,6 @@ std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(CompanionP
     return group;
 }
 
-// void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
-// {
-//     auto group = getMappedWidgetGroupByCompanion(companion);
-//     emit group->addMessageWidgetToCentralPanelChatHistorySignal(message);
-// }
-
 void Manager::addEarlyMessages(CompanionPtr companion)
 {
     messageHandler_.addEarlyMessages(companion);
@@ -145,7 +139,6 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
     return true;
 }
 
-// void Manager::receiveMessage(CompanionPtr companion, const std::string &json)
 void Manager::receiveMessage(int companionId, const std::string &json)
 {
     auto companion = getMappedCompanionById(companionId);
@@ -341,7 +334,6 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
 {
     // TODO check new data before data dialog is closed, move to Action::act
     // check if data was modified
-    // auto oldData = action->getCompanion()->getData();
     auto oldData = networkManager_.getCompanionData(action->getCompanion());
     auto newData = action->getCompanionData();
 
@@ -431,7 +423,6 @@ ActionResultPtr Manager::clearCompanionHistory(CompanionActionPtr action)
         return deleteMessagesResult;
 
     // clear companion's message mapping
-    // action->getCompanion()->clearMessageMapping();
     messageHandler_.clearMessageMapping(action->getCompanion());
 
     // clear chat history widget
@@ -633,7 +624,6 @@ bool Manager::buildCompanions()
             continue;
 
         // add to message storage
-        // messageHandler_.fillCompanionMessageMapping(companion, false);
         if (!messageHandler_.addCompanionToMessageStorage(companion))
             continue;
 
@@ -840,34 +830,6 @@ bool Manager::setMappedMessageWidget(
     return messageHandler_.setMappedMessageWidget(companion, message, widget);
 }
 
-// void Manager::waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message)
-// {
-//     auto lambda = [=]()
-//     {
-//         auto sleepDuration = SLEEP_DURATION_INITIAL_MS;
-
-//         sleepForMS(sleepDuration);
-
-//         while (true) {
-//             if (message->isReceived())
-//                 return;
-
-//             // send message reception confirmation request
-//             auto meta = std::make_shared<MessageMetaData>();
-//             meta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST;
-//             meta->networkId_ = message->getNetworkId();
-
-//             bool result = companion->sendMessage(message, meta);
-
-//             // sleep
-//             sleepForMS(sleepDuration);
-//             sleepDuration *= SLEEP_DURATION_INCREASE_RATE;
-//         }
-//     };
-
-//     runInDetachedThread(lambda);
-// }
-
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
 {
     // mark in db
@@ -889,9 +851,7 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
     getGraphicManager()->setMessageWidgetAsSent(info);
 }
 
-void Manager::markMessageAsReceived(
-    // CompanionPtr companion, MessagePtr message)
-    std::shared_ptr<MessageInfo> info)
+void Manager::markMessageAsReceived(std::shared_ptr<MessageInfo> info)
 {
     // mark in widget
     getGraphicManager()->setMessageWidgetAsReceived(info);
@@ -926,7 +886,6 @@ MessageMetaDataPtr Manager::pushMessageToDB(
 
     auto result = std::make_shared<MessageMetaData>();
 
-    // id, companion_id, timestamp_tz
     result->messageId_ = id;
     result->companionId_ = companionId;
     result->timestampTz_ = timestampTz;

@@ -51,8 +51,8 @@ public:
 
     void set(std::shared_ptr<Companion> companion);
 
-    std::shared_ptr<MessageWidget> buildMessageWidget(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    // std::shared_ptr<MessageWidget> buildMessageWidget(
+    //     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
     void addMessageWidget(
         // std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,

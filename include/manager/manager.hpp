@@ -15,8 +15,6 @@
 #include "action.hpp"
 #include "action_result.hpp"
 #include "constants.hpp"
-// #include "db_constants.hpp"
-// #include "db_interaction.hpp"
 #include "db_operator.hpp"
 #include "file_manager.hpp"
 #include "message_handler.hpp"
@@ -31,7 +29,6 @@ class ActionSharedValueResult;
 
 class Companion;
 class CompanionAction;
-// class DBOperator;
 class Message;
 class MessageData;
 class MessageInfo;
@@ -82,17 +79,11 @@ public:
     CompanionPtr getSelectedCompanion();
     bool userIsAuthenticated();
     void set();
-
-    // CompanionPtr getMappedCompanionBySocketInfoBaseWidget(std::shared_ptr<SocketInfoBaseWidget>) const;
     CompanionPtr getMappedCompanionById(int id) const;
     CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
     std::shared_ptr<WidgetGroup> getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
-
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
-
-    // void receiveMessage(CompanionPtr companion, const std::string &json);
     void receiveMessage(int companionId, const std::string &json);
-
     void resetSelectedCompanion(CompanionPtr companion);
 
     template<typename T>
@@ -122,11 +113,7 @@ public:
     void initEntrancePasswordReception();
     void initFileSend(std::shared_ptr<Companion> companion);
     void initFileReception(const std::string &networkId, std::shared_ptr<Companion> companion);
-
     ActionResultPtr createCompanion(CompanionActionPtr action);
-
-    // void updateCompanion(CompanionActionPtr action);
-
     ActionResultPtr updateCompanion(CompanionActionPtr action);
     void updateSocketInfo(int id, std::shared_ptr<CompanionData> data);
     ActionResultPtr deleteCompanion(CompanionActionPtr action);
@@ -156,13 +143,7 @@ public:
         MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
-
-    // void markMessageAsReceived(
-    //     CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
-
-    // void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
-    // void addMessageWidget(CompanionPtr companion, MessagePtr message);
     void addEarlyMessages(CompanionPtr companion);
     void sendUnsentMessages(CompanionPtr companion);
     std::shared_ptr<NetworkEntity> getNetworkEntity(int id);
@@ -171,13 +152,8 @@ public:
         CompanionPtr companion, const std::string &networkId, const std::string &data);
 
     std::shared_ptr<CompanionData> getCompanionData(CompanionPtr companion);
-    // std::string getIpAddress(CompanionPtr companion);
-    // uint16_t getServerPort(CompanionPtr companion);
-    // uint16_t getClientPort(CompanionPtr companion);
-
     bool connectClient(CompanionPtr companion);
     bool disconnectClient(CompanionPtr companion);
-
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
 
     void addReceiverOperator(

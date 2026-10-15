@@ -2,26 +2,20 @@
 #define GRAPHIC_MANAGER_HPP
 
 #include <memory>
-#include <mutex>
 #include <string>
-#include <vector>
 
 #include <QString>
 #include <QWidget>
 
 #include "constants.hpp"
 
-class ButtonInfo;
 class Companion;
-class CompanionAction;
 class MainWindow;
 class Message;
 class MessageInfo;
 class MessageWidget;
-class PasswordAction;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
-class TextDialog;
 class WidgetGroup;
 
 using CompanionPtr = std::shared_ptr<Companion>;
@@ -41,10 +35,7 @@ public:
         std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer);
 
     void setStubWidgets();
-
-    void sendMessage(
-        MessageType type, std::shared_ptr<Companion> companion, const std::string &text);
-
+    void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
     void addTextToAppLogWidget(const QString &text);
     std::size_t getCompanionPanelChildrenSize();
     void hideWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group);
@@ -55,21 +46,12 @@ public:
 
     void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
     void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
-
-    // void createTextDialogAndShow(
-    //     std::shared_ptr<QWidget> parent, DialogType type, const std::string &text,
-    //     std::shared_ptr<std::vector<ButtonInfo>> buttonInfo);
-
     void createCompanion();
     void createGroupChat();
     void updateCompanion(std::shared_ptr<Companion> companion);
     void clearCompanionHistory(std::shared_ptr<Companion> companion);
     void clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup);
     void deleteCompanion(std::shared_ptr<Companion> companion);
-    // void sendCompanionDataToManager(std::shared_ptr<CompanionAction> action);
-    // void showCompanionInfoDialog(std::shared_ptr<CompanionAction> action, std::string &&header);
-    // void sendNewPasswordDataToManager(std::shared_ptr<PasswordAction> action);
-    // void sendExistingPasswordDataToManager(std::shared_ptr<PasswordAction> action);
     void hideCompanionPanelStub();
     void hideCentralPanelStub();
     void showCentralPanelStub();
@@ -83,19 +65,10 @@ public:
     void enableMainWindowBlurEffect();
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
-
     std::shared_ptr<MessageWidget> buildMessageWidget(CompanionPtr companion, MessagePtr message);
-
     void addMessageWidget(CompanionPtr companion, MessagePtr message);
-
-    bool setMessageWidgetAsSent(
-        // std::shared_ptr<Companion> companion, MessagePtr message);
-        std::shared_ptr<MessageInfo> info);
-
-    void setMessageWidgetAsReceived(
-        // std::shared_ptr<Companion> companion, MessagePtr message);
-        std::shared_ptr<MessageInfo> info);
-
+    bool setMessageWidgetAsSent(std::shared_ptr<MessageInfo> info);
+    void setMessageWidgetAsReceived(std::shared_ptr<MessageInfo> info);
     void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
     void sendFile(CompanionPtr companion);
     void saveFile(const std::string& networkId, CompanionPtr companion);

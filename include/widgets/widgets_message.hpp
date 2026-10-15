@@ -53,6 +53,8 @@ public:
     void setSent();
     void setReceived();
 
+    std::shared_ptr<QLabel> messageLabel();
+
 signals:
     void widgetSelectedSignal(std::shared_ptr<MessageWidget> widget);
 
