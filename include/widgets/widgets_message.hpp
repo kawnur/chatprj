@@ -40,8 +40,8 @@ class MessageWidget : public QWidget, public std::enable_shared_from_this<Messag
 
 public:
     MessageWidget(
-        std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-        std::shared_ptr<Message> message);
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+        std::shared_ptr<QWidget> parent = nullptr);
 
     virtual ~MessageWidget() {}
 
@@ -78,8 +78,8 @@ class TextMessageWidget : public MessageWidget
 
 public:
     TextMessageWidget(
-        std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-        std::shared_ptr<Message> message);
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+        std::shared_ptr<QWidget> parent = nullptr);
 
     ~TextMessageWidget();
 
@@ -93,8 +93,8 @@ class FileMessageWidget : public MessageWidget
 
 public:
     FileMessageWidget(
-        std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-        std::shared_ptr<Message> message);
+        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+        std::shared_ptr<QWidget> parent = nullptr);
 
     ~FileMessageWidget() = default;
 

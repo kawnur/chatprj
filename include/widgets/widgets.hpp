@@ -342,7 +342,7 @@ public:
     ~WidgetGroup();
 
     void set();
-    void addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message);
+    // void addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message);
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
@@ -352,17 +352,19 @@ public:
     void askUserForHistorySendingConfirmation();
     void updateSocketInfoWidget();
 
+    void addMessageWidget(std::shared_ptr<Message> message);
+
 signals:
-    void addMessageWidgetToCentralPanelChatHistorySignal(std::shared_ptr<Message> message);
+    // void addMessageWidgetSignal(std::shared_ptr<Message> message);
     void askUserForHistorySendingConfirmationSignal();
-    void buildChatHistorySignal();    
+    // void buildChatHistorySignal();
 
 public slots:
     void messageWidgetSelected(std::shared_ptr<MessageWidget> widget);
-    void buildChatHistorySlot();
+    // void buildChatHistorySlot();
 
 private slots:
-    void addMessageWidgetToCentralPanelChatHistorySlot(std::shared_ptr<Message> message);
+    // void addMessageWidgetSlot(std::shared_ptr<Message> message);
     void askUserForHistorySendingConfirmationSlot();
 
 private:

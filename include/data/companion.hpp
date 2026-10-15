@@ -69,14 +69,14 @@ public:
     // std::shared_ptr<MessageInfo> createMessageAndAddToMapping(
     //     std::shared_ptr<DBReplyData> messagesData, std::size_t index);
 
-    void setMappedMessageWidget(
-        std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget);
+    // void setMappedMessageWidget(
+    //     std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget);
 
     void updateData(std::shared_ptr<CompanionData> data);
     // std::shared_ptr<Message> findMessage(uint32_t messageId);
 
-    void addMessageWidgetsToChatHistory();
-    void addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group);
+    // void addMessageWidgetsToChatHistory();
+    // void addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group);
     // void clearMessageMapping();
     // std::string generateNetworkId(bool);
 

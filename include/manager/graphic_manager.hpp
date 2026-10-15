@@ -24,6 +24,9 @@ class StubWidgetGroup;
 class TextDialog;
 class WidgetGroup;
 
+using CompanionPtr = std::shared_ptr<Companion>;
+using MessagePtr = std::shared_ptr<Message>;
+
 class GraphicManager
 {
 public:
@@ -81,17 +84,21 @@ public:
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
 
+    std::shared_ptr<MessageWidget> buildMessageWidget(CompanionPtr companion, MessagePtr message);
+
+    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+
     bool setMessageWidgetAsSent(
-        // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+        // std::shared_ptr<Companion> companion, MessagePtr message);
         std::shared_ptr<MessageInfo> info);
 
     void setMessageWidgetAsReceived(
-        // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+        // std::shared_ptr<Companion> companion, MessagePtr message);
         std::shared_ptr<MessageInfo> info);
 
     void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
-    void sendFile(std::shared_ptr<Companion> companion);
-    void saveFile(const std::string& networkId, std::shared_ptr<Companion> companion);
+    void sendFile(CompanionPtr companion);
+    void saveFile(const std::string& networkId, CompanionPtr companion);
     std::string getFilePathString(const std::string &networkId);
 
 private:

@@ -172,19 +172,19 @@ std::string Companion::name() const
 //     return (result.second) ? info : nullptr;
 // }
 
-void Companion::setMappedMessageWidget(
-    std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// void Companion::setMappedMessageWidget(
+//     std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto id = message->getId();
-    auto result = messageMapping_.find(id);
+//     auto id = message->getId();
+//     auto result = messageMapping_.find(id);
 
-    if (result == messageMapping_.end())
-        logTemplateError("message with id {} was not found in messageMapping_", id);
-    else
-        result->second->setWidget(widget);
-}
+//     if (result == messageMapping_.end())
+//         logTemplateError("message with id {} was not found in messageMapping_", id);
+//     else
+//         result->second->setWidget(widget);
+// }
 
 void Companion::updateData(std::shared_ptr<CompanionData> data)
 {
@@ -201,20 +201,20 @@ void Companion::updateData(std::shared_ptr<CompanionData> data)
 //     return (result == messageMapping_.end()) ? nullptr : result->second->getMessage();
 // }
 
-void Companion::addMessageWidgetsToChatHistory()
-{
-    auto group = getManager()->getMappedWidgetGroupByCompanion(shared_from_this());
+// void Companion::addMessageWidgetsToChatHistory()
+// {
+//     auto group = getManager()->getMappedWidgetGroupByCompanion(shared_from_this());
 
-    addMessageWidgetsToChatHistory(group);
-}
+//     addMessageWidgetsToChatHistory(group);
+// }
 
-void Companion::addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
+// void Companion::addMessageWidgetsToChatHistory(std::shared_ptr<WidgetGroup> group)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
 
-    for (auto &iterator : messageMapping_)
-        group->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
-}
+//     for (auto &iterator : messageMapping_)
+//         group->addMessageWidget(iterator.second->getMessage());
+// }
 
 // void Companion::clearMessageMapping()
 // {

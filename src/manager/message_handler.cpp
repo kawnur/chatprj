@@ -77,10 +77,10 @@ std::shared_ptr<Message> MessageHandler::createMessage(
 void MessageHandler::sendMessage(
     MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text)
 {
-    auto group = manager_->getMappedWidgetGroupByCompanion(companion);
+    // auto group = manager_->getMappedWidgetGroupByCompanion(companion);
 
-    if (!group)
-        return;
+    // if (!group)
+    //     return;
 
     // encrypt message
 
@@ -127,7 +127,8 @@ void MessageHandler::sendMessage(
             manager_->addSenderOperator(message->networkId(), cast->getPath());
     }
 
-    group->addMessageWidgetToCentralPanelChatHistory(message);
+    // group->addMessageWidgetToCentralPanelChatHistory(message);
+    getGraphicManager()->addMessageWidget(companion, message);
 
     // define NetworkMessageType
     auto networkMessageType = defineNetworkMessageType(type);
@@ -141,7 +142,7 @@ void MessageHandler::sendMessage(
         manager_->markMessageAsSent(companion, message);
 
     // wait for message reception confirmation
-    waitForMessageReceptionConfirmation(companion, message);
+    // waitForMessageReceptionConfirmation(companion, message);
 }
 
 bool MessageHandler::sendMessageByNetwork(
@@ -311,11 +312,12 @@ void MessageHandler::receiveTextMessage(
     // decrypt message
 
     // add to widget
-    manager_->addMessageWidget(companion, message);
+    // manager_->addMessageWidget(companion, message);
+    getGraphicManager()->addMessageWidget(companion, message);
 
     // send reply message to sender
-    pushMeta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION;
-    bool result = sendMessageByNetwork(companion, message, pushMeta);
+    // pushMeta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION;
+    // bool result = sendMessageByNetwork(companion, message, pushMeta);
 }
 
 void MessageHandler::receiveFileProposalMessage(
@@ -350,7 +352,8 @@ void MessageHandler::receiveFileProposalMessage(
     // decrypt message
 
     // add to widget
-    manager_->addMessageWidget(companion, message);
+    // manager_->addMessageWidget(companion, message);
+    getGraphicManager()->addMessageWidget(companion, message);
 
     // send reply message to sender
     bool result = sendMessageByNetwork(companion, message, replyMeta);
@@ -443,11 +446,11 @@ void MessageHandler::receiveChatHistoryData(CompanionPtr companion, const nlohma
     // fill container with messages
     fillCompanionMessageMapping(companion, true);
 
-    // build chat history
-    auto group = manager_->getMappedWidgetGroupByCompanion(companion);
+    // // build chat history
+    // auto group = manager_->getMappedWidgetGroupByCompanion(companion);
 
-    if (group)
-        emit group->buildChatHistorySignal();
+    // if (group)
+    //     emit group->buildChatHistorySignal();
 }
 
 void MessageHandler::receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta)
@@ -565,7 +568,7 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
         return;
     }
 
-    auto widgetGroup = manager_->getMappedWidgetGroupByCompanion(companion);
+    auto group = manager_->getMappedWidgetGroupByCompanion(companion);
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
         logArgs("adding message with id", messagesData->getValue(i, "id"));
@@ -579,10 +582,11 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
             continue;
         }
 
-        widgetGroup->addMessageWidgetToCentralPanelChatHistory(message);
+        // group->addMessageWidgetToCentralPanelChatHistory(message);
+        getGraphicManager()->addMessageWidget(companion, message);
     }
 
-    widgetGroup->sortChatHistoryElements();
+    group->sortChatHistoryElements();
 }
 
 void MessageHandler::sendUnsentMessages(CompanionPtr companion)
@@ -598,7 +602,12 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
         uint32_t messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
 
         // auto message = companion->findMessage(messageId);
-        auto message = messageStorage_.getMessage(companion->id(), messageId);
+        auto info = messageStorage_.getMessageInfo(companion->id(), messageId);
+
+        if (!info)
+            continue;
+
+        auto message = info->message();
 
         std::string networkId;
 
@@ -647,6 +656,11 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
 
 void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
 {
+    auto group = getManager()->getMappedWidgetGroupByCompanion(companion);
+
+    if (!group)
+        return;
+
     uint8_t companionId = companion->id();
 
     // get messages data
@@ -667,12 +681,16 @@ void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool co
                 // companion->addMessage(const_cast<MessagePtr>(pair.second));
             } else {
                 // companion->createMessageAndAddToMapping(messagesData, i);
-                createMessageAndAddToMapping(companion, messagesData, i);
+                auto message = createMessageAndAddToMapping(companion, messagesData, i);
+                // emit group->addMessageWidgetSignal(message);
+                group->addMessageWidget(message);
             }
         }
         else {
             // companion->createMessageAndAddToMapping(messagesData, i);
-            createMessageAndAddToMapping(companion, messagesData, i);
+            auto message = createMessageAndAddToMapping(companion, messagesData, i);
+            // emit group->addMessageWidgetSignal(message);
+            group->addMessageWidget(message);
         }
     }
 }
@@ -716,6 +734,22 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
     };
 
     runInDetachedThread(lambda);
+}
+
+bool MessageHandler::setMappedMessageWidget(
+    CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget)
+{
+    return messageStorage_.setMessageWidget(companion->id(), message->id(), widget);
+}
+
+bool MessageHandler::clearMessageMapping(CompanionPtr companion)
+{
+    return messageStorage_.clearMessageMapping(companion->id());
+}
+
+bool MessageHandler::addCompanionToMessageStorage(CompanionPtr companion)
+{
+    return messageStorage_.addCompanion(companion->id());
 }
 
 std::string buildMessageJSONString(

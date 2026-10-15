@@ -815,26 +815,26 @@ WidgetGroup::~WidgetGroup()
 
 void WidgetGroup::set()
 {
-    connect(
-        this, &WidgetGroup::addMessageWidgetToCentralPanelChatHistorySignal,
-        this, &WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot,
-        Qt::QueuedConnection);
+    // connect(
+    //     this, &WidgetGroup::addMessageWidgetSignal,
+    //     this, &WidgetGroup::addMessageWidgetSlot,
+    //     Qt::QueuedConnection);
 
     connect(
         this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
         this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
         Qt::QueuedConnection);
 
-    connect(
-        this, &WidgetGroup::buildChatHistorySignal,
-        this, &WidgetGroup::buildChatHistorySlot,
-        Qt::QueuedConnection);
+    // connect(
+    //     this, &WidgetGroup::buildChatHistorySignal,
+    //     this, &WidgetGroup::buildChatHistorySlot,
+    //     Qt::QueuedConnection);
 }
 
-void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message)
-{
-    centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message);
-}
+// void WidgetGroup::addMessageWidgetToCentralPanelChatHistory(std::shared_ptr<Message> message)
+// {
+//     centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message);
+// }
 
 void WidgetGroup::clearChatHistory()
 {
@@ -867,7 +867,7 @@ std::shared_ptr<SocketInfoBaseWidget> WidgetGroup::getSocketInfoBase()
 
 void WidgetGroup::sortChatHistoryElements()
 {
-    centralPanel_->sortChatHistoryElements(true);
+    centralPanel_->sortChatHistory(true);
 }
 
 void WidgetGroup::messageAdded()
@@ -926,12 +926,13 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
     }
 }
 
-void WidgetGroup::buildChatHistorySlot()
-{
-    companion_->addMessageWidgetsToChatHistory();
-}
+// void WidgetGroup::buildChatHistorySlot()
+// {
+//     companion_->addMessageWidgetsToChatHistory();
+// }
 
-void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(std::shared_ptr<Message> message)
+// void WidgetGroup::addMessageWidgetSlot(std::shared_ptr<Message> message)
+void WidgetGroup::addMessageWidget(std::shared_ptr<Message> message)
 {
     bool isAntecedent = message->isAntecedent();
 
@@ -943,7 +944,23 @@ void WidgetGroup::addMessageWidgetToCentralPanelChatHistorySlot(std::shared_ptr<
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
     }
 
-    centralPanel_->addMessageWidgetToChatHistory(shared_from_this(), companion_, message);
+    auto widget = getGraphicManager()->buildMessageWidget(companion_, message);
+
+    // auto lambda = [=]()
+    // {
+    //     // companion->setMappedMessageWidget(message, widget);
+    //     getManager()->setMappedMessageWidget(companion_, message, widget);
+    // };
+
+    // runInDetachedThread(lambda);
+    getManager()->setMappedMessageWidget(companion_, message, widget);
+
+    widget->setBase(shared_from_this());
+
+    // centralPanel_->addMessageWidget(shared_from_this(), companion_, message);
+    centralPanel_->addMessageWidget(widget, isAntecedent);
+
+    messageAdded();
 }
 
 void WidgetGroup::askUserForHistorySendingConfirmationSlot()

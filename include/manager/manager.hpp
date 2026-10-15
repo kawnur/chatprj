@@ -162,7 +162,7 @@ public:
     void markMessageAsReceived(std::shared_ptr<MessageInfo> info);
 
     // void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
-    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    // void addMessageWidget(CompanionPtr companion, MessagePtr message);
     void addEarlyMessages(CompanionPtr companion);
     void sendUnsentMessages(CompanionPtr companion);
     std::shared_ptr<NetworkEntity> getNetworkEntity(int id);
@@ -198,6 +198,9 @@ public:
     std::string getFilePathString(const std::string &networkId);
     bool setFileOperatorFilePath(const std::string &networkId, const std::filesystem::path &path);
     std::string getFileOperatorMD5Hash(const std::string &networkId);
+
+    bool setMappedMessageWidget(
+        CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget);
 
 private:
     ActionResultPtr getActionResultByKeyDBData(
@@ -248,7 +251,7 @@ private:
     CompanionPtr selectedCompanion_;
 
     std::map<int, std::pair<CompanionPtr, std::shared_ptr<WidgetGroup>>>
-        companionAndWidgetGroupMap_;
+        companionAndWidgetGroupMap_;  // TODO move to graphic manager
 
     std::filesystem::path lastOpenedPath_;
     ActionPtr currentAction_;

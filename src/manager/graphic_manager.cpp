@@ -44,7 +44,7 @@ void GraphicManager::setStubWidgets()
 }
 
 void GraphicManager::sendMessage(
-    MessageType type, std::shared_ptr<Companion> companion, const std::string &text)
+    MessageType type, CompanionPtr companion, const std::string &text)
 {
     getManager()->sendMessage(type, companion, nullptr, text);
 }
@@ -108,12 +108,12 @@ void GraphicManager::createGroupChat()
     // action->set();
 }
 
-void GraphicManager::updateCompanion(std::shared_ptr<Companion> companion)
+void GraphicManager::updateCompanion(CompanionPtr companion)
 {
     getManager()->initCompanionUpdate(companion);
 }
 
-void GraphicManager::clearCompanionHistory(std::shared_ptr<Companion> companion)
+void GraphicManager::clearCompanionHistory(CompanionPtr companion)
 {
     getManager()->initCompanionHistoryClearing(companion);
 }
@@ -123,7 +123,7 @@ void GraphicManager::clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup)
     widgetGroup->clearChatHistory();
 }
 
-void GraphicManager::deleteCompanion(std::shared_ptr<Companion> companion)
+void GraphicManager::deleteCompanion(CompanionPtr companion)
 {
     getManager()->initCompanionDeletion(companion);
 }
@@ -275,8 +275,36 @@ void GraphicManager::getEntrancePassword()
     getManager()->initEntrancePasswordReception();
 }
 
+std::shared_ptr<MessageWidget> GraphicManager::buildMessageWidget(
+    CompanionPtr companion, MessagePtr message)
+{
+    switch (message->type()) {
+    case MessageType::TEXT:
+        return std::make_shared<TextMessageWidget>(companion, message);
+
+    case MessageType::FILE:
+        return std::make_shared<FileMessageWidget>(companion, message);
+
+    default:
+        logArgsError("message widget building error");
+
+        return nullptr;
+    }
+}
+
+void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message)
+{
+    auto group = getManager()->getMappedWidgetGroupByCompanion(companion);
+
+    if (!group)
+        return;
+
+    // emit group->addMessageWidgetSignal(message);
+    group->addMessageWidget(message);
+}
+
 bool GraphicManager::setMessageWidgetAsSent(
-    // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+    // CompanionPtr companion, MessagePtr message)
     std::shared_ptr<MessageInfo> info)
 {
     // auto lambda = [&]()
@@ -292,10 +320,12 @@ bool GraphicManager::setMessageWidgetAsSent(
         widget->setSent();
     else
         logArgsError("marking widget as sent error");
+
+    return true;  // TODO modify
 }
 
 void GraphicManager::setMessageWidgetAsReceived(
-    // std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+    // CompanionPtr companion, MessagePtr message)
     std::shared_ptr<MessageInfo> info)
 {
     // auto lambda = [&]()
@@ -318,12 +348,12 @@ void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<Widge
     group->sortChatHistoryElements();
 }
 
-void GraphicManager::sendFile(std::shared_ptr<Companion> companion)
+void GraphicManager::sendFile(CompanionPtr companion)
 {
     getManager()->initFileSend(companion);
 }
 
-void GraphicManager::saveFile(const std::string &networkId, std::shared_ptr<Companion> companion)
+void GraphicManager::saveFile(const std::string &networkId, CompanionPtr companion)
 {
     getManager()->initFileReception(networkId, companion);
 }

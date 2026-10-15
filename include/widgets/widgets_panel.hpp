@@ -18,7 +18,7 @@ class Message;
 class MessageWidget;
 class SocketInfoBaseWidget;
 class TextEditWidget;
-class WidgetGroup;
+// class WidgetGroup;
 
 class LeftPanelWidget : public QWidget
 {
@@ -54,13 +54,14 @@ public:
     std::shared_ptr<MessageWidget> buildMessageWidget(
         std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
 
-    void addMessageWidgetToChatHistory(
-        std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-        std::shared_ptr<Message> message);
+    void addMessageWidget(
+        // std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
+        // std::shared_ptr<Message> message);
+        std::shared_ptr<MessageWidget> widget, bool isAntecedent);
 
     void scrollDownChatHistory();
     void clearChatHistory();
-    void sortChatHistoryElements(bool lock);
+    void sortChatHistory(bool lock);
 
 private:
     std::mutex mutex_;

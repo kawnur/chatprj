@@ -63,8 +63,8 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
 }
 
 MessageWidget::MessageWidget(
-    std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-    std::shared_ptr<Message> message)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<QWidget> parent)
 {
     companion_ = companion;
     message_ = message;
@@ -133,8 +133,8 @@ void MessageWidget::mousePressEvent(QMouseEvent *event)
 }
 
 TextMessageWidget::TextMessageWidget(
-    std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-    std::shared_ptr<Message> message) : MessageWidget(parent, companion, message)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<QWidget> parent) : MessageWidget(companion, message, parent)
 {
     if (parent)
         setParent(parent.get());
@@ -150,8 +150,8 @@ void TextMessageWidget::addMembersToLayout()
 }
 
 FileMessageWidget::FileMessageWidget(
-    std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion,
-    std::shared_ptr<Message> message) : MessageWidget(parent, companion, message)
+    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
+    std::shared_ptr<QWidget> parent) : MessageWidget(companion, message, parent)
 {
     if (parent)
         setParent(parent.get());
@@ -163,7 +163,7 @@ FileMessageWidget::FileMessageWidget(
     // rewrite widget body text for sender's widget
     if (isMessageFromMe) {
         auto color = getHTMLColor(Widget::MESSAGE_SENT);
-        auto path = getGraphicManager()->getFilePathString(message->getNetworkId());
+        auto path = getGraphicManager()->getFilePathString(message->networkId());
         auto text = getHTMLBody(color, getStringByFormat("SEND FILE: {}", path), true, false);
 
         messageLabel_->setText(getQString(text));
@@ -201,7 +201,7 @@ void FileMessageWidget::addMembersToLayout()
 void FileMessageWidget::saveFileSlot()
 {
     // create file operator for this networkId
-    auto networkId = message_->getNetworkId();
+    auto networkId = message_->networkId();
     getGraphicManager()->saveFile(networkId, companion_);
 }
 
@@ -209,10 +209,10 @@ std::pair<std::string, std::string> formatMessageHeaderAndBody(
     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
 {
     auto companionName = companion->name();
-    auto companionId = message->getCompanionId();
-    auto authorId = message->getAuthorId();
-    auto time = message->getTime();
-    auto text = message->getText();
+    auto companionId = message->companionId();
+    auto authorId = message->authorId();
+    auto time = message->time();
+    auto text = message->text();
 
     std::string color, sender, receiver;
 

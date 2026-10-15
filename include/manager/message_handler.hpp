@@ -112,6 +112,12 @@ public:
     void requestHistoryFromCompanion(CompanionPtr companion);
     void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
 
+    bool setMappedMessageWidget(
+        CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget);
+
+    bool clearMessageMapping(CompanionPtr companion);
+    bool addCompanionToMessageStorage(CompanionPtr companion);
+
 private:
     std::shared_ptr<Manager> manager_;
     MessageStorage messageStorage_;

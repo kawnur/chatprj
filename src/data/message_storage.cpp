@@ -1,6 +1,7 @@
 #include "message_storage.hpp"
 
 #include <algorithm>
+#include <utility>
 
 #include "message.hpp"
 #include "utils.hpp"
@@ -67,7 +68,7 @@ bool CompanionMessageStorage::updateAndInsert(MessageInfoPtr info)
 //         group->addMessageWidgetToCentralPanelChatHistory(iterator.second->getMessage());
 // }
 
-void CompanionMessageStorage::clearMessageMapping()
+void CompanionMessageStorage::clear()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -104,6 +105,25 @@ std::string CompanionMessageStorage::generateNetworkId(bool lock)
     return networkId;
 }
 
+bool CompanionMessageStorage::setMessageWidget(int id, MessageWidgetPtr widget)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    auto result = map_.find(id);
+
+    if (result == map_.end())
+        return false;
+
+    auto info = result->second;
+
+    if (!info)
+        return false;
+
+    info->setWidget(widget);
+
+    return true;
+}
+
 MessageStorage::MessageStorage() : mutex_(), storage_() {}
 
 MessageInfoPtr MessageStorage::getMessageInfo(int companionId, int messageId)
@@ -124,9 +144,37 @@ MessageInfoPtr MessageStorage::getMessageInfoByNetworkId(int companionId, const 
     return (result == storage_.end()) ? nullptr : result->second.getMessageInfoByNetworkId(networkId);
 }
 
+MessagePtr MessageStorage::getEarliestMessage(int companionId)
+{
+    auto lambda = [&]() { return storage_.at(companionId).getEarliestMessage(); };
+
+    return runAndReturnSharedPtr<Message>(lambda);
+}
+
 bool MessageStorage::updateAndInsert(int companionId, MessageInfoPtr info)
 {
     auto lambda = [&]() { return storage_.at(companionId).updateAndInsert(info); };
 
     return runAndReturnBool(lambda);
+}
+
+bool MessageStorage::setMessageWidget(int companionId, int messageId, MessageWidgetPtr widget)
+{
+    auto lambda = [&]() { storage_.at(companionId).setMessageWidget(messageId, widget); };
+
+    return runAndReturnBool(lambda);
+}
+
+bool MessageStorage::clearMessageMapping(int companionId)
+{
+    auto lambda = [&]() { storage_.at(companionId).clear(); };
+
+    return runAndReturnBool(lambda);
+}
+
+bool MessageStorage::addCompanion(int companionId)
+{
+    auto result = storage_.try_emplace(companionId);
+
+    return result.second;
 }

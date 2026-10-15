@@ -91,11 +91,11 @@ std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(CompanionP
     return group;
 }
 
-void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
-{
-    auto group = getMappedWidgetGroupByCompanion(companion);
-    emit group->addMessageWidgetToCentralPanelChatHistorySignal(message);
-}
+// void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
+// {
+//     auto group = getMappedWidgetGroupByCompanion(companion);
+//     emit group->addMessageWidgetToCentralPanelChatHistorySignal(message);
+// }
 
 void Manager::addEarlyMessages(CompanionPtr companion)
 {
@@ -431,7 +431,8 @@ ActionResultPtr Manager::clearCompanionHistory(CompanionActionPtr action)
         return deleteMessagesResult;
 
     // clear companion's message mapping
-    action->getCompanion()->clearMessageMapping();
+    // action->getCompanion()->clearMessageMapping();
+    messageHandler_.clearMessageMapping(action->getCompanion());
 
     // clear chat history widget
     clearChatHistory(action->getCompanion());
@@ -613,6 +614,7 @@ bool Manager::buildCompanions()
         if (!socketsData || socketsData->isEmpty())
             return false;
 
+        // add to network manager
         // TODO use port number pool
         auto ipAddress = socketsData->getValue(0, "ipaddress");
         auto clientPort = getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "client_port"));
@@ -630,7 +632,10 @@ bool Manager::buildCompanions()
         if (companion->id() <= 1)  // TODO change condition
             continue;
 
-        messageHandler_.fillCompanionMessageMapping(companion, false);
+        // add to message storage
+        // messageHandler_.fillCompanionMessageMapping(companion, false);
+        if (!messageHandler_.addCompanionToMessageStorage(companion))
+            continue;
 
         bool started = (*entityResult.first).second->start();
     }
@@ -649,15 +654,19 @@ void Manager::buildWidgetGroups()
 
     if (companionsNumber == 0 && childrenSize == 0) {
         logArgsWarning("strange case, empty sockets panel");
+
+        return;
     }
-    else {
-        // TODO check if sockets already are children
 
-        // hide companion panel stub widget
-        graphicManager->hideCompanionPanelStub();
+    // TODO check if sockets already are children
 
-        for (const auto &pair : companionAndWidgetGroupMap_)
-            createWidgetGroupAndAddToMapping(pair.second.first);
+    // hide companion panel stub widget
+    graphicManager->hideCompanionPanelStub();
+
+    for (const auto &pair : companionAndWidgetGroupMap_) {
+        auto companion = pair.second.first;
+        createWidgetGroupAndAddToMapping(companion);
+        messageHandler_.fillCompanionMessageMapping(companion, false);
     }
 }
 
@@ -734,8 +743,11 @@ void Manager::createWidgetGroupAndAddToMapping(CompanionPtr companion)
 {
     auto group = std::make_shared<WidgetGroup>(companion);
     group->set();
+
+    // no existance check
     companionAndWidgetGroupMap_[companion->id()].second = group;
-    companion->addMessageWidgetsToChatHistory(group);
+
+    // companion->addMessageWidgetsToChatHistory(group);  // ???
 }
 
 void Manager::deleteCompanionObject(CompanionPtr companion)
@@ -820,6 +832,12 @@ bool Manager::setFileOperatorFilePath(
 std::string Manager::getFileOperatorMD5Hash(const std::string &networkId)
 {
     return fileManager_.getFileOperatorMD5Hash(networkId);
+}
+
+bool Manager::setMappedMessageWidget(
+    CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget)
+{
+    return messageHandler_.setMappedMessageWidget(companion, message, widget);
 }
 
 // void Manager::waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message)

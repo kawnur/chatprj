@@ -188,54 +188,58 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
     chatHistoryScrollArea_->installEventFilter(this);
 }
 
-std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
-{
-    switch (message->type()) {
-    case MessageType::TEXT:
-        return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, message);
+// std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
+//     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+// {
+//     switch (message->type()) {
+//     case MessageType::TEXT:
+//         return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, message);
 
-    case MessageType::FILE:
-        return std::make_shared<FileMessageWidget>(chatHistoryWidget_, companion, message);
+//     case MessageType::FILE:
+//         return std::make_shared<FileMessageWidget>(chatHistoryWidget_, companion, message);
 
-    default:
-        logArgsError("message widget building error");
+//     default:
+//         logArgsError("message widget building error");
 
-        return nullptr;
-    }
-}
+//         return nullptr;
+//     }
+// }
 
-void CentralPanelWidget::addMessageWidgetToChatHistory(
-    std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-    std::shared_ptr<Message> message)
+void CentralPanelWidget::addMessageWidget(
+    // std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
+    // std::shared_ptr<Message> message)
+    std::shared_ptr<MessageWidget> widget, bool isAntecedent)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        auto widget = buildMessageWidget(companion, message);
+        // auto widget = buildMessageWidget(companion, message);
 
-        if (!widget)
-            return;
+        widget->setParent(chatHistoryWidget_.get());
 
-        auto lambda = [=]()
-        {
-            companion->setMappedMessageWidget(message, widget);
-        };
+        // if (!widget)
+        //     return;
 
-        runInDetachedThread(lambda);
+        // auto lambda = [=]()
+        // {
+        //     // companion->setMappedMessageWidget(message, widget);
+        //     getManager()->setMappedMessageWidget(companion, message, widget);
+        // };
 
-        if (widgetGroup)
-            widget->setBase(widgetGroup);
+        // runInDetachedThread(lambda);
+
+        // if (widgetGroup)
+        //     widget->setBase(widgetGroup);
 
         chatHistoryLayout_->addWidget(widget.get());
 
-        if (message->isAntecedent())
-            sortChatHistoryElements(false);
+        if (isAntecedent)
+            sortChatHistory(false);
     }
 
     // widget group action
-    if (widgetGroup)
-        widgetGroup->messageAdded();
+    // if (widgetGroup)
+    //     widgetGroup->messageAdded();
 
     scrollDownChatHistory();
 }
@@ -268,7 +272,7 @@ void CentralPanelWidget::clearChatHistory()
     }
 }
 
-void CentralPanelWidget::sortChatHistoryElements(bool lock)
+void CentralPanelWidget::sortChatHistory(bool lock)
 {
     if (lock)
         std::lock_guard<std::mutex> lockObject(mutex_);
