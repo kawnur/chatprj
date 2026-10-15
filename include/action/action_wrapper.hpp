@@ -20,8 +20,8 @@
 //     virtual void act() {}
 //     virtual void failed() {}
 //     virtual void method1() {}
-//     virtual std::shared_ptr<Action> getAction() { return nullptr; }
-//     virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
+//     virtual ActionPtr getAction() { return nullptr; }
+//     virtual CompanionDataPtr getCompanionData() { return nullptr; }
 // };
 
 // template<typename T, typename...Ts>
@@ -44,7 +44,7 @@
 
 //     ~ActionWrapper() { logArgsInfo(Q_FUNC_INFO); }
 
-//     std::shared_ptr<Action> getAction() { return action_; }
+//     ActionPtr getAction() { return action_; }
 //     std::shared_ptr<Dialog> getDialog() { return dialog_; }
 
 //     void set()
@@ -61,7 +61,7 @@
 //         dialog_->show();
 //     }
 
-//     std::shared_ptr<CompanionData> getCompanionData() override
+//     CompanionDataPtr getCompanionData() override
 //     {
 //         return dialog_->getCompanionData();
 //     }
@@ -83,7 +83,7 @@
 //     }
 
 // private:
-//     std::shared_ptr<Action> action_;
+//     ActionPtr action_;
 //     std::shared_ptr<Dialog> dialog_;
 // };
 

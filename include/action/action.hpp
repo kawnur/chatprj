@@ -6,13 +6,9 @@
 
 #include <QObject>
 
+#include "alias.hpp"
 #include "constants.hpp"
 #include "widgets_dialog.hpp"
-
-class ActionResult;
-class Companion;
-class CompanionData;
-class GroupChatData;
 
 class Action : public QObject
 {
@@ -23,7 +19,7 @@ public:
     virtual ~Action();
 
     virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
-    void setDialog(std::shared_ptr<Action> action);
+    void setDialog(ActionPtr action);
 
     virtual void buildDataDialog() {}
     // virtual void buildInfoDialog() {}
@@ -31,7 +27,7 @@ public:
     virtual void set() {}
     virtual void preAct() {}
     virtual void act() {}
-    virtual void postAct(std::shared_ptr<ActionResult> result) {}
+    virtual void postAct(ActionResultPtr result) {}
     virtual void endAct() {}
 
     virtual std::string name() { return ""s; }
@@ -77,7 +73,7 @@ class CompanionAction : public RegularAction, public std::enable_shared_from_thi
     Q_OBJECT
 
 public:
-    CompanionAction(ActionType type, std::shared_ptr<Companion> companion);
+    CompanionAction(ActionType type, CompanionPtr companion);
     ~CompanionAction();
 
     void buildDataDialog() override;
@@ -88,23 +84,23 @@ public:
     std::string serverPort() override;
     std::string clientPort() override;
     int companionId() override;
-    std::shared_ptr<CompanionData> getCompanionData() const;
-    std::shared_ptr<Companion> getCompanion() const;
+    CompanionDataPtr getCompanionData() const;
+    CompanionPtr getCompanion() const;
 
     void set() override;
 
     void updateCompanionObjectData();
-    void updateInfoDialog(std::shared_ptr<ActionResult> result);
+    void updateInfoDialog(ActionResultPtr result);
 
 public slots:
     void preAct() override;
     void act() override;
-    void postAct(std::shared_ptr<ActionResult> result) override;
+    void postAct(ActionResultPtr result) override;
     void endAct() override;
 
 private:
-    std::shared_ptr<CompanionData> data_;
-    std::shared_ptr<Companion> companion_;
+    CompanionDataPtr data_;
+    CompanionPtr companion_;
 };
 
 class GroupChatAction : public RegularAction
@@ -132,9 +128,9 @@ public:
 
     void set() override;
     void preAct() override;
-    void updateInfoDialog(std::shared_ptr<ActionResult> result);
+    void updateInfoDialog(ActionResultPtr result);
     void act() override;
-    void postAct(std::shared_ptr<ActionResult> result) override;
+    void postAct(ActionResultPtr result) override;
     void endAct() override;
 
 private:
@@ -146,11 +142,11 @@ class FileAction : public Action, public std::enable_shared_from_this<FileAction
     Q_OBJECT
 
 public:
-    FileAction(ActionType type, const std::string &networkId, std::shared_ptr<Companion> companion);
+    FileAction(ActionType type, const std::string &networkId, CompanionPtr companion);
     ~FileAction();
 
     void buildDataDialog() override;
-    std::shared_ptr<Companion> getCompanion() const;
+    CompanionPtr getCompanion() const;
     std::filesystem::path getPath() const;
     void set() override;
     void preAct() override;
@@ -159,7 +155,7 @@ public:
 
 private:
     std::filesystem::path filePath_;
-    std::shared_ptr<Companion> companion_;
+    CompanionPtr companion_;
     std::string networkId_;
 };
 

@@ -22,13 +22,13 @@ void DBOperator::connectToDB()
 
     // create connection
     auto info = parameters.getConnectionInfo();
-    auto connection = std::shared_ptr<PGconn>(PQconnectdb(info.data()), PQfinish);
+    auto connection = PGconnPtr(PQconnectdb(info.data()), PQfinish);
 
     if (getConnectionStatus(connection))
         connection_ = connection;
 }
 
-std::shared_ptr<PGresult> DBOperator::sendRequestAndReturnResult(const std::string &command)
+PGresultPtr DBOperator::sendRequestAndReturnResult(const std::string &command)
 {
     if (log_)
         logArgs(command);
@@ -41,7 +41,7 @@ std::shared_ptr<PGresult> DBOperator::sendRequestAndReturnResult(const std::stri
             PQclear(result);
     };
 
-    std::shared_ptr<PGresult> result(PQexec(connection_.get(), command.data()), lambda);
+    PGresultPtr result(PQexec(connection_.get(), command.data()), lambda);
 
     return result;
 }
@@ -51,7 +51,7 @@ bool DBOperator::isReady()
     return (connection_) ? true : false;
 }
 
-bool getConnectionStatus(std::shared_ptr<PGconn> connection)
+bool getConnectionStatus(PGconnPtr connection)
 {
     ConnStatusType status = PQstatus(connection.get());
     std::string mark = (status == 0) ? "OK" : "?";

@@ -143,8 +143,8 @@ bool MessageData::setFields(CompanionPtr companion, const nlohmann::json &data)
 }
 
 Message::Message(
-    std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-    std::shared_ptr<MessageState> state) : meta_(meta), data_(data), state_(state) {}
+    MessageMetaDataPtr meta, MessageDataPtr data,
+    MessageStatePtr state) : meta_(meta), data_(data), state_(state) {}
 
 Message::~Message() = default;
 
@@ -204,17 +204,17 @@ std::string Message::networkId() const
     return meta_->networkId_;
 }
 
-std::shared_ptr<MessageMetaData> Message::meta() const
+MessageMetaDataPtr Message::meta() const
 {
     return meta_;
 }
 
-std::shared_ptr<MessageData> Message::data() const
+MessageDataPtr Message::data() const
 {
     return data_;
 }
 
-std::shared_ptr<MessageState> Message::state() const
+MessageStatePtr Message::state() const
 {
     return state_;
 }
@@ -276,21 +276,20 @@ bool MessageState::setFields(CompanionPtr companion, const nlohmann::json &data)
     return result;
 }
 
-MessageInfo::MessageInfo(
-    std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget)
+MessageInfo::MessageInfo(MessagePtr message, MessageWidgetPtr widget)
     : message_(message), widget_(widget) {}
 
-std::shared_ptr<Message> MessageInfo::message() const
+MessagePtr MessageInfo::message() const
 {
     return message_;
 }
 
-std::shared_ptr<MessageWidget> MessageInfo::widget() const
+MessageWidgetPtr MessageInfo::widget() const
 {
     return widget_;
 }
 
-void MessageInfo::setWidget(std::shared_ptr<MessageWidget> widget)
+void MessageInfo::setWidget(MessageWidgetPtr widget)
 {
     widget_ = widget;
 }

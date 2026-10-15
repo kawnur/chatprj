@@ -7,10 +7,8 @@
 #include <mutex>
 #include <string>
 
+#include "alias.hpp"
 #include "logging.hpp"
-
-class FileOperator;
-class MessageMetaData;
 
 class FileManager
 {
@@ -19,12 +17,8 @@ public:
     ~FileManager() = default;
 
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
-
-    void addReceiverOperator(
-        std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path);
-
+    void addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path);
     std::shared_ptr<FileOperator> getOperator(const std::string &key);
-
     bool removeOperator(const std::string &key);
     std::string getFilePathString(const std::string &networkId);
     bool setFileOperatorFilePath(const std::string &networkId, const std::filesystem::path &path);

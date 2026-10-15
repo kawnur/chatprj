@@ -2,8 +2,7 @@
 
 #include "action.hpp"
 
-DataChecker::DataChecker(std::shared_ptr<Action> action)
-    : status_(true), action_(action), errors_() {}
+DataChecker::DataChecker(ActionPtr action) : status_(true), action_(action), errors_() {}
 
 std::vector<std::string> DataChecker::errors() const
 {
@@ -95,7 +94,7 @@ bool DataChecker::check()
     }
 }
 
-std::shared_ptr<ActionResult> checkDataForExistance(std::shared_ptr<Action> action)
+ActionResultPtr checkDataForExistance(ActionPtr action)
 {
     DataChecker checker(action);
 

@@ -5,19 +5,16 @@
 #include <string>
 #include <vector>
 
+#include "alias.hpp"
 #include "db_constants.hpp"
 #include "manager.hpp"
 
-class CompanionAction;
-class DBReplyData;
-class Manager;
-
-std::shared_ptr<Manager> getManager();
+ManagerPtr getManager();
 
 class DataChecker
 {
 public:
-    DataChecker(std::shared_ptr<Action> action);
+    DataChecker(ActionPtr action);
     ~DataChecker() = default;
 
     template<typename... Ts>
@@ -34,8 +31,7 @@ public:
     }
 
     template<typename... Ts>
-    bool checkDataForExistance(
-        DBRequestType type, const std::string &entryTemplate, Ts &&...args)
+    bool checkDataForExistance(DBRequestType type, const std::string &entryTemplate, Ts &&...args)
     {
         if (!status_)
             return false;
@@ -126,10 +122,10 @@ public:
 private:
 
     bool status_;
-    std::shared_ptr<Action> action_;
+    ActionPtr action_;
     std::vector<std::string> errors_;
 };
 
-std::shared_ptr<ActionResult> checkDataForExistance(std::shared_ptr<Action> action);
+ActionResultPtr checkDataForExistance(ActionPtr action);
 
 #endif // DATA_CHECKER_HPP

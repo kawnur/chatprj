@@ -9,7 +9,7 @@
 #include <QString>
 #include <QTime>
 
-// #include "graphic_manager.hpp"
+#include "alias.hpp"
 #include "utils.hpp"
 #include "utils_cout.hpp"
 
@@ -18,7 +18,7 @@ class GraphicManager;
 class SocketInfo;
 class SocketInfoWidget;
 
-std::shared_ptr<GraphicManager> getGraphicManager();
+GraphicManagerPtr getGraphicManager();
 
 template<typename... Ts>
 void coutArgsWithSpaceSeparator(Ts&&... args);
@@ -108,6 +108,6 @@ void logArgsWithCustomMark(Ts &&...args)
     logArgs(logCustomDelimiter, args...);
 }
 
-void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column);
+void logDBResultUnknownField(PGresultPtr result, int row, int column);
 
 #endif // LOGGING_HPP

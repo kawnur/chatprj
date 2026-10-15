@@ -15,7 +15,7 @@
 #include "utils.hpp"
 #include "widgets.hpp"
 
-// void Dialog::setAction(std::shared_ptr<Action> action)
+// void Dialog::setAction(ActionPtr action)
 // {
 //     action_ = action;
 // }
@@ -55,7 +55,7 @@ void Dialog::setDialogType(DialogType type)
 }
 
 CompanionDataDialog::CompanionDataDialog(
-    ActionType type, std::shared_ptr<QWidget> parent, std::shared_ptr<Companion> companion)
+    ActionType type, QWidgetPtr parent, CompanionPtr companion)
     : Dialog()
 {
     setTitleAsData();
@@ -115,7 +115,7 @@ std::string CompanionDataDialog::port()
     return portEdit_->text().toStdString();
 }
 
-void CompanionDataDialog::set(std::shared_ptr<Action> action)
+void CompanionDataDialog::set(ActionPtr action)
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
@@ -132,13 +132,13 @@ void CompanionDataDialog::set(std::shared_ptr<Action> action)
 
 }
 
-std::shared_ptr<CompanionData> CompanionDataDialog::getCompanionData()
+CompanionDataPtr CompanionDataDialog::getCompanionData()
 {
     return std::make_shared<CompanionData>(
         name(), ipAddress(), ""s, port());
 }
 
-GroupChatDataDialog::GroupChatDataDialog(ActionType type, std::shared_ptr<QWidget> parent)
+GroupChatDataDialog::GroupChatDataDialog(ActionType type, QWidgetPtr parent)
 {
     setTitleAsData();
 
@@ -157,7 +157,7 @@ GroupChatDataDialog::GroupChatDataDialog(ActionType type, std::shared_ptr<QWidge
     layout_->addWidget(list_.get());
 }
 
-void GroupChatDataDialog::set(std::shared_ptr<Action> action) {}
+void GroupChatDataDialog::set(ActionPtr action) {}
 
 CreatePasswordDialog::CreatePasswordDialog()
 {
@@ -186,7 +186,7 @@ CreatePasswordDialog::CreatePasswordDialog()
 }
 
 // void CreatePasswordDialog::set()
-void CreatePasswordDialog::set(std::shared_ptr<Action> action)
+void CreatePasswordDialog::set(ActionPtr action)
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
@@ -225,7 +225,7 @@ GetPasswordDialog::GetPasswordDialog()
     layout_->addWidget(buttonBox_.get());
 }
 
-void GetPasswordDialog::set(std::shared_ptr<Action> action)
+void GetPasswordDialog::set(ActionPtr action)
 {
     connect(
         buttonBox_.get(), &QDialogButtonBox::accepted,
@@ -282,7 +282,7 @@ TextDialog::TextDialog(
 
 TextDialog::~TextDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-void TextDialog::set(std::shared_ptr<Action> action)
+void TextDialog::set(ActionPtr action)
 {
     connect(this, &QDialog::rejected, action.get(), &Action::endAct, Qt::QueuedConnection);
 }
@@ -374,7 +374,7 @@ FileDialog::FileDialog(ActionType type)
 
 FileDialog::~FileDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-void FileDialog::set(std::shared_ptr<Action> action)
+void FileDialog::set(ActionPtr action)
 {
     connect(
         dialog_.get(), &QFileDialog::accepted,

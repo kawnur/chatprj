@@ -18,19 +18,8 @@
 #include <QString>
 #include <QWidget>
 
+#include "alias.hpp"
 #include "constants.hpp"
-
-using namespace std::string_literals;
-
-class ButtonInfo;
-class Companion;
-class CompanionAction;
-class DBReplyData;
-class GraphicManager;
-class Message;
-class MessageMetaData;
-
-std::shared_ptr<GraphicManager> getGraphicManager();
 
 template<typename M>
 concept AssociativeContainer = requires(M m)

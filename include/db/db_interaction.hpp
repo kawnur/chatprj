@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "alias.hpp"
 #include "db_constants.hpp"
 
 class DBConnectionPrameters
@@ -68,7 +69,7 @@ public:
     std::string getValue(std::size_t position, const std::string &key);
     bool findValue(const std::string&, const std::string &);    
 
-    int getDataFromResult(std::shared_ptr<PGresult> result, int maxTuples);
+    int getDataFromResult(PGresultPtr result, int maxTuples);
     void log();
 
 private:
@@ -76,7 +77,6 @@ private:
     std::vector<std::map<std::string, std::string>> data_;
 };
 
-std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys);
+std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::string> &keys);
 
 #endif // DB_INTERACTION_HPP

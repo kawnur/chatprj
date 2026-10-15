@@ -84,7 +84,7 @@ std::string Validator::getErrorsText()
     return buildTextAsUnorderedListWithHeader("Validation errors", errors_);
 }
 
-std::shared_ptr<ActionResult> Validator::getResult(bool value)
+ActionResultPtr Validator::getResult(bool value)
 {
     if (value)
         return std::make_shared<ActionResult>(true, ""s);
@@ -93,8 +93,7 @@ std::shared_ptr<ActionResult> Validator::getResult(bool value)
 }
 
 template<>
-std::shared_ptr<ActionResult> Validator::validate<CompanionAction>(
-    std::shared_ptr<CompanionAction> action)
+ActionResultPtr Validator::validate<CompanionAction>(CompanionActionPtr action)
 {
     bool nameResult = validateCompanionName(action->name());
     bool ipAddressResult = validateIpAddress(action->ipAddress());
@@ -108,8 +107,7 @@ std::shared_ptr<ActionResult> Validator::validate<CompanionAction>(
 }
 
 template<>
-std::shared_ptr<ActionResult> Validator::validate<PasswordAction>(
-    std::shared_ptr<PasswordAction> action)
+ActionResultPtr Validator::validate<PasswordAction>(PasswordActionPtr action)
 {
     bool result = validatePassword(action->password());
 

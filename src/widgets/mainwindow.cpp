@@ -21,7 +21,7 @@ MainWindow::MainWindow()
     bar->setPalette(*menuBarPalette_);
 
     // central widget
-    centralWidget_ = std::shared_ptr<QWidget>(new QWidget);
+    centralWidget_ = QWidgetPtr(new QWidget);
     setCentralWidget(centralWidget_.get());
 
     centralWidgetLayout_ = std::make_unique<QHBoxLayout>(centralWidget_.get());
@@ -89,7 +89,7 @@ void MainWindow::addTextToAppLogWidget(const QString &text)
 }
 
 bool MainWindow::addWidgetToContainerAndSetParentTo(
-    MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
+    MainWindowContainerPosition position, QWidgetPtr widget)
 {
     auto lambda = [&]()
     {
@@ -99,7 +99,7 @@ bool MainWindow::addWidgetToContainerAndSetParentTo(
     return runAndReturnBool(lambda);
 }
 
-void MainWindow::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
+void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
     leftPanel_->addWidgetToCompanionPanel(widget);
 }
@@ -109,7 +109,7 @@ std::size_t MainWindow::getCompanionPanelChildrenSize()
     return leftPanel_->getCompanionPanelChildrenSize();
 }
 
-void MainWindow::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
+void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
     leftPanel_->removeWidgetFromCompanionPanel(widget);
 }

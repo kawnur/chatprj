@@ -18,25 +18,14 @@
 #include <QPushButton>
 #include <QString>
 
+#include "alias.hpp"
 #include "constants.hpp"
-#include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "utils.hpp"
 
-using namespace std::string_literals;
-
-// using DataDialogTitleMap = std::unordered_map<ActionType, QString>;
-
-class Action;
-// class ActionWrapperBase;
-class ButtonBox;
-class Companion;
-class CompanionData;
-class FileAction;
-
 // template <typename T, typename F>
 // void showDialogAndLog(
-//     T &&message, F &&func, DialogType type, std::shared_ptr<QWidget> parent = nullptr)
+//     T &&message, F &&func, DialogType type, QWidgetPtr parent = nullptr)
 // {
 //     getGraphicManager()->createTextDialogAndShow(
 //         parent, type, message, createOkButtonInfoVector(func));
@@ -45,25 +34,25 @@ class FileAction;
 // }
 
 // template <typename T, typename F>
-// void showInfoDialogAndLogInfo(T &&message, F &&func, std::shared_ptr<QWidget> parent = nullptr)
+// void showInfoDialogAndLogInfo(T &&message, F &&func, QWidgetPtr parent = nullptr)
 // {
 //     showDialogAndLog(message, func, DialogType::INFO, parent);
 // }
 
 // template <typename T>
-// void showInfoDialogAndLogInfo(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+// void showInfoDialogAndLogInfo(T &&message, QWidgetPtr parent = nullptr)
 // {
 //     showDialogAndLog(message, &QDialog::accept, DialogType::INFO, parent);
 // }
 
 // template <typename T>
-// void showWarningDialogAndLogWarning(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+// void showWarningDialogAndLogWarning(T &&message, QWidgetPtr parent = nullptr)
 // {
 //     showDialogAndLog(message, &QDialog::accept, DialogType::WARNING, parent);
 // }
 
 // template <typename T>
-// void showErrorDialogAndLogError(T &&message, std::shared_ptr<QWidget> parent = nullptr)
+// void showErrorDialogAndLogError(T &&message, QWidgetPtr parent = nullptr)
 // {
 //     showDialogAndLog(message, &QDialog::accept, DialogType::ERROR, parent);
 // }
@@ -77,16 +66,16 @@ public:
     virtual ~Dialog() { logArgsInfo(Q_FUNC_INFO); }
 
     // virtual void set() {}
-    virtual void set(std::shared_ptr<Action> action) {}
+    virtual void set(ActionPtr action) {}
     virtual void showDialog() {}
-    virtual std::shared_ptr<CompanionData> getCompanionData() { return nullptr; }
+    virtual CompanionDataPtr getCompanionData() { return nullptr; }
     // virtual void method1() {}
     virtual std::string firstEditText() { return ""s; }
     virtual std::string secondEditText() { return ""s; }
     virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() { return QStringList(); }
 
-    // void setAction(std::shared_ptr<Action> action);
+    // void setAction(ActionPtr action);
     // void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
     bool containsDialog() const { return containsDialog_; }
     void setDialogType(DialogType type);
@@ -107,7 +96,7 @@ protected:
     std::reference_wrapper<const DataDialogTitleMap> dataMap_;
     std::reference_wrapper<const InfoDialogTitleMap> infoMap_;
     QString defaultTitle_;
-    // std::shared_ptr<Action> action_;
+    // ActionPtr action_;
     // std::shared_ptr<ActionWrapperBase> wrapper_;
 };
 
@@ -116,17 +105,17 @@ class CompanionDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    CompanionDataDialog(ActionType, std::shared_ptr<QWidget>, std::shared_ptr<Companion>);
+    CompanionDataDialog(ActionType, QWidgetPtr, CompanionPtr);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     std::string name();
     std::string ipAddress();
     std::string port();
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    void set(ActionPtr action) override;
     // void method1() override;
 
-    std::shared_ptr<CompanionData> getCompanionData() override;
+    CompanionDataPtr getCompanionData() override;
 
 private:
     ActionType type_;
@@ -145,11 +134,11 @@ class GroupChatDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    GroupChatDataDialog(ActionType, std::shared_ptr<QWidget>);
+    GroupChatDataDialog(ActionType, QWidgetPtr);
     ~GroupChatDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    void set(ActionPtr action) override;
 
 private:
     ActionType type_;
@@ -167,7 +156,7 @@ public:
     ~CreatePasswordDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    void set(ActionPtr action) override;
     std::string firstEditText() override;
     std::string secondEditText() override;
 
@@ -189,7 +178,7 @@ public:
     ~GetPasswordDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    void set(ActionPtr action) override;
     std::string editText() override;
 
 private:
@@ -213,7 +202,7 @@ public:
     ~TextDialog();
 
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    void set(ActionPtr action) override;
     void closeSelf();
     void closeSelfAndParentDialog();
     void acceptAction();
@@ -245,7 +234,7 @@ public:
     ~FileDialog();
 
     // void set() override;
-    void set(std::shared_ptr<Action> action) override;
+    void set(ActionPtr action) override;
     void showDialog() override;
 
     std::shared_ptr<QFileDialog> getFileDialog();

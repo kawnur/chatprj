@@ -5,8 +5,6 @@
 #include "manager.hpp"
 #include "message.hpp"
 
-using namespace std::string_literals;
-
 FileOperator::FileOperator(const std::filesystem::path &path) : path_(path), buf_() {}
 
 FileOperator::~FileOperator()
@@ -49,7 +47,7 @@ SenderOperator::SenderOperator(const std::filesystem::path &path) : FileOperator
 }
 
 bool SenderOperator::sendFilePart(
-    std::shared_ptr<Companion> companion, const std::string &networkId)
+    CompanionPtr companion, const std::string &networkId)
 {
     std::stringstream sstream;
     char buffer[MAX_BUFFER_SIZE] = { 0 };
@@ -69,7 +67,7 @@ bool SenderOperator::sendFilePart(
     return result;
 }
 
-void SenderOperator::sendFile(std::shared_ptr<Companion> companion, const std::string &networkId)
+void SenderOperator::sendFile(CompanionPtr companion, const std::string &networkId)
 {
     auto getReplyMeta = [&](NetworkMessageType type)
     {

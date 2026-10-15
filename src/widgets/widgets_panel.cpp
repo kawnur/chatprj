@@ -10,6 +10,7 @@
 #include "companion.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
+#include "graphic_manager.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils_cout.hpp"
@@ -17,9 +18,7 @@
 #include "widgets.hpp"
 #include "widgets_message.hpp"
 
-using namespace std::string_literals;
-
-LeftPanelWidget::LeftPanelWidget(std::shared_ptr<QWidget> parent)
+LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
 {
     if (parent)
         setParent(parent.get());
@@ -54,7 +53,7 @@ LeftPanelWidget::LeftPanelWidget(std::shared_ptr<QWidget> parent)
     layout_->addSpacerItem(spacer_.get());
 }
 
-void LeftPanelWidget::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
+void LeftPanelWidget::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
     companionPanelLayout_->addWidget(widget.get());
 }
@@ -68,7 +67,7 @@ std::size_t LeftPanelWidget::getCompanionPanelChildrenSize()
     return companionPanelChildren.size();
 }
 
-void LeftPanelWidget::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
+void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
     // TODO get rid of children mechanism usage
     auto companionPanelChildren =
@@ -81,7 +80,7 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoB
     } else if (index == 0) {
 
     } else if (index > 0) {
-        std::shared_ptr<Manager> manager = getManager();
+        ManagerPtr manager = getManager();
         auto previousWidget = companionPanelChildren.at(index - 1);
         auto previousCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(previousWidget);
         manager->resetSelectedCompanion(previousCompanion);
@@ -98,8 +97,7 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
     return runAndReturnDefault([&]() { return children.at(children.size() - 1)->width(); }, -1);
 }
 
-CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string &name)
-    : mutex_()
+CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name) : mutex_()
 {
     chatHistoryScrollArea_ = nullptr;
     chatHistoryWidgetPalette_ = nullptr;
@@ -170,7 +168,7 @@ CentralPanelWidget::CentralPanelWidget(std::shared_ptr<QWidget> parent, const st
     // splitter_->addWidget(textEdit_);
 }
 
-void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
+void CentralPanelWidget::set(CompanionPtr companion)
 {
     companion_ = companion;
 
@@ -189,8 +187,8 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
     chatHistoryScrollArea_->installEventFilter(this);
 }
 
-// std::shared_ptr<MessageWidget> CentralPanelWidget::buildMessageWidget(
-//     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+// MessageWidgetPtr CentralPanelWidget::buildMessageWidget(
+//     CompanionPtr companion, MessagePtr message)
 // {
 //     switch (message->type()) {
 //     case MessageType::TEXT:
@@ -207,9 +205,9 @@ void CentralPanelWidget::set(std::shared_ptr<Companion> companion)
 // }
 
 void CentralPanelWidget::addMessageWidget(
-    // std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-    // std::shared_ptr<Message> message)
-    std::shared_ptr<MessageWidget> widget, bool isAntecedent)
+    // WidgetGroupPtr widgetGroup, CompanionPtr companion,
+    // MessagePtr message)
+    MessageWidgetPtr widget, bool isAntecedent)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -273,7 +271,7 @@ void CentralPanelWidget::clearChatHistory()
     auto children = chatHistoryWidget_->children();
 
     for (auto &child : children) {
-        // std::shared_ptr<MessageWidget> messageWidget = dynamic_cast<std::shared_ptr<MessageWidget>>(child);
+        // MessageWidgetPtr messageWidget = dynamic_cast<MessageWidgetPtr>(child);
         auto messageWidget = qobject_cast<MessageWidget *>(child);
 
         // if (messageWidget) {
@@ -295,7 +293,6 @@ void CentralPanelWidget::sortChatHistory(bool lock)
     auto lambda = [&](const auto &item)
     {
         auto cast = qobject_cast<MessageWidget *>(item);
-        // auto message = companion_->getMappedMessageByMessageWidget(false, cast);
         auto message = cast->message();
 
         return (message) ? message->time() : ""s;
@@ -376,7 +373,7 @@ void CentralPanelWidget::saveFileSlot()
     getGraphicManager()->sendFile(companion_);
 }
 
-RightPanelWidget::RightPanelWidget(std::shared_ptr<QWidget> parent)
+RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
 {
     if (parent)
         setParent(parent.get());

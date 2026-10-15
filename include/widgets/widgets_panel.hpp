@@ -13,24 +13,19 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-class Companion;
-class Message;
-class MessageWidget;
-class SocketInfoBaseWidget;
-class TextEditWidget;
-// class WidgetGroup;
+#include "alias.hpp"
 
 class LeftPanelWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    LeftPanelWidget(std::shared_ptr<QWidget> parent);
+    LeftPanelWidget(QWidgetPtr parent);
     ~LeftPanelWidget() = default;
 
-    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
+    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
     int getLastCompanionPanelChildWidth();
 
 private:
@@ -46,18 +41,18 @@ class CentralPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    CentralPanelWidget(std::shared_ptr<QWidget> parent, const std::string &name);
+    CentralPanelWidget(QWidgetPtr parent, const std::string &name);
     ~CentralPanelWidget() = default;
 
-    void set(std::shared_ptr<Companion> companion);
+    void set(CompanionPtr companion);
 
-    // std::shared_ptr<MessageWidget> buildMessageWidget(
-    //     std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    // MessageWidgetPtr buildMessageWidget(
+    //     CompanionPtr companion, MessagePtr message);
 
     void addMessageWidget(
-        // std::shared_ptr<WidgetGroup> widgetGroup, std::shared_ptr<Companion> companion,
-        // std::shared_ptr<Message> message);
-        std::shared_ptr<MessageWidget> widget, bool isAntecedent);
+        // WidgetGroupPtr widgetGroup, CompanionPtr companion,
+        // MessagePtr message);
+        MessageWidgetPtr widget, bool isAntecedent);
 
     void scrollDownChatHistory();
     void clearChatHistory();
@@ -65,7 +60,7 @@ public:
 
 private:
     std::mutex mutex_;
-    std::shared_ptr<Companion> companion_;
+    CompanionPtr companion_;
     std::unique_ptr<QVBoxLayout> layout_;
 
     //    std::shared_ptr<QGraphicsScene> graphicsScene_;
@@ -82,7 +77,7 @@ private:
     std::unique_ptr<QScrollArea> chatHistoryScrollArea_;
     // std::shared_ptr<ScrollArea> chatHistoryScrollArea_;
 
-    std::shared_ptr<QWidget> chatHistoryWidget_;
+    QWidgetPtr chatHistoryWidget_;
     std::unique_ptr<QVBoxLayout> chatHistoryLayout_;
 
     std::unique_ptr<QWidget> buttonPanelWidget_;
@@ -109,7 +104,7 @@ class RightPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    RightPanelWidget(std::shared_ptr<QWidget> parent);
+    RightPanelWidget(QWidgetPtr parent);
     ~RightPanelWidget() = default;
 
     void set();

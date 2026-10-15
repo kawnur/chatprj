@@ -2,13 +2,14 @@
 
 #include "companion.hpp"
 #include "file_info.hpp"
+#include "graphic_manager.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 #include "widgets.hpp"
 
 MessageHandler::MessageHandler() : messageStorage_() {}
 
-void MessageHandler::setManager(std::shared_ptr<Manager> manager)
+void MessageHandler::setManager(ManagerPtr manager)
 {
     manager_ = manager;
 }
@@ -19,7 +20,7 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
 }
 
 MessageMetaDataPtr MessageHandler::buildMessageMetaData(
-    CompanionPtr companion, std::shared_ptr<DBReplyData> messagesData, std::size_t index)
+    CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index)
 {
     // network id is created by storage
     return std::make_shared<MessageMetaData>(
@@ -30,14 +31,12 @@ MessageMetaDataPtr MessageHandler::buildMessageMetaData(
         messagesData->getValue(index, "timestamp_tz"), "", "");
 }
 
-MessageDataPtr MessageHandler::buildMessageData(
-    std::shared_ptr<DBReplyData> messagesData, std::size_t index)
+MessageDataPtr MessageHandler::buildMessageData(DBReplyDataPtr messagesData, std::size_t index)
 {
     return std::make_shared<MessageData>(messagesData->getValue(index, "message"), "");
 }
 
-MessageStatePtr MessageHandler::buildMessageState(
-    std::shared_ptr<DBReplyData> messagesData, std::size_t index)
+MessageStatePtr MessageHandler::buildMessageState(DBReplyDataPtr messagesData, std::size_t index)
 {
     return std::make_shared<MessageState>(
         false,
@@ -45,8 +44,8 @@ MessageStatePtr MessageHandler::buildMessageState(
         getBoolFromDBValue(messagesData->getValue(index, "is_received")));
 }
 
-std::shared_ptr<Message> MessageHandler::createMessageAndAddToMapping(
-    CompanionPtr companion, std::shared_ptr<DBReplyData> messagesData, std::size_t index)
+MessagePtr MessageHandler::createMessageAndAddToMapping(
+    CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index)
 {
     auto meta = buildMessageMetaData(companion, messagesData, index);
     auto data = buildMessageData(messagesData, index);
@@ -55,7 +54,7 @@ std::shared_ptr<Message> MessageHandler::createMessageAndAddToMapping(
     return createMessage(companion, meta, data, state);
 }
 
-std::shared_ptr<Message> MessageHandler::createMessage(
+MessagePtr MessageHandler::createMessage(
     CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     auto message = std::make_shared<Message>(meta, data, state);
@@ -130,7 +129,7 @@ void MessageHandler::sendMessage(
 }
 
 bool MessageHandler::sendMessageByNetwork(
-    CompanionPtr companion, std::shared_ptr<Message> message, MessageMetaDataPtr meta)
+    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
 {
     if (meta->networkMessageType_ == NetworkMessageType::UNKNOWN)
         return false;
@@ -158,7 +157,7 @@ bool MessageHandler::sendJsonByNetwork(CompanionPtr companion, const std::string
 }
 
 bool MessageHandler::sendChatHistoryByNetwork(
-    CompanionPtr companion, std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys)
+    CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys)
 {
     // build json
     std::string json = buildChatHistoryJSONString(data, keys);
@@ -440,7 +439,8 @@ void MessageHandler::receiveFileRequest(CompanionPtr companion, MessageMetaDataP
         logTemplateError("companion has no file operator for networkId = {}", networkId);
 }
 
-void MessageHandler::receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data)
+void MessageHandler::receiveFileData(
+    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data)
 {
     logArgs(__FUNCTION__);
 
@@ -703,7 +703,7 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
 }
 
 bool MessageHandler::setMappedMessageWidget(
-    CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget)
+    CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget)
 {
     return messageStorage_.setMessageWidget(companion->id(), message->id(), widget);
 }
@@ -719,8 +719,7 @@ bool MessageHandler::addCompanionToMessageStorage(CompanionPtr companion)
 }
 
 std::string buildMessageJSONString(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    MessageMetaDataPtr meta)
+    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
 {
     using json = nlohmann::json;
 
@@ -766,7 +765,7 @@ std::string buildMessageJSONString(
 }
 
 std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data)
+    CompanionPtr companion, const std::string &networkId, const std::string &data)
 {
     using json = nlohmann::json;
 

@@ -186,7 +186,7 @@ bool DBReplyData::findValue(const std::string &key, const std::string &value)
     return !(result == data_.end());
 }
 
-int DBReplyData::getDataFromResult(std::shared_ptr<PGresult> result, int maxTuples)
+int DBReplyData::getDataFromResult(PGresultPtr result, int maxTuples)
 {
     int dataIsOk = 0;
 
@@ -247,7 +247,7 @@ void DBReplyData::log()
 }
 
 std::string buildChatHistoryJSONString(
-    std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys)
+    DBReplyDataPtr data, std::vector<std::string> &keys)
 {
     using json = nlohmann::json;
 

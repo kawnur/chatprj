@@ -4,7 +4,6 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
-// #include <QHostAddress>
 
 #include <openssl/md5.h>
 #include <openssl/evp.h>

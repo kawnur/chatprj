@@ -2,7 +2,7 @@
 
 #include "constants.hpp"
 
-void logDBResultUnknownField(std::shared_ptr<PGresult> result, int row, int column)
+void logDBResultUnknownField(PGresultPtr result, int row, int column)
 {
     auto value = PQgetvalue(result.get(), row, column);
     auto logMark = (value) ? std::string(value) : "nullptr";

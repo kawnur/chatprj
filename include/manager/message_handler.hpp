@@ -6,28 +6,13 @@
 
 #include <nlohmann/json.hpp>
 
+#include "alias.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
 #include "message_storage.hpp"
 
-class Action;
-class Companion;
-class Manager;
-class MessageData;
-class MessageMetaData;
-class MessageState;
-
-using CompanionPtr = std::shared_ptr<Companion>;
-using ActionPtr = std::shared_ptr<Action>;
-using MessagePtr = std::shared_ptr<Message>;
-using MessageInfoPtr = std::shared_ptr<MessageInfo>;
-using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;
-using MessageDataPtr = std::shared_ptr<MessageData>;
-using MessageStatePtr = std::shared_ptr<MessageState>;
-
 template <typename T>
-std::shared_ptr<T> buildObjectFromJson(
-    CompanionPtr companion, const nlohmann::json &data)
+std::shared_ptr<T> buildObjectFromJson(CompanionPtr companion, const nlohmann::json &data)
 {
     auto object = std::make_shared<T>();
     auto result = object->setFields(companion, data);
@@ -44,43 +29,36 @@ public:
     MessageHandler();
     ~MessageHandler() = default;
 
-    void setManager(std::shared_ptr<Manager> manager);
+    void setManager(ManagerPtr manager);
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
 
     MessageMetaDataPtr buildMessageMetaData(
-        CompanionPtr companion, std::shared_ptr<DBReplyData> messagesData, std::size_t index);
+        CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
 
-    MessageDataPtr buildMessageData(
-        std::shared_ptr<DBReplyData> messagesData, std::size_t index);
+    MessageDataPtr buildMessageData(DBReplyDataPtr messagesData, std::size_t index);
+    MessageStatePtr buildMessageState(DBReplyDataPtr messagesData, std::size_t index);
 
-    MessageStatePtr buildMessageState(
-        std::shared_ptr<DBReplyData> messagesData, std::size_t index);
+    MessagePtr createMessageAndAddToMapping(
+        CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
 
-    std::shared_ptr<Message> createMessageAndAddToMapping(
-        CompanionPtr companion, std::shared_ptr<DBReplyData> messagesData, std::size_t index);
-
-    std::shared_ptr<Message> createMessage(
+    MessagePtr createMessage(
         CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data,
         MessageStatePtr state);
 
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
-    bool sendMessageByNetwork(
-        CompanionPtr companion, std::shared_ptr<Message> message,
-        MessageMetaDataPtr meta);
-
+    bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
     bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
 
     bool sendChatHistoryByNetwork(
-        CompanionPtr companion, std::shared_ptr<DBReplyData> data, std::vector<std::string> &keys);
+        CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys);
 
     bool sendFileBlockByNetwork(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
 
     void sendFile(CompanionPtr companion, const std::filesystem::path &path);
-
     void receiveMessage(CompanionPtr companion, const std::string &json);
 
     void receiveTextMessage(
@@ -110,21 +88,20 @@ public:
     void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
 
     bool setMappedMessageWidget(
-        CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget);
+        CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
 
     bool clearMessageMapping(CompanionPtr companion);
     bool addCompanionToMessageStorage(CompanionPtr companion);
 
 private:
-    std::shared_ptr<Manager> manager_;
+    ManagerPtr manager_;
     MessageStorage messageStorage_;
 };
 
 std::string buildMessageJSONString(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    MessageMetaDataPtr meta);
+    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
 
 std::string buildFileBlockJSONString(
-    std::shared_ptr<Companion> companion, const std::string &networkId, const std::string &data);
+    CompanionPtr companion, const std::string &networkId, const std::string &data);
 
 #endif // MESSAGE_HANDLER_HPP

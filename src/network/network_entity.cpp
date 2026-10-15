@@ -19,15 +19,14 @@ uint16_t SocketInfo::port() const
     return port_;
 }
 
-void SocketInfo::updateData(std::shared_ptr<CompanionData> data)
+void SocketInfo::updateData(CompanionDataPtr data)
 {
     ipAddress_ = data->ipAddress();
     port_ = getIntFromString(PORT_BAD_VALUE, data->clientPort());
 }
 
 NetworkEntity::NetworkEntity(
-    int companionId, std::shared_ptr<SocketInfo> clientSocket,
-    std::shared_ptr<SocketInfo> serverSocket)
+    int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket)
     : companionId_(companionId), clientSocket_(clientSocket), serverSocket_(serverSocket),
     client_(nullptr), server_(nullptr) {}
 
@@ -120,7 +119,7 @@ bool NetworkEntity::sendJsonViaClient(const std::string &json)
     return result;
 }
 
-void NetworkEntity::updateClientSocketInfo(std::shared_ptr<CompanionData> data)
+void NetworkEntity::updateClientSocketInfo(CompanionDataPtr data)
 {
     clientSocket_->updateData(data);
 }
@@ -130,12 +129,12 @@ int NetworkEntity::companionId() const
     return companionId_;
 }
 
-std::shared_ptr<SocketInfo> NetworkEntity::clientSocket() const
+SocketInfoPtr NetworkEntity::clientSocket() const
 {
     return clientSocket_;
 }
 
-std::shared_ptr<SocketInfo> NetworkEntity::serverSocket() const
+SocketInfoPtr NetworkEntity::serverSocket() const
 {
     return serverSocket_;
 }

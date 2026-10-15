@@ -15,7 +15,7 @@ std::string Companion::name() const
     return name_;
 }
 
-void Companion::updateData(std::shared_ptr<CompanionData> data)
+void Companion::updateData(CompanionDataPtr data)
 {
     name_ = data->name();
     getManager()->updateSocketInfo(id_, data);

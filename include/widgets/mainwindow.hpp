@@ -13,16 +13,8 @@
 #include <QString>
 #include <QWidget>
 
+#include "alias.hpp"
 #include "constants.hpp"
-#include "graphic_manager.hpp"
-#include "logging.hpp"
-
-class CentralPanelWidget;
-class LeftPanelWidget;
-class MainWindowContainerWidget;
-class RightPanelWidget;
-class ShowHideWidget;
-class SocketInfoBaseWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -36,11 +28,11 @@ public:
     void addTextToAppLogWidget(const QString &text);
 
     bool addWidgetToContainerAndSetParentTo(
-        MainWindowContainerPosition position, std::shared_ptr<QWidget> widget);
+        MainWindowContainerPosition position, QWidgetPtr widget);
 
-    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
+    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
     void hideLeftAndRightPanels();
     void showLeftAndRightPanels();
     int getLeftPanelWidgetWidth();
@@ -79,7 +71,7 @@ private:
 
     std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
     std::unique_ptr<QPalette> menuBarPalette_;
-    std::shared_ptr<QWidget> centralWidget_;
+    QWidgetPtr centralWidget_;
     std::unique_ptr<QHBoxLayout> centralWidgetLayout_;
     std::unique_ptr<QSplitter> splitter_;
 };

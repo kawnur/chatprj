@@ -7,19 +7,10 @@
 #include <QString>
 #include <QWidget>
 
+#include "alias.hpp"
 #include "constants.hpp"
 
-class Companion;
-class MainWindow;
-class Message;
-class MessageInfo;
-class MessageWidget;
-class SocketInfoBaseWidget;
-class StubWidgetGroup;
-class WidgetGroup;
-
-using CompanionPtr = std::shared_ptr<Companion>;
-using MessagePtr = std::shared_ptr<Message>;
+#include "alias.hpp"
 
 class GraphicManager
 {
@@ -27,31 +18,27 @@ public:
     GraphicManager();
     ~GraphicManager() = default;
 
-    std::shared_ptr<MainWindow> getMainWindow();
-
+    MainWindowPtr getMainWindow();
     void set();
-
-    void setParentsForStubs(
-        std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer);
-
+    void setParentsForStubs(QWidgetPtr leftContainer, QWidgetPtr centralContainer);
     void setStubWidgets();
     void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
     void addTextToAppLogWidget(const QString &text);
     std::size_t getCompanionPanelChildrenSize();
-    void hideWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group);
-    void showWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group);
+    void hideWidgetGroupCentralPanel(WidgetGroupPtr group);
+    void showWidgetGroupCentralPanel(WidgetGroupPtr group);
 
     void addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition position, std::shared_ptr<QWidget> widget);
+        MainWindowContainerPosition position, QWidgetPtr widget);
 
-    void addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
-    void removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget);
+    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
+    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
     void createCompanion();
     void createGroupChat();
-    void updateCompanion(std::shared_ptr<Companion> companion);
-    void clearCompanionHistory(std::shared_ptr<Companion> companion);
-    void clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup);
-    void deleteCompanion(std::shared_ptr<Companion> companion);
+    void updateCompanion(CompanionPtr companion);
+    void clearCompanionHistory(CompanionPtr companion);
+    void clearChatHistory(WidgetGroupPtr widgetGroup);
+    void deleteCompanion(CompanionPtr companion);
     void hideCompanionPanelStub();
     void hideCentralPanelStub();
     void showCentralPanelStub();
@@ -65,11 +52,11 @@ public:
     void enableMainWindowBlurEffect();
     void disableMainWindowBlurEffect();
     void getEntrancePassword();
-    std::shared_ptr<MessageWidget> buildMessageWidget(CompanionPtr companion, MessagePtr message);
+    MessageWidgetPtr buildMessageWidget(CompanionPtr companion, MessagePtr message);
     void addMessageWidget(CompanionPtr companion, MessagePtr message);
-    bool setMessageWidgetAsSent(std::shared_ptr<MessageInfo> info);
-    void setMessageWidgetAsReceived(std::shared_ptr<MessageInfo> info);
-    void sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group);
+    bool setMessageWidgetAsSent(MessageInfoPtr info);
+    void setMessageWidgetAsReceived(MessageInfoPtr info);
+    void sortChatHistoryElementsForWidgetGroup(WidgetGroupPtr group);
     void sendFile(CompanionPtr companion);
     void saveFile(const std::string& networkId, CompanionPtr companion);
     std::string getFilePathString(const std::string &networkId);
@@ -77,9 +64,9 @@ public:
 private:
     // std::mutex messageToMessageWidgetMapMutex_;
     std::shared_ptr<StubWidgetGroup> stubWidgets_;
-    std::shared_ptr<MainWindow> mainWindow_;
+    MainWindowPtr mainWindow_;
 };
 
-std::shared_ptr<GraphicManager> getGraphicManager();
+GraphicManagerPtr getGraphicManager();
 
 #endif // GRAPHIC_MANAGER_HPP

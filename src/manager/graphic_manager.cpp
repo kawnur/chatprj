@@ -14,7 +14,7 @@ GraphicManager::GraphicManager()
     mainWindow_ = std::make_shared<MainWindow>();
 }
 
-std::shared_ptr<MainWindow> GraphicManager::getMainWindow()
+MainWindowPtr GraphicManager::getMainWindow()
 {
     return mainWindow_;
 }
@@ -26,8 +26,7 @@ void GraphicManager::set()
     mainWindow_->show();
 }
 
-void GraphicManager::setParentsForStubs(
-    std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer)
+void GraphicManager::setParentsForStubs(QWidgetPtr leftContainer, QWidgetPtr centralContainer)
 {
     stubWidgets_->setParents(leftContainer, centralContainer);
 }
@@ -52,29 +51,29 @@ std::size_t GraphicManager::getCompanionPanelChildrenSize()
     return mainWindow_->getCompanionPanelChildrenSize();
 }
 
-void GraphicManager::hideWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group)
+void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroupPtr group)
 {
     group->hideCentralPanel();
 }
 
-void GraphicManager::showWidgetGroupCentralPanel(std::shared_ptr<WidgetGroup> group)
+void GraphicManager::showWidgetGroupCentralPanel(WidgetGroupPtr group)
 {
     group->showCentralPanel();
 }
 
 void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
-    MainWindowContainerPosition position, std::shared_ptr<QWidget> widget)
+    MainWindowContainerPosition position, QWidgetPtr widget)
 {
     if (!mainWindow_->addWidgetToContainerAndSetParentTo(position, widget))
         logArgsError("addWidgetToContainerAndSetParentTo error");
 }
 
-void GraphicManager::addWidgetToCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
+void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
     mainWindow_->addWidgetToCompanionPanel(widget);
 }
 
-void GraphicManager::removeWidgetFromCompanionPanel(std::shared_ptr<SocketInfoBaseWidget> widget)
+void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
     mainWindow_->removeWidgetFromCompanionPanel(widget);
 }
@@ -100,7 +99,7 @@ void GraphicManager::clearCompanionHistory(CompanionPtr companion)
     getManager()->initCompanionHistoryClearing(companion);
 }
 
-void GraphicManager::clearChatHistory(std::shared_ptr<WidgetGroup> widgetGroup)
+void GraphicManager::clearChatHistory(WidgetGroupPtr widgetGroup)
 {
     widgetGroup->clearChatHistory();
 }
@@ -184,8 +183,7 @@ void GraphicManager::getEntrancePassword()
     getManager()->initEntrancePasswordReception();
 }
 
-std::shared_ptr<MessageWidget> GraphicManager::buildMessageWidget(
-    CompanionPtr companion, MessagePtr message)
+MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, MessagePtr message)
 {
     switch (message->type()) {
     case MessageType::TEXT:
@@ -214,7 +212,7 @@ void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message
 
 bool GraphicManager::setMessageWidgetAsSent(
     // CompanionPtr companion, MessagePtr message)
-    std::shared_ptr<MessageInfo> info)
+    MessageInfoPtr info)
 {
     // auto lambda = [&]()
     // {
@@ -235,7 +233,7 @@ bool GraphicManager::setMessageWidgetAsSent(
 
 void GraphicManager::setMessageWidgetAsReceived(
     // CompanionPtr companion, MessagePtr message)
-    std::shared_ptr<MessageInfo> info)
+    MessageInfoPtr info)
 {
     // auto lambda = [&]()
     // {
@@ -252,7 +250,7 @@ void GraphicManager::setMessageWidgetAsReceived(
         logArgsError("marking widget as received error");
 }
 
-void GraphicManager::sortChatHistoryElementsForWidgetGroup(std::shared_ptr<WidgetGroup> group)
+void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroupPtr group)
 {
     group->sortChatHistoryElements();
 }
@@ -272,7 +270,7 @@ std::string GraphicManager::getFilePathString(const std::string &networkId)
     return getManager()->getFilePathString(networkId);
 }
 
-std::shared_ptr<GraphicManager> getGraphicManager()
+GraphicManagerPtr getGraphicManager()
 {
     QCoreApplication *coreApp = QCoreApplication::instance();
     ChatApp *app = dynamic_cast<ChatApp*>(coreApp);

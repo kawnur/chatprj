@@ -6,6 +6,7 @@
 #include "data.hpp"
 #include "data_checker.hpp"
 #include "functional"
+#include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "message.hpp"
 #include "message_handler.hpp"
@@ -13,9 +14,6 @@
 #include "utils.hpp"
 #include "validator.hpp"
 #include "widgets.hpp"
-#include "widgets_dialog.hpp"
-
-using namespace std::string_literals;
 
 Manager::Manager()
     : messageHandler_(), fileManager_(), networkManager_(), messageStateToMessageMapMutex_(),
@@ -74,9 +72,9 @@ CompanionPtr Manager::getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWid
     return (result == companionAndWidgetGroupMap_.end()) ? nullptr : result->second.first;
 }
 
-std::shared_ptr<WidgetGroup> Manager::getMappedWidgetGroupByCompanion(CompanionPtr companion) const
+WidgetGroupPtr Manager::getMappedWidgetGroupByCompanion(CompanionPtr companion) const
 {
-    std::shared_ptr<WidgetGroup> group = nullptr;
+    WidgetGroupPtr group = nullptr;
 
     auto id = companion->id();
 
@@ -212,18 +210,18 @@ void Manager::initEntrancePasswordReception()
     initAction<PasswordAction>(ActionType::GET_PASSWORD);
 }
 
-void Manager::initFileSend(std::shared_ptr<Companion> companion)
+void Manager::initFileSend(CompanionPtr companion)
 {
     initAction<FileAction>(ActionType::SEND_FILE, ""s, companion);
 }
 
-void Manager::initFileReception(const std::string &networkId, std::shared_ptr<Companion> companion)
+void Manager::initFileReception(const std::string &networkId, CompanionPtr companion)
 {
     initAction<FileAction>(ActionType::SAVE_FILE, networkId, companion);
 }
 
 ActionResultPtr Manager::getActionResultByKeyDBData(
-    std::shared_ptr<DBReplyData> data, const std::string &key, bool allowEmptyResult)
+    DBReplyDataPtr data, const std::string &key, bool allowEmptyResult)
 {
     // TODO define db schema as code and switch from string field names to enum values
     if (!data)
@@ -368,7 +366,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::updateSocketInfo(int id, std::shared_ptr<CompanionData> data)
+void Manager::updateSocketInfo(int id, CompanionDataPtr data)
 {
     networkManager_.updateSocketInfo(id, data);
 }
@@ -556,12 +554,12 @@ void Manager::sendMessage(
 }
 
 bool Manager::sendMessage(
-    CompanionPtr companion, std::shared_ptr<Message> message, std::shared_ptr<MessageMetaData> meta)
+    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
 {
     return messageHandler_.sendMessageByNetwork(companion, message, meta);
 }
 
-CompanionPtr Manager::getMappedCompanionByWidgetGroup(std::shared_ptr<WidgetGroup> group) const
+CompanionPtr Manager::getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const
 {
     auto lambda = [&](const auto &pair)
     {
@@ -669,7 +667,7 @@ CompanionPtr Manager::addCompanionObject(int id, const std::string &name)
     }
 
     auto companion = std::make_shared<Companion>(id, name);
-    std::shared_ptr<WidgetGroup> group = nullptr;
+    WidgetGroupPtr group = nullptr;
     auto value = std::pair(companion, group);
     auto result = companionAndWidgetGroupMap_.emplace(id, value);
 
@@ -693,7 +691,7 @@ std::shared_ptr<CompanionResult> Manager::addCompanionToManagerMap(
     }
 
     auto companion = std::make_shared<Companion>(id, name);
-    std::shared_ptr<WidgetGroup> group = nullptr;
+    WidgetGroupPtr group = nullptr;
     auto value = std::pair(companion, group);
     auto result = companionAndWidgetGroupMap_.emplace(id, value);
 
@@ -707,8 +705,7 @@ std::shared_ptr<CompanionResult> Manager::addCompanionToManagerMap(
     return std::make_shared<CompanionResult>(companion, true, ""s);
 }
 
-std::shared_ptr<ActionResult> Manager::addCompanionToNetworkManagerMap(
-    int id, std::shared_ptr<CompanionData> data)
+ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPtr data)
 {
     // update network manager
     auto clientSocket = std::make_shared<SocketInfo>(
@@ -782,7 +779,7 @@ bool Manager::sendFileBlock(
     return messageHandler_.sendFileBlockByNetwork(companion, networkId, data);
 }
 
-std::shared_ptr<CompanionData> Manager::getCompanionData(CompanionPtr companion)
+CompanionDataPtr Manager::getCompanionData(CompanionPtr companion)
 {
     return networkManager_.getCompanionData(companion);
 }
@@ -803,7 +800,7 @@ void Manager::addSenderOperator(const std::string &networkId, const std::filesys
 }
 
 void Manager::addReceiverOperator(
-    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
+    MessageMetaDataPtr meta, const std::filesystem::path &path)
 {
     fileManager_.addReceiverOperator(meta, path);
 }
@@ -825,7 +822,7 @@ std::string Manager::getFileOperatorMD5Hash(const std::string &networkId)
 }
 
 bool Manager::setMappedMessageWidget(
-    CompanionPtr companion, MessagePtr message, std::shared_ptr<MessageWidget> widget)
+    CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget)
 {
     return messageHandler_.setMappedMessageWidget(companion, message, widget);
 }
@@ -851,7 +848,7 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
     getGraphicManager()->setMessageWidgetAsSent(info);
 }
 
-void Manager::markMessageAsReceived(std::shared_ptr<MessageInfo> info)
+void Manager::markMessageAsReceived(MessageInfoPtr info)
 {
     // mark in widget
     getGraphicManager()->setMessageWidgetAsReceived(info);
@@ -964,7 +961,7 @@ Manager::getActionLambda(FileActionPtr action)
     }
 }
 
-std::shared_ptr<Manager> getManager()
+ManagerPtr getManager()
 {
     QCoreApplication *coreApp = QCoreApplication::instance();
     ChatApp *app = dynamic_cast<ChatApp *>(coreApp);

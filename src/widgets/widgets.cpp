@@ -162,7 +162,7 @@ void IndicatorWidget::toggle()
     (isOn_ == true) ? setOff() : setOn();
 }
 
-SocketInfoWidget::SocketInfoWidget(std::shared_ptr<Companion> companion)
+SocketInfoWidget::SocketInfoWidget(CompanionPtr companion)
 {
     buildFields();
 
@@ -321,7 +321,7 @@ void SocketInfoWidget::buildFields()
     received_ = std::make_shared<IndicatorWidget>(NEW_MESSAGES_INDICATOR_WIDGET_SIZE, false);
 
     // add widgets to layout
-    std::vector<std::shared_ptr<QWidget>> widgets {
+    std::vector<QWidgetPtr> widgets {
         state_, name_, ipAddress_, serverPort_, clientPort_, edit_, connect_, received_
     };
 
@@ -467,7 +467,7 @@ void ShowHideWidget::mousePressEvent(QMouseEvent *event)
 //     logArgs(__FUNCTION__);
 // }
 
-WidgetGroup::WidgetGroup(std::shared_ptr<Companion> companion)
+WidgetGroup::WidgetGroup(CompanionPtr companion)
     : companion_(companion), antecedentMessagesCounterMutex_(std::mutex())
 {
     antecedentMessagesCounter_ = 0;
@@ -535,7 +535,7 @@ void WidgetGroup::showCentralPanel()
     centralPanel_->scrollDownChatHistory();
 }
 
-std::shared_ptr<SocketInfoBaseWidget> WidgetGroup::getSocketInfoBase()
+SocketInfoBaseWidgetPtr WidgetGroup::getSocketInfoBase()
 {
     return socketInfoBase_;
 }
@@ -570,7 +570,7 @@ void WidgetGroup::updateSocketInfoWidget()
     socketInfoBase_->updateFields();
 }
 
-void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
+void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 {
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
@@ -605,7 +605,7 @@ void WidgetGroup::messageWidgetSelected(std::shared_ptr<MessageWidget> widget)
 //     companion_->addMessageWidgetsToChatHistory();
 // }
 
-void WidgetGroup::addMessageWidgetSlot(std::shared_ptr<Message> message)
+void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
 {
     bool isAntecedent = message->isAntecedent();
 
@@ -669,7 +669,7 @@ void StubWidgetGroup::set()
 }
 
 void StubWidgetGroup::setParents(
-    std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer)
+    QWidgetPtr leftContainer, QWidgetPtr centralContainer)
 {
     leftPanel_->setParent(centralContainer.get());
     centralPanel_->setParent(centralContainer.get());
@@ -713,7 +713,7 @@ void StubWidgetGroup::setLeftPanelWidth(int width)
     leftPanel_->resize(width, leftPanel_->height());
 }
 
-MainWindowContainerWidget::MainWindowContainerWidget(std::shared_ptr<QWidget> widget)
+MainWindowContainerWidget::MainWindowContainerWidget(QWidgetPtr widget)
 {
     if (widget)
         setParent(widget.get());
@@ -724,13 +724,13 @@ MainWindowContainerWidget::MainWindowContainerWidget(std::shared_ptr<QWidget> wi
     setLayout(layout_.get());
 }
 
-void MainWindowContainerWidget::addWidgetToLayout(std::shared_ptr<QWidget> widget)
+void MainWindowContainerWidget::addWidgetToLayout(QWidgetPtr widget)
 {
     if (widget)
         layout_->addWidget(widget.get());
 }
 
-void MainWindowContainerWidget::addWidgetToLayoutAndSetParentTo(std::shared_ptr<QWidget> widget)
+void MainWindowContainerWidget::addWidgetToLayoutAndSetParentTo(QWidgetPtr widget)
 {
     if (widget) {
         layout_->addWidget(widget.get());

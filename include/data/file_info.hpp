@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-class Companion;
+#include "alias.hpp"
 
 // TODO rename to file_operator.hpp
 
@@ -35,8 +35,8 @@ public:
     SenderOperator(const std::filesystem::path &path);
     ~SenderOperator() = default;
 
-    bool sendFilePart(std::shared_ptr<Companion> companion, const std::string &networkId);
-    void sendFile(std::shared_ptr<Companion> companion, const std::string &networkId);
+    bool sendFilePart(CompanionPtr companion, const std::string &networkId);
+    void sendFile(CompanionPtr companion, const std::string &networkId);
 };
 
 class ReceiverOperator : public FileOperator

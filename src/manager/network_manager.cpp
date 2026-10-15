@@ -8,8 +8,7 @@
 NetworkManager::NetworkManager() : map_() {}
 
 std::pair<NetworkManagerMap::iterator, bool> NetworkManager::addToMap(
-    int companionId, std::shared_ptr<SocketInfo> clientSocket,
-    std::shared_ptr<SocketInfo> serverSocket)
+    int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket)
 {
     auto entity = std::make_shared<NetworkEntity>(companionId, clientSocket, serverSocket);
 
@@ -26,12 +25,12 @@ std::shared_ptr<NetworkEntity> NetworkManager::getValue(int id)
     return runAndReturnSharedPtr<NetworkEntity>([&]() { return map_.at(id); });
 }
 
-void NetworkManager::updateSocketInfo(int id, std::shared_ptr<CompanionData> data)
+void NetworkManager::updateSocketInfo(int id, CompanionDataPtr data)
 {
     runAndLogException([&]() { map_.at(id)->updateClientSocketInfo(data); });
 }
 
-std::shared_ptr<CompanionData> NetworkManager::getCompanionData(CompanionPtr companion)
+CompanionDataPtr NetworkManager::getCompanionData(CompanionPtr companion)
 {
     auto entity = getValue(companion->id());
 
@@ -44,7 +43,7 @@ std::shared_ptr<CompanionData> NetworkManager::getCompanionData(CompanionPtr com
     auto clientPort = getString(entity->clientPort());
 
     return std::make_shared<CompanionData>(name, ipAddress, serverPort, clientPort);
-    // return std::shared_ptr<CompanionData>(new CompanionData(name, ipAddress, serverPort, clientPort));
+    // return CompanionDataPtr(new CompanionData(name, ipAddress, serverPort, clientPort));
 }
 
 bool NetworkManager::connectClient(CompanionPtr companion)

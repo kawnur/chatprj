@@ -13,15 +13,8 @@
 #include <QPushButton>
 #include <QTextEdit>
 
+#include "alias.hpp"
 #include "logging.hpp"
-
-class CentralPanelWidget;
-class Companion;
-class LeftPanelWidget;
-class Message;
-class MessageWidget;
-class RightPanelWidget;
-class TextDialog;
 
 ButtonType getInitialConnectButtonType();
 ButtonType getNextConnectButtonType(ButtonType current);
@@ -139,7 +132,7 @@ class SocketInfoWidget : public SocketInfoBaseWidget
     Q_OBJECT
 
 public:
-    SocketInfoWidget(std::shared_ptr<Companion> companion);
+    SocketInfoWidget(CompanionPtr companion);
     ~SocketInfoWidget() = default;
 
     QString name() const;
@@ -171,7 +164,7 @@ private:
 
     bool isSelected_;
     bool isConnected_;
-    std::shared_ptr<Companion> companion_;
+    CompanionPtr companion_;
     QColor selected_;
     QColor unselected_;
     std::shared_ptr<QPalette> palette_;
@@ -244,35 +237,35 @@ class WidgetGroup : public QObject, public std::enable_shared_from_this<WidgetGr
     Q_OBJECT
 
 public:
-    WidgetGroup(std::shared_ptr<Companion> companion);
+    WidgetGroup(CompanionPtr companion);
     ~WidgetGroup();
 
     void set();
     void clearChatHistory();
     void hideCentralPanel();
     void showCentralPanel();
-    std::shared_ptr<SocketInfoBaseWidget> getSocketInfoBase();
+    SocketInfoBaseWidgetPtr getSocketInfoBase();
     void sortChatHistoryElements();
     void messageAdded();
     void askUserForHistorySendingConfirmation();
     void updateSocketInfoWidget();
 
 signals:
-    void addMessageWidgetSignal(std::shared_ptr<Message> message);
+    void addMessageWidgetSignal(MessagePtr message);
     void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
 public slots:
-    void messageWidgetSelected(std::shared_ptr<MessageWidget> widget);
+    void messageWidgetSelected(MessageWidgetPtr widget);
     // void buildChatHistorySlot();
 
 private slots:
-    void addMessageWidgetSlot(std::shared_ptr<Message> message);
+    void addMessageWidgetSlot(MessagePtr message);
     void askUserForHistorySendingConfirmationSlot();
 
 private:
-    std::shared_ptr<Companion> companion_;
-    std::shared_ptr<SocketInfoBaseWidget> socketInfoBase_;
+    CompanionPtr companion_;
+    SocketInfoBaseWidgetPtr socketInfoBase_;
     std::shared_ptr<CentralPanelWidget> centralPanel_;
     uint32_t antecedentMessagesCounter_;
     std::mutex antecedentMessagesCounterMutex_;
@@ -287,7 +280,7 @@ public:
     void set();
 
     void setParents(
-        std::shared_ptr<QWidget> leftContainer, std::shared_ptr<QWidget> centralContainer);
+        QWidgetPtr leftContainer, QWidgetPtr centralContainer);
 
     void hideSocketInfoStubWidget();
     void hideCentralPanel();
@@ -308,11 +301,11 @@ class MainWindowContainerWidget : public QWidget
     Q_OBJECT
 
 public:
-    MainWindowContainerWidget(std::shared_ptr<QWidget> widget);
+    MainWindowContainerWidget(QWidgetPtr widget);
     ~MainWindowContainerWidget() = default;
 
-    void addWidgetToLayout(std::shared_ptr<QWidget> widget);
-    void addWidgetToLayoutAndSetParentTo(std::shared_ptr<QWidget> widget);
+    void addWidgetToLayout(QWidgetPtr widget);
+    void addWidgetToLayoutAndSetParentTo(QWidgetPtr widget);
 
 private:
     std::unique_ptr<QVBoxLayout> layout_;

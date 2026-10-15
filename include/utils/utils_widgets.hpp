@@ -4,9 +4,8 @@
 #include <QString>
 #include <QWidget>
 
+#include "alias.hpp"
 #include "constants.hpp"
-
-class ButtonInfo;
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function);
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function);

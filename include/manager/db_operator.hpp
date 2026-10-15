@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 
+#include "alias.hpp"
 #include "constants.hpp"
 #include "db_interaction.hpp"
 #include "logging.hpp"
@@ -18,7 +19,7 @@ public:
     void connectToDB();
 
     template<typename... Ts>
-    std::shared_ptr<DBReplyData> getDBData(DBRequestType type, Ts &&...args)
+    DBReplyDataPtr getDBData(DBRequestType type, Ts &&...args)
     {
         DBRequestData requestData { type };
         auto data = getReplyData(requestData, args...);
@@ -41,7 +42,7 @@ public:
     }
 
     template<typename... Ts>
-    std::shared_ptr<DBReplyData> getReplyData(DBRequestData &requestData, Ts &&...args)
+    DBReplyDataPtr getReplyData(DBRequestData &requestData, Ts &&...args)
     {
         if (!requestData.isValid()) {
             logArgsError("requestData is invalid");
@@ -50,7 +51,7 @@ public:
         }
 
         auto command = requestData.buildCommand(args...);
-        std::shared_ptr<PGresult> dbResult = sendRequestAndReturnResult(command);
+        PGresultPtr dbResult = sendRequestAndReturnResult(command);
 
         if (log_) {
             logArgs(logDelimiter);
@@ -81,16 +82,16 @@ public:
         return replyData;
     }
 
-    std::shared_ptr<PGresult> sendRequestAndReturnResult(const std::string &command);
+    PGresultPtr sendRequestAndReturnResult(const std::string &command);
     bool isReady();
 
 
 private:
     bool log_;
     std::mutex mutex_;  // ???
-    std::shared_ptr<PGconn> connection_;
+    PGconnPtr connection_;
 };
 
-bool getConnectionStatus(std::shared_ptr<PGconn> connection);
+bool getConnectionStatus(PGconnPtr connection);
 
 #endif // DB_OPERATOR_HPP

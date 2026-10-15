@@ -5,9 +5,7 @@
 #include <string>
 #include <vector>
 
-class ActionResult;
-class CompanionAction;
-class PasswordAction;
+#include "alias.hpp"
 
 class Validator
 {
@@ -16,7 +14,7 @@ public:
     ~Validator() = default;
 
     template<class A>
-    std::shared_ptr<ActionResult> validate(std::shared_ptr<A> action);
+    ActionResultPtr validate(std::shared_ptr<A> action);
 
     bool validateCompanionName(const std::string &name);
     bool validateIpAddress(const std::string &ipAddress);
@@ -27,22 +25,22 @@ public:
         const std::string &mark, const std::string &value, std::size_t limit);
 
     std::string getErrorsText();
-    std::shared_ptr<ActionResult> getResult(bool value);
+    ActionResultPtr getResult(bool value);
 
 private:
     std::vector<std::string> errors_;
 };
 
 template<>
-std::shared_ptr<ActionResult> Validator::validate<CompanionAction>(
-    std::shared_ptr<CompanionAction> action);
+ActionResultPtr Validator::validate<CompanionAction>(
+    CompanionActionPtr action);
 
 template<>
-std::shared_ptr<ActionResult> Validator::validate<PasswordAction>(
-    std::shared_ptr<PasswordAction> action);
+ActionResultPtr Validator::validate<PasswordAction>(
+    PasswordActionPtr action);
 
 template<typename T>
-std::shared_ptr<ActionResult> validateActionData(std::shared_ptr<T> action)
+ActionResultPtr validateActionData(std::shared_ptr<T> action)
 {
     Validator validator {};
 

@@ -47,7 +47,7 @@ void CompanionData::log()
 GroupChatData::GroupChatData() : members_() {}
 
 bool compareCompanionData(
-    std::shared_ptr<CompanionData> data1, std::shared_ptr<CompanionData> data2)
+    CompanionDataPtr data1, CompanionDataPtr data2)
 {
     // do not check serverPort
 

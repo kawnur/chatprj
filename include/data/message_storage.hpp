@@ -2,19 +2,12 @@
 #define MESSAGE_STORAGE_HPP
 
 #include <cstdint>
-#include <memory>
 #include <mutex>
 #include <unordered_map>
 
-class Message;
-class MessageInfo;
-class MessageWidget;
-class WidgetGroup;
+#include "alias.hpp"
 
-using MessagePtr = std::shared_ptr<Message>;
-using MessageInfoPtr = std::shared_ptr<MessageInfo>;
 using MessageMap = std::unordered_map<uint32_t, MessageInfoPtr>;
-using MessageWidgetPtr = std::shared_ptr<MessageWidget>;
 
 class CompanionMessageStorage
 {

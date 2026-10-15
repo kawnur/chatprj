@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "alias.hpp"
 #include "logging.hpp"
 
 class Companion;
@@ -41,10 +42,10 @@ public:
     ~GroupChatData() = default;
 
 private:
-    std::vector<std::shared_ptr<Companion>> members_;
+    std::vector<CompanionPtr> members_;
 };
 
 bool compareCompanionData(
-    std::shared_ptr<CompanionData> data1, std::shared_ptr<CompanionData> data2);
+    CompanionDataPtr data1, CompanionDataPtr data2);
 
 #endif // DATA_HPP

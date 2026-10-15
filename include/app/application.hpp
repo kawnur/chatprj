@@ -5,6 +5,8 @@
 
 #include <QApplication>
 
+#include "alias.hpp"
+
 class GraphicManager;
 class Manager;
 
@@ -16,8 +18,8 @@ public:
 
     void set();
 
-    std::shared_ptr<GraphicManager> graphicManager_;
-    std::shared_ptr<Manager> manager_;
+    GraphicManagerPtr graphicManager_;
+    ManagerPtr manager_;
 };
 
 #endif // APPLICATION_HPP

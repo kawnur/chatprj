@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+#include "alias.hpp"
+
 class CompanionData;
 
 class Companion : public std::enable_shared_from_this<Companion>
@@ -20,7 +22,7 @@ public:
     int id() const;
     std::string name() const;
 
-    void updateData(std::shared_ptr<CompanionData> data);
+    void updateData(CompanionDataPtr data);
 
 private:
     int id_;  // TODO change type

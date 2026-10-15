@@ -3,15 +3,10 @@
 
 #include <cstdint>
 #include <memory>
-#include <queue>
 #include <string>
 
+#include "alias.hpp"
 #include "utils.hpp"
-
-class Companion;
-class MessageWidget;
-
-using CompanionPtr = std::shared_ptr<Companion>;
 
 class PriorityTask
 {
@@ -33,11 +28,6 @@ private:
     std::function<void()> func_;
     bool isMandatory_;
 };
-
-using PriorityTaskComparator = std::function<bool(const PriorityTask&, const PriorityTask&)>;
-
-using PriorityTaskQueue =
-    std::priority_queue<PriorityTask, std::vector<PriorityTask>, PriorityTaskComparator>;
 
 class PriorityTaskQueueWrapper
 {
@@ -140,8 +130,8 @@ public:
     //     MessageType type, const MessageMetaData &meta, const std::string &text);
 
     Message(
-        std::shared_ptr<MessageMetaData> meta, std::shared_ptr<MessageData> data,
-        std::shared_ptr<MessageState> state);
+        MessageMetaDataPtr meta, MessageDataPtr data,
+        MessageStatePtr state);
 
     ~Message();
 
@@ -159,9 +149,9 @@ public:
 
     friend bool operator<(const Message &message1, const Message &message2);
 
-    std::shared_ptr<MessageMetaData> meta() const;
-    std::shared_ptr<MessageData> data() const;
-    std::shared_ptr<MessageState> state() const;
+    MessageMetaDataPtr meta() const;
+    MessageDataPtr data() const;
+    MessageStatePtr state() const;
 
 private:
     // MessageType type_;
@@ -170,25 +160,25 @@ private:
     // uint8_t author_id_;
     // std::string time_;  // TODO add timezone support
     // std::string text_;
-    std::shared_ptr<MessageMetaData> meta_;
-    std::shared_ptr<MessageData> data_;
-    std::shared_ptr<MessageState> state_;
+    MessageMetaDataPtr meta_;
+    MessageDataPtr data_;
+    MessageStatePtr state_;
 };
 
 class MessageInfo
 {
 public:
-    MessageInfo(std::shared_ptr<Message> message, std::shared_ptr<MessageWidget> widget);
+    MessageInfo(MessagePtr message, MessageWidgetPtr widget);
     ~MessageInfo() = default;
 
-    std::shared_ptr<Message> message() const;
-    std::shared_ptr<MessageWidget> widget() const;
+    MessagePtr message() const;
+    MessageWidgetPtr widget() const;
 
-    void setWidget(std::shared_ptr<MessageWidget> widget);
+    void setWidget(MessageWidgetPtr widget);
 
 private:
-    std::shared_ptr<Message> message_;
-    std::shared_ptr<MessageWidget> widget_;
+    MessagePtr message_;
+    MessageWidgetPtr widget_;
 };
 
 #endif // MESSAGE_HPP

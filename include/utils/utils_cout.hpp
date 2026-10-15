@@ -12,9 +12,8 @@
 
 #include <QString>
 
+#include "alias.hpp"
 #include "utils.hpp"
-
-using namespace std::string_literals;
 
 void endline(int number);
 

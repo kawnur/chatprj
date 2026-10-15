@@ -9,7 +9,7 @@
 #include "widgets.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
-    bool sentByMe, std::shared_ptr<Message> message)
+    bool sentByMe, MessagePtr message)
 {
     sentByMe_ = sentByMe;
 
@@ -62,9 +62,7 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
         newMessageLabel_->setText("");
 }
 
-MessageWidget::MessageWidget(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<QWidget> parent)
+MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
 {
     companion_ = companion;
     message_ = message;
@@ -98,12 +96,12 @@ MessageWidget::MessageWidget(
     indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(isMessageFromMe_, message);
 }
 
-std::shared_ptr<Message> MessageWidget::message()
+MessagePtr MessageWidget::message()
 {
     return message_;
 }
 
-void MessageWidget::setBase(std::shared_ptr<WidgetGroup> group)
+void MessageWidget::setBase(WidgetGroupPtr group)
 {
     addMembersToLayout();
 
@@ -137,9 +135,8 @@ void MessageWidget::mousePressEvent(QMouseEvent *event)
     emit widgetSelectedSignal(shared_from_this());
 }
 
-TextMessageWidget::TextMessageWidget(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<QWidget> parent) : MessageWidget(companion, message, parent)
+TextMessageWidget::TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : MessageWidget(companion, message, parent)
 {
     if (parent)
         setParent(parent.get());
@@ -154,9 +151,8 @@ void TextMessageWidget::addMembersToLayout()
     layout_->addWidget(indicatorPanel_.get());
 }
 
-FileMessageWidget::FileMessageWidget(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-    std::shared_ptr<QWidget> parent) : MessageWidget(companion, message, parent)
+FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : MessageWidget(companion, message, parent)
 {
     if (parent)
         setParent(parent.get());
@@ -183,7 +179,7 @@ FileMessageWidget::FileMessageWidget(
         : nullptr;
 }
 
-void FileMessageWidget::set(std::shared_ptr<WidgetGroup> group)
+void FileMessageWidget::set(WidgetGroupPtr group)
 {
     connect(
         downloadButton_.get(), &QPushButton::clicked,
@@ -211,7 +207,7 @@ void FileMessageWidget::saveFileSlot()
 }
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message)
+    CompanionPtr companion, MessagePtr message)
 {
     auto companionName = companion->name();
     auto companionId = message->companionId();

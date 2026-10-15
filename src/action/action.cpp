@@ -7,6 +7,7 @@
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
+#include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
@@ -16,13 +17,11 @@
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
-using namespace std::string_literals;
-
 Action::Action(ActionType type) : type_(type) {}
 
 Action::~Action() { logArgsInfo(Q_FUNC_INFO); }
 
-void Action::setDialog(std::shared_ptr<Action> action)
+void Action::setDialog(ActionPtr action)
 {
     if (dataDialog_)
         dataDialog_->set(action);
@@ -80,14 +79,14 @@ void RegularAction::set()
     dataDialog_->show();
 }
 
-CompanionAction::CompanionAction(ActionType type, std::shared_ptr<Companion> companion)
+CompanionAction::CompanionAction(ActionType type, CompanionPtr companion)
     : companion_(companion), data_(nullptr), RegularAction(type) {}
 
 CompanionAction::~CompanionAction() { logArgsInfo(Q_FUNC_INFO); }
 
 void CompanionAction::buildDataDialog()
 {
-    std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
+    MainWindowPtr mainWindow = getGraphicManager()->getMainWindow();
 
     switch (type_) {
     case ActionType::CREATE_COMPANION:
@@ -126,12 +125,12 @@ int CompanionAction::companionId()
     return companion_->id();
 }
 
-std::shared_ptr<CompanionData> CompanionAction::getCompanionData() const
+CompanionDataPtr CompanionAction::getCompanionData() const
 {
     return data_;
 }
 
-std::shared_ptr<Companion> CompanionAction::getCompanion() const
+CompanionPtr CompanionAction::getCompanion() const
 {
     return companion_;
 }
@@ -156,7 +155,7 @@ void CompanionAction::updateCompanionObjectData()
     companion_->updateData(data_);
 }
 
-void CompanionAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
+void CompanionAction::updateInfoDialog(ActionResultPtr result)
 {
     // TODO move to parent
     DialogType type = DialogType::UNKNOWN;
@@ -270,7 +269,7 @@ void CompanionAction::act()
     getManager()->performAction(shared_from_this());
 }
 
-void CompanionAction::postAct(std::shared_ptr<ActionResult> result)
+void CompanionAction::postAct(ActionResultPtr result)
 {
     updateInfoDialog(result);
     infoDialog_->show();
@@ -283,7 +282,7 @@ void CompanionAction::endAct()
 
 GroupChatAction::GroupChatAction(ActionType type) : data_(new GroupChatData), RegularAction(type)
 {
-    std::shared_ptr<MainWindow> mainWindow = getGraphicManager()->getMainWindow();
+    MainWindowPtr mainWindow = getGraphicManager()->getMainWindow();
 
     switch (type) {
     case ActionType::CREATE_GROUP:
@@ -342,7 +341,7 @@ void PasswordAction::preAct()
     dataDialog_->show();
 }
 
-void PasswordAction::updateInfoDialog(std::shared_ptr<ActionResult> result)
+void PasswordAction::updateInfoDialog(ActionResultPtr result)
 {
     // TODO move to parent
     DialogType type = DialogType::UNKNOWN;
@@ -422,7 +421,7 @@ void PasswordAction::act()
     getManager()->performAction(shared_from_this());
 }
 
-void PasswordAction::postAct(std::shared_ptr<ActionResult> result)
+void PasswordAction::postAct(ActionResultPtr result)
 {
     updateInfoDialog(result);
     infoDialog_->show();
@@ -434,7 +433,7 @@ void PasswordAction::endAct()
 }
 
 FileAction::FileAction(
-    ActionType type, const std::string &networkId, std::shared_ptr<Companion> companion)
+    ActionType type, const std::string &networkId, CompanionPtr companion)
     : Action(type), companion_(companion), networkId_(networkId) {}
 
 FileAction::~FileAction() { logArgsInfo(Q_FUNC_INFO); }
@@ -444,7 +443,7 @@ void FileAction::buildDataDialog()
     dataDialog_ = std::make_shared<FileDialog>(type_);
 }
 
-std::shared_ptr<Companion> FileAction::getCompanion() const
+CompanionPtr FileAction::getCompanion() const
 {
     return companion_;
 }
@@ -572,7 +571,6 @@ void FileAction::defineFilePath()
         return;
 
     auto pathQStr = QString::fromStdString(getManager()->getLastOpenedPath().string());
-
     QString param { "Save File" };
     auto result = QFileDialog::getSaveFileName(cast.get(), param, pathQStr);
     filePath_ = std::filesystem::path(result.toStdString());

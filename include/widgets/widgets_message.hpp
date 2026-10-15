@@ -9,17 +9,14 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-class Companion;
-class IndicatorWidget;
-class Message;
-class WidgetGroup;
+#include "alias.hpp"
 
 class MessageIndicatorPanelWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    MessageIndicatorPanelWidget(bool sentByMe, std::shared_ptr<Message> message);
+    MessageIndicatorPanelWidget(bool sentByMe, MessagePtr message);
     ~MessageIndicatorPanelWidget() = default;
 
     void setSentIndicatorOn();
@@ -39,31 +36,25 @@ class MessageWidget : public QWidget, public std::enable_shared_from_this<Messag
     Q_OBJECT
 
 public:
-    MessageWidget(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-        std::shared_ptr<QWidget> parent = nullptr);
-
+    MessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     virtual ~MessageWidget() {}
 
-    std::shared_ptr<Message> message();
-
-    virtual void set(std::shared_ptr<WidgetGroup>) {}
-
-    void setBase(std::shared_ptr<WidgetGroup> group);
+    MessagePtr message();
+    virtual void set(WidgetGroupPtr) {}
+    void setBase(WidgetGroupPtr group);
     void setSent();
     void setReceived();
-
     std::shared_ptr<QLabel> messageLabel();
 
 signals:
-    void widgetSelectedSignal(std::shared_ptr<MessageWidget> widget);
+    void widgetSelectedSignal(MessageWidgetPtr widget);
 
 protected:
     virtual void addMembersToLayout() {}
 
     bool isMessageFromMe_;
-    std::shared_ptr<Companion> companion_;
-    std::shared_ptr<Message> message_;
+    CompanionPtr companion_;
+    MessagePtr message_;
     std::shared_ptr<QPalette> palette_;
     std::shared_ptr<QVBoxLayout> layout_;
     std::shared_ptr<QLabel> headerLabel_;
@@ -79,10 +70,7 @@ class TextMessageWidget : public MessageWidget
     Q_OBJECT
 
 public:
-    TextMessageWidget(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-        std::shared_ptr<QWidget> parent = nullptr);
-
+    TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     ~TextMessageWidget();
 
 private:
@@ -94,17 +82,14 @@ class FileMessageWidget : public MessageWidget
     Q_OBJECT
 
 public:
-    FileMessageWidget(
-        std::shared_ptr<Companion> companion, std::shared_ptr<Message> message,
-        std::shared_ptr<QWidget> parent = nullptr);
-
+    FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     ~FileMessageWidget() = default;
 
-    void set(std::shared_ptr<WidgetGroup>) override;
+    void set(WidgetGroupPtr) override;
 
 private:
     bool showButton_;
-    std::shared_ptr<QWidget> fileWidget_;
+    QWidgetPtr fileWidget_;
     std::shared_ptr<QHBoxLayout> fileWidgetLayout_;
     std::shared_ptr<QPushButton> downloadButton_;
 
@@ -115,6 +100,6 @@ private slots:
 };
 
 std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    std::shared_ptr<Companion> companion, std::shared_ptr<Message> message);
+    CompanionPtr companion, MessagePtr message);
 
 #endif // WIDGETS_MESSAGE_HPP

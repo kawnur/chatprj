@@ -6,8 +6,7 @@
 
 FileManager::FileManager() : mutex_(), map_() {}
 
-void FileManager::addSenderOperator(
-    const std::string &networkId, const std::filesystem::path &path)
+void FileManager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -20,8 +19,7 @@ void FileManager::addSenderOperator(
     map_[networkId] = std::make_shared<SenderOperator>(path);
 }
 
-void FileManager::addReceiverOperator(
-    std::shared_ptr<MessageMetaData> meta, const std::filesystem::path &path)
+void FileManager::addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
