@@ -1,14 +1,9 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
-#include <memory>
-
 #include <QApplication>
 
 #include "alias.hpp"
-
-class GraphicManager;
-class Manager;
 
 class ChatApp : public QApplication
 {

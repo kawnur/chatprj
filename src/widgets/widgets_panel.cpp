@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QMenu>
 #include <QScrollBar>
+#include <QWidget>
 
 #include "companion.hpp"
 #include "constants.hpp"
@@ -82,7 +83,7 @@ void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr wid
     } else if (index > 0) {
         ManagerPtr manager = getManager();
         auto previousWidget = companionPanelChildren.at(index - 1);
-        auto previousCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(previousWidget);
+        auto previousCompanion = getGraphicManager()->getMappedCompanionBySocketInfoBaseWidget(previousWidget);
         manager->resetSelectedCompanion(previousCompanion);
         companionPanelLayout_->removeWidget(widget.get());
     }
@@ -241,18 +242,6 @@ void CentralPanelWidget::addMessageWidget(
     //     widgetGroup->messageAdded();
 
     scrollDownChatHistory();
-
-    auto count = chatHistoryLayout_->count();
-
-    for (int i = 0; i < count; ++i) {
-        auto item = chatHistoryLayout_->itemAt(i);
-
-        auto cast = dynamic_cast<MessageWidget *>(item->widget());
-
-        logArgsInfo(item, "#", cast->messageLabel()->text(), "#");
-    }
-
-    logArgsInfo(".");
 }
 
 void CentralPanelWidget::scrollDownChatHistory()
@@ -451,4 +440,174 @@ void RightPanelWidget::customMenuRequestedSlot(const QPoint &position)
         this, &RightPanelWidget::clearLogAction, Qt::QueuedConnection);
 
     menu->popup(mapToGlobal(position));
+}
+
+MainWidget::MainWidget() : layout_(nullptr) {}
+
+void MainWidget::set()
+{
+    layout_ = std::make_unique<QHBoxLayout>(this);
+    layout_->setSpacing(0);
+    layout_->setContentsMargins(0, 0, 0, 0);
+
+    setLayout(layout_.get());
+
+    // left container
+    left_ = std::make_shared<MainWindowContainerWidget<LeftPanelWidget>>(this);
+    left_->set();
+    layout_->addWidget(left_.get());
+
+    // central container
+    central_ = std::make_shared<MainWindowContainerWidget<CentralPanelWidget>>(this);
+    central_->set(false, ""s);
+    layout_->addWidget(central_.get());
+
+    // right container
+    right_ = std::make_shared<MainWindowContainerWidget<RightPanelWidget>>(this);
+    right_->set();
+    layout_->addWidget(right_.get());
+
+    // splitter
+    splitter_ = std::make_unique<QSplitter>(this);
+    // splitter_-addWidget(leftContainerWidget_);
+    splitter_->addWidget(central_.get());
+    splitter_->addWidget(right_.get());
+    layout_->addWidget(splitter_.get());
+
+    // auto graphicManager = getGraphicManager();
+    stubWidgets_ = std::make_shared<StubWidgetGroup>();
+
+    // graphicManager->setParentsForStubs(left_, central_);
+    stubWidgets_->setParents(left_, central_);
+
+    // graphicManager->setStubWidgets();
+    addWidgetToCompanionPanel(stubWidgets_->socketInfoBase());
+    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, stubWidgets_->leftPanel());
+    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::CENTRAL, stubWidgets_->centralPanel());
+    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::RIGHT, stubWidgets_->rightPanel());
+    stubWidgets_->set();
+
+    // graphicManager->showCentralPanelStub();
+    stubWidgets_->showCentralPanel();
+
+    if (!addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_))
+        logArgsError("addWidgetToContainerAndSetParentTo error");
+
+    initBlurEffect();
+}
+
+std::shared_ptr<QHBoxLayout> MainWidget::layout() const
+{
+    return layout_;
+}
+
+bool MainWidget::addWidgetToContainerAndSetParentTo(
+    MainWindowContainerPosition position, QWidgetPtr widget)
+{
+    switch (position) {
+    case MainWindowContainerPosition::LEFT:
+        left_->addWidgetToLayoutAndSetParentTo(widget);
+
+    case MainWindowContainerPosition::CENTRAL:
+        central_->addWidgetToLayoutAndSetParentTo(widget);
+
+    case MainWindowContainerPosition::RIGHT:
+        right_->addWidgetToLayoutAndSetParentTo(widget);
+
+    default:
+        return false;
+    }
+
+    return true;
+}
+
+void MainWidget::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
+{
+    left_->addWidgetToCompanionPanel(widget);
+}
+
+void MainWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
+{
+    left_->removeWidgetFromCompanionPanel(widget);
+}
+
+std::size_t MainWidget::getCompanionPanelChildrenSize()
+{
+    return left_->getCompanionPanelChildrenSize();
+}
+
+void MainWidget::initBlurEffect()
+{
+    blurEffect_ = std::make_shared<QGraphicsBlurEffect>();
+    blurEffect_->setBlurRadius(BLUR_RADIUS);
+}
+
+void MainWidget::addTextToAppLogWidget(const QString &text)
+{
+    right_->addTextToAppLogWidget(text);
+}
+
+void MainWidget::hideLeftAndRightPanels()
+{
+    left_->hide();
+    right_->hide();
+}
+
+void MainWidget::showLeftAndRightPanels()
+{
+    left_->show();
+    right_->show();
+}
+
+void MainWidget::hideCentralPanelStub()
+{
+    stubWidgets_->hideCentralPanel();
+}
+
+void MainWidget::showCentralPanelStub()
+{
+    stubWidgets_->showCentralPanel();
+}
+
+void MainWidget::hideCompanionPanelStub()
+{
+    stubWidgets_->hideSocketInfoStubWidget();
+}
+
+void MainWidget::showStubPanels()
+{
+    hideLeftAndRightPanels();
+    stubWidgets_->setLeftPanelWidth(left_->getLastCompanionPanelChildWidth());
+    stubWidgets_->showStubPanels();
+}
+
+void MainWidget::hideStubPanels()
+{
+    showLeftAndRightPanels();
+    stubWidgets_->hideStubPanels();
+}
+
+void MainWidget::enableWidgetsForShowHide()
+{
+    // leftPanel_->setEnabled(true);
+    // centralContainerWidget_->setEnabled(true);
+    // rightContainerWidget_->setEnabled(true);
+    left_->setEnabled(true);
+    central_->setEnabled(true);
+    right_->setEnabled(true);
+}
+
+void MainWidget::disableWidgetsForShowHide()
+{
+    // leftPanel_->setEnabled(false);
+    // centralContainerWidget_->setEnabled(false);
+    // rightContainerWidget_->setEnabled(false);
+    left_->setEnabled(false);
+    central_->setEnabled(false);
+    right_->setEnabled(false);
+}
+
+void MainWidget::setBlurEffect()
+{
+    setGraphicsEffect(blurEffect_.get());
 }

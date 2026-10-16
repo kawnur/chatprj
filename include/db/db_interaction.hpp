@@ -9,6 +9,7 @@
 
 #include "alias.hpp"
 #include "db_constants.hpp"
+#include "utils.hpp"
 
 class DBConnectionPrameters
 {

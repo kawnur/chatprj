@@ -1,14 +1,11 @@
 #ifndef DATA_HPP
 #define DATA_HPP
 
-#include <memory>
 #include <string>
 #include <vector>
 
 #include "alias.hpp"
 #include "logging.hpp"
-
-class Companion;
 
 class CompanionData
 {

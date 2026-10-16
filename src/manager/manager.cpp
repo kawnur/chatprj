@@ -1,23 +1,19 @@
 #include "manager.hpp"
 
-#include "action_wrapper.hpp"
+#include "action.hpp"
+#include "action_result.hpp"
 #include "application.hpp"
 #include "companion.hpp"
 #include "data.hpp"
 #include "data_checker.hpp"
-#include "functional"
-#include "graphic_manager.hpp"
-#include "logging.hpp"
 #include "message.hpp"
-#include "message_handler.hpp"
-#include "network_entity.hpp"
 #include "utils.hpp"
 #include "validator.hpp"
 #include "widgets.hpp"
 
-Manager::Manager()
-    : messageHandler_(), fileManager_(), networkManager_(), messageStateToMessageMapMutex_(),
-    userIsAuthenticated_(false), selectedCompanion_(nullptr), companionAndWidgetGroupMap_(),
+Manager::Manager(GraphicManagerPtr graphicManager)
+    : graphicManager_(graphicManager), messageHandler_(), fileManager_(), networkManager_(),
+    messageStateToMessageMapMutex_(), userIsAuthenticated_(false), selectedCompanion_(nullptr),
     lastOpenedPath_(HOME_PATH) {}
 
 Manager::~Manager() {}
@@ -46,47 +42,6 @@ void Manager::set()
         buildWidgetGroups();
     else
         logArgsError("problem with companions initialization");
-}
-
-CompanionPtr Manager::getMappedCompanionById(int id) const
-{
-    auto lambda = [&](int id) { return companionAndWidgetGroupMap_.at(id).first; };
-
-    auto result = runAndReturnSharedPtr<Companion>(lambda, id);
-
-    if (!result)
-        logTemplateError("companion with id '{}' not found in manager's map", id);
-
-    return result;
-}
-
-CompanionPtr Manager::getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const
-{
-    auto lambda = [&](const auto &pair)
-    {
-        return pair.second.second->getSocketInfoBase().get() == widget;
-    };
-
-    auto result = std::ranges::find_if(companionAndWidgetGroupMap_, lambda);
-
-    return (result == companionAndWidgetGroupMap_.end()) ? nullptr : result->second.first;
-}
-
-WidgetGroupPtr Manager::getMappedWidgetGroupByCompanion(CompanionPtr companion) const
-{
-    WidgetGroupPtr group = nullptr;
-
-    auto id = companion->id();
-
-    try {
-        group = companionAndWidgetGroupMap_.at(id).second;
-    } catch(std::out_of_range) {
-        logTemplateError("mapCompanionToWidgetGroup_ does not conain id {0}", id);
-
-        return nullptr;
-    }
-
-    return group;
 }
 
 void Manager::addEarlyMessages(CompanionPtr companion)
@@ -139,7 +94,7 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
 
 void Manager::receiveMessage(int companionId, const std::string &json)
 {
-    auto companion = getMappedCompanionById(companionId);
+    auto companion = graphicManager_->getMappedCompanionById(companionId);
 
     if (!companion)
         return;
@@ -149,35 +104,9 @@ void Manager::receiveMessage(int companionId, const std::string &json)
 
 void Manager::resetSelectedCompanion(CompanionPtr companion)  // TODO rewrite
 {
-    auto graphicManager = getGraphicManager();
-
-    if (selectedCompanion_) {
-        auto widgetGroup = getMappedWidgetGroupByCompanion(selectedCompanion_);
-        auto cast = dynamic_pointer_cast<SocketInfoWidget>(widgetGroup->getSocketInfoBase());
-
-        if (cast)
-            cast->unselect();
-
-        widgetGroup->hideCentralPanel();
-    }
-    else {
-        graphicManager->hideCentralPanelStub();
-    }
-
+    graphicManager_->preSelectCompanion(selectedCompanion_);
     selectedCompanion_ = companion;
-
-    if (selectedCompanion_) {
-        auto widgetGroup = getMappedWidgetGroupByCompanion(selectedCompanion_);
-        auto cast = dynamic_pointer_cast<SocketInfoWidget>(widgetGroup->getSocketInfoBase());
-
-        if (cast)
-            cast->select();
-
-        widgetGroup->showCentralPanel();
-    }
-    else {
-        graphicManager->showCentralPanelStub();
-    }
+    graphicManager_->postSelectCompanion(selectedCompanion_);
 }
 
 void Manager::initCompanionCreation()
@@ -314,7 +243,7 @@ ActionResultPtr Manager::createCompanion(CompanionActionPtr action)
 
     // add companion and widget group to mapping
     auto companion = managerMapResult->value();
-    createWidgetGroupAndAddToMapping(companion);
+    graphicManager_->createWidgetGroupAndAddToMapping(companion);
 
     return std::make_shared<ActionResult>(true, ""s);
 }
@@ -360,7 +289,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     action->updateCompanionObjectData();
 
     // update SocketInfoWidget
-    auto widgetGroup = getMappedWidgetGroupByCompanion(action->getCompanion());
+    auto widgetGroup = graphicManager_->getMappedWidgetGroupByCompanion(action->getCompanion());
     widgetGroup->updateSocketInfoWidget();
 
     return std::make_shared<ActionResult>(true, ""s);
@@ -408,8 +337,8 @@ ActionResultPtr Manager::deleteCompanion(CompanionActionPtr action)
 
 void Manager::clearChatHistory(CompanionPtr companion)
 {
-    auto widgetGroup = getMappedWidgetGroupByCompanion(companion);
-    getGraphicManager()->clearChatHistory(widgetGroup);
+    auto widgetGroup = graphicManager_->getMappedWidgetGroupByCompanion(companion);
+    graphicManager_->clearChatHistory(widgetGroup);
 }
 
 ActionResultPtr Manager::clearCompanionHistory(CompanionActionPtr action)
@@ -455,8 +384,6 @@ ActionResultPtr Manager::createUserPassword(PasswordActionPtr action)
 
 ActionResultPtr Manager::authenticateUser(PasswordActionPtr action)
 {
-    auto graphicManager = getGraphicManager();
-
     // data checking
     auto checkResult = checkDataForExistance(action);
 
@@ -468,26 +395,9 @@ ActionResultPtr Manager::authenticateUser(PasswordActionPtr action)
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::hideSelectedCompanionCentralPanel()
-{
-    if (selectedCompanion_) {
-        auto group = getMappedWidgetGroupByCompanion(selectedCompanion_);
-        getGraphicManager()->hideWidgetGroupCentralPanel(group);
-    }
-}
-
-void Manager::showSelectedCompanionCentralPanel()
-{
-    if (selectedCompanion_) {
-        auto group = getMappedWidgetGroupByCompanion(selectedCompanion_);
-        getGraphicManager()->showWidgetGroupCentralPanel(group);
-    }
-}
-
 void Manager::startUserAuthentication()
 {
-    auto graphicManager = getGraphicManager();
-    graphicManager->enableMainWindowBlurEffect();
+    graphicManager_->enableMainWindowBlurEffect();
 
     // do we have password in db?
     auto passwordData = getDBData(DBRequestType::GET_PASSWORD);
@@ -503,16 +413,6 @@ void Manager::startUserAuthentication()
 
 void Manager::requestHistoryFromCompanion(CompanionPtr companion)
 {
-//     auto meta = std::make_shared<MessageMetaData>();
-//     meta->networkMessageType_ = NetworkMessageType::CHAT_HISTORY_REQUEST;
-
-//     auto state = std::make_shared<MessageState>();
-//     state->isAntecedent_ = true;
-
-//     auto message = companion->createMessage(meta, nullptr, state);
-
-//     bool result = companion->sendMessage(message, message->meta());
-
     messageHandler_.requestHistoryFromCompanion(companion);
 }
 
@@ -557,18 +457,6 @@ bool Manager::sendMessage(
     CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
 {
     return messageHandler_.sendMessageByNetwork(companion, message, meta);
-}
-
-CompanionPtr Manager::getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const
-{
-    auto lambda = [&](const auto &pair)
-    {
-        return pair.second.second == group;
-    };
-
-    auto result = std::ranges::find_if(companionAndWidgetGroupMap_, lambda);
-
-    return result->second.first;
 }
 
 bool Manager::buildCompanions()
@@ -633,29 +521,7 @@ bool Manager::buildCompanions()
 
 void Manager::buildWidgetGroups()
 {
-    auto graphicManager = getGraphicManager();
-
-    auto companionsNumber = companionAndWidgetGroupMap_.size();
-    auto childrenSize = graphicManager->getCompanionPanelChildrenSize();
-
-    logTemplateInfo("companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
-
-    if (companionsNumber == 0 && childrenSize == 0) {
-        logArgsWarning("strange case, empty sockets panel");
-
-        return;
-    }
-
-    // TODO check if sockets already are children
-
-    // hide companion panel stub widget
-    graphicManager->hideCompanionPanelStub();
-
-    for (const auto &pair : companionAndWidgetGroupMap_) {
-        auto companion = pair.second.first;
-        createWidgetGroupAndAddToMapping(companion);
-        messageHandler_.fillCompanionMessageMapping(companion, false);
-    }
+    graphicManager_->buildWidgetGroups();
 }
 
 CompanionPtr Manager::addCompanionObject(int id, const std::string &name)
@@ -667,17 +533,9 @@ CompanionPtr Manager::addCompanionObject(int id, const std::string &name)
     }
 
     auto companion = std::make_shared<Companion>(id, name);
-    WidgetGroupPtr group = nullptr;
-    auto value = std::pair(companion, group);
-    auto result = companionAndWidgetGroupMap_.emplace(id, value);
+    bool result = graphicManager_->addCompanion(companion);
 
-    if (!result.second) {
-        logArgsError("companion is nullptr");
-
-        return nullptr;
-    }
-
-    return result.first->second.first;
+    return (result) ? companion : nullptr;
 }
 
 std::shared_ptr<CompanionResult> Manager::addCompanionToManagerMap(
@@ -691,18 +549,12 @@ std::shared_ptr<CompanionResult> Manager::addCompanionToManagerMap(
     }
 
     auto companion = std::make_shared<Companion>(id, name);
-    WidgetGroupPtr group = nullptr;
-    auto value = std::pair(companion, group);
-    auto result = companionAndWidgetGroupMap_.emplace(id, value);
+    auto result = graphicManager_->addCompanion(companion);
 
-    if (!result.second) {
-        auto entry = "companion is nullptr"s;
-        logArgsError(entry);
-
-        return std::make_shared<CompanionResult>(nullptr, false, entry);
-    }
-
-    return std::make_shared<CompanionResult>(companion, true, ""s);
+    if (result)
+        return std::make_shared<CompanionResult>(companion, true, ""s);
+    else
+        return std::make_shared<CompanionResult>(nullptr, false, "companion is nullptr"s);
 }
 
 ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPtr data)
@@ -726,17 +578,6 @@ ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPt
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::createWidgetGroupAndAddToMapping(CompanionPtr companion)
-{
-    auto group = std::make_shared<WidgetGroup>(companion);
-    group->set();
-
-    // no existance check
-    companionAndWidgetGroupMap_[companion->id()].second = group;
-
-    // companion->addMessageWidgetsToChatHistory(group);  // ???
-}
-
 void Manager::deleteCompanionObject(CompanionPtr companion)
 {
     deleteWidgetGroupAndDeleteFromMapping(companion);
@@ -744,23 +585,10 @@ void Manager::deleteCompanionObject(CompanionPtr companion)
 
 void Manager::deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion)
 {
-    auto lambda = [&](const auto &iterator)
-    {
-        return iterator.second.first == companion;
-    };
+    auto result = graphicManager_->deleteWidgetGroup(companion);
 
-    // TODO use range
-    auto result = std::ranges::find_if(companionAndWidgetGroupMap_, lambda);
-
-    if (result == companionAndWidgetGroupMap_.end()) {
-        // showErrorDialogAndLogError("Companion was not found in mapping at deletion");
-    }
-    else {
-        if (selectedCompanion_ == companion)
-            selectedCompanion_ = nullptr;
-
-        companionAndWidgetGroupMap_.erase(result);
-    }
+    if (result && selectedCompanion_ == companion)
+        selectedCompanion_ = nullptr;
 }
 
 void Manager::sendUnsentMessages(CompanionPtr companion)
@@ -768,7 +596,7 @@ void Manager::sendUnsentMessages(CompanionPtr companion)
     messageHandler_.sendUnsentMessages(companion);
 }
 
-std::shared_ptr<NetworkEntity> Manager::getNetworkEntity(int id)
+NetworkEntityPtr Manager::getNetworkEntity(int id)
 {
     return networkManager_.getValue(id);
 }
@@ -827,6 +655,11 @@ bool Manager::setMappedMessageWidget(
     return messageHandler_.setMappedMessageWidget(companion, message, widget);
 }
 
+void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
+{
+    messageHandler_.fillCompanionMessageMapping(companion, containersNotEmpty);
+}
+
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
 {
     // mark in db
@@ -845,13 +678,13 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
         return;
 
     // mark in widget
-    getGraphicManager()->setMessageWidgetAsSent(info);
+    graphicManager_->setMessageWidgetAsSent(info);
 }
 
 void Manager::markMessageAsReceived(MessageInfoPtr info)
 {
     // mark in widget
-    getGraphicManager()->setMessageWidgetAsReceived(info);
+    graphicManager_->setMessageWidgetAsReceived(info);
 
     // if (!result)
     //     logArgsError("marking wiget as received error");

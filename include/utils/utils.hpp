@@ -2,6 +2,7 @@
 #define UTILS_HPP
 
 #include <iostream>
+#include <format>
 #include <functional>
 #include <memory>
 #include <optional>

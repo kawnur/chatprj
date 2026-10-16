@@ -20,7 +20,7 @@ std::pair<NetworkManagerMap::iterator, bool> NetworkManager::addToMap(
     return result;
 }
 
-std::shared_ptr<NetworkEntity> NetworkManager::getValue(int id)
+NetworkEntityPtr NetworkManager::getValue(int id)
 {
     return runAndReturnSharedPtr<NetworkEntity>([&]() { return map_.at(id); });
 }

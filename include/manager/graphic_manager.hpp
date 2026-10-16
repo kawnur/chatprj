@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <QString>
 #include <QWidget>
@@ -20,11 +21,28 @@ public:
 
     MainWindowPtr getMainWindow();
     void set();
-    void setParentsForStubs(QWidgetPtr leftContainer, QWidgetPtr centralContainer);
-    void setStubWidgets();
+    void setManager(ManagerPtr manager);
+
+    void buildWidgetGroups();
+    bool addCompanion(CompanionPtr companion);
+    CompanionPtr getMappedCompanionById(int id) const;
+    CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
+    WidgetGroupPtr getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
+    CompanionPtr getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const;
+
+    void createWidgetGroupAndAddToMapping(CompanionPtr companion);
+    bool deleteWidgetGroup(CompanionPtr companion);
+
+    void hideSelectedCompanionCentralPanel();
+    void showSelectedCompanionCentralPanel();
+
+    void preSelectCompanion(CompanionPtr companion);
+    void postSelectCompanion(CompanionPtr companion);
+
+    // void setParentsForStubs(QWidgetPtr leftContainer, QWidgetPtr centralContainer);
+    // void setStubWidgets();
     void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
     void addTextToAppLogWidget(const QString &text);
-    std::size_t getCompanionPanelChildrenSize();
     void hideWidgetGroupCentralPanel(WidgetGroupPtr group);
     void showWidgetGroupCentralPanel(WidgetGroupPtr group);
 
@@ -39,9 +57,9 @@ public:
     void clearCompanionHistory(CompanionPtr companion);
     void clearChatHistory(WidgetGroupPtr widgetGroup);
     void deleteCompanion(CompanionPtr companion);
-    void hideCompanionPanelStub();
-    void hideCentralPanelStub();
-    void showCentralPanelStub();
+    // void hideCompanionPanelStub();
+    // void hideCentralPanelStub();
+    // void showCentralPanelStub();
     void hideInfoViaBlur();
     void showInfoViaBlur();
     void hideInfoViaStubs();
@@ -63,8 +81,11 @@ public:
 
 private:
     // std::mutex messageToMessageWidgetMapMutex_;
-    std::shared_ptr<StubWidgetGroup> stubWidgets_;
+    ManagerPtr manager_;
+    // std::shared_ptr<StubWidgetGroup> stubWidgets_;
     MainWindowPtr mainWindow_;
+
+    std::unordered_map<int, std::pair<CompanionPtr, WidgetGroupPtr>> map_;
 };
 
 GraphicManagerPtr getGraphicManager();

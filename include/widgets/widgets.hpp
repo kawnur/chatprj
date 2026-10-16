@@ -289,26 +289,16 @@ public:
     void showStubPanels();
     void setLeftPanelWidth(int width);
 
+    std::shared_ptr<SocketInfoBaseWidget> socketInfoBase() const;
+    std::shared_ptr<LeftPanelWidget> leftPanel() const;
+    std::shared_ptr<CentralPanelWidget> centralPanel() const;
+    std::shared_ptr<RightPanelWidget> rightPanel() const;
+
 private:
     std::shared_ptr<SocketInfoStubWidget> socketInfo_;
     std::shared_ptr<LeftPanelWidget> leftPanel_;
     std::shared_ptr<CentralPanelWidget> centralPanel_;
     std::shared_ptr<RightPanelWidget> rightPanel_;
-};
-
-class MainWindowContainerWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    MainWindowContainerWidget(QWidgetPtr widget);
-    ~MainWindowContainerWidget() = default;
-
-    void addWidgetToLayout(QWidgetPtr widget);
-    void addWidgetToLayoutAndSetParentTo(QWidgetPtr widget);
-
-private:
-    std::unique_ptr<QVBoxLayout> layout_;
 };
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);

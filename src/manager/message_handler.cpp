@@ -1,5 +1,6 @@
 #include "message_handler.hpp"
 
+#include "action.hpp"
 #include "companion.hpp"
 #include "file_info.hpp"
 #include "graphic_manager.hpp"
@@ -405,7 +406,7 @@ void MessageHandler::reciveChatHistoryRequest(CompanionPtr companion)
 {
     logTemplateInfo("got history request from {}", companion->name());
 
-    auto group = manager_->getMappedWidgetGroupByCompanion(companion);
+    auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
 
     if (group)
         emit group->askUserForHistorySendingConfirmationSignal();
@@ -541,7 +542,7 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
         return;
     }
 
-    auto group = manager_->getMappedWidgetGroupByCompanion(companion);
+    auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
         logArgs("adding message with id", messagesData->getValue(i, "id"));
@@ -626,7 +627,7 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
 
 void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
 {
-    auto group = getManager()->getMappedWidgetGroupByCompanion(companion);
+    auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
 
     if (!group)
         return;

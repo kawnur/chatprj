@@ -7,7 +7,7 @@
 #include "alias.hpp"
 #include "network_entity.hpp"
 
-using NetworkManagerMap = std::unordered_map<int, std::shared_ptr<NetworkEntity>>;
+using NetworkManagerMap = std::unordered_map<int, NetworkEntityPtr>;
 
 class NetworkManager
 {
@@ -19,7 +19,7 @@ public:
         int companionId, SocketInfoPtr clientSocket,
         SocketInfoPtr serverSocket);
 
-    std::shared_ptr<NetworkEntity> getValue(int id);
+    NetworkEntityPtr getValue(int id);
     void updateSocketInfo(int id, CompanionDataPtr data);
     CompanionDataPtr getCompanionData(CompanionPtr companion);
 

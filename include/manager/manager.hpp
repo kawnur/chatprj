@@ -2,7 +2,6 @@
 #define MANAGER_HPP
 
 #include <filesystem>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -12,15 +11,13 @@
 #include <QString>
 #include <QWidget>
 
-#include "action.hpp"
 #include "alias.hpp"
-#include "action_result.hpp"
 #include "constants.hpp"
+#include "db_constants.hpp"
 #include "db_operator.hpp"
 #include "file_manager.hpp"
 #include "message_handler.hpp"
 #include "network_manager.hpp"
-#include "utils.hpp"
 
 int getDataFromDBResult(bool log, DBReplyDataPtr data, PGresultPtr result, int maxTuples);
 
@@ -28,7 +25,7 @@ int getDataFromDBResult(bool log, DBReplyDataPtr data, PGresultPtr result, int m
 class Manager : public QObject, public std::enable_shared_from_this<Manager>
 {
 public:
-    Manager();
+    Manager(GraphicManagerPtr graphicManager);
     ~Manager();
 
     template<typename... Ts>
@@ -49,9 +46,6 @@ public:
     CompanionPtr getSelectedCompanion();
     bool userIsAuthenticated();
     void set();
-    CompanionPtr getMappedCompanionById(int id) const;
-    CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
-    WidgetGroupPtr getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
     void receiveMessage(int companionId, const std::string &json);
     void resetSelectedCompanion(CompanionPtr companion);
@@ -92,8 +86,6 @@ public:
     ActionResultPtr pushPasswordToDbAndReturnId(PasswordActionPtr action);
     ActionResultPtr createUserPassword(PasswordActionPtr action);
     ActionResultPtr authenticateUser(PasswordActionPtr action);
-    void hideSelectedCompanionCentralPanel();
-    void showSelectedCompanionCentralPanel();
     void startUserAuthentication();
     void requestHistoryFromCompanion(CompanionPtr companion);
     void sendChatHistoryToCompanion(CompanionPtr companion);
@@ -114,7 +106,7 @@ public:
     void markMessageAsReceived(MessageInfoPtr info);
     void addEarlyMessages(CompanionPtr companion);
     void sendUnsentMessages(CompanionPtr companion);
-    std::shared_ptr<NetworkEntity> getNetworkEntity(int id);
+    NetworkEntityPtr getNetworkEntity(int id);
 
     bool sendFileBlock(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
@@ -144,6 +136,8 @@ public:
     bool setMappedMessageWidget(
         CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
 
+    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
+
 private:
     ActionResultPtr getActionResultByKeyDBData(
         DBReplyDataPtr data, const std::string &key, bool allowEmptyResult = false);
@@ -154,13 +148,11 @@ private:
     ActionResultPtr updateCompanionInDbAndReturnId(CompanionActionPtr action);
     ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action);
     ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action);
-    CompanionPtr getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const;
     bool buildCompanions();
     void buildWidgetGroups();
     CompanionPtr addCompanionObject(int id, const std::string &name);
     std::shared_ptr<CompanionResult> addCompanionToManagerMap(int id, const std::string &name);
     ActionResultPtr addCompanionToNetworkManagerMap(int id, CompanionDataPtr data);
-    void createWidgetGroupAndAddToMapping(CompanionPtr companion);
     void deleteCompanionObject(CompanionPtr companion);
     void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
 
@@ -181,6 +173,7 @@ private:
     void setCurrentAction(ActionPtr action);
     void checkAndResetCurrentAction(ActionPtr action);
 
+    GraphicManagerPtr graphicManager_;
     DBOperator dbOperator_;
     MessageHandler messageHandler_;
     FileManager fileManager_;
@@ -188,10 +181,6 @@ private:
     NetworkManager networkManager_;
     bool userIsAuthenticated_;
     CompanionPtr selectedCompanion_;
-
-    std::map<int, std::pair<CompanionPtr, WidgetGroupPtr>>
-        companionAndWidgetGroupMap_;  // TODO move to graphic manager
-
     std::filesystem::path lastOpenedPath_;
     ActionPtr currentAction_;
 };

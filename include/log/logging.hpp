@@ -1,7 +1,6 @@
 #ifndef LOGGING_HPP
 #define LOGGING_HPP
 
-#include <memory>
 #include <string>
 
 #include <libpq-fe.h>
@@ -10,13 +9,9 @@
 #include <QTime>
 
 #include "alias.hpp"
+#include "graphic_manager.hpp"
 #include "utils.hpp"
 #include "utils_cout.hpp"
-
-class DBReplyData;
-class GraphicManager;
-class SocketInfo;
-class SocketInfoWidget;
 
 GraphicManagerPtr getGraphicManager();
 
@@ -30,7 +25,11 @@ void logArgs(Ts &&...args)
 
     ((text += (getStringByFormat("{} ", args))), ...);
 
-    // getGraphicManager()->addTextToAppLogWidget(getQString(text));
+    auto graphicManager = getGraphicManager();
+
+    if (graphicManager)
+        graphicManager->addTextToAppLogWidget(getQString(text));
+
     coutArgsWithSpaceSeparator(text);
 }
 

@@ -253,7 +253,7 @@ void SocketInfoWidget::clientAction()
 {
     bool result = false;
     auto manager = getManager();
-    auto companion = manager->getMappedCompanionBySocketInfoBaseWidget(this);
+    auto companion = getGraphicManager()->getMappedCompanionBySocketInfoBaseWidget(this);
 
     // TODO change to states
     if (isConnected_) {
@@ -383,7 +383,7 @@ void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 
     auto baseObject = qobject_cast<SocketInfoBaseWidget *>(this);
 
-    auto newCompanion = manager->getMappedCompanionBySocketInfoBaseWidget(baseObject);
+    auto newCompanion = getGraphicManager()->getMappedCompanionBySocketInfoBaseWidget(baseObject);
     manager->resetSelectedCompanion(newCompanion);
 
     QWidget::mousePressEvent(event);
@@ -650,26 +650,25 @@ StubWidgetGroup::StubWidgetGroup()
 
 void StubWidgetGroup::set()
 {
-    auto graphicManager = getGraphicManager();
-    auto baseObjectCast = dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
-    graphicManager->addWidgetToCompanionPanel(baseObjectCast);
+    // auto graphicManager = getGraphicManager();
+    // auto baseObjectCast = dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
+    // graphicManager->addWidgetToCompanionPanel(baseObjectCast);
 
-    graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition::LEFT, leftPanel_);
+    // graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
+    //     MainWindowContainerPosition::LEFT, leftPanel_);
 
-    graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition::CENTRAL, centralPanel_);
+    // graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
+    //     MainWindowContainerPosition::CENTRAL, centralPanel_);
 
-    graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition::RIGHT, rightPanel_);
+    // graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
+    //     MainWindowContainerPosition::RIGHT, rightPanel_);
 
     leftPanel_->hide();
     centralPanel_->hide();
     rightPanel_->hide();
 }
 
-void StubWidgetGroup::setParents(
-    QWidgetPtr leftContainer, QWidgetPtr centralContainer)
+void StubWidgetGroup::setParents(QWidgetPtr leftContainer, QWidgetPtr centralContainer)
 {
     leftPanel_->setParent(centralContainer.get());
     centralPanel_->setParent(centralContainer.get());
@@ -713,29 +712,24 @@ void StubWidgetGroup::setLeftPanelWidth(int width)
     leftPanel_->resize(width, leftPanel_->height());
 }
 
-MainWindowContainerWidget::MainWindowContainerWidget(QWidgetPtr widget)
+std::shared_ptr<SocketInfoBaseWidget> StubWidgetGroup::socketInfoBase() const
 {
-    if (widget)
-        setParent(widget.get());
-
-    layout_ = std::make_unique<QVBoxLayout>();
-    layout_->setSpacing(0);
-    layout_->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout_.get());
+    return dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
 }
 
-void MainWindowContainerWidget::addWidgetToLayout(QWidgetPtr widget)
+std::shared_ptr<LeftPanelWidget> StubWidgetGroup::leftPanel() const
 {
-    if (widget)
-        layout_->addWidget(widget.get());
+    return leftPanel_;
 }
 
-void MainWindowContainerWidget::addWidgetToLayoutAndSetParentTo(QWidgetPtr widget)
+std::shared_ptr<CentralPanelWidget> StubWidgetGroup::centralPanel() const
 {
-    if (widget) {
-        layout_->addWidget(widget.get());
-        widget->setParent(this);
-    }
+    return centralPanel_;
+}
+
+std::shared_ptr<RightPanelWidget> StubWidgetGroup::rightPanel() const
+{
+    return rightPanel_;
 }
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)

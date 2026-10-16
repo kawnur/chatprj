@@ -28,8 +28,12 @@ class GraphicManager;
 class GroupChatData;
 class IndicatorWidget;
 class LeftPanelWidget;
+class MainWidget;
 class MainWindow;
+
+template<typename T>
 class MainWindowContainerWidget;
+
 class Manager;
 class Message;
 class MessageData;
@@ -38,6 +42,7 @@ class MessageInfo;
 class MessageMetaData;
 class MessageState;
 class MessageWidget;
+class NetworkEntity;
 class PasswordAction;
 class PriorityTask;
 class RightPanelWidget;
@@ -68,6 +73,7 @@ using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;
 using MessagePtr = std::shared_ptr<Message>;
 using MessageStatePtr = std::shared_ptr<MessageState>;
 using MessageWidgetPtr = std::shared_ptr<MessageWidget>;
+using NetworkEntityPtr = std::shared_ptr<NetworkEntity>;
 using PasswordActionPtr = std::shared_ptr<PasswordAction>;
 using PGconnPtr = std::shared_ptr<PGconn>;
 using PGresultPtr = std::shared_ptr<PGresult>;

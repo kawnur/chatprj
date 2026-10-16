@@ -1,6 +1,7 @@
 #include "data_checker.hpp"
 
 #include "action.hpp"
+#include "action_result.hpp"
 
 DataChecker::DataChecker(ActionPtr action) : status_(true), action_(action), errors_() {}
 

@@ -21,136 +21,150 @@ MainWindow::MainWindow()
     bar->setPalette(*menuBarPalette_);
 
     // central widget
-    centralWidget_ = QWidgetPtr(new QWidget);
-    setCentralWidget(centralWidget_.get());
+    // mainWidget_ = QWidgetPtr(new QWidget);
+    // mainWidget_ = std::make_unique<MainWidget>(new MainWidget);
+    mainWidget_ = std::make_unique<MainWidget>();
+    mainWidget_->set();
+    setCentralWidget(mainWidget_.get());
 
-    centralWidgetLayout_ = std::make_unique<QHBoxLayout>(centralWidget_.get());
-    centralWidgetLayout_->setSpacing(0);
-    centralWidgetLayout_->setContentsMargins(0, 0, 0, 0);
-    centralWidget_->setLayout(centralWidgetLayout_.get());
+    // mainWidgetLayout_ = std::make_unique<QHBoxLayout>(mainWidget_.get());
+    // mainWidgetLayout_->setSpacing(0);
+    // mainWidgetLayout_->setContentsMargins(0, 0, 0, 0);
+    // mainWidget_->setLayout(mainWidgetLayout_.get());
 
-    // left panel
-    leftContainerWidget_ = std::make_shared<MainWindowContainerWidget>(centralWidget_);
-    centralWidgetLayout_->addWidget(leftContainerWidget_.get());
+    // // left panel
+    // leftContainerWidget_ = std::make_shared<MainWindowContainerWidget>(mainWidget_);
+    // mainWidgetLayout_->addWidget(leftContainerWidget_.get());
 
-    leftPanel_ = std::make_shared<LeftPanelWidget>(leftContainerWidget_);
-    leftContainerWidget_->addWidgetToLayout(dynamic_pointer_cast<QWidget>(leftPanel_));
+    // leftPanel_ = std::make_shared<LeftPanelWidget>(leftContainerWidget_);
+    // leftContainerWidget_->addWidgetToLayout(dynamic_pointer_cast<QWidget>(leftPanel_));
 
-    // central panel
-    centralContainerWidget_ = std::make_shared<MainWindowContainerWidget>(centralWidget_);
-    centralWidgetLayout_->addWidget(centralContainerWidget_.get());
+    // // central panel
+    // centralContainerWidget_ = std::make_shared<MainWindowContainerWidget>(mainWidget_);
+    // mainWidgetLayout_->addWidget(centralContainerWidget_.get());
 
-    centralPanel_ = nullptr;
+    // centralPanel_ = nullptr;
 
-    // right panel
-    rightContainerWidget_ = std::make_shared<MainWindowContainerWidget>(centralWidget_);
-    centralWidgetLayout_->addWidget(rightContainerWidget_.get());
+    // // right panel
+    // rightContainerWidget_ = std::make_shared<MainWindowContainerWidget>(mainWidget_);
+    // mainWidgetLayout_->addWidget(rightContainerWidget_.get());
 
-    rightPanel_ = std::make_shared<RightPanelWidget>(rightContainerWidget_);
-    rightPanel_->set();
+    // rightPanel_ = std::make_shared<RightPanelWidget>(rightContainerWidget_);
+    // rightPanel_->set();
 
-    rightContainerWidget_->addWidgetToLayout(rightPanel_);
+    // rightContainerWidget_->addWidgetToLayout(rightPanel_);
 
     // map container ptr to position
-    containerMap[MainWindowContainerPosition::LEFT] = leftContainerWidget_;
-    containerMap[MainWindowContainerPosition::CENTRAL] = centralContainerWidget_;
-    containerMap[MainWindowContainerPosition::RIGHT] = rightContainerWidget_;
+    // containerMap_[MainWindowContainerPosition::LEFT] = leftContainerWidget_;
+    // containerMap_[MainWindowContainerPosition::CENTRAL] = centralContainerWidget_;
+    // containerMap_[MainWindowContainerPosition::RIGHT] = rightContainerWidget_;
     
     // blur effect moved to set
 
-    // splitter
-    splitter_ = std::make_unique<QSplitter>(centralWidget_.get());
-    // splitter_-addWidget(leftContainerWidget_);
-    splitter_->addWidget(centralContainerWidget_.get());
-    splitter_->addWidget(rightContainerWidget_.get());
-    centralWidgetLayout_->addWidget(splitter_.get());
+    // // splitter
+    // splitter_ = std::make_unique<QSplitter>(mainWidget_.get());
+    // // splitter_-addWidget(leftContainerWidget_);
+    // splitter_->addWidget(centralContainerWidget_.get());
+    // splitter_->addWidget(rightContainerWidget_.get());
+    // mainWidgetLayout_->addWidget(splitter_.get());
 }
 
 void MainWindow::set()
 {
     createMenu();
 
-    auto graphicManager = getGraphicManager();
-    graphicManager->setParentsForStubs(leftContainerWidget_, centralContainerWidget_);
-    graphicManager->setStubWidgets();
-    graphicManager->showCentralPanelStub();
+    // auto graphicManager = getGraphicManager();
+    // graphicManager->setParentsForStubs(leftContainerWidget_, centralContainerWidget_);
+    // graphicManager->setStubWidgets();
+    // graphicManager->showCentralPanelStub();
 
-    showHideWidget_ = std::make_shared<ShowHideWidget>();
+    // showHideWidget_ = std::make_shared<ShowHideWidget>();
 
-    if (!addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_))
-        logArgsError("addWidgetToContainerAndSetParentTo error");
+    // if (!addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_))
+    //     logArgsError("addWidgetToContainerAndSetParentTo error");
 
-    initBlurEffect();
+    // initBlurEffect();
 }
 
 void MainWindow::addTextToAppLogWidget(const QString &text)
 {
-    rightPanel_->addTextToAppLogWidget(text);
+    // rightPanel_->addTextToAppLogWidget(text);
+    mainWidget_->addTextToAppLogWidget(text);
 }
 
 bool MainWindow::addWidgetToContainerAndSetParentTo(
     MainWindowContainerPosition position, QWidgetPtr widget)
 {
-    auto lambda = [&]()
-    {
-        containerMap.at(position)->addWidgetToLayoutAndSetParentTo(widget);
-    };
+    // auto lambda = [&]()
+    // {
+    //     containerMap_.at(position)->addWidgetToLayoutAndSetParentTo(widget);
+    // };
 
-    return runAndReturnBool(lambda);
+    // return runAndReturnBool(lambda);
+
+    return mainWidget_->addWidgetToContainerAndSetParentTo(position, widget);
 }
 
 void MainWindow::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
-    leftPanel_->addWidgetToCompanionPanel(widget);
+    // leftPanel_->addWidgetToCompanionPanel(widget);
+    mainWidget_->addWidgetToCompanionPanel(widget);
 }
 
 std::size_t MainWindow::getCompanionPanelChildrenSize()
 {
-    return leftPanel_->getCompanionPanelChildrenSize();
+    // return leftPanel_->getCompanionPanelChildrenSize();
+    return mainWidget_->getCompanionPanelChildrenSize();
 }
 
 void MainWindow::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
 {
-    leftPanel_->removeWidgetFromCompanionPanel(widget);
+    // leftPanel_->removeWidgetFromCompanionPanel(widget);
+    mainWidget_->removeWidgetFromCompanionPanel(widget);
 }
 
-void MainWindow::hideLeftAndRightPanels()
-{
-    leftPanel_->hide();
-    rightPanel_->hide();
-}
+// void MainWindow::hideLeftAndRightPanels()
+// {
+//     // leftPanel_->hide();
+//     // rightPanel_->hide();
+//     mainWidget_->hideLeftAndRightPanels();
+// }
 
-void MainWindow::showLeftAndRightPanels()
-{
-    leftPanel_->show();
-    rightPanel_->show();
-}
+// void MainWindow::showLeftAndRightPanels()
+// {
+//     // leftPanel_->show();
+//     // rightPanel_->show();
+//     mainWidget_->showLeftAndRightPanels();
+// }
 
-int MainWindow::getLeftPanelWidgetWidth()
-{
-    return leftPanel_->getLastCompanionPanelChildWidth();
-}
+// int MainWindow::getLeftPanelWidgetWidth()
+// {
+//     return leftPanel_->getLastCompanionPanelChildWidth();
+// }
 
 void MainWindow::enableWidgetsForShowHide()
 {
     menuBar()->setEnabled(true);
-    leftPanel_->setEnabled(true);
-    centralContainerWidget_->setEnabled(true);
-    rightContainerWidget_->setEnabled(true);
+    // leftPanel_->setEnabled(true);
+    // centralContainerWidget_->setEnabled(true);
+    // rightContainerWidget_->setEnabled(true);
+    mainWidget_->enableWidgetsForShowHide();
 }
 
 void MainWindow::disableWidgetsForShowHide()
 {
     menuBar()->setEnabled(false);
-    leftPanel_->setEnabled(false);
-    centralContainerWidget_->setEnabled(false);
-    rightContainerWidget_->setEnabled(false);
+    // leftPanel_->setEnabled(false);
+    // centralContainerWidget_->setEnabled(false);
+    // rightContainerWidget_->setEnabled(false);
+    mainWidget_->disableWidgetsForShowHide();
 }
 
 void MainWindow::enableBlurEffect()
 {
     disableWidgetsForShowHide();
-    setGraphicsEffect(blurEffect_.get());
+    // setGraphicsEffect(blurEffect_.get());
+    mainWidget_->setBlurEffect();
 }
 
 void MainWindow::disableBlurEffect()
@@ -159,7 +173,8 @@ void MainWindow::disableBlurEffect()
     // setGraphicsEffect(nullptr);
 
     // // setGraphicsEffect deletes previous effect object
-    initBlurEffect();
+    // initBlurEffect();
+    mainWidget_->initBlurEffect();
 }
 
 void MainWindow::createCompanion()
@@ -217,8 +232,33 @@ void MainWindow::createMenu()
         this, &MainWindow::createGroupChat, Qt::QueuedConnection);
 }
 
-void MainWindow::initBlurEffect()
+// void MainWindow::initBlurEffect()
+// {
+//     blurEffect_ = std::make_shared<QGraphicsBlurEffect>();
+//     blurEffect_->setBlurRadius(BLUR_RADIUS);
+// }
+
+void MainWindow::hideCentralPanelStub()
 {
-    blurEffect_ = std::make_shared<QGraphicsBlurEffect>();
-    blurEffect_->setBlurRadius(BLUR_RADIUS);
+    mainWidget_->hideCentralPanelStub();
+}
+
+void MainWindow::showCentralPanelStub()
+{
+    mainWidget_->showCentralPanelStub();
+}
+
+void MainWindow::hideCompanionPanelStub()
+{
+    mainWidget_->hideCompanionPanelStub();
+}
+
+void MainWindow::showStubPanels()
+{
+    mainWidget_->showStubPanels();
+}
+
+void MainWindow::hideStubPanels()
+{
+    mainWidget_->hideStubPanels();
 }
