@@ -79,7 +79,7 @@ public:
     void initFileReception(const std::string &networkId, CompanionPtr companion);
     ActionResultPtr createCompanion(CompanionActionPtr action);
     ActionResultPtr updateCompanion(CompanionActionPtr action);
-    void updateSocketInfo(int id, CompanionDataPtr data);
+    // void updateSocketInfo(int id, CompanionDataPtr data);
     ActionResultPtr deleteCompanion(CompanionActionPtr action);
     void clearChatHistory(CompanionPtr companion);
     ActionResultPtr clearCompanionHistory(CompanionActionPtr action);
@@ -137,6 +137,10 @@ public:
         CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
 
     void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
+    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    void sortHistory(CompanionPtr companion);
+    void disableBlur();
+    bool clientAction(CompanionPtr companion, bool isConnected);
 
 private:
     ActionResultPtr getActionResultByKeyDBData(

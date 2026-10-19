@@ -3,10 +3,8 @@
 #include "action.hpp"
 #include "companion.hpp"
 #include "file_info.hpp"
-#include "graphic_manager.hpp"
 #include "manager.hpp"
 #include "message.hpp"
-#include "widgets.hpp"
 
 MessageHandler::MessageHandler() : messageStorage_() {}
 
@@ -112,7 +110,7 @@ void MessageHandler::sendMessage(
             manager_->addSenderOperator(message->networkId(), cast->getPath());
     }
 
-    getGraphicManager()->addMessageWidget(companion, message);
+    manager_->addMessageWidget(companion, message);
 
     // define NetworkMessageType
     auto networkMessageType = defineNetworkMessageType(type);
@@ -296,7 +294,7 @@ void MessageHandler::receiveTextMessage(
     // decrypt message
 
     // add to widget
-    getGraphicManager()->addMessageWidget(companion, message);
+    manager_->addMessageWidget(companion, message);
 
     // send reply message to sender
     pushMeta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION;
@@ -335,7 +333,7 @@ void MessageHandler::receiveFileProposalMessage(
     // decrypt message
 
     // add to widget
-    getGraphicManager()->addMessageWidget(companion, message);
+    manager_->addMessageWidget(companion, message);
 
     // send reply message to sender
     bool result = sendMessageByNetwork(companion, message, replyMeta);
@@ -405,11 +403,6 @@ void MessageHandler::receiveConfirmationRequest(
 void MessageHandler::reciveChatHistoryRequest(CompanionPtr companion)
 {
     logTemplateInfo("got history request from {}", companion->name());
-
-    auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
-
-    if (group)
-        emit group->askUserForHistorySendingConfirmationSignal();
 }
 
 void MessageHandler::receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data)
@@ -542,8 +535,6 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
         return;
     }
 
-    auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
-
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO use iterators
         logArgs("adding message with id", messagesData->getValue(i, "id"));
 
@@ -555,10 +546,10 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
             continue;
         }
 
-        getGraphicManager()->addMessageWidget(companion, message);
+        manager_->addMessageWidget(companion, message);
     }
 
-    group->sortChatHistoryElements();
+    manager_->sortHistory(companion);
 }
 
 void MessageHandler::sendUnsentMessages(CompanionPtr companion)
@@ -627,11 +618,6 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
 
 void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
 {
-    auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
-
-    if (!group)
-        return;
-
     uint8_t companionId = companion->id();
 
     // get messages data
@@ -652,12 +638,12 @@ void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool co
                 // companion->addMessage(const_cast<MessagePtr>(pair.second));
             } else {
                 auto message = createMessageAndAddToMapping(companion, messagesData, i);
-                emit group->addMessageWidgetSignal(message);
+                manager_->addMessageWidget(companion, message);
             }
         }
         else {
             auto message = createMessageAndAddToMapping(companion, messagesData, i);
-            emit group->addMessageWidgetSignal(message);
+            manager_->addMessageWidget(companion, message);
         }
     }
 }

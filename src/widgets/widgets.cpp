@@ -1,12 +1,10 @@
 #include "widgets.hpp"
 
-#include "action.hpp"
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
 #include "graphic_manager.hpp"
 #include "mainwindow.hpp"
-#include "manager.hpp"
 #include "message.hpp"
 #include "utils_widgets.hpp"
 #include "widgets_message.hpp"
@@ -162,9 +160,9 @@ void IndicatorWidget::toggle()
     (isOn_ == true) ? setOff() : setOn();
 }
 
-SocketInfoWidget::SocketInfoWidget(CompanionPtr companion)
+SocketInfoWidget::SocketInfoWidget(WidgetGroupPtr group, CompanionPtr companion)
 {
-    buildFields();
+    buildFields(group);
 
     companion_ = companion;
 
@@ -202,6 +200,11 @@ bool SocketInfoWidget::isSelected()
     return isSelected_;
 }
 
+bool SocketInfoWidget::isConnected()
+{
+    return isConnected_;
+}
+
 void SocketInfoWidget::select()
 {
     isSelected_ = true;
@@ -229,11 +232,6 @@ void SocketInfoWidget::setNewMessagesIndicatorOff()
     received_->setOff();
 }
 
-void SocketInfoWidget::requestHistoryFromCompanionAction()
-{
-    getManager()->requestHistoryFromCompanion(companion_);
-}
-
 void SocketInfoWidget::updateCompanionAction()
 {
     getGraphicManager()->updateCompanion(companion_);
@@ -249,24 +247,8 @@ void SocketInfoWidget::deleteCompanionAction()
     getGraphicManager()->deleteCompanion(companion_);
 }
 
-void SocketInfoWidget::clientAction()
+void SocketInfoWidget::update()
 {
-    bool result = false;
-    auto manager = getManager();
-    auto companion = getGraphicManager()->getMappedCompanionBySocketInfoBaseWidget(this);
-
-    // TODO change to states
-    if (isConnected_) {
-        result = manager->disconnectClient(companion);
-    }
-    else {
-        result = manager->connectClient(companion);
-        getManager()->sendUnsentMessages(companion);
-    }
-
-    if (!result)
-        return;
-
     // change value
     isConnected_ = !(isConnected_);
 
@@ -281,7 +263,7 @@ void SocketInfoWidget::clientAction()
     requestHistory_->setDisabled(requestHistory_->isEnabled());
 }
 
-void SocketInfoWidget::buildFields()
+void SocketInfoWidget::buildFields(WidgetGroupPtr group)
 {
     // value fields
     isSelected_ = false;
@@ -316,7 +298,8 @@ void SocketInfoWidget::buildFields()
 
     connect(
         connect_.get(), &QPushButton::clicked,
-        this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
+        // this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
+        group.get(), &WidgetGroup::clientAction, Qt::QueuedConnection);
 
     received_ = std::make_shared<IndicatorWidget>(NEW_MESSAGES_INDICATOR_WIDGET_SIZE, false);
 
@@ -335,8 +318,8 @@ void SocketInfoWidget::buildFields()
     // connections
     connect(
         requestHistory_.get(), &QAction::triggered,
-        this, &SocketInfoWidget::requestHistoryFromCompanionAction,
-        Qt::QueuedConnection);
+        // this, &SocketInfoWidget::requestHistoryFromCompanionAction,
+        group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -357,7 +340,7 @@ void SocketInfoWidget::setFields()
 void SocketInfoWidget::setFieldsFromCompanionData()
 {
     name_->setText(getQString(companion_->name()));
-    auto data = getManager()->getCompanionData(companion_);
+    auto data = getGraphicManager()->getCompanionData(companion_);
 
     if (data) {
         ipAddress_->setText(getQString(data->ipAddress()));
@@ -377,12 +360,10 @@ void SocketInfoWidget::changeColor(QColor &color)
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 {
-    auto manager = getManager();
-
     auto baseObject = qobject_cast<SocketInfoBaseWidget *>(this);
 
-    auto newCompanion = getGraphicManager()->getMappedCompanionBySocketInfoBaseWidget(baseObject);
-    manager->resetSelectedCompanion(newCompanion);
+    auto newCompanion = getGraphicManager()->getCompanionByWidget(baseObject);
+    getGraphicManager()->resetSelectedCompanion(newCompanion);
 
     QWidget::mousePressEvent(event);
 }
@@ -466,24 +447,7 @@ void ShowHideWidget::mousePressEvent(QMouseEvent *event)
 // }
 
 WidgetGroup::WidgetGroup(CompanionPtr companion)
-    : companion_(companion), antecedentMessagesCounterMutex_(std::mutex())
-{
-    antecedentMessagesCounter_ = 0;
-    auto graphicManager = getGraphicManager();
-    auto widget = std::make_shared<SocketInfoWidget>(companion_);
-    socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
-    graphicManager->addCompanionWidget(socketInfoBase_);
-
-    centralPanel_ = std::make_shared<CentralPanelWidget>(
-        getGraphicManager()->getMainWindow(), companion_->name());
-
-    centralPanel_->set(companion_);
-
-    graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-        MWContainerPosition::CENTRAL, centralPanel_);
-
-    centralPanel_->hide();
-}
+    : companion_(companion), antecedentMessagesCounterMutex_(), antecedentMessagesCounter_(0) {}
 
 WidgetGroup::~WidgetGroup()
 {
@@ -493,15 +457,32 @@ WidgetGroup::~WidgetGroup()
 
 void WidgetGroup::set()
 {
+    auto graphicManager = getGraphicManager();
+
+    auto widget = std::make_shared<SocketInfoWidget>(shared_from_this(), companion_);
+
+    socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
+    graphicManager->addCompanionWidget(socketInfoBase_);
+
+    centralPanel_ = std::make_shared<CentralPanelWidget>(
+        getGraphicManager()->getMainWindow(), companion_->name());
+
+    centralPanel_->set(companion_);
+
+    graphicManager->addWidget(
+        MWContainerPosition::CENTRAL, centralPanel_);
+
+    centralPanel_->hide();
+
     connect(
         this, &WidgetGroup::addMessageWidgetSignal,
         this, &WidgetGroup::addMessageWidgetSlot,
         Qt::QueuedConnection);
 
-    connect(
-        this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
-        this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
-        Qt::QueuedConnection);
+    // connect(
+    //     this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
+    //     this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
+    //     Qt::QueuedConnection);
 
     // connect(
     //     this, &WidgetGroup::buildChatHistorySignal,
@@ -509,7 +490,7 @@ void WidgetGroup::set()
     //     Qt::QueuedConnection);
 }
 
-void WidgetGroup::clearChatHistory()
+void WidgetGroup::clearHistory()
 {
     centralPanel_->clearHistory();
 
@@ -538,7 +519,7 @@ SocketInfoBaseWidgetPtr WidgetGroup::getSocketInfoBase()
     return socketInfoBase_;
 }
 
-void WidgetGroup::sortChatHistoryElements()
+void WidgetGroup::sortHistory()
 {
     centralPanel_->sortHistory(true);
 }
@@ -555,12 +536,6 @@ void WidgetGroup::messageAdded()
 
     if (cast)
         cast->setNewMessagesIndicatorOn();
-}
-
-void WidgetGroup::askUserForHistorySendingConfirmation()
-{
-    auto action = std::make_unique<CompanionAction>(ActionType::SEND_HISTORY, companion_);
-    action->set();
 }
 
 void WidgetGroup::updateSocketInfoWidget()
@@ -624,7 +599,7 @@ void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
     // };
 
     // runInDetachedThread(lambda);
-    getManager()->setMappedMessageWidget(companion_, message, widget);
+    getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
 
     widget->setBase(shared_from_this());
 
@@ -633,10 +608,24 @@ void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
     messageAdded();
 }
 
-void WidgetGroup::askUserForHistorySendingConfirmationSlot()
+void WidgetGroup::requestHistorySlot()
 {
-    askUserForHistorySendingConfirmation();
+    getGraphicManager()->requestHistory(companion_);
 }
+
+void WidgetGroup::clientAction()
+{
+    if (!getGraphicManager()->clientAction(companion_, socketInfoBase_->isConnected()))
+        return;
+
+    socketInfoBase_->update();
+}
+
+// void WidgetGroup::askUserForHistorySendingConfirmationSlot()
+// {
+//     auto action = std::make_unique<CompanionAction>(ActionType::SEND_HISTORY, companion_);
+//     action->set();
+// }
 
 StubWidgetGroup::StubWidgetGroup()
 {

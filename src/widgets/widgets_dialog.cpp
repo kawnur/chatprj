@@ -38,13 +38,11 @@ void Dialog::setDialogType(DialogType type)
     setTitleAsInfo();
 }
 
-CompanionDataDialog::CompanionDataDialog(
-    ActionType type, QWidgetPtr parent, CompanionPtr companion)
-    : Dialog()
+CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion) : Dialog()
 {
     setTitleAsData();
 
-    setParent(parent.get());
+    setParent(getGraphicManager()->getMainWindow().get());
     setModal(true);
     setWindowFlag(Qt::Window);
 
@@ -122,11 +120,11 @@ CompanionDataPtr CompanionDataDialog::getCompanionData()
         name(), ipAddress(), ""s, port());
 }
 
-GroupChatDataDialog::GroupChatDataDialog(ActionType type, QWidgetPtr parent)
+GroupChatDataDialog::GroupChatDataDialog(ActionType type)
 {
     setTitleAsData();
 
-    setParent(parent.get());
+    setParent(getGraphicManager()->getMainWindow().get());
     setModal(true);
     setWindowFlag(Qt::Window);
 
@@ -324,7 +322,7 @@ void TextDialog::updateButtonBox(std::initializer_list<ButtonInfo> list)
 
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 {
-    getGraphicManager()->disableMainWindowBlurEffect();
+    getGraphicManager()->disableBlur();
     closeSelfAndParent();
 }
 
@@ -369,4 +367,14 @@ std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
 QStringList FileDialog::selectedFiles()
 {
     return dialog_->selectedFiles();
+}
+
+QString FileDialog::getSaveFileName(const QString &param, const QString &path)
+{
+    auto cast = dynamic_pointer_cast<QWidget>(getGraphicManager()->getMainWindow());
+
+    if (!cast)
+        return "";
+
+    return dialog_->getSaveFileName(cast.get(), param, path);
 }

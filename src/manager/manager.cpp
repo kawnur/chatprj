@@ -94,7 +94,7 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
 
 void Manager::receiveMessage(int companionId, const std::string &json)
 {
-    auto companion = graphicManager_->getMappedCompanionById(companionId);
+    auto companion = graphicManager_->getCompanion(companionId);
 
     if (!companion)
         return;
@@ -201,7 +201,7 @@ ActionResultPtr Manager::createCompanion(CompanionActionPtr action)
         return validationResult;
 
     // data checking
-    auto checkResult = checkDataForExistance(action);
+    auto checkResult = checkDataForExistance(shared_from_this(), action);
 
     if (!checkResult->status())
         return checkResult;
@@ -243,7 +243,7 @@ ActionResultPtr Manager::createCompanion(CompanionActionPtr action)
 
     // add companion and widget group to mapping
     auto companion = managerMapResult->value();
-    graphicManager_->createWidgetGroupAndAddToMapping(companion);
+    graphicManager_->updateMapping(companion);
 
     return std::make_shared<ActionResult>(true, ""s);
 }
@@ -261,7 +261,8 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
 {
     // TODO check new data before data dialog is closed, move to Action::act
     // check if data was modified
-    auto oldData = networkManager_.getCompanionData(action->getCompanion());
+    auto companion = action->getCompanion();
+    auto oldData = networkManager_.getCompanionData(companion);
     auto newData = action->getCompanionData();
 
     if (compareCompanionData(oldData, newData))
@@ -274,7 +275,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
         return validationResult;
 
     // data checking
-    auto checkResult = checkDataForExistance(action);
+    auto checkResult = checkDataForExistance(shared_from_this(), action);
 
     if (!checkResult->status())
         return checkResult;
@@ -286,19 +287,20 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
         return idResult;
 
     // update Companion and SocketInfo object
-    action->updateCompanionObjectData();
+    // action->updateCompanionObjectData();
+    companion->setName(newData->name());
+    networkManager_.updateSocketInfo(companion->id(), newData);
 
     // update SocketInfoWidget
-    auto widgetGroup = graphicManager_->getMappedWidgetGroupByCompanion(action->getCompanion());
-    widgetGroup->updateSocketInfoWidget();
+    graphicManager_->updateCompanionWidget(companion);
 
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::updateSocketInfo(int id, CompanionDataPtr data)
-{
-    networkManager_.updateSocketInfo(id, data);
-}
+// void Manager::updateSocketInfo(int id, CompanionDataPtr data)
+// {
+//     networkManager_.updateSocketInfo(id, data);
+// }
 
 ActionResultPtr Manager::deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action)
 {
@@ -337,8 +339,7 @@ ActionResultPtr Manager::deleteCompanion(CompanionActionPtr action)
 
 void Manager::clearChatHistory(CompanionPtr companion)
 {
-    auto widgetGroup = graphicManager_->getMappedWidgetGroupByCompanion(companion);
-    graphicManager_->clearChatHistory(widgetGroup);
+    graphicManager_->clearHistory(companion);
 }
 
 ActionResultPtr Manager::clearCompanionHistory(CompanionActionPtr action)
@@ -385,7 +386,7 @@ ActionResultPtr Manager::createUserPassword(PasswordActionPtr action)
 ActionResultPtr Manager::authenticateUser(PasswordActionPtr action)
 {
     // data checking
-    auto checkResult = checkDataForExistance(action);
+    auto checkResult = checkDataForExistance(shared_from_this(), action);
 
     if (!checkResult->status())
         return checkResult;
@@ -549,7 +550,7 @@ std::shared_ptr<CompanionResult> Manager::addCompanionToManagerMap(
     }
 
     auto companion = std::make_shared<Companion>(id, name);
-    auto result = graphicManager_->addCompanion(companion);
+    bool result = graphicManager_->addCompanion(companion);
 
     if (result)
         return std::make_shared<CompanionResult>(companion, true, ""s);
@@ -658,6 +659,37 @@ bool Manager::setMappedMessageWidget(
 void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
 {
     messageHandler_.fillCompanionMessageMapping(companion, containersNotEmpty);
+}
+
+void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
+{
+    graphicManager_->addMessageWidget(companion, message);
+}
+
+void Manager::sortHistory(CompanionPtr companion)
+{
+    graphicManager_->sortHistory(companion);
+}
+
+void Manager::disableBlur()
+{
+    graphicManager_->disableBlur();
+}
+
+bool Manager::clientAction(CompanionPtr companion, bool isConnected)
+{
+    bool result = false;
+
+    // TODO change to states
+    if (isConnected) {
+        result = disconnectClient(companion);
+    }
+    else {
+        result = connectClient(companion);
+        sendUnsentMessages(companion);
+    }
+
+    return result;
 }
 
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)

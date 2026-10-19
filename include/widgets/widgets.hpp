@@ -116,6 +116,7 @@ public:
     virtual bool isStub() { return false; }
     virtual void setNewMessagesIndicatorOff() {}
     virtual void updateFields() {}
+    virtual bool isConnected() { return false; }
 
     void initializeFields();  // non-virtual because is called from constructor
 };
@@ -132,7 +133,7 @@ class SocketInfoWidget : public SocketInfoBaseWidget
     Q_OBJECT
 
 public:
-    SocketInfoWidget(CompanionPtr companion);
+    SocketInfoWidget(WidgetGroupPtr group, CompanionPtr companion);
     ~SocketInfoWidget() = default;
 
     QString name() const;
@@ -142,21 +143,22 @@ public:
 
     bool isStub() override;
     bool isSelected();
+    bool isConnected() override;
     void select();
     void unselect();
     void updateFields() override;
     void setNewMessagesIndicatorOn();
     void setNewMessagesIndicatorOff() override;
 
+    void update();
+
 public slots:
-    void requestHistoryFromCompanionAction();
     void updateCompanionAction();
     void clearHistoryAction();
     void deleteCompanionAction();
-    void clientAction();
 
 private:
-    void buildFields();
+    void buildFields(WidgetGroupPtr group);
     void setFieldsFromCompanionData();
     void setFields();
     void changeColor(QColor &color);
@@ -241,27 +243,28 @@ public:
     ~WidgetGroup();
 
     void set();
-    void clearChatHistory();
+    void clearHistory();
     void hideCentralPanel();
     void showCentralPanel();
     SocketInfoBaseWidgetPtr getSocketInfoBase();
-    void sortChatHistoryElements();
+    void sortHistory();
     void messageAdded();
-    void askUserForHistorySendingConfirmation();
     void updateSocketInfoWidget();
 
 signals:
     void addMessageWidgetSignal(MessagePtr message);
-    void askUserForHistorySendingConfirmationSignal();
+    // void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
 public slots:
     void messageWidgetSelected(MessageWidgetPtr widget);
     // void buildChatHistorySlot();
+    void requestHistorySlot();
+    void clientAction();
 
 private slots:
     void addMessageWidgetSlot(MessagePtr message);
-    void askUserForHistorySendingConfirmationSlot();
+    // void askUserForHistorySendingConfirmationSlot();
 
 private:
     CompanionPtr companion_;

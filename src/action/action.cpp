@@ -7,9 +7,7 @@
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
-#include "graphic_manager.hpp"
 #include "logging.hpp"
-#include "mainwindow.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 #include "utils.hpp"
@@ -86,12 +84,10 @@ CompanionAction::~CompanionAction() { logArgsInfo(Q_FUNC_INFO); }
 
 void CompanionAction::buildDataDialog()
 {
-    MainWindowPtr mainWindow = getGraphicManager()->getMainWindow();
-
     switch (type_) {
     case ActionType::CREATE_COMPANION:
     case ActionType::UPDATE_COMPANION:
-        dataDialog_ = std::make_shared<CompanionDataDialog>(type_, mainWindow, companion_);
+        dataDialog_ = std::make_shared<CompanionDataDialog>(type_, companion_);
 
     break;
 
@@ -150,10 +146,11 @@ void CompanionAction::set()
     preAct();
 }
 
-void CompanionAction::updateCompanionObjectData()
-{
-    companion_->updateData(data_);
-}
+// void CompanionAction::updateCompanionObjectData()
+// {
+//     // companion_->updateData(data_);
+//     getManager()->updateCompanion()
+// }
 
 void CompanionAction::updateInfoDialog(ActionResultPtr result)
 {
@@ -282,11 +279,9 @@ void CompanionAction::endAct()
 
 GroupChatAction::GroupChatAction(ActionType type) : data_(), RegularAction(type)
 {
-    MainWindowPtr mainWindow = getGraphicManager()->getMainWindow();
-
     switch (type) {
     case ActionType::CREATE_GROUP:
-        dataDialog_ = std::make_shared<GroupChatDataDialog>(type_, mainWindow);
+        dataDialog_ = std::make_shared<GroupChatDataDialog>(type_);
 
         break;
 
@@ -356,7 +351,7 @@ void PasswordAction::updateInfoDialog(ActionResultPtr result)
 
         function = [this]()
         {
-            getGraphicManager()->disableMainWindowBlurEffect();
+            getManager()->disableBlur();
             infoDialog_->closeSelfAndParent();
         };
     } else {
@@ -565,14 +560,9 @@ void FileAction::act()
 
 void FileAction::defineFilePath()
 {
-    auto cast = dynamic_pointer_cast<QWidget>(getGraphicManager()->getMainWindow());
-
-    if (!cast)
-        return;
-
     auto pathQStr = QString::fromStdString(getManager()->getLastOpenedPath().string());
     QString param { "Save File" };
-    auto result = QFileDialog::getSaveFileName(cast.get(), param, pathQStr);
+    auto result = dataDialog_->getSaveFileName(param, pathQStr);
     filePath_ = std::filesystem::path(result.toStdString());
     act();
 }

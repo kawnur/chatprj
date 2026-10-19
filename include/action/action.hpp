@@ -89,7 +89,7 @@ public:
 
     void set() override;
 
-    void updateCompanionObjectData();
+    // void updateCompanionObjectData();
     void updateInfoDialog(ActionResultPtr result);
 
 public slots:

@@ -3,7 +3,8 @@
 #include "action.hpp"
 #include "action_result.hpp"
 
-DataChecker::DataChecker(ActionPtr action) : status_(true), action_(action), errors_() {}
+DataChecker::DataChecker(ManagerPtr manager, ActionPtr action)
+    : manager_(manager), status_(true), action_(action), errors_() {}
 
 std::vector<std::string> DataChecker::errors() const
 {
@@ -95,10 +96,9 @@ bool DataChecker::check()
     }
 }
 
-ActionResultPtr checkDataForExistance(ActionPtr action)
+ActionResultPtr checkDataForExistance(ManagerPtr manager, ActionPtr action)
 {
-    DataChecker checker(action);
-
+    DataChecker checker(manager, action);
     auto result = checker.check();
 
     if (result)

@@ -48,7 +48,7 @@ void GraphicManager::buildWidgetGroups()
 
     for (const auto &pair : map_) {
         auto companion = pair.second.first;
-        createWidgetGroupAndAddToMapping(companion);
+        updateMapping(companion);
         manager_->fillCompanionMessageMapping(companion, false);
     }
 }
@@ -65,7 +65,7 @@ bool GraphicManager::addCompanion(CompanionPtr companion)
     return result.second;
 }
 
-CompanionPtr GraphicManager::getMappedCompanionById(int id) const
+CompanionPtr GraphicManager::getCompanion(int id) const
 {
     auto lambda = [&](int id) { return map_.at(id).first; };
 
@@ -77,7 +77,7 @@ CompanionPtr GraphicManager::getMappedCompanionById(int id) const
     return result;
 }
 
-CompanionPtr GraphicManager::getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const
+CompanionPtr GraphicManager::getCompanionByWidget(SocketInfoBaseWidget *widget) const
 {
     auto lambda = [&](const auto &pair)
     {
@@ -89,7 +89,7 @@ CompanionPtr GraphicManager::getMappedCompanionBySocketInfoBaseWidget(SocketInfo
     return (result == map_.end()) ? nullptr : result->second.first;
 }
 
-WidgetGroupPtr GraphicManager::getMappedWidgetGroupByCompanion(CompanionPtr companion) const
+WidgetGroupPtr GraphicManager::getWidgetGroup(CompanionPtr companion) const
 {
     WidgetGroupPtr group = nullptr;
 
@@ -106,19 +106,7 @@ WidgetGroupPtr GraphicManager::getMappedWidgetGroupByCompanion(CompanionPtr comp
     return group;
 }
 
-CompanionPtr GraphicManager::getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const
-{
-    auto lambda = [&](const auto &pair)
-    {
-        return pair.second.second == group;
-    };
-
-    auto result = std::ranges::find_if(map_, lambda);
-
-    return result->second.first;
-}
-
-void GraphicManager::createWidgetGroupAndAddToMapping(CompanionPtr companion)
+void GraphicManager::updateMapping(CompanionPtr companion)
 {
     auto group = std::make_shared<WidgetGroup>(companion);
     group->set();
@@ -160,7 +148,7 @@ void GraphicManager::hideSelectedCompanionCentralPanel()
     if (!selected)
         return;
 
-    auto group = getMappedWidgetGroupByCompanion(selected);
+    auto group = getWidgetGroup(selected);
     hideWidgetGroupCentralPanel(group);
 }
 
@@ -171,14 +159,14 @@ void GraphicManager::showSelectedCompanionCentralPanel()
     if (!selected)
         return;
 
-    auto group = getMappedWidgetGroupByCompanion(selected);
+    auto group = getWidgetGroup(selected);
     showWidgetGroupCentralPanel(group);
 }
 
 void GraphicManager::preSelectCompanion(CompanionPtr companion)  // TODO rewrite
 {
     if (companion) {
-        auto group = getMappedWidgetGroupByCompanion(companion);
+        auto group = getWidgetGroup(companion);
         auto cast = dynamic_pointer_cast<SocketInfoWidget>(group->getSocketInfoBase());
 
         if (cast)
@@ -194,7 +182,7 @@ void GraphicManager::preSelectCompanion(CompanionPtr companion)  // TODO rewrite
 void GraphicManager::postSelectCompanion(CompanionPtr companion)  // TODO rewrite
 {
     if (companion) {
-        auto group = getMappedWidgetGroupByCompanion(companion);
+        auto group = getWidgetGroup(companion);
         auto cast = dynamic_pointer_cast<SocketInfoWidget>(group->getSocketInfoBase());
 
         if (cast)
@@ -227,7 +215,7 @@ void GraphicManager::showWidgetGroupCentralPanel(WidgetGroupPtr group)
     group->showCentralPanel();
 }
 
-void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
+void GraphicManager::addWidget(
     MWContainerPosition position, QWidgetPtr widget)
 {
     if (!mainWindow_->addWidget(position, widget))
@@ -265,24 +253,17 @@ void GraphicManager::clearCompanionHistory(CompanionPtr companion)
     manager_->initCompanionHistoryClearing(companion);
 }
 
-void GraphicManager::clearChatHistory(WidgetGroupPtr widgetGroup)
+void GraphicManager::clearHistory(CompanionPtr companion)
 {
-    widgetGroup->clearChatHistory();
+    auto group = getWidgetGroup(companion);
+
+    if (group)
+        group->clearHistory();
 }
 
 void GraphicManager::deleteCompanion(CompanionPtr companion)
 {
     manager_->initCompanionDeletion(companion);
-}
-
-void GraphicManager::hideInfoViaBlur()
-{
-    enableMainWindowBlurEffect();
-}
-
-void GraphicManager::showInfoViaBlur()
-{
-    disableMainWindowBlurEffect();
 }
 
 void GraphicManager::hideInfoViaStubs()
@@ -299,7 +280,7 @@ void GraphicManager::showInfoViaStubs()
 
 void GraphicManager::hideInfo()
 {
-    hideInfoViaBlur();
+    enableMainWindowBlurEffect();
     // hideInfoViaStubs();
 }
 
@@ -311,19 +292,19 @@ void GraphicManager::showInfo()
     // showInfoViaStubs();
 }
 
-void GraphicManager::createEntrancePassword()
-{
-    manager_->initEntrancePasswordCreation();
-}
-
 void GraphicManager::enableMainWindowBlurEffect()
 {
     mainWindow_->enableBlur();
 }
 
-void GraphicManager::disableMainWindowBlurEffect()
+void GraphicManager::disableBlur()
 {
     mainWindow_->disableBlur();
+}
+
+void GraphicManager::createEntrancePassword()
+{
+    manager_->initEntrancePasswordCreation();
 }
 
 void GraphicManager::getEntrancePassword()
@@ -349,13 +330,12 @@ MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, Mess
 
 void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message)
 {
-    auto group = getMappedWidgetGroupByCompanion(companion);
+    auto group = getWidgetGroup(companion);
 
     if (!group)
         return;
 
     emit group->addMessageWidgetSignal(message);
-    // group->addMessageWidget(message);
 }
 
 bool GraphicManager::setMessageWidgetAsSent(MessageInfoPtr info)
@@ -394,11 +374,6 @@ void GraphicManager::setMessageWidgetAsReceived(MessageInfoPtr info)
         logArgsError("marking widget as received error");
 }
 
-void GraphicManager::sortChatHistoryElementsForWidgetGroup(WidgetGroupPtr group)
-{
-    group->sortChatHistoryElements();
-}
-
 void GraphicManager::sendFile(CompanionPtr companion)
 {
     manager_->initFileSend(companion);
@@ -412,6 +387,64 @@ void GraphicManager::saveFile(const std::string &networkId, CompanionPtr compani
 std::string GraphicManager::getFilePathString(const std::string &networkId)
 {
     return manager_->getFilePathString(networkId);
+}
+
+void GraphicManager::updateCompanionWidget(CompanionPtr companion)
+{
+    auto group = getWidgetGroup(companion);
+
+    if (group)
+        group->updateSocketInfoWidget();
+}
+
+void GraphicManager::sortHistory(CompanionPtr companion)
+{
+    auto group = getWidgetGroup(companion);
+
+    if (group)
+        group->sortHistory();
+}
+
+void GraphicManager::requestHistory(CompanionPtr companion)
+{
+    manager_->requestHistoryFromCompanion(companion);
+}
+
+// bool GraphicManager::connectClient(CompanionPtr companion)
+// {
+//     return manager_->connectClient(companion);
+// }
+
+// bool GraphicManager::disconnectClient(CompanionPtr companion)
+// {
+//     return manager_->disconnectClient(companion);
+// }
+
+bool GraphicManager::clientAction(CompanionPtr companion, bool isConnected)
+{
+    return manager_->clientAction(companion, isConnected);
+}
+
+CompanionDataPtr GraphicManager::getCompanionData(CompanionPtr companion)
+{
+    return manager_->getCompanionData(companion);
+}
+
+void GraphicManager::resetSelectedCompanion(CompanionPtr companion)
+{
+    manager_->resetSelectedCompanion(companion);
+}
+
+void GraphicManager::resetSelectedCompanion(SocketInfoBaseWidget *previous)
+{
+    auto previousCompanion = getCompanionByWidget(previous);
+    resetSelectedCompanion(previousCompanion);
+}
+
+bool GraphicManager::setMappedMessageWidget(
+    CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget)
+{
+    return manager_->setMappedMessageWidget(companion, message, widget);
 }
 
 GraphicManagerPtr getGraphicManager()

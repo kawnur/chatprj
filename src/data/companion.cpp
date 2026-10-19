@@ -1,8 +1,5 @@
 #include "companion.hpp"
 
-#include "data.hpp"
-#include "manager.hpp"
-
 Companion::Companion(int id, const std::string &name) : id_(id), name_(name) {}
 
 int Companion::id() const
@@ -15,8 +12,7 @@ std::string Companion::name() const
     return name_;
 }
 
-void Companion::updateData(CompanionDataPtr data)
+void Companion::setName(const std::string &name)
 {
-    name_ = data->name();
-    getManager()->updateSocketInfo(id_, data);
+    name_ = name;
 }

@@ -38,6 +38,7 @@ public:
     virtual std::string secondEditText() { return ""s; }
     virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() { return QStringList(); }
+    virtual QString getSaveFileName(const QString &param, const QString &path) { return ""; }
 
     bool containsDialog() const { return containsDialog_; }
     void setDialogType(DialogType type);
@@ -63,7 +64,7 @@ class CompanionDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    CompanionDataDialog(ActionType, QWidgetPtr, CompanionPtr);
+    CompanionDataDialog(ActionType type, CompanionPtr companion);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     std::string name();
@@ -91,7 +92,7 @@ class GroupChatDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    GroupChatDataDialog(ActionType, QWidgetPtr);
+    GroupChatDataDialog(ActionType type);
     ~GroupChatDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     void set(ActionPtr action) override;
@@ -188,6 +189,8 @@ public:
 
     std::shared_ptr<QFileDialog> getFileDialog();
     QStringList selectedFiles() override;
+
+    QString getSaveFileName(const QString &param, const QString &path) override;
 
 private:
     std::shared_ptr<QFileDialog> dialog_;

@@ -1,7 +1,6 @@
 #ifndef DATA_CHECKER_HPP
 #define DATA_CHECKER_HPP
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -9,18 +8,16 @@
 #include "db_constants.hpp"
 #include "manager.hpp"
 
-ManagerPtr getManager();
-
 class DataChecker
 {
 public:
-    DataChecker(ActionPtr action);
+    DataChecker(ManagerPtr manager, ActionPtr action);
     ~DataChecker() = default;
 
     template<typename... Ts>
     auto getDBData(Ts &&...args)
     {
-        auto data = getManager()->getDBData(args...);
+        auto data = manager_->getDBData(args...);
 
         if (!data) {
             errors_.push_back(DB_REPLY_NULL);
@@ -119,13 +116,14 @@ public:
 
     bool checkPasswordForExistanceAtAuthentication();
     bool check();
-private:
 
+private:
+    ManagerPtr manager_;
     bool status_;
     ActionPtr action_;
     std::vector<std::string> errors_;
 };
 
-ActionResultPtr checkDataForExistance(ActionPtr action);
+ActionResultPtr checkDataForExistance(ManagerPtr manager, ActionPtr action);
 
 #endif // DATA_CHECKER_HPP

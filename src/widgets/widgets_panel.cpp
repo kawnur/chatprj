@@ -11,7 +11,7 @@
 #include "constants.hpp"
 #include "logging.hpp"
 #include "graphic_manager.hpp"
-#include "manager.hpp"
+// #include "manager.hpp"
 #include "message.hpp"  // used in lambda
 #include "utils_cout.hpp"
 #include "utils_widgets.hpp"
@@ -80,10 +80,11 @@ void LeftPanelWidget::removeCompanion(SocketInfoBaseWidgetPtr widget)
     } else if (index == 0) {
 
     } else if (index > 0) {
-        ManagerPtr manager = getManager();
-        auto previousWidget = companionPanelChildren.at(index - 1);
-        auto previousCompanion = getGraphicManager()->getMappedCompanionBySocketInfoBaseWidget(previousWidget);
-        manager->resetSelectedCompanion(previousCompanion);
+        // ManagerPtr manager = getManager();
+        auto previous = companionPanelChildren.at(index - 1);
+        // auto previousCompanion = getGraphicManager()->getCompanionByWidget(previousWidget);
+        // manager->resetSelectedCompanion(previousCompanion);
+        getGraphicManager()->resetSelectedCompanion(previous);
         companionPanelLayout_->removeWidget(widget.get());
     }
 }

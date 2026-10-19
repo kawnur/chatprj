@@ -24,11 +24,9 @@ public:
 
     void buildWidgetGroups();
     bool addCompanion(CompanionPtr companion);
-    CompanionPtr getMappedCompanionById(int id) const;
-    CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
-    WidgetGroupPtr getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
-    CompanionPtr getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const;
-    void createWidgetGroupAndAddToMapping(CompanionPtr companion);
+    CompanionPtr getCompanion(int id) const;
+    CompanionPtr getCompanionByWidget(SocketInfoBaseWidget *widget) const;
+    void updateMapping(CompanionPtr companion);
     bool deleteWidgetGroup(CompanionPtr companion);
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
@@ -38,38 +36,47 @@ public:
     void addLog(const QString &text);
     void hideWidgetGroupCentralPanel(WidgetGroupPtr group);
     void showWidgetGroupCentralPanel(WidgetGroupPtr group);
-
-    void addWidgetToMainWindowContainerAndSetParentTo(
-        MWContainerPosition position, QWidgetPtr widget);
-
+    void addWidget(MWContainerPosition position, QWidgetPtr widget);
     void addCompanionWidget(SocketInfoBaseWidgetPtr widget);
     void removeCompanionWidget(SocketInfoBaseWidgetPtr widget);
     void createCompanion();
     void createGroupChat();
     void updateCompanion(CompanionPtr companion);
     void clearCompanionHistory(CompanionPtr companion);
-    void clearChatHistory(WidgetGroupPtr widgetGroup);
+    void clearHistory(CompanionPtr companion);
     void deleteCompanion(CompanionPtr companion);
-    void hideInfoViaBlur();
-    void showInfoViaBlur();
     void hideInfoViaStubs();
     void showInfoViaStubs();
     void hideInfo();
     void showInfo();
-    void createEntrancePassword();
     void enableMainWindowBlurEffect();
-    void disableMainWindowBlurEffect();
+    void disableBlur();
+    void createEntrancePassword();
     void getEntrancePassword();
     MessageWidgetPtr buildMessageWidget(CompanionPtr companion, MessagePtr message);
     void addMessageWidget(CompanionPtr companion, MessagePtr message);
     bool setMessageWidgetAsSent(MessageInfoPtr info);
     void setMessageWidgetAsReceived(MessageInfoPtr info);
-    void sortChatHistoryElementsForWidgetGroup(WidgetGroupPtr group);
     void sendFile(CompanionPtr companion);
     void saveFile(const std::string& networkId, CompanionPtr companion);
     std::string getFilePathString(const std::string &networkId);
+    void updateCompanionWidget(CompanionPtr companion);
+    void sortHistory(CompanionPtr companion);
+    void requestHistory(CompanionPtr companion);
+    // bool connectClient(CompanionPtr companion);
+    // bool disconnectClient(CompanionPtr companion);
+    bool clientAction(CompanionPtr companion, bool isConnected);
+    CompanionDataPtr getCompanionData(CompanionPtr companion);
+    void resetSelectedCompanion(CompanionPtr companion);
+    void resetSelectedCompanion(SocketInfoBaseWidget *previous);
+
+    bool setMappedMessageWidget(
+        CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
+
 
 private:
+    WidgetGroupPtr getWidgetGroup(CompanionPtr companion) const;
+
     // std::mutex messageToMessageWidgetMapMutex_;
     ManagerPtr manager_;
     MainWindowPtr mainWindow_;

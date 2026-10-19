@@ -20,7 +20,7 @@ public:
     int id() const;
     std::string name() const;
 
-    void updateData(CompanionDataPtr data);
+    void setName(const std::string &name);
 
 private:
     int id_;  // TODO change type
