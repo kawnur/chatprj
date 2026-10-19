@@ -52,7 +52,7 @@ signals:
 protected:
     virtual void addMembersToLayout() {}
 
-    bool isMessageFromMe_;
+    bool fromMe_;
     CompanionPtr companion_;
     MessagePtr message_;
     std::shared_ptr<QPalette> palette_;

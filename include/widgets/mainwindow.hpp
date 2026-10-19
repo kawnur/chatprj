@@ -1,15 +1,12 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-// #include <map>
 #include <memory>
 
-// #include <QGraphicsBlurEffect>
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMenu>
 #include <QObject>
-// #include <QSplitter>
 #include <QString>
 #include <QWidget>
 
@@ -26,27 +23,22 @@ public:
     ~MainWindow() = default;
 
     void set();
-    void addTextToAppLogWidget(const QString &text);
 
-    bool addWidgetToContainerAndSetParentTo(
-        MainWindowContainerPosition position, QWidgetPtr widget);
-
-    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
+    void addLog(const QString &text);
+    bool addWidget(MWContainerPosition position, QWidgetPtr widget);
+    void addCompanion(SocketInfoBaseWidgetPtr widget);
+    void removeCompanion(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
-    // void hideLeftAndRightPanels();
-    // void showLeftAndRightPanels();
-    // int getLeftPanelWidgetWidth();
-    void enableWidgetsForShowHide();
-    void disableWidgetsForShowHide();
-    void enableBlurEffect();
-    void disableBlurEffect();
+    void enable();
+    void disable();
+    void enableBlur();
+    void disableBlur();
+    void hideCentralStub();
+    void showCentralStub();
+    void hideCompanionStub();
+    void showStubs();
+    void hideStubs();
 
-    void hideCentralPanelStub();
-    void showCentralPanelStub();
-    void hideCompanionPanelStub();
-    void showStubPanels();
-    void hideStubPanels();
 private slots:
     void createCompanion();
     void createGroupChat();
@@ -56,31 +48,9 @@ private:
     void keyPressEvent(QKeyEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void createMenu();
-    // void initBlurEffect();
 
-    // left panel
-    // std::shared_ptr<MainWindowContainerWidget> leftContainerWidget_;
-    // std::shared_ptr<LeftPanelWidget> leftPanel_;
-
-    // central panel
-    // std::shared_ptr<MainWindowContainerWidget> centralContainerWidget_;
-    // std::shared_ptr<CentralPanelWidget> centralPanel_;
-
-    // right panel
-    // std::shared_ptr<MainWindowContainerWidget> rightContainerWidget_;
-    // std::shared_ptr<RightPanelWidget> rightPanel_;
-
-    // std::shared_ptr<ShowHideWidget> showHideWidget_;
-
-    // containerMap_
-    // std::map<MainWindowContainerPosition, std::shared_ptr<MainWindowContainerWidget>> containerMap_;
-
-    // std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
     std::unique_ptr<QPalette> menuBarPalette_;
-    // QWidgetPtr mainWidget_;
     std::unique_ptr<MainWidget> mainWidget_;
-    // std::unique_ptr<QHBoxLayout> mainWidgetLayout_;
-    // std::unique_ptr<QSplitter> splitter_;
 };
 
 #endif // MAINWINDOW_HPP

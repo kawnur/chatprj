@@ -544,7 +544,7 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
 
     auto group = getGraphicManager()->getMappedWidgetGroupByCompanion(companion);
 
-    for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
+    for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO use iterators
         logArgs("adding message with id", messagesData->getValue(i, "id"));
 
         auto message = createMessageAndAddToMapping(companion, messagesData, i);
@@ -570,7 +570,7 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
     if (!messagesData || messagesData->isEmpty())
         return;
 
-    for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
+    for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO use iterators
         uint32_t messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
 
         auto info = messageStorage_.getMessageInfo(companion->id(), messageId);
@@ -642,7 +642,7 @@ void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool co
         return;
 
     // TODO modify
-    for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO switch to iterators
+    for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO use iterators
         auto messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
 
         if (containersNotEmpty) {

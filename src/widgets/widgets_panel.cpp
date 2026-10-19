@@ -8,12 +8,11 @@
 #include <QScrollBar>
 #include <QWidget>
 
-#include "companion.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
 #include "graphic_manager.hpp"
 #include "manager.hpp"
-#include "message.hpp"
+#include "message.hpp"  // used in lambda
 #include "utils_cout.hpp"
 #include "utils_widgets.hpp"
 #include "widgets.hpp"
@@ -54,7 +53,7 @@ LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
     layout_->addSpacerItem(spacer_.get());
 }
 
-void LeftPanelWidget::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
+void LeftPanelWidget::addCompanion(SocketInfoBaseWidgetPtr widget)
 {
     companionPanelLayout_->addWidget(widget.get());
 }
@@ -68,7 +67,7 @@ std::size_t LeftPanelWidget::getCompanionPanelChildrenSize()
     return companionPanelChildren.size();
 }
 
-void LeftPanelWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
+void LeftPanelWidget::removeCompanion(SocketInfoBaseWidgetPtr widget)
 {
     // TODO get rid of children mechanism usage
     auto companionPanelChildren =
@@ -100,8 +99,8 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
 
 CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name) : mutex_()
 {
-    chatHistoryScrollArea_ = nullptr;
-    chatHistoryWidgetPalette_ = nullptr;
+    historyScrollArea_ = nullptr;
+    historyPalette_ = nullptr;
 
     if (parent)
         setParent(parent.get());
@@ -111,54 +110,54 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
     layout_->setContentsMargins(0, 0, 0, 0);
     setLayout(layout_.get());
 
-    companionNameLabel_ = std::make_unique<QLabel>(getQString(name));
+    companionLabel_ = std::make_unique<QLabel>(getQString(name));
     // companionNameLabel_->setStyleSheet("border-bottom: 1px solid black");
-    companionNameLabelPalette_ = std::make_unique<QPalette>();
+    companionPalette_ = std::make_unique<QPalette>();
     auto color = QColor(getWidgetColor(Widget::COMPANION_NAME_LABEL));
-    companionNameLabelPalette_->setColor(QPalette::Window, color);
-    companionNameLabel_->setAutoFillBackground(true);
-    companionNameLabel_->setPalette(*companionNameLabelPalette_);
+    companionPalette_->setColor(QPalette::Window, color);
+    companionLabel_->setAutoFillBackground(true);
+    companionLabel_->setPalette(*companionPalette_);
 
-    layout_->addWidget(companionNameLabel_.get());
+    layout_->addWidget(companionLabel_.get());
 
-    chatHistoryWidget_ = std::make_shared<QWidget>();
+    history_ = std::make_shared<QWidget>();
 
-    chatHistoryLayout_ = std::make_unique<QVBoxLayout>();
-    chatHistoryLayout_->setSpacing(0);
-    chatHistoryLayout_->setContentsMargins(0, 0, 0, 0);
-    chatHistoryLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    historyLayout_ = std::make_unique<QVBoxLayout>();
+    historyLayout_->setSpacing(0);
+    historyLayout_->setContentsMargins(0, 0, 0, 0);
+    historyLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    chatHistoryLayout_->setSizeConstraint(QLayout::SetMaximumSize);
-    chatHistoryWidget_->setLayout(chatHistoryLayout_.get());
+    historyLayout_->setSizeConstraint(QLayout::SetMaximumSize);
+    history_->setLayout(historyLayout_.get());
 
     if (name.size() != 0) {
-        chatHistoryScrollArea_ = std::make_unique<QScrollArea>();
+        historyScrollArea_ = std::make_unique<QScrollArea>();
         // chatHistoryScrollArea_ = new ScrollArea;
-        chatHistoryScrollArea_->setWidgetResizable(true);
-        chatHistoryScrollArea_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-        chatHistoryScrollArea_->setWidget(chatHistoryWidget_.get());
-        chatHistoryWidgetPalette_ = std::make_unique<QPalette>();
-        chatHistoryWidgetPalette_->setColor(QPalette::Window, QColorConstants::Gray);
-        chatHistoryWidget_->setPalette(*chatHistoryWidgetPalette_);
+        historyScrollArea_->setWidgetResizable(true);
+        historyScrollArea_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        historyScrollArea_->setWidget(history_.get());
+        historyPalette_ = std::make_unique<QPalette>();
+        historyPalette_->setColor(QPalette::Window, QColorConstants::Gray);
+        history_->setPalette(*historyPalette_);
 
-        layout_->addWidget(chatHistoryScrollArea_.get());
+        layout_->addWidget(historyScrollArea_.get());
     }
 
-    buttonPanelWidget_ = std::make_unique<QWidget>();
-    buttonPanelLayout_ = std::make_unique<QHBoxLayout>();
-    buttonPanelLayout_->setSpacing(10);
-    buttonPanelLayout_->setContentsMargins(10, 10, 10, 10);
-    buttonPanelLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    buttonPanelWidget_->setLayout(buttonPanelLayout_.get());
-    buttonPanelPalette_ = std::make_unique<QPalette>();
-    buttonPanelPalette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::BUTTON_PANEL)));
-    chatHistoryWidget_->setPalette(*buttonPanelPalette_);
+    buttons_ = std::make_unique<QWidget>();
+    buttonsLayout_ = std::make_unique<QHBoxLayout>();
+    buttonsLayout_->setSpacing(10);
+    buttonsLayout_->setContentsMargins(10, 10, 10, 10);
+    buttonsLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    buttons_->setLayout(buttonsLayout_.get());
+    buttonsPalette_ = std::make_unique<QPalette>();
+    buttonsPalette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::BUTTON_PANEL)));
+    history_->setPalette(*buttonsPalette_);
     sendFileButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_FILE));
     sendTextButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_TEXT));
-    buttonPanelLayout_->addWidget(sendFileButton_.get());
-    buttonPanelLayout_->addWidget(sendTextButton_.get());
+    buttonsLayout_->addWidget(sendFileButton_.get());
+    buttonsLayout_->addWidget(sendTextButton_.get());
 
-    layout_->addWidget(buttonPanelWidget_.get());
+    layout_->addWidget(buttons_.get());
 
     textEdit_ = std::make_unique<TextEditWidget>();
     layout_->addWidget(textEdit_.get());
@@ -185,99 +184,54 @@ void CentralPanelWidget::set(CompanionPtr companion)
         sendTextButton_.get(), &QPushButton::clicked,
         textEdit_.get(), &TextEditWidget::sendSlot, Qt::QueuedConnection);
 
-    chatHistoryScrollArea_->installEventFilter(this);
+    historyScrollArea_->installEventFilter(this);
 }
 
-// MessageWidgetPtr CentralPanelWidget::buildMessageWidget(
-//     CompanionPtr companion, MessagePtr message)
-// {
-//     switch (message->type()) {
-//     case MessageType::TEXT:
-//         return std::make_shared<TextMessageWidget>(chatHistoryWidget_, companion, message);
-
-//     case MessageType::FILE:
-//         return std::make_shared<FileMessageWidget>(chatHistoryWidget_, companion, message);
-
-//     default:
-//         logArgsError("message widget building error");
-
-//         return nullptr;
-//     }
-// }
-
-void CentralPanelWidget::addMessageWidget(
-    // WidgetGroupPtr widgetGroup, CompanionPtr companion,
-    // MessagePtr message)
-    MessageWidgetPtr widget, bool isAntecedent)
+void CentralPanelWidget::addMessage(MessageWidgetPtr widget, bool isAntecedent)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        // auto widget = buildMessageWidget(companion, message);
+        widget->setParent(history_.get());
 
-        widget->setParent(chatHistoryWidget_.get());
-
-        // if (!widget)
-        //     return;
-
-        // auto lambda = [=]()
-        // {
-        //     // companion->setMappedMessageWidget(message, widget);
-        //     getManager()->setMappedMessageWidget(companion, message, widget);
-        // };
-
-        // runInDetachedThread(lambda);
-
-        // if (widgetGroup)
-        //     widget->setBase(widgetGroup);
-
-        chatHistoryLayout_->addWidget(widget.get());
+        historyLayout_->addWidget(widget.get());
 
         if (isAntecedent)
-            sortChatHistory(false);
+            sortHistory(false);
     }
 
-    // widget group action
-    // if (widgetGroup)
-    //     widgetGroup->messageAdded();
-
-    scrollDownChatHistory();
+    scrollDownHistory();
 }
 
-void CentralPanelWidget::scrollDownChatHistory()
+void CentralPanelWidget::scrollDownHistory()
 {
     // double call workaround to scroll down fully
     // TODO find out
     QApplication::processEvents();
     QApplication::processEvents();
 
-    auto value = chatHistoryScrollArea_->verticalScrollBar()->maximum();
-    chatHistoryScrollArea_->verticalScrollBar()->setValue(value);
+    auto value = historyScrollArea_->verticalScrollBar()->maximum();
+    historyScrollArea_->verticalScrollBar()->setValue(value);
 }
 
-void CentralPanelWidget::clearChatHistory()
+void CentralPanelWidget::clearHistory()
 {
-    auto children = chatHistoryWidget_->children();
+    auto children = history_->children();
 
     for (auto &child : children) {
-        // MessageWidgetPtr messageWidget = dynamic_cast<MessageWidgetPtr>(child);
         auto messageWidget = qobject_cast<MessageWidget *>(child);
 
-        // if (messageWidget) {
-        //     messageWidget->hide();
-        //     delete messageWidget;
-        // }
         if (messageWidget)
             messageWidget->hide();
     }
 }
 
-void CentralPanelWidget::sortChatHistory(bool lock)
+void CentralPanelWidget::sortHistory(bool lock)
 {
     if (lock)
         std::lock_guard<std::mutex> lockObject(mutex_);
 
-    auto list = chatHistoryWidget_->children();
+    auto list = history_->children();
 
     auto lambda = [&](const auto &item)
     {
@@ -304,7 +258,6 @@ void CentralPanelWidget::sortChatHistory(bool lock)
 
     for (auto &element : list) {
         auto cast = qobject_cast<MessageWidget *>(element);
-        // auto message = companion_->getMappedMessageByMessageWidget(false, cast);
         auto message = cast->message();
 
         coutArgsWithSpaceSeparator("message:", message.get());
@@ -312,8 +265,8 @@ void CentralPanelWidget::sortChatHistory(bool lock)
         if (message)
             coutArgsWithSpaceSeparator("element message:", message->text());
 
-        chatHistoryLayout_->removeWidget(cast);
-        chatHistoryLayout_->addWidget(cast);
+        historyLayout_->removeWidget(cast);
+        historyLayout_->addWidget(cast);
     }
 }
 
@@ -321,8 +274,8 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
 {
     auto result = QWidget::eventFilter(object, event);
 
-    if (object == chatHistoryScrollArea_.get()) {
-        auto verticalScrollBar = chatHistoryScrollArea_->verticalScrollBar();
+    if (object == historyScrollArea_.get()) {
+        auto verticalScrollBar = historyScrollArea_->verticalScrollBar();
 
         if (verticalScrollBar && verticalScrollBar->value() == verticalScrollBar->minimum()) {
             auto eventCast = dynamic_cast<QKeyEvent *>(event);
@@ -372,18 +325,18 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
     layout_->setContentsMargins(0, 0, 0, 0);
     setLayout(layout_.get());
 
-    appLogWidget_ = std::make_unique<QPlainTextEdit>();
+    log_ = std::make_unique<QPlainTextEdit>();
     // appLogWidget_->setStyleSheet("border-left: 1px solid black");
-    appLogWidget_->setReadOnly(true);
-    appLogWidget_->setPlainText("");
+    log_->setReadOnly(true);
+    log_->setPlainText("");
 
-    appLogWidgetPalette_ = std::make_unique<QPalette>();
-    appLogWidgetPalette_->setColor(QPalette::Base, QColor(getWidgetColor(Widget::APP_LOG)));
-    appLogWidgetPalette_->setColor(QPalette::Text, QColorConstants::Black);
-    appLogWidget_->setAutoFillBackground(true);
-    appLogWidget_->setPalette(*appLogWidgetPalette_);
+    palette_ = std::make_unique<QPalette>();
+    palette_->setColor(QPalette::Base, QColor(getWidgetColor(Widget::APP_LOG)));
+    palette_->setColor(QPalette::Text, QColorConstants::Black);
+    log_->setAutoFillBackground(true);
+    log_->setPalette(*palette_);
 
-    layout_->addWidget(appLogWidget_.get());
+    layout_->addWidget(log_.get());
 
     //    testPlainTextEditButton_ = new QPushButton("testPlainTextEditButton");
     //    connect(
@@ -396,37 +349,36 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
 
 void RightPanelWidget::set()
 {
-    appLogWidget_->setParent(this);
+    log_->setParent(this);
 
     connect(
-        this, SIGNAL(addTextToAppLogWidgetSignal(const QString &)),
-        this, SLOT(addTextToAppLogWidgetSlot(const QString &)),
+        this, SIGNAL(addLogSignal(const QString &)), this, SLOT(addLogSlot(const QString &)),
         Qt::QueuedConnection);
 
-    appLogWidget_->setContextMenuPolicy(Qt::CustomContextMenu);
+    log_->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(
-        appLogWidget_.get(), &QWidget::customContextMenuRequested,
+        log_.get(), &QWidget::customContextMenuRequested,
         this, &RightPanelWidget::customMenuRequestedSlot, Qt::QueuedConnection);
 }
 
-void RightPanelWidget::addTextToAppLogWidget(const QString &text)
+void RightPanelWidget::addLog(const QString &text)
 {
-    emit addTextToAppLogWidgetSignal(text);
+    emit addLogSignal(text);
 }
 
-void RightPanelWidget::clearLogAction()
+void RightPanelWidget::clearLog()
 {
-    appLogWidget_->clear();
+    log_->clear();
 }
 
-void RightPanelWidget::addTextToAppLogWidgetSlot(const QString &text)
+void RightPanelWidget::addLogSlot(const QString &text)
 {
-    appLogWidget_->appendPlainText(text);
+    log_->appendPlainText(text);
 
     // QApplication::processEvents();
 
-    appLogWidget_->ensureCursorVisible();
+    log_->ensureCursorVisible();
 }
 
 void RightPanelWidget::customMenuRequestedSlot(const QPoint &position)
@@ -437,7 +389,7 @@ void RightPanelWidget::customMenuRequestedSlot(const QPoint &position)
 
     connect(
         clearLogAction.get(), &QAction::triggered,
-        this, &RightPanelWidget::clearLogAction, Qt::QueuedConnection);
+        this, &RightPanelWidget::clearLog, Qt::QueuedConnection);
 
     menu->popup(mapToGlobal(position));
 }
@@ -446,10 +398,10 @@ MainWidget::MainWidget() : layout_(nullptr) {}
 
 void MainWidget::set()
 {
+    // layout
     layout_ = std::make_unique<QHBoxLayout>(this);
     layout_->setSpacing(0);
     layout_->setContentsMargins(0, 0, 0, 0);
-
     setLayout(layout_.get());
 
     // left container
@@ -469,30 +421,25 @@ void MainWidget::set()
 
     // splitter
     splitter_ = std::make_unique<QSplitter>(this);
-    // splitter_-addWidget(leftContainerWidget_);
     splitter_->addWidget(central_.get());
     splitter_->addWidget(right_.get());
     layout_->addWidget(splitter_.get());
 
-    // auto graphicManager = getGraphicManager();
-    stubWidgets_ = std::make_shared<StubWidgetGroup>();
+    // stub widgets
+    stubs_ = std::make_shared<StubWidgetGroup>();
+    stubs_->setParents(left_, central_);
+    addCompanion(stubs_->socketInfoBase());
+    addWidget(MWContainerPosition::LEFT, stubs_->left());
+    addWidget(MWContainerPosition::CENTRAL, stubs_->central());
+    addWidget(MWContainerPosition::RIGHT, stubs_->right());
+    stubs_->hide();
+    stubs_->showCentral();
 
-    // graphicManager->setParentsForStubs(left_, central_);
-    stubWidgets_->setParents(left_, central_);
-
-    // graphicManager->setStubWidgets();
-    addWidgetToCompanionPanel(stubWidgets_->socketInfoBase());
-    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, stubWidgets_->leftPanel());
-    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::CENTRAL, stubWidgets_->centralPanel());
-    addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::RIGHT, stubWidgets_->rightPanel());
-    stubWidgets_->set();
-
-    // graphicManager->showCentralPanelStub();
-    stubWidgets_->showCentralPanel();
-
-    if (!addWidgetToContainerAndSetParentTo(MainWindowContainerPosition::LEFT, showHideWidget_))
+    // show - hide widget
+    if (!addWidget(MWContainerPosition::LEFT, showHide_))
         logArgsError("addWidgetToContainerAndSetParentTo error");
 
+    // blur effect
     initBlurEffect();
 }
 
@@ -501,18 +448,23 @@ std::shared_ptr<QHBoxLayout> MainWidget::layout() const
     return layout_;
 }
 
-bool MainWidget::addWidgetToContainerAndSetParentTo(
-    MainWindowContainerPosition position, QWidgetPtr widget)
+bool MainWidget::addWidget(MWContainerPosition position, QWidgetPtr widget)
 {
     switch (position) {
-    case MainWindowContainerPosition::LEFT:
-        left_->addWidgetToLayoutAndSetParentTo(widget);
+    case MWContainerPosition::LEFT:
+        left_->addWidget(widget);
 
-    case MainWindowContainerPosition::CENTRAL:
-        central_->addWidgetToLayoutAndSetParentTo(widget);
+    break;
 
-    case MainWindowContainerPosition::RIGHT:
-        right_->addWidgetToLayoutAndSetParentTo(widget);
+    case MWContainerPosition::CENTRAL:
+        central_->addWidget(widget);
+
+    break;
+
+    case MWContainerPosition::RIGHT:
+        right_->addWidget(widget);
+
+    break;
 
     default:
         return false;
@@ -521,14 +473,14 @@ bool MainWidget::addWidgetToContainerAndSetParentTo(
     return true;
 }
 
-void MainWidget::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
+void MainWidget::addCompanion(SocketInfoBaseWidgetPtr widget)
 {
-    left_->addWidgetToCompanionPanel(widget);
+    left_->addCompanion(widget);
 }
 
-void MainWidget::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
+void MainWidget::removeCompanion(SocketInfoBaseWidgetPtr widget)
 {
-    left_->removeWidgetFromCompanionPanel(widget);
+    left_->removeCompanion(widget);
 }
 
 std::size_t MainWidget::getCompanionPanelChildrenSize()
@@ -538,76 +490,70 @@ std::size_t MainWidget::getCompanionPanelChildrenSize()
 
 void MainWidget::initBlurEffect()
 {
-    blurEffect_ = std::make_shared<QGraphicsBlurEffect>();
-    blurEffect_->setBlurRadius(BLUR_RADIUS);
+    blur_ = std::make_shared<QGraphicsBlurEffect>();
+    blur_->setBlurRadius(BLUR_RADIUS);
 }
 
-void MainWidget::addTextToAppLogWidget(const QString &text)
+void MainWidget::addLog(const QString &text)
 {
-    right_->addTextToAppLogWidget(text);
+    right_->addLog(text);
 }
 
-void MainWidget::hideLeftAndRightPanels()
+void MainWidget::hideLeftAndRight()
 {
     left_->hide();
     right_->hide();
 }
 
-void MainWidget::showLeftAndRightPanels()
+void MainWidget::showLeftAndRight()
 {
     left_->show();
     right_->show();
 }
 
-void MainWidget::hideCentralPanelStub()
+void MainWidget::hideCentralStub()
 {
-    stubWidgets_->hideCentralPanel();
+    stubs_->hideCentral();
 }
 
-void MainWidget::showCentralPanelStub()
+void MainWidget::showCentralStub()
 {
-    stubWidgets_->showCentralPanel();
+    stubs_->showCentral();
 }
 
-void MainWidget::hideCompanionPanelStub()
+void MainWidget::hideCompanionStub()
 {
-    stubWidgets_->hideSocketInfoStubWidget();
+    stubs_->hideSocketInfo();
 }
 
-void MainWidget::showStubPanels()
+void MainWidget::showStubs()
 {
-    hideLeftAndRightPanels();
-    stubWidgets_->setLeftPanelWidth(left_->getLastCompanionPanelChildWidth());
-    stubWidgets_->showStubPanels();
+    hideLeftAndRight();
+    stubs_->setLeftPanelWidth(left_->getLastCompanionPanelChildWidth());
+    stubs_->show();
 }
 
-void MainWidget::hideStubPanels()
+void MainWidget::hideStubs()
 {
-    showLeftAndRightPanels();
-    stubWidgets_->hideStubPanels();
+    showLeftAndRight();
+    stubs_->hide();
 }
 
-void MainWidget::enableWidgetsForShowHide()
+void MainWidget::enable()
 {
-    // leftPanel_->setEnabled(true);
-    // centralContainerWidget_->setEnabled(true);
-    // rightContainerWidget_->setEnabled(true);
     left_->setEnabled(true);
     central_->setEnabled(true);
     right_->setEnabled(true);
 }
 
-void MainWidget::disableWidgetsForShowHide()
+void MainWidget::disable()
 {
-    // leftPanel_->setEnabled(false);
-    // centralContainerWidget_->setEnabled(false);
-    // rightContainerWidget_->setEnabled(false);
     left_->setEnabled(false);
     central_->setEnabled(false);
     right_->setEnabled(false);
 }
 
-void MainWidget::setBlurEffect()
+void MainWidget::setBlur()
 {
-    setGraphicsEffect(blurEffect_.get());
+    setGraphicsEffect(blur_.get());
 }

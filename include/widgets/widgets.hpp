@@ -277,28 +277,23 @@ public:
     StubWidgetGroup();
     ~StubWidgetGroup() = default;
 
-    void set();
-
-    void setParents(
-        QWidgetPtr leftContainer, QWidgetPtr centralContainer);
-
-    void hideSocketInfoStubWidget();
-    void hideCentralPanel();
-    void showCentralPanel();
-    void hideStubPanels();
-    void showStubPanels();
+    void hide();
+    void show();
+    void setParents(QWidgetPtr leftContainer, QWidgetPtr centralContainer);
+    void hideSocketInfo();
+    void hideCentral();
+    void showCentral();
     void setLeftPanelWidth(int width);
-
     std::shared_ptr<SocketInfoBaseWidget> socketInfoBase() const;
-    std::shared_ptr<LeftPanelWidget> leftPanel() const;
-    std::shared_ptr<CentralPanelWidget> centralPanel() const;
-    std::shared_ptr<RightPanelWidget> rightPanel() const;
+    std::shared_ptr<LeftPanelWidget> left() const;
+    std::shared_ptr<CentralPanelWidget> central() const;
+    std::shared_ptr<RightPanelWidget> right() const;
 
 private:
     std::shared_ptr<SocketInfoStubWidget> socketInfo_;
-    std::shared_ptr<LeftPanelWidget> leftPanel_;
-    std::shared_ptr<CentralPanelWidget> centralPanel_;
-    std::shared_ptr<RightPanelWidget> rightPanel_;
+    std::shared_ptr<LeftPanelWidget> left_;
+    std::shared_ptr<CentralPanelWidget> central_;
+    std::shared_ptr<RightPanelWidget> right_;
 };
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);

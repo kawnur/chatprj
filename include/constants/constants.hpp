@@ -121,7 +121,10 @@ enum class ActionType
     SAVE_FILE
 };
 
-enum class MainWindowContainerPosition
+/*!
+ * \brief The MWContainerPosition enum, main window container position
+ */
+enum class MWContainerPosition
 {
     LEFT,
     CENTRAL,

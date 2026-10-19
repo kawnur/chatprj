@@ -1,7 +1,6 @@
 #ifndef GRAPHIC_MANAGER_HPP
 #define GRAPHIC_MANAGER_HPP
 
-#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -29,37 +28,28 @@ public:
     CompanionPtr getMappedCompanionBySocketInfoBaseWidget(SocketInfoBaseWidget *widget) const;
     WidgetGroupPtr getMappedWidgetGroupByCompanion(CompanionPtr companion) const;
     CompanionPtr getMappedCompanionByWidgetGroup(WidgetGroupPtr group) const;
-
     void createWidgetGroupAndAddToMapping(CompanionPtr companion);
     bool deleteWidgetGroup(CompanionPtr companion);
-
     void hideSelectedCompanionCentralPanel();
     void showSelectedCompanionCentralPanel();
-
     void preSelectCompanion(CompanionPtr companion);
     void postSelectCompanion(CompanionPtr companion);
-
-    // void setParentsForStubs(QWidgetPtr leftContainer, QWidgetPtr centralContainer);
-    // void setStubWidgets();
     void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
-    void addTextToAppLogWidget(const QString &text);
+    void addLog(const QString &text);
     void hideWidgetGroupCentralPanel(WidgetGroupPtr group);
     void showWidgetGroupCentralPanel(WidgetGroupPtr group);
 
     void addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition position, QWidgetPtr widget);
+        MWContainerPosition position, QWidgetPtr widget);
 
-    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
+    void addCompanionWidget(SocketInfoBaseWidgetPtr widget);
+    void removeCompanionWidget(SocketInfoBaseWidgetPtr widget);
     void createCompanion();
     void createGroupChat();
     void updateCompanion(CompanionPtr companion);
     void clearCompanionHistory(CompanionPtr companion);
     void clearChatHistory(WidgetGroupPtr widgetGroup);
     void deleteCompanion(CompanionPtr companion);
-    // void hideCompanionPanelStub();
-    // void hideCentralPanelStub();
-    // void showCentralPanelStub();
     void hideInfoViaBlur();
     void showInfoViaBlur();
     void hideInfoViaStubs();
@@ -82,9 +72,7 @@ public:
 private:
     // std::mutex messageToMessageWidgetMapMutex_;
     ManagerPtr manager_;
-    // std::shared_ptr<StubWidgetGroup> stubWidgets_;
     MainWindowPtr mainWindow_;
-
     std::unordered_map<int, std::pair<CompanionPtr, WidgetGroupPtr>> map_;
 };
 

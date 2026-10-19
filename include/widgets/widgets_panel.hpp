@@ -1,7 +1,6 @@
 #ifndef WIDGETS_PANEL_HPP
 #define WIDGETS_PANEL_HPP
 
-// #include <map>
 #include <memory>
 #include <mutex>
 
@@ -39,9 +38,9 @@ public:
     LeftPanelWidget(QWidgetPtr parent);
     ~LeftPanelWidget() = default;
 
-    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
+    void addCompanion(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
+    void removeCompanion(SocketInfoBaseWidgetPtr widget);
     int getLastCompanionPanelChildWidth();
 
 private:
@@ -61,18 +60,10 @@ public:
     ~CentralPanelWidget() = default;
 
     void set(CompanionPtr companion);
-
-    // MessageWidgetPtr buildMessageWidget(
-    //     CompanionPtr companion, MessagePtr message);
-
-    void addMessageWidget(
-        // WidgetGroupPtr widgetGroup, CompanionPtr companion,
-        // MessagePtr message);
-        MessageWidgetPtr widget, bool isAntecedent);
-
-    void scrollDownChatHistory();
-    void clearChatHistory();
-    void sortChatHistory(bool lock);
+    void addMessage(MessageWidgetPtr widget, bool isAntecedent);
+    void scrollDownHistory();
+    void clearHistory();
+    void sortHistory(bool lock);
 
 private:
     std::mutex mutex_;
@@ -86,19 +77,19 @@ private:
     //    int linesCount_;
     //    std::shared_ptr<QFont> font_;
 
-    std::unique_ptr<QLabel> companionNameLabel_;
-    std::unique_ptr<QPalette> companionNameLabelPalette_;
-    std::unique_ptr<QPalette> chatHistoryWidgetPalette_;
+    std::unique_ptr<QLabel> companionLabel_;
+    std::unique_ptr<QPalette> companionPalette_;
 
-    std::unique_ptr<QScrollArea> chatHistoryScrollArea_;
-    // std::shared_ptr<ScrollArea> chatHistoryScrollArea_;
+    std::unique_ptr<QPalette> historyPalette_;
+    std::unique_ptr<QScrollArea> historyScrollArea_;
+    // std::shared_ptr<ScrollArea> historyScrollArea_;
 
-    QWidgetPtr chatHistoryWidget_;
-    std::unique_ptr<QVBoxLayout> chatHistoryLayout_;
+    QWidgetPtr history_;
+    std::unique_ptr<QVBoxLayout> historyLayout_;
 
-    std::unique_ptr<QWidget> buttonPanelWidget_;
-    std::unique_ptr<QHBoxLayout> buttonPanelLayout_;
-    std::unique_ptr<QPalette> buttonPanelPalette_;
+    std::unique_ptr<QWidget> buttons_;
+    std::unique_ptr<QHBoxLayout> buttonsLayout_;
+    std::unique_ptr<QPalette> buttonsPalette_;
     std::unique_ptr<QPushButton> sendFileButton_;
     std::unique_ptr<QPushButton> sendTextButton_;
 
@@ -124,21 +115,21 @@ public:
     ~RightPanelWidget() = default;
 
     void set();
-    void addTextToAppLogWidget(const QString &text);
+    void addLog(const QString &text);
 
 public slots:
-    void clearLogAction();
+    void clearLog();
 
 signals:
-    void addTextToAppLogWidgetSignal(const QString &text);
+    void addLogSignal(const QString &text);
 
 private:
     std::unique_ptr<QVBoxLayout> layout_;
-    std::unique_ptr<QPlainTextEdit> appLogWidget_;
-    std::unique_ptr<QPalette> appLogWidgetPalette_;
+    std::unique_ptr<QPlainTextEdit> log_;
+    std::unique_ptr<QPalette> palette_;
 
 private slots:
-    void addTextToAppLogWidgetSlot(const QString &text);
+    void addLogSlot(const QString &text);
     void customMenuRequestedSlot(const QPoint &position);
 };
 
@@ -149,11 +140,6 @@ class MainWindowContainerWidget
     // Q_OBJECT
 
 public:
-    // MainWindowContainerWidget(QWidgetPtr widget);
-    // ~MainWindowContainerWidget() = default;
-
-    // void addWidgetToLayout(QWidgetPtr widget);
-    // void addWidgetToLayoutAndSetParentTo(QWidgetPtr widget);
     MainWindowContainerWidget(QWidget *widget) : panel_(nullptr), layout_(nullptr)
     {
         if (widget)
@@ -174,13 +160,7 @@ public:
         }
     }
 
-    void addWidgetToLayout(QWidgetPtr widget)
-    {
-        if (widget)
-            layout_->addWidget(widget.get());
-    }
-
-    void addWidgetToLayoutAndSetParentTo(QWidgetPtr widget)
+    void addWidget(QWidgetPtr widget)
     {
         if (widget) {
             layout_->addWidget(widget.get());
@@ -188,19 +168,19 @@ public:
         }
     }
 
-    void addTextToAppLogWidget(const QString &text)
+    void addLog(const QString &text)
     {
-        panel_->addTextToAppLogWidget(text);
+        panel_->addLog(text);
     }
 
-    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
+    void addCompanion(SocketInfoBaseWidgetPtr widget)
     {
-        panel_->addWidgetToCompanionPanel(widget);
+        panel_->addCompanion(widget);
     }
 
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
+    void removeCompanion(SocketInfoBaseWidgetPtr widget)
     {
-        panel_->removeWidgetFromCompanionPanel(widget);
+        panel_->removeCompanion(widget);
     }
 
     std::size_t getCompanionPanelChildrenSize()
@@ -236,60 +216,35 @@ public:
     MainWidget();
     ~MainWidget() = default;
 
-    // template<typename T>
-    // T getContainer(MainWindowContainerPosition position)
-    // {
-    //     switch (position) {
-    //     case MainWindowContainerPosition::LEFT:
-    //         return left_;
-
-    //     case MainWindowContainerPosition::CENTRAL:
-    //         return central_;
-
-    //     case MainWindowContainerPosition::RIGHT:
-    //         return right_;
-
-    //     default:
-    //         return nullptr;
-    //     }
-    // }
-
+    std::shared_ptr<QHBoxLayout> layout() const;
     void set();
 
-    std::shared_ptr<QHBoxLayout> layout() const;
-
-    bool addWidgetToContainerAndSetParentTo(
-        MainWindowContainerPosition position, QWidgetPtr widget);
-
-    void addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget);
-    void removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget);
+    bool addWidget(MWContainerPosition position, QWidgetPtr widget);
+    void addCompanion(SocketInfoBaseWidgetPtr widget);
+    void removeCompanion(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();
-
     void initBlurEffect();
-    void addTextToAppLogWidget(const QString &text);
-    void hideLeftAndRightPanels();
-    void showLeftAndRightPanels();
+    void addLog(const QString &text);
+    void hideLeftAndRight();
+    void showLeftAndRight();
+    void hideCentralStub();
+    void showCentralStub();
+    void hideCompanionStub();
+    void showStubs();
+    void hideStubs();
+    void enable();
+    void disable();
+    void setBlur();
 
-    void hideCentralPanelStub();
-    void showCentralPanelStub();
-    void hideCompanionPanelStub();
-    void showStubPanels();
-    void hideStubPanels();
-    void enableWidgetsForShowHide();
-    void disableWidgetsForShowHide();
-    void setBlurEffect();
 private:
     std::shared_ptr<QHBoxLayout> layout_;
-
     std::shared_ptr<MainWindowContainerWidget<LeftPanelWidget>> left_;
     std::shared_ptr<MainWindowContainerWidget<CentralPanelWidget>> central_;
     std::shared_ptr<MainWindowContainerWidget<RightPanelWidget>> right_;
-
-    std::shared_ptr<ShowHideWidget> showHideWidget_;
-    std::shared_ptr<QGraphicsBlurEffect> blurEffect_;
-
+    std::shared_ptr<ShowHideWidget> showHide_;
+    std::shared_ptr<QGraphicsBlurEffect> blur_;
     std::unique_ptr<QSplitter> splitter_;
-    std::shared_ptr<StubWidgetGroup> stubWidgets_;
+    std::shared_ptr<StubWidgetGroup> stubs_;
 };
 
 #endif // WIDGETS_PANEL_HPP

@@ -68,7 +68,7 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
     message_ = message;
 
     // createdAsAntecedent_ = messageState->getIsAntecedent();
-    isMessageFromMe_ = message->isMessageFromMe();
+    fromMe_ = message->isMessageFromMe();
 
     // set parent
     if (parent)
@@ -93,7 +93,7 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
     headerLabel_ = std::make_shared<QLabel>(getQString(data.first));
     messageLabel_ = std::make_shared<QLabel>(getQString(data.second));
 
-    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(isMessageFromMe_, message);
+    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(fromMe_, message);
 }
 
 MessagePtr MessageWidget::message()

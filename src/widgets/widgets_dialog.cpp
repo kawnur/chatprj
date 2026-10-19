@@ -15,22 +15,6 @@
 #include "utils.hpp"
 #include "widgets.hpp"
 
-// void Dialog::setAction(ActionPtr action)
-// {
-//     action_ = action;
-// }
-
-// void Dialog::setWrapper(std::shared_ptr<ActionWrapperBase> wrapper)
-// {
-//     wrapper_ = wrapper;
-// }
-
-// void Dialog::actionSlot()
-// {
-//     close();
-//     wrapper_->act();
-// }
-
 Dialog::Dialog()
     : dialogType_(DialogType::INFO), actionType_(ActionType::UNKNOWN), containsDialog_(false),
     dataMap_(ACTION_TITLE_MAP), infoMap_(INFO_STUB),
@@ -185,7 +169,6 @@ CreatePasswordDialog::CreatePasswordDialog()
     layout_->addWidget(buttonBox_.get());
 }
 
-// void CreatePasswordDialog::set()
 void CreatePasswordDialog::set(ActionPtr action)
 {
     connect(
@@ -270,10 +253,10 @@ TextDialog::TextDialog(
     layout_ = std::make_unique<QVBoxLayout>();
     setLayout(layout_.get());
 
-    textEdit_ = std::make_unique<QPlainTextEdit>();
-    textEdit_->setReadOnly(true);
-    textEdit_->setPlainText(getQString(text));
-    layout_->addWidget(textEdit_.get());
+    edit_ = std::make_unique<QPlainTextEdit>();
+    edit_->setReadOnly(true);
+    edit_->setPlainText(getQString(text));
+    layout_->addWidget(edit_.get());
 
     // set button box
     buttonBox_ = std::make_unique<ButtonBox>(buttonsInfo);
@@ -292,7 +275,7 @@ void TextDialog::closeSelf()
     close();
 }
 
-void TextDialog::closeSelfAndParentDialog()
+void TextDialog::closeSelfAndParent()
 {
     close();
 
@@ -310,13 +293,11 @@ void TextDialog::closeSelfAndParentDialog()
 void TextDialog::acceptAction()
 {
     close();
-    // action_->act();
-    // wrapper_->act();
 }
 
 void TextDialog::setText(const std::string &text)
 {
-    textEdit_->setPlainText(getQString(text));
+    edit_->setPlainText(getQString(text));
 }
 
 void TextDialog::update(
@@ -341,15 +322,10 @@ void TextDialog::updateButtonBox(std::initializer_list<ButtonInfo> list)
     layout_->addWidget(buttonBox_.get());
 }
 
-// void TextDialog::closeEvent(QCloseEvent *event)
-// {
-//     event->ignore();
-// }
-
 void TextDialog::unsetMainWindowBlurAndCloseDialogs()
 {
     getGraphicManager()->disableMainWindowBlurEffect();
-    closeSelfAndParentDialog();
+    closeSelfAndParent();
 }
 
 void TextDialog::reject()
@@ -357,7 +333,6 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-// FileDialog::FileDialog(std::shared_ptr<FileAction> action, const std::string &title)
 FileDialog::FileDialog(ActionType type)
 {
     // title
@@ -395,14 +370,3 @@ QStringList FileDialog::selectedFiles()
 {
     return dialog_->selectedFiles();
 }
-
-// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(void (TextDialog::*function)())
-// std::vector<ButtonInfo> *createOkButtonInfoVector(void (QDialog::*function)())
-// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
-//     std::function<void(TextDialog &)> function)
-// {
-//     auto vector = std::make_shared<std::vector<ButtonInfo>>();
-//     vector->emplace_back(ButtonType::OK, QDialogButtonBox::AcceptRole, function);
-
-//     return vector;
-// }

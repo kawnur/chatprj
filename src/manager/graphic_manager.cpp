@@ -11,7 +11,6 @@
 
 GraphicManager::GraphicManager() : map_()
 {
-    // stubWidgets_ = std::make_shared<StubWidgetGroup>();
     mainWindow_ = std::make_shared<MainWindow>();
 }
 
@@ -22,7 +21,6 @@ MainWindowPtr GraphicManager::getMainWindow()
 
 void GraphicManager::set()
 {
-    // stubWidgets_->set();
     mainWindow_->set();
     mainWindow_->show();
 }
@@ -46,10 +44,7 @@ void GraphicManager::buildWidgetGroups()
     }
 
     // TODO check if sockets already are children
-
-    // hide companion panel stub widget
-    // hideCompanionPanelStub();
-    mainWindow_->hideCompanionPanelStub();
+    mainWindow_->hideCompanionStub();
 
     for (const auto &pair : map_) {
         auto companion = pair.second.first;
@@ -192,8 +187,7 @@ void GraphicManager::preSelectCompanion(CompanionPtr companion)  // TODO rewrite
         group->hideCentralPanel();
     }
     else {
-        // hideCentralPanelStub();
-        mainWindow_->hideCentralPanelStub();
+        mainWindow_->hideCentralStub();
     }
 }
 
@@ -209,29 +203,18 @@ void GraphicManager::postSelectCompanion(CompanionPtr companion)  // TODO rewrit
         group->showCentralPanel();
     }
     else {
-        // showCentralPanelStub();
-        mainWindow_->showCentralPanelStub();
+        mainWindow_->showCentralStub();
     }
 }
-
-// void GraphicManager::setParentsForStubs(QWidgetPtr leftContainer, QWidgetPtr centralContainer)
-// {
-//     stubWidgets_->setParents(leftContainer, centralContainer);
-// }
-
-// void GraphicManager::setStubWidgets()
-// {
-//     stubWidgets_->set();
-// }
 
 void GraphicManager::sendMessage(MessageType type, CompanionPtr companion, const std::string &text)
 {
     manager_->sendMessage(type, companion, nullptr, text);
 }
 
-void GraphicManager::addTextToAppLogWidget(const QString &text)
+void GraphicManager::addLog(const QString &text)
 {
-    mainWindow_->addTextToAppLogWidget(text);
+    mainWindow_->addLog(text);
 }
 
 void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroupPtr group)
@@ -245,20 +228,20 @@ void GraphicManager::showWidgetGroupCentralPanel(WidgetGroupPtr group)
 }
 
 void GraphicManager::addWidgetToMainWindowContainerAndSetParentTo(
-    MainWindowContainerPosition position, QWidgetPtr widget)
+    MWContainerPosition position, QWidgetPtr widget)
 {
-    if (!mainWindow_->addWidgetToContainerAndSetParentTo(position, widget))
+    if (!mainWindow_->addWidget(position, widget))
         logArgsError("addWidgetToContainerAndSetParentTo error");
 }
 
-void GraphicManager::addWidgetToCompanionPanel(SocketInfoBaseWidgetPtr widget)
+void GraphicManager::addCompanionWidget(SocketInfoBaseWidgetPtr widget)
 {
-    mainWindow_->addWidgetToCompanionPanel(widget);
+    mainWindow_->addCompanion(widget);
 }
 
-void GraphicManager::removeWidgetFromCompanionPanel(SocketInfoBaseWidgetPtr widget)
+void GraphicManager::removeCompanionWidget(SocketInfoBaseWidgetPtr widget)
 {
-    mainWindow_->removeWidgetFromCompanionPanel(widget);
+    mainWindow_->removeCompanion(widget);
 }
 
 void GraphicManager::createCompanion()
@@ -292,21 +275,6 @@ void GraphicManager::deleteCompanion(CompanionPtr companion)
     manager_->initCompanionDeletion(companion);
 }
 
-// void GraphicManager::hideCompanionPanelStub()
-// {
-//     stubWidgets_->hideSocketInfoStubWidget();
-// }
-
-// void GraphicManager::hideCentralPanelStub()
-// {
-//     stubWidgets_->hideCentralPanel();
-// }
-
-// void GraphicManager::showCentralPanelStub()
-// {
-//     stubWidgets_->showCentralPanel();
-// }
-
 void GraphicManager::hideInfoViaBlur()
 {
     enableMainWindowBlurEffect();
@@ -319,20 +287,13 @@ void GraphicManager::showInfoViaBlur()
 
 void GraphicManager::hideInfoViaStubs()
 {
-    // stubWidgets_->setLeftPanelWidth(mainWindow_->getLeftPanelWidgetWidth());
-    // mainWindow_->hideLeftAndRightPanels();
-    // hideSelectedCompanionCentralPanel();
-    // stubWidgets_->showStubPanels();
-    mainWindow_->showStubPanels();
+    mainWindow_->showStubs();
     hideSelectedCompanionCentralPanel();
 }
 
 void GraphicManager::showInfoViaStubs()
 {
-    // mainWindow_->showLeftAndRightPanels();
-    // showSelectedCompanionCentralPanel();
-    // stubWidgets_->hideStubPanels();
-    mainWindow_->hideStubPanels();
+    mainWindow_->hideStubs();
     showSelectedCompanionCentralPanel();
 }
 
@@ -357,12 +318,12 @@ void GraphicManager::createEntrancePassword()
 
 void GraphicManager::enableMainWindowBlurEffect()
 {
-    mainWindow_->enableBlurEffect();
+    mainWindow_->enableBlur();
 }
 
 void GraphicManager::disableMainWindowBlurEffect()
 {
-    mainWindow_->disableBlurEffect();
+    mainWindow_->disableBlur();
 }
 
 void GraphicManager::getEntrancePassword()
@@ -397,9 +358,7 @@ void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message
     // group->addMessageWidget(message);
 }
 
-bool GraphicManager::setMessageWidgetAsSent(
-    // CompanionPtr companion, MessagePtr message)
-    MessageInfoPtr info)
+bool GraphicManager::setMessageWidgetAsSent(MessageInfoPtr info)
 {
     // auto lambda = [&]()
     // {
@@ -418,9 +377,7 @@ bool GraphicManager::setMessageWidgetAsSent(
     return true;  // TODO modify
 }
 
-void GraphicManager::setMessageWidgetAsReceived(
-    // CompanionPtr companion, MessagePtr message)
-    MessageInfoPtr info)
+void GraphicManager::setMessageWidgetAsReceived(MessageInfoPtr info)
 {
     // auto lambda = [&]()
     // {

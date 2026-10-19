@@ -21,41 +21,7 @@
 #include "alias.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
-#include "utils.hpp"
-
-// template <typename T, typename F>
-// void showDialogAndLog(
-//     T &&message, F &&func, DialogType type, QWidgetPtr parent = nullptr)
-// {
-//     getGraphicManager()->createTextDialogAndShow(
-//         parent, type, message, createOkButtonInfoVector(func));
-
-//     logTypeArgs(getLogTypeByDialogType(type), message);
-// }
-
-// template <typename T, typename F>
-// void showInfoDialogAndLogInfo(T &&message, F &&func, QWidgetPtr parent = nullptr)
-// {
-//     showDialogAndLog(message, func, DialogType::INFO, parent);
-// }
-
-// template <typename T>
-// void showInfoDialogAndLogInfo(T &&message, QWidgetPtr parent = nullptr)
-// {
-//     showDialogAndLog(message, &QDialog::accept, DialogType::INFO, parent);
-// }
-
-// template <typename T>
-// void showWarningDialogAndLogWarning(T &&message, QWidgetPtr parent = nullptr)
-// {
-//     showDialogAndLog(message, &QDialog::accept, DialogType::WARNING, parent);
-// }
-
-// template <typename T>
-// void showErrorDialogAndLogError(T &&message, QWidgetPtr parent = nullptr)
-// {
-//     showDialogAndLog(message, &QDialog::accept, DialogType::ERROR, parent);
-// }
+// #include "utils.hpp"
 
 class Dialog : public QDialog
 {
@@ -65,18 +31,14 @@ public:
     Dialog();
     virtual ~Dialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    // virtual void set() {}
     virtual void set(ActionPtr action) {}
     virtual void showDialog() {}
     virtual CompanionDataPtr getCompanionData() { return nullptr; }
-    // virtual void method1() {}
     virtual std::string firstEditText() { return ""s; }
     virtual std::string secondEditText() { return ""s; }
     virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() { return QStringList(); }
 
-    // void setAction(ActionPtr action);
-    // void setWrapper(std::shared_ptr<ActionWrapperBase> wrapper);
     bool containsDialog() const { return containsDialog_; }
     void setDialogType(DialogType type);
 
@@ -91,13 +53,9 @@ protected:
     DialogType dialogType_;
     ActionType actionType_;
     bool containsDialog_;
-    // const DataDialogTitleMap &dataMap_;
-    // const InfoDialogTitleMap &infoMap_;
     std::reference_wrapper<const DataDialogTitleMap> dataMap_;
     std::reference_wrapper<const InfoDialogTitleMap> infoMap_;
     QString defaultTitle_;
-    // ActionPtr action_;
-    // std::shared_ptr<ActionWrapperBase> wrapper_;
 };
 
 class CompanionDataDialog : public Dialog
@@ -111,9 +69,8 @@ public:
     std::string name();
     std::string ipAddress();
     std::string port();
-    // void set() override;
+
     void set(ActionPtr action) override;
-    // void method1() override;
 
     CompanionDataPtr getCompanionData() override;
 
@@ -137,7 +94,6 @@ public:
     GroupChatDataDialog(ActionType, QWidgetPtr);
     ~GroupChatDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    // void set() override;
     void set(ActionPtr action) override;
 
 private:
@@ -155,7 +111,6 @@ public:
     CreatePasswordDialog();
     ~CreatePasswordDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    // void set() override;
     void set(ActionPtr action) override;
     std::string firstEditText() override;
     std::string secondEditText() override;
@@ -177,7 +132,6 @@ public:
     GetPasswordDialog();
     ~GetPasswordDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    // void set() override;
     void set(ActionPtr action) override;
     std::string editText() override;
 
@@ -201,10 +155,9 @@ public:
 
     ~TextDialog();
 
-    // void set() override;
     void set(ActionPtr action) override;
     void closeSelf();
-    void closeSelfAndParentDialog();
+    void closeSelfAndParent();
     void acceptAction();
     void setText(const std::string &text);
 
@@ -212,14 +165,12 @@ public:
     void updateType(DialogType type);
     void updateButtonBox(std::initializer_list<ButtonInfo> list);
 
-    // void closeEvent(QCloseEvent *event) override;
-
 public slots:
     void unsetMainWindowBlurAndCloseDialogs();
     void reject() override;
 
 private:
-    std::unique_ptr<QPlainTextEdit> textEdit_;
+    std::unique_ptr<QPlainTextEdit> edit_;
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<ButtonBox> buttonBox_;
 };
@@ -229,11 +180,9 @@ class FileDialog : public Dialog
     Q_OBJECT
 
 public:
-    // FileDialog(std::shared_ptr<FileAction> action, const std::string &title);
     FileDialog(ActionType type);
     ~FileDialog();
 
-    // void set() override;
     void set(ActionPtr action) override;
     void showDialog() override;
 
@@ -241,43 +190,7 @@ public:
     QStringList selectedFiles() override;
 
 private:
-    // std::shared_ptr<FileAction> action_;
     std::shared_ptr<QFileDialog> dialog_;
 };
-
-// template<class T>
-// void setButtonBox(
-//     std::shared_ptr<T> dialog, std::shared_ptr<QDialogButtonBox> buttonBox,
-//     std::vector<ButtonInfo> *infoVector, std::vector<std::unique_ptr<QPushButton>> &buttons)
-// {
-//     const std::map<QDialogButtonBox::ButtonRole, std::function<void()>> signalMap {
-//         { QDialogButtonBox::ButtonRole::AcceptRole, &QDialogButtonBox::accepted },
-//         { QDialogButtonBox::ButtonRole::RejectRole, &QDialogButtonBox::rejected }
-//     };
-
-//     for (auto &info : *infoVector) {
-//         auto role = info.getRole();
-//         auto function = info.getFunction();
-//         // auto button = buttonBox->addButton(info.getText(), role);
-//         buttons.emplace_back(buttonBox->addButton(info.getText(), role));
-
-//         auto connectLambda = [&]()
-//         {
-//             QObject::connect(
-//                 buttonBox.get(), signalMap.at(role), dialog, function, Qt::QueuedConnection);
-//         };
-
-//         auto handlerLambda = [&](const std::exception &e)
-//         {
-//             if (dynamic_cast<const std::out_of_range *>(&e))
-//                 showErrorDialogAndLogError("Unmanaged button role"s);
-//         };
-
-//         runAndHandleException(connectLambda, handlerLambda, role);
-//     }
-// }
-
-// std::shared_ptr<std::vector<ButtonInfo>> createOkButtonInfoVector(
-//     std::function<void(TextDialog &)> function);
 
 #endif // WIDGETS_DIALOG_HPP

@@ -182,7 +182,7 @@ void CompanionAction::updateInfoDialog(ActionResultPtr result)
     }
 
     text = buildTextAsUnorderedListWithHeader(header, messages);
-    auto list = { getOKButtonInfo([this]() { infoDialog_->closeSelfAndParentDialog(); }) };
+    auto list = { getOKButtonInfo([this]() { infoDialog_->closeSelfAndParent(); }) };
     infoDialog_->update(type, text, list);
 }
 
@@ -280,7 +280,7 @@ void CompanionAction::endAct()
     getManager()->endAction(shared_from_this());
 }
 
-GroupChatAction::GroupChatAction(ActionType type) : data_(new GroupChatData), RegularAction(type)
+GroupChatAction::GroupChatAction(ActionType type) : data_(), RegularAction(type)
 {
     MainWindowPtr mainWindow = getGraphicManager()->getMainWindow();
 
@@ -357,7 +357,7 @@ void PasswordAction::updateInfoDialog(ActionResultPtr result)
         function = [this]()
         {
             getGraphicManager()->disableMainWindowBlurEffect();
-            infoDialog_->closeSelfAndParentDialog();
+            infoDialog_->closeSelfAndParent();
         };
     } else {
         type = DialogType::ERROR;
@@ -367,7 +367,7 @@ void PasswordAction::updateInfoDialog(ActionResultPtr result)
 
         function = [this]()
         {
-            infoDialog_->closeSelfAndParentDialog();
+            infoDialog_->closeSelfAndParent();
         };
     }
 

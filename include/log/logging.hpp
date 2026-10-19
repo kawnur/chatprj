@@ -28,7 +28,7 @@ void logArgs(Ts &&...args)
     auto graphicManager = getGraphicManager();
 
     if (graphicManager)
-        graphicManager->addTextToAppLogWidget(getQString(text));
+        graphicManager->addLog(getQString(text));
 
     coutArgsWithSpaceSeparator(text);
 }

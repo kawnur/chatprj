@@ -343,8 +343,6 @@ void SocketInfoWidget::buildFields()
     connect(
         this, &QWidget::customContextMenuRequested,
         this, &SocketInfoWidget::customMenuRequestedSlot, Qt::QueuedConnection);
-
-    // connect
 }
 
 void SocketInfoWidget::setFields()
@@ -474,7 +472,7 @@ WidgetGroup::WidgetGroup(CompanionPtr companion)
     auto graphicManager = getGraphicManager();
     auto widget = std::make_shared<SocketInfoWidget>(companion_);
     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
-    graphicManager->addWidgetToCompanionPanel(socketInfoBase_);
+    graphicManager->addCompanionWidget(socketInfoBase_);
 
     centralPanel_ = std::make_shared<CentralPanelWidget>(
         getGraphicManager()->getMainWindow(), companion_->name());
@@ -482,14 +480,14 @@ WidgetGroup::WidgetGroup(CompanionPtr companion)
     centralPanel_->set(companion_);
 
     graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-        MainWindowContainerPosition::CENTRAL, centralPanel_);
+        MWContainerPosition::CENTRAL, centralPanel_);
 
     centralPanel_->hide();
 }
 
 WidgetGroup::~WidgetGroup()
 {
-    getGraphicManager()->removeWidgetFromCompanionPanel(socketInfoBase_);
+    getGraphicManager()->removeCompanionWidget(socketInfoBase_);
     hideCentralPanel();
 }
 
@@ -513,7 +511,7 @@ void WidgetGroup::set()
 
 void WidgetGroup::clearChatHistory()
 {
-    centralPanel_->clearChatHistory();
+    centralPanel_->clearHistory();
 
     auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
 
@@ -532,7 +530,7 @@ void WidgetGroup::hideCentralPanel()
 void WidgetGroup::showCentralPanel()
 {
     centralPanel_->show();
-    centralPanel_->scrollDownChatHistory();
+    centralPanel_->scrollDownHistory();
 }
 
 SocketInfoBaseWidgetPtr WidgetGroup::getSocketInfoBase()
@@ -542,7 +540,7 @@ SocketInfoBaseWidgetPtr WidgetGroup::getSocketInfoBase()
 
 void WidgetGroup::sortChatHistoryElements()
 {
-    centralPanel_->sortChatHistory(true);
+    centralPanel_->sortHistory(true);
 }
 
 void WidgetGroup::messageAdded()
@@ -630,7 +628,7 @@ void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
 
     widget->setBase(shared_from_this());
 
-    centralPanel_->addMessageWidget(widget, isAntecedent);
+    centralPanel_->addMessage(widget, isAntecedent);
 
     messageAdded();
 }
@@ -643,73 +641,50 @@ void WidgetGroup::askUserForHistorySendingConfirmationSlot()
 StubWidgetGroup::StubWidgetGroup()
 {
     socketInfo_ = std::make_shared<SocketInfoStubWidget>();
-    leftPanel_ = std::make_shared<LeftPanelWidget>(nullptr);
-    centralPanel_ = std::make_shared<CentralPanelWidget>(nullptr, "");
-    rightPanel_ = std::make_shared<RightPanelWidget>(nullptr);
+    left_ = std::make_shared<LeftPanelWidget>(nullptr);
+    central_ = std::make_shared<CentralPanelWidget>(nullptr, "");
+    right_ = std::make_shared<RightPanelWidget>(nullptr);
 }
 
-void StubWidgetGroup::set()
+void StubWidgetGroup::hide()
 {
-    // auto graphicManager = getGraphicManager();
-    // auto baseObjectCast = dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
-    // graphicManager->addWidgetToCompanionPanel(baseObjectCast);
+    left_->hide();
+    central_->hide();
+    right_->hide();
+}
 
-    // graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-    //     MainWindowContainerPosition::LEFT, leftPanel_);
-
-    // graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-    //     MainWindowContainerPosition::CENTRAL, centralPanel_);
-
-    // graphicManager->addWidgetToMainWindowContainerAndSetParentTo(
-    //     MainWindowContainerPosition::RIGHT, rightPanel_);
-
-    leftPanel_->hide();
-    centralPanel_->hide();
-    rightPanel_->hide();
+void StubWidgetGroup::show()
+{
+    left_->show();
+    central_->show();
+    right_->show();
 }
 
 void StubWidgetGroup::setParents(QWidgetPtr leftContainer, QWidgetPtr centralContainer)
 {
-    leftPanel_->setParent(centralContainer.get());
-    centralPanel_->setParent(centralContainer.get());
-    rightPanel_->setParent(centralContainer.get());
+    left_->setParent(centralContainer.get());
+    central_->setParent(centralContainer.get());
+    right_->setParent(centralContainer.get());
 }
 
-void StubWidgetGroup::hideSocketInfoStubWidget()
+void StubWidgetGroup::hideSocketInfo()
 {
     socketInfo_->hide();
 }
 
-void StubWidgetGroup::hideCentralPanel()
+void StubWidgetGroup::hideCentral()
 {
-    centralPanel_->hide();
+    central_->hide();
 }
 
-void StubWidgetGroup::showCentralPanel()
+void StubWidgetGroup::showCentral()
 {
-    centralPanel_->show();
-}
-
-void StubWidgetGroup::hideStubPanels()
-{
-    leftPanel_->hide();
-
-    if (getManager()->getSelectedCompanion())
-        centralPanel_->hide();
-
-    rightPanel_->hide();
-}
-
-void StubWidgetGroup::showStubPanels()
-{
-    leftPanel_->show();
-    centralPanel_->show();
-    rightPanel_->show();
+    central_->show();
 }
 
 void StubWidgetGroup::setLeftPanelWidth(int width)
 {
-    leftPanel_->resize(width, leftPanel_->height());
+    left_->resize(width, left_->height());
 }
 
 std::shared_ptr<SocketInfoBaseWidget> StubWidgetGroup::socketInfoBase() const
@@ -717,19 +692,19 @@ std::shared_ptr<SocketInfoBaseWidget> StubWidgetGroup::socketInfoBase() const
     return dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
 }
 
-std::shared_ptr<LeftPanelWidget> StubWidgetGroup::leftPanel() const
+std::shared_ptr<LeftPanelWidget> StubWidgetGroup::left() const
 {
-    return leftPanel_;
+    return left_;
 }
 
-std::shared_ptr<CentralPanelWidget> StubWidgetGroup::centralPanel() const
+std::shared_ptr<CentralPanelWidget> StubWidgetGroup::central() const
 {
-    return centralPanel_;
+    return central_;
 }
 
-std::shared_ptr<RightPanelWidget> StubWidgetGroup::rightPanel() const
+std::shared_ptr<RightPanelWidget> StubWidgetGroup::right() const
 {
-    return rightPanel_;
+    return right_;
 }
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)

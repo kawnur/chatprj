@@ -43,7 +43,6 @@ CompanionDataPtr NetworkManager::getCompanionData(CompanionPtr companion)
     auto clientPort = getString(entity->clientPort());
 
     return std::make_shared<CompanionData>(name, ipAddress, serverPort, clientPort);
-    // return CompanionDataPtr(new CompanionData(name, ipAddress, serverPort, clientPort));
 }
 
 bool NetworkManager::connectClient(CompanionPtr companion)
