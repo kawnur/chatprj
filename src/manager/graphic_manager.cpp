@@ -9,7 +9,7 @@
 #include "widgets_message.hpp"
 #include "utils.hpp"
 
-GraphicManager::GraphicManager() : map_()
+GraphicManager::GraphicManager() : manager_(nullptr), mainWindow_(nullptr), map_()
 {
     mainWindow_ = std::make_shared<MainWindow>();
 }

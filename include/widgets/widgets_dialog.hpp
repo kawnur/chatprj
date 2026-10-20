@@ -37,7 +37,7 @@ public:
     virtual std::string firstEditText() { return ""s; }
     virtual std::string secondEditText() { return ""s; }
     virtual std::string editText() { return ""s; }
-    virtual QStringList selectedFiles() { return QStringList(); }
+    virtual QStringList selectedFiles() const { return QStringList(); }
     virtual QString getSaveFileName(const QString &param, const QString &path) { return ""; }
 
     bool containsDialog() const { return containsDialog_; }
@@ -188,7 +188,7 @@ public:
     void showDialog() override;
 
     std::shared_ptr<QFileDialog> getFileDialog();
-    QStringList selectedFiles() override;
+    QStringList selectedFiles() const override;
 
     QString getSaveFileName(const QString &param, const QString &path) override;
 

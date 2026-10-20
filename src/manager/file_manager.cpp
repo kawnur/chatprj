@@ -5,7 +5,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 
-FileManager::FileManager() : mutex_(), lastOpenedPath_(HOME_PATH), map_() {}
+FileManager::FileManager() : manager_(nullptr), mutex_(), lastOpenedPath_(HOME_PATH), map_() {}
 
 void FileManager::setManager(ManagerPtr manager)
 {
@@ -32,7 +32,7 @@ void FileManager::addSenderOperator(const std::string &networkId, const std::fil
         return;
     }
 
-    map_[networkId] = std::make_shared<SenderOperator>(path);
+    map_[networkId] = std::make_shared<SenderOperator>(shared_from_this(), path);
 }
 
 void FileManager::addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path)
@@ -47,7 +47,7 @@ void FileManager::addReceiverOperator(MessageMetaDataPtr meta, const std::filesy
         return;
     }
 
-    map_[networkId] = std::make_shared<ReceiverOperator>(path, meta->hashMD5_);
+    map_[networkId] = std::make_shared<ReceiverOperator>(shared_from_this(), path, meta->hashMD5_);
 }
 
 std::shared_ptr<FileOperator> FileManager::getOperator(const std::string &key)
@@ -108,3 +108,115 @@ bool FileManager::sendFileBlock(
     return manager_->sendFileBlock(companion, networkId, data);
 }
 
+void FileManager::sendFile(CompanionPtr companion, const std::string &networkId)
+{
+    auto sender = getOperator(networkId);
+
+    if (!sender) {
+        logTemplateError("companion has no file operator for networkId = {}", networkId);
+
+        return;
+    }
+
+    sender->sendFile(companion, networkId);
+
+    fileTransmissionHandler();
+}
+
+bool FileManager::mapIsEmpty()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    return map_.empty();
+}
+
+void FileManager::handleFileSendError(FileManagerMap::iterator iterator)
+{
+    auto networkId = iterator->first;
+    auto _operator = iterator->second;
+    auto companion = _operator->companion();
+
+    // close file
+    _operator->closeFile();
+
+    // remove file
+    _operator->removeFile();
+
+    // remove operator
+    map_.erase(iterator);
+
+    // send message
+    auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
+    getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(type, networkId));
+}
+
+void FileManager::handleFileSendSuccess(FileManagerMap::iterator iterator)
+{
+    auto networkId = iterator->first;
+    auto _operator = iterator->second;
+    auto companion = _operator->companion();
+
+    // close file
+    _operator->closeFile();
+
+    // send 'end of transmission' message
+    auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_END;
+    getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(type, networkId));
+}
+
+void FileManager::handleOperatorState(FileManagerMap::iterator iterator)
+{
+    // logArgsInfo(item.second);
+
+    auto _operator = iterator->second;
+
+    switch (_operator->state()) {
+    case FileTransmissionState::SEND_FAILURE:
+        handleFileSendError(iterator);
+
+        break;
+    case FileTransmissionState::SEND_SUCCESS:
+        handleFileSendSuccess(iterator);
+
+        break;
+
+    default:
+        break;
+    }
+}
+
+void FileManager::fileTransmissionHandler()
+{
+    auto lambda = [&]()
+    {
+        while (!mapIsEmpty()) {
+            std::lock_guard<std::mutex> lock(mutex_);
+
+            for (auto iter = map_.begin(); iter != map_.end(); ++iter)
+                handleOperatorState(iter);
+
+            sleepForMS(FILE_MANAGER_HANDLER_SLEEP_MS);
+        }
+    };
+
+    runInDetachedThread(lambda);
+}
+
+MessageMetaDataPtr getReplyMeta(NetworkMessageType type, const std::string &networkId)
+{
+    auto meta = std::make_shared<MessageMetaData>();
+    meta->networkMessageType_ = type;
+    meta->networkId_ = networkId;
+
+    return meta;
+};
+
+MessagePtr getEmptyMessage()
+{
+    auto state = std::make_shared<MessageState>();
+    state->isAntecedent_ = false;
+
+    auto message = std::make_shared<Message>(nullptr, nullptr, state);
+
+    return message;
+};

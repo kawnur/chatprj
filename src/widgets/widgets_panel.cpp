@@ -308,7 +308,7 @@ void CentralPanelWidget::sendFileSlot()
 
 void CentralPanelWidget::saveFileSlot()
 {
-    getGraphicManager()->sendFile(companion_);
+    // getGraphicManager()->saveFile(companion_);
 }
 
 RightPanelWidget::RightPanelWidget(QWidgetPtr parent)

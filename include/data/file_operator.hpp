@@ -7,6 +7,7 @@
 #include <string>
 
 #include "alias.hpp"
+#include "constants.hpp"
 
 class FileOperator
 {
@@ -15,14 +16,22 @@ public:
     virtual ~FileOperator();
 
     virtual bool createFileAndOpen() { return false; }
+    virtual void sendFile(CompanionPtr companion, const std::string &networkId) {}
 
+    FileTransmissionState state();
+    CompanionPtr companion() const;
     std::filesystem::path path() const;
     std::string md5Hash() const;
+    void setState(FileTransmissionState state);
+    void setCompanion(const CompanionPtr &companion);
     bool setPath(const std::filesystem::path &path);
     std::filebuf *closeFile();
+    bool removeFile();
 
 protected:
+    FileTransmissionState state_;
     FileManagerPtr fileManager_;
+    CompanionPtr companion_;
     std::filebuf buf_;
     std::filesystem::path path_;
     std::string md5Hash_;
@@ -35,7 +44,7 @@ public:
     ~SenderOperator() = default;
 
     bool sendFilePart(CompanionPtr companion, const std::string &networkId);
-    void sendFile(CompanionPtr companion, const std::string &networkId);
+    void sendFile(CompanionPtr companion, const std::string &networkId) override;
 };
 
 class ReceiverOperator : public FileOperator

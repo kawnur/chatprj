@@ -6,7 +6,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 
-MessageHandler::MessageHandler() : messageStorage_() {}
+MessageHandler::MessageHandler() : manager_(nullptr), messageStorage_() {}
 
 void MessageHandler::setManager(ManagerPtr manager)
 {
@@ -360,22 +360,6 @@ void MessageHandler::receiveFileProposal(
         return;
 
     manager_->receiveFile(companion, message);
-
-    // // add to DB and get timestamp
-    // auto replyMeta = manager_->pushMessageToDB(meta, data, state);
-
-    // if (!replyMeta || !replyMeta->isValid())
-    //     return;
-
-    // // decrypt message
-
-    // // create receiver operator
-    // manager_->addReceiverOperator(meta, HOME_PATH);
-    // // add to widget
-    // manager_->addMessageWidget(companion, message);
-
-    // // send reply message to sender
-    // bool result = sendMessageByNetwork(companion, message, replyMeta);
 }
 
 void MessageHandler::receiveConfirmation(
@@ -463,8 +447,9 @@ void MessageHandler::receiveFileRequest(CompanionPtr companion, MessageMetaDataP
 {
     logArgs(__FUNCTION__);
 
-    auto networkId = meta->networkId_;
+    manager_->sendFile(companion, meta);
 
+    // auto networkId = meta->networkId_;
 
     // auto sender = manager_->getFileOperator<SenderOperator>(networkId);
 

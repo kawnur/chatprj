@@ -43,6 +43,20 @@ const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
 
 const std::size_t NETWORK_ID_SIZE = 5;
 
+// file transmission
+enum class FileTransmissionState
+{
+    UNKNOWN,
+    SEND_STARTED,
+    SEND_SUCCESS,
+    SEND_FAILURE,
+    RECEIVE_STARTED,
+    RECEIVE_SUCCESS,
+    RECEIVE_FAILURE
+};
+
+const uint32_t FILE_MANAGER_HANDLER_SLEEP_MS = 500;
+
 // validation
 const std::size_t COMPANION_NAME_SIZE_LIMIT = 30;
 const std::size_t PASSWORD_SIZE_LIMIT = 30;

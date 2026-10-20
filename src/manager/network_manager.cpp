@@ -6,7 +6,7 @@
 #include "manager.hpp"
 #include "utils.hpp"
 
-NetworkManager::NetworkManager() : map_() {}
+NetworkManager::NetworkManager() : manager_(nullptr), map_() {}
 
 void NetworkManager::setManager(ManagerPtr manager)
 {

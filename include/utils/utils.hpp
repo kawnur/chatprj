@@ -16,6 +16,7 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QHostAddress>
 #include <QString>
 #include <QWidget>
 
@@ -84,6 +85,8 @@ std::string getString(T &&value)
         return getString(getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, NOT_FOUND));
     else if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::filesystem::path>)
         return value.string();
+    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, QHostAddress>)
+        return getString(value.toString());
     else
         return std::to_string(value);
 }

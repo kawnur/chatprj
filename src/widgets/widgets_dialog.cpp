@@ -77,7 +77,7 @@ CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion
 
 std::string CompanionDataDialog::name()
 {
-    return nameEdit_->text().toStdString();
+    return getString(nameEdit_->text());
 }
 
 std::string CompanionDataDialog::ipAddress()
@@ -86,12 +86,12 @@ std::string CompanionDataDialog::ipAddress()
     auto ipAddressFromWidget = ipAddressEdit_->text();
     QHostAddress hostAddress { ipAddressFromWidget };
 
-    return hostAddress.toString().toStdString();
+    return getString(hostAddress);
 }
 
 std::string CompanionDataDialog::port()
 {
-    return portEdit_->text().toStdString();
+    return getString(portEdit_->text());
 }
 
 void CompanionDataDialog::set(ActionPtr action)
@@ -173,12 +173,12 @@ void CreatePasswordDialog::set(ActionPtr action)
 
 std::string CreatePasswordDialog::firstEditText()
 {
-    return firstEdit_->text().toStdString();
+    return getString(firstEdit_->text());
 }
 
 std::string CreatePasswordDialog::secondEditText()
 {
-    return secondEdit_->text().toStdString();
+    return getString(secondEdit_->text());
 }
 
 GetPasswordDialog::GetPasswordDialog()
@@ -217,7 +217,7 @@ void GetPasswordDialog::set(ActionPtr action)
 
 std::string GetPasswordDialog::editText()
 {
-    return edit_->text().toStdString();
+    return getString(edit_->text());
 }
 
 TextDialog::TextDialog(
@@ -361,7 +361,7 @@ std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
     return dialog_;
 }
 
-QStringList FileDialog::selectedFiles()
+QStringList FileDialog::selectedFiles() const
 {
     return dialog_->selectedFiles();
 }

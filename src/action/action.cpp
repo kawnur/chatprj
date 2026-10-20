@@ -547,7 +547,7 @@ void FileAction::act()
             manager->setLastOpenedPath(filePath_.parent_path());
         }
         else {
-            logTemplateError("error saving file, path: {}", filePath_.string());
+            logTemplateError("error saving file, path: {}", filePath_);
         }
     }
 
@@ -560,7 +560,8 @@ void FileAction::act()
 
 void FileAction::defineFilePath()
 {
-    auto pathQStr = QString::fromStdString(getManager()->getLastOpenedPath().string());
+    // auto pathQStr = QString::fromStdString(getManager()->getLastOpenedPath().string());
+    auto pathQStr = getQString(getManager()->getLastOpenedPath());
     QString param { "Save File" };
     auto result = dataDialog_->getSaveFileName(param, pathQStr);
     filePath_ = std::filesystem::path(result.toStdString());

@@ -141,6 +141,7 @@ public:
     void sortHistory(CompanionPtr companion);
     void disableBlur();
     bool clientAction(CompanionPtr companion, bool isConnected);
+    void sendFile(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFile(CompanionPtr companion, MessagePtr message);
     MessageMetaDataPtr pushMessageToDB(MessagePtr message);
 
@@ -183,8 +184,8 @@ private:
     DBOperator dbOperator_;
     MessageHandler messageHandler_;
     FileManager fileManager_;
+    NetworkManagerPtr networkManager_;
     std::mutex messageStateToMessageMapMutex_;
-    NetworkManager networkManager_;
     bool userIsAuthenticated_;
     CompanionPtr selectedCompanion_;
     ActionPtr currentAction_;

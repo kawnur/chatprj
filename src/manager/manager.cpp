@@ -13,7 +13,8 @@
 
 Manager::Manager(GraphicManagerPtr graphicManager)
     : graphicManager_(graphicManager), dbOperator_(), messageHandler_(), fileManager_(),
-    messageStateToMessageMapMutex_(), userIsAuthenticated_(false), selectedCompanion_(nullptr) {}
+    networkManager_(new NetworkManager), messageStateToMessageMapMutex_(),
+    userIsAuthenticated_(false), selectedCompanion_(nullptr), currentAction_(nullptr) {}
 
 Manager::~Manager() {}
 
@@ -33,6 +34,7 @@ void Manager::set()
     //     exitUtil(EXIT_FAILURE);
 
     messageHandler_.setManager(shared_from_this());
+    networkManager_->setManager(shared_from_this());
 
     bool companionsBuilt = buildCompanions();
     logArgs("companionsBuilt:", companionsBuilt);
@@ -69,8 +71,8 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
             return false;
 
         if (!messageGetData->isEmpty()) {
-            auto entryTemplate =
-                "Message with timestamp {0} from companion with id {1} already exists";
+            // auto entryTemplate =
+            //     "Message with timestamp {0} from companion with id {1} already exists";
 
             // showInfoDialogAndLogInfo(getStringByFormat(entryTemplate, timestamp, companionId));
 
@@ -261,7 +263,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     // TODO check new data before data dialog is closed, move to Action::act
     // check if data was modified
     auto companion = action->getCompanion();
-    auto oldData = networkManager_.getCompanionData(companion);
+    auto oldData = networkManager_->getCompanionData(companion);
     auto newData = action->getCompanionData();
 
     if (compareCompanionData(oldData, newData))
@@ -288,7 +290,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     // update Companion and SocketInfo object
     // action->updateCompanionObjectData();
     companion->setName(newData->name());
-    networkManager_.updateSocketInfo(companion->id(), newData);
+    networkManager_->updateSocketInfo(companion->id(), newData);
 
     // update SocketInfoWidget
     graphicManager_->updateCompanionWidget(companion);
@@ -298,7 +300,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
 
 // void Manager::updateSocketInfo(int id, CompanionDataPtr data)
 // {
-//     networkManager_.updateSocketInfo(id, data);
+//     networkManager_->updateSocketInfo(id, data);
 // }
 
 ActionResultPtr Manager::deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action)
@@ -500,7 +502,7 @@ bool Manager::buildCompanions()
         auto serverSocket = std::make_shared<SocketInfo>(
             ""s, getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "server_port")));
 
-        auto entityResult = networkManager_.addToMap(id, clientSocket, serverSocket);
+        auto entityResult = networkManager_->addToMap(id, clientSocket, serverSocket);
 
         if (!entityResult.second)
             continue;
@@ -565,7 +567,7 @@ ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPt
     auto serverSocket = std::make_shared<SocketInfo>(
         ""s, getIntFromString(PORT_BAD_VALUE, data->serverPort()));
 
-    auto networkResult = networkManager_.addToMap(id, clientSocket, serverSocket);
+    auto networkResult = networkManager_->addToMap(id, clientSocket, serverSocket);
 
     if (!networkResult.second) {
         auto entry = getStringByFormat(
@@ -597,7 +599,7 @@ void Manager::sendUnsentMessages(CompanionPtr companion)
 
 NetworkEntityPtr Manager::getNetworkEntity(int id)
 {
-    return networkManager_.getValue(id);
+    return networkManager_->getValue(id);
 }
 
 bool Manager::sendFileBlock(
@@ -608,17 +610,17 @@ bool Manager::sendFileBlock(
 
 CompanionDataPtr Manager::getCompanionData(CompanionPtr companion)
 {
-    return networkManager_.getCompanionData(companion);
+    return networkManager_->getCompanionData(companion);
 }
 
 bool Manager::connectClient(CompanionPtr companion)
 {
-    return networkManager_.connectClient(companion);
+    return networkManager_->connectClient(companion);
 }
 
 bool Manager::disconnectClient(CompanionPtr companion)
 {
-    return networkManager_.disconnectClient(companion);
+    return networkManager_->disconnectClient(companion);
 }
 
 void Manager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
@@ -689,6 +691,12 @@ bool Manager::clientAction(CompanionPtr companion, bool isConnected)
     return result;
 }
 
+void Manager::sendFile(CompanionPtr companion, MessageMetaDataPtr meta)
+{
+    auto networkId = meta->networkId_;
+    fileManager_.sendFile(companion, networkId);
+}
+
 void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
 {
     // add to DB and get timestamp
@@ -708,7 +716,7 @@ void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
     addMessageWidget(companion, message);
 
     // send reply message to sender
-    bool result = sendMessageByNetwork(companion, message, replyMeta);
+    // bool result = sendMessageByNetwork(companion, message, replyMeta);
 }
 
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)

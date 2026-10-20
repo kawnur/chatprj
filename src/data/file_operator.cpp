@@ -3,16 +3,25 @@
 #include "constants.hpp"
 #include "file_manager.hpp"
 #include "logging.hpp"
-// #include "manager.hpp"
-#include "message.hpp"
 
 FileOperator::FileOperator(FileManagerPtr fileManager, const std::filesystem::path &path)
-    : fileManager_(fileManager), path_(path), buf_() {}
+    : state_(FileTransmissionState::UNKNOWN), fileManager_(fileManager), companion_(nullptr),
+    path_(path), buf_() {}
 
 FileOperator::~FileOperator()
 {
     if (buf_.is_open())
         buf_.close();
+}
+
+FileTransmissionState FileOperator::state()
+{
+    return state_;
+}
+
+CompanionPtr FileOperator::companion() const
+{
+    return companion_;
 }
 
 std::filesystem::path FileOperator::path() const
@@ -23,6 +32,16 @@ std::filesystem::path FileOperator::path() const
 std::string FileOperator::md5Hash() const
 {
     return md5Hash_;
+}
+
+void FileOperator::setState(FileTransmissionState state)
+{
+    state_ = state;
+}
+
+void FileOperator::setCompanion(const CompanionPtr &companion)
+{
+    companion_ = companion;
 }
 
 bool FileOperator::setPath(const std::filesystem::path &path)
@@ -37,7 +56,22 @@ bool FileOperator::setPath(const std::filesystem::path &path)
 
 std::filebuf *FileOperator::closeFile()
 {
-    return buf_.close();
+    std::filebuf *result = buf_.close();
+
+    if (!result)
+        logTemplateError("file closing error, path: {}", path_);
+
+    return result;
+}
+
+bool FileOperator::removeFile()
+{
+    bool result = std::filesystem::remove(path_);
+
+    if (!result)
+        logTemplateError("file removing error, path: {}", path_);
+
+    return result;
 }
 
 SenderOperator::SenderOperator(FileManagerPtr fileManager, const std::filesystem::path &path)
@@ -46,7 +80,7 @@ SenderOperator::SenderOperator(FileManagerPtr fileManager, const std::filesystem
     md5Hash_ = hashFileMD5(path_.string());
 
     if (!buf_.open(path_, std::ios::binary | std::ios::in))
-        logTemplateError("file opening error, path: {}", path_.string());
+        logTemplateError("file opening error, path: {}", path_);
 }
 
 bool SenderOperator::sendFilePart(CompanionPtr companion, const std::string &networkId)
@@ -72,29 +106,12 @@ bool SenderOperator::sendFilePart(CompanionPtr companion, const std::string &net
 
 void SenderOperator::sendFile(CompanionPtr companion, const std::string &networkId)
 {
-    auto getReplyMeta = [&](NetworkMessageType type)
-    {
-        auto meta = std::make_shared<MessageMetaData>();
-        meta->networkMessageType_ = type;
-        meta->networkId_ = networkId;
-
-        return meta;
-    };
-
-    auto getEmptyMessage = []()
-    {
-        auto state = std::make_shared<MessageState>();
-        state->isAntecedent_ = false;
-
-        auto message = std::make_shared<Message>(nullptr, nullptr, state);
-
-        return message;
-    };
+    setCompanion(companion);
 
     auto lambda = [=, this]()
     {
         if (!buf_.is_open()) {
-            logTemplateError("file opening error, path: {}", path_.string());
+            logTemplateError("file opening error, path: {}", path_);
 
             return;
         }
@@ -113,42 +130,13 @@ void SenderOperator::sendFile(CompanionPtr companion, const std::string &network
             if (result)
                 continue;
 
-            // hanle error
-            logTemplateError("file sending stopped because of error, path: {}", path_.string());
-
-            // close file
-            std::filebuf *closeResult = buf_.close();
-
-            if (!closeResult)
-                logTemplateError("file closing error, path: {}", path_.string());
-
-            // remove file
-            bool removeResult = std::filesystem::remove(path_);
-
-            if (!removeResult)
-                logTemplateError("file {} did not exist at deletion", path_.string());
-
-            // send message
-            auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
-            getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(type));
-
-            // remove self
-            auto lambda = [=]()
-            {
-                getManager()->removeFileOperator<SenderOperator>(networkId);
-            };
-
-            runInDetachedThread(lambda);
+            logTemplateError("file sending stopped because of error, path: {}", path_);
+            setState(FileTransmissionState::SEND_FAILURE);
 
             return;
         }
 
-        // send 'end of transmission' message
-        auto typeEnd = NetworkMessageType::FILE_DATA_TRANSMISSON_END;
-        getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(typeEnd));
-
-        if (!closeFile())
-            logTemplateError("file closing error, path: {}", path_.string());
+        setState(FileTransmissionState::SEND_SUCCESS);
     };
 
     runInDetachedThread(lambda);
@@ -180,7 +168,7 @@ void ReceiverOperator::receiveFilePart(const std::string &value)
 bool ReceiverOperator::receiveFile()
 {
     if (!closeFile())
-        logTemplateError("file closing error, path: {}", path_.string());
+        logTemplateError("file closing error, path: {}", path_);
 
     md5Hash_ = hashFileMD5(path_.string());
 
@@ -201,7 +189,7 @@ bool ReceiverOperator::createFileAndOpen()
     auto openResult = buf_.open(path_, std::ios::binary | std::ios::out);
 
     if (!openResult)
-        logTemplateError("file {} open error", path_.string());
+        logTemplateError("file {} open error", path_);
 
     return (openResult) ? true : false;
 }

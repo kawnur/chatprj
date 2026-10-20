@@ -700,6 +700,5 @@ void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
 {
     logTemplateInfo(
         "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
-        object->name().toStdString(), object->ipAddress().toStdString(),
-        object->serverPort(), object->clientPort());
+        object->name(), object->ipAddress(), object->serverPort(), object->clientPort());
 }

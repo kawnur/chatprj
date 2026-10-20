@@ -10,6 +10,8 @@
 #include "alias.hpp"
 #include "logging.hpp"
 
+using FileManagerMap = std::unordered_map<std::string, std::shared_ptr<FileOperator>>;
+
 class FileManager : public std::enable_shared_from_this<FileManager>
 {
 public:
@@ -56,12 +58,22 @@ public:
 
     std::string getFileOperatorMD5Hash(const std::string &networkId);
     bool sendFileBlock(CompanionPtr companion, const std::string &networkId, const std::string &data);
+    void sendFile(CompanionPtr companion, const std::string &networkId);
+
+    bool mapIsEmpty();
+    void handleFileSendError(FileManagerMap::iterator iterator);
+    void handleFileSendSuccess(FileManagerMap::iterator iterator);
+    void handleOperatorState(FileManagerMap::iterator iterator);
+    void fileTransmissionHandler();
 
 private:
     ManagerPtr manager_;
     std::mutex mutex_;
     std::filesystem::path lastOpenedPath_;
-    std::unordered_map<std::string, std::shared_ptr<FileOperator>> map_;
+    FileManagerMap map_;
 };
+
+MessageMetaDataPtr getReplyMeta(NetworkMessageType type, const std::string &networkId);
+MessagePtr getEmptyMessage();
 
 #endif // FILE_MANAGER_HPP
