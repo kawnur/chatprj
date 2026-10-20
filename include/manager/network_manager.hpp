@@ -9,24 +9,26 @@
 
 using NetworkManagerMap = std::unordered_map<int, NetworkEntityPtr>;
 
-class NetworkManager
+class NetworkManager : public std::enable_shared_from_this<NetworkManager>
 {
 public:
     NetworkManager();
     ~NetworkManager() = default;
 
+    void setManager(ManagerPtr manager);
+
     std::pair<NetworkManagerMap::iterator, bool> addToMap(
-        int companionId, SocketInfoPtr clientSocket,
-        SocketInfoPtr serverSocket);
+        int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket);
 
     NetworkEntityPtr getValue(int id);
     void updateSocketInfo(int id, CompanionDataPtr data);
     CompanionDataPtr getCompanionData(CompanionPtr companion);
-
     bool connectClient(CompanionPtr companion);
     bool disconnectClient(CompanionPtr companion);
+    void receiveMessage(int companionId, const std::string &json);
 
 private:
+    ManagerPtr manager_;
     NetworkManagerMap map_;
 };
 

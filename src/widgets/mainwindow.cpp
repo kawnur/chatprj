@@ -3,7 +3,6 @@
 #include <QMenuBar>
 
 #include "graphic_manager.hpp"
-#include "manager.hpp"
 #include "utils.hpp"
 #include "widgets_panel.hpp"
 
@@ -97,7 +96,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)
-        getManager()->resetSelectedCompanion(nullptr);
+        getGraphicManager()->resetSelectedCompanion(nullptr);
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)

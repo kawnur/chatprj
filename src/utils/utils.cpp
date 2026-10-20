@@ -22,10 +22,10 @@ std::string getString(std::nullptr_t value)
     return "nullptr_t"s;
 }
 
-std::string getString(const std::filesystem::path &value)
-{
-    return value.string();
-}
+// std::string getString(const std::filesystem::path &value)
+// {
+//     return value.string();
+// }
 
 std::string getString(const QString value)
 {

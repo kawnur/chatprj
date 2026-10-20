@@ -111,6 +111,13 @@ bool MessageMetaData::isValid()
     return true;
 }
 
+void MessageMetaData::update(MessageMetaDataPtr meta)
+{
+    messageId_ = meta->messageId_;
+    companionId_ = meta->companionId_;
+    timestampTz_ = meta->timestampTz_;
+}
+
 MessageData::MessageData(const std::string &text, const std::string &data)
     : text_(text), data_(data) {}
 
@@ -217,6 +224,11 @@ MessageDataPtr Message::data() const
 MessageStatePtr Message::state() const
 {
     return state_;
+}
+
+void Message::updateMeta(MessageMetaDataPtr meta)
+{
+    meta_->update(meta);
 }
 
 // MessageState::MessageState(

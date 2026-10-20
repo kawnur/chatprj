@@ -1,10 +1,26 @@
 #include "file_manager.hpp"
 
-#include "file_info.hpp"
+#include "file_operator.hpp"
 #include "logging.hpp"
+#include "manager.hpp"
 #include "message.hpp"
 
-FileManager::FileManager() : mutex_(), map_() {}
+FileManager::FileManager() : mutex_(), lastOpenedPath_(HOME_PATH), map_() {}
+
+void FileManager::setManager(ManagerPtr manager)
+{
+    manager_ = manager;
+}
+
+std::filesystem::path FileManager::lastOpenedPath()
+{
+    return lastOpenedPath_;
+}
+
+void FileManager::setLastOpenedPath(const std::filesystem::path &path)
+{
+    lastOpenedPath_ = path;
+}
 
 void FileManager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
 {
@@ -85,3 +101,10 @@ std::string FileManager::getFileOperatorMD5Hash(const std::string &networkId)
 
     return (_operator) ? _operator->md5Hash() : ""s;
 }
+
+bool FileManager::sendFileBlock(
+    CompanionPtr companion, const std::string &networkId, const std::string &data)
+{
+    return manager_->sendFileBlock(companion, networkId, data);
+}
+

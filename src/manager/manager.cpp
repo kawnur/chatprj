@@ -12,9 +12,8 @@
 #include "widgets.hpp"
 
 Manager::Manager(GraphicManagerPtr graphicManager)
-    : graphicManager_(graphicManager), messageHandler_(), fileManager_(), networkManager_(),
-    messageStateToMessageMapMutex_(), userIsAuthenticated_(false), selectedCompanion_(nullptr),
-    lastOpenedPath_(HOME_PATH) {}
+    : graphicManager_(graphicManager), dbOperator_(), messageHandler_(), fileManager_(),
+    messageStateToMessageMapMutex_(), userIsAuthenticated_(false), selectedCompanion_(nullptr) {}
 
 Manager::~Manager() {}
 
@@ -435,12 +434,12 @@ void Manager::sendChatHistoryToCompanion(CompanionPtr companion)
 
 std::filesystem::path Manager::getLastOpenedPath()
 {
-    return lastOpenedPath_;
+    return fileManager_.lastOpenedPath();
 }
 
 void Manager::setLastOpenedPath(const std::filesystem::path &path)
 {
-    lastOpenedPath_ = path;
+    fileManager_.setLastOpenedPath(path);
 }
 
 void Manager::endAction(ActionPtr action)
@@ -454,8 +453,7 @@ void Manager::sendMessage(
     messageHandler_.sendMessage(type, companion, action, text);
 }
 
-bool Manager::sendMessage(
-    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
+bool Manager::sendMessage(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
 {
     return messageHandler_.sendMessageByNetwork(companion, message, meta);
 }
@@ -628,10 +626,9 @@ void Manager::addSenderOperator(const std::string &networkId, const std::filesys
     fileManager_.addSenderOperator(networkId, path);
 }
 
-void Manager::addReceiverOperator(
-    MessageMetaDataPtr meta, const std::filesystem::path &path)
+void Manager::addReceiverOperator(MessageMetaDataPtr meta)
 {
-    fileManager_.addReceiverOperator(meta, path);
+    fileManager_.addReceiverOperator(meta);
 }
 
 std::string Manager::getFilePathString(const std::string &networkId)
@@ -692,6 +689,28 @@ bool Manager::clientAction(CompanionPtr companion, bool isConnected)
     return result;
 }
 
+void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
+{
+    // add to DB and get timestamp
+    auto replyMeta = pushMessageToDB(message);
+
+    if (!replyMeta || !replyMeta->isValid())
+        return;
+
+    message->updateMeta(replyMeta);
+
+    // decrypt message
+
+    // create receiver operator
+    addReceiverOperator(message->meta());
+
+    // add to widget
+    addMessageWidget(companion, message);
+
+    // send reply message to sender
+    bool result = sendMessageByNetwork(companion, message, replyMeta);
+}
+
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
 {
     // mark in db
@@ -726,10 +745,15 @@ void Manager::markMessageAsReceived(MessageInfoPtr info)
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->message()->id());
 }
 
+MessageMetaDataPtr Manager::pushMessageToDB(MessagePtr message)
+{
+    return pushMessageToDB(message->meta(), message->data(), message->state());
+}
+
 MessageMetaDataPtr Manager::pushMessageToDB(
     MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
-    const std::string companionIdString("companion_id");
+    // const std::string companionIdString("companion_id");
 
     auto messageData = getDBData(
         DBRequestType::PUSH_MESSAGE_AND_RETURN, meta->companionName_, meta->authorName_,

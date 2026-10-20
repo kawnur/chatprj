@@ -1,11 +1,13 @@
-#include "file_info.hpp"
+#include "file_operator.hpp"
 
 #include "constants.hpp"
+#include "file_manager.hpp"
 #include "logging.hpp"
-#include "manager.hpp"
+// #include "manager.hpp"
 #include "message.hpp"
 
-FileOperator::FileOperator(const std::filesystem::path &path) : path_(path), buf_() {}
+FileOperator::FileOperator(FileManagerPtr fileManager, const std::filesystem::path &path)
+    : fileManager_(fileManager), path_(path), buf_() {}
 
 FileOperator::~FileOperator()
 {
@@ -38,7 +40,8 @@ std::filebuf *FileOperator::closeFile()
     return buf_.close();
 }
 
-SenderOperator::SenderOperator(const std::filesystem::path &path) : FileOperator(path)
+SenderOperator::SenderOperator(FileManagerPtr fileManager, const std::filesystem::path &path)
+    : FileOperator(fileManager, path)
 {
     md5Hash_ = hashFileMD5(path_.string());
 
@@ -46,8 +49,7 @@ SenderOperator::SenderOperator(const std::filesystem::path &path) : FileOperator
         logTemplateError("file opening error, path: {}", path_.string());
 }
 
-bool SenderOperator::sendFilePart(
-    CompanionPtr companion, const std::string &networkId)
+bool SenderOperator::sendFilePart(CompanionPtr companion, const std::string &networkId)
 {
     std::stringstream sstream;
     char buffer[MAX_BUFFER_SIZE] = { 0 };
@@ -56,12 +58,13 @@ bool SenderOperator::sendFilePart(
     sstream << std::hex << std::setfill('0');
 
     for (std::size_t i = 0; i < read; i++)
+        // TODO get rid of double cast
         // double cast to get rid of precedence of ffffff for big values
         sstream << std::setw(2) << (int)(unsigned char)buffer[i];
 
     std::string resultString = sstream.str();
 
-    bool result = getManager()->sendFileBlock(companion, networkId, resultString);
+    bool result = fileManager_->sendFileBlock(companion, networkId, resultString);
     // coutWithEndl(resultString);
 
     return result;
@@ -152,7 +155,9 @@ void SenderOperator::sendFile(CompanionPtr companion, const std::string &network
 }
 
 ReceiverOperator::ReceiverOperator(
-    const std::filesystem::path &path, const std::string &md5HashFromSender) : FileOperator(path)
+    FileManagerPtr fileManager, const std::filesystem::path &path,
+    const std::string &md5HashFromSender)
+    : FileOperator(fileManager, path)
 {
     md5Hash_ = ""s;
     md5HashFromSender_ = md5HashFromSender;

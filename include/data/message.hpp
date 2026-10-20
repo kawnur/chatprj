@@ -54,6 +54,7 @@ public:
 
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
     bool isValid();
+    void update(MessageMetaDataPtr meta);
 
     MessageType messageType_;
     NetworkMessageType networkMessageType_;
@@ -152,6 +153,8 @@ public:
     MessageMetaDataPtr meta() const;
     MessageDataPtr data() const;
     MessageStatePtr state() const;
+
+    void updateMeta(MessageMetaDataPtr meta);
 
 private:
     // MessageType type_;

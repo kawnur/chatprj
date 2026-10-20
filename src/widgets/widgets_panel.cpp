@@ -11,7 +11,6 @@
 #include "constants.hpp"
 #include "logging.hpp"
 #include "graphic_manager.hpp"
-// #include "manager.hpp"
 #include "message.hpp"  // used in lambda
 #include "utils_cout.hpp"
 #include "utils_widgets.hpp"
@@ -80,10 +79,7 @@ void LeftPanelWidget::removeCompanion(SocketInfoBaseWidgetPtr widget)
     } else if (index == 0) {
 
     } else if (index > 0) {
-        // ManagerPtr manager = getManager();
         auto previous = companionPanelChildren.at(index - 1);
-        // auto previousCompanion = getGraphicManager()->getCompanionByWidget(previousWidget);
-        // manager->resetSelectedCompanion(previousCompanion);
         getGraphicManager()->resetSelectedCompanion(previous);
         companionPanelLayout_->removeWidget(widget.get());
     }
@@ -276,23 +272,22 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
     auto result = QWidget::eventFilter(object, event);
 
     if (object == historyScrollArea_.get()) {
-        auto verticalScrollBar = historyScrollArea_->verticalScrollBar();
+        auto bar = historyScrollArea_->verticalScrollBar();
 
-        if (verticalScrollBar && verticalScrollBar->value() == verticalScrollBar->minimum()) {
-            auto eventCast = dynamic_cast<QKeyEvent *>(event);
+        if (bar && bar->value() == bar->minimum()) {
+            auto cast = dynamic_cast<QKeyEvent *>(event);
             auto type = event->type();
 
             bool condition1 = (type == QEvent::Wheel);
 
             auto keys = (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home);
-            bool condition21 = (eventCast && (eventCast->key()  &keys));
+            bool condition21 = (cast && (cast->key() & keys));
             bool condition2 = (type == QEvent::KeyPress && condition21);
 
             if (condition1 || condition2) {
-                logTemplateInfo(
-                    "scroll bar minimum event type {}", std::to_string(event->type()));
+                logTemplateInfo("scroll bar minimum event type {}", getString(event->type()));
 
-                getManager()->addEarlyMessages(companion_);
+                getGraphicManager()->addEarlyMessages(companion_);
             }
         }
     }

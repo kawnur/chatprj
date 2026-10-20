@@ -58,13 +58,10 @@ public:
     bool sendFileBlockByNetwork(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
 
-    void sendFile(CompanionPtr companion, const std::filesystem::path &path);
+    // void sendFile(CompanionPtr companion, const std::filesystem::path &path);
     void receiveMessage(CompanionPtr companion, const std::string &json);
 
     void receiveTextMessage(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveFileProposalMessage(
         CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
 
     void receiveConfirmation(
@@ -75,6 +72,10 @@ public:
 
     void reciveChatHistoryRequest(CompanionPtr companion);
     void receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data);
+
+    void receiveFileProposal(
+        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
+
     void receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data);
     void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta);

@@ -447,6 +447,16 @@ bool GraphicManager::setMappedMessageWidget(
     return manager_->setMappedMessageWidget(companion, message, widget);
 }
 
+void GraphicManager::addEarlyMessages(CompanionPtr companion)
+{
+    manager_->addEarlyMessages(companion);
+}
+
+std::filesystem::path GraphicManager::getLastOpenedPath()
+{
+    return manager_->getLastOpenedPath();
+}
+
 GraphicManagerPtr getGraphicManager()
 {
     QCoreApplication *coreApp = QCoreApplication::instance();

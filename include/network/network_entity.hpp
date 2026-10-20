@@ -33,7 +33,10 @@ private:
 class NetworkEntity
 {
 public:
-    NetworkEntity(int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket);
+    NetworkEntity(
+        NetworkManagerPtr networkManager, int companionId, SocketInfoPtr clientSocket,
+        SocketInfoPtr serverSocket);
+
     ~NetworkEntity() = default;
 
     std::string ipAddress();
@@ -56,6 +59,7 @@ public:
     std::shared_ptr<ChatServer> server() const;
 
 private:
+    NetworkManagerPtr networkManager_;
     int companionId_;
     SocketInfoPtr clientSocket_;
     SocketInfoPtr serverSocket_;

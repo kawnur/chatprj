@@ -115,7 +115,7 @@ public:
     bool connectClient(CompanionPtr companion);
     bool disconnectClient(CompanionPtr companion);
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
-    void addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path);
+    void addReceiverOperator(MessageMetaDataPtr meta);
 
     template<typename T>
     std::shared_ptr<T> getFileOperator(const std::string &networkId)
@@ -141,6 +141,8 @@ public:
     void sortHistory(CompanionPtr companion);
     void disableBlur();
     bool clientAction(CompanionPtr companion, bool isConnected);
+    void receiveFile(CompanionPtr companion, MessagePtr message);
+    MessageMetaDataPtr pushMessageToDB(MessagePtr message);
 
 private:
     ActionResultPtr getActionResultByKeyDBData(
@@ -185,7 +187,6 @@ private:
     NetworkManager networkManager_;
     bool userIsAuthenticated_;
     CompanionPtr selectedCompanion_;
-    std::filesystem::path lastOpenedPath_;
     ActionPtr currentAction_;
 };
 

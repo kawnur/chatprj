@@ -2,7 +2,7 @@
 
 #include "action.hpp"
 #include "companion.hpp"
-#include "file_info.hpp"
+#include "file_operator.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 
@@ -86,15 +86,17 @@ void MessageHandler::sendMessage(
     if (!pushMeta || !pushMeta->isValid())
         return;
 
-    pushMeta->messageType_ = type;
-    pushMeta->networkMessageType_ = NetworkMessageType::TEXT;
-    pushMeta->companionName_ = meta->companionName_;
-    pushMeta->authorId_ = 1;
-    pushMeta->authorName_ = meta->authorName_;
+    meta->update(pushMeta);
+
+    meta->messageType_ = type;
+    meta->networkMessageType_ = NetworkMessageType::TEXT;
+    meta->companionName_ = meta->companionName_;
+    meta->authorId_ = 1;
+    meta->authorName_ = meta->authorName_;
 
     state->isAntecedent_ = false;
 
-    auto message = createMessage(companion, pushMeta, data, state);
+    auto message = createMessage(companion, meta, data, state);
 
     if (!message)
         return;
@@ -175,10 +177,10 @@ bool MessageHandler::sendFileBlockByNetwork(
     return sendJsonByNetwork(companion, json);
 }
 
-void MessageHandler::sendFile(CompanionPtr companion, const std::filesystem::path &path)
-{
-    logArgs(__FUNCTION__);
-}
+// void MessageHandler::sendFile(CompanionPtr companion, const std::filesystem::path &path)
+// {
+//     logArgs(__FUNCTION__);
+// }
 
 void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &json)
 {
@@ -209,7 +211,7 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     break;
 
     case NetworkMessageType::FILE_PROPOSAL:
-        receiveFileProposalMessage(companion, meta, data, state);
+        receiveFileProposal(companion, meta, data, state);
 
     break;
 
@@ -280,50 +282,13 @@ void MessageHandler::receiveTextMessage(
     if (!pushMeta || !pushMeta->isValid())
         return;
 
-    pushMeta->messageType_ = MessageType::TEXT;
-    pushMeta->networkMessageType_ = NetworkMessageType::TEXT;
-    pushMeta->companionName_ = meta->companionName_;
-    pushMeta->authorId_ = meta->authorId_;
-    pushMeta->authorName_ = meta->authorName_;
+    meta->update(pushMeta);
 
-    auto message = createMessage(companion, pushMeta, data, state);
-
-    if (!message)
-        return;
-
-    // decrypt message
-
-    // add to widget
-    manager_->addMessageWidget(companion, message);
-
-    // send reply message to sender
-    pushMeta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION;
-    bool result = sendMessageByNetwork(companion, message, pushMeta);
-}
-
-void MessageHandler::receiveFileProposalMessage(
-    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
-{
-    // create receiver operator
-    manager_->addReceiverOperator(meta, HOME_PATH);
-
-    // update message info
-    auto name = companion->name();
-
-    meta->companionName_ = name;
-    meta->authorName_ = name;
-    state->isSent_ = false;
-    state->isReceived_ = true;
-
-    // add to DB and get timestamp
-    auto replyMeta = manager_->pushMessageToDB(meta, data, state);
-
-    if (!replyMeta || !replyMeta->isValid())
-        return;
-
-    // create message
-    replyMeta->messageType_ = MessageType::FILE;
-    replyMeta->networkMessageType_ = NetworkMessageType::NO_ACTION;
+    meta->messageType_ = MessageType::TEXT;
+    meta->networkMessageType_ = NetworkMessageType::TEXT;
+    meta->companionName_ = meta->companionName_;
+    meta->authorId_ = meta->authorId_;
+    meta->authorName_ = meta->authorName_;
 
     auto message = createMessage(companion, meta, data, state);
 
@@ -336,7 +301,81 @@ void MessageHandler::receiveFileProposalMessage(
     manager_->addMessageWidget(companion, message);
 
     // send reply message to sender
-    bool result = sendMessageByNetwork(companion, message, replyMeta);
+    meta->networkMessageType_ = NetworkMessageType::RECEIVE_CONFIRMATION;
+    bool result = sendMessageByNetwork(companion, message, meta);
+}
+
+void MessageHandler::receiveFileProposal(
+    CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
+{
+    // // create receiver operator
+    // manager_->addReceiverOperator(meta, HOME_PATH);
+
+    // // update message info
+    // auto name = companion->name();
+
+    // meta->companionName_ = name;
+    // meta->authorName_ = name;
+    // state->isSent_ = false;
+    // state->isReceived_ = true;
+
+    // // add to DB and get timestamp
+    // auto replyMeta = manager_->pushMessageToDB(meta, data, state);
+
+    // if (!replyMeta || !replyMeta->isValid())
+    //     return;
+
+    // // create message
+    // replyMeta->messageType_ = MessageType::FILE;
+    // replyMeta->networkMessageType_ = NetworkMessageType::NO_ACTION;
+
+    // auto message = createMessage(companion, meta, data, state);
+
+    // if (!message)
+    //     return;
+
+    // // decrypt message
+
+    // // add to widget
+    // manager_->addMessageWidget(companion, message);
+
+    // // send reply message to sender
+    // bool result = sendMessageByNetwork(companion, message, replyMeta);
+
+    // update message info
+    auto name = companion->name();
+
+    meta->companionName_ = name;
+    meta->authorName_ = name;
+    state->isSent_ = false;
+    state->isReceived_ = true;
+
+    // create message
+    meta->messageType_ = MessageType::FILE;
+    meta->networkMessageType_ = NetworkMessageType::NO_ACTION;
+
+    auto message = createMessage(companion, meta, data, state);
+
+    if (!message)
+        return;
+
+    manager_->receiveFile(companion, message);
+
+    // // add to DB and get timestamp
+    // auto replyMeta = manager_->pushMessageToDB(meta, data, state);
+
+    // if (!replyMeta || !replyMeta->isValid())
+    //     return;
+
+    // // decrypt message
+
+    // // create receiver operator
+    // manager_->addReceiverOperator(meta, HOME_PATH);
+    // // add to widget
+    // manager_->addMessageWidget(companion, message);
+
+    // // send reply message to sender
+    // bool result = sendMessageByNetwork(companion, message, replyMeta);
 }
 
 void MessageHandler::receiveConfirmation(
@@ -425,12 +464,14 @@ void MessageHandler::receiveFileRequest(CompanionPtr companion, MessageMetaDataP
     logArgs(__FUNCTION__);
 
     auto networkId = meta->networkId_;
-    auto sender = manager_->getFileOperator<SenderOperator>(networkId);
 
-    if (sender)
-        sender->sendFile(companion, networkId);
-    else
-        logTemplateError("companion has no file operator for networkId = {}", networkId);
+
+    // auto sender = manager_->getFileOperator<SenderOperator>(networkId);
+
+    // if (sender)
+    //     sender->sendFile(companion, networkId);
+    // else
+    //     logTemplateError("companion has no file operator for networkId = {}", networkId);
 }
 
 void MessageHandler::receiveFileData(

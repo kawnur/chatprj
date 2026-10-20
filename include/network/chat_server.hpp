@@ -6,6 +6,7 @@
 
 #include <boost/asio.hpp>
 
+#include "alias.hpp"
 #include "constants.hpp"
 
 using boost::asio::ip::tcp;
@@ -13,7 +14,7 @@ using boost::asio::ip::tcp;
 class ServerSession : public std::enable_shared_from_this<class ServerSession>
 {
 public:
-    ServerSession(int companionId, tcp::socket socket);
+    ServerSession(NetworkManagerPtr networkManager, int companionId, tcp::socket socket);
     ~ServerSession() = default;
 
     void start();
@@ -21,6 +22,7 @@ public:
 private:
     void do_read();
 
+    NetworkManagerPtr networkManager_;
     int companionId_;
     tcp::socket socket_;
     char data_[MAX_BUFFER_SIZE];
@@ -31,7 +33,7 @@ class ChatServer
 {
 public:
     // TODO what if port is blocked?
-    ChatServer(int companionId, uint16_t port);
+    ChatServer(NetworkManagerPtr networkManager, int companionId, uint16_t port);
     ~ChatServer() = default;
 
     void run();
@@ -39,6 +41,7 @@ public:
 private:
     void do_accept();
 
+    NetworkManagerPtr networkManager_;
     boost::asio::io_context io_context_;
     uint16_t port_;
     int companionId_;

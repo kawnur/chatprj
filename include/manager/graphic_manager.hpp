@@ -73,6 +73,8 @@ public:
     bool setMappedMessageWidget(
         CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
 
+    void addEarlyMessages(CompanionPtr companion);
+    std::filesystem::path getLastOpenedPath();
 
 private:
     WidgetGroupPtr getWidgetGroup(CompanionPtr companion) const;

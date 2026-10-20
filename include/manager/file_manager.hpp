@@ -10,14 +10,19 @@
 #include "alias.hpp"
 #include "logging.hpp"
 
-class FileManager
+class FileManager : public std::enable_shared_from_this<FileManager>
 {
 public:
     FileManager();
     ~FileManager() = default;
 
+    void setManager(ManagerPtr manager);
+
+    std::filesystem::path lastOpenedPath();
+    void setLastOpenedPath(const std::filesystem::path &path);
+
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
-    void addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path);
+    void addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path = HOME_PATH);
     std::shared_ptr<FileOperator> getOperator(const std::string &key);
     bool removeOperator(const std::string &key);
     std::string getFilePathString(const std::string &networkId);
@@ -50,9 +55,12 @@ public:
     }
 
     std::string getFileOperatorMD5Hash(const std::string &networkId);
+    bool sendFileBlock(CompanionPtr companion, const std::string &networkId, const std::string &data);
 
 private:
+    ManagerPtr manager_;
     std::mutex mutex_;
+    std::filesystem::path lastOpenedPath_;
     std::unordered_map<std::string, std::shared_ptr<FileOperator>> map_;
 };
 

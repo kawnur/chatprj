@@ -1,12 +1,12 @@
 #include "chat_server.hpp"
 
 #include "logging.hpp"
-#include "manager.hpp"
+#include "network_manager.hpp"
 
 using boost::asio::ip::tcp;
 
-ServerSession::ServerSession(int companionId, tcp::socket socket)
-    : companionId_(companionId), socket_(std::move(socket)) {}
+ServerSession::ServerSession(NetworkManagerPtr networkManager, int companionId, tcp::socket socket)
+    : networkManager_(networkManager), companionId_(companionId), socket_(std::move(socket)) {}
 
 void ServerSession::start()
 {
@@ -47,7 +47,7 @@ void ServerSession::do_read()
                         closeCounter = 0;
                         previous_ = "";
 
-                        getManager()->receiveMessage(companionId_, message);
+                        networkManager_->receiveMessage(companionId_, message);
                     }
                 }
             }
@@ -62,8 +62,8 @@ void ServerSession::do_read()
     socket_.async_read_some(boost::asio::buffer(data_, MAX_BUFFER_SIZE), lambda);
 }
 
-ChatServer::ChatServer(int companionId, uint16_t port)
-    : companionId_(companionId), port_(port), io_context_(),
+ChatServer::ChatServer(NetworkManagerPtr networkManager, int companionId, uint16_t port)
+    : networkManager_(networkManager), companionId_(companionId), port_(port), io_context_(),
     acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
 {
     do_accept();
@@ -71,7 +71,7 @@ ChatServer::ChatServer(int companionId, uint16_t port)
 
 void ChatServer::run()
 {
-    runInDetachedThread([this](){ io_context_.run(); });
+    runInDetachedThread([this]() { io_context_.run(); });
 }
 
 void ChatServer::do_accept()
@@ -81,7 +81,8 @@ void ChatServer::do_accept()
     auto lambda = [this](boost::system::error_code ec, tcp::socket socket)
     {
         if (!ec)
-            std::make_shared<ServerSession>(companionId_, std::move(socket))->start();
+            std::make_shared<ServerSession>(
+                networkManager_, companionId_, std::move(socket))->start();
 
         do_accept();
     };

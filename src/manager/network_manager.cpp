@@ -3,14 +3,21 @@
 #include "companion.hpp"
 #include "data.hpp"
 #include "logging.hpp"
+#include "manager.hpp"
 #include "utils.hpp"
 
 NetworkManager::NetworkManager() : map_() {}
 
+void NetworkManager::setManager(ManagerPtr manager)
+{
+    manager_ = manager;
+}
+
 std::pair<NetworkManagerMap::iterator, bool> NetworkManager::addToMap(
     int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket)
 {
-    auto entity = std::make_shared<NetworkEntity>(companionId, clientSocket, serverSocket);
+    auto entity = std::make_shared<NetworkEntity>(
+        shared_from_this(), companionId, clientSocket, serverSocket);
 
     auto result = map_.emplace(companionId, entity);
 
@@ -63,4 +70,9 @@ bool NetworkManager::disconnectClient(CompanionPtr companion)
         return false;
 
     return entity->disconnectClient();
+}
+
+void NetworkManager::receiveMessage(int companionId, const std::string &json)
+{
+    manager_->receiveMessage(companionId, json);
 }

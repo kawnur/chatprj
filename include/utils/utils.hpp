@@ -35,6 +35,12 @@ concept AssociativeContainer = requires(M m)
     m.at(std::declval<typename M::key_type>());
 };
 
+template<typename T>
+concept IsArithmetic = std::is_arithmetic_v<std::remove_cvref_t<T>>;
+
+template<typename T>
+concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_cvref_t<T>>;
+
 template <typename T>
 struct isOptionalHelper : std::false_type {};
 
@@ -44,15 +50,9 @@ struct isOptionalHelper<std::optional<T>> : std::true_type {};
 template <typename T>
 concept IsOptional = isOptionalHelper<std::remove_cvref_t<T>>::value;
 
-template<typename T>
-concept IsArithmetic = std::is_arithmetic_v<std::remove_cvref_t<T>>;
-
-template<typename T>
-concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_cvref_t<T>>;
-
 std::string getString(const char *value);
 std::string getString(std::nullptr_t value);
-std::string getString(const std::filesystem::path &value);
+// std::string getString(const std::filesystem::path &value);
 std::string getString(const QString value);
 
 template<typename T>
@@ -62,12 +62,6 @@ std::string getString(T *value)
     ss << (void *)value;
 
     return ss.str();
-}
-
-template<IsOptional T>
-std::string getString(T &value)
-{
-    return (value) ? getString(value.value()) : "EMPTY OPTIONAL";
 }
 
 template<IsArithmetic T>
@@ -88,8 +82,16 @@ std::string getString(T &&value)
         return value;
     else if constexpr (std::is_same_v<std::remove_cvref_t<T>, ButtonType>)
         return getString(getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, NOT_FOUND));
+    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::filesystem::path>)
+        return value.string();
     else
         return std::to_string(value);
+}
+
+template<IsOptional T>
+std::string getString(T &value)
+{
+    return (value) ? getString(value.value()) : "EMPTY OPTIONAL";
 }
 
 template<typename T>

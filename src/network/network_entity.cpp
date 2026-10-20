@@ -26,9 +26,10 @@ void SocketInfo::updateData(CompanionDataPtr data)
 }
 
 NetworkEntity::NetworkEntity(
-    int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket)
-    : companionId_(companionId), clientSocket_(clientSocket), serverSocket_(serverSocket),
-    client_(nullptr), server_(nullptr) {}
+    NetworkManagerPtr networkManager, int companionId, SocketInfoPtr clientSocket,
+    SocketInfoPtr serverSocket)
+    : networkManager_(networkManager), companionId_(companionId), clientSocket_(clientSocket),
+    serverSocket_(serverSocket), client_(nullptr), server_(nullptr) {}
 
 std::string NetworkEntity::ipAddress()
 {
@@ -70,7 +71,9 @@ bool NetworkEntity::startServer()
 
     auto lambda = [&]()
     {
-        server_ = std::make_shared<ChatServer>(companionId_, serverSocket_->port());
+        auto port = serverSocket_->port();
+        server_ = std::make_shared<ChatServer>(networkManager_, companionId_, port);
+
         server_->run();
         started = true;
     };

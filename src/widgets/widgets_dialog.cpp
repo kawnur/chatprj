@@ -1,7 +1,5 @@
 #include "widgets_dialog.hpp"
 
-#include <filesystem>
-
 #include <QHostAddress>
 
 #include "action.hpp"
@@ -11,7 +9,6 @@
 #include "graphic_manager.hpp"
 #include "logging.hpp"
 #include "mainwindow.hpp"
-#include "manager.hpp"
 #include "utils.hpp"
 #include "widgets.hpp"
 
@@ -61,7 +58,7 @@ CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion
     portEdit_ = std::make_unique<QLineEdit>();
 
     if (type_ == ActionType::UPDATE_COMPANION && companion) {
-        auto data = getManager()->getCompanionData(companion);
+        auto data = getGraphicManager()->getCompanionData(companion);
 
         if (data) {
             nameEdit_->setText(getQString(companion->name()));
@@ -341,7 +338,7 @@ FileDialog::FileDialog(ActionType type)
     dialog_ = std::make_shared<QFileDialog>();
     dialog_->setFileMode(QFileDialog::AnyFile);
     dialog_->setViewMode(QFileDialog::Detail);
-    dialog_->setDirectory(getQString(getManager()->getLastOpenedPath().string()));
+    dialog_->setDirectory(getQString(getGraphicManager()->getLastOpenedPath()));
     // dialog_->setWindowTitle(getQString(title));
 }
 
