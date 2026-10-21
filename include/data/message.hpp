@@ -139,7 +139,9 @@ public:
     MessageType type() const;
     uint32_t id() const;
     uint8_t companionId() const;
+    std::string companionName() const;
     uint8_t authorId() const;
+    std::string authorName() const;
     std::string time() const;
     std::string text() const;
     bool isMessageFromMe() const;
@@ -147,6 +149,11 @@ public:
     bool isReceived() const;
     bool isAntecedent() const;
     std::string networkId() const;
+    NetworkMessageType networkMessageType() const;
+
+    void setId(int id);
+    void setCompanionId(int id);
+    void setTime(const std::string &time);
 
     friend bool operator<(const Message &message1, const Message &message2);
 
@@ -157,12 +164,6 @@ public:
     void updateMeta(MessageMetaDataPtr meta);
 
 private:
-    // MessageType type_;
-    // uint32_t id_;
-    // uint8_t companion_id_;
-    // uint8_t author_id_;
-    // std::string time_;  // TODO add timezone support
-    // std::string text_;
     MessageMetaDataPtr meta_;
     MessageDataPtr data_;
     MessageStatePtr state_;

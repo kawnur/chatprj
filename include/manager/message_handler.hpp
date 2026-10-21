@@ -9,6 +9,7 @@
 #include "alias.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
+#include "message_builder.hpp"
 #include "message_storage.hpp"
 
 template <typename T>
@@ -33,24 +34,19 @@ public:
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
 
-    MessageMetaDataPtr buildMessageMetaData(
-        CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
-
-    MessageDataPtr buildMessageData(DBReplyDataPtr messagesData, std::size_t index);
-    MessageStatePtr buildMessageState(DBReplyDataPtr messagesData, std::size_t index);
-
     MessagePtr createMessageAndAddToMapping(
         CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
 
-    MessagePtr createMessage(
+    MessagePtr createMessage1(
         CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data,
         MessageStatePtr state);
+
+    bool addToStorage(CompanionPtr companion, MessagePtr message);
 
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
     bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
-    bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
 
     bool sendChatHistoryByNetwork(
         CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys);
@@ -96,11 +92,11 @@ public:
 
 private:
     ManagerPtr manager_;
-    MessageStorage messageStorage_;
+    MessageStorage storage_;
+    MessageBuilder builder_;
 };
 
-std::string buildMessageJSONString(
-    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
+std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message);
 
 std::string buildFileBlockJSONString(
     CompanionPtr companion, const std::string &networkId, const std::string &data);

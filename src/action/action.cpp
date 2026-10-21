@@ -443,7 +443,7 @@ CompanionPtr FileAction::getCompanion() const
     return companion_;
 }
 
-std::filesystem::path FileAction::getPath() const
+std::filesystem::path FileAction::getPath()
 {
     return filePath_;
 }

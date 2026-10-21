@@ -1,6 +1,5 @@
 #include "network_manager.hpp"
 
-#include "companion.hpp"
 #include "data.hpp"
 #include "logging.hpp"
 #include "manager.hpp"
@@ -27,7 +26,7 @@ std::pair<NetworkManagerMap::iterator, bool> NetworkManager::addToMap(
     return result;
 }
 
-NetworkEntityPtr NetworkManager::getValue(int id)
+NetworkEntityPtr NetworkManager::getNetworkEntity(int id)
 {
     return runAndReturnSharedPtr<NetworkEntity>([&]() { return map_.at(id); });
 }
@@ -37,24 +36,23 @@ void NetworkManager::updateSocketInfo(int id, CompanionDataPtr data)
     runAndLogException([&]() { map_.at(id)->updateClientSocketInfo(data); });
 }
 
-CompanionDataPtr NetworkManager::getCompanionData(CompanionPtr companion)
+CompanionDataPtr NetworkManager::getCompanionData(int companionId)
 {
-    auto entity = getValue(companion->id());
+    auto entity = getNetworkEntity(companionId);
 
     if (!entity)
         return nullptr;
 
-    auto name = companion->name();
     auto ipAddress = entity->ipAddress();
     auto serverPort = getString(entity->serverPort());
     auto clientPort = getString(entity->clientPort());
 
-    return std::make_shared<CompanionData>(name, ipAddress, serverPort, clientPort);
+    return std::make_shared<CompanionData>(""s, ipAddress, serverPort, clientPort);
 }
 
-bool NetworkManager::connectClient(CompanionPtr companion)
+bool NetworkManager::connectClient(int companionId)
 {
-    auto entity = getValue(companion->id());
+    auto entity = getNetworkEntity(companionId);
 
     if (!entity)
         return false;
@@ -62,9 +60,9 @@ bool NetworkManager::connectClient(CompanionPtr companion)
     return entity->connectClient();
 }
 
-bool NetworkManager::disconnectClient(CompanionPtr companion)
+bool NetworkManager::disconnectClient(int companionId)
 {
-    auto entity = getValue(companion->id());
+    auto entity = getNetworkEntity(companionId);
 
     if (!entity)
         return false;
@@ -75,4 +73,16 @@ bool NetworkManager::disconnectClient(CompanionPtr companion)
 void NetworkManager::receiveMessage(int companionId, const std::string &json)
 {
     manager_->receiveMessage(companionId, json);
+}
+
+bool NetworkManager::sendJson(int companionId, const std::string &json)
+{
+    auto entity = getNetworkEntity(companionId);
+
+    if (!entity)
+        return false;
+
+    auto result = entity->sendJsonViaClient(json);
+
+    return result;
 }

@@ -30,6 +30,23 @@ void GraphicManager::setManager(ManagerPtr manager)
     manager_ = manager;
 }
 
+std::vector<CompanionPtr> GraphicManager::getSortedCompanions()
+{
+    std::vector<CompanionPtr> data;
+
+    for (const auto &item : map_)
+        data.emplace_back(item.second.first);
+
+    auto lambda = [&](auto &item1, auto &item2)
+    {
+        return item1->id() < item2->id();
+    };
+
+    std::ranges::sort(data, lambda);
+
+    return data;
+}
+
 void GraphicManager::buildWidgetGroups()
 {
     auto companionsNumber = map_.size();
@@ -46,8 +63,7 @@ void GraphicManager::buildWidgetGroups()
     // TODO check if sockets already are children
     mainWindow_->hideCompanionStub();
 
-    for (const auto &pair : map_) {
-        auto companion = pair.second.first;
+    for (const auto &companion : getSortedCompanions()) {
         updateMapping(companion);
         manager_->fillCompanionMessageMapping(companion, false);
     }
@@ -57,10 +73,11 @@ bool GraphicManager::addCompanion(CompanionPtr companion)
 {
     WidgetGroupPtr group = nullptr;
     auto value = std::pair(companion, group);
+    auto id = companion->id();
     auto result = map_.emplace(companion->id(), value);
 
     if (!result.second)
-        logArgsError("companion is nullptr");
+        logTemplateError("companion with id '{}' exists im graphic manager mapping", id);
 
     return result.second;
 }

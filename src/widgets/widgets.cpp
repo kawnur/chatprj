@@ -247,7 +247,7 @@ void SocketInfoWidget::deleteCompanionAction()
     getGraphicManager()->deleteCompanion(companion_);
 }
 
-void SocketInfoWidget::update()
+void SocketInfoWidget::updateState()
 {
     // change value
     isConnected_ = !(isConnected_);
@@ -618,7 +618,7 @@ void WidgetGroup::clientAction()
     if (!getGraphicManager()->clientAction(companion_, socketInfoBase_->isConnected()))
         return;
 
-    socketInfoBase_->update();
+    socketInfoBase_->updateState();
 }
 
 // void WidgetGroup::askUserForHistorySendingConfirmationSlot()

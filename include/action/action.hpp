@@ -36,6 +36,7 @@ public:
     virtual std::string clientPort() { return ""s; }
     virtual int companionId() { return ID_BAD_VALUE; }
     virtual std::string password() { return ""s; }
+    virtual std::filesystem::path getPath() { return std::filesystem::path(); }
 
     ActionType type();
     std::string getInfoDialogHeader(const auto &map);
@@ -147,7 +148,7 @@ public:
 
     void buildDataDialog() override;
     CompanionPtr getCompanion() const;
-    std::filesystem::path getPath() const;
+    std::filesystem::path getPath() override;
     void set() override;
     void preAct() override;
     void act() override;

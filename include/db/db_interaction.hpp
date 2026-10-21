@@ -5,11 +5,15 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "alias.hpp"
 #include "db_constants.hpp"
 #include "utils.hpp"
+
+using DataMap = std::unordered_map<std::string, std::string>;
+using Data = std::vector<DataMap>;
 
 class DBConnectionPrameters
 {
@@ -73,11 +77,22 @@ public:
     int getDataFromResult(PGresultPtr result, int maxTuples);
     void log();
 
+    void sortDataById();
+    void sortDataViaLambda(std::function<bool(DataMap &, DataMap &)> lambda);
+
 private:
     bool log_;
-    std::vector<std::map<std::string, std::string>> data_;
+    Data data_;
 };
 
 std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::string> &keys);
+
+int getBoolFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key);
+
+int getIntFromDbData(
+    int defaultValue, DBReplyDataPtr data, std::size_t index, const std::string &key);
+
+int getIdFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key);
+int getPortFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key);
 
 #endif // DB_INTERACTION_HPP

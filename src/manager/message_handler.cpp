@@ -6,7 +6,7 @@
 #include "manager.hpp"
 #include "message.hpp"
 
-MessageHandler::MessageHandler() : manager_(nullptr), messageStorage_() {}
+MessageHandler::MessageHandler() : manager_(nullptr), storage_(), builder_() {}
 
 void MessageHandler::setManager(ManagerPtr manager)
 {
@@ -15,52 +15,34 @@ void MessageHandler::setManager(ManagerPtr manager)
 
 MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr message)
 {
-    return messageStorage_.getMessageInfo(companion->id(), message->id());
-}
-
-MessageMetaDataPtr MessageHandler::buildMessageMetaData(
-    CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index)
-{
-    // network id is created by storage
-    return std::make_shared<MessageMetaData>(
-        MessageType::TEXT, NetworkMessageType::UNKNOWN,
-        getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "id")), companion->id(),
-        companion->name(),
-        getIntFromString(ID_BAD_VALUE, messagesData->getValue(index, "author_id")), "",
-        messagesData->getValue(index, "timestamp_tz"), "", "");
-}
-
-MessageDataPtr MessageHandler::buildMessageData(DBReplyDataPtr messagesData, std::size_t index)
-{
-    return std::make_shared<MessageData>(messagesData->getValue(index, "message"), "");
-}
-
-MessageStatePtr MessageHandler::buildMessageState(DBReplyDataPtr messagesData, std::size_t index)
-{
-    return std::make_shared<MessageState>(
-        false,
-        getBoolFromDBValue(messagesData->getValue(index, "is_sent")),
-        getBoolFromDBValue(messagesData->getValue(index, "is_received")));
+    return storage_.getMessageInfo(companion->id(), message->id());
 }
 
 MessagePtr MessageHandler::createMessageAndAddToMapping(
     CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index)
 {
-    auto meta = buildMessageMetaData(companion, messagesData, index);
-    auto data = buildMessageData(messagesData, index);
-    auto state = buildMessageState(messagesData, index);
+    auto message = builder_.buildMessageFromDbData(companion, messagesData, index);
 
-    return createMessage(companion, meta, data, state);
+    return (addToStorage(companion, message)) ? message : nullptr;
 }
 
-MessagePtr MessageHandler::createMessage(
+MessagePtr MessageHandler::createMessage1(
     CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     auto message = std::make_shared<Message>(meta, data, state);
     auto info = std::make_shared<MessageInfo>(message, nullptr);
-    auto result = messageStorage_.updateAndInsert(companion->id(), info);
+    auto result = storage_.updateAndInsert(companion->id(), info);
 
     return (result) ? message : nullptr;
+}
+
+bool MessageHandler::addToStorage(CompanionPtr companion, MessagePtr message)
+{
+    auto info = std::make_shared<MessageInfo>(message, nullptr);
+    auto result = storage_.updateAndInsert(companion->id(), info);
+
+    // return (result) ? message : nullptr;
+    return result;
 }
 
 void MessageHandler::sendMessage(
@@ -68,55 +50,32 @@ void MessageHandler::sendMessage(
 {
     // encrypt message
 
-    // add to DB and get timestamp    
-    auto meta = std::make_shared<MessageMetaData>();
-    meta->companionName_ = companion->name();
-    meta->authorName_ = getString(ME_NAME);
-    meta->timestampTz_ = "now()"s;
+    // add to DB and get timestamp
+    // auto meta = buildMyTextMessageMetaData(type, companion);
+    // auto data = std::make_shared<MessageData>(text, "");
+    // auto state = std::make_shared<MessageState>(false, false, false);
+    auto message = builder_.buildMyTextMessage(type, companion, text);
 
-    auto data = std::make_shared<MessageData>();
-    data->text_ = text;
+    // auto pushMeta = manager_->pushMessageToDB(meta, data, state);
+    auto pushResult = manager_->pushMessageToDB(message);
 
-    auto state = std::make_shared<MessageState>();
-    state->isSent_ = false;
-    state->isReceived_ = false;
-
-    auto pushMeta = manager_->pushMessageToDB(meta, data, state);
-
-    if (!pushMeta || !pushMeta->isValid())
+    if (!pushResult || !pushResult->meta()->isValid())
         return;
 
-    meta->update(pushMeta);
+    // meta->update(pushMeta);
+    // auto message = createMessage(companion, meta, data, state);
+    auto storeResult = addToStorage(companion, message);
 
-    meta->messageType_ = type;
-    meta->networkMessageType_ = NetworkMessageType::TEXT;
-    meta->companionName_ = meta->companionName_;
-    meta->authorId_ = 1;
-    meta->authorName_ = meta->authorName_;
-
-    state->isAntecedent_ = false;
-
-    auto message = createMessage(companion, meta, data, state);
-
-    if (!message)
+    // if (!message)
+    if (!storeResult)
         return;
 
-    // add to widget
-    if (type == MessageType::FILE) {
-        // TODO modify
-        auto cast = std::dynamic_pointer_cast<FileAction>(action);
+    // add file sender
+    if (type == MessageType::FILE)
+        manager_->addSenderOperator(message->networkId(), action->getPath());
 
-        if (!cast)
-            logArgsError("file action cast error");
-        else
-            manager_->addSenderOperator(message->networkId(), cast->getPath());
-    }
-
+    // add message widget
     manager_->addMessageWidget(companion, message);
-
-    // define NetworkMessageType
-    auto networkMessageType = defineNetworkMessageType(type);
-    message->meta()->networkMessageType_ = networkMessageType;
 
     // send over network
     bool result = sendMessageByNetwork(companion, message, message->meta());
@@ -142,19 +101,7 @@ bool MessageHandler::sendMessageByNetwork(
     auto json = buildMessageJSONString(companion, message, meta);
 
     // send json over network
-    return sendJsonByNetwork(companion, json);
-}
-
-bool MessageHandler::sendJsonByNetwork(CompanionPtr companion, const std::string &json)
-{
-    auto networkEntity = manager_->getNetworkEntity(companion->id());
-
-    if (!networkEntity)
-        return false;
-
-    auto result = networkEntity->sendJsonViaClient(json);
-
-    return result;
+    return manager_->sendJsonByNetwork(companion, json);
 }
 
 bool MessageHandler::sendChatHistoryByNetwork(
@@ -164,7 +111,7 @@ bool MessageHandler::sendChatHistoryByNetwork(
     std::string json = buildChatHistoryJSONString(data, keys);
 
     // send json over network
-    return sendJsonByNetwork(companion, json);
+    return manager_->sendJsonByNetwork(companion, json);
 }
 
 bool MessageHandler::sendFileBlockByNetwork(
@@ -174,7 +121,7 @@ bool MessageHandler::sendFileBlockByNetwork(
     auto json = buildFileBlockJSONString(companion, networkId, data);
 
     // send json over network
-    return sendJsonByNetwork(companion, json);
+    return manager_->sendJsonByNetwork(companion, json);
 }
 
 // void MessageHandler::sendFile(CompanionPtr companion, const std::filesystem::path &path)
@@ -273,7 +220,7 @@ void MessageHandler::receiveTextMessage(
 
     meta->companionName_ = name;
     meta->authorName_ = name;
-    state->isSent_ = false;
+
     state->isReceived_ = true;
 
     // add to DB and get timestamp
@@ -283,13 +230,6 @@ void MessageHandler::receiveTextMessage(
         return;
 
     meta->update(pushMeta);
-
-    meta->messageType_ = MessageType::TEXT;
-    meta->networkMessageType_ = NetworkMessageType::TEXT;
-    meta->companionName_ = meta->companionName_;
-    meta->authorId_ = meta->authorId_;
-    meta->authorName_ = meta->authorName_;
-
     auto message = createMessage(companion, meta, data, state);
 
     if (!message)
@@ -367,7 +307,7 @@ void MessageHandler::receiveConfirmation(
 {
     if (state->isReceived_) {  // successfully received
         // mark message as received
-        auto info = messageStorage_.getMessageInfoByNetworkId(companion->id(), meta->networkId_);
+        auto info = storage_.getMessageInfoByNetworkId(companion->id(), meta->networkId_);
         auto state = info->message()->state();
 
         if (state) {
@@ -389,7 +329,7 @@ void MessageHandler::receiveConfirmationRequest(
     CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
 {
     // search for message in companions's mapping
-    auto info = messageStorage_.getMessageInfoByNetworkId(companion->id(), meta->networkId_);
+    auto info = storage_.getMessageInfoByNetworkId(companion->id(), meta->networkId_);
 
     if (!info) {
         // probably old message from previous sessions, search for it in db
@@ -544,7 +484,7 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
 
     // get earliest message in current messages
     auto companionId = companion->id();
-    auto earliestMessage = messageStorage_.getEarliestMessage(companionId);
+    auto earliestMessage = storage_.getEarliestMessage(companionId);
     auto messageId = earliestMessage->id();
 
     // get messages data
@@ -588,9 +528,9 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
         return;
 
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO use iterators
-        uint32_t messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
+        uint32_t messageId = getIdFromDbData(messagesData, i, "id");
 
-        auto info = messageStorage_.getMessageInfo(companion->id(), messageId);
+        auto info = storage_.getMessageInfo(companion->id(), messageId);
 
         if (!info)
             continue;
@@ -628,7 +568,7 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
             auto state = std::make_shared<MessageState>();
             state->isAntecedent_ = true;
             state->isSent_ = false;
-            state->isReceived_ = getBoolFromDBValue(messagesData->getValue(i, "is_received"));
+            state->isReceived_ = getBoolFromDbData(messagesData, i, "is_received");
 
             message = createMessage(companion, meta, data, state);
         }
@@ -655,10 +595,10 @@ void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool co
 
     // TODO modify
     for (std::size_t i = 0; i < messagesData->size(); i++) {  // TODO use iterators
-        auto messageId = getIntFromString(ID_BAD_VALUE, messagesData->getValue(i, "id"));
+        auto messageId = getIdFromDbData(messagesData, i, "id");
 
         if (containersNotEmpty) {
-            auto info = messageStorage_.getMessageInfo(companion->id(), messageId);
+            auto info = storage_.getMessageInfo(companion->id(), messageId);
 
             if (info && info->message()->state()) {
                 // companion->addMessage(const_cast<MessagePtr>(pair.second));
@@ -718,28 +658,27 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
 bool MessageHandler::setMappedMessageWidget(
     CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget)
 {
-    return messageStorage_.setMessageWidget(companion->id(), message->id(), widget);
+    return storage_.setMessageWidget(companion->id(), message->id(), widget);
 }
 
 bool MessageHandler::clearMessageMapping(CompanionPtr companion)
 {
-    return messageStorage_.clearMessageMapping(companion->id());
+    return storage_.clearMessageMapping(companion->id());
 }
 
 bool MessageHandler::addCompanionToMessageStorage(CompanionPtr companion)
 {
-    return messageStorage_.addCompanion(companion->id());
+    return storage_.addCompanion(companion->id());
 }
 
-std::string buildMessageJSONString(
-    CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
+std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message)
 {
     using json = nlohmann::json;
 
     json jsonData;
 
     auto networkId = message->networkId();
-    auto type = meta->networkMessageType_;
+    auto type = message->networkMessageType();
 
     jsonData["type"] = type;
     jsonData["id"] = networkId;

@@ -1,6 +1,7 @@
 #ifndef GRAPHIC_MANAGER_HPP
 #define GRAPHIC_MANAGER_HPP
 
+// #include <map>
 #include <string>
 #include <unordered_map>
 
@@ -12,6 +13,9 @@
 
 #include "alias.hpp"
 
+using GraphicManagerData = std::unordered_map<int, std::pair<CompanionPtr, WidgetGroupPtr>>;
+// using GraphicManagerData = std::map<int, std::pair<CompanionPtr, WidgetGroupPtr>>;
+
 class GraphicManager
 {
 public:
@@ -22,6 +26,7 @@ public:
     void set();
     void setManager(ManagerPtr manager);
 
+    std::vector<CompanionPtr> getSortedCompanions();
     void buildWidgetGroups();
     bool addCompanion(CompanionPtr companion);
     CompanionPtr getCompanion(int id) const;
@@ -82,7 +87,7 @@ private:
     // std::mutex messageToMessageWidgetMapMutex_;
     ManagerPtr manager_;
     MainWindowPtr mainWindow_;
-    std::unordered_map<int, std::pair<CompanionPtr, WidgetGroupPtr>> map_;
+    GraphicManagerData map_;
 };
 
 GraphicManagerPtr getGraphicManager();

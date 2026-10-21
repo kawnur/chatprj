@@ -40,7 +40,7 @@ void Manager::set()
     logArgs("companionsBuilt:", companionsBuilt);
 
     if (companionsBuilt)  // TODO rewrite
-        buildWidgetGroups();
+        graphicManager_->buildWidgetGroups();
     else
         logArgsError("problem with companions initialization");
 }
@@ -164,7 +164,7 @@ ActionResultPtr Manager::getActionResultByKeyDBData(
             return std::make_shared<ActionResult>(false, DB_REPLY_EMPTY);
     }
 
-    auto result = getIntFromString(ID_BAD_VALUE, data->getValue(0, key));
+    auto result = getIdFromDbData(data, 0, key);
 
     if (result == ID_BAD_VALUE)
         return std::make_shared<ActionResult>(false, VALUE_BUILDING_ERROR);
@@ -227,7 +227,7 @@ ActionResultPtr Manager::createCompanion(CompanionActionPtr action)
         return pushSocketResult;
 
     // create companion object
-    auto managerMapResult = addCompanionToManagerMap(id, action->name());
+    auto managerMapResult = addCompanionAndRetutnResult(id, action->name());
 
     if (!managerMapResult->status())
         return managerMapResult;
@@ -263,7 +263,7 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     // TODO check new data before data dialog is closed, move to Action::act
     // check if data was modified
     auto companion = action->getCompanion();
-    auto oldData = networkManager_->getCompanionData(companion);
+    auto oldData = getCompanionData(companion);
     auto newData = action->getCompanionData();
 
     if (compareCompanionData(oldData, newData))
@@ -470,18 +470,13 @@ bool Manager::buildCompanions()
     if (!companionsData)
         return false;
 
-    // auto lambda = [&](auto &iterator1, auto &iterator2)
-    // {
-    //     return iterator1.at("id") < iterator2.at("id");
-    // };
-
-    // std::ranges::sort(companionsData->getData(), lambda);
+    // companionsData->sortDataById();
 
     for (std::size_t index = 0; index < companionsData->size(); index++) {  // TODO switch to iterators
-        int id = getIntFromString(ID_BAD_VALUE, companionsData->getValue(index, "id"));
+        int id = getIdFromDbData(companionsData, index, "id");
 
         // create companion object
-        auto companion = addCompanionObject(id, companionsData->getValue(index, "name"));
+        auto companion = addCompanion(id, companionsData->getValue(index, "name"));
 
         if (!companion)
             continue;
@@ -495,12 +490,11 @@ bool Manager::buildCompanions()
         // add to network manager
         // TODO use port number pool
         auto ipAddress = socketsData->getValue(0, "ipaddress");
-        auto clientPort = getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "client_port"));
-
+        auto clientPort = getPortFromDbData(socketsData, 0, "client_port");
         auto clientSocket = std::make_shared<SocketInfo>(ipAddress, clientPort);
 
         auto serverSocket = std::make_shared<SocketInfo>(
-            ""s, getIntFromString(PORT_BAD_VALUE, socketsData->getValue(0, "server_port")));
+            ""s, getPortFromDbData(socketsData, 0, "server_port"));
 
         auto entityResult = networkManager_->addToMap(id, clientSocket, serverSocket);
 
@@ -520,15 +514,19 @@ bool Manager::buildCompanions()
     return result;
 }
 
-void Manager::buildWidgetGroups()
+CompanionPtr Manager::addCompanion(int id, const std::string &name)
 {
-    graphicManager_->buildWidgetGroups();
+    auto s = ""s;
+
+    return addCompanion(id, name, s);
 }
 
-CompanionPtr Manager::addCompanionObject(int id, const std::string &name)
+CompanionPtr Manager::addCompanion(int id, const std::string &name, std::string &entry)
 {
     if (id == 0) {
-        logArgsError("companion id == 0");
+        entry = "companion id == 0"s;
+
+        logArgsError(entry);  // TODO move logging to action
 
         return nullptr;
     }
@@ -536,26 +534,28 @@ CompanionPtr Manager::addCompanionObject(int id, const std::string &name)
     auto companion = std::make_shared<Companion>(id, name);
     bool result = graphicManager_->addCompanion(companion);
 
-    return (result) ? companion : nullptr;
-}
+    if (!result) {
+        entry = "companion is nullptr"s;
 
-std::shared_ptr<CompanionResult> Manager::addCompanionToManagerMap(
-    int id, const std::string &name)
-{
-    if (id == 0) {
-        auto entry = "companion id == 0"s;
         logArgsError(entry);  // TODO move logging to action
 
-        return std::make_shared<CompanionResult>(nullptr, false, entry);
+        return nullptr;
     }
 
-    auto companion = std::make_shared<Companion>(id, name);
-    bool result = graphicManager_->addCompanion(companion);
+    return companion;
+}
 
-    if (result)
+std::shared_ptr<CompanionResult> Manager::addCompanionAndRetutnResult(
+    int id, const std::string &name)
+{
+    std::string entry { "" };
+
+    auto companion = addCompanion(id, name, entry);
+
+    if (companion)
         return std::make_shared<CompanionResult>(companion, true, ""s);
     else
-        return std::make_shared<CompanionResult>(nullptr, false, "companion is nullptr"s);
+        return std::make_shared<CompanionResult>(nullptr, false, entry);
 }
 
 ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPtr data)
@@ -597,11 +597,6 @@ void Manager::sendUnsentMessages(CompanionPtr companion)
     messageHandler_.sendUnsentMessages(companion);
 }
 
-NetworkEntityPtr Manager::getNetworkEntity(int id)
-{
-    return networkManager_->getValue(id);
-}
-
 bool Manager::sendFileBlock(
     CompanionPtr companion, const std::string &networkId, const std::string &data)
 {
@@ -610,17 +605,20 @@ bool Manager::sendFileBlock(
 
 CompanionDataPtr Manager::getCompanionData(CompanionPtr companion)
 {
-    return networkManager_->getCompanionData(companion);
+    auto data = networkManager_->getCompanionData(companion->id());
+    data->setName(companion->name());
+
+    return data;
 }
 
 bool Manager::connectClient(CompanionPtr companion)
 {
-    return networkManager_->connectClient(companion);
+    return networkManager_->connectClient(companion->id());
 }
 
 bool Manager::disconnectClient(CompanionPtr companion)
 {
-    return networkManager_->disconnectClient(companion);
+    return networkManager_->disconnectClient(companion->id());
 }
 
 void Manager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
@@ -753,38 +751,50 @@ void Manager::markMessageAsReceived(MessageInfoPtr info)
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->message()->id());
 }
 
-MessageMetaDataPtr Manager::pushMessageToDB(MessagePtr message)
+// MessageMetaDataPtr Manager::pushMessageToDB(MessagePtr message)
+// {
+//     return pushMessageToDB(message->meta(), message->data(), message->state());
+// }
+
+bool Manager::sendJsonByNetwork(CompanionPtr companion, const std::string &json)
 {
-    return pushMessageToDB(message->meta(), message->data(), message->state());
+    return networkManager_->sendJson(companion->id(), json);
 }
 
-MessageMetaDataPtr Manager::pushMessageToDB(
-    MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
+MessagePtr Manager::pushMessageToDB(
+    // MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
+    MessagePtr message)
 {
-    // const std::string companionIdString("companion_id");
-
     auto messageData = getDBData(
-        DBRequestType::PUSH_MESSAGE_AND_RETURN, meta->companionName_, meta->authorName_,
-        meta->timestampTz_, data->text_, state->isSent_, state->isReceived_);
+        DBRequestType::PUSH_MESSAGE_AND_RETURN,
+        message->companionName(),
+        message->authorName(),
+        message->time(),
+        message->text(),
+        message->isSent(),
+        message->isReceived());
 
-    // TODO get rid of copy constructing
     if (!messageData || messageData->isEmpty())
         return nullptr;
 
-    uint32_t id = getIntFromString(ID_BAD_VALUE, messageData->getValue(0, "id"));
-    uint8_t companionId = getIntFromString(ID_BAD_VALUE, messageData->getValue(0, "companion_id"));
+    uint32_t id = getIdFromDbData(messageData, 0, "id");
+    uint8_t companionId = getIdFromDbData(messageData, 0, "companion_id");
     std::string timestampTz { messageData->getValue(0, "timestamp_tz") };
 
     if (LOG_DB_INTERACTION)
         logTemplateInfo("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
 
-    auto result = std::make_shared<MessageMetaData>();
+    // auto result = std::make_shared<MessageMetaData>();
 
-    result->messageId_ = id;
-    result->companionId_ = companionId;
-    result->timestampTz_ = timestampTz;
+    // result->messageId_ = id;
+    // result->companionId_ = companionId;
+    // result->timestampTz_ = timestampTz;
+    message->setId(id);
+    message->setCompanionId(companionId);
+    message->setTime(timestampTz);
 
-    return result;
+    // return result;
+    return message;
 }
 
 void Manager::setCurrentAction(ActionPtr action)

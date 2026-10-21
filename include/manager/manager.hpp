@@ -99,14 +99,14 @@ public:
 
     bool sendMessage(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
 
-    MessageMetaDataPtr pushMessageToDB(
-        MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
+    // MessageMetaDataPtr pushMessageToDB(
+    //     MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
+    MessagePtr pushMessageToDB(MessagePtr message);
 
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
     void addEarlyMessages(CompanionPtr companion);
     void sendUnsentMessages(CompanionPtr companion);
-    NetworkEntityPtr getNetworkEntity(int id);
 
     bool sendFileBlock(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
@@ -143,7 +143,8 @@ public:
     bool clientAction(CompanionPtr companion, bool isConnected);
     void sendFile(CompanionPtr companion, MessageMetaDataPtr meta);
     void receiveFile(CompanionPtr companion, MessagePtr message);
-    MessageMetaDataPtr pushMessageToDB(MessagePtr message);
+    // MessageMetaDataPtr pushMessageToDB(MessagePtr message);
+    bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
 
 private:
     ActionResultPtr getActionResultByKeyDBData(
@@ -156,9 +157,9 @@ private:
     ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action);
     ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action);
     bool buildCompanions();
-    void buildWidgetGroups();
-    CompanionPtr addCompanionObject(int id, const std::string &name);
-    std::shared_ptr<CompanionResult> addCompanionToManagerMap(int id, const std::string &name);
+    CompanionPtr addCompanion(int id, const std::string &name);
+    CompanionPtr addCompanion(int id, const std::string &name, std::string &entry);
+    std::shared_ptr<CompanionResult> addCompanionAndRetutnResult(int id, const std::string &name);
     ActionResultPtr addCompanionToNetworkManagerMap(int id, CompanionDataPtr data);
     void deleteCompanionObject(CompanionPtr companion);
     void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);

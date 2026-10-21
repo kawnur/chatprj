@@ -20,12 +20,13 @@ public:
     std::pair<NetworkManagerMap::iterator, bool> addToMap(
         int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket);
 
-    NetworkEntityPtr getValue(int id);
+    NetworkEntityPtr getNetworkEntity(int id);
     void updateSocketInfo(int id, CompanionDataPtr data);
-    CompanionDataPtr getCompanionData(CompanionPtr companion);
-    bool connectClient(CompanionPtr companion);
-    bool disconnectClient(CompanionPtr companion);
+    CompanionDataPtr getCompanionData(int companionId);
+    bool connectClient(int companionId);
+    bool disconnectClient(int companionId);
     void receiveMessage(int companionId, const std::string &json);
+    bool sendJson(int companionId, const std::string &json);
 
 private:
     ManagerPtr manager_;

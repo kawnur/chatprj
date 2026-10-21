@@ -1,5 +1,7 @@
 #include "db_interaction.hpp"
 
+#include <algorithm>
+
 #include "logging.hpp"
 #include "utils.hpp"
 
@@ -246,8 +248,22 @@ void DBReplyData::log()
     logArgs(logDelimiter);
 }
 
-std::string buildChatHistoryJSONString(
-    DBReplyDataPtr data, std::vector<std::string> &keys)
+void DBReplyData::sortDataById()
+{
+    auto lambda = [&](const auto &item1, const auto &item2)
+    {
+        return item1.at("id") < item2.at("id");
+    };
+
+    sortDataViaLambda(lambda);
+}
+
+void DBReplyData::sortDataViaLambda(std::function<bool(DataMap &, DataMap &)> lambda)
+{
+    std::ranges::sort(data_, lambda);
+}
+
+std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::string> &keys)
 {
     using json = nlohmann::json;
 
@@ -264,4 +280,25 @@ std::string buildChatHistoryJSONString(
     std::string result = jsonData.dump();
 
     return result;
+}
+
+int getBoolFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key)
+{
+    return getBoolFromDBValue(data->getValue(index, key));
+}
+
+int getIntFromDbData(
+    int defaultValue, DBReplyDataPtr data, std::size_t index, const std::string &key)
+{
+    return getIntFromString(defaultValue, data->getValue(index, key));
+}
+
+int getIdFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key)
+{
+    return getIntFromDbData(ID_BAD_VALUE, data, index, key);
+}
+
+int getPortFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key)
+{
+    return getIntFromDbData(PORT_BAD_VALUE, data, index, key);
 }

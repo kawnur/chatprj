@@ -171,9 +171,19 @@ uint8_t Message::companionId() const
     return meta_->companionId_;
 }
 
+std::string Message::companionName() const
+{
+    return meta_->companionName_;
+}
+
 uint8_t Message::authorId() const
 {
     return meta_->authorId_;
+}
+
+std::string Message::authorName() const
+{
+    return meta_->authorName_;
 }
 
 std::string Message::time() const
@@ -209,6 +219,26 @@ bool Message::isAntecedent() const
 std::string Message::networkId() const
 {
     return meta_->networkId_;
+}
+
+NetworkMessageType Message::networkMessageType() const
+{
+    return meta_->networkMessageType_;
+}
+
+void Message::setId(int id)
+{
+    meta_->messageId_ = id;
+}
+
+void Message::setCompanionId(int id)
+{
+    meta_->companionId_ = id;
+}
+
+void Message::setTime(const std::string &time)
+{
+    meta_->timestampTz_ = time;
 }
 
 MessageMetaDataPtr Message::meta() const

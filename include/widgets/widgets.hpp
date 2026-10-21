@@ -117,6 +117,7 @@ public:
     virtual void setNewMessagesIndicatorOff() {}
     virtual void updateFields() {}
     virtual bool isConnected() { return false; }
+    virtual void updateState() {}
 
     void initializeFields();  // non-virtual because is called from constructor
 };
@@ -150,7 +151,7 @@ public:
     void setNewMessagesIndicatorOn();
     void setNewMessagesIndicatorOff() override;
 
-    void update();
+    void updateState() override;
 
 public slots:
     void updateCompanionAction();
