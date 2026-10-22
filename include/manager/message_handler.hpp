@@ -34,19 +34,16 @@ public:
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
 
-    MessagePtr createMessageAndAddToMapping(
+    MessagePtr createMessageAndAddToStorage(
         CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
 
-    MessagePtr createMessage1(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data,
-        MessageStatePtr state);
-
     bool addToStorage(CompanionPtr companion, MessagePtr message);
+    bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
 
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
-    bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
+    bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
 
     bool sendChatHistoryByNetwork(
         CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys);
@@ -54,33 +51,26 @@ public:
     bool sendFileBlockByNetwork(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
 
-    // void sendFile(CompanionPtr companion, const std::filesystem::path &path);
+    bool sendFileRequestMessage(CompanionPtr companion, const std::string &networkId);
+
+    bool sendFileDataTransmissionResultMessage(
+        CompanionPtr companion, NetworkMessageType type, const std::string &networkId);
+
     void receiveMessage(CompanionPtr companion, const std::string &json);
-
-    void receiveTextMessage(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveConfirmation(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveConfirmationRequest(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
+    void receiveTextMessage(CompanionPtr companion, MessagePtr message);
+    void receiveConfirmation(CompanionPtr companion, MessagePtr message);
+    void receiveConfirmationRequest(CompanionPtr companion, MessagePtr message);
     void reciveChatHistoryRequest(CompanionPtr companion);
     void receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data);
-
-    void receiveFileProposal(
-        CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
-
-    void receiveFileRequest(CompanionPtr companion, MessageMetaDataPtr meta);
-    void receiveFileData(CompanionPtr companion, MessageMetaDataPtr meta, MessageDataPtr data);
-    void receiveFileDataCheck(CompanionPtr companion, MessageMetaDataPtr meta);
-    void receiveFileDataTransmissionEnd(CompanionPtr companion, MessageMetaDataPtr meta);
-    void receiveFileDataTransmissionFailure(CompanionPtr companion, MessageMetaDataPtr meta);
+    void receiveFileProposal(CompanionPtr companion, MessagePtr message);
+    void receiveFileRequest(CompanionPtr companion, MessagePtr message);
+    void receiveFileData(CompanionPtr companion, MessagePtr message);
+    void receiveFileDataCheck(CompanionPtr companion, MessagePtr message);
+    void receiveFileDataTransmissionEnd(CompanionPtr companion, MessagePtr message);
+    void receiveFileDataTransmissionFailure(CompanionPtr companion, MessagePtr message);
     void addEarlyMessages(CompanionPtr companion);
     void sendUnsentMessages(CompanionPtr companion);
     void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
-
     void requestHistoryFromCompanion(CompanionPtr companion);
     void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
 

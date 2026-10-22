@@ -91,7 +91,7 @@ bool SenderOperator::sendFilePart(CompanionPtr companion, const std::string &net
     auto read = buf_.sgetn(buffer, MAX_BUFFER_SIZE);
     sstream << std::hex << std::setfill('0');
 
-    for (std::size_t i = 0; i < read; i++)
+    for (std::size_t i = 0; i < read; ++i)
         // TODO get rid of double cast
         // double cast to get rid of precedence of ffffff for big values
         sstream << std::setw(2) << (int)(unsigned char)buffer[i];
@@ -119,7 +119,7 @@ void SenderOperator::sendFile(CompanionPtr companion, const std::string &network
         auto length = buf_.in_avail();
         uint32_t iterationNumber = length / MAX_BUFFER_SIZE + 1;
 
-        for (uint32_t i = 0; i < iterationNumber; i++) {
+        for (uint32_t i = 0; i < iterationNumber; ++i) {
             if (i % 100 == 0) {
                 std::string line { "{0} iteration: {1}/{2}" };
                 coutWithEndl(getStringByFormat(line, logCustomDelimiter, i + 1, iterationNumber));
@@ -158,14 +158,14 @@ void ReceiverOperator::receiveFilePart(const std::string &value)
 {
     std::size_t byteSize = value.size() / 2;
 
-    for (std::size_t i = 0; i < byteSize; i++) {
+    for (std::size_t i = 0; i < byteSize; ++i) {
         std::string dataString(value.begin() + 2  *i, value.begin() + 2  *i + 2);
         uint8_t value = getIntFromString(DATA_BAD_VALUE, dataString, nullptr, 16);
         buf_.sputc(value);
     }
 }
 
-bool ReceiverOperator::receiveFile()
+bool ReceiverOperator::getOperationResult()
 {
     if (!closeFile())
         logTemplateError("file closing error, path: {}", path_);

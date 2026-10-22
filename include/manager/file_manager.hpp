@@ -24,7 +24,7 @@ public:
     void setLastOpenedPath(const std::filesystem::path &path);
 
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
-    void addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path = HOME_PATH);
+    void addReceiverOperator(MessagePtr message, const std::filesystem::path &path = HOME_PATH);
     std::shared_ptr<FileOperator> getOperator(const std::string &key);
     bool removeOperator(const std::string &key);
     std::string getFilePathString(const std::string &networkId);
@@ -72,8 +72,5 @@ private:
     std::filesystem::path lastOpenedPath_;
     FileManagerMap map_;
 };
-
-MessageMetaDataPtr getReplyMeta(NetworkMessageType type, const std::string &networkId);
-MessagePtr getEmptyMessage();
 
 #endif // FILE_MANAGER_HPP

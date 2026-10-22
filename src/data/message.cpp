@@ -8,7 +8,7 @@ PriorityTask::PriorityTask(
     uint8_t priority, const std::string &key, std::function<void ()> function, bool isMandatory)
     : priority_(priority), isMandatory_(isMandatory), key_(key), func_(function) {}
 
-PriorityTask::~PriorityTask() { logArgsInfo(Q_FUNC_INFO, key_); }
+PriorityTask::~PriorityTask() { /*logArgsInfo(Q_FUNC_INFO, key_);*/ }
 
 uint8_t PriorityTask::priority() const
 {
@@ -66,6 +66,20 @@ MessageMetaData::MessageMetaData(
     companionId_(companionId), companionName_(companionName), authorId_(authorId),
     authorName_(authorName), timestampTz_(timestampTz), hashMD5_(hashMD5), networkId_(networkId) {}
 
+MessageMetaData::MessageMetaData(MessageMetaDataPtr meta)
+{
+    messageType_ = meta->messageType_;
+    networkMessageType_ = meta->networkMessageType_;
+    messageId_ = meta->messageId_;
+    companionId_ = meta->companionId_;
+    companionName_ = meta->companionName_;
+    authorId_ = meta->authorId_;
+    authorName_ = meta->authorName_;
+    timestampTz_ = meta->timestampTz_;
+    hashMD5_ = meta->hashMD5_;
+    networkId_ = meta->networkId_;
+}
+
 bool MessageMetaData::setFields(CompanionPtr companion, const nlohmann::json &data)
 {
     std::vector<PriorityTask> taskVector
@@ -121,6 +135,12 @@ void MessageMetaData::update(MessageMetaDataPtr meta)
 MessageData::MessageData(const std::string &text, const std::string &data)
     : text_(text), data_(data) {}
 
+MessageData::MessageData(MessageDataPtr data)
+{
+    data_ = data->data_;
+    text_ = data->text_;
+}
+
 // Message::Message(
 //     MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/
 //      const MessageMetaData &meta, const std::string &text)
@@ -152,6 +172,13 @@ bool MessageData::setFields(CompanionPtr companion, const nlohmann::json &data)
 Message::Message(
     MessageMetaDataPtr meta, MessageDataPtr data,
     MessageStatePtr state) : meta_(meta), data_(data), state_(state) {}
+
+Message::Message(MessagePtr message)
+{
+    meta_ = message->meta();
+    data_ = message->data();
+    state_ = message->state();
+}
 
 Message::~Message() = default;
 
@@ -189,6 +216,11 @@ std::string Message::authorName() const
 std::string Message::time() const
 {
     return meta_->timestampTz_;
+}
+
+std::string Message::hashMD5() const
+{
+    return meta_->hashMD5_;
 }
 
 std::string Message::text() const
@@ -268,6 +300,13 @@ void Message::updateMeta(MessageMetaDataPtr meta)
 
 MessageState::MessageState(bool isAntecedent, bool isSent, bool isReceived)
     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived) {}
+
+MessageState::MessageState(MessageStatePtr state)
+{
+    isAntecedent_ = state->isAntecedent_;
+    isSent_ = state->isSent_;
+    isReceived_ = state->isReceived_;
+}
 
 // bool MessageState::isAntecedent() const
 // {

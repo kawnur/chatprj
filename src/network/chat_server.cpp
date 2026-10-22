@@ -33,12 +33,12 @@ void ServerSession::do_read()
             int closeCounter = 0;
             auto currentIterator = str.begin();
 
-            for (auto iterator = str.begin(); iterator != str.end(); iterator++) {
+            for (auto iterator = str.begin(); iterator != str.end(); ++iterator) {
                 if (*iterator == '{')
-                    openCounter++;
+                    ++openCounter;
 
                 if (*iterator == '}') {
-                    closeCounter++;
+                    ++closeCounter;
 
                     if (openCounter == closeCounter) {
                         std::string message(currentIterator, iterator + 1);

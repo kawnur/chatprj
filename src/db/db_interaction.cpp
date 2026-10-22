@@ -102,7 +102,7 @@ DBReplyData::DBReplyData(bool log, int count, ...) : log_(log), data_(1)
     va_list args;
     va_start(args, count);
 
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; ++i) {
         auto key = std::string(va_arg(args, char *));
 
         data_.at(0).insert({key, ""});
@@ -147,7 +147,7 @@ void DBReplyData::fill(std::size_t count)
 {
     std::size_t size = data_.size();
 
-    for (int i = 0; i < count - size; i++)
+    for (int i = 0; i < count - size; ++i)
         data_.push_back(data_.at(0));
 }
 
@@ -212,10 +212,10 @@ int DBReplyData::getDataFromResult(PGresultPtr result, int maxTuples)
 
     dataIsOk = 1;
 
-    for (int i = 0; i < ntuples; i++) {
+    for (int i = 0; i < ntuples; ++i) {
         std::string logString;
 
-        for (int j = 0; j < nfields; j++) {
+        for (int j = 0; j < nfields; ++j) {
             const char *fname = PQfname(result.get(), j);
             std::string fnameString = (fname) ? std::string(fname) : "nullptr";
 
@@ -272,7 +272,7 @@ std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::str
     jsonData["type"] = NetworkMessageType::CHAT_HISTORY_DATA;
     jsonData["messages"] = {};
 
-    for (std::size_t i = 0; i < data->size(); i++) {  // TODO switch to iterators
+    for (std::size_t i = 0; i < data->size(); ++i) {  // TODO switch to iterators
         for (auto &key : keys)
             jsonData["messages"][i][key] = data->getValue(i, key);
     }

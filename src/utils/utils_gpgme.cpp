@@ -135,7 +135,7 @@ void listKeys(gpgme_ctx_t *context)
             coutUserIdInfo(&r_key);
         }
 
-        i++;
+        ++i;
         coutArgsWithSpaceSeparator("i:", i);
     }
 
@@ -148,7 +148,7 @@ void listKeys(gpgme_ctx_t *context)
 
     coutMappingValue(mapEnd, errorEnd);
 
-    i++;
+    ++i;
     coutArgsWithSpaceSeparator("i:", i);
 }
 
@@ -205,8 +205,8 @@ void printAsBytesTillNullTerminator(const char *value)
 
     while (*p != '\0') {
         printf("%x ", *p);
-        p++;
-        i++;
+        ++p;
+        ++i;
     }
 
     endline(1);
@@ -220,8 +220,8 @@ void printAsBytes(const char *value, std::size_t size)
 
     while (i < size) {
         printf("%x ", *p);
-        p++;
-        i++;
+        ++p;
+        ++i;
     }
 
     endline(1);
@@ -235,8 +235,8 @@ void printAsChars(const char *value, std::size_t size)
 
     while (i < size) {
         printf("%c ", *p);
-        p++;
-        i++;
+        ++p;
+        ++i;
     }
 
     endline(1);
@@ -253,8 +253,8 @@ int getTerminatorPosition(const char *value, ssize_t size)
             return i;
         }
 
-        p++;
-        i++;
+        ++p;
+        ++i;
     }
 
     return -1;

@@ -111,7 +111,7 @@ std::string getRandomString(std::size_t length)
     std::string result(length, '_');
     std::size_t baseSize = sizeof(alphanum);
 
-    for (int i = 0; i < length; i++)
+    for (int i = 0; i < length; ++i)
         result.at(i) = alphanum[rand() % (baseSize - 1)];
 
     return result;

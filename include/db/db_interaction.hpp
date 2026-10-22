@@ -72,7 +72,7 @@ public:
     void push(std::size_t, std::string, const std::string &value);
     std::size_t size();
     std::string getValue(std::size_t position, const std::string &key);
-    bool findValue(const std::string&, const std::string &);    
+    bool findValue(const std::string&, const std::string &);
 
     int getDataFromResult(PGresultPtr result, int maxTuples);
     void log();

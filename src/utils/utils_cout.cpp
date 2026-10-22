@@ -4,7 +4,7 @@
 
 void endline(int number)
 {
-    for (int i = 0; i < number; i++)
+    for (int i = 0; i < number; ++i)
         std::cout << std::endl;
 }
 
@@ -54,14 +54,14 @@ void coutVectorWithIndexesHorizontally(const std::vector<int> &vector)
 
     coutWithManipulators("Index: ", width);
 
-    for (int i = 0; i < (int)vector.size(); i++)
+    for (int i = 0; i < (int)vector.size(); ++i)
         coutWithManipulators(std::to_string(i), width);
 
     std::cout << std::endl;
 
     coutWithManipulators("Value: ", width);
 
-    for (int i = 0; i < (int)vector.size(); i++)
+    for (int i = 0; i < (int)vector.size(); ++i)
         coutWithManipulators(std::to_string(vector.at(i)), width);
 
     std::cout << std::endl;
@@ -72,7 +72,7 @@ void printArray(std::array<int, 10> &array)
 {
     std::cout << "&a: " << &array << std::endl;
 
-    for (std::size_t i = 0; i < array.size(); i++) {
+    for (std::size_t i = 0; i < array.size(); ++i) {
         std::cout << "&a[" << i << "]: " << &array[i] << '\t';
         std::cout << "a[" << i << "]: " << array[i] << std::endl;
     }
@@ -103,7 +103,7 @@ void printSet(std::set<int> &set)
 // string
 void coutString(std::string::const_iterator iterator1, std::string::const_iterator iterator2)
 {
-    for (auto it = iterator1; it != iterator2; it++)
+    for (auto it = iterator1; it != iterator2; ++it)
         std::cout << *it;
 
     endline(1);

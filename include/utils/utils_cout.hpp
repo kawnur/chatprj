@@ -151,7 +151,7 @@ void coutVectorState(const T &vector)
 
 	coutArgsWithManipulators(width, "ADDRESS", "INDEX", "VALUE");
 
-    for (std::size_t i = 0; i < vector.size(); i++)
+    for (std::size_t i = 0; i < vector.size(); ++i)
         coutArgsWithManipulators(width, &(vector.at(i)), i, vector.at(i));
 
     coutArgsWithManipulators(width1, "SIZE:", vector.size());

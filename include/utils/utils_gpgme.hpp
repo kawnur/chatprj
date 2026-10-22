@@ -31,7 +31,7 @@ namespace TestGpgme
             else
 				break;
 
-			i++;
+            ++i;
 		}
 	}
 

@@ -190,7 +190,6 @@ void CentralPanelWidget::addMessage(MessageWidgetPtr widget, bool isAntecedent)
         std::lock_guard<std::mutex> lock(mutex_);
 
         widget->setParent(history_.get());
-
         historyLayout_->addWidget(widget.get());
 
         if (isAntecedent)
@@ -198,6 +197,17 @@ void CentralPanelWidget::addMessage(MessageWidgetPtr widget, bool isAntecedent)
     }
 
     scrollDownHistory();
+}
+
+void CentralPanelWidget::logHistoryLayout()
+{
+    coutArgsWithSpaceSeparator(Q_FUNC_INFO, this, historyLayout_.get());
+
+    for (int i = 0; i < historyLayout_->count(); ++i) {
+        auto cast = qobject_cast<MessageWidget *>(historyLayout_->itemAt(i)->widget());
+
+        coutArgsWithSpaceSeparator(i, cast->message()->data()->text_);
+    }
 }
 
 void CentralPanelWidget::scrollDownHistory()

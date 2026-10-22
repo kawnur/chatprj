@@ -54,7 +54,7 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
 {
     // TODO wrap in util
 
-    for (std::size_t i = 0; i < data["messages"].size(); i++) {
+    for (std::size_t i = 0; i < data["messages"].size(); ++i) {
         uint8_t authorId =
             getIntFromString(ID_BAD_VALUE, data["messages"][i]["author_id"].get<std::string>());
 
@@ -455,9 +455,20 @@ void Manager::sendMessage(
     messageHandler_.sendMessage(type, companion, action, text);
 }
 
-bool Manager::sendMessage(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta)
+bool Manager::sendMessage(CompanionPtr companion, MessagePtr message)
 {
-    return messageHandler_.sendMessageByNetwork(companion, message, meta);
+    return messageHandler_.sendMessageByNetwork(companion, message);
+}
+
+bool Manager::sendFileRequestMessage(CompanionPtr companion, const std::string &networkId)
+{
+    return messageHandler_.sendFileRequestMessage(companion, networkId);
+}
+
+bool Manager::sendFileDataTransmissionResultMessage(
+    CompanionPtr companion, NetworkMessageType type, const std::string &networkId)
+{
+    return messageHandler_.sendFileRequestMessage(companion, networkId);
 }
 
 bool Manager::buildCompanions()
@@ -472,7 +483,7 @@ bool Manager::buildCompanions()
 
     // companionsData->sortDataById();
 
-    for (std::size_t index = 0; index < companionsData->size(); index++) {  // TODO switch to iterators
+    for (std::size_t index = 0; index < companionsData->size(); ++index) {  // TODO switch to iterators
         int id = getIdFromDbData(companionsData, index, "id");
 
         // create companion object
@@ -626,9 +637,9 @@ void Manager::addSenderOperator(const std::string &networkId, const std::filesys
     fileManager_.addSenderOperator(networkId, path);
 }
 
-void Manager::addReceiverOperator(MessageMetaDataPtr meta)
+void Manager::addReceiverOperator(MessagePtr message)
 {
-    fileManager_.addReceiverOperator(meta);
+    fileManager_.addReceiverOperator(message);
 }
 
 std::string Manager::getFilePathString(const std::string &networkId)
@@ -689,26 +700,23 @@ bool Manager::clientAction(CompanionPtr companion, bool isConnected)
     return result;
 }
 
-void Manager::sendFile(CompanionPtr companion, MessageMetaDataPtr meta)
+void Manager::sendFile(CompanionPtr companion, MessagePtr message)
 {
-    auto networkId = meta->networkId_;
-    fileManager_.sendFile(companion, networkId);
+    fileManager_.sendFile(companion, message->networkId());
 }
 
 void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
 {
     // add to DB and get timestamp
-    auto replyMeta = pushMessageToDB(message);
+    auto reply = pushMessageToDB(message);
 
-    if (!replyMeta || !replyMeta->isValid())
+    if (!reply || !reply->meta()->isValid())
         return;
-
-    message->updateMeta(replyMeta);
 
     // decrypt message
 
     // create receiver operator
-    addReceiverOperator(message->meta());
+    addReceiverOperator(message);
 
     // add to widget
     addMessageWidget(companion, message);
@@ -751,20 +759,14 @@ void Manager::markMessageAsReceived(MessageInfoPtr info)
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->message()->id());
 }
 
-// MessageMetaDataPtr Manager::pushMessageToDB(MessagePtr message)
-// {
-//     return pushMessageToDB(message->meta(), message->data(), message->state());
-// }
-
 bool Manager::sendJsonByNetwork(CompanionPtr companion, const std::string &json)
 {
     return networkManager_->sendJson(companion->id(), json);
 }
 
-MessagePtr Manager::pushMessageToDB(
-    // MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
-    MessagePtr message)
+MessagePtr Manager::pushMessageToDB(MessagePtr message)
 {
+    // push data to db
     auto messageData = getDBData(
         DBRequestType::PUSH_MESSAGE_AND_RETURN,
         message->companionName(),
@@ -777,6 +779,7 @@ MessagePtr Manager::pushMessageToDB(
     if (!messageData || messageData->isEmpty())
         return nullptr;
 
+    // update message
     uint32_t id = getIdFromDbData(messageData, 0, "id");
     uint8_t companionId = getIdFromDbData(messageData, 0, "companion_id");
     std::string timestampTz { messageData->getValue(0, "timestamp_tz") };
@@ -784,16 +787,10 @@ MessagePtr Manager::pushMessageToDB(
     if (LOG_DB_INTERACTION)
         logTemplateInfo("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
 
-    // auto result = std::make_shared<MessageMetaData>();
-
-    // result->messageId_ = id;
-    // result->companionId_ = companionId;
-    // result->timestampTz_ = timestampTz;
     message->setId(id);
     message->setCompanionId(companionId);
     message->setTime(timestampTz);
 
-    // return result;
     return message;
 }
 

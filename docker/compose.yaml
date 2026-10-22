@@ -4,7 +4,8 @@ services:
     #     command: /my/app/chatapp --app
     #     user: root
     #     depends_on:
-    #         - client1_db
+    #         client1_db:
+    #             condition: service_healthy
     #     environment:
     #         XDG_SESSION_TYPE: wayland
     #         XDG_RUNTIME_DIR: /tmp
@@ -40,7 +41,8 @@ services:
     #    command: "sleep infinity"
         command: /my/app/chatapp --app
         depends_on:
-            - client2_db
+            client2_db:
+                condition: service_healthy
         environment:
             XDG_SESSION_TYPE: wayland
             XDG_RUNTIME_DIR: /tmp
@@ -76,7 +78,8 @@ services:
     # #    command: "sleep infinity"
     #     command: /my/app/chatapp --app
     #     depends_on:
-    #         - client3_db
+    #         client3_db:
+    #             condition: service_healthy
     #     environment:
     #         XDG_SESSION_TYPE: wayland
     #         XDG_RUNTIME_DIR: /tmp
@@ -117,6 +120,12 @@ services:
         environment:
             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+            start_period: 5s
         volumes:
             - chatapp_volume1:/var/lib/postgresql/data
             - type: bind
@@ -135,6 +144,12 @@ services:
         environment:
             - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
             - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+            start_period: 5s
         volumes:
             - chatapp_volume2:/var/lib/postgresql/data
             - type: bind
@@ -153,6 +168,12 @@ services:
     #     environment:
     #         - POSTGRES_USER=$CHATAPP_DB_POSTGRES_USER
     #         - POSTGRES_PASSWORD=$CHATAPP_DB_POSTGRES_PASSWORD
+    #     healthcheck:
+    #         test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+    #         interval: 5s
+    #         timeout: 5s
+    #         retries: 5
+    #         start_period: 5s
     #     volumes:
     #         - chatapp_volume3:/var/lib/postgresql/data
     #         - type: bind

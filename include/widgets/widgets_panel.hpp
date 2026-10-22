@@ -65,6 +65,7 @@ public:
     void clearHistory();
     void sortHistory(bool lock);
 
+    void logHistoryLayout();
 private:
     std::mutex mutex_;
     CompanionPtr companion_;

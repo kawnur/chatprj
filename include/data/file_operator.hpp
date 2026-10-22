@@ -57,7 +57,7 @@ public:
     ~ReceiverOperator() = default;
 
     void receiveFilePart(const std::string &value);
-    bool receiveFile();
+    bool getOperationResult();
 
 private:
     bool createFileAndOpen() override;

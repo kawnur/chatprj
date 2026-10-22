@@ -540,10 +540,12 @@ void FileAction::act()
 
         if (setResult) {
             // send without saving to db
-            auto meta = std::make_shared<MessageMetaData>();
-            meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
-            meta->networkId_ = networkId_;
-            bool result = manager->sendMessage(companion_, nullptr, meta);
+            // auto meta = std::make_shared<MessageMetaData>();
+            // meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
+            // meta->networkId_ = networkId_;
+
+            // bool result = manager->sendMessage(companion_, nullptr, meta);
+            bool result = manager->sendFileRequestMessage(companion_, networkId_);
             manager->setLastOpenedPath(filePath_.parent_path());
         }
         else {

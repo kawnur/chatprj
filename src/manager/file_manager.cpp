@@ -35,11 +35,11 @@ void FileManager::addSenderOperator(const std::string &networkId, const std::fil
     map_[networkId] = std::make_shared<SenderOperator>(shared_from_this(), path);
 }
 
-void FileManager::addReceiverOperator(MessageMetaDataPtr meta, const std::filesystem::path &path)
+void FileManager::addReceiverOperator(MessagePtr message, const std::filesystem::path &path)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto networkId = meta->networkId_;
+    auto networkId = message->networkId();
 
     if (map_.count(networkId) != 0) {
         logTemplateError("file operator for key {} already exists", networkId);
@@ -47,7 +47,8 @@ void FileManager::addReceiverOperator(MessageMetaDataPtr meta, const std::filesy
         return;
     }
 
-    map_[networkId] = std::make_shared<ReceiverOperator>(shared_from_this(), path, meta->hashMD5_);
+    map_[networkId] =
+        std::make_shared<ReceiverOperator>(shared_from_this(), path, message->hashMD5());
 }
 
 std::shared_ptr<FileOperator> FileManager::getOperator(const std::string &key)
@@ -147,7 +148,7 @@ void FileManager::handleFileSendError(FileManagerMap::iterator iterator)
 
     // send message
     auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE;
-    getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(type, networkId));
+    manager_->sendFileDataTransmissionResultMessage(companion, type, networkId);
 }
 
 void FileManager::handleFileSendSuccess(FileManagerMap::iterator iterator)
@@ -161,7 +162,7 @@ void FileManager::handleFileSendSuccess(FileManagerMap::iterator iterator)
 
     // send 'end of transmission' message
     auto type = NetworkMessageType::FILE_DATA_TRANSMISSON_END;
-    getManager()->sendMessage(companion, getEmptyMessage(), getReplyMeta(type, networkId));
+    manager_->sendFileDataTransmissionResultMessage(companion, type, networkId);
 }
 
 void FileManager::handleOperatorState(FileManagerMap::iterator iterator)
@@ -201,22 +202,3 @@ void FileManager::fileTransmissionHandler()
 
     runInDetachedThread(lambda);
 }
-
-MessageMetaDataPtr getReplyMeta(NetworkMessageType type, const std::string &networkId)
-{
-    auto meta = std::make_shared<MessageMetaData>();
-    meta->networkMessageType_ = type;
-    meta->networkId_ = networkId;
-
-    return meta;
-};
-
-MessagePtr getEmptyMessage()
-{
-    auto state = std::make_shared<MessageState>();
-    state->isAntecedent_ = false;
-
-    auto message = std::make_shared<Message>(nullptr, nullptr, state);
-
-    return message;
-};

@@ -52,6 +52,8 @@ public:
         const std::string &authorName, const std::string &timestampTz, const std::string &hashMD5,
         const std::string networkId);
 
+    MessageMetaData(MessageMetaDataPtr meta);
+
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
     bool isValid();
     void update(MessageMetaDataPtr meta);
@@ -73,6 +75,8 @@ class MessageData
 public:
     MessageData() = default;
     MessageData(const std::string &text, const std::string &data);
+    MessageData(MessageDataPtr data);
+
     ~MessageData() = default;
 
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
@@ -90,6 +94,8 @@ public:
     //         std::string networkId);
     MessageState() = default;
     MessageState(bool isAntecedent, bool isSent, bool isReceived);
+    MessageState(MessageStatePtr state);
+
     ~MessageState() = default;
 
     //     bool isAntecedent() const;
@@ -130,9 +136,8 @@ public:
     //     // const std::string &time, const std::string &text);
     //     MessageType type, const MessageMetaData &meta, const std::string &text);
 
-    Message(
-        MessageMetaDataPtr meta, MessageDataPtr data,
-        MessageStatePtr state);
+    Message(MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
+    Message(MessagePtr message);
 
     ~Message();
 
@@ -143,6 +148,7 @@ public:
     uint8_t authorId() const;
     std::string authorName() const;
     std::string time() const;
+    std::string hashMD5() const;
     std::string text() const;
     bool isMessageFromMe() const;
     bool isSent() const;

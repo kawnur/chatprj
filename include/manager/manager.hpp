@@ -97,12 +97,13 @@ public:
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
-    bool sendMessage(CompanionPtr companion, MessagePtr message, MessageMetaDataPtr meta);
+    bool sendMessage(CompanionPtr companion, MessagePtr message);
+    bool sendFileRequestMessage(CompanionPtr companion, const std::string &networkId);
 
-    // MessageMetaDataPtr pushMessageToDB(
-    //     MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
+    bool sendFileDataTransmissionResultMessage(
+        CompanionPtr companion, NetworkMessageType type, const std::string &networkId);
+
     MessagePtr pushMessageToDB(MessagePtr message);
-
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
     void addEarlyMessages(CompanionPtr companion);
@@ -115,7 +116,7 @@ public:
     bool connectClient(CompanionPtr companion);
     bool disconnectClient(CompanionPtr companion);
     void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
-    void addReceiverOperator(MessageMetaDataPtr meta);
+    void addReceiverOperator(MessagePtr message);
 
     template<typename T>
     std::shared_ptr<T> getFileOperator(const std::string &networkId)
@@ -141,9 +142,8 @@ public:
     void sortHistory(CompanionPtr companion);
     void disableBlur();
     bool clientAction(CompanionPtr companion, bool isConnected);
-    void sendFile(CompanionPtr companion, MessageMetaDataPtr meta);
+    void sendFile(CompanionPtr companion, MessagePtr message);
     void receiveFile(CompanionPtr companion, MessagePtr message);
-    // MessageMetaDataPtr pushMessageToDB(MessagePtr message);
     bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
 
 private:

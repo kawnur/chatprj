@@ -61,7 +61,7 @@ bool ChatClient::send(std::string text)
     };
 
     runAndLogException(lambda);
-    // logArgs("client sent message:", text);
+    logArgs("client sent message:", text);
 
     return sent;
 }
