@@ -20,21 +20,30 @@
 #include "message_handler.hpp"
 #include "network_manager.hpp"
 
-int getDataFromDBResult(bool log, DBReplyDataPtr data, PGresultPtr result, int maxTuples);
-
-// class Manager : public QObject // TODO do we need inheritance?
+// TODO do we need QObject inheritance?
 class Manager : public QObject, public std::enable_shared_from_this<Manager>
 {
 public:
     Manager(GraphicManagerPtr graphicManager);
     ~Manager();
 
+    CompanionPtr getSelectedCompanion();
+    // bool isInitialised();
+    // bool userIsAuthenticated();
+    void set();
+
+    // db
     template<typename... Ts>
     DBReplyDataPtr getDBData(DBRequestType type, Ts &&...args)
     {
         return dbOperator_.getDBData(type, args...);
     }
 
+    MessagePtr pushMessageToDB(MessagePtr message);
+    bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
+    DBReplyDataPtr getEarlyMessagesDBData(int companionId, int messageId);
+
+    // action
     template<typename F, typename T>
     ActionResultPtr performActionAndCallPostAct(F &&func, std::shared_ptr<T> action)
     {
@@ -43,13 +52,6 @@ public:
 
         return result;
     }
-
-    CompanionPtr getSelectedCompanion();
-    bool userIsAuthenticated();
-    void set();
-    bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
-    void receiveMessage(int companionId, const std::string &json);
-    void resetSelectedCompanion(CompanionPtr companion);
 
     template<typename T>
     std::function<ActionResultPtr(std::shared_ptr<T>)> getActionLambda(std::shared_ptr<T> action);
@@ -62,14 +64,6 @@ public:
         return performActionAndCallPostAct(lambda, action);
     }
 
-    template<typename T, typename... Ts>
-    void initAction(ActionType type, Ts &&...args)
-    {
-        auto action = std::make_shared<T>(type, args...);
-        setCurrentAction(std::dynamic_pointer_cast<Action>(action));  // TODO check cast
-        action->set();
-    }
-
     void initCompanionCreation();
     void initCompanionUpdate(CompanionPtr companion);
     void initCompanionDeletion(CompanionPtr companion);
@@ -78,44 +72,41 @@ public:
     void initEntrancePasswordReception();
     void initFileSend(CompanionPtr companion);
     void initFileReception(const std::string &networkId, CompanionPtr companion);
-    ActionResultPtr createCompanion(CompanionActionPtr action);
-    ActionResultPtr updateCompanion(CompanionActionPtr action);
-    // void updateSocketInfo(int id, CompanionDataPtr data);
-    ActionResultPtr deleteCompanion(CompanionActionPtr action);
-    void clearChatHistory(CompanionPtr companion);
-    ActionResultPtr clearCompanionHistory(CompanionActionPtr action);
-    ActionResultPtr pushPasswordToDbAndReturnId(PasswordActionPtr action);
-    ActionResultPtr createUserPassword(PasswordActionPtr action);
-    ActionResultPtr authenticateUser(PasswordActionPtr action);
     void startUserAuthentication();
-    void requestHistoryFromCompanion(CompanionPtr companion);
-    void sendChatHistoryToCompanion(CompanionPtr companion);
-    // bool isInitialised();
-    std::filesystem::path getLastOpenedPath();
-    void setLastOpenedPath(const std::filesystem::path &path);
     void endAction(ActionPtr action);
+
+    // message
+    void receiveMessage(int companionId, const std::string &json);
+    void requestHistoryFromCompanion(CompanionPtr companion);
+    void sendHistoryToCompanion(CompanionPtr companion);
 
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
-    bool sendMessage(CompanionPtr companion, MessagePtr message);
     bool sendFileRequestMessage(CompanionPtr companion, const std::string &networkId);
 
     bool sendFileDataTransmissionResultMessage(
         CompanionPtr companion, NetworkMessageType type, const std::string &networkId);
 
-    MessagePtr pushMessageToDB(MessagePtr message);
+    void addEarlyMessages(CompanionPtr companion);
+
+    bool setMappedMessageWidget(
+        CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
+
+    void fillCompanionMessageMapping(CompanionPtr companion, bool containersAreEmpty);
+
+    // widgets
+    void resetSelectedCompanion(CompanionPtr companion);
+    void clearChatHistory(CompanionPtr companion);
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
-    void addEarlyMessages(CompanionPtr companion);
-    void sendUnsentMessages(CompanionPtr companion);
+    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    void sortHistory(CompanionPtr companion);
+    void disableBlur();
 
-    bool sendFileBlock(
-        CompanionPtr companion, const std::string &networkId, const std::string &data);
-
-    CompanionDataPtr getCompanionData(CompanionPtr companion);
-    bool connectClient(CompanionPtr companion);
-    bool disconnectClient(CompanionPtr companion);
+    // files
+    std::filesystem::path getLastOpenedPath();
+    void setLastOpenedPath(const std::filesystem::path &path);
     void addSenderOperator(const std::string &networkId, ActionPtr action);
     void addReceiverOperator(MessagePtr message);
     void removeSenderOperator(const std::string &networkId);
@@ -123,38 +114,41 @@ public:
     bool setFileOperatorFilePath(const std::string &networkId, const std::filesystem::path &path);
     std::string getFileOperatorMD5Hash(const std::string &networkId);
 
-    bool setMappedMessageWidget(
-        CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
+    bool sendFileBlock(
+        CompanionPtr companion, const std::string &networkId, const std::string &data);
 
-    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
-    void addMessageWidget(CompanionPtr companion, MessagePtr message);
-    void sortHistory(CompanionPtr companion);
-    void disableBlur();
-    bool clientAction(CompanionPtr companion, bool isConnected);
     void sendFile(CompanionPtr companion, MessagePtr message);
     void receiveFileData(CompanionPtr companion, MessagePtr message);
     void receiveFile(CompanionPtr companion, MessagePtr message);
     std::optional<bool> stopFileDataReceiving(MessagePtr message);
     void stopFileDataSending(MessagePtr message);
+
+    // network
+    CompanionDataPtr getCompanionData(CompanionPtr companion);
+    bool connectClient(CompanionPtr companion);
+    bool disconnectClient(CompanionPtr companion);
+    bool clientAction(CompanionPtr companion, bool isConnected);
     bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
 
 private:
-    ActionResultPtr getActionResultByKeyDBData(
-        DBReplyDataPtr data, const std::string &key, bool allowEmptyResult = false);
+    bool buildCompanions();
+    CompanionPtr addCompanion(int id, const std::string &name);
+    CompanionPtr addCompanion(int id, const std::string &name, std::string &entry);
 
-    ActionResultPtr pushCompanionToDbAndReturnId(CompanionActionPtr action);
-    uint16_t getServerPortByCompanionId(int id);
+    // db
     ActionResultPtr pushSocketToDb(CompanionActionPtr action, int serverPort);
     ActionResultPtr updateCompanionInDbAndReturnId(CompanionActionPtr action);
     ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action);
     ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action);
-    bool buildCompanions();
-    CompanionPtr addCompanion(int id, const std::string &name);
-    CompanionPtr addCompanion(int id, const std::string &name, std::string &entry);
-    std::shared_ptr<CompanionResult> addCompanionAndRetutnResult(int id, const std::string &name);
-    ActionResultPtr addCompanionToNetworkManagerMap(int id, CompanionDataPtr data);
-    void deleteCompanionObject(CompanionPtr companion);
-    void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
+
+    // action
+    template<typename T, typename... Ts>
+    void initAction(ActionType type, Ts &&...args)
+    {
+        auto action = std::make_shared<T>(type, args...);
+        setCurrentAction(std::dynamic_pointer_cast<Action>(action));  // TODO check cast
+        action->set();
+    }
 
     template<typename... Ts>
     ActionResultPtr getActionResult(Ts &&...args)
@@ -170,8 +164,33 @@ private:
         return std::make_shared<ActionResult>(true, ""s);
     }
 
+    ActionResultPtr getActionResultByKeyDBData(
+        DBReplyDataPtr data, const std::string &key, bool allowEmptyResult = false);
+
+    ActionResultPtr createCompanion(CompanionActionPtr action);
+    ActionResultPtr updateCompanion(CompanionActionPtr action);
+    ActionResultPtr deleteCompanion(CompanionActionPtr action);
+    ActionResultPtr clearCompanionHistory(CompanionActionPtr action);
+    ActionResultPtr pushPasswordToDbAndReturnId(PasswordActionPtr action);
+    ActionResultPtr createUserPassword(PasswordActionPtr action);
+    ActionResultPtr authenticateUser(PasswordActionPtr action);
+    ActionResultPtr pushCompanionToDbAndReturnId(CompanionActionPtr action);
+
+    std::shared_ptr<CompanionResult> addCompanionAndRetutnResult(int id, const std::string &name);
+    ActionResultPtr addCompanionToNetworkManagerMap(int id, CompanionDataPtr data);
     void setCurrentAction(ActionPtr action);
     void checkAndResetCurrentAction(ActionPtr action);
+
+    // message
+    void sendUnsentMessages(CompanionPtr companion);
+
+    // widgets
+    void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);
+
+    // files
+
+    // network
+    uint16_t getServerPortByCompanionId(int id);
 
     GraphicManagerPtr graphicManager_;
     DBOperator dbOperator_;
@@ -179,7 +198,7 @@ private:
     FileManager fileManager_;
     NetworkManagerPtr networkManager_;
     std::mutex messageStateToMessageMapMutex_;
-    bool userIsAuthenticated_;
+    // bool userIsAuthenticated_;
     CompanionPtr selectedCompanion_;
     ActionPtr currentAction_;
 };

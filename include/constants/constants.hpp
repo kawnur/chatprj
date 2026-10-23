@@ -310,4 +310,10 @@ const std::unordered_map<Widget, uint32_t> WIDGET_COLOR_MAP {
     { Widget::NEW_MESSAGE_EDIT, 0xdcdc07 }
 };
 
+enum class MessageWidgetState {
+    UNKNOWN,
+    SENT,
+    RECEIVED
+};
+
 #endif // CONSTANTS_HPP

@@ -16,8 +16,6 @@ public:
     SocketInfo(T &&ipAddress, U &&port)
         : ipAddress_(std::forward<T>(ipAddress)), port_(std::forward<U>(port)) {}
 
-    SocketInfo(const SocketInfo &object);
-    SocketInfo(SocketInfo &&object) = default;
     ~SocketInfo() = default;
 
     std::string ipAddress() const;

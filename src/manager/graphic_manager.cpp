@@ -65,7 +65,7 @@ void GraphicManager::buildWidgetGroups()
 
     for (const auto &companion : getSortedCompanions()) {
         updateMapping(companion);
-        manager_->fillCompanionMessageMapping(companion, false);
+        manager_->fillCompanionMessageMapping(companion, true);
     }
 }
 
@@ -324,10 +324,10 @@ void GraphicManager::createEntrancePassword()
     manager_->initEntrancePasswordCreation();
 }
 
-void GraphicManager::getEntrancePassword()
-{
-    manager_->initEntrancePasswordReception();
-}
+// void GraphicManager::getEntrancePassword()
+// {
+//     manager_->initEntrancePasswordReception();
+// }
 
 MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, MessagePtr message)
 {
@@ -355,40 +355,30 @@ void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message
     emit group->addMessageWidgetSignal(message);
 }
 
-bool GraphicManager::setMessageWidgetAsSent(MessageInfoPtr info)
+void GraphicManager::setMessageWidgetState(MessageWidgetState state, MessageInfoPtr info)
 {
-    // auto lambda = [&]()
-    // {
-    //     // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
-    //     companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsSent();
-    // };
-
-    // return runAndReturnBool(lambda);
     auto widget = info->widget();
 
-    if (widget)
+    if (!widget) {
+        logArgsError("message widget state setting error");
+
+        return;
+    }
+
+    switch (state) {
+    case MessageWidgetState::SENT:
         widget->setSent();
-    else
-        logArgsError("marking widget as sent error");
 
-    return true;  // TODO modify
-}
+    break;
 
-void GraphicManager::setMessageWidgetAsReceived(MessageInfoPtr info)
-{
-    // auto lambda = [&]()
-    // {
-    //     // std::lock_guard<std::mutex> lock(messageToMessageWidgetMapMutex_);
-    //     companion->getMappedMessageWidgetByMessage(message)->setMessageWidgetAsReceived();
-    // };
+    case MessageWidgetState::RECEIVED:
+        widget->setReceived();
 
-    // return runAndReturnBool(lambda);
-    auto widget = info->widget();
+    break;
 
-    if (widget)
-        widget->setSent();
-    else
-        logArgsError("marking widget as received error");
+    default:
+        break;
+    }
 }
 
 void GraphicManager::sendFile(CompanionPtr companion)
@@ -426,16 +416,6 @@ void GraphicManager::requestHistory(CompanionPtr companion)
 {
     manager_->requestHistoryFromCompanion(companion);
 }
-
-// bool GraphicManager::connectClient(CompanionPtr companion)
-// {
-//     return manager_->connectClient(companion);
-// }
-
-// bool GraphicManager::disconnectClient(CompanionPtr companion)
-// {
-//     return manager_->disconnectClient(companion);
-// }
 
 bool GraphicManager::clientAction(CompanionPtr companion, bool isConnected)
 {

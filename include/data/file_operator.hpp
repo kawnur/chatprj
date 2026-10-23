@@ -17,6 +17,7 @@ public:
     virtual bool createFileAndOpen() { return false; }
     virtual void sendFile(CompanionPtr companion, const std::string &networkId) {}
     virtual bool getOperationResult() { return false; }
+    virtual void logResult() {}
 
     FileTransmissionState state();
     CompanionPtr companion() const;
@@ -59,7 +60,7 @@ public:
 
     void receiveFilePart(const std::string &value);
     bool getOperationResult() override;
-    void logResult();
+    void logResult() override;
 
 private:
     bool createFileAndOpen() override;

@@ -20,7 +20,6 @@ public:
     std::pair<NetworkManagerMap::iterator, bool> addToMap(
         int companionId, SocketInfoPtr clientSocket, SocketInfoPtr serverSocket);
 
-    NetworkEntityPtr getNetworkEntity(int id);
     void updateSocketInfo(int id, CompanionDataPtr data);
     CompanionDataPtr getCompanionData(int companionId);
     bool connectClient(int companionId);
@@ -29,6 +28,8 @@ public:
     bool sendJson(int companionId, const std::string &json);
 
 private:
+    NetworkEntityPtr getNetworkEntity(int id);
+
     ManagerPtr manager_;
     NetworkManagerMap map_;
 };

@@ -16,12 +16,25 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
     return storage_.getMessageInfo(companion->id(), message->id());
 }
 
-MessagePtr MessageHandler::createMessageAndAddToStorage(
-    CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index)
+void MessageHandler::addMessage1(
+    CompanionPtr companion, DBReplyDataPtr data, std::size_t index)
 {
-    auto message = builder_.buildMessageFromDbData(companion, messagesData, index);
+    logArgs("adding message with id", data->getValue(index, "id"));
 
-    return (addToStorage(companion, message)) ? message : nullptr;
+    // create message
+    auto message = builder_.buildMessageFromDbData(companion, data, index);
+
+    // add to storage
+    bool storageResult = addToStorage(companion, message);
+
+    if (!storageResult) {
+        logArgsError("adding message to storage error");
+
+        return;
+    }
+
+    // add widget
+    manager_->addMessageWidget(companion, message);
 }
 
 bool MessageHandler::addToStorage(CompanionPtr companion, MessagePtr message)
@@ -94,7 +107,7 @@ bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr mes
     return manager_->sendJsonByNetwork(companion, json);
 }
 
-bool MessageHandler::sendChatHistoryByNetwork(
+bool MessageHandler::sendChatHistory(
     CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys)
 {
     // build json
@@ -104,7 +117,7 @@ bool MessageHandler::sendChatHistoryByNetwork(
     return manager_->sendJsonByNetwork(companion, json);
 }
 
-bool MessageHandler::sendFileBlockByNetwork(
+bool MessageHandler::sendFileBlock(
     CompanionPtr companion, const std::string &networkId, const std::string &data)
 {
     // build json
@@ -114,7 +127,7 @@ bool MessageHandler::sendFileBlockByNetwork(
     return manager_->sendJsonByNetwork(companion, json);
 }
 
-bool MessageHandler::sendFileRequestMessage(CompanionPtr companion, const std::string &networkId)
+bool MessageHandler::sendFileRequest(CompanionPtr companion, const std::string &networkId)
 {
     auto message = builder_.buildFileRequestMessage(networkId);
 
@@ -387,7 +400,7 @@ void MessageHandler::receiveChatHistoryData(CompanionPtr companion, const nlohma
     manager_->clearChatHistory(companion);
 
     // fill container with messages
-    fillCompanionMessageMapping(companion, true);
+    fillMessageStorageForCompanion(companion, true);
 }
 
 void MessageHandler::receiveFileRequest(CompanionPtr companion, MessagePtr message)
@@ -451,33 +464,16 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
     auto messageId = earliestMessage->id();
 
     // get messages data
-    auto messagesData = manager_->getDBData(
-        DBRequestType::GET_EARLY_MESSAGES_BY_MESSAGE_ID, companionId, messageId);
+    auto data = manager_->getEarlyMessagesDBData(companionId, messageId);
 
-    if (!messagesData)
+    if (!data)
         return;
 
-    if (messagesData->isEmpty()) {
-        logTemplateWarning(
-            "no messages earlier than id = {0} in db with companion {1}", messageId, companionId);
+    // add messages
+    for (std::size_t i = 0; i < data->size(); ++i)
+        addMessage1(companion, data, i);
 
-        return;
-    }
-
-    for (std::size_t i = 0; i < messagesData->size(); ++i) {  // TODO use iterators
-        logArgs("adding message with id", messagesData->getValue(i, "id"));
-
-        auto message = createMessageAndAddToStorage(companion, messagesData, i);
-
-        if (!message) {
-            logArgsError("could not add message to messageMapping_");
-
-            continue;
-        }
-
-        manager_->addMessageWidget(companion, message);
-    }
-
+    // sort message widgets
     manager_->sortHistory(companion);
 }
 
@@ -525,35 +521,24 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
     }
 }
 
-void MessageHandler::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
+void MessageHandler::fillMessageStorageForCompanion(CompanionPtr companion, bool containersAreEmpty)
 {
     uint8_t companionId = companion->id();
 
     // get messages data
-    auto messagesData = manager_->getDBData(
+    auto data = manager_->getDBData(
         DBRequestType::GET_MESSAGES, companionId, NUMBER_OF_MESSAGES_TO_GET_FROM_DB);
 
-    if (!messagesData || messagesData->isEmpty())
+    if (!data || data->isEmpty())
         return;
 
-    // TODO modify
-    for (std::size_t i = 0; i < messagesData->size(); ++i) {  // TODO use iterators
-        auto messageId = getIdFromDbData(messagesData, i, "id");
+    for (std::size_t i = 0; i < data->size(); ++i) {
+        auto messageId = getIdFromDbData(data, i, "id");
+        auto info = storage_.getMessageInfo(companion->id(), messageId);
+        bool messageExists = info && info->message()->state();
 
-        if (containersNotEmpty) {
-            auto info = storage_.getMessageInfo(companion->id(), messageId);
-
-            if (info && info->message()->state()) {
-                // companion->addMessage(const_cast<MessagePtr>(pair.second));
-            } else {
-                auto message = createMessageAndAddToStorage(companion, messagesData, i);
-                manager_->addMessageWidget(companion, message);
-            }
-        }
-        else {
-            auto message = createMessageAndAddToStorage(companion, messagesData, i);
-            manager_->addMessageWidget(companion, message);
-        }
+        if (containersAreEmpty || !messageExists)
+            addMessage1(companion, data, i);
     }
 }
 

@@ -253,7 +253,7 @@ void CompanionAction::act()
 
     case ActionType::SEND_HISTORY:
         // TODO if client is disconnected show error dialog
-        getManager()->sendChatHistoryToCompanion(companion_);
+        getManager()->sendHistoryToCompanion(companion_);
 
     break;
 

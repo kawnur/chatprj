@@ -3,12 +3,6 @@
 #include "data.hpp"
 #include "utils.hpp"
 
-SocketInfo::SocketInfo(const SocketInfo &object)
-{
-    ipAddress_ = object.ipAddress_;
-    port_ = object.port_;
-}
-
 std::string SocketInfo::ipAddress() const
 {
     return ipAddress_;

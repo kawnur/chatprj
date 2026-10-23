@@ -171,7 +171,7 @@ void CentralPanelWidget::set(CompanionPtr companion)
 
     connect(
         textEdit_.get(), &TextEditWidget::sendSignal,
-        this, &CentralPanelWidget::sendMessage, Qt::QueuedConnection);
+        this, &CentralPanelWidget::sendMessageSlot, Qt::QueuedConnection);
 
     connect(
         sendFileButton_.get(), &QPushButton::clicked,
@@ -305,7 +305,7 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
     return result;
 }
 
-void CentralPanelWidget::sendMessage(const QString &text)
+void CentralPanelWidget::sendMessageSlot(const QString &text)
 {
     if (!text.isEmpty())
         getGraphicManager()->sendMessage(MessageType::TEXT, companion_, text.toStdString());

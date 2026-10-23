@@ -14,7 +14,7 @@
 Manager::Manager(GraphicManagerPtr graphicManager)
     : graphicManager_(graphicManager), dbOperator_(), messageHandler_(), fileManager_(),
     networkManager_(new NetworkManager), messageStateToMessageMapMutex_(),
-    userIsAuthenticated_(false), selectedCompanion_(nullptr), currentAction_(nullptr) {}
+    /*userIsAuthenticated_(false), */selectedCompanion_(nullptr), currentAction_(nullptr) {}
 
 Manager::~Manager() {}
 
@@ -23,10 +23,10 @@ CompanionPtr Manager::getSelectedCompanion()
     return selectedCompanion_;
 }
 
-bool Manager::userIsAuthenticated()
-{
-    return userIsAuthenticated_;
-}
+// bool Manager::userIsAuthenticated()
+// {
+//     return userIsAuthenticated_;
+// }
 
 void Manager::set()
 {
@@ -52,16 +52,14 @@ void Manager::addEarlyMessages(CompanionPtr companion)
 
 bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data)
 {
-    // TODO wrap in util
+    auto messages = data["messages"];
 
-    for (std::size_t i = 0; i < data["messages"].size(); ++i) {
-        uint8_t authorId =
-            getIntFromString(ID_BAD_VALUE, data["messages"][i]["author_id"].get<std::string>());
-
-        authorId = (authorId == 1) ? companion->id() : 1;
-        std::string timestamp = data["messages"][i]["timestamp_tz"];
-        std::string text = data["messages"][i]["message"];
+    for (const auto &message : data["messages"]) {
+        uint8_t authorId = getIntFromString(ID_BAD_VALUE, message["author_id"].get<std::string>());
         uint8_t companionId = companion->id();
+        authorId = (authorId == 1) ? companionId : 1;
+        std::string timestamp = message["timestamp_tz"];
+        std::string text = message["message"];
 
         // check if message from this companion with such timestamp already exists
         auto messageGetData = getDBData(
@@ -84,7 +82,7 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
         // push message to db
         auto messageAddData = getDBData(
             DBRequestType::PUSH_MESSAGE_AND_RETURN, companion->name(),
-            std::to_string(authorId), timestamp, idString, text, true, true);
+            getString(authorId), timestamp, idString, text, true, true);
 
         if (!messageAddData || messageAddData->isEmpty())
             return false;
@@ -298,11 +296,6 @@ ActionResultPtr Manager::updateCompanion(CompanionActionPtr action)
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-// void Manager::updateSocketInfo(int id, CompanionDataPtr data)
-// {
-//     networkManager_->updateSocketInfo(id, data);
-// }
-
 ActionResultPtr Manager::deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action)
 {
     auto data = getDBData(DBRequestType::DELETE_MESSAGES_AND_RETURN, action->companionId());
@@ -333,7 +326,7 @@ ActionResultPtr Manager::deleteCompanion(CompanionActionPtr action)
         return deleteCompanionAndSocketResult;
 
     // delete companion object
-    deleteCompanionObject(action->getCompanion());
+    deleteWidgetGroupAndDeleteFromMapping(action->getCompanion());
 
     return std::make_shared<ActionResult>(true, ""s);
 }
@@ -392,7 +385,7 @@ ActionResultPtr Manager::authenticateUser(PasswordActionPtr action)
     if (!checkResult->status())
         return checkResult;
 
-    userIsAuthenticated_ = true;
+    // userIsAuthenticated_ = true;
 
     return std::make_shared<ActionResult>(true, ""s);
 }
@@ -418,20 +411,19 @@ void Manager::requestHistoryFromCompanion(CompanionPtr companion)
     messageHandler_.requestHistoryFromCompanion(companion);
 }
 
-void Manager::sendChatHistoryToCompanion(CompanionPtr companion)
+void Manager::sendHistoryToCompanion(CompanionPtr companion)
 {
     logArgs(__FUNCTION__);
 
     auto keys = buildStringVector("author_id", "timestamp_tz", "message");
 
     // get messages from db
-    auto messagesData = getDBData(
-        DBRequestType::GET_ALL_MESSAGES_BY_COMPANION_ID, companion->id());
+    auto data = getDBData(DBRequestType::GET_ALL_MESSAGES_BY_COMPANION_ID, companion->id());
 
-    if (!messagesData || messagesData->isEmpty())
+    if (!data || data->isEmpty())
         return;
 
-    bool result = messageHandler_.sendChatHistoryByNetwork(companion, messagesData, keys);
+    bool result = messageHandler_.sendChatHistory(companion, data, keys);
 }
 
 std::filesystem::path Manager::getLastOpenedPath()
@@ -455,20 +447,15 @@ void Manager::sendMessage(
     messageHandler_.sendMessage(type, companion, action, text);
 }
 
-bool Manager::sendMessage(CompanionPtr companion, MessagePtr message)
-{
-    return messageHandler_.sendMessageByNetwork(companion, message);
-}
-
 bool Manager::sendFileRequestMessage(CompanionPtr companion, const std::string &networkId)
 {
-    return messageHandler_.sendFileRequestMessage(companion, networkId);
+    return messageHandler_.sendFileRequest(companion, networkId);
 }
 
 bool Manager::sendFileDataTransmissionResultMessage(
     CompanionPtr companion, NetworkMessageType type, const std::string &networkId)
 {
-    return messageHandler_.sendFileRequestMessage(companion, networkId);
+    return messageHandler_.sendFileRequest(companion, networkId);
 }
 
 bool Manager::buildCompanions()
@@ -590,11 +577,6 @@ ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPt
     return std::make_shared<ActionResult>(true, ""s);
 }
 
-void Manager::deleteCompanionObject(CompanionPtr companion)
-{
-    deleteWidgetGroupAndDeleteFromMapping(companion);
-}
-
 void Manager::deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion)
 {
     auto result = graphicManager_->deleteWidgetGroup(companion);
@@ -611,7 +593,7 @@ void Manager::sendUnsentMessages(CompanionPtr companion)
 bool Manager::sendFileBlock(
     CompanionPtr companion, const std::string &networkId, const std::string &data)
 {
-    return messageHandler_.sendFileBlockByNetwork(companion, networkId, data);
+    return messageHandler_.sendFileBlock(companion, networkId, data);
 }
 
 CompanionDataPtr Manager::getCompanionData(CompanionPtr companion)
@@ -669,9 +651,9 @@ bool Manager::setMappedMessageWidget(
     return messageHandler_.setMappedMessageWidget(companion, message, widget);
 }
 
-void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty)
+void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool containersAreEmpty)
 {
-    messageHandler_.fillCompanionMessageMapping(companion, containersNotEmpty);
+    messageHandler_.fillMessageStorageForCompanion(companion, containersAreEmpty);
 }
 
 void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
@@ -762,14 +744,14 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
     if (!info)
         return;
 
-    // mark in widget
-    graphicManager_->setMessageWidgetAsSent(info);
+    // set widget state
+    graphicManager_->setMessageWidgetState(MessageWidgetState::SENT, info);
 }
 
 void Manager::markMessageAsReceived(MessageInfoPtr info)
 {
-    // mark in widget
-    graphicManager_->setMessageWidgetAsReceived(info);
+    // set widget state
+    graphicManager_->setMessageWidgetState(MessageWidgetState::RECEIVED, info);
 
     // if (!result)
     //     logArgsError("marking wiget as received error");
@@ -782,6 +764,22 @@ void Manager::markMessageAsReceived(MessageInfoPtr info)
 bool Manager::sendJsonByNetwork(CompanionPtr companion, const std::string &json)
 {
     return networkManager_->sendJson(companion->id(), json);
+}
+
+DBReplyDataPtr Manager::getEarlyMessagesDBData(int companionId, int messageId)
+{
+    // get messages data
+    auto data = getDBData(
+        DBRequestType::GET_EARLY_MESSAGES_BY_MESSAGE_ID, companionId, messageId);
+
+    if (data && data->isEmpty()) {
+        logTemplateWarning(
+            "companion '{0}' has no messages earlier than id '{1}' in db", companionId, messageId);
+
+        return nullptr;
+    }
+
+    return data;
 }
 
 MessagePtr Manager::pushMessageToDB(MessagePtr message)

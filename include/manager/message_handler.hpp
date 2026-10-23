@@ -34,29 +34,38 @@ public:
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
 
-    MessagePtr createMessageAndAddToStorage(
-        CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
-
-    bool addToStorage(CompanionPtr companion, MessagePtr message);
-    bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
-
     void sendMessage(
         MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
 
-    bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
-
-    bool sendChatHistoryByNetwork(
+    bool sendChatHistory(
         CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys);
 
-    bool sendFileBlockByNetwork(
+    bool sendFileBlock(
         CompanionPtr companion, const std::string &networkId, const std::string &data);
 
-    bool sendFileRequestMessage(CompanionPtr companion, const std::string &networkId);
+    bool sendFileRequest(CompanionPtr companion, const std::string &networkId);
 
-    bool sendFileDataTransmissionResultMessage(
+    bool sendFileDataTransmissionResultMessage(  // NOT USED
         CompanionPtr companion, NetworkMessageType type, const std::string &networkId);
 
     void receiveMessage(CompanionPtr companion, const std::string &json);
+    void addEarlyMessages(CompanionPtr companion);
+    void sendUnsentMessages(CompanionPtr companion);
+    void fillMessageStorageForCompanion(CompanionPtr companion, bool containersAreEmpty);
+    void requestHistoryFromCompanion(CompanionPtr companion);
+
+    bool setMappedMessageWidget(
+        CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
+
+    bool clearMessageMapping(CompanionPtr companion);
+    bool addCompanionToMessageStorage(CompanionPtr companion);
+
+private:
+    void addMessage1(CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
+    bool addToStorage(CompanionPtr companion, MessagePtr message);
+    bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
+    bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
+
     void receiveTextMessage(CompanionPtr companion, MessagePtr message);
     void receiveConfirmation(CompanionPtr companion, MessagePtr message);
     void receiveConfirmationRequest(CompanionPtr companion, MessagePtr message);
@@ -68,19 +77,9 @@ public:
     void receiveFileDataCheck(CompanionPtr companion, MessagePtr message);
     void receiveFileDataTransmissionEnd(CompanionPtr companion, MessagePtr message);
     void receiveFileDataTransmissionFailure(CompanionPtr companion, MessagePtr message);
-    void addEarlyMessages(CompanionPtr companion);
-    void sendUnsentMessages(CompanionPtr companion);
-    void fillCompanionMessageMapping(CompanionPtr companion, bool containersNotEmpty);
-    void requestHistoryFromCompanion(CompanionPtr companion);
+
     void waitForMessageReceptionConfirmation(CompanionPtr companion, MessagePtr message);
 
-    bool setMappedMessageWidget(
-        CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
-
-    bool clearMessageMapping(CompanionPtr companion);
-    bool addCompanionToMessageStorage(CompanionPtr companion);
-
-private:
     ManagerPtr manager_;
     MessageStorage storage_;
     MessageBuilder builder_;
