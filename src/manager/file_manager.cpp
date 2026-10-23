@@ -1,6 +1,5 @@
 #include "file_manager.hpp"
 
-#include "file_operator.hpp"
 #include "logging.hpp"
 #include "manager.hpp"
 #include "message.hpp"
@@ -88,8 +87,7 @@ std::string FileManager::getFilePathString(const std::string &networkId)
     return (_operator) ? _operator->path().string() : ""s;
 }
 
-bool FileManager::setFileOperatorFilePath(
-    const std::string &networkId, const std::filesystem::path &path)
+bool FileManager::setFilePath(const std::string &networkId, const std::filesystem::path &path)
 {
     auto _operator = getOperator(networkId);
 
@@ -122,6 +120,19 @@ void FileManager::sendFile(CompanionPtr companion, const std::string &networkId)
     sender->sendFile(companion, networkId);
 
     fileTransmissionHandler();
+}
+
+void FileManager::receiveFileData(CompanionPtr companion, MessagePtr message)
+{
+    logArgs(__FUNCTION__);
+
+    auto networkId = message->networkId();
+    auto receiver = getOperatorByType<ReceiverOperator>(networkId);
+
+    if (receiver)
+        receiver->receiveFilePart(message->data()->data());
+    else
+        logTemplateError("companion has no file operator for networkId = {}", networkId);
 }
 
 bool FileManager::mapIsEmpty()
@@ -201,4 +212,29 @@ void FileManager::fileTransmissionHandler()
     };
 
     runInDetachedThread(lambda);
+}
+
+std::optional<bool> FileManager::stopFileDataReceiving(MessagePtr message)
+{
+    auto networkId = message->networkId();
+    auto receiver = getOperatorByType<ReceiverOperator>(networkId);
+
+    if (!receiver)
+        return std::nullopt;
+
+    auto result = receiver->getOperationResult();
+
+    if (result)
+        removeFileOperator<ReceiverOperator>(networkId);
+
+    return result;
+}
+
+void FileManager::stopFileDataSending(MessagePtr message)
+{
+    auto networkId = message->networkId();
+
+    logTemplateInfo("companion did not receive file '{}'", getFilePathString(networkId));
+
+    removeFileOperator<SenderOperator>(networkId);
 }

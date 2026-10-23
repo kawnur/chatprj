@@ -632,14 +632,19 @@ bool Manager::disconnectClient(CompanionPtr companion)
     return networkManager_->disconnectClient(companion->id());
 }
 
-void Manager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
+void Manager::addSenderOperator(const std::string &networkId, ActionPtr action)
 {
-    fileManager_.addSenderOperator(networkId, path);
+    fileManager_.addSenderOperator(networkId, action->getPath());
 }
 
 void Manager::addReceiverOperator(MessagePtr message)
 {
     fileManager_.addReceiverOperator(message);
+}
+
+void Manager::removeSenderOperator(const std::string &networkId)
+{
+    fileManager_.removeFileOperator<SenderOperator>(networkId);
 }
 
 std::string Manager::getFilePathString(const std::string &networkId)
@@ -650,7 +655,7 @@ std::string Manager::getFilePathString(const std::string &networkId)
 bool Manager::setFileOperatorFilePath(
     const std::string &networkId, const std::filesystem::path &path)
 {
-    return fileManager_.setFileOperatorFilePath(networkId, path);
+    return fileManager_.setFilePath(networkId, path);
 }
 
 std::string Manager::getFileOperatorMD5Hash(const std::string &networkId)
@@ -705,6 +710,11 @@ void Manager::sendFile(CompanionPtr companion, MessagePtr message)
     fileManager_.sendFile(companion, message->networkId());
 }
 
+void Manager::receiveFileData(CompanionPtr companion, MessagePtr message)
+{
+    fileManager_.receiveFileData(companion, message);
+}
+
 void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
 {
     // add to DB and get timestamp
@@ -725,6 +735,16 @@ void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
     // bool result = sendMessageByNetwork(companion, message, replyMeta);
 }
 
+std::optional<bool> Manager::stopFileDataReceiving(MessagePtr message)
+{
+    return fileManager_.stopFileDataReceiving(message);
+}
+
+void Manager::stopFileDataSending(MessagePtr message)
+{
+    fileManager_.stopFileDataSending(message);
+}
+
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
 {
     // mark in db
@@ -734,7 +754,7 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
         return;
 
     // update message
-    message->state()->isSent_ = true;
+    message->state()->setIsSent(true);
 
     // get message info
     auto info = messageHandler_.getMessageInfo(companion, message);

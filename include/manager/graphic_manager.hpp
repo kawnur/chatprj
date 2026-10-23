@@ -1,7 +1,6 @@
 #ifndef GRAPHIC_MANAGER_HPP
 #define GRAPHIC_MANAGER_HPP
 
-// #include <map>
 #include <string>
 #include <unordered_map>
 
@@ -11,10 +10,7 @@
 #include "alias.hpp"
 #include "constants.hpp"
 
-#include "alias.hpp"
-
 using GraphicManagerData = std::unordered_map<int, std::pair<CompanionPtr, WidgetGroupPtr>>;
-// using GraphicManagerData = std::map<int, std::pair<CompanionPtr, WidgetGroupPtr>>;
 
 class GraphicManager
 {

@@ -2,12 +2,14 @@
 #define FILE_MANAGER_HPP
 
 #include <filesystem>
-#include <unordered_map>
+#include <optional>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 
 #include "alias.hpp"
+#include "file_operator.hpp"
 #include "logging.hpp"
 
 using FileManagerMap = std::unordered_map<std::string, std::shared_ptr<FileOperator>>;
@@ -28,10 +30,10 @@ public:
     std::shared_ptr<FileOperator> getOperator(const std::string &key);
     bool removeOperator(const std::string &key);
     std::string getFilePathString(const std::string &networkId);
-    bool setFileOperatorFilePath(const std::string &networkId, const std::filesystem::path &path);
+    bool setFilePath(const std::string &networkId, const std::filesystem::path &path);
 
     template<typename T>
-    std::shared_ptr<T> getFileOperator(const std::string &networkId)
+    std::shared_ptr<T> getOperatorByType(const std::string &networkId)
     {
         return dynamic_pointer_cast<T>(getOperator(networkId));
     }
@@ -39,13 +41,15 @@ public:
     template<typename T>
     void removeFileOperator(const std::string &networkId)
     {
-        auto fileOperator = getFileOperator<T>(networkId);
+        auto _operator = getOperatorByType<T>(networkId);
 
-        if (fileOperator) {
+        if (!_operator) {
             logTemplateError("file operator was not found for networkId {}", networkId);
 
             return;
         }
+
+        _operator->logResult();
 
         if (!removeOperator(networkId))
             logTemplateInfo("remove file operator error for networkId {}", networkId);
@@ -59,14 +63,17 @@ public:
     std::string getFileOperatorMD5Hash(const std::string &networkId);
     bool sendFileBlock(CompanionPtr companion, const std::string &networkId, const std::string &data);
     void sendFile(CompanionPtr companion, const std::string &networkId);
-
-    bool mapIsEmpty();
+    void receiveFileData(CompanionPtr companion, MessagePtr message);
     void handleFileSendError(FileManagerMap::iterator iterator);
     void handleFileSendSuccess(FileManagerMap::iterator iterator);
     void handleOperatorState(FileManagerMap::iterator iterator);
-    void fileTransmissionHandler();
+    std::optional<bool> stopFileDataReceiving(MessagePtr message);
+    void stopFileDataSending(MessagePtr message);
 
 private:
+    bool mapIsEmpty();
+    void fileTransmissionHandler();
+
     ManagerPtr manager_;
     std::mutex mutex_;
     std::filesystem::path lastOpenedPath_;

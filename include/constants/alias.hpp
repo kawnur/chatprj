@@ -47,7 +47,9 @@ class NetworkEntity;
 class NetworkManager;
 class PasswordAction;
 class PriorityTask;
+class ReceiverOperator;
 class RightPanelWidget;
+class SenderOperator;
 class ShowHideWidget;
 class SocketInfo;
 class SocketInfoBaseWidget;
@@ -86,6 +88,7 @@ using PriorityTaskComparator = std::function<bool(const PriorityTask&, const Pri
 using PriorityTaskQueue =
     std::priority_queue<PriorityTask, std::vector<PriorityTask>, PriorityTaskComparator>;
 
+using ReceiverOperatorPtr = std::shared_ptr<ReceiverOperator>;
 using SocketInfoBaseWidgetPtr = std::shared_ptr<SocketInfoBaseWidget>;
 using SocketInfoPtr = std::shared_ptr<SocketInfo>;
 using QWidgetPtr = std::shared_ptr<QWidget>;

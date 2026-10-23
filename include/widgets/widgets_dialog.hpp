@@ -21,7 +21,6 @@
 #include "alias.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
-// #include "utils.hpp"
 
 class Dialog : public QDialog
 {

@@ -3,7 +3,6 @@
 #include <QHostAddress>
 
 #include "action.hpp"
-#include "action_wrapper.hpp"
 #include "companion.hpp"
 #include "data.hpp"
 #include "graphic_manager.hpp"

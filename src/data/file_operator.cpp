@@ -6,7 +6,7 @@
 
 FileOperator::FileOperator(FileManagerPtr fileManager, const std::filesystem::path &path)
     : state_(FileTransmissionState::UNKNOWN), fileManager_(fileManager), companion_(nullptr),
-    path_(path), buf_() {}
+    path_(path), buf_(), result_(false) {}
 
 FileOperator::~FileOperator()
 {
@@ -167,15 +167,22 @@ void ReceiverOperator::receiveFilePart(const std::string &value)
 
 bool ReceiverOperator::getOperationResult()
 {
-    if (!closeFile())
-        logTemplateError("file closing error, path: {}", path_);
+    closeFile();
 
     md5Hash_ = hashFileMD5(path_.string());
 
     logArgs("fileMD5Hash_:", md5Hash_);
     logArgs("md5HashFromSender_:", md5HashFromSender_);
 
-    return (md5Hash_ == md5HashFromSender_);
+    result_ = (md5Hash_ == md5HashFromSender_);
+
+    return result_;
+}
+
+void ReceiverOperator::logResult()
+{
+    if (result_)
+        logTemplateInfo("file '{}' successfully received", path_);
 }
 
 bool ReceiverOperator::createFileAndOpen()

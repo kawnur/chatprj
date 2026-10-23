@@ -3,7 +3,6 @@
 
 #include <filesystem>
 #include <fstream>
-// #include <memory>
 #include <string>
 
 #include "alias.hpp"
@@ -17,6 +16,7 @@ public:
 
     virtual bool createFileAndOpen() { return false; }
     virtual void sendFile(CompanionPtr companion, const std::string &networkId) {}
+    virtual bool getOperationResult() { return false; }
 
     FileTransmissionState state();
     CompanionPtr companion() const;
@@ -35,6 +35,7 @@ protected:
     std::filebuf buf_;
     std::filesystem::path path_;
     std::string md5Hash_;
+    bool result_;
 };
 
 class SenderOperator : public FileOperator
@@ -57,7 +58,8 @@ public:
     ~ReceiverOperator() = default;
 
     void receiveFilePart(const std::string &value);
-    bool getOperationResult();
+    bool getOperationResult() override;
+    void logResult();
 
 private:
     bool createFileAndOpen() override;

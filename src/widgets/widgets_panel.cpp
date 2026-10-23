@@ -206,7 +206,7 @@ void CentralPanelWidget::logHistoryLayout()
     for (int i = 0; i < historyLayout_->count(); ++i) {
         auto cast = qobject_cast<MessageWidget *>(historyLayout_->itemAt(i)->widget());
 
-        coutArgsWithSpaceSeparator(i, cast->message()->data()->text_);
+        coutArgsWithSpaceSeparator(i, cast->message()->data()->text());
     }
 }
 

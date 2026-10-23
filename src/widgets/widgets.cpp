@@ -552,7 +552,7 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
     if (!messageState)
         return;
 
-    bool isAntecedent = messageState->isAntecedent_;
+    bool isAntecedent = messageState->isAntecedent();
 
     logArgs("isAntecedent:", isAntecedent);
 
@@ -562,7 +562,7 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 
         logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
 
-        messageState->isAntecedent_ = false;
+        messageState->setIsAntecedent(false);
 
         if (antecedentMessagesCounter_ == 0) {
             auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);

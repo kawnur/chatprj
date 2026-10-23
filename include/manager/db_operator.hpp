@@ -85,7 +85,6 @@ public:
     PGresultPtr sendRequestAndReturnResult(const std::string &command);
     bool isReady();
 
-
 private:
     bool log_;
     std::mutex mutex_;  // ???

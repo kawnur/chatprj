@@ -57,7 +57,29 @@ public:
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
     bool isValid();
     void update(MessageMetaDataPtr meta);
+    bool isMessageFromMe();
 
+    MessageType messageType() const;
+    NetworkMessageType networkMessageType() const;
+    uint32_t messageId() const;
+    uint8_t companionId() const;
+    std::string companionName() const;
+    uint8_t authorId() const;
+    std::string authorName() const;
+    std::string timestampTz() const;
+    std::string hashMD5() const;
+    std::string networkId() const;
+
+    void setMessageId(uint32_t newMessageId);
+    void setCompanionId(uint8_t newCompanionId);
+    void setTimestampTz(const std::string &newTimestampTz);
+    void setNetworkId(const std::string &newNetworkId);
+    void setNetworkMessageType(NetworkMessageType newNetworkMessageType);
+    void setMessageType(MessageType newMessageType);
+    void setCompanionName(const std::string &newCompanionName);
+    void setAuthorName(const std::string &newAuthorName);
+
+private:
     MessageType messageType_;
     NetworkMessageType networkMessageType_;
     uint32_t messageId_;
@@ -79,8 +101,14 @@ public:
 
     ~MessageData() = default;
 
-    bool setFields(CompanionPtr companion, const nlohmann::json &data);
+    std::string text() const;
+    std::string data() const;
 
+    bool setFields(CompanionPtr companion, const nlohmann::json &data);
+    void setText(const std::string &newText);
+    void setData(const std::string &newData);
+
+private:
     std::string text_;
     std::string data_;  // for file transfer
 };
@@ -88,44 +116,25 @@ public:
 class MessageState
 {
 public:
-
-    //     MessageState(
-    //         uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived,
-    //         std::string networkId);
     MessageState() = default;
     MessageState(bool isAntecedent, bool isSent, bool isReceived);
     MessageState(MessageStatePtr state);
 
     ~MessageState() = default;
 
-    //     bool isAntecedent() const;
-        // bool isSent() const;
-        // bool isReceived() const;
-    //     std::string getNetworkId() const;
-
-    //     void setIsAntecedent(bool);
-    //     void setIsReceived(bool);
-    //     void setNetworkId(const std::string &);
+    bool isAntecedent() const;
+    bool isSent() const;
+    bool isReceived() const;
 
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
+    void setIsAntecedent(bool newIsAntecedent);
+    void setIsSent(bool newIsSent);
+    void setIsReceived(bool newIsReceived);
 
-    // template<typename...Ts>
-    // bool setFields(const nlohmann::json &data, Ts &&...args)
-    // {
-    //     const LambdaMap lambdaMap
-    //         {
-    //             { "antecedent", [&]() { isAntecedent_ = data.at("antecedent"); } },
-    //             { "received", [&]() { isReceived_ = data.at("received"); } }
-    //         };
-
-    //     return setFieldsFromJson(lambdaMap, data, args...);
-    // };
-
-    // private:
+private:
     bool isAntecedent_;
     bool isSent_;
     bool isReceived_;
-    // std::string networkId_;
 };
 
 class Message

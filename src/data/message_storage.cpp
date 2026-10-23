@@ -51,10 +51,10 @@ bool CompanionMessageStorage::updateAndInsert(MessageInfoPtr info)
 
     auto meta = info->message()->meta();
 
-    if (meta->networkId_.empty())
-        meta->networkId_ = generateNetworkId(false);
+    if (meta->networkId().empty())
+        meta->setNetworkId(generateNetworkId(false));
 
-    auto result = map_.emplace(meta->messageId_, info);
+    auto result = map_.emplace(meta->messageId(), info);
 
     return result.second;
 }

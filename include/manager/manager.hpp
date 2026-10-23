@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #include <libpq-fe.h>
@@ -115,21 +116,9 @@ public:
     CompanionDataPtr getCompanionData(CompanionPtr companion);
     bool connectClient(CompanionPtr companion);
     bool disconnectClient(CompanionPtr companion);
-    void addSenderOperator(const std::string &networkId, const std::filesystem::path &path);
+    void addSenderOperator(const std::string &networkId, ActionPtr action);
     void addReceiverOperator(MessagePtr message);
-
-    template<typename T>
-    std::shared_ptr<T> getFileOperator(const std::string &networkId)
-    {
-        return fileManager_.getFileOperator<T>(networkId);
-    }
-
-    template<typename T>
-    void removeFileOperator(const std::string &networkId)
-    {
-        fileManager_.removeFileOperator<T>(networkId);
-    }
-
+    void removeSenderOperator(const std::string &networkId);
     std::string getFilePathString(const std::string &networkId);
     bool setFileOperatorFilePath(const std::string &networkId, const std::filesystem::path &path);
     std::string getFileOperatorMD5Hash(const std::string &networkId);
@@ -143,7 +132,10 @@ public:
     void disableBlur();
     bool clientAction(CompanionPtr companion, bool isConnected);
     void sendFile(CompanionPtr companion, MessagePtr message);
+    void receiveFileData(CompanionPtr companion, MessagePtr message);
     void receiveFile(CompanionPtr companion, MessagePtr message);
+    std::optional<bool> stopFileDataReceiving(MessagePtr message);
+    void stopFileDataSending(MessagePtr message);
     bool sendJsonByNetwork(CompanionPtr companion, const std::string &json);
 
 private:

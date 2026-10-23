@@ -1,8 +1,6 @@
 #include "message_handler.hpp"
 
-#include "action.hpp"
 #include "companion.hpp"
-#include "file_operator.hpp"
 #include "manager.hpp"
 #include "message.hpp"
 
@@ -63,7 +61,7 @@ void MessageHandler::sendMessage(
 
     // add file sender
     if (type == MessageType::FILE)
-        manager_->addSenderOperator(message->networkId(), action->getPath());
+        manager_->addSenderOperator(message->networkId(), action);
 
     // add message widget
     manager_->addMessageWidget(companion, message);
@@ -147,8 +145,8 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     // build meta
     auto meta = buildObjectFromJson<MessageMetaData>(companion, jsonData);
     auto name = companion->name();
-    meta->companionName_ = name;
-    meta->authorName_ = name;
+    meta->setCompanionName(name);
+    meta->setAuthorName(name);
 
     if (!meta)
         return;
@@ -161,7 +159,7 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
 
     // build state
     auto state = buildObjectFromJson<MessageState>(companion, jsonData);
-    state->isReceived_ = true;
+    state->setIsReceived(true);
 
     if (!state)
         return;
@@ -332,7 +330,7 @@ void MessageHandler::receiveConfirmation(CompanionPtr companion, MessagePtr mess
     }
 
     // message found
-    state->isReceived_ = true;
+    state->setIsReceived(true);
     manager_->markMessageAsReceived(info);
 }
 
@@ -359,7 +357,7 @@ void MessageHandler::receiveConfirmationRequest(CompanionPtr companion, MessageP
         return;
 
     // message found in managers's mapping
-    if (!state->isReceived_) {
+    if (!state->isReceived()) {
         // strange situation
         logArgsError(
             "received reception confirmation request "
@@ -401,15 +399,7 @@ void MessageHandler::receiveFileRequest(CompanionPtr companion, MessagePtr messa
 
 void MessageHandler::receiveFileData(CompanionPtr companion, MessagePtr message)
 {
-    logArgs(__FUNCTION__);
-
-    auto networkId = message->networkId();
-    auto receiver = manager_->getFileOperator<ReceiverOperator>(networkId);
-
-    if (receiver)
-        receiver->receiveFilePart(message->data()->data_);
-    else
-        logTemplateError("companion has no file operator for networkId = {}", networkId);
+    manager_->receiveFileData(companion, message);
 }
 
 void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr message)
@@ -426,31 +416,18 @@ void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr mes
 
     logTemplateInfo(entryTemplate, manager_->getFilePathString(networkId));
 
-    manager_->removeFileOperator<SenderOperator>(networkId);
+    manager_->removeSenderOperator(networkId);
 }
 
 void MessageHandler::receiveFileDataTransmissionEnd(CompanionPtr companion, MessagePtr message)
 {
     logArgs(__FUNCTION__);
 
-    auto networkId = message->networkId();
-    auto receiver = manager_->getFileOperator<ReceiverOperator>(networkId);
+    auto receiveResult = manager_->stopFileDataReceiving(message);
 
-    if (!receiver) {
-        logTemplateError("companion has no file operator for networkId '{}'", networkId);
-
-        return;
-    }
-
-    auto resultType = (receiver->getOperationResult())
+    auto resultType = (receiveResult)
         ? NetworkMessageType::FILE_DATA_CHECK_SUCCESS
         : NetworkMessageType::FILE_DATA_CHECK_FAILURE;
-
-    if (resultType == NetworkMessageType::FILE_DATA_CHECK_SUCCESS) {
-        logArgs("file received successfully");
-
-        manager_->removeFileOperator<ReceiverOperator>(networkId);
-    }
 
     auto reply = builder_.buildFileDataCheckResultMessage(resultType, message);
     bool result = sendMessageByNetwork(companion, reply);
@@ -460,11 +437,7 @@ void MessageHandler::receiveFileDataTransmissionFailure(CompanionPtr companion, 
 {
     logArgs(__FUNCTION__);
 
-    auto networkId = message->networkId();
-
-    logTemplateInfo("companion did not receive file '{}'", manager_->getFilePathString(networkId));
-
-    manager_->removeFileOperator<SenderOperator>(networkId);
+    manager_->stopFileDataSending(message);
 }
 
 void MessageHandler::addEarlyMessages(CompanionPtr companion)

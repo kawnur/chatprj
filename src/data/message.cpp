@@ -132,6 +132,101 @@ void MessageMetaData::update(MessageMetaDataPtr meta)
     timestampTz_ = meta->timestampTz_;
 }
 
+bool MessageMetaData::isMessageFromMe()
+{
+    return (authorId_ != companionId_);
+}
+
+MessageType MessageMetaData::messageType() const
+{
+    return messageType_;
+}
+
+NetworkMessageType MessageMetaData::networkMessageType() const
+{
+    return networkMessageType_;
+}
+
+uint32_t MessageMetaData::messageId() const
+{
+    return messageId_;
+}
+
+uint8_t MessageMetaData::companionId() const
+{
+    return companionId_;
+}
+
+std::string MessageMetaData::companionName() const
+{
+    return companionName_;
+}
+
+uint8_t MessageMetaData::authorId() const
+{
+    return authorId_;
+}
+
+std::string MessageMetaData::authorName() const
+{
+    return authorName_;
+}
+
+std::string MessageMetaData::timestampTz() const
+{
+    return timestampTz_;
+}
+
+std::string MessageMetaData::hashMD5() const
+{
+    return hashMD5_;
+}
+
+std::string MessageMetaData::networkId() const
+{
+    return networkId_;
+}
+
+void MessageMetaData::setMessageId(uint32_t newMessageId)
+{
+    messageId_ = newMessageId;
+}
+
+void MessageMetaData::setCompanionId(uint8_t newCompanionId)
+{
+    companionId_ = newCompanionId;
+}
+
+void MessageMetaData::setTimestampTz(const std::string &newTimestampTz)
+{
+    timestampTz_ = newTimestampTz;
+}
+
+void MessageMetaData::setNetworkId(const std::string &newNetworkId)
+{
+    networkId_ = newNetworkId;
+}
+
+void MessageMetaData::setNetworkMessageType(NetworkMessageType newNetworkMessageType)
+{
+    networkMessageType_ = newNetworkMessageType;
+}
+
+void MessageMetaData::setMessageType(MessageType newMessageType)
+{
+    messageType_ = newMessageType;
+}
+
+void MessageMetaData::setCompanionName(const std::string &newCompanionName)
+{
+    companionName_ = newCompanionName;
+}
+
+void MessageMetaData::setAuthorName(const std::string &newAuthorName)
+{
+    authorName_ = newAuthorName;
+}
+
 MessageData::MessageData(const std::string &text, const std::string &data)
     : text_(text), data_(data) {}
 
@@ -140,20 +235,6 @@ MessageData::MessageData(MessageDataPtr data)
     data_ = data->data_;
     text_ = data->text_;
 }
-
-// Message::Message(
-//     MessageType type, /*uint32_t id, uint8_t companion_id, uint8_t author_id, const std::string &time,*/
-//      const MessageMetaData &meta, const std::string &text)
-//     // : type_(type), id_(id), companion_id_(companion_id), author_id_(author_id), time_(time),
-//     // text_(text) {}
-// {
-//     type_ = type;
-//     id_ = meta.messageId_;
-//     companion_id_ = meta.companionId_;
-//     author_id_ = meta.authorId_;
-//     time_ = meta.timestampTz_;
-//     text_ = text;
-// }
 
 bool MessageData::setFields(CompanionPtr companion, const nlohmann::json &data)
 {
@@ -167,6 +248,26 @@ bool MessageData::setFields(CompanionPtr companion, const nlohmann::json &data)
     bool result = wrapper.runTasksAndReturnResult();
 
     return result;
+}
+
+std::string MessageData::text() const
+{
+    return text_;
+}
+
+void MessageData::setText(const std::string &newText)
+{
+    text_ = newText;
+}
+
+std::string MessageData::data() const
+{
+    return data_;
+}
+
+void MessageData::setData(const std::string &newData)
+{
+    data_ = newData;
 }
 
 Message::Message(
@@ -184,93 +285,93 @@ Message::~Message() = default;
 
 MessageType Message::type() const
 {
-    return meta_->messageType_;
+    return meta_->messageType();
 }
 
 uint32_t Message::id() const
 {
     // return id_;
-    return meta_->messageId_;
+    return meta_->messageId();
 }
 
 uint8_t Message::companionId() const
 {
-    return meta_->companionId_;
+    return meta_->companionId();
 }
 
 std::string Message::companionName() const
 {
-    return meta_->companionName_;
+    return meta_->companionName();
 }
 
 uint8_t Message::authorId() const
 {
-    return meta_->authorId_;
+    return meta_->authorId();
 }
 
 std::string Message::authorName() const
 {
-    return meta_->authorName_;
+    return meta_->authorName();
 }
 
 std::string Message::time() const
 {
-    return meta_->timestampTz_;
+    return meta_->timestampTz();
 }
 
 std::string Message::hashMD5() const
 {
-    return meta_->hashMD5_;
+    return meta_->hashMD5();
 }
 
 std::string Message::text() const
 {
-    return data_->text_;
+    return data_->text();
 }
 
 bool Message::isMessageFromMe() const
 {
-    return (meta_->authorId_ != meta_->companionId_);
+    return meta_->isMessageFromMe();
 }
 
 bool Message::isSent() const
 {
-    return state_->isSent_;
+    return state_->isSent();
 }
 
 bool Message::isReceived() const
 {
-    return state_->isReceived_;
+    return state_->isReceived();
 }
 
 bool Message::isAntecedent() const
 {
-    return state_->isAntecedent_;
+    return state_->isAntecedent();
 }
 
 std::string Message::networkId() const
 {
-    return meta_->networkId_;
+    return meta_->networkId();
 }
 
 NetworkMessageType Message::networkMessageType() const
 {
-    return meta_->networkMessageType_;
+    return meta_->networkMessageType();
 }
 
 void Message::setId(int id)
 {
-    meta_->messageId_ = id;
+    meta_->setMessageId(id);
 }
 
 void Message::setCompanionId(int id)
 {
-    meta_->companionId_ = id;
+    meta_->setCompanionId(id);
 }
 
 void Message::setTime(const std::string &time)
 {
-    meta_->timestampTz_ = time;
+    meta_->setTimestampTz(time);
 }
 
 MessageMetaDataPtr Message::meta() const
@@ -308,41 +409,6 @@ MessageState::MessageState(MessageStatePtr state)
     isReceived_ = state->isReceived_;
 }
 
-// bool MessageState::isAntecedent() const
-// {
-//     return isAntecedent_;
-// }
-
-// bool MessageState::isSent() const
-// {
-//     return isSent_;
-// }
-
-// bool MessageState::isReceived() const
-// {
-//     return isReceived_;
-// }
-
-// std::string MessageState::getNetworkId() const
-// {
-//     return networkId_;
-// }
-
-// void MessageState::setIsAntecedent(bool value)
-// {
-//     isAntecedent_ = value;
-// }
-
-// void MessageState::setIsReceived(bool value)
-// {
-//     isReceived_ = value;
-// }
-
-// void MessageState::setNetworkId(const std::string &networkId)
-// {
-//     networkId_ = networkId;
-// }
-
 bool MessageState::setFields(CompanionPtr companion, const nlohmann::json &data)
 {
     std::vector<PriorityTask> taskVector
@@ -355,6 +421,36 @@ bool MessageState::setFields(CompanionPtr companion, const nlohmann::json &data)
     bool result = wrapper.runTasksAndReturnResult();
 
     return result;
+}
+
+bool MessageState::isAntecedent() const
+{
+    return isAntecedent_;
+}
+
+void MessageState::setIsAntecedent(bool newIsAntecedent)
+{
+    isAntecedent_ = newIsAntecedent;
+}
+
+bool MessageState::isSent() const
+{
+    return isSent_;
+}
+
+void MessageState::setIsSent(bool newIsSent)
+{
+    isSent_ = newIsSent;
+}
+
+bool MessageState::isReceived() const
+{
+    return isReceived_;
+}
+
+void MessageState::setIsReceived(bool newIsReceived)
+{
+    isReceived_ = newIsReceived;
 }
 
 MessageInfo::MessageInfo(MessagePtr message, MessageWidgetPtr widget)
