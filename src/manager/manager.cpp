@@ -14,14 +14,14 @@
 Manager::Manager(GraphicManagerPtr graphicManager)
     : graphicManager_(graphicManager), dbOperator_(), messageHandler_(), fileManager_(),
     networkManager_(new NetworkManager), messageStateToMessageMapMutex_(),
-    /*userIsAuthenticated_(false), */selectedCompanion_(nullptr), currentAction_(nullptr) {}
+    /*userIsAuthenticated_(false), selectedCompanion_(nullptr), */currentAction_(nullptr) {}
 
 Manager::~Manager() {}
 
-CompanionPtr Manager::getSelectedCompanion()
-{
-    return selectedCompanion_;
-}
+// CompanionPtr Manager::getSelectedCompanion()
+// {
+//     return selectedCompanion_;
+// }
 
 // bool Manager::userIsAuthenticated()
 // {
@@ -37,12 +37,12 @@ void Manager::set()
     networkManager_->setManager(shared_from_this());
 
     bool companionsBuilt = buildCompanions();
-    logArgs("companionsBuilt:", companionsBuilt);
+    logTemplateInfo("companionsBuilt: {}", companionsBuilt);
 
     if (companionsBuilt)  // TODO rewrite
         graphicManager_->buildWidgetGroups();
     else
-        logArgsError("problem with companions initialization");
+        logArgsError("companion initialization error");
 }
 
 void Manager::addEarlyMessages(CompanionPtr companion)
@@ -101,12 +101,12 @@ void Manager::receiveMessage(int companionId, const std::string &json)
     messageHandler_.receiveMessage(companion, json);
 }
 
-void Manager::resetSelectedCompanion(CompanionPtr companion)  // TODO rewrite
-{
-    graphicManager_->preSelectCompanion(selectedCompanion_);
-    selectedCompanion_ = companion;
-    graphicManager_->postSelectCompanion(selectedCompanion_);
-}
+// void Manager::resetSelectedCompanion(CompanionPtr companion)  // TODO rewrite
+// {
+//     graphicManager_->preSelectCompanion(selectedCompanion_);
+//     selectedCompanion_ = companion;
+//     graphicManager_->postSelectCompanion(selectedCompanion_);
+// }
 
 void Manager::initCompanionCreation()
 {
@@ -413,7 +413,7 @@ void Manager::requestHistoryFromCompanion(CompanionPtr companion)
 
 void Manager::sendHistoryToCompanion(CompanionPtr companion)
 {
-    logArgs(__FUNCTION__);
+    logArgsInfo(__FUNCTION__);
 
     auto keys = buildStringVector("author_id", "timestamp_tz", "message");
 
@@ -579,10 +579,11 @@ ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPt
 
 void Manager::deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion)
 {
-    auto result = graphicManager_->deleteWidgetGroup(companion);
+    // auto result = graphicManager_->deleteWidgetGroup(companion);
+    graphicManager_->deleteWidgetGroup(companion);
 
-    if (result && selectedCompanion_ == companion)
-        selectedCompanion_ = nullptr;
+    // if (result && selectedCompanion_ == companion)
+    //     selectedCompanion_ = nullptr;
 }
 
 void Manager::sendUnsentMessages(CompanionPtr companion)

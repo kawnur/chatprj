@@ -24,7 +24,7 @@ bool Validator::validateIpAddress(const std::string &ipAddress)
         errors_.push_back(entry);
     }
 
-    // logArgs("validateIpAddress result:", result);
+    // logArgsInfo("validateIpAddress result:", result);
 
     return result;
 }
@@ -52,7 +52,7 @@ bool Validator::validatePort(const std::string &port)
         errors_.push_back(getStringByFormat(entryTemplateException, entry));
     }
 
-    // logArgs("validatePort result:", result);
+    // logArgsInfo("validatePort result:", result);
 
     return result;
 }
@@ -74,7 +74,7 @@ bool Validator::validateStringByLength(
         errors_.push_back(entry);
     }
 
-    // logArgs("validatePort result:", result);
+    // logArgsInfo("validatePort result:", result);
 
     return result;
 }
@@ -101,7 +101,7 @@ ActionResultPtr Validator::validate<CompanionAction>(CompanionActionPtr action)
 
     bool result = nameResult && ipAddressResult && portResult;
 
-    logArgs("companion data validation result:", result);
+    logTemplateInfo("companion data validation result: {}", result);
 
     return getResult(result);
 }
@@ -111,7 +111,7 @@ ActionResultPtr Validator::validate<PasswordAction>(PasswordActionPtr action)
 {
     bool result = validatePassword(action->password());
 
-    logArgs("companion data validation result:", result);
+    logTemplateInfo("companion data validation result: {}", result);
 
     return getResult(result);
 }

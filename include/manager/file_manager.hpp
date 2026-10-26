@@ -44,7 +44,7 @@ public:
         auto _operator = getOperatorByType<T>(networkId);
 
         if (!_operator) {
-            logTemplateError("file operator was not found for networkId {}", networkId);
+            logTemplateError("file operator for networkId '{}' not found ", networkId);
 
             return;
         }
@@ -52,7 +52,7 @@ public:
         _operator->logResult();
 
         if (!removeOperator(networkId))
-            logTemplateInfo("remove file operator error for networkId {}", networkId);
+            logTemplateInfo("remove file operator error for networkId '{}'", networkId);
 
         // if (fileOperator)
         //     delete fileOperator;  // TODO remove

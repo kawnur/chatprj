@@ -18,11 +18,11 @@ bool ChatClient::connect()
 {
     auto lambda = [this]()
     {
-        logArgs("ChatClient connects to", ipAddress_, port_);
+        logTemplateInfo("client connects to '{0}' '{1}'", ipAddress_, port_);
 
         boost::asio::connect(socket_, resolver_.resolve(ipAddress_, std::to_string(port_)));
 
-        logArgs("socket_.is_open():", socket_.is_open());
+        logTemplateInfo("socket is open: {}", socket_.is_open());
 
         isConnected_ = true;
     };
@@ -36,11 +36,11 @@ bool ChatClient::disconnect()
 {
     auto lambda = [this]()
     {
-        logArgs("ChatClient disconnects from", ipAddress_, port_);
+        logTemplateInfo("client disconnects from '{0}' '{1}'", ipAddress_, port_);
 
         socket_.close();
 
-        logArgs("socket_.is_open():", socket_.is_open());
+        logTemplateInfo("socket is open: {}", socket_.is_open());
 
         isConnected_ = false;
     };
@@ -61,7 +61,7 @@ bool ChatClient::send(std::string text)
     };
 
     runAndLogException(lambda);
-    logArgs("client sent message:", text);
+    logTemplateInfo("client sent message: {}", text);
 
     return sent;
 }

@@ -54,9 +54,9 @@ public:
         PGresultPtr dbResult = sendRequestAndReturnResult(command);
 
         if (log_) {
-            logArgs(logDelimiter);
-            logArgs(requestData.logMark());
-            logArgs("dbResult:", dbResult.get());
+            logArgsInfo(logDelimiter);
+            logArgsInfo(requestData.logMark());
+            logArgsInfo("dbResult:", dbResult.get());
         }
 
         if (!dbResult) {
@@ -74,9 +74,9 @@ public:
         }
 
         if (log_) {
-            // logArgs("dbData->size():", dbData->size());
+            // logArgsInfo("dbData->size():", dbData->size());
             replyData->log();
-            logArgs(logDelimiter);
+            logArgsInfo(logDelimiter);
         }
 
         return replyData;

@@ -12,9 +12,9 @@ MessageInfoPtr CompanionMessageStorage::getMessageInfo(int id)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto result = map_.find(id);
+    auto lambda = [&]() { return map_.at(id); };
 
-    return (result == map_.end()) ? nullptr : result->second;
+    return runAndReturnSharedPtr<MessageInfo>(lambda);
 }
 
 MessageInfoPtr CompanionMessageStorage::getMessageInfoByNetworkId(const std::string &networkId)
@@ -121,6 +121,7 @@ MessageInfoPtr MessageStorage::getMessageInfo(int companionId, int messageId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
+    // TODO use util
     auto result = storage_.find(companionId);
 
     return (result == storage_.end()) ? nullptr : result->second.getMessageInfo(messageId);
@@ -130,9 +131,17 @@ MessageInfoPtr MessageStorage::getMessageInfoByNetworkId(int companionId, const 
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto result = storage_.find(companionId);
+    // TODO use util
+    auto iter = storage_.find(companionId);
+    bool result = (iter != storage_.end());
 
-    return (result == storage_.end()) ? nullptr : result->second.getMessageInfoByNetworkId(networkId);
+    if (result) {
+        return iter->second.getMessageInfoByNetworkId(networkId);
+    } else {
+        logTemplateError("companion with id '{}' not found", companionId);
+
+        return nullptr;
+    }
 }
 
 MessagePtr MessageStorage::getEarliestMessage(int companionId)

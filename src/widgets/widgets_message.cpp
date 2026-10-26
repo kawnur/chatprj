@@ -190,7 +190,6 @@ void FileMessageWidget::addMembersToLayout()
 {
     layout_->addWidget(headerLabel_.get());
     fileWidgetLayout_->addWidget(messageLabel_.get());
-    logArgs("showButton_:", showButton_);
 
     if (showButton_)
         fileWidgetLayout_->addWidget(downloadButton_.get());

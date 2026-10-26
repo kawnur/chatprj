@@ -45,13 +45,13 @@ bool NetworkEntity::start()
     bool result = true;
 
     if (!startServer()) {
-        logArgsError("problem with server start for companion id", companionId_);
+        logTemplateError("server start error for companion id '{}'", companionId_);
 
         result = false;
     }
 
     if (!createClient()) {
-        logArgsError("problem with client creation for companion id", companionId_);
+        logArgsError("client creation error for companion id '{}'", companionId_);
 
         result = false;
     }

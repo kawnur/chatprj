@@ -554,13 +554,13 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 
     bool isAntecedent = messageState->isAntecedent();
 
-    logArgs("isAntecedent:", isAntecedent);
+    logTemplateInfo("isAntecedent: {}", isAntecedent);
 
     if (isAntecedent) {
         if (antecedentMessagesCounter_ != 0)
             --antecedentMessagesCounter_;
 
-        logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
+        logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
 
         messageState->setIsAntecedent(false);
 
@@ -587,7 +587,7 @@ void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
 
         ++antecedentMessagesCounter_;
 
-        logArgs("antecedentMessagesCounter_:", antecedentMessagesCounter_);
+        logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
     }
 
     auto widget = getGraphicManager()->buildMessageWidget(companion_, message);
@@ -699,6 +699,6 @@ std::shared_ptr<RightPanelWidget> StubWidgetGroup::right() const
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)
 {
     logTemplateInfo(
-        "name: {0}, ipAddress: {1}, serverPort_: {2}, clientPort_: {3}",
+        "name: {0}, ipAddress: {1}, serverPort: {2}, clientPort: {3}",
         object->name(), object->ipAddress(), object->serverPort(), object->clientPort());
 }

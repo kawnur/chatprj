@@ -295,7 +295,7 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
             bool condition2 = (type == QEvent::KeyPress && condition21);
 
             if (condition1 || condition2) {
-                logTemplateInfo("scroll bar minimum event type {}", getString(event->type()));
+                logTemplateInfo("scroll bar minimum event type '{}'", getString(event->type()));
 
                 getGraphicManager()->addEarlyMessages(companion_);
             }
@@ -443,7 +443,7 @@ void MainWidget::set()
 
     // show - hide widget
     if (!addWidget(MWContainerPosition::LEFT, showHide_))
-        logArgsError("addWidgetToContainerAndSetParentTo error");
+        logArgsError("addWidget error");
 
     // blur effect
     initBlurEffect();

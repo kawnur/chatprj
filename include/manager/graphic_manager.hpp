@@ -10,7 +10,8 @@
 #include "alias.hpp"
 #include "constants.hpp"
 
-using GraphicManagerData = std::unordered_map<int, std::pair<CompanionPtr, WidgetGroupPtr>>;
+using GraphicManagerMapValue = std::pair<CompanionPtr, WidgetGroupPtr>;
+using GraphicManagerMap = std::unordered_map<int, GraphicManagerMapValue>;
 
 class GraphicManager
 {
@@ -27,7 +28,7 @@ public:
     CompanionPtr getCompanion(int id) const;
     CompanionPtr getCompanionByWidget(SocketInfoBaseWidget *widget) const;
     void updateMapping(CompanionPtr companion);
-    bool deleteWidgetGroup(CompanionPtr companion);
+    void deleteWidgetGroup(CompanionPtr companion);
     void preSelectCompanion(CompanionPtr companion);
     void postSelectCompanion(CompanionPtr companion);
     void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
@@ -67,6 +68,7 @@ public:
     std::filesystem::path getLastOpenedPath();
 
 private:
+    std::optional<GraphicManagerMapValue> getMappedValue(int id) const;
     WidgetGroupPtr getWidgetGroup(CompanionPtr companion) const;
     std::vector<CompanionPtr> getSortedCompanions();
     void hideSelectedCompanionCentralPanel();
@@ -80,7 +82,8 @@ private:
     // std::mutex messageToMessageWidgetMapMutex_;
     ManagerPtr manager_;
     MainWindowPtr mainWindow_;
-    GraphicManagerData map_;
+    GraphicManagerMap map_;
+    CompanionPtr selectedCompanion_;
 };
 
 GraphicManagerPtr getGraphicManager();

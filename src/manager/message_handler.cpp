@@ -19,7 +19,7 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
 void MessageHandler::addMessage1(
     CompanionPtr companion, DBReplyDataPtr data, std::size_t index)
 {
-    logArgs("adding message with id", data->getValue(index, "id"));
+    logTemplateInfo("adding message with id '{}'", data->getValue(index, "id"));
 
     // create message
     auto message = builder_.buildMessageFromDbData(companion, data, index);
@@ -328,19 +328,19 @@ void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr mess
 void MessageHandler::receiveConfirmation(CompanionPtr companion, MessagePtr message)
 {
     if (!message->isReceived())
-        return;  // message was not received, resend message
+        return;  // TODO message was not received, resend message
 
     // successfully received
     // mark message as received
     auto info = storage_.getMessageInfoByNetworkId(companion->id(), message->networkId());
+
+    if (!info)
+        return;
+
     auto state = info->message()->state();
 
-    if (!state) {
-        // strange situation
-        logArgsError("received confirmation for message which is not in messageMapping_");
-
+    if (!state)
         return;
-    }
 
     // message found
     state->setIsReceived(true);
@@ -352,32 +352,15 @@ void MessageHandler::receiveConfirmationRequest(CompanionPtr companion, MessageP
     // search for message in storage
     auto info = storage_.getMessageInfoByNetworkId(companion->id(), message->networkId());
 
-    if (!info) {
-        // probably old message from previous sessions, search for it in db
-        logArgsInfo("probably old message from previous sessions, search for it in db");
-
+    if (!info)
         return;
-    }
 
     // verifiable message
     auto verifiable = info->message();
-
-    logArgs("message:", verifiable.get(), "info:", info.get());
-
     auto state = verifiable->state();
 
-    if (!state)
+    if (!state || !state->isReceived())
         return;
-
-    // message found in managers's mapping
-    if (!state->isReceived()) {
-        // strange situation
-        logArgsError(
-            "received reception confirmation request "
-            "for message in messageMapping_ with isReceived = false");
-
-        return;
-    }
 
     // send confirmation
     bool result = buildAndSendConfirmation(companion, message);
@@ -405,7 +388,7 @@ void MessageHandler::receiveChatHistoryData(CompanionPtr companion, const nlohma
 
 void MessageHandler::receiveFileRequest(CompanionPtr companion, MessagePtr message)
 {
-    logArgs(__FUNCTION__);
+    logArgsInfo(__FUNCTION__);
 
     manager_->sendFile(companion, message);
 }
@@ -419,7 +402,7 @@ void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr mes
 {
     bool success = (message->networkMessageType() == NetworkMessageType::FILE_DATA_CHECK_SUCCESS);
 
-    logArgs(__FUNCTION__, success);
+    logArgsInfo(__FUNCTION__, success);
 
     auto entryTemplate = (success)
         ? "file '{}' received by companion successfully"
@@ -434,7 +417,7 @@ void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr mes
 
 void MessageHandler::receiveFileDataTransmissionEnd(CompanionPtr companion, MessagePtr message)
 {
-    logArgs(__FUNCTION__);
+    logArgsInfo(__FUNCTION__);
 
     auto receiveResult = manager_->stopFileDataReceiving(message);
 
@@ -448,7 +431,7 @@ void MessageHandler::receiveFileDataTransmissionEnd(CompanionPtr companion, Mess
 
 void MessageHandler::receiveFileDataTransmissionFailure(CompanionPtr companion, MessagePtr message)
 {
-    logArgs(__FUNCTION__);
+    logArgsInfo(__FUNCTION__);
 
     manager_->stopFileDataSending(message);
 }
@@ -497,20 +480,11 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
 
         std::string networkId;
 
-        if (message) {
-            if (message->state()) {
-                networkId = message->networkId();
-            }
-            else {
-                logArgsError(
-                    "strange case: unsent message found in companions messages, "
-                    "but not found in companion's messageMapping_");
-            }
-        }
-        else {
+        if (message && message->state())
+            networkId = message->networkId();
+        else
             // add to companion's messages if needed
             message = builder_.buildUnsentTextMessageFromDbData(companion, data, i);
-        }
 
         // send over network
         bool result = sendMessageByNetwork(companion, message);
@@ -552,9 +526,9 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
 {
     auto lambda = [=, this]()  // ???
     {
-        auto sleepDuration = SLEEP_DURATION_INITIAL_MS;
+        auto sleep = SLEEP_DURATION_INITIAL_MS;
 
-        sleepForMS(sleepDuration);
+        sleepForMS(sleep);
 
         while (true) {
             if (message->isReceived())
@@ -565,8 +539,8 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
             bool result = sendMessageByNetwork(companion, message);
 
             // sleep
-            sleepForMS(sleepDuration);
-            sleepDuration *= SLEEP_DURATION_INCREASE_RATE;
+            sleepForMS(sleep);
+            sleep *= SLEEP_DURATION_INCREASE_RATE;
         }
     };
 

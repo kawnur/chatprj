@@ -9,7 +9,8 @@
 #include "widgets_message.hpp"
 #include "utils.hpp"
 
-GraphicManager::GraphicManager() : manager_(nullptr), mainWindow_(nullptr), map_()
+GraphicManager::GraphicManager()
+    : manager_(nullptr), mainWindow_(nullptr), map_(), selectedCompanion_(nullptr)
 {
     mainWindow_ = std::make_shared<MainWindow>();
 }
@@ -54,12 +55,6 @@ void GraphicManager::buildWidgetGroups()
 
     logTemplateInfo("companionsNumber: {0}, childrenSize: {1}", companionsNumber, childrenSize);
 
-    if (companionsNumber == 0 && childrenSize == 0) {
-        logArgsWarning("strange case, empty sockets panel");
-
-        return;
-    }
-
     // TODO check if sockets already are children
     mainWindow_->hideCompanionStub();
 
@@ -77,21 +72,27 @@ bool GraphicManager::addCompanion(CompanionPtr companion)
     auto result = map_.emplace(companion->id(), value);
 
     if (!result.second)
-        logTemplateError("companion with id '{}' exists im graphic manager mapping", id);
+        logTemplateError("companion with id '{}' exists in graphic manager mapping", id);
 
     return result.second;
 }
 
-CompanionPtr GraphicManager::getCompanion(int id) const
+std::optional<GraphicManagerMapValue> GraphicManager::getMappedValue(int id) const
 {
-    auto lambda = [&](int id) { return map_.at(id).first; };
-
-    auto result = runAndReturnSharedPtr<Companion>(lambda, id);
+    auto lambda = [&]() { return map_.at(id); };
+    auto result = runAndReturnOptional<GraphicManagerMapValue>(lambda);
 
     if (!result)
-        logTemplateError("companion with id '{}' not found in manager's map", id);
+        logTemplateError("companion with id '{}' not found", id);
 
     return result;
+}
+
+CompanionPtr GraphicManager::getCompanion(int id) const
+{
+    auto value = getMappedValue(id);
+
+    return (value) ? value.value().first : nullptr;
 }
 
 CompanionPtr GraphicManager::getCompanionByWidget(SocketInfoBaseWidget *widget) const
@@ -108,19 +109,9 @@ CompanionPtr GraphicManager::getCompanionByWidget(SocketInfoBaseWidget *widget) 
 
 WidgetGroupPtr GraphicManager::getWidgetGroup(CompanionPtr companion) const
 {
-    WidgetGroupPtr group = nullptr;
+    auto value = getMappedValue(companion->id());
 
-    auto id = companion->id();
-
-    try {
-        group = map_.at(id).second;
-    } catch(std::out_of_range) {
-        logTemplateError("mapCompanionToWidgetGroup_ does not conain id {0}", id);
-
-        return nullptr;
-    }
-
-    return group;
+    return (value) ? value.value().second : nullptr;
 }
 
 void GraphicManager::updateMapping(CompanionPtr companion)
@@ -134,49 +125,42 @@ void GraphicManager::updateMapping(CompanionPtr companion)
     // companion->addMessageWidgetsToChatHistory(group);  // ???
 }
 
-bool GraphicManager::deleteWidgetGroup(CompanionPtr companion)
+void GraphicManager::deleteWidgetGroup(CompanionPtr companion)
 {
     auto lambda = [&](const auto &iterator)
     {
         return iterator.second.first == companion;
     };
 
-    // TODO use range
     auto result = std::ranges::find_if(map_, lambda);
 
-    if (result == map_.end()) {
-        // showErrorDialogAndLogError("Companion was not found in mapping at deletion");
-        return false;
-    }
-    else {
-        // if (selectedCompanion_ == companion)
-        //     selectedCompanion_ = nullptr;
-
+    if (result != map_.end()) {
         map_.erase(result);
 
-        return true;
+        if (selectedCompanion_ == companion)
+            selectedCompanion_ = nullptr;
     }
 }
 
 void GraphicManager::hideSelectedCompanionCentralPanel()
 {
-    auto selected = manager_->getSelectedCompanion();
+    // auto selected = manager_->getSelectedCompanion();
 
-    if (!selected)
+    if (!selectedCompanion_)
         return;
 
-    auto group = getWidgetGroup(selected);
+    auto group = getWidgetGroup(selectedCompanion_);
     hideWidgetGroupCentralPanel(group);
 }
 
 void GraphicManager::showSelectedCompanionCentralPanel()
 {
-    auto selected = manager_->getSelectedCompanion();
+    // auto selected = manager_->getSelectedCompanion();
 
-    if (!selected)
+    if (!selectedCompanion_)
         return;
 
-    auto group = getWidgetGroup(selected);
+    auto group = getWidgetGroup(selectedCompanion_);
     showWidgetGroupCentralPanel(group);
 }
 
@@ -232,11 +216,10 @@ void GraphicManager::showWidgetGroupCentralPanel(WidgetGroupPtr group)
     group->showCentralPanel();
 }
 
-void GraphicManager::addWidget(
-    MWContainerPosition position, QWidgetPtr widget)
+void GraphicManager::addWidget(MWContainerPosition position, QWidgetPtr widget)
 {
     if (!mainWindow_->addWidget(position, widget))
-        logArgsError("addWidgetToContainerAndSetParentTo error");
+        logArgsError(Q_FUNC_INFO, "error");
 }
 
 void GraphicManager::addCompanionWidget(SocketInfoBaseWidgetPtr widget)
@@ -429,7 +412,9 @@ CompanionDataPtr GraphicManager::getCompanionData(CompanionPtr companion)
 
 void GraphicManager::resetSelectedCompanion(CompanionPtr companion)
 {
-    manager_->resetSelectedCompanion(companion);
+    preSelectCompanion(selectedCompanion_);
+    selectedCompanion_ = companion;
+    postSelectCompanion(selectedCompanion_);
 }
 
 void GraphicManager::resetSelectedCompanion(SocketInfoBaseWidget *previous)

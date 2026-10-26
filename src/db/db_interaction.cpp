@@ -47,7 +47,7 @@ DBRequestData::DBRequestData(DBRequestType type) : logMark_(), requestTemplate_(
 
     // check value size
     if (size < 3) {
-        logTemplateError("dbRequestDataMap value size {} is less than expected", size);
+        logTemplateError("dbRequestDataMap value size '{}' is less than expected", size);
 
         return;
     }
@@ -240,12 +240,12 @@ int DBReplyData::getDataFromResult(PGresultPtr result, int maxTuples)
 
 void DBReplyData::log()
 {
-    logArgs(logDelimiter);
+    logArgsInfo(logDelimiter);
 
     for (auto &element : buildDataStringVector())
-        logArgs(element);
+        logArgsInfo(element);
 
-    logArgs(logDelimiter);
+    logArgsInfo(logDelimiter);
 }
 
 void DBReplyData::sortDataById()

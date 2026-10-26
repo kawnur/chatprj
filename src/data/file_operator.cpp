@@ -130,7 +130,7 @@ void SenderOperator::sendFile(CompanionPtr companion, const std::string &network
             if (result)
                 continue;
 
-            logTemplateError("file sending stopped because of error, path: {}", path_);
+            logTemplateError("file sending error, path: {}", path_);
             setState(FileTransmissionState::SEND_FAILURE);
 
             return;
@@ -171,8 +171,8 @@ bool ReceiverOperator::getOperationResult()
 
     md5Hash_ = hashFileMD5(path_.string());
 
-    logArgs("fileMD5Hash_:", md5Hash_);
-    logArgs("md5HashFromSender_:", md5HashFromSender_);
+    auto entry = "{0}, file hash, calculated: {1}, from sender: {2}"s;
+    logTemplateInfo(entry, md5Hash_, md5HashFromSender_);
 
     result_ = (md5Hash_ == md5HashFromSender_);
 
@@ -196,7 +196,7 @@ bool ReceiverOperator::createFileAndOpen()
     auto openResult = buf_.open(path_, std::ios::binary | std::ios::out);
 
     if (!openResult)
-        logTemplateError("file {} open error", path_);
+        logTemplateError("file '{}' opening error", path_);
 
     return (openResult) ? true : false;
 }

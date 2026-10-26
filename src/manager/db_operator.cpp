@@ -31,7 +31,7 @@ void DBOperator::connectToDB()
 PGresultPtr DBOperator::sendRequestAndReturnResult(const std::string &command)
 {
     if (log_)
-        logArgs(command);
+        logArgsInfo(command);
 
     std::lock_guard<std::mutex> lock(mutex_);
 

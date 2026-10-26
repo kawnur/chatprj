@@ -216,7 +216,7 @@ bool runAndReturnTrue(F &&func, Ts&&... args)
 }
 
 template<typename T, typename F, typename... Ts>
-std::optional<T> runAndReturnOptionalResult(F &&func, Ts&&... args)
+std::optional<T> runAndReturnOptional(F &&func, Ts&&... args)
 {
     try {
         return func(args...);

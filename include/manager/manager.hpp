@@ -27,7 +27,7 @@ public:
     Manager(GraphicManagerPtr graphicManager);
     ~Manager();
 
-    CompanionPtr getSelectedCompanion();
+    // CompanionPtr getSelectedCompanion();
     // bool isInitialised();
     // bool userIsAuthenticated();
     void set();
@@ -96,7 +96,7 @@ public:
     void fillCompanionMessageMapping(CompanionPtr companion, bool containersAreEmpty);
 
     // widgets
-    void resetSelectedCompanion(CompanionPtr companion);
+    // void resetSelectedCompanion(CompanionPtr companion);
     void clearChatHistory(CompanionPtr companion);
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
@@ -199,7 +199,7 @@ private:
     NetworkManagerPtr networkManager_;
     std::mutex messageStateToMessageMapMutex_;
     // bool userIsAuthenticated_;
-    CompanionPtr selectedCompanion_;
+    // CompanionPtr selectedCompanion_;
     ActionPtr currentAction_;
 };
 

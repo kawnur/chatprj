@@ -21,12 +21,13 @@ void FileManager::setLastOpenedPath(const std::filesystem::path &path)
     lastOpenedPath_ = path;
 }
 
+// TODO make one of two methods
 void FileManager::addSenderOperator(const std::string &networkId, const std::filesystem::path &path)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (map_.count(networkId) != 0) {
-        logTemplateError("file operator for key {} already exists", networkId);
+        logTemplateError("file operator for key '{}' already exists", networkId);
 
         return;
     }
@@ -41,7 +42,7 @@ void FileManager::addReceiverOperator(MessagePtr message, const std::filesystem:
     auto networkId = message->networkId();
 
     if (map_.count(networkId) != 0) {
-        logTemplateError("file operator for key {} already exists", networkId);
+        logTemplateError("file operator for key '{}' already exists", networkId);
 
         return;
     }
@@ -112,7 +113,7 @@ void FileManager::sendFile(CompanionPtr companion, const std::string &networkId)
     auto sender = getOperator(networkId);
 
     if (!sender) {
-        logTemplateError("companion has no file operator for networkId = {}", networkId);
+        logTemplateError("companion has no file operator for networkId '{}'", networkId);
 
         return;
     }
@@ -124,7 +125,7 @@ void FileManager::sendFile(CompanionPtr companion, const std::string &networkId)
 
 void FileManager::receiveFileData(CompanionPtr companion, MessagePtr message)
 {
-    logArgs(__FUNCTION__);
+    logArgsInfo(__FUNCTION__);
 
     auto networkId = message->networkId();
     auto receiver = getOperatorByType<ReceiverOperator>(networkId);
@@ -132,7 +133,7 @@ void FileManager::receiveFileData(CompanionPtr companion, MessagePtr message)
     if (receiver)
         receiver->receiveFilePart(message->data()->data());
     else
-        logTemplateError("companion has no file operator for networkId = {}", networkId);
+        logTemplateError("companion has no file operator for networkId '{}'", networkId);
 }
 
 bool FileManager::mapIsEmpty()
@@ -233,8 +234,9 @@ std::optional<bool> FileManager::stopFileDataReceiving(MessagePtr message)
 void FileManager::stopFileDataSending(MessagePtr message)
 {
     auto networkId = message->networkId();
+    auto path = getFilePathString(networkId);
 
-    logTemplateInfo("companion did not receive file '{}'", getFilePathString(networkId));
+    logTemplateInfo("companion did not receive file '{}'", path);
 
     removeFileOperator<SenderOperator>(networkId);
 }

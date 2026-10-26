@@ -117,7 +117,7 @@ bool MessageMetaData::setFields(CompanionPtr companion, const nlohmann::json &da
 bool MessageMetaData::isValid()
 {
     if (companionId_ == 0 || timestampTz_ == "") {
-        logArgsError("MessageMetaData is invalid, error adding message to db");
+        logArgsError("MessageMetaData is invalid, adding message to db error");
 
         return false;
     }

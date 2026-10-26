@@ -49,7 +49,7 @@ std::string buildTextAsUnorderedList(const std::vector<std::string> &messages)
 
     auto text = ""s;
 
-    logArgs("messages.size():", messages.size());
+    logTemplateInfo("messages.size(): {}", messages.size());
 
     for (auto &message : messages)
         text += getStringByFormat("- {}\n", message);
@@ -196,7 +196,7 @@ std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variabl
     auto value = std::getenv(variableName.data());
 
     if (!value) {
-        logTemplateError("environment variable {} not found", variableName);
+        logTemplateError("environment variable '{}' not found", variableName);
 
         return std::nullopt;
     }

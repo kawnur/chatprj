@@ -7,7 +7,7 @@ void logDBResultUnknownField(PGresultPtr result, int row, int column)
     auto value = PQgetvalue(result.get(), row, column);
     auto logMark = (value) ? std::string(value) : "nullptr";
 
-    logArgsError("unknown field name:", logMark);
+    logTemplateError("unknown field name: {}", logMark);
 }
 
 std::string buildLogEntryPrefix(LogType type)
