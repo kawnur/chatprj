@@ -26,11 +26,10 @@ public:
     void buildWidgetGroups();
     bool addCompanion(CompanionPtr companion);
     CompanionPtr getCompanion(int id) const;
-    CompanionPtr getCompanionByWidget(SocketInfoBaseWidget *widget) const;
     void updateMapping(CompanionPtr companion);
     void deleteWidgetGroup(CompanionPtr companion);
-    void preSelectCompanion(CompanionPtr companion);
-    void postSelectCompanion(CompanionPtr companion);
+    void preSelectCompanion();
+    void postSelectCompanion();
     void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
     void addLog(const QString &text);
     void addWidget(MWContainerPosition position, QWidgetPtr widget);
@@ -59,7 +58,7 @@ public:
     bool clientAction(CompanionPtr companion, bool isConnected);
     CompanionDataPtr getCompanionData(CompanionPtr companion);
     void resetSelectedCompanion(CompanionPtr companion);
-    void resetSelectedCompanion(SocketInfoBaseWidget *previous);
+    void resetSelectedCompanion(SocketInfoBaseWidget *widget);
 
     bool setMappedMessageWidget(
         CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);

@@ -298,7 +298,6 @@ void SocketInfoWidget::buildFields(WidgetGroupPtr group)
 
     connect(
         connect_.get(), &QPushButton::clicked,
-        // this, &SocketInfoWidget::clientAction, Qt::QueuedConnection);
         group.get(), &WidgetGroup::clientAction, Qt::QueuedConnection);
 
     received_ = std::make_shared<IndicatorWidget>(NEW_MESSAGES_INDICATOR_WIDGET_SIZE, false);
@@ -318,7 +317,6 @@ void SocketInfoWidget::buildFields(WidgetGroupPtr group)
     // connections
     connect(
         requestHistory_.get(), &QAction::triggered,
-        // this, &SocketInfoWidget::requestHistoryFromCompanionAction,
         group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -360,12 +358,14 @@ void SocketInfoWidget::changeColor(QColor &color)
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 {
-    auto baseObject = qobject_cast<SocketInfoBaseWidget *>(this);
-
-    auto newCompanion = getGraphicManager()->getCompanionByWidget(baseObject);
-    getGraphicManager()->resetSelectedCompanion(newCompanion);
+    getGraphicManager()->resetSelectedCompanion(companion_);
 
     QWidget::mousePressEvent(event);
+}
+
+CompanionPtr SocketInfoWidget::companion()
+{
+    return companion_;
 }
 
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
@@ -468,36 +468,18 @@ void WidgetGroup::set()
         getGraphicManager()->getMainWindow(), companion_->name());
 
     centralPanel_->set(companion_);
-
-    graphicManager->addWidget(
-        MWContainerPosition::CENTRAL, centralPanel_);
-
+    graphicManager->addWidget(MWContainerPosition::CENTRAL, centralPanel_);
     centralPanel_->hide();
 
     connect(
-        this, &WidgetGroup::addMessageWidgetSignal,
-        this, &WidgetGroup::addMessageWidgetSlot,
+        this, &WidgetGroup::addMessageWidgetSignal, this, &WidgetGroup::addMessageWidgetSlot,
         Qt::QueuedConnection);
-
-    // connect(
-    //     this, &WidgetGroup::askUserForHistorySendingConfirmationSignal,
-    //     this, &WidgetGroup::askUserForHistorySendingConfirmationSlot,
-    //     Qt::QueuedConnection);
-
-    // connect(
-    //     this, &WidgetGroup::buildChatHistorySignal,
-    //     this, &WidgetGroup::buildChatHistorySlot,
-    //     Qt::QueuedConnection);
 }
 
 void WidgetGroup::clearHistory()
 {
     centralPanel_->clearHistory();
-
-    auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
-
-    if (cast)
-        cast->setNewMessagesIndicatorOff();
+    setNewMessagesIndicatorOff();
 
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
     antecedentMessagesCounter_ = 0;
@@ -514,11 +496,6 @@ void WidgetGroup::showCentralPanel()
     centralPanel_->scrollDownHistory();
 }
 
-SocketInfoBaseWidgetPtr WidgetGroup::getSocketInfoBase()
-{
-    return socketInfoBase_;
-}
-
 void WidgetGroup::sortHistory()
 {
     centralPanel_->sortHistory(true);
@@ -532,15 +509,32 @@ void WidgetGroup::messageAdded()
     if (antecedentMessagesCounter_ <= 0)
         return;
 
-    auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
-
-    if (cast)
-        cast->setNewMessagesIndicatorOn();
+    setNewMessagesIndicatorOn();
 }
 
 void WidgetGroup::updateSocketInfoWidget()
 {
     socketInfoBase_->updateFields();
+}
+
+void WidgetGroup::select()
+{
+    socketInfoBase_->select();
+}
+
+void WidgetGroup::unselect()
+{
+    socketInfoBase_->unselect();
+}
+
+void WidgetGroup::setNewMessagesIndicatorOn()
+{
+    socketInfoBase_->setNewMessagesIndicatorOn();
+}
+
+void WidgetGroup::setNewMessagesIndicatorOff()
+{
+    socketInfoBase_->setNewMessagesIndicatorOff();
 }
 
 void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
@@ -564,12 +558,8 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 
         messageState->setIsAntecedent(false);
 
-        if (antecedentMessagesCounter_ == 0) {
-            auto cast = dynamic_pointer_cast<SocketInfoWidget>(socketInfoBase_);
-
-            if (cast)
-                cast->setNewMessagesIndicatorOff();
-        }
+        if (antecedentMessagesCounter_ == 0)
+            setNewMessagesIndicatorOff();
     }
 }
 

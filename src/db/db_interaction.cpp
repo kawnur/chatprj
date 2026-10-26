@@ -174,10 +174,10 @@ std::string DBReplyData::getValue(std::size_t position, const std::string &key)
 
 bool DBReplyData::findValue(const std::string &key, const std::string &value)
 {
-    auto lambda = [&](const auto &iterator)
+    auto lambda = [&](const auto &item)
     {
         try {
-            return iterator.at(key) == value;
+            return item.at(key) == value;
         } catch (...) {
             return false;
         }

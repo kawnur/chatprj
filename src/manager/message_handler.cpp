@@ -438,7 +438,7 @@ void MessageHandler::receiveFileDataTransmissionFailure(CompanionPtr companion, 
 
 void MessageHandler::addEarlyMessages(CompanionPtr companion)
 {
-    if (companion)
+    if (!companion)
         return;
 
     // get earliest message in current messages

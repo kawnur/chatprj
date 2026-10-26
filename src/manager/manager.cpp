@@ -14,14 +14,9 @@
 Manager::Manager(GraphicManagerPtr graphicManager)
     : graphicManager_(graphicManager), dbOperator_(), messageHandler_(), fileManager_(),
     networkManager_(new NetworkManager), messageStateToMessageMapMutex_(),
-    /*userIsAuthenticated_(false), selectedCompanion_(nullptr), */currentAction_(nullptr) {}
+    /*userIsAuthenticated_(false), */currentAction_(nullptr) {}
 
 Manager::~Manager() {}
-
-// CompanionPtr Manager::getSelectedCompanion()
-// {
-//     return selectedCompanion_;
-// }
 
 // bool Manager::userIsAuthenticated()
 // {
@@ -34,6 +29,7 @@ void Manager::set()
     //     exitUtil(EXIT_FAILURE);
 
     messageHandler_.setManager(shared_from_this());
+    fileManager_.setManager(shared_from_this());
     networkManager_->setManager(shared_from_this());
 
     bool companionsBuilt = buildCompanions();
@@ -100,13 +96,6 @@ void Manager::receiveMessage(int companionId, const std::string &json)
 
     messageHandler_.receiveMessage(companion, json);
 }
-
-// void Manager::resetSelectedCompanion(CompanionPtr companion)  // TODO rewrite
-// {
-//     graphicManager_->preSelectCompanion(selectedCompanion_);
-//     selectedCompanion_ = companion;
-//     graphicManager_->postSelectCompanion(selectedCompanion_);
-// }
 
 void Manager::initCompanionCreation()
 {
@@ -579,11 +568,7 @@ ActionResultPtr Manager::addCompanionToNetworkManagerMap(int id, CompanionDataPt
 
 void Manager::deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion)
 {
-    // auto result = graphicManager_->deleteWidgetGroup(companion);
     graphicManager_->deleteWidgetGroup(companion);
-
-    // if (result && selectedCompanion_ == companion)
-    //     selectedCompanion_ = nullptr;
 }
 
 void Manager::sendUnsentMessages(CompanionPtr companion)
@@ -771,7 +756,8 @@ DBReplyDataPtr Manager::getEarlyMessagesDBData(int companionId, int messageId)
 {
     // get messages data
     auto data = getDBData(
-        DBRequestType::GET_EARLY_MESSAGES_BY_MESSAGE_ID, companionId, messageId);
+        DBRequestType::GET_EARLY_MESSAGES_BY_MESSAGE_ID, companionId, messageId,
+        NUMBER_OF_MESSAGES_TO_GET_FROM_DB);
 
     if (data && data->isEmpty()) {
         logTemplateWarning(

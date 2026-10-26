@@ -46,11 +46,6 @@ PGresultPtr DBOperator::sendRequestAndReturnResult(const std::string &command)
     return result;
 }
 
-bool DBOperator::isReady()
-{
-    return (connection_) ? true : false;
-}
-
 bool getConnectionStatus(PGconnPtr connection)
 {
     ConnStatusType status = PQstatus(connection.get());

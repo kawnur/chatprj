@@ -21,9 +21,9 @@ MessageInfoPtr CompanionMessageStorage::getMessageInfoByNetworkId(const std::str
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iter)
+    auto lambda = [&](const auto &pair)
     {
-        return iter.second->message()->networkId() == networkId;
+        return pair.second->message()->networkId() == networkId;
     };
 
     auto result = std::ranges::find_if(map_, lambda);
@@ -35,9 +35,9 @@ MessagePtr CompanionMessageStorage::getEarliestMessage()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    auto lambda = [&](const auto &iterator1, const auto &iterator2)
+    auto lambda = [&](const auto &pair1, const auto &pair2)
     {
-        return iterator1.second->message()->id() < iterator2.second->message()->id();
+        return pair1.second->message()->id() < pair2.second->message()->id();
     };
 
     auto min = std::ranges::min_element(map_, lambda);
@@ -78,9 +78,9 @@ std::string CompanionMessageStorage::generateNetworkId(bool lock)
 
         auto lambda = [&]()
         {
-            auto lambdaInternal = [&](const auto &iter)
+            auto lambdaInternal = [&](const auto &pair)
             {
-                return iter.second->message()->networkId() == networkId;
+                return pair.second->message()->networkId() == networkId;
             };
 
             auto iterator = std::ranges::find_if(map_, lambdaInternal);

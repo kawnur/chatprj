@@ -114,10 +114,14 @@ public:
     virtual ~SocketInfoBaseWidget() {}
 
     virtual bool isStub() { return false; }
+    virtual void select() {}
+    virtual void unselect() {}
+    virtual void setNewMessagesIndicatorOn() {}
     virtual void setNewMessagesIndicatorOff() {}
     virtual void updateFields() {}
     virtual bool isConnected() { return false; }
     virtual void updateState() {}
+    virtual CompanionPtr companion() { return nullptr; }
 
     void initializeFields();  // non-virtual because is called from constructor
 };
@@ -145,13 +149,15 @@ public:
     bool isStub() override;
     bool isSelected();
     bool isConnected() override;
-    void select();
-    void unselect();
+    void select() override;
+    void unselect() override;
     void updateFields() override;
-    void setNewMessagesIndicatorOn();
+    void setNewMessagesIndicatorOn() override;
     void setNewMessagesIndicatorOff() override;
 
     void updateState() override;
+
+    CompanionPtr companion() override;
 
 public slots:
     void updateCompanionAction();
@@ -247,10 +253,13 @@ public:
     void clearHistory();
     void hideCentralPanel();
     void showCentralPanel();
-    SocketInfoBaseWidgetPtr getSocketInfoBase();
     void sortHistory();
     void messageAdded();
     void updateSocketInfoWidget();
+    void select();
+    void unselect();
+    void setNewMessagesIndicatorOn();
+    void setNewMessagesIndicatorOff();
 
 signals:
     void addMessageWidgetSignal(MessagePtr message);

@@ -94,7 +94,8 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
     return runAndReturnDefault([&]() { return children.at(children.size() - 1)->width(); }, -1);
 }
 
-CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name) : mutex_()
+CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name)
+    : PanelWidget(), mutex_()
 {
     historyScrollArea_ = nullptr;
     historyPalette_ = nullptr;
@@ -238,17 +239,28 @@ void CentralPanelWidget::sortHistory(bool lock)
     if (lock)
         std::lock_guard<std::mutex> lockObject(mutex_);
 
-    auto list = history_->children();
+    // auto list = history_->children();
+
+    QList<MessageWidget *> list;
+
+    for (const auto &item : history_->children()) {
+        auto cast = qobject_cast<MessageWidget *>(item);
+
+        if (cast)
+            list.push_back(cast);
+    }
 
     auto lambda = [&](const auto &item)
     {
-        auto cast = qobject_cast<MessageWidget *>(item);
-        auto message = cast->message();
+        // auto cast = qobject_cast<MessageWidget *>(item);
+        // auto message = cast->message();
+        auto message = item->message();
 
         return (message) ? message->time() : ""s;
     };
 
-    auto sortingLambda = [&](QObject *element1, QObject *element2)
+    // auto sortingLambda = [&](QObject *element1, QObject *element2)
+    auto sortingLambda = [&](MessageWidget *element1, MessageWidget *element2)
     {
         auto res1 = lambda(element1);
         auto res2 = lambda(element2);
@@ -259,21 +271,41 @@ void CentralPanelWidget::sortHistory(bool lock)
         return res;
     };
 
+    auto print = [&]()
+    {
+        for (const auto l : list)
+            coutArgsWithSpaceSeparator(l->message()->text());
+    };
+
+    coutArgsWithSpaceSeparator("BEFORE SORTING");
+    print();
+
     std::ranges::sort(list, sortingLambda);
 
     coutArgsWithSpaceSeparator("AFTER SORTING");
+    print();
+
 
     for (auto &element : list) {
-        auto cast = qobject_cast<MessageWidget *>(element);
-        auto message = cast->message();
+        // auto cast = qobject_cast<MessageWidget *>(element);
+        // auto message = cast->message();
+
+        // coutArgsWithSpaceSeparator("message:", message.get());
+
+        // if (message)
+        //     coutArgsWithSpaceSeparator("element message:", message->text());
+
+        // historyLayout_->removeWidget(cast);
+        // historyLayout_->addWidget(cast);
+        auto message = element->message();
 
         coutArgsWithSpaceSeparator("message:", message.get());
 
         if (message)
             coutArgsWithSpaceSeparator("element message:", message->text());
 
-        historyLayout_->removeWidget(cast);
-        historyLayout_->addWidget(cast);
+        historyLayout_->removeWidget(element);
+        historyLayout_->addWidget(element);
     }
 }
 
@@ -358,8 +390,7 @@ void RightPanelWidget::set()
     log_->setParent(this);
 
     connect(
-        this, SIGNAL(addLogSignal(const QString &)), this, SLOT(addLogSlot(const QString &)),
-        Qt::QueuedConnection);
+        this, SIGNAL(addLogSignal(QString)), this, SLOT(addLogSlot(QString)), Qt::QueuedConnection);
 
     log_->setContextMenuPolicy(Qt::CustomContextMenu);
 

@@ -18,19 +18,18 @@
 #include "alias.hpp"
 #include "constants.hpp"
 
-// class PanelWidget : public QWidget
-// {
-//     Q_OBJECT
+class PanelWidget : public QWidget
+{
+    Q_OBJECT
 
-// public:
-//     PanelWidget();
-//     ~PanelWidget();
+public:
+    PanelWidget() = default;
+    ~PanelWidget() = default;
 
-// private:
+    virtual void set() {}
+};
 
-// };
-
-class LeftPanelWidget : public QWidget
+class LeftPanelWidget : public PanelWidget
 {
     Q_OBJECT
 
@@ -51,7 +50,7 @@ private:
     std::unique_ptr<QSpacerItem> spacer_;
 };
 
-class CentralPanelWidget : public QWidget
+class CentralPanelWidget : public PanelWidget
 {
     Q_OBJECT
 
@@ -60,6 +59,7 @@ public:
     ~CentralPanelWidget() = default;
 
     void set(CompanionPtr companion);
+    void set() override {}
     void addMessage(MessageWidgetPtr widget, bool isAntecedent);
     void scrollDownHistory();
     void clearHistory();
@@ -107,7 +107,7 @@ private slots:
     void saveFileSlot();
 };
 
-class RightPanelWidget : public QWidget
+class RightPanelWidget : public PanelWidget
 {
     Q_OBJECT
 
@@ -115,7 +115,7 @@ public:
     RightPanelWidget(QWidgetPtr parent);
     ~RightPanelWidget() = default;
 
-    void set();
+    void set() override;
     void addLog(const QString &text);
 
 public slots:
@@ -157,6 +157,7 @@ public:
 
         if (init) {
             panel_ = std::make_unique<T>(this->shared_from_this(), args...);
+            panel_->set();
             layout_->addWidget(panel_.get());
         }
     }

@@ -95,18 +95,6 @@ CompanionPtr GraphicManager::getCompanion(int id) const
     return (value) ? value.value().first : nullptr;
 }
 
-CompanionPtr GraphicManager::getCompanionByWidget(SocketInfoBaseWidget *widget) const
-{
-    auto lambda = [&](const auto &pair)
-    {
-        return pair.second.second->getSocketInfoBase().get() == widget;
-    };
-
-    auto result = std::ranges::find_if(map_, lambda);
-
-    return (result == map_.end()) ? nullptr : result->second.first;
-}
-
 WidgetGroupPtr GraphicManager::getWidgetGroup(CompanionPtr companion) const
 {
     auto value = getMappedValue(companion->id());
@@ -117,6 +105,10 @@ WidgetGroupPtr GraphicManager::getWidgetGroup(CompanionPtr companion) const
 void GraphicManager::updateMapping(CompanionPtr companion)
 {
     auto group = std::make_shared<WidgetGroup>(companion);
+
+    if (!group)
+        return;
+
     group->set();
 
     // no existance check
@@ -134,66 +126,73 @@ void GraphicManager::deleteWidgetGroup(CompanionPtr companion)
 
     auto result = std::ranges::find_if(map_, lambda);
 
-    if (result != map_.end()) {
-        map_.erase(result);
+    if (result == map_.end())
+        return;
 
-        if (selectedCompanion_ == companion)
-            selectedCompanion_ = nullptr;
-    }
+    map_.erase(result);
+
+    if (selectedCompanion_ == companion)
+        selectedCompanion_ = nullptr;
 }
 
 void GraphicManager::hideSelectedCompanionCentralPanel()
 {
-    // auto selected = manager_->getSelectedCompanion();
-
     if (!selectedCompanion_)
         return;
 
     auto group = getWidgetGroup(selectedCompanion_);
+
+    if (!group)
+        return;
+
     hideWidgetGroupCentralPanel(group);
 }
 
 void GraphicManager::showSelectedCompanionCentralPanel()
 {
-    // auto selected = manager_->getSelectedCompanion();
-
     if (!selectedCompanion_)
         return;
 
     auto group = getWidgetGroup(selectedCompanion_);
+
+    if (!group)
+        return;
+
     showWidgetGroupCentralPanel(group);
 }
 
-void GraphicManager::preSelectCompanion(CompanionPtr companion)  // TODO rewrite
+void GraphicManager::preSelectCompanion()
 {
-    if (companion) {
-        auto group = getWidgetGroup(companion);
-        auto cast = dynamic_pointer_cast<SocketInfoWidget>(group->getSocketInfoBase());
-
-        if (cast)
-            cast->unselect();
-
-        group->hideCentralPanel();
-    }
-    else {
+    if (!selectedCompanion_) {
         mainWindow_->hideCentralStub();
+
+        return;
     }
+
+    auto group = getWidgetGroup(selectedCompanion_);
+
+    if (!group)
+        return;
+
+    group->unselect();
+    group->hideCentralPanel();
 }
 
-void GraphicManager::postSelectCompanion(CompanionPtr companion)  // TODO rewrite
+void GraphicManager::postSelectCompanion()
 {
-    if (companion) {
-        auto group = getWidgetGroup(companion);
-        auto cast = dynamic_pointer_cast<SocketInfoWidget>(group->getSocketInfoBase());
-
-        if (cast)
-            cast->select();
-
-        group->showCentralPanel();
-    }
-    else {
+    if (!selectedCompanion_) {
         mainWindow_->showCentralStub();
+
+        return;
     }
+
+    auto group = getWidgetGroup(selectedCompanion_);
+
+    if (!group)
+        return;
+
+    group->select();
+    group->showCentralPanel();
 }
 
 void GraphicManager::sendMessage(MessageType type, CompanionPtr companion, const std::string &text)
@@ -257,8 +256,10 @@ void GraphicManager::clearHistory(CompanionPtr companion)
 {
     auto group = getWidgetGroup(companion);
 
-    if (group)
-        group->clearHistory();
+    if (!group)
+        return;
+
+    group->clearHistory();
 }
 
 void GraphicManager::deleteCompanion(CompanionPtr companion)
@@ -383,16 +384,20 @@ void GraphicManager::updateCompanionWidget(CompanionPtr companion)
 {
     auto group = getWidgetGroup(companion);
 
-    if (group)
-        group->updateSocketInfoWidget();
+    if (!group)
+        return;
+
+    group->updateSocketInfoWidget();
 }
 
 void GraphicManager::sortHistory(CompanionPtr companion)
 {
     auto group = getWidgetGroup(companion);
 
-    if (group)
-        group->sortHistory();
+    if (!group)
+        return;
+
+    group->sortHistory();
 }
 
 void GraphicManager::requestHistory(CompanionPtr companion)
@@ -412,15 +417,15 @@ CompanionDataPtr GraphicManager::getCompanionData(CompanionPtr companion)
 
 void GraphicManager::resetSelectedCompanion(CompanionPtr companion)
 {
-    preSelectCompanion(selectedCompanion_);
+    preSelectCompanion();
     selectedCompanion_ = companion;
-    postSelectCompanion(selectedCompanion_);
+    postSelectCompanion();
 }
 
-void GraphicManager::resetSelectedCompanion(SocketInfoBaseWidget *previous)
+void GraphicManager::resetSelectedCompanion(SocketInfoBaseWidget *widget)
 {
-    auto previousCompanion = getCompanionByWidget(previous);
-    resetSelectedCompanion(previousCompanion);
+    auto companion = (widget) ? widget->companion() : nullptr;
+    resetSelectedCompanion(companion);
 }
 
 bool GraphicManager::setMappedMessageWidget(

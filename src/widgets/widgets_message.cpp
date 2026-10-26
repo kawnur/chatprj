@@ -35,7 +35,6 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sent_ = nullptr;
         received_ = nullptr;
 
-        // auto color = getString(getWidgetColor(Widget::MESSAGE_RECEIVED));
         auto color = getHTMLColor(Widget::MESSAGE_RECEIVED);
         auto text = (message->isAntecedent()) ? "NEW"s : ""s;
         auto textHtml = getHTMLBody(color, text, false, true);
