@@ -35,10 +35,10 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(
         sent_ = nullptr;
         received_ = nullptr;
 
-        auto color = getHTMLColor(Widget::MESSAGE_RECEIVED);
+        auto color = getHTMLColor(WidgetType::MESSAGE_RECEIVED);
         auto text = (message->isAntecedent()) ? "NEW"s : ""s;
         auto textHtml = getHTMLBody(color, text, false, true);
-        newMessageLabel_ = std::make_shared<QLabel>(getQString(textHtml));
+        newMessageLabel_ = std::make_shared<QLabel>(textHtml);
         newMessageLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
 
         layout_->addWidget(newMessageLabel_.get());
@@ -61,25 +61,38 @@ void MessageIndicatorPanelWidget::unsetNewMessageLabel()
         newMessageLabel_->setText("");
 }
 
+TextMessageBodyWidget::TextMessageBodyWidget(MessagePtr message)
+{
+
+}
+
+FileMessageBodyWidget::FileMessageBodyWidget(MessagePtr message)
+{
+
+}
+
 MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
 {
+    // fields
+    type_ = WidgetType::UNKNOWN;
     companion_ = companion;
     message_ = message;
 
     // createdAsAntecedent_ = messageState->getIsAntecedent();
-    fromMe_ = message->isMessageFromMe();
 
-    // set parent
+    // parent
     if (parent)
         setParent(parent.get());
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
+    // palette
     palette_ = std::make_shared<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::MESSAGE)));
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::MESSAGE)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 
+    // layout
     layout_ = std::make_shared<QVBoxLayout>();
     layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     layout_->setSpacing(0);
@@ -87,12 +100,32 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
 
     setLayout(layout_.get());
 
-    auto data = formatMessageHeaderAndBody(companion, message);
+    // data
+    // auto data = formatMessageHeaderAndBody(companion, message);
 
-    headerLabel_ = std::make_shared<QLabel>(getQString(data.first));
-    messageLabel_ = std::make_shared<QLabel>(getQString(data.second));
+    // header_ = std::make_shared<QLabel>(getQString(data.first));
+    // header_ = std::make_shared<QLabel>(getQString(data.first));
 
-    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(fromMe_, message);
+    // messageLabel_ = std::make_shared<QLabel>(getQString(data.second));
+
+    bool fromMe = message->isMessageFromMe();
+    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(fromMe, message);
+}
+
+MessageBodyWidgetPtr MessageWidget::initBody(MessagePtr message)
+{
+    switch (message->type()) {
+    case MessageType::TEXT:
+        return std::make_shared<TextMessageBodyWidget>(message);
+
+    case MessageType::FILE:
+        return std::make_shared<FileMessageBodyWidget>(message);
+
+    default:
+        logArgsError("message widget building error");
+
+        return nullptr;
+    }
 }
 
 MessagePtr MessageWidget::message()
@@ -123,10 +156,10 @@ void MessageWidget::setReceived()
     indicatorPanel_->setReceivedIndicatorOn();
 }
 
-std::shared_ptr<QLabel> MessageWidget::messageLabel()
-{
-    return messageLabel_;
-}
+// std::shared_ptr<QLabel> MessageWidget::messageLabel()
+// {
+//     return messageLabel_;
+// }
 
 void MessageWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -139,42 +172,65 @@ TextMessageWidget::TextMessageWidget(CompanionPtr companion, MessagePtr message,
 {
     if (parent)
         setParent(parent.get());
+
+    type_ = (message->isMessageFromMe()) ? WidgetType::MESSAGE_SENT : WidgetType::MESSAGE_RECEIVED;
 }
 
 TextMessageWidget::~TextMessageWidget() {}
 
 void TextMessageWidget::addMembersToLayout()
 {
-    layout_->addWidget(headerLabel_.get());
-    layout_->addWidget(messageLabel_.get());
+    layout_->addWidget(header_.get());
+    // layout_->addWidget(messageLabel_.get());
     layout_->addWidget(indicatorPanel_.get());
 }
 
+// FileWidget::FileWidget()
+// {
+//     layout_ = std::make_shared<QHBoxLayout>();
+//     setLayout(layout_.get());
+// }
+
+// void FileWidget::set()
+// {
+
+// }
+
 FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
-    : MessageWidget(companion, message, parent)
+    : MessageWidget(companion, message, parent), /*fileWidget_(new FileWidget),*/
+    downloadButton_(nullptr)
 {
     if (parent)
         setParent(parent.get());
 
-    bool isMessageFromMe = message->isMessageFromMe();
-    showButton_ = !isMessageFromMe;
+    // fromMe_ = message->isMessageFromMe();
+    type_ = (message->isMessageFromMe()) ? WidgetType::FILE_SENT : WidgetType::FILE_RECEIVED;
 
-    // rewrite widget body text for sender's widget
-    if (isMessageFromMe) {
-        auto color = getHTMLColor(Widget::MESSAGE_SENT);
-        auto path = getGraphicManager()->getFilePathString(message->networkId());
-        auto text = getHTMLBody(color, getStringByFormat("SEND FILE: {}", path), true, false);
-
-        messageLabel_->setText(getQString(text));
-    }
+    buildText(message);
 
     fileWidget_ = std::make_shared<QWidget>();
-    fileWidgetLayout_ = std::make_shared<QHBoxLayout>();
-    fileWidget_->setLayout(fileWidgetLayout_.get());
+    // fileWidgetLayout_ = std::make_shared<QHBoxLayout>();
+    // fileWidget_->setLayout(fileWidgetLayout_.get());
 
-    downloadButton_ = (showButton_)
-        ? std::make_shared<QPushButton>(getButtonText(ButtonType::DOWNLOAD_FILE))
-        : nullptr;
+    // button
+    if (type_ == WidgetType::FILE_RECEIVED)
+        downloadButton_ = std::make_shared<QPushButton>(getButtonText(ButtonType::DOWNLOAD_FILE));
+}
+
+void FileMessageWidget::buildText(MessagePtr message)
+{
+    auto color = getHTMLColor(type_);
+    auto path = getGraphicManager()->getFilePathString(message->networkId());
+    auto textTemplate = getFileWidgetText(type_);
+    auto text = ""s;
+
+    if (type_ == WidgetType::FILE_SENT)
+        text = getStringByFormat(textTemplate, path);
+    else if (type_ == WidgetType::FILE_RECEIVED)
+        text = getStringByFormat(textTemplate, message->text());
+
+    auto textHtml = getHTMLBody(color, text, true, false);
+    // messageLabel_->setText(getQString(textHtml));
 }
 
 void FileMessageWidget::set(WidgetGroupPtr group)
@@ -186,11 +242,11 @@ void FileMessageWidget::set(WidgetGroupPtr group)
 
 void FileMessageWidget::addMembersToLayout()
 {
-    layout_->addWidget(headerLabel_.get());
-    fileWidgetLayout_->addWidget(messageLabel_.get());
+    layout_->addWidget(header_.get());
+    // fileWidgetLayout_->addWidget(messageLabel_.get());
 
-    if (showButton_)
-        fileWidgetLayout_->addWidget(downloadButton_.get());
+    // if (type_ == WidgetType::FILE_RECEIVED)
+    //     fileWidgetLayout_->addWidget(downloadButton_.get());
 
     layout_->addWidget(fileWidget_.get());
     layout_->addWidget(indicatorPanel_.get());
@@ -203,30 +259,67 @@ void FileMessageWidget::saveFileSlot()
     getGraphicManager()->saveFile(networkId, companion_);
 }
 
-std::pair<std::string, std::string> formatMessageHeaderAndBody(
-    CompanionPtr companion, MessagePtr message)
+// std::pair<std::string, std::string> formatMessageHeaderAndBody(
+//     CompanionPtr companion, MessagePtr message)
+// {
+//     auto companionName = companion->name();
+//     auto companionId = message->companionId();
+//     auto authorId = message->authorId();
+//     auto time = message->time();
+//     auto text = message->text();
+
+//     std::string color, sender, receiver;
+
+//     if (companionId == authorId) {
+//         color = getHTMLColor(WidgetType::MESSAGE_RECEIVED);
+//         sender = companionName;
+//         receiver = "Me";
+//     }
+//     else {
+//         color = getHTMLColor(WidgetType::MESSAGE_SENT);
+//         sender = "Me";
+//         receiver = companionName;
+//     }
+
+//     auto header = getHTMLHeader(color, sender, receiver, time);
+//     auto body = getHTMLBody(color, text, true, false);
+
+//     return std::pair<std::string, std::string>(header, body);
+// }
+
+QString formatHeader(CompanionPtr companion, MessagePtr message)
 {
     auto companionName = companion->name();
-    auto companionId = message->companionId();
-    auto authorId = message->authorId();
     auto time = message->time();
-    auto text = message->text();
 
     std::string color, sender, receiver;
 
-    if (companionId == authorId) {
-        color = getHTMLColor(Widget::MESSAGE_RECEIVED);
+    if (message->isMessageFromMe()) {
+        color = getHTMLColor(WidgetType::MESSAGE_SENT);
+        sender = "Me";
+        receiver = companionName;
+    } else {
+        color = getHTMLColor(WidgetType::MESSAGE_RECEIVED);
         sender = companionName;
         receiver = "Me";
     }
-    else {
-        color = getHTMLColor(Widget::MESSAGE_SENT);
-        sender = "Me";
-        receiver = companionName;
-    }
 
     auto header = getHTMLHeader(color, sender, receiver, time);
+
+    return header;
+}
+
+QString formatBody(CompanionPtr companion, MessagePtr message)
+{
+    auto text = message->text();
+    std::string color;
+
+    if (message->isMessageFromMe())
+        color = getHTMLColor(WidgetType::MESSAGE_SENT);
+    else
+        color = getHTMLColor(WidgetType::MESSAGE_RECEIVED);
+
     auto body = getHTMLBody(color, text, true, false);
 
-    return std::pair<std::string, std::string>(header, body);
+    return body;
 }

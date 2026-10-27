@@ -22,3 +22,8 @@ QDialogButtonBox::ButtonRole getButtonRole(ButtonType type)
 {
     return getMapValue(BUTTON_TYPE_TO_ROLE_MAP, type, DEFAULT_BUTTON_ROLE);
 }
+
+QString getFileWidgetText(WidgetType value)
+{
+    return getMapValue(FILE_WIDGET_TEXT_MAP, value, DEFAULT_FILE_WIDGET_TEXT);
+}

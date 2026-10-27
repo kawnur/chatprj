@@ -299,8 +299,8 @@ std::vector<std::string> buildStringVector(const Ts &...args)
 }
 
 // color
-uint32_t getWidgetColor(Widget value);
-std::string getHTMLColor(Widget value);
+uint32_t getWidgetColor(WidgetType value);
+std::string getHTMLColor(WidgetType value);
 
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
 
@@ -309,11 +309,11 @@ std::string buildTextAsUnorderedListWithHeader(
 
 LogType getLogTypeByDialogType(DialogType type);
 
-std::string getHTMLHeader(
+QString getHTMLHeader(
     const std::string &color, const std::string &sender, const std::string &receiver,
     const std::string &time);
 
-std::string getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
+QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
 nlohmann::json buildJsonObject(const std::string &jsonString);
 std::string getNetworkId();
 std::string getRandomString(std::size_t length);

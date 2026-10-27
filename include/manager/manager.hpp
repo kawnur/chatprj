@@ -117,7 +117,7 @@ public:
 
     void sendFile(CompanionPtr companion, MessagePtr message);
     void receiveFileData(CompanionPtr companion, MessagePtr message);
-    void receiveFile(CompanionPtr companion, MessagePtr message);
+    // void receiveFile(CompanionPtr companion, MessagePtr message);
     std::optional<bool> stopFileDataReceiving(MessagePtr message);
     void stopFileDataSending(MessagePtr message);
 

@@ -30,7 +30,7 @@ LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
     setLayout(layout_.get());
 
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::LEFT_PANEL)));
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::LEFT_PANEL)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 
@@ -111,7 +111,7 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
     companionLabel_ = std::make_unique<QLabel>(getQString(name));
     // companionNameLabel_->setStyleSheet("border-bottom: 1px solid black");
     companionPalette_ = std::make_unique<QPalette>();
-    auto color = QColor(getWidgetColor(Widget::COMPANION_NAME_LABEL));
+    auto color = QColor(getWidgetColor(WidgetType::COMPANION_NAME_LABEL));
     companionPalette_->setColor(QPalette::Window, color);
     companionLabel_->setAutoFillBackground(true);
     companionLabel_->setPalette(*companionPalette_);
@@ -148,7 +148,7 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
     buttonsLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     buttons_->setLayout(buttonsLayout_.get());
     buttonsPalette_ = std::make_unique<QPalette>();
-    buttonsPalette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::BUTTON_PANEL)));
+    buttonsPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::BUTTON_PANEL)));
     history_->setPalette(*buttonsPalette_);
     sendFileButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_FILE));
     sendTextButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_TEXT));
@@ -369,7 +369,7 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
     log_->setPlainText("");
 
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Base, QColor(getWidgetColor(Widget::APP_LOG)));
+    palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::APP_LOG)));
     palette_->setColor(QPalette::Text, QColorConstants::Black);
     log_->setAutoFillBackground(true);
     log_->setPalette(*palette_);

@@ -12,7 +12,7 @@ MainWindow::MainWindow()
 
     // menu bar
     menuBarPalette_ = std::make_unique<QPalette>();
-    menuBarPalette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::MAIN_WINDOW_MENU)));
+    menuBarPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::MAIN_WINDOW_MENU)));
 
     auto *bar = menuBar();
     bar->setAutoFillBackground(true);

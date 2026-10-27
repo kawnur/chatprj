@@ -37,6 +37,7 @@ class MainWindowContainerWidget;
 
 class Manager;
 class Message;
+class MessageBodyWidget;
 class MessageData;
 class MessageInfo;
 // class MessageHandler;
@@ -72,6 +73,7 @@ using FileManagerPtr = std::shared_ptr<FileManager>;
 using GraphicManagerPtr = std::shared_ptr<GraphicManager>;
 using MainWindowPtr = std::shared_ptr<MainWindow>;
 using ManagerPtr = std::shared_ptr<Manager>;
+using MessageBodyWidgetPtr = std::shared_ptr<MessageBodyWidget>;
 using MessageDataPtr = std::shared_ptr<MessageData>;
 using MessageInfoPtr = std::shared_ptr<MessageInfo>;
 using MessageMetaDataPtr = std::shared_ptr<MessageMetaData>;

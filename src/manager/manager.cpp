@@ -686,25 +686,25 @@ void Manager::receiveFileData(CompanionPtr companion, MessagePtr message)
     fileManager_->receiveFileData(companion, message);
 }
 
-void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
-{
+// void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
+// {
     // add to DB and get timestamp
-    auto reply = pushMessageToDB(message);
+    // auto reply = pushMessageToDB(message);
 
-    if (!reply || !reply->meta()->isValid())
-        return;
+    // if (!reply || !reply->meta()->isValid())
+        // return;
 
     // decrypt message
 
     // create receiver operator
-    addReceiverOperator(message);
+    // addReceiverOperator(message);
 
     // add to widget
-    addMessageWidget(companion, message);
+    // addMessageWidget(companion, message);
 
     // send reply message to sender
-    // bool result = sendMessageByNetwork(companion, message, replyMeta);
-}
+    // bool result = sendMessage(companion, message);
+// }
 
 std::optional<bool> Manager::stopFileDataReceiving(MessagePtr message)
 {

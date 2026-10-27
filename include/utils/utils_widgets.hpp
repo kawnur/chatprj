@@ -11,5 +11,6 @@ ButtonInfo getOKButtonInfo(const std::function<void()> &function);
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function);
 QString getButtonText(ButtonType value);
 QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
+QString getFileWidgetText(WidgetType value);
 
 #endif // UTILS_WIDGETS_HPP

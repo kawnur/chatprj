@@ -73,7 +73,7 @@ ButtonBox::~ButtonBox() { logArgsInfo(Q_FUNC_INFO); }
 TextEditWidget::TextEditWidget()
 {
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Base, QColor(getWidgetColor(Widget::TEXT_EDIT)));
+    palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::TEXT_EDIT)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 }
@@ -116,7 +116,7 @@ IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
     isOn_ = isOn;
     onColor_ = QColor(QColorConstants::DarkGreen);
     offColor_ = QColor(QColorConstants::DarkRed);
-    meColor_ = QColor(getWidgetColor(Widget::INDICATOR_ME));
+    meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
 
     palette_ = std::make_shared<QPalette>();
     palette_->setColor(QPalette::Window, (isOn_) ? onColor_ : offColor_);
@@ -418,7 +418,7 @@ ShowHideWidget::ShowHideWidget()
     label_->setText("Show / Hide");
 
     palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(Widget::SHOW_HIDE)));
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::SHOW_HIDE)));
     setAutoFillBackground(true);
     setPalette(*palette_);
 

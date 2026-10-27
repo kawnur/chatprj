@@ -106,7 +106,7 @@ void MessageHandler::sendMessage(
         manager_->markMessageAsSent(companion, message);
 
     // wait for message reception confirmation
-    waitForMessageReceptionConfirmation(companion, message);
+    // waitForMessageReceptionConfirmation(companion, message);
 }
 
 bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr message)
@@ -275,7 +275,7 @@ void MessageHandler::receiveTextMessage(CompanionPtr companion, MessagePtr messa
 
     // decrypt message
 
-    // add to widget
+    // add widget
     manager_->addMessageWidget(companion, message);
 
     // send reply message to sender
@@ -335,13 +335,24 @@ void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr mess
     // if (!message)
     //     return;
 
+    // file proposal not pushed to db
+
+    // store
     auto storeResult = addToStorage(companion, message);
 
     if (!storeResult)
         return;
 
+    // add widget
+    manager_->addMessageWidget(companion, message);
+
+    // create receiver operator
+    manager_->addReceiverOperator(message);
+
+    // reply
     auto reply = builder_.buildFileProposalReplyMessage(message);
-    manager_->receiveFile(companion, reply);
+    // manager_->receiveFile(companion, reply);
+    sendMessageByNetwork(companion, reply);
 }
 
 void MessageHandler::receiveConfirmation(CompanionPtr companion, MessagePtr message)

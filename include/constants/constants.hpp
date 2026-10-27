@@ -253,6 +253,7 @@ const std::vector<ButtonType> CONNECT_BUTTONS {
 };
 
 const QString DEFAULT_BUTTON_TEXT { "OK" };
+const QString DEFAULT_FILE_WIDGET_TEXT { "FILE_WIDGET" };
 
 const std::unordered_map<ButtonType, QString> BUTTON_TYPE_TO_TEXT_MAP {
     { ButtonType::OK, "OK" },
@@ -277,8 +278,9 @@ const std::unordered_map<ButtonType, QDialogButtonBox::ButtonRole> BUTTON_TYPE_T
 };
 
 // colors
-enum class Widget
+enum class WidgetType
 {
+    UNKNOWN,
     MAIN_WINDOW_MENU,
     LEFT_PANEL,
     COMPANION_NAME_LABEL,
@@ -286,6 +288,8 @@ enum class Widget
     MESSAGE,
     MESSAGE_SENT,
     MESSAGE_RECEIVED,
+    FILE_SENT,
+    FILE_RECEIVED,
     BUTTON_PANEL,
     TEXT_EDIT,
     APP_LOG,
@@ -295,19 +299,26 @@ enum class Widget
 
 const uint32_t DEFAULT_WIDGET_COLOR = 0x000000;  // black
 
-const std::unordered_map<Widget, uint32_t> WIDGET_COLOR_MAP {
-    { Widget::MAIN_WINDOW_MENU, 0x777777 },
-    { Widget::LEFT_PANEL, 0xc9c9c9 },
-    { Widget::COMPANION_NAME_LABEL, 0xa4a4a4 },
-    { Widget::SHOW_HIDE, 0x7a7a7a },
-    { Widget::MESSAGE, 0xd1d1d1 },
-    { Widget::MESSAGE_SENT, 0x115e00 },
-    { Widget::MESSAGE_RECEIVED, 0x00115e },
-    { Widget::BUTTON_PANEL, 0x898989 },
-    { Widget::TEXT_EDIT, 0xe1e1e1 },
-    { Widget::APP_LOG, 0xcccaca },
-    { Widget::INDICATOR_ME, 0x6a6a6a },
-    { Widget::NEW_MESSAGE_EDIT, 0xdcdc07 }
+const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
+    { WidgetType::MAIN_WINDOW_MENU, 0x777777 },
+    { WidgetType::LEFT_PANEL, 0xc9c9c9 },
+    { WidgetType::COMPANION_NAME_LABEL, 0xa4a4a4 },
+    { WidgetType::SHOW_HIDE, 0x7a7a7a },
+    { WidgetType::MESSAGE, 0xd1d1d1 },
+    { WidgetType::MESSAGE_SENT, 0x115e00 },
+    { WidgetType::MESSAGE_RECEIVED, 0x00115e },
+    { WidgetType::FILE_SENT, 0x093400 },
+    { WidgetType::FILE_RECEIVED, 0x000934 },
+    { WidgetType::BUTTON_PANEL, 0x898989 },
+    { WidgetType::TEXT_EDIT, 0xe1e1e1 },
+    { WidgetType::APP_LOG, 0xcccaca },
+    { WidgetType::INDICATOR_ME, 0x6a6a6a },
+    { WidgetType::NEW_MESSAGE_EDIT, 0xdcdc07 }
+};
+
+const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
+    { WidgetType::FILE_SENT, "SEND FILE: {}" },
+    { WidgetType::FILE_RECEIVED, "RECEIVE FILE: {}" }
 };
 
 enum class MessageWidgetState {
