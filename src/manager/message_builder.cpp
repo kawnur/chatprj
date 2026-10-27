@@ -168,10 +168,12 @@ MessagePtr MessageBuilder::buildFileProposalReplyMessage(MessagePtr message)
     meta->setMessageType(MessageType::FILE);
     meta->setNetworkMessageType(NetworkMessageType::NO_ACTION);
 
+    auto data = std::make_shared<MessageData>(message->data());
+
     auto state = std::make_shared<MessageState>();
     state->setIsSent(false);
 
-    auto newMessage = std::make_shared<Message>(meta, nullptr, state);
+    auto newMessage = std::make_shared<Message>(meta, data, state);
 
     return newMessage;
 }

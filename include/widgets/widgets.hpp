@@ -253,7 +253,6 @@ public:
     void clearHistory();
     void hideCentralPanel();
     void showCentralPanel();
-    void sortHistory();
     void messageAdded();
     void updateSocketInfoWidget();
     void select();
@@ -263,6 +262,7 @@ public:
 
 signals:
     void addMessageWidgetSignal(MessagePtr message);
+    void addMessageWidgetsSignal(const std::vector<MessagePtr> &messages);
     // void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
@@ -274,6 +274,7 @@ public slots:
 
 private slots:
     void addMessageWidgetSlot(MessagePtr message);
+    void addMessageWidgetsSlot(const std::vector<MessagePtr> &messages);
     // void askUserForHistorySendingConfirmationSlot();
 
 private:

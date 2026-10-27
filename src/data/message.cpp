@@ -134,7 +134,7 @@ void MessageMetaData::update(MessageMetaDataPtr meta)
 
 bool MessageMetaData::isMessageFromMe()
 {
-    return (authorId_ != companionId_);
+    return (authorId_ == 1);
 }
 
 MessageType MessageMetaData::messageType() const

@@ -157,7 +157,6 @@ FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message,
         setParent(parent.get());
 
     bool isMessageFromMe = message->isMessageFromMe();
-
     showButton_ = !isMessageFromMe;
 
     // rewrite widget body text for sender's widget

@@ -215,8 +215,8 @@ void CentralPanelWidget::scrollDownHistory()
 {
     // double call workaround to scroll down fully
     // TODO find out
-    QApplication::processEvents();
-    QApplication::processEvents();
+    // QApplication::processEvents();
+    // QApplication::processEvents();
 
     auto value = historyScrollArea_->verticalScrollBar()->maximum();
     historyScrollArea_->verticalScrollBar()->setValue(value);

@@ -474,6 +474,10 @@ void WidgetGroup::set()
     connect(
         this, &WidgetGroup::addMessageWidgetSignal, this, &WidgetGroup::addMessageWidgetSlot,
         Qt::QueuedConnection);
+
+    connect(
+        this, &WidgetGroup::addMessageWidgetsSignal, this, &WidgetGroup::addMessageWidgetsSlot,
+        Qt::QueuedConnection);
 }
 
 void WidgetGroup::clearHistory()
@@ -494,11 +498,6 @@ void WidgetGroup::showCentralPanel()
 {
     centralPanel_->show();
     centralPanel_->scrollDownHistory();
-}
-
-void WidgetGroup::sortHistory()
-{
-    centralPanel_->sortHistory(true);
 }
 
 void WidgetGroup::messageAdded()
@@ -589,13 +588,18 @@ void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
     // };
 
     // runInDetachedThread(lambda);
-    getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-
+    auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
     widget->setBase(shared_from_this());
-
     centralPanel_->addMessage(widget, isAntecedent);
-
     messageAdded();
+}
+
+void WidgetGroup::addMessageWidgetsSlot(const std::vector<MessagePtr> &messages)
+{
+    for (auto message : messages)
+        addMessageWidgetSlot(message);
+
+    centralPanel_->sortHistory(true);
 }
 
 void WidgetGroup::requestHistorySlot()

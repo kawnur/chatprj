@@ -99,7 +99,7 @@ public:
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
     void addMessageWidget(CompanionPtr companion, MessagePtr message);
-    void sortHistory(CompanionPtr companion);
+    void addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages);
     void disableBlur();
 
     // files
@@ -193,7 +193,7 @@ private:
     GraphicManagerPtr graphicManager_;
     DBOperator dbOperator_;
     MessageHandler messageHandler_;
-    FileManager fileManager_;
+    FileManagerPtr fileManager_;
     NetworkManagerPtr networkManager_;
     std::mutex messageStateToMessageMapMutex_;
     // bool userIsAuthenticated_;

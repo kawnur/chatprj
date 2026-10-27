@@ -12,9 +12,9 @@
 #include "widgets.hpp"
 
 Manager::Manager(GraphicManagerPtr graphicManager)
-    : graphicManager_(graphicManager), dbOperator_(), messageHandler_(), fileManager_(),
-    networkManager_(new NetworkManager), messageStateToMessageMapMutex_(),
-    /*userIsAuthenticated_(false), */currentAction_(nullptr) {}
+    : graphicManager_(graphicManager), dbOperator_(), messageHandler_(),
+    fileManager_(new FileManager), networkManager_(new NetworkManager),
+    messageStateToMessageMapMutex_(), /*userIsAuthenticated_(false), */currentAction_(nullptr) {}
 
 Manager::~Manager() {}
 
@@ -29,16 +29,19 @@ void Manager::set()
     //     exitUtil(EXIT_FAILURE);
 
     messageHandler_.setManager(shared_from_this());
-    fileManager_.setManager(shared_from_this());
+    fileManager_->setManager(shared_from_this());
     networkManager_->setManager(shared_from_this());
 
     bool companionsBuilt = buildCompanions();
     logTemplateInfo("companionsBuilt: {}", companionsBuilt);
 
-    if (companionsBuilt)  // TODO rewrite
-        graphicManager_->buildWidgetGroups();
-    else
-        logArgsError("companion initialization error");
+    if (!companionsBuilt) {
+        logArgsError("companion building error");
+
+    return;
+    }
+
+    graphicManager_->buildWidgetGroups();
 }
 
 void Manager::addEarlyMessages(CompanionPtr companion)
@@ -417,12 +420,12 @@ void Manager::sendHistoryToCompanion(CompanionPtr companion)
 
 std::filesystem::path Manager::getLastOpenedPath()
 {
-    return fileManager_.lastOpenedPath();
+    return fileManager_->lastOpenedPath();
 }
 
 void Manager::setLastOpenedPath(const std::filesystem::path &path)
 {
-    fileManager_.setLastOpenedPath(path);
+    fileManager_->setLastOpenedPath(path);
 }
 
 void Manager::endAction(ActionPtr action)
@@ -602,33 +605,33 @@ bool Manager::disconnectClient(CompanionPtr companion)
 
 void Manager::addSenderOperator(const std::string &networkId, ActionPtr action)
 {
-    fileManager_.addSenderOperator(networkId, action->getPath());
+    fileManager_->addSenderOperator(networkId, action->getPath());
 }
 
 void Manager::addReceiverOperator(MessagePtr message)
 {
-    fileManager_.addReceiverOperator(message);
+    fileManager_->addReceiverOperator(message);
 }
 
 void Manager::removeSenderOperator(const std::string &networkId)
 {
-    fileManager_.removeFileOperator<SenderOperator>(networkId);
+    fileManager_->removeFileOperator<SenderOperator>(networkId);
 }
 
 std::string Manager::getFilePathString(const std::string &networkId)
 {
-    return fileManager_.getFilePathString(networkId);
+    return fileManager_->getFilePathString(networkId);
 }
 
 bool Manager::setFileOperatorFilePath(
     const std::string &networkId, const std::filesystem::path &path)
 {
-    return fileManager_.setFilePath(networkId, path);
+    return fileManager_->setFilePath(networkId, path);
 }
 
 std::string Manager::getFileOperatorMD5Hash(const std::string &networkId)
 {
-    return fileManager_.getFileOperatorMD5Hash(networkId);
+    return fileManager_->getFileOperatorMD5Hash(networkId);
 }
 
 bool Manager::setMappedMessageWidget(
@@ -647,9 +650,9 @@ void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
     graphicManager_->addMessageWidget(companion, message);
 }
 
-void Manager::sortHistory(CompanionPtr companion)
+void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages)
 {
-    graphicManager_->sortHistory(companion);
+    graphicManager_->addMessageWidgets(companion, messages);
 }
 
 void Manager::disableBlur()
@@ -675,12 +678,12 @@ bool Manager::clientAction(CompanionPtr companion, bool isConnected)
 
 void Manager::sendFile(CompanionPtr companion, MessagePtr message)
 {
-    fileManager_.sendFile(companion, message->networkId());
+    fileManager_->sendFile(companion, message->networkId());
 }
 
 void Manager::receiveFileData(CompanionPtr companion, MessagePtr message)
 {
-    fileManager_.receiveFileData(companion, message);
+    fileManager_->receiveFileData(companion, message);
 }
 
 void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
@@ -705,12 +708,12 @@ void Manager::receiveFile(CompanionPtr companion, MessagePtr message)
 
 std::optional<bool> Manager::stopFileDataReceiving(MessagePtr message)
 {
-    return fileManager_.stopFileDataReceiving(message);
+    return fileManager_->stopFileDataReceiving(message);
 }
 
 void Manager::stopFileDataSending(MessagePtr message)
 {
-    fileManager_.stopFileDataSending(message);
+    fileManager_->stopFileDataSending(message);
 }
 
 void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)

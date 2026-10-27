@@ -48,12 +48,12 @@ public:
     // void getEntrancePassword();
     MessageWidgetPtr buildMessageWidget(CompanionPtr companion, MessagePtr message);
     void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    void addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages);
     void setMessageWidgetState(MessageWidgetState state, MessageInfoPtr info);
     void sendFile(CompanionPtr companion);
     void saveFile(const std::string& networkId, CompanionPtr companion);
     std::string getFilePathString(const std::string &networkId);
     void updateCompanionWidget(CompanionPtr companion);
-    void sortHistory(CompanionPtr companion);
     void requestHistory(CompanionPtr companion);
     bool clientAction(CompanionPtr companion, bool isConnected);
     CompanionDataPtr getCompanionData(CompanionPtr companion);

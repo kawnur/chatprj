@@ -339,6 +339,17 @@ void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message
     emit group->addMessageWidgetSignal(message);
 }
 
+void GraphicManager::addMessageWidgets(
+    CompanionPtr companion, const std::vector<MessagePtr> &messages)
+{
+    auto group = getWidgetGroup(companion);
+
+    if (!group)
+        return;
+
+    emit group->addMessageWidgetsSignal(messages);
+}
+
 void GraphicManager::setMessageWidgetState(MessageWidgetState state, MessageInfoPtr info)
 {
     auto widget = info->widget();
@@ -388,16 +399,6 @@ void GraphicManager::updateCompanionWidget(CompanionPtr companion)
         return;
 
     group->updateSocketInfoWidget();
-}
-
-void GraphicManager::sortHistory(CompanionPtr companion)
-{
-    auto group = getWidgetGroup(companion);
-
-    if (!group)
-        return;
-
-    group->sortHistory();
 }
 
 void GraphicManager::requestHistory(CompanionPtr companion)

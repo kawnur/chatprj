@@ -499,12 +499,10 @@ void FileAction::act()
     switch (type_) {
     case ActionType::SEND_FILE:
     {
-        for (const auto &path : dataDialog_->selectedFiles()) {  // one file
+        for (const auto &path : dataDialog_->selectedFiles()) {
             filePath_ = std::filesystem::path(getString(path));
-
-            manager->sendMessage(
-                MessageType::FILE, companion_, shared_from_this(), filePath_.filename().string());
-
+            auto text = filePath_.filename().string();
+            manager->sendMessage(MessageType::FILE, companion_, shared_from_this(), text);
             manager->setLastOpenedPath(filePath_.parent_path());
         }
     }
@@ -562,7 +560,6 @@ void FileAction::act()
 
 void FileAction::defineFilePath()
 {
-    // auto pathQStr = QString::fromStdString(getManager()->getLastOpenedPath().string());
     auto pathQStr = getQString(getManager()->getLastOpenedPath());
     QString param { "Save File" };
     auto result = dataDialog_->getSaveFileName(param, pathQStr);

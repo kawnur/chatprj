@@ -16,8 +16,8 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
     return storage_.getMessageInfo(companion->id(), message->id());
 }
 
-void MessageHandler::addMessage1(
-    CompanionPtr companion, DBReplyDataPtr data, std::size_t index)
+void MessageHandler::buildMessageAndStore(
+    CompanionPtr companion, DBReplyDataPtr data, int index, std::vector<MessagePtr> &messages)
 {
     logTemplateInfo("adding message with id '{}'", data->getValue(index, "id"));
 
@@ -27,14 +27,33 @@ void MessageHandler::addMessage1(
     // add to storage
     bool storageResult = addToStorage(companion, message);
 
-    if (!storageResult) {
+    if (!storageResult)
         logArgsError("adding message to storage error");
 
-        return;
-    }
+    messages.push_back(message);
+}
 
-    // add widget
-    manager_->addMessageWidget(companion, message);
+void MessageHandler::addMessages(CompanionPtr companion, DBReplyDataPtr data)
+{
+    std::vector<MessagePtr> messages {};
+
+    for (std::size_t i = 0; i < data->size(); ++i)
+        buildMessageAndStore(companion, data, i, messages);
+
+    // add widgets
+    manager_->addMessageWidgets(companion, messages);
+}
+
+void MessageHandler::addMessagesByIndexes(
+    CompanionPtr companion, DBReplyDataPtr data, const std::vector<int> &indexes)
+{
+    std::vector<MessagePtr> messages {};
+
+    for (const auto &i : indexes)
+        buildMessageAndStore(companion, data, i, messages);
+
+    // add widgets
+    manager_->addMessageWidgets(companion, messages);
 }
 
 bool MessageHandler::addToStorage(CompanionPtr companion, MessagePtr message)
@@ -453,11 +472,7 @@ void MessageHandler::addEarlyMessages(CompanionPtr companion)
         return;
 
     // add messages
-    for (std::size_t i = 0; i < data->size(); ++i)
-        addMessage1(companion, data, i);
-
-    // sort message widgets
-    manager_->sortHistory(companion);
+    addMessages(companion, data);
 }
 
 void MessageHandler::sendUnsentMessages(CompanionPtr companion)
@@ -506,14 +521,25 @@ void MessageHandler::fillMessageStorageForCompanion(CompanionPtr companion, bool
     if (!data || data->isEmpty())
         return;
 
+    if (containersAreEmpty) {
+        addMessages(companion, data);
+
+        return;
+    }
+
+    // if containers are not empty check every message for existance
+    std::vector<int> indexes {};
+
     for (std::size_t i = 0; i < data->size(); ++i) {
         auto messageId = getIdFromDbData(data, i, "id");
         auto info = storage_.getMessageInfo(companion->id(), messageId);
         bool messageExists = info && info->message()->state();
 
-        if (containersAreEmpty || !messageExists)
-            addMessage1(companion, data, i);
+        if (!messageExists)
+            indexes.push_back(i);
     }
+
+    addMessagesByIndexes(companion, data, indexes);
 }
 
 void MessageHandler::requestHistoryFromCompanion(CompanionPtr companion)

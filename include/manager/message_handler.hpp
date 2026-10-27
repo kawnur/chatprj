@@ -61,7 +61,14 @@ public:
     bool addCompanionToMessageStorage(CompanionPtr companion);
 
 private:
-    void addMessage1(CompanionPtr companion, DBReplyDataPtr messagesData, std::size_t index);
+    void buildMessageAndStore(
+        CompanionPtr companion, DBReplyDataPtr data, int index, std::vector<MessagePtr> &messages);
+
+    void addMessages(CompanionPtr companion, DBReplyDataPtr messagesData);
+
+    void addMessagesByIndexes(
+        CompanionPtr companion, DBReplyDataPtr data, const std::vector<int> &indexes);
+
     bool addToStorage(CompanionPtr companion, MessagePtr message);
     bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
     bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
