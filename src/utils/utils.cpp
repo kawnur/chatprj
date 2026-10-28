@@ -22,26 +22,6 @@ std::string getString(std::nullptr_t value)
     return "nullptr_t"s;
 }
 
-// std::string getString(const std::filesystem::path &value)
-// {
-//     return value.string();
-// }
-
-std::string getString(const QString value)
-{
-    return value.toStdString();
-}
-
-uint32_t getWidgetColor(WidgetType value)
-{
-    return getMapValue(WIDGET_COLOR_MAP, value, DEFAULT_WIDGET_COLOR);
-}
-
-std::string getHTMLColor(WidgetType value)
-{
-    return std::format("#{:06x}", getWidgetColor(value));
-}
-
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages)
 {
     if (messages.empty())
@@ -72,26 +52,6 @@ std::string buildTextAsUnorderedListWithHeader(
 LogType getLogTypeByDialogType(DialogType type)
 {
     return getMapValue(MAP_DIALOG_TYPE_TO_LOG_TYPE, type, LogType::INFO);
-}
-
-QString getHTMLHeader(
-    const std::string &color, const std::string &sender, const std::string &receiver,
-    const std::string &time)
-{
-    auto headerTemplate = "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>"s;
-
-    return getQString(getStringByFormat(headerTemplate, color, sender, receiver, time));
-}
-
-QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold)
-{
-    auto breakSub = (_break) ? "<br>"s : ""s;
-    auto boldOpen = (bold) ? "<b>"s : ""s;
-    auto boldClose = (bold) ? "</b>"s : ""s;
-
-    auto textSub = getStringByFormat("{0}{1}{2}{3}", breakSub, boldOpen, text, boldClose);
-
-    return getQString(getStringByFormat("<font color=\"{0}\">{1}</font>", color, textSub));
 }
 
 nlohmann::json buildJsonObject(const std::string &jsonString)

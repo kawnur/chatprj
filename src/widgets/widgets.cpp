@@ -589,7 +589,8 @@ void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
 
     // runInDetachedThread(lambda);
     auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-    widget->setBase(shared_from_this());
+    // widget->setBase(shared_from_this());
+    widget->set(shared_from_this());
     centralPanel_->addMessage(widget, isAntecedent);
     messageAdded();
 }

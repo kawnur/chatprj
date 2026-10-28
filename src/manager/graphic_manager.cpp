@@ -315,18 +315,20 @@ void GraphicManager::createEntrancePassword()
 
 MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, MessagePtr message)
 {
-    switch (message->type()) {
-    case MessageType::TEXT:
-        return std::make_shared<TextMessageWidget>(companion, message);
+    // switch (message->type()) {
+    // case MessageType::TEXT:
+    //     return std::make_shared<TextMessageWidget>(companion, message);
 
-    case MessageType::FILE:
-        return std::make_shared<FileMessageWidget>(companion, message);
+    // case MessageType::FILE:
+    //     return std::make_shared<FileMessageWidget>(companion, message);
 
-    default:
-        logArgsError("message widget building error");
+    // default:
+    //     logArgsError("message widget building error");
 
-        return nullptr;
-    }
+    //     return nullptr;
+    // }
+
+    return std::make_shared<MessageWidget>(companion, message);
 }
 
 void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message)

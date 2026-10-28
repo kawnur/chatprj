@@ -53,8 +53,6 @@ concept IsOptional = isOptionalHelper<std::remove_cvref_t<T>>::value;
 
 std::string getString(const char *value);
 std::string getString(std::nullptr_t value);
-// std::string getString(const std::filesystem::path &value);
-std::string getString(const QString value);
 
 template<typename T>
 std::string getString(T *value)
@@ -65,10 +63,13 @@ std::string getString(T *value)
     return ss.str();
 }
 
+template<typename T, typename U>
+concept Same = std::is_same_v<std::remove_cvref_t<T>, U>;
+
 template<IsArithmetic T>
 std::string getString(T &&value)
 {
-    if constexpr (std::is_same_v<std::remove_cvref_t<T>, bool>)
+    if constexpr (Same<T, bool>)
         return (value) ? "true"s : "false"s;
     else
         return std::to_string(std::forward<T>(value));
@@ -77,15 +78,19 @@ std::string getString(T &&value)
 template<IsNotArithmetic T>
 std::string getString(T &&value)
 {
-    if constexpr (std::is_same_v<std::remove_cvref_t<T>, QString>)
+    if constexpr (Same<T, QString>)
         return value.toStdString();
-    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+    else if constexpr (Same<T, std::string>)
         return value;
-    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, ButtonType>)
+    else if constexpr (Same<T, ButtonType>)
         return getString(getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, NOT_FOUND));
-    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::filesystem::path>)
+    else if constexpr (Same<T, NetworkMessageType>)
+        return getMapValue(NETWORK_MESSAGE_TYPE_STRING_REPR_MAP, value, getString(NOT_FOUND));
+    else if constexpr (Same<T, MessageType>)
+        return getMapValue(MESSAGE_TYPE_STRING_REPR_MAP, value, getString(NOT_FOUND));
+    else if constexpr (Same<T, std::filesystem::path>)
         return value.string();
-    else if constexpr (std::is_same_v<std::remove_cvref_t<T>, QHostAddress>)
+    else if constexpr (Same<T, QHostAddress>)
         return getString(value.toString());
     else
         return std::to_string(value);
@@ -112,8 +117,9 @@ std::string getStringByFormat(T &&formatString, Ts &&...args)
 
     auto lambda = [&](auto&... params)
     {
-        auto formatArgs = std::make_format_args(params...);  // std::make_format_args needs lvalue args
-        result = std::vformat(getString(formatString), formatArgs);
+        // std::make_format_args needs lvalue args
+        auto formatArgs = std::make_format_args(params...);
+        result = std::vformat(getString(std::forward<T>(formatString)), formatArgs);
     };
 
     std::apply(lambda, argsTuple);
@@ -298,22 +304,12 @@ std::vector<std::string> buildStringVector(const Ts &...args)
     return result;
 }
 
-// color
-uint32_t getWidgetColor(WidgetType value);
-std::string getHTMLColor(WidgetType value);
-
 std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
 
 std::string buildTextAsUnorderedListWithHeader(
     const std::string &header, const std::vector<std::string> &messages);
 
 LogType getLogTypeByDialogType(DialogType type);
-
-QString getHTMLHeader(
-    const std::string &color, const std::string &sender, const std::string &receiver,
-    const std::string &time);
-
-QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
 nlohmann::json buildJsonObject(const std::string &jsonString);
 std::string getNetworkId();
 std::string getRandomString(std::size_t length);

@@ -12,7 +12,8 @@ public:
     template<typename T>
     ActionResult(bool status, T &&value) : status_(status)
     {
-        if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+        // if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+        if constexpr (Same<T, std::string>)
             definitions_.push_back(value);
         else
             definitions_ = std::forward<T>(value);

@@ -12,5 +12,16 @@ ButtonInfo getCancelButtonInfo(const std::function<void()> &function);
 QString getButtonText(ButtonType value);
 QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
 QString getFileWidgetText(WidgetType value);
+MessageWidgetType getMessageWidgetType(MessageType value);
+
+// color
+uint32_t getWidgetColor(WidgetType value);
+std::string getHTMLColor(WidgetType value);
+
+QString getHTMLHeader(
+    const std::string &color, const std::string &sender, const std::string &receiver,
+    const std::string &time);
+
+QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
 
 #endif // UTILS_WIDGETS_HPP

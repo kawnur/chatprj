@@ -12,7 +12,7 @@
 #include "widgets.hpp"
 
 Dialog::Dialog()
-    : dialogType_(DialogType::INFO), actionType_(ActionType::UNKNOWN), containsDialog_(false),
+    : dialogType_(DialogType::INFO), actionType_(ActionType::UNKNOWN), /*containsDialog_(false),*/
     dataMap_(ACTION_TITLE_MAP), infoMap_(INFO_STUB),
     defaultTitle_(getQString(ACTION_INFO_DIALOG_DEFAULT_HEADER)) {}
 
@@ -333,7 +333,7 @@ FileDialog::FileDialog(ActionType type)
     actionType_ = type;
     setTitleAsData();
 
-    containsDialog_ = true;
+    // containsDialog_ = true;
     dialog_ = std::make_shared<QFileDialog>();
     dialog_->setFileMode(QFileDialog::AnyFile);
     dialog_->setViewMode(QFileDialog::Detail);
@@ -355,10 +355,10 @@ void FileDialog::showDialog()
     dialog_->show();
 }
 
-std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
-{
-    return dialog_;
-}
+// std::shared_ptr<QFileDialog> FileDialog::getFileDialog()
+// {
+//     return dialog_;
+// }
 
 QStringList FileDialog::selectedFiles() const
 {

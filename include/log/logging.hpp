@@ -104,7 +104,7 @@ void logTemplateError(T &&templateString, Ts &&...args)
 template<typename... Ts>
 void logArgsWithCustomMark(Ts &&...args)
 {
-    logArgs(logCustomDelimiter, args...);
+    logArgs(LOG_CUSTOM_DELIMITER, args...);
 }
 
 void logDBResultUnknownField(PGresultPtr result, int row, int column);

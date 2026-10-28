@@ -17,7 +17,7 @@ class MessageIndicatorPanelWidget : public QWidget
     Q_OBJECT
 
 public:
-    MessageIndicatorPanelWidget(bool sentByMe, MessagePtr message);
+    MessageIndicatorPanelWidget(MessagePtr message);
     ~MessageIndicatorPanelWidget() = default;
 
     void setSentIndicatorOn();
@@ -34,16 +34,30 @@ private:
 
 class MessageBodyWidget : public QWidget
 {
+    Q_OBJECT
+
 public:
     MessageBodyWidget() = default;
     ~MessageBodyWidget() = default;
+
+    virtual void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) {}
+    virtual void setParentTo(MessageWidget *widget) {}
+    virtual void set() {}
+
+protected:
+    WidgetType type_;  // TODO change enum
 };
 
 class TextMessageBodyWidget : public MessageBodyWidget
 {
+    Q_OBJECT
+
 public:
     TextMessageBodyWidget(MessagePtr message);
     ~TextMessageBodyWidget() = default;
+
+    void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) override;
+    void setParentTo(MessageWidget *widget) override;
 
 private:
     std::shared_ptr<QLabel> label_;
@@ -51,11 +65,22 @@ private:
 
 class FileMessageBodyWidget : public MessageBodyWidget
 {
+    Q_OBJECT
+
 public:
     FileMessageBodyWidget(MessagePtr message);
     ~FileMessageBodyWidget() = default;
 
+    void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) override;
+    void setParentTo(MessageWidget *widget) override;
+    void set() override;
+
+private slots:
+    void saveFileSlot();
+
 private:
+    void buildText(MessagePtr message);
+
     std::shared_ptr<QHBoxLayout> layout_;
     std::shared_ptr<QLabel> label_;
     std::shared_ptr<QPushButton> button_;  // download button
@@ -70,11 +95,11 @@ public:
     virtual ~MessageWidget() {}
 
     MessagePtr message();
-    virtual void set(WidgetGroupPtr) {}
-    void setBase(WidgetGroupPtr group);
+    void set(WidgetGroupPtr group);
+
+    void saveFile();
     void setSent();
     void setReceived();
-    std::shared_ptr<QLabel> messageLabel();
 
 signals:
     void widgetSelectedSignal(MessageWidgetPtr widget);
@@ -82,73 +107,21 @@ signals:
 protected:
     virtual void addMembersToLayout() {}
 
-    WidgetType type_;
-    // bool fromMe_;
+    MessageWidgetType type_;
     CompanionPtr companion_;
     MessagePtr message_;
     std::shared_ptr<QPalette> palette_;
     std::shared_ptr<QVBoxLayout> layout_;
     std::shared_ptr<QLabel> header_;
-    // std::shared_ptr<QLabel> messageLabel_;
     MessageBodyWidgetPtr body_;
     std::shared_ptr<MessageIndicatorPanelWidget> indicatorPanel_;
 
 private:
-    MessageBodyWidgetPtr initBody(MessagePtr message);
+    void initBody();
     void mousePressEvent(QMouseEvent *) override;
 };
 
-class TextMessageWidget : public MessageWidget
-{
-    Q_OBJECT
-
-public:
-    TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
-    ~TextMessageWidget();
-
-private:
-    void addMembersToLayout() override;
-};
-
-// class FileWidget : public QWidget
-// {
-// public:
-//     FileWidget();
-//     ~FileWidget();
-
-
-// private:
-//     std::shared_ptr<QHBoxLayout> layout_;
-// };
-
-class FileMessageWidget : public MessageWidget
-{
-    Q_OBJECT
-
-public:
-    FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
-    ~FileMessageWidget() = default;
-
-    void set(WidgetGroupPtr) override;
-
-private:
-    void buildText(MessagePtr message);
-
-    QWidgetPtr fileWidget_;
-    // std::shared_ptr<QHBoxLayout> fileWidgetLayout_;
-    // std::unique_ptr<FileWidget> fileWidget_;
-    std::shared_ptr<QPushButton> downloadButton_;
-
-    void addMembersToLayout() override;
-
-private slots:
-    void saveFileSlot();
-};
-
-// std::pair<std::string, std::string> formatMessageHeaderAndBody(
-//     CompanionPtr companion, MessagePtr message);
-
 QString formatHeader(CompanionPtr companion, MessagePtr message);
-QString formatBody(CompanionPtr companion, MessagePtr message);
+QString formatBody(MessagePtr message);
 
 #endif // WIDGETS_MESSAGE_HPP

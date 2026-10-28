@@ -97,17 +97,21 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
 CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name)
     : PanelWidget(), mutex_()
 {
+    // fields
     historyScrollArea_ = nullptr;
     historyPalette_ = nullptr;
 
+    // parent
     if (parent)
         setParent(parent.get());
 
+    // layout
     layout_ = std::make_unique<QVBoxLayout>();
     layout_->setSpacing(0);
     layout_->setContentsMargins(0, 0, 0, 0);
     setLayout(layout_.get());
 
+    // companion panel
     companionLabel_ = std::make_unique<QLabel>(getQString(name));
     // companionNameLabel_->setStyleSheet("border-bottom: 1px solid black");
     companionPalette_ = std::make_unique<QPalette>();
@@ -118,6 +122,7 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
 
     layout_->addWidget(companionLabel_.get());
 
+    // history
     history_ = std::make_shared<QWidget>();
 
     historyLayout_ = std::make_unique<QVBoxLayout>();
@@ -141,15 +146,20 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
         layout_->addWidget(historyScrollArea_.get());
     }
 
+    // button panel
     buttons_ = std::make_unique<QWidget>();
+
     buttonsLayout_ = std::make_unique<QHBoxLayout>();
     buttonsLayout_->setSpacing(10);
     buttonsLayout_->setContentsMargins(10, 10, 10, 10);
     buttonsLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     buttons_->setLayout(buttonsLayout_.get());
+
     buttonsPalette_ = std::make_unique<QPalette>();
     buttonsPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::BUTTON_PANEL)));
-    history_->setPalette(*buttonsPalette_);
+    buttons_->setAutoFillBackground(true);
+    buttons_->setPalette(*buttonsPalette_);
+
     sendFileButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_FILE));
     sendTextButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_TEXT));
     buttonsLayout_->addWidget(sendFileButton_.get());
@@ -157,6 +167,7 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
 
     layout_->addWidget(buttons_.get());
 
+    // text edit panel
     textEdit_ = std::make_unique<TextEditWidget>();
     layout_->addWidget(textEdit_.get());
 
@@ -215,8 +226,8 @@ void CentralPanelWidget::scrollDownHistory()
 {
     // double call workaround to scroll down fully
     // TODO find out
-    // QApplication::processEvents();
-    // QApplication::processEvents();
+    QApplication::processEvents();
+    QApplication::processEvents();
 
     auto value = historyScrollArea_->verticalScrollBar()->maximum();
     historyScrollArea_->verticalScrollBar()->setValue(value);

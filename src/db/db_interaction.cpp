@@ -240,12 +240,12 @@ int DBReplyData::getDataFromResult(PGresultPtr result, int maxTuples)
 
 void DBReplyData::log()
 {
-    logArgsInfo(logDelimiter);
+    logArgsInfo(LOG_DELIMITER);
 
     for (auto &element : buildDataStringVector())
         logArgsInfo(element);
 
-    logArgsInfo(logDelimiter);
+    logArgsInfo(LOG_DELIMITER);
 }
 
 void DBReplyData::sortDataById()

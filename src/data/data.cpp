@@ -39,7 +39,7 @@ void CompanionData::setServerPort(uint16_t port)
 
 void CompanionData::log()
 {
-    std::string entry { "name: {0}, ipAddress: {1}, serverPort: {2}, clientPort: {3}" };
+    auto entry = "name: {0}, ipAddress: {1}, serverPort: {2}, clientPort: {3}"s;
 
     logTemplateInfo(entry, name_, ipAddress_, serverPort_, clientPort_);
 }

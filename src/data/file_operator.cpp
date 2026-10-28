@@ -121,8 +121,8 @@ void SenderOperator::sendFile(CompanionPtr companion, const std::string &network
 
         for (uint32_t i = 0; i < iterationNumber; ++i) {
             if (i % 100 == 0) {
-                std::string line { "{0} iteration: {1}/{2}" };
-                coutWithEndl(getStringByFormat(line, logCustomDelimiter, i + 1, iterationNumber));
+                auto line = "{0} iteration: {1}/{2}"s;
+                coutWithEndl(getStringByFormat(line, LOG_CUSTOM_DELIMITER, i + 1, iterationNumber));
             }
 
             bool result = sendFilePart(companion, networkId);

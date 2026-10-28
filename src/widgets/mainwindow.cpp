@@ -3,7 +3,7 @@
 #include <QMenuBar>
 
 #include "graphic_manager.hpp"
-#include "utils.hpp"
+#include "utils_widgets.hpp"
 #include "widgets_panel.hpp"
 
 MainWindow::MainWindow()

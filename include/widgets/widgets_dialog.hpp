@@ -39,7 +39,7 @@ public:
     virtual QStringList selectedFiles() const { return QStringList(); }
     virtual QString getSaveFileName(const QString &param, const QString &path) { return ""; }
 
-    bool containsDialog() const { return containsDialog_; }
+    // bool containsDialog() const { return containsDialog_; }
     void setDialogType(DialogType type);
 
 // protected slots:
@@ -52,7 +52,7 @@ protected:
 
     DialogType dialogType_;
     ActionType actionType_;
-    bool containsDialog_;
+    // bool containsDialog_;
     std::reference_wrapper<const DataDialogTitleMap> dataMap_;
     std::reference_wrapper<const InfoDialogTitleMap> infoMap_;
     QString defaultTitle_;
@@ -186,7 +186,7 @@ public:
     void set(ActionPtr action) override;
     void showDialog() override;
 
-    std::shared_ptr<QFileDialog> getFileDialog();
+    // std::shared_ptr<QFileDialog> getFileDialog();
     QStringList selectedFiles() const override;
 
     QString getSaveFileName(const QString &param, const QString &path) override;

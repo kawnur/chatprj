@@ -77,6 +77,7 @@ void MessageHandler::sendMessage(
 {
     // encrypt message
 
+    // build message
     auto message = builder_.buildMyTextMessage(type, companion, text);
 
     // add to DB and get timestamp

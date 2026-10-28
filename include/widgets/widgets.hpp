@@ -110,7 +110,6 @@ class SocketInfoBaseWidget : public QWidget
 
 public:
     SocketInfoBaseWidget() = default;
-    SocketInfoBaseWidget(const SocketInfoBaseWidget &) = default;
     virtual ~SocketInfoBaseWidget() {}
 
     virtual bool isStub() { return false; }

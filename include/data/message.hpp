@@ -79,6 +79,8 @@ public:
     void setCompanionName(const std::string &newCompanionName);
     void setAuthorName(const std::string &newAuthorName);
 
+    void log();
+
 private:
     MessageType messageType_;
     NetworkMessageType networkMessageType_;
@@ -108,6 +110,8 @@ public:
     void setText(const std::string &newText);
     void setData(const std::string &newData);
 
+    void log();
+
 private:
     std::string text_;
     std::string data_;  // for file transfer
@@ -130,6 +134,8 @@ public:
     void setIsAntecedent(bool newIsAntecedent);
     void setIsSent(bool newIsSent);
     void setIsReceived(bool newIsReceived);
+
+    void log();
 
 private:
     bool isAntecedent_;
@@ -179,6 +185,8 @@ public:
     void updateMeta(MessageMetaDataPtr meta);
 
 private:
+    void log();
+
     MessageMetaDataPtr meta_;
     MessageDataPtr data_;
     MessageStatePtr state_;

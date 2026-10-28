@@ -227,6 +227,18 @@ void MessageMetaData::setAuthorName(const std::string &newAuthorName)
     authorName_ = newAuthorName;
 }
 
+void MessageMetaData::log()
+{
+    auto entryTemplate =
+        "messageType: {0}, networkMessageType: {1}, messageId: {2}, companionId: {3}, "
+        "companionName: {4}, authorId: {5}, authorName: {6}, timestampTz: {7}, hashMD5: {8}, "
+        "networkId: {9}"s;
+
+    logTemplateInfo(
+        entryTemplate, messageType_, networkMessageType_, messageId_, companionId_, companionName_,
+        authorId_, authorName_, timestampTz_, hashMD5_, networkId_);
+}
+
 MessageData::MessageData(const std::string &text, const std::string &data)
     : text_(text), data_(data) {}
 
@@ -270,15 +282,27 @@ void MessageData::setData(const std::string &newData)
     data_ = newData;
 }
 
+void MessageData::log()
+{
+    auto entryTemplate = "data: {0}, text: {1}"s;
+
+    logTemplateInfo(entryTemplate, data_, text_);
+}
+
 Message::Message(
     MessageMetaDataPtr meta, MessageDataPtr data,
-    MessageStatePtr state) : meta_(meta), data_(data), state_(state) {}
+    MessageStatePtr state) : meta_(meta), data_(data), state_(state)
+{
+    log();
+}
 
 Message::Message(MessagePtr message)
 {
     meta_ = message->meta();
     data_ = message->data();
     state_ = message->state();
+
+    log();
 }
 
 Message::~Message() = default;
@@ -394,6 +418,15 @@ void Message::updateMeta(MessageMetaDataPtr meta)
     meta_->update(meta);
 }
 
+void Message::log()
+{
+    logArgsInfo(MESSAGE_LOG_DELIMITER);
+    meta_->log();
+    data_->log();
+    state_->log();
+    logArgsInfo(MESSAGE_LOG_DELIMITER);
+}
+
 // MessageState::MessageState(
 //     uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
 //     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
@@ -451,6 +484,13 @@ bool MessageState::isReceived() const
 void MessageState::setIsReceived(bool newIsReceived)
 {
     isReceived_ = newIsReceived;
+}
+
+void MessageState::log()
+{
+    auto entryTemplate = "isAntecedent: {0}, isSent: {1}, isReceived: {2}"s;
+
+    logTemplateInfo(entryTemplate, isAntecedent_, isSent_, isReceived_);
 }
 
 MessageInfo::MessageInfo(MessagePtr message, MessageWidgetPtr widget)

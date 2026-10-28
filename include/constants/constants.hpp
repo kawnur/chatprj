@@ -9,8 +9,9 @@
 #include <QDialogButtonBox>
 #include <QString>
 
-const std::string logDelimiter { "############################" };
-const std::string logCustomDelimiter { "?????????????????????????" };
+const std::string LOG_DELIMITER(28, '#');
+const std::string LOG_CUSTOM_DELIMITER(25, '?');
+const std::string MESSAGE_LOG_DELIMITER(28, 'M');
 const std::string EXIT_LOG_ENTRY { "Exit..." };
 
 const std::size_t MAX_BUFFER_SIZE = 1024;
@@ -40,6 +41,7 @@ const QString NOT_FOUND { "NOT FOUND" };
 
 const uint8_t CONNECTION_STATE_INDICATOR_WIDGET_SIZE = 15;
 const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
+const uint8_t MESSAGE_WIDGET_INDICATOR_WIDGET_SIZE = 10;
 
 const std::size_t NETWORK_ID_SIZE = 5;
 
@@ -68,6 +70,12 @@ enum class MessageType
     FILE
 };
 
+const std::unordered_map<MessageType, std::string> MESSAGE_TYPE_STRING_REPR_MAP {
+    { MessageType::UNKNOWN, "UNKNOWN" },
+    { MessageType::TEXT, "TEXT" },
+    { MessageType::FILE, "FILE" }
+};
+
 enum class NetworkMessageType
 {
     UNKNOWN,
@@ -84,6 +92,23 @@ enum class NetworkMessageType
     RECEIVE_CONFIRMATION_REQUEST,
     CHAT_HISTORY_REQUEST,
     CHAT_HISTORY_DATA
+};
+
+const std::unordered_map<NetworkMessageType, std::string> NETWORK_MESSAGE_TYPE_STRING_REPR_MAP {
+    { NetworkMessageType::UNKNOWN, "UNKNOWN" },
+    { NetworkMessageType::NO_ACTION, "NO_ACTION" },
+    { NetworkMessageType::TEXT, "TEXT" },
+    { NetworkMessageType::FILE_PROPOSAL, "FILE_PROPOSAL" },
+    { NetworkMessageType::FILE_REQUEST, "FILE_REQUEST" },
+    { NetworkMessageType::FILE_DATA, "FILE_DATA" },
+    { NetworkMessageType::FILE_DATA_CHECK_SUCCESS, "FILE_DATA_CHECK_SUCCESS" },
+    { NetworkMessageType::FILE_DATA_CHECK_FAILURE, "FILE_DATA_CHECK_FAILURE" },
+    { NetworkMessageType::FILE_DATA_TRANSMISSON_END, "FILE_DATA_TRANSMISSON_END" },
+    { NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE, "FILE_DATA_TRANSMISSON_FAILURE" },
+    { NetworkMessageType::RECEIVE_CONFIRMATION, "RECEIVE_CONFIRMATION" },
+    { NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST, "RECEIVE_CONFIRMATION_REQUEST" },
+    { NetworkMessageType::CHAT_HISTORY_REQUEST, "CHAT_HISTORY_REQUEST" },
+    { NetworkMessageType::CHAT_HISTORY_DATA, "CHAT_HISTORY_DATA" }
 };
 
 const std::unordered_map<NetworkMessageType, MessageType> NETWORK_MESSAGE_TYPE_TO_MESSAGE_TYPE_MAP {
@@ -297,28 +322,23 @@ enum class WidgetType
     NEW_MESSAGE_EDIT
 };
 
+const uint32_t DEFAULT_WIDGET_LIGHTNESS = 0;  // black
 const uint32_t DEFAULT_WIDGET_COLOR = 0x000000;  // black
-
-const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
-    { WidgetType::MAIN_WINDOW_MENU, 0x777777 },
-    { WidgetType::LEFT_PANEL, 0xc9c9c9 },
-    { WidgetType::COMPANION_NAME_LABEL, 0xa4a4a4 },
-    { WidgetType::SHOW_HIDE, 0x7a7a7a },
-    { WidgetType::MESSAGE, 0xd1d1d1 },
-    { WidgetType::MESSAGE_SENT, 0x115e00 },
-    { WidgetType::MESSAGE_RECEIVED, 0x00115e },
-    { WidgetType::FILE_SENT, 0x093400 },
-    { WidgetType::FILE_RECEIVED, 0x000934 },
-    { WidgetType::BUTTON_PANEL, 0x898989 },
-    { WidgetType::TEXT_EDIT, 0xe1e1e1 },
-    { WidgetType::APP_LOG, 0xcccaca },
-    { WidgetType::INDICATOR_ME, 0x6a6a6a },
-    { WidgetType::NEW_MESSAGE_EDIT, 0xdcdc07 }
-};
 
 const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
     { WidgetType::FILE_SENT, "SEND FILE: {}" },
     { WidgetType::FILE_RECEIVED, "RECEIVE FILE: {}" }
+};
+
+enum class MessageWidgetType {
+    UNKNOWN,
+    TEXT,
+    FILE
+};
+
+const std::unordered_map<MessageType, MessageWidgetType> MESSAGE_WIDGET_TYPE_MAP {
+    { MessageType::TEXT, MessageWidgetType::TEXT },
+    { MessageType::FILE, MessageWidgetType::FILE }
 };
 
 enum class MessageWidgetState {
