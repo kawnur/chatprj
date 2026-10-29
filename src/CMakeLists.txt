@@ -3,6 +3,10 @@ file(GLOB_RECURSE SOURCE_LIST ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 add_library(chatapp_lib ${HEADER_LIST} ${SOURCE_LIST})
 
+# target_compile_options(chatapp_lib PRIVATE
+#     -fplugin-arg-clazy-no-non-pod-global-static
+# )
+
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/action)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/app)

@@ -1,6 +1,9 @@
 #ifndef UTILS_WIDGETS_HPP
 #define UTILS_WIDGETS_HPP
 
+#include <functional>
+#include <string>
+
 #include <QString>
 #include <QWidget>
 

@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="aIU88XDhlDwrzjkHTBSQ">
-    <mxGraphModel dx="694" dy="1715" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="933" dy="1715" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -13,13 +13,13 @@
         <mxCell id="05WnEXeXGnTUUeLQxwUw-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
           <mxGeometry height="740" width="250" x="40" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Log widget 80" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Log widget 85" vertex="1">
           <mxGeometry height="740" width="230" x="570" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Selected companion 80" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Selected companion 40" vertex="1">
           <mxGeometry height="40" width="250" x="40" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Unselected companion 40" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Unselected companion 55" vertex="1">
           <mxGeometry height="40" width="250" x="40" y="100" as="geometry" />
         </mxCell>
         <mxCell id="05WnEXeXGnTUUeLQxwUw-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Companion name panel 60" vertex="1">
@@ -28,19 +28,19 @@
         <mxCell id="05WnEXeXGnTUUeLQxwUw-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
           <mxGeometry height="290" width="280" x="290" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Message widgets 95" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Message widgets 80" vertex="1">
           <mxGeometry height="145" width="280" x="290" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Button panel 70" vertex="1">
-          <mxGeometry height="70" width="280" x="290" y="370" as="geometry" />
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Button panel 65" vertex="1">
+          <mxGeometry height="70" width="280" x="290" y="369" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Left panel 85" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Left panel 70" vertex="1">
           <mxGeometry height="660" width="250" x="40" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Message widget panel 80" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Message widget panel 75" vertex="1">
           <mxGeometry height="145" width="280" x="290" y="225" as="geometry" />
         </mxCell>
-        <mxCell id="05WnEXeXGnTUUeLQxwUw-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Text edit 75" vertex="1">
+        <mxCell id="05WnEXeXGnTUUeLQxwUw-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Text edit 80" vertex="1">
           <mxGeometry height="360" width="280" x="290" y="440" as="geometry" />
         </mxCell>
       </root>

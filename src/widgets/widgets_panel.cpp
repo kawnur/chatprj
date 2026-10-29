@@ -140,7 +140,7 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
         historyScrollArea_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         historyScrollArea_->setWidget(history_.get());
         historyPalette_ = std::make_unique<QPalette>();
-        historyPalette_->setColor(QPalette::Window, QColorConstants::Gray);
+        historyPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::HISTORY)));
         history_->setPalette(*historyPalette_);
 
         layout_->addWidget(historyScrollArea_.get());

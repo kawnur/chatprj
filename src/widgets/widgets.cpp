@@ -114,8 +114,8 @@ IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
     setFixedHeight(size_);
 
     isOn_ = isOn;
-    onColor_ = QColor(QColorConstants::DarkGreen);
-    offColor_ = QColor(QColorConstants::DarkRed);
+    onColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ON));
+    offColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_OFF));
     meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
 
     palette_ = std::make_shared<QPalette>();
@@ -268,8 +268,8 @@ void SocketInfoWidget::buildFields(WidgetGroupPtr group)
     // value fields
     isSelected_ = false;
     isConnected_ = false;
-    selected_ = QColor(QColorConstants::DarkGray);
-    unselected_ = QColor(QColorConstants::Gray);
+    selected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO_SELECTED));
+    unselected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO));
 
     // palette
     palette_ = std::make_shared<QPalette>();

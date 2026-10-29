@@ -1,25 +1,36 @@
 #include "utils_widgets.hpp"
 
+#include <unordered_map>
+
 #include "widgets.hpp"
 
 const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
-    { WidgetType::MAIN_WINDOW_MENU, 50 },
-    { WidgetType::LEFT_PANEL, 85 },
+    { WidgetType::MAIN_WINDOW_MENU, 45 },
+    { WidgetType::LEFT_PANEL, 70 },
+    { WidgetType::SOCKET_INFO, 55 },
+    { WidgetType::SOCKET_INFO_SELECTED, 40 },
     { WidgetType::COMPANION_NAME_LABEL, 60 },
     { WidgetType::SHOW_HIDE, 20 },
-    { WidgetType::MESSAGE, 95 },
+    { WidgetType::MESSAGE, 80 },
+    { WidgetType::HISTORY, 75 },
+    { WidgetType::BUTTON_PANEL, 65 },
+    { WidgetType::TEXT_EDIT, 80 },
+    { WidgetType::APP_LOG, 85 },
+    { WidgetType::INDICATOR_ME, 30 }
+};
+
+const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
     { WidgetType::MESSAGE_SENT, 0x115e00 },
     { WidgetType::MESSAGE_RECEIVED, 0x00115e },
     { WidgetType::FILE_SENT, 0x093400 },
     { WidgetType::FILE_RECEIVED, 0x000934 },
-    { WidgetType::BUTTON_PANEL, 70 },
-    { WidgetType::TEXT_EDIT, 75 },
-    { WidgetType::APP_LOG, 80 },
-    { WidgetType::INDICATOR_ME, 0x6a6a6a },
+    { WidgetType::INDICATOR_ON, 0x009600 },
+    { WidgetType::INDICATOR_OFF, 0x690000 },
     { WidgetType::NEW_MESSAGE_EDIT, 0xdcdc07 }
 };
 
-const std::unordered_map<uint32_t, uint32_t> WIDGET_COLOR_MAP {
+// TODO add color calculation instead of color map
+const std::unordered_map<uint32_t, uint32_t> WIDGET_LIGHTNESS_TO_COLOR_MAP {
     { 0, 0x000000 },
     { 5, 0x0d0d0c },
     { 10, 0x1b1a18 },
@@ -74,15 +85,21 @@ MessageWidgetType getMessageWidgetType(MessageType value)
 }
 
 // color
-uint32_t getWidgetColor(WidgetType value)
+uint32_t getWidgetColor(WidgetType type)
 {
-    auto lightness = getMapValue(WIDGET_LIGHTNESS_MAP, value, DEFAULT_WIDGET_LIGHTNESS);
-    return getMapValue(WIDGET_COLOR_MAP, lightness, DEFAULT_WIDGET_COLOR);
+    // get color
+    if (WIDGET_COLOR_MAP.contains(type))
+        return WIDGET_COLOR_MAP.at(type);
+
+    // or get color by lightness
+    auto lightness = getMapValue(WIDGET_LIGHTNESS_MAP, type, DEFAULT_WIDGET_LIGHTNESS);
+
+    return getMapValue(WIDGET_LIGHTNESS_TO_COLOR_MAP, lightness, DEFAULT_WIDGET_COLOR);
 }
 
-std::string getHTMLColor(WidgetType value)
+std::string getHTMLColor(WidgetType type)
 {
-    return std::format("#{:06x}", getWidgetColor(value));
+    return std::format("#{:06x}", getWidgetColor(type));
 }
 
 QString getHTMLHeader(
