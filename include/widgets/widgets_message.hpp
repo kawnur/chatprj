@@ -11,6 +11,7 @@
 
 #include "alias.hpp"
 #include "constants.hpp"
+#include "widgets.hpp"
 
 class MessageIndicatorPanelWidget : public QWidget
 {
@@ -86,7 +87,8 @@ private:
     std::shared_ptr<QPushButton> button_;  // download button
 };
 
-class MessageWidget : public QWidget, public std::enable_shared_from_this<MessageWidget>
+// class MessageWidget : public QWidget, public std::enable_shared_from_this<MessageWidget>
+class MessageWidget : public Widget, public std::enable_shared_from_this<MessageWidget>
 {
     Q_OBJECT
 
@@ -110,7 +112,7 @@ protected:
     MessageWidgetType type_;
     CompanionPtr companion_;
     MessagePtr message_;
-    std::shared_ptr<QPalette> palette_;
+    // std::shared_ptr<QPalette> palette_;
     std::shared_ptr<QVBoxLayout> layout_;
     std::shared_ptr<QLabel> header_;
     MessageBodyWidgetPtr body_;

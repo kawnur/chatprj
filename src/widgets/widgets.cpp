@@ -10,31 +10,25 @@
 #include "widgets_message.hpp"
 #include "widgets_panel.hpp"
 
-ButtonType getInitialConnectButtonType()
+Widget::Widget(WidgetType type) : type_(type)
 {
-    return runAndReturnDefault([]() { return CONNECT_BUTTONS.at(0); }, ButtonType::UNKNOWN);
+    // palette_ = std::make_unique<QPalette>();
+    palette_ = std::make_shared<QPalette>();
+    setColor();
+    setAutoFillBackground(true);
+    // setPalette(*palette_);
 }
 
-ButtonType getNextConnectButtonType(ButtonType currentValue)
+void Widget::setType(WidgetType type)
 {
-    auto lambda = [&](const auto &container) {
-        auto current = std::ranges::find(container, currentValue);
+    type_ = type;
+    setColor();
+}
 
-        if (current == container.end()) {
-            auto entry = getStringByFormat("current type '{}' not found in container", currentValue);
-
-            throw std::runtime_error(entry);
-        }
-
-        auto next = current + 1;
-
-        if (next == container.end())
-            next = container.begin();
-
-        return *next;
-    };
-
-    return runAndReturnDefault(lambda, ButtonType::UNKNOWN, CONNECT_BUTTONS);
+void Widget::setColor()
+{
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(type_)));
+    setPalette(*palette_);
 }
 
 // Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
@@ -107,7 +101,8 @@ void TextEditWidget::sendSlot()
     emit sendSignal(text);
 }
 
-IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
+// IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
+IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn) : Widget(WidgetType::INDICATOR_OFF)
 {
     size_ = size;
     setFixedWidth(size_);
@@ -118,47 +113,55 @@ IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
     offColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_OFF));
     meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
 
-    palette_ = std::make_shared<QPalette>();
-    palette_->setColor(QPalette::Window, (isOn_) ? onColor_ : offColor_);
-
-    setAutoFillBackground(true);
-    setPalette(*palette_);
+    // palette_ = std::make_shared<QPalette>();
+    // palette_->setColor(QPalette::Window, (isOn_) ? onColor_ : offColor_);
+    // setAutoFillBackground(true);
+    // setPalette(*palette_);
 }
 
-IndicatorWidget::IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator)
-{
-    size_ = indicator->size_;
-    isOn_ = indicator->isOn_;
-    onColor_ = indicator->onColor_;
-    offColor_ = indicator->offColor_;
-    palette_ = indicator->palette_;
-}
+// IndicatorWidget::IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator)
+// {
+//     size_ = indicator->size_;
+//     isOn_ = indicator->isOn_;
+//     onColor_ = indicator->onColor_;
+//     offColor_ = indicator->offColor_;
+//     // palette_ = indicator->palette_;
+// }
+
+// void IndicatorWidget::set(bool on, const QColor &color)
+// {
+//     isOn_ = on;
+//     // palette_->setColor(QPalette::Window, color);
+//     // setPalette(*palette_);
+// }
 
 void IndicatorWidget::setOn()
 {
+    // set(true, onColor_);
     isOn_ = true;
-    palette_->setColor(QPalette::Window, onColor_);
-    setPalette(*palette_);
+    setType(WidgetType::INDICATOR_ON);
 }
 
 void IndicatorWidget::setOff()
 {
+    // set(false, offColor_);
     isOn_ = false;
-    palette_->setColor(QPalette::Window, offColor_);
-    setPalette(*palette_);
+    setType(WidgetType::INDICATOR_OFF);
 }
 
 void IndicatorWidget::setMe()
 {
+    // set(false, meColor_);
     isOn_ = false;
-    palette_->setColor(QPalette::Window, meColor_);
-    setPalette(*palette_);
+    setType(WidgetType::INDICATOR_ME);
 }
 
 void IndicatorWidget::toggle()
 {
     (isOn_ == true) ? setOff() : setOn();
 }
+
+SocketInfoBaseWidget::SocketInfoBaseWidget() : Widget(WidgetType::SOCKET_INFO) {}
 
 SocketInfoWidget::SocketInfoWidget(WidgetGroupPtr group, CompanionPtr companion)
 {
@@ -208,13 +211,15 @@ bool SocketInfoWidget::isConnected()
 void SocketInfoWidget::select()
 {
     isSelected_ = true;
-    changeColor(selected_);
+    // changeColor(selected_);
+    setType(WidgetType::SOCKET_INFO_SELECTED);
 }
 
 void SocketInfoWidget::unselect()
 {
     isSelected_ = false;
-    changeColor(unselected_);
+    // changeColor(unselected_);
+    setType(WidgetType::SOCKET_INFO);
 }
 
 void SocketInfoWidget::updateFields()
@@ -271,11 +276,11 @@ void SocketInfoWidget::buildFields(WidgetGroupPtr group)
     selected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO_SELECTED));
     unselected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO));
 
-    // palette
-    palette_ = std::make_shared<QPalette>();
-    palette_->setColor(QPalette::Window, unselected_);
-    setAutoFillBackground(true);
-    setPalette(*palette_);
+    // // palette
+    // palette_ = std::make_shared<QPalette>();
+    // palette_->setColor(QPalette::Window, unselected_);
+    // setAutoFillBackground(true);
+    // setPalette(*palette_);
 
     // layout
     layout_ = std::make_shared<QHBoxLayout>();
@@ -347,14 +352,13 @@ void SocketInfoWidget::setFieldsFromCompanionData()
     }
 }
 
-void SocketInfoWidget::changeColor(QColor &color)
-{
-    palette_ = std::make_shared<QPalette>();
-    palette_->setColor(QPalette::Window, color);
-
-    setAutoFillBackground(true);
-    setPalette(*palette_);
-}
+// void SocketInfoWidget::changeColor(QColor &color)
+// {
+//     palette_ = std::make_shared<QPalette>();
+//     palette_->setColor(QPalette::Window, color);
+//     setAutoFillBackground(true);
+//     setPalette(*palette_);
+// }
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -407,7 +411,8 @@ bool SocketInfoStubWidget::isStub()
     return true;
 }
 
-ShowHideWidget::ShowHideWidget()
+// ShowHideWidget::ShowHideWidget()
+ShowHideWidget::ShowHideWidget() : Widget(WidgetType::SHOW_HIDE)
 {
     show_ = true;
     layout_ = std::make_unique<QVBoxLayout>();
@@ -417,10 +422,10 @@ ShowHideWidget::ShowHideWidget()
     label_ = std::make_unique<QLabel>();
     label_->setText("Show / Hide");
 
-    palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::SHOW_HIDE)));
-    setAutoFillBackground(true);
-    setPalette(*palette_);
+    // palette_ = std::make_unique<QPalette>();
+    // palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::SHOW_HIDE)));
+    // setAutoFillBackground(true);
+    // setPalette(*palette_);
 
     layout_->addWidget(label_.get());
 }
@@ -439,6 +444,15 @@ void ShowHideWidget::mousePressEvent(QMouseEvent *event)
 {
     (show_) ? hideInfo() : showInfo();
     show_ = !(show_);
+}
+
+AppLogWidget::AppLogWidget() : Widget(WidgetType::APP_LOG)
+{
+    log_ = std::make_unique<QPlainTextEdit>();
+    // appLogWidget_->setStyleSheet("border-left: 1px solid black");
+    log_->setReadOnly(true);
+    log_->setPlainText("");
+
 }
 
 // void ScrollArea::wheelEvent(std::shared_ptr<QWheelEvent> event)
@@ -689,6 +703,33 @@ std::shared_ptr<CentralPanelWidget> StubWidgetGroup::central() const
 std::shared_ptr<RightPanelWidget> StubWidgetGroup::right() const
 {
     return right_;
+}
+
+ButtonType getInitialConnectButtonType()
+{
+    return runAndReturnDefault([]() { return CONNECT_BUTTONS.at(0); }, ButtonType::UNKNOWN);
+}
+
+ButtonType getNextConnectButtonType(ButtonType currentValue)
+{
+    auto lambda = [&](const auto &container) {
+        auto current = std::ranges::find(container, currentValue);
+
+        if (current == container.end()) {
+            auto entry = getStringByFormat("current type '{}' not found in container", currentValue);
+
+            throw std::runtime_error(entry);
+        }
+
+        auto next = current + 1;
+
+        if (next == container.end())
+            next = container.begin();
+
+        return *next;
+    };
+
+    return runAndReturnDefault(lambda, ButtonType::UNKNOWN, CONNECT_BUTTONS);
 }
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)

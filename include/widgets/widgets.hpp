@@ -16,8 +16,22 @@
 #include "alias.hpp"
 #include "logging.hpp"
 
-ButtonType getInitialConnectButtonType();
-ButtonType getNextConnectButtonType(ButtonType current);
+class Widget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    Widget(WidgetType type);
+    virtual ~Widget() = default;
+
+    void setType(WidgetType type);
+    void setColor();
+
+protected:
+    WidgetType type_;
+    // std::unique_ptr<QPalette> palette_;
+    std::shared_ptr<QPalette> palette_;
+};
 
 // class Button : public QPushButton
 // {
@@ -79,15 +93,17 @@ public slots:
     void sendSlot();
 };
 
-class IndicatorWidget : public QWidget
+// class IndicatorWidget : public QWidget
+class IndicatorWidget : public Widget
 {
     Q_OBJECT
 
 public:
     IndicatorWidget(uint8_t size, bool isOn);
-    IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator);
+    // IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator);
     ~IndicatorWidget() = default;
 
+    // void set(bool on, const QColor &color);
     void setOn();
     void setOff();
     void setMe();
@@ -101,15 +117,17 @@ private:
     QColor onColor_;
     QColor offColor_;
     QColor meColor_;
-    std::shared_ptr<QPalette> palette_;
+    // std::shared_ptr<QPalette> palette_;
 };
 
-class SocketInfoBaseWidget : public QWidget
+// class SocketInfoBaseWidget : public QWidget
+class SocketInfoBaseWidget : public Widget
 {
     Q_OBJECT
 
 public:
-    SocketInfoBaseWidget() = default;
+    // SocketInfoBaseWidget() = default;
+    SocketInfoBaseWidget();
     virtual ~SocketInfoBaseWidget() {}
 
     virtual bool isStub() { return false; }
@@ -167,7 +185,7 @@ private:
     void buildFields(WidgetGroupPtr group);
     void setFieldsFromCompanionData();
     void setFields();
-    void changeColor(QColor &color);
+    // void changeColor(QColor &color);
     void mousePressEvent(QMouseEvent *event) override;
 
     bool isSelected_;
@@ -175,7 +193,7 @@ private:
     CompanionPtr companion_;
     QColor selected_;
     QColor unselected_;
-    std::shared_ptr<QPalette> palette_;
+    // std::shared_ptr<QPalette> palette_;
     std::shared_ptr<QHBoxLayout> layout_;
     std::shared_ptr<IndicatorWidget> state_;
     std::shared_ptr<QLabel> name_;
@@ -210,7 +228,8 @@ private:
     void initializeFields();
 };
 
-class ShowHideWidget : public QWidget
+// class ShowHideWidget : public QWidget
+class ShowHideWidget : public Widget
 {
     Q_OBJECT
 
@@ -226,7 +245,19 @@ private:
     bool show_;
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QLabel> label_;
-    std::unique_ptr<QPalette> palette_;
+    // std::unique_ptr<QPalette> palette_;
+};
+
+class AppLogWidget : public Widget
+{
+    Q_OBJECT
+
+public:
+    AppLogWidget();
+    ~AppLogWidget() = default;
+
+private:
+
 };
 
 // class ScrollArea : public QScrollArea
@@ -309,6 +340,8 @@ private:
     std::shared_ptr<RightPanelWidget> right_;
 };
 
+ButtonType getInitialConnectButtonType();
+ButtonType getNextConnectButtonType(ButtonType current);
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);
 
 #endif // WIDGETS_HPP

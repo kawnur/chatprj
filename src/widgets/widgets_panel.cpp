@@ -14,9 +14,12 @@
 #include "message.hpp"  // used in lambda
 #include "utils_cout.hpp"
 #include "utils_widgets.hpp"
-#include "widgets.hpp"
+// #include "widgets.hpp"
 #include "widgets_message.hpp"
 
+// PanelWidget::PanelWidget(WidgetType type) : Widget(type) {}
+
+// LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::LEFT_PANEL)
 LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
 {
     if (parent)
@@ -29,10 +32,10 @@ LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
 
     setLayout(layout_.get());
 
-    palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::LEFT_PANEL)));
-    setAutoFillBackground(true);
-    setPalette(*palette_);
+    // palette_ = std::make_unique<QPalette>();
+    // palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::LEFT_PANEL)));
+    // setAutoFillBackground(true);
+    // setPalette(*palette_);
 
     companionPanel_ = std::make_unique<QWidget>();
     // leftPanel_->setStyleSheet("border-right: 1px solid black");
@@ -94,8 +97,18 @@ int LeftPanelWidget::getLastCompanionPanelChildWidth()
     return runAndReturnDefault([&]() { return children.at(children.size() - 1)->width(); }, -1);
 }
 
+void LeftPanelWidget::enable()
+{
+    companionPanel_->setDisabled(false);
+}
+
+void LeftPanelWidget::disable()
+{
+    companionPanel_->setDisabled(true);
+}
+
 CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name)
-    : PanelWidget(), mutex_()
+    : /*PanelWidget(WidgetType::CENTRAL_PANEL), */mutex_()
 {
     // fields
     historyScrollArea_ = nullptr;
@@ -366,12 +379,12 @@ void CentralPanelWidget::saveFileSlot()
 
 RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
 {
-    if (parent)
-        setParent(parent.get());
+    // if (parent)
+    //     setParent(parent.get());
 
     layout_ = std::make_unique<QVBoxLayout>();
-    layout_->setSpacing(0);
-    layout_->setContentsMargins(0, 0, 0, 0);
+    // layout_->setSpacing(0);
+    // layout_->setContentsMargins(0, 0, 0, 0);
     setLayout(layout_.get());
 
     log_ = std::make_unique<QPlainTextEdit>();
@@ -379,11 +392,13 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
     log_->setReadOnly(true);
     log_->setPlainText("");
 
-    palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::APP_LOG)));
-    palette_->setColor(QPalette::Text, QColorConstants::Black);
-    log_->setAutoFillBackground(true);
-    log_->setPalette(*palette_);
+    // palette_ = std::make_unique<QPalette>();
+    // palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::APP_LOG)));
+    // palette_->setColor(QPalette::Text, QColorConstants::Black);
+    // auto palette = std::make_unique<QPalette>();
+    // palette->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::APP_LOG)));
+    // palette->setColor(QPalette::Text, QColorConstants::Black);
+    // log_->setAutoFillBackground(true);
 
     layout_->addWidget(log_.get());
 
@@ -398,7 +413,8 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
 
 void RightPanelWidget::set()
 {
-    log_->setParent(this);
+    // setParent(qobject_cast<Widget *>(this));
+    // log_->setParent(this);
 
     connect(
         this, SIGNAL(addLogSignal(QString)), this, SLOT(addLogSlot(QString)), Qt::QueuedConnection);
@@ -484,6 +500,8 @@ void MainWidget::set()
     stubs_->showCentral();
 
     // show - hide widget
+    showHide_ = std::make_shared<ShowHideWidget>();
+
     if (!addWidget(MWContainerPosition::LEFT, showHide_))
         logArgsError("addWidget error");
 
@@ -589,14 +607,16 @@ void MainWidget::hideStubs()
 
 void MainWidget::enable()
 {
-    left_->setEnabled(true);
+    // left_->setEnabled(true);
+    left_->enable();
     central_->setEnabled(true);
     right_->setEnabled(true);
 }
 
 void MainWidget::disable()
 {
-    left_->setEnabled(false);
+    // left_->setEnabled(false);
+    left_->disable();  // leave showHide enabled
     central_->setEnabled(false);
     right_->setEnabled(false);
 }

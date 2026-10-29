@@ -6,7 +6,7 @@
 #include "message.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
-#include "widgets.hpp"
+// #include "widgets.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(MessagePtr message)
 {
@@ -142,6 +142,7 @@ void FileMessageBodyWidget::buildText(MessagePtr message)
 }
 
 MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : Widget(WidgetType::MESSAGE)
 {
     // fields
     type_ = getMessageWidgetType(message->type());
@@ -157,10 +158,10 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     // palette
-    palette_ = std::make_shared<QPalette>();
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::MESSAGE)));
-    setAutoFillBackground(true);
-    setPalette(*palette_);
+    // palette_ = std::make_shared<QPalette>();
+    // palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::MESSAGE)));
+    // setAutoFillBackground(true);
+    // setPalette(*palette_);
 
     // layout
     layout_ = std::make_shared<QVBoxLayout>();

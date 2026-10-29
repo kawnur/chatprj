@@ -10,7 +10,7 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::SOCKET_INFO, 55 },
     { WidgetType::SOCKET_INFO_SELECTED, 40 },
     { WidgetType::COMPANION_NAME_LABEL, 60 },
-    { WidgetType::SHOW_HIDE, 20 },
+    { WidgetType::SHOW_HIDE, 30 },
     { WidgetType::MESSAGE, 80 },
     { WidgetType::HISTORY, 75 },
     { WidgetType::BUTTON_PANEL, 65 },

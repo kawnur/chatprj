@@ -8,6 +8,7 @@ build/
 *~
 *.autosave
 *.a
+*.bkp
 *.core
 *.moc
 *.o

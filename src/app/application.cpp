@@ -15,5 +15,5 @@ void ChatApp::set()
     graphicManager_->setManager(manager_);
     manager_->set();
 
-    manager_->startUserAuthentication();
+    // manager_->startUserAuthentication();
 }

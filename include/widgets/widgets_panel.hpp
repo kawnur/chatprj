@@ -17,14 +17,17 @@
 
 #include "alias.hpp"
 #include "constants.hpp"
+#include "widgets.hpp"
 
 class PanelWidget : public QWidget
+// class PanelWidget : public Widget
 {
     Q_OBJECT
 
 public:
+    // PanelWidget(WidgetType type);
     PanelWidget() = default;
-    ~PanelWidget() = default;
+    virtual ~PanelWidget() = default;
 
     virtual void set() {}
 };
@@ -41,10 +44,12 @@ public:
     std::size_t getCompanionPanelChildrenSize();
     void removeCompanion(SocketInfoBaseWidgetPtr widget);
     int getLastCompanionPanelChildWidth();
+    void enable();
+    void disable();
 
 private:
     std::unique_ptr<QVBoxLayout> layout_;
-    std::unique_ptr<QPalette> palette_;
+    // std::unique_ptr<QPalette> palette_;
     std::unique_ptr<QWidget> companionPanel_;
     std::unique_ptr<QVBoxLayout> companionPanelLayout_;
     std::unique_ptr<QSpacerItem> spacer_;
@@ -127,7 +132,7 @@ signals:
 private:
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QPlainTextEdit> log_;
-    std::unique_ptr<QPalette> palette_;
+    // std::unique_ptr<QPalette> palette_;
 
 private slots:
     void addLogSlot(const QString &text);
@@ -203,6 +208,16 @@ public:
     int getLastCompanionPanelChildWidth()
     {
         return panel_->getLastCompanionPanelChildWidth();
+    }
+
+    void enable()
+    {
+        panel_->enable();
+    }
+
+    void disable()
+    {
+        panel_->disable();
     }
 
 private:
