@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QPushButton>
+#include <QSplitter>
 #include <QTextEdit>
 
 #include "alias.hpp"
@@ -25,6 +26,105 @@ public:
     virtual ~Widget() = default;
 
     void setType(WidgetType type);
+    void setColor();
+
+protected:
+    WidgetType type_;
+    // std::unique_ptr<QPalette> palette_;
+    std::shared_ptr<QPalette> palette_;
+};
+
+class VLayout
+{
+public:
+    VLayout();
+    virtual ~VLayout() = default;
+
+    void addWidget(QWidget *widget);
+    void removeWidget(QWidget *widget);
+
+protected:
+    std::unique_ptr<QVBoxLayout> layout_;
+};
+
+class HLayout
+{
+public:
+    HLayout();
+    virtual ~HLayout() = default;
+
+    void addWidget(QWidget *widget);
+    void removeWidget(QWidget *widget);
+
+protected:
+    std::unique_ptr<QHBoxLayout> layout_;
+};
+
+class VLayoutWidget : public Widget, public VLayout
+{
+    Q_OBJECT
+
+public:
+    VLayoutWidget(WidgetType type);
+    virtual ~VLayoutWidget() = default;
+
+    void set();
+};
+
+class HLayoutWidget : public Widget, public HLayout
+{
+    Q_OBJECT
+
+public:
+    HLayoutWidget(WidgetType type);
+    virtual ~HLayoutWidget() = default;
+
+    void set();
+};
+
+class LabelWidget : public QLabel
+{
+    Q_OBJECT
+
+public:
+    LabelWidget(WidgetType type, const QString &text);
+    virtual ~LabelWidget() = default;
+
+    // void setType(WidgetType type);
+    void setColor();
+
+protected:
+    WidgetType type_;
+    // std::unique_ptr<QPalette> palette_;
+    std::shared_ptr<QPalette> palette_;
+};
+
+class SplitterWidget : public QSplitter
+{
+    Q_OBJECT
+
+public:
+    SplitterWidget(WidgetType type, QWidget *parent = nullptr);
+    virtual ~SplitterWidget() = default;
+
+    // void setType(WidgetType type);
+    void setColor();
+
+protected:
+    WidgetType type_;
+    // std::unique_ptr<QPalette> palette_;
+    std::shared_ptr<QPalette> palette_;
+};
+
+class TextEditWidget : public QTextEdit
+{
+    Q_OBJECT
+
+public:
+    TextEditWidget(WidgetType type);
+    virtual ~TextEditWidget() = default;
+
+    // void setType(WidgetType type);
     void setColor();
 
 protected:
@@ -73,16 +173,17 @@ private:
 
 };
 
-class TextEditWidget : public QTextEdit
+// class TextEditWidget : public QTextEdit
+class MessageEditWidget : public TextEditWidget
 {
     Q_OBJECT
 
 public:
-    TextEditWidget();
-    ~TextEditWidget() = default;
+    MessageEditWidget(WidgetType type);
+    ~MessageEditWidget() = default;
 
 private:
-    std::unique_ptr<QPalette> palette_;
+    // std::unique_ptr<QPalette> palette_;
 
     void keyPressEvent(QKeyEvent *event);
 
@@ -248,17 +349,17 @@ private:
     // std::unique_ptr<QPalette> palette_;
 };
 
-class AppLogWidget : public Widget
-{
-    Q_OBJECT
+// class AppLogWidget : public Widget
+// {
+//     Q_OBJECT
 
-public:
-    AppLogWidget();
-    ~AppLogWidget() = default;
+// public:
+//     AppLogWidget();
+//     ~AppLogWidget() = default;
 
-private:
+// private:
 
-};
+// };
 
 // class ScrollArea : public QScrollArea
 // {

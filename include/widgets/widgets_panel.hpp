@@ -11,7 +11,6 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSpacerItem>
-#include <QSplitter>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -19,14 +18,14 @@
 #include "constants.hpp"
 #include "widgets.hpp"
 
-class PanelWidget : public QWidget
-// class PanelWidget : public Widget
+// class PanelWidget : public QWidget
+class PanelWidget : public Widget
 {
     Q_OBJECT
 
 public:
-    // PanelWidget(WidgetType type);
-    PanelWidget() = default;
+    PanelWidget(WidgetType type);
+    // PanelWidget() = default;
     virtual ~PanelWidget() = default;
 
     virtual void set() {}
@@ -70,7 +69,7 @@ public:
     void clearHistory();
     void sortHistory(bool lock);
 
-    void logHistoryLayout();
+    // void logHistoryLayout();
 private:
     std::mutex mutex_;
     CompanionPtr companion_;
@@ -86,20 +85,23 @@ private:
     std::unique_ptr<QLabel> companionLabel_;
     std::unique_ptr<QPalette> companionPalette_;
 
-    std::unique_ptr<QPalette> historyPalette_;
+    // std::unique_ptr<QPalette> historyPalette_;
     std::unique_ptr<QScrollArea> historyScrollArea_;
     // std::shared_ptr<ScrollArea> historyScrollArea_;
 
-    QWidgetPtr history_;
-    std::unique_ptr<QVBoxLayout> historyLayout_;
+    // QWidgetPtr history_;
+    std::shared_ptr<VLayoutWidget> history_;
+    // std::unique_ptr<QVBoxLayout> historyLayout_;
 
-    std::unique_ptr<QWidget> buttons_;
-    std::unique_ptr<QHBoxLayout> buttonsLayout_;
-    std::unique_ptr<QPalette> buttonsPalette_;
+    // std::unique_ptr<QWidget> buttons_;
+    std::unique_ptr<HLayoutWidget> buttons_;
+    // std::unique_ptr<QHBoxLayout> buttonsLayout_;
+    // std::unique_ptr<QPalette> buttonsPalette_;
     std::unique_ptr<QPushButton> sendFileButton_;
     std::unique_ptr<QPushButton> sendTextButton_;
 
-    std::unique_ptr<TextEditWidget> textEdit_;
+    // std::unique_ptr<TextEditWidget> textEdit_;
+    std::unique_ptr<MessageEditWidget> textEdit_;
     std::unique_ptr<QPalette> textEditPalette_;
 
     // std::shared_ptr<QSplitter> splitter_;
@@ -131,7 +133,8 @@ signals:
 
 private:
     std::unique_ptr<QVBoxLayout> layout_;
-    std::unique_ptr<QPlainTextEdit> log_;
+    // std::unique_ptr<QPlainTextEdit> log_;
+    std::unique_ptr<TextEditWidget> log_;
     // std::unique_ptr<QPalette> palette_;
 
 private slots:
@@ -260,7 +263,8 @@ private:
     std::shared_ptr<MainWindowContainerWidget<RightPanelWidget>> right_;
     std::shared_ptr<ShowHideWidget> showHide_;
     std::shared_ptr<QGraphicsBlurEffect> blur_;
-    std::unique_ptr<QSplitter> splitter_;
+    // std::unique_ptr<QSplitter> splitter_;
+    std::unique_ptr<SplitterWidget> splitter_;
     std::shared_ptr<StubWidgetGroup> stubs_;
 };
 

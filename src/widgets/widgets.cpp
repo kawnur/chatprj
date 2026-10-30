@@ -31,6 +31,120 @@ void Widget::setColor()
     setPalette(*palette_);
 }
 
+VLayout::VLayout() : layout_(new QVBoxLayout)
+{
+    layout_->setSpacing(0);
+    layout_->setContentsMargins(0, 0, 0, 0);
+    layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    layout_->setSizeConstraint(QLayout::SetMaximumSize);
+}
+
+void VLayout::addWidget(QWidget *widget)
+{
+    layout_->addWidget(widget);
+}
+
+void VLayout::removeWidget(QWidget *widget)
+{
+    layout_->removeWidget(widget);
+}
+
+HLayout::HLayout() : layout_(new QHBoxLayout)
+{
+    layout_->setSpacing(0);
+    layout_->setContentsMargins(0, 0, 0, 0);
+    layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    layout_->setSizeConstraint(QLayout::SetMaximumSize);
+}
+
+void HLayout::addWidget(QWidget *widget)
+{
+    layout_->addWidget(widget);
+}
+
+void HLayout::removeWidget(QWidget *widget)
+{
+    layout_->removeWidget(widget);
+}
+
+VLayoutWidget::VLayoutWidget(WidgetType type) : Widget(type), VLayout()
+{
+    setLayout(layout_.get());
+}
+
+HLayoutWidget::HLayoutWidget(WidgetType type) : Widget(type), HLayout()
+{
+    setLayout(layout_.get());
+}
+
+LabelWidget::LabelWidget(WidgetType type, const QString &text) : type_(type), QLabel(text)
+{
+    // palette_ = std::make_unique<QPalette>();
+    palette_ = std::make_shared<QPalette>();
+    setColor();
+    setAutoFillBackground(true);
+    // setPalette(*palette_);
+}
+
+// void LabelWidget::setType(WidgetType type)
+// {
+//     type_ = type;
+//     setColor();
+// }
+
+void LabelWidget::setColor()
+{
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(type_)));
+    setPalette(*palette_);
+}
+
+SplitterWidget::SplitterWidget(WidgetType type, QWidget *parent) : type_(type)
+{
+    if (parent)
+        setParent(parent);
+
+    // palette_ = std::make_unique<QPalette>();
+    palette_ = std::make_shared<QPalette>();
+    setColor();
+    setAutoFillBackground(true);
+    // setPalette(*palette_);
+}
+
+// void SplitterWidget::setType(WidgetType type)
+// {
+//     type_ = type;
+//     setColor();
+// }
+
+void SplitterWidget::setColor()
+{
+    palette_->setColor(QPalette::Window, QColor(getWidgetColor(type_)));
+    setPalette(*palette_);
+}
+
+TextEditWidget::TextEditWidget(WidgetType type) : type_(type)
+{
+    // palette_ = std::make_unique<QPalette>();
+    palette_ = std::make_shared<QPalette>();
+    setColor();
+    setAutoFillBackground(true);
+    // setPalette(*palette_);
+}
+
+// void TextEditWidget::setType(WidgetType type)
+// {
+//     type_ = type;
+//     setColor();
+// }
+
+void TextEditWidget::setColor()
+{
+    palette_->setColor(QPalette::Base, QColor(getWidgetColor(type_)));
+    setPalette(*palette_);
+}
+
 // Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
 
 // Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
@@ -64,15 +178,17 @@ ButtonBox::ButtonBox(const std::initializer_list<ButtonInfo> &list) : QDialogBut
 
 ButtonBox::~ButtonBox() { logArgsInfo(Q_FUNC_INFO); }
 
-TextEditWidget::TextEditWidget()
+// TextEditWidget::TextEditWidget()
+MessageEditWidget::MessageEditWidget(WidgetType type) : TextEditWidget(type)
 {
-    palette_ = std::make_unique<QPalette>();
-    palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::TEXT_EDIT)));
-    setAutoFillBackground(true);
-    setPalette(*palette_);
+    // palette_ = std::make_unique<QPalette>();
+    // palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::TEXT_EDIT)));
+    // setAutoFillBackground(true);
+    // setPalette(*palette_);
 }
 
-void TextEditWidget::keyPressEvent(QKeyEvent *event)
+// void TextEditWidget::keyPressEvent(QKeyEvent *event)
+void MessageEditWidget::keyPressEvent(QKeyEvent *event)
 {
 //    coutWithEndl("keyPressEvent");
 //    coutArgsWithSpaceSeparator("event->type():", std::hex, event->type());
@@ -94,7 +210,8 @@ void TextEditWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void TextEditWidget::sendSlot()
+// void TextEditWidget::sendSlot()
+void MessageEditWidget::sendSlot()
 {
     auto text = toPlainText();
     setText("");
@@ -446,14 +563,14 @@ void ShowHideWidget::mousePressEvent(QMouseEvent *event)
     show_ = !(show_);
 }
 
-AppLogWidget::AppLogWidget() : Widget(WidgetType::APP_LOG)
-{
-    log_ = std::make_unique<QPlainTextEdit>();
-    // appLogWidget_->setStyleSheet("border-left: 1px solid black");
-    log_->setReadOnly(true);
-    log_->setPlainText("");
+// AppLogWidget::AppLogWidget() : Widget(WidgetType::APP_LOG)
+// {
+//     log_ = std::make_unique<QPlainTextEdit>();
+//     // appLogWidget_->setStyleSheet("border-left: 1px solid black");
+//     log_->setReadOnly(true);
+//     log_->setPlainText("");
 
-}
+// }
 
 // void ScrollArea::wheelEvent(std::shared_ptr<QWheelEvent> event)
 // {

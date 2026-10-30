@@ -17,10 +17,10 @@
 // #include "widgets.hpp"
 #include "widgets_message.hpp"
 
-// PanelWidget::PanelWidget(WidgetType type) : Widget(type) {}
+PanelWidget::PanelWidget(WidgetType type) : Widget(type) {}
 
-// LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::LEFT_PANEL)
-LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
+LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::LEFT_PANEL)
+// LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent)
 {
     if (parent)
         setParent(parent.get());
@@ -108,11 +108,11 @@ void LeftPanelWidget::disable()
 }
 
 CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name)
-    : /*PanelWidget(WidgetType::CENTRAL_PANEL), */mutex_()
+    : PanelWidget(WidgetType::CENTRAL_PANEL), mutex_()
 {
     // fields
     historyScrollArea_ = nullptr;
-    historyPalette_ = nullptr;
+    // historyPalette_ = nullptr;
 
     // parent
     if (parent)
@@ -125,26 +125,29 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
     setLayout(layout_.get());
 
     // companion panel
-    companionLabel_ = std::make_unique<QLabel>(getQString(name));
+    // companionLabel_ = std::make_unique<QLabel>(getQString(name));
     // companionNameLabel_->setStyleSheet("border-bottom: 1px solid black");
-    companionPalette_ = std::make_unique<QPalette>();
-    auto color = QColor(getWidgetColor(WidgetType::COMPANION_NAME_LABEL));
-    companionPalette_->setColor(QPalette::Window, color);
-    companionLabel_->setAutoFillBackground(true);
-    companionLabel_->setPalette(*companionPalette_);
+    // companionPalette_ = std::make_unique<QPalette>();
+    // auto color = QColor(getWidgetColor(WidgetType::COMPANION_NAME_LABEL));
+    // companionPalette_->setColor(QPalette::Window, color);
+    // companionLabel_->setAutoFillBackground(true);
+    // companionLabel_->setPalette(*companionPalette_);
+    companionLabel_ =
+        std::make_unique<LabelWidget>(WidgetType::COMPANION_NAME_LABEL, getQString(name));
 
     layout_->addWidget(companionLabel_.get());
 
     // history
-    history_ = std::make_shared<QWidget>();
+    // history_ = std::make_shared<QWidget>();
+    history_ = std::make_shared<VLayoutWidget>(WidgetType::HISTORY);
 
-    historyLayout_ = std::make_unique<QVBoxLayout>();
-    historyLayout_->setSpacing(0);
-    historyLayout_->setContentsMargins(0, 0, 0, 0);
-    historyLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    historyLayout_->setSizeConstraint(QLayout::SetMaximumSize);
-    history_->setLayout(historyLayout_.get());
+    // historyLayout_ = std::make_unique<QVBoxLayout>();
+    // historyLayout_->setSpacing(0);
+    // historyLayout_->setContentsMargins(0, 0, 0, 0);
+    // historyLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    // // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    // historyLayout_->setSizeConstraint(QLayout::SetMaximumSize);
+    // history_->setLayout(historyLayout_.get());
 
     if (name.size() != 0) {
         historyScrollArea_ = std::make_unique<QScrollArea>();
@@ -152,36 +155,40 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
         historyScrollArea_->setWidgetResizable(true);
         historyScrollArea_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         historyScrollArea_->setWidget(history_.get());
-        historyPalette_ = std::make_unique<QPalette>();
-        historyPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::HISTORY)));
-        history_->setPalette(*historyPalette_);
+        // historyPalette_ = std::make_unique<QPalette>();
+        // historyPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::HISTORY)));
+        // history_->setPalette(*historyPalette_);
 
         layout_->addWidget(historyScrollArea_.get());
     }
 
     // button panel
-    buttons_ = std::make_unique<QWidget>();
+    // buttons_ = std::make_unique<QWidget>();
+    buttons_ = std::make_unique<HLayoutWidget>(WidgetType::BUTTON_PANEL);
 
-    buttonsLayout_ = std::make_unique<QHBoxLayout>();
-    buttonsLayout_->setSpacing(10);
-    buttonsLayout_->setContentsMargins(10, 10, 10, 10);
-    buttonsLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    buttons_->setLayout(buttonsLayout_.get());
+    // buttonsLayout_ = std::make_unique<QHBoxLayout>();
+    // buttonsLayout_->setSpacing(10);
+    // buttonsLayout_->setContentsMargins(10, 10, 10, 10);
+    // buttonsLayout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    // buttons_->setLayout(buttonsLayout_.get());
 
-    buttonsPalette_ = std::make_unique<QPalette>();
-    buttonsPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::BUTTON_PANEL)));
-    buttons_->setAutoFillBackground(true);
-    buttons_->setPalette(*buttonsPalette_);
+    // buttonsPalette_ = std::make_unique<QPalette>();
+    // buttonsPalette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::BUTTON_PANEL)));
+    // buttons_->setAutoFillBackground(true);
+    // buttons_->setPalette(*buttonsPalette_);
 
     sendFileButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_FILE));
     sendTextButton_ = std::make_unique<QPushButton>(getButtonText(ButtonType::SEND_TEXT));
-    buttonsLayout_->addWidget(sendFileButton_.get());
-    buttonsLayout_->addWidget(sendTextButton_.get());
+    // buttonsLayout_->addWidget(sendFileButton_.get());
+    buttons_->addWidget(sendFileButton_.get());
+    // buttonsLayout_->addWidget(sendTextButton_.get());
+    buttons_->addWidget(sendTextButton_.get());
 
     layout_->addWidget(buttons_.get());
 
     // text edit panel
-    textEdit_ = std::make_unique<TextEditWidget>();
+    // textEdit_ = std::make_unique<TextEditWidget>();
+    textEdit_ = std::make_unique<MessageEditWidget>(WidgetType::TEXT_EDIT);
     layout_->addWidget(textEdit_.get());
 
     // splitter_ = new QSplitter;
@@ -195,7 +202,8 @@ void CentralPanelWidget::set(CompanionPtr companion)
     companion_ = companion;
 
     connect(
-        textEdit_.get(), &TextEditWidget::sendSignal,
+        // textEdit_.get(), &TextEditWidget::sendSignal,
+        textEdit_.get(), &MessageEditWidget::sendSignal,
         this, &CentralPanelWidget::sendMessageSlot, Qt::QueuedConnection);
 
     connect(
@@ -204,7 +212,8 @@ void CentralPanelWidget::set(CompanionPtr companion)
 
     connect(
         sendTextButton_.get(), &QPushButton::clicked,
-        textEdit_.get(), &TextEditWidget::sendSlot, Qt::QueuedConnection);
+        // textEdit_.get(), &TextEditWidget::sendSlot, Qt::QueuedConnection);
+        textEdit_.get(), &MessageEditWidget::sendSlot, Qt::QueuedConnection);
 
     historyScrollArea_->installEventFilter(this);
 }
@@ -215,7 +224,8 @@ void CentralPanelWidget::addMessage(MessageWidgetPtr widget, bool isAntecedent)
         std::lock_guard<std::mutex> lock(mutex_);
 
         widget->setParent(history_.get());
-        historyLayout_->addWidget(widget.get());
+        // historyLayout_->addWidget(widget.get());
+        history_->addWidget(widget.get());
 
         if (isAntecedent)
             sortHistory(false);
@@ -224,16 +234,16 @@ void CentralPanelWidget::addMessage(MessageWidgetPtr widget, bool isAntecedent)
     scrollDownHistory();
 }
 
-void CentralPanelWidget::logHistoryLayout()
-{
-    coutArgsWithSpaceSeparator(Q_FUNC_INFO, this, historyLayout_.get());
+// void CentralPanelWidget::logHistoryLayout()
+// {
+//     coutArgsWithSpaceSeparator(Q_FUNC_INFO, this, historyLayout_.get());
 
-    for (int i = 0; i < historyLayout_->count(); ++i) {
-        auto cast = qobject_cast<MessageWidget *>(historyLayout_->itemAt(i)->widget());
+//     for (int i = 0; i < historyLayout_->count(); ++i) {
+//         auto cast = qobject_cast<MessageWidget *>(historyLayout_->itemAt(i)->widget());
 
-        coutArgsWithSpaceSeparator(i, cast->message()->data()->text());
-    }
-}
+//         coutArgsWithSpaceSeparator(i, cast->message()->data()->text());
+//     }
+// }
 
 void CentralPanelWidget::scrollDownHistory()
 {
@@ -328,8 +338,10 @@ void CentralPanelWidget::sortHistory(bool lock)
         if (message)
             coutArgsWithSpaceSeparator("element message:", message->text());
 
-        historyLayout_->removeWidget(element);
-        historyLayout_->addWidget(element);
+        // historyLayout_->removeWidget(element);
+        history_->removeWidget(element);
+        // historyLayout_->addWidget(element);
+        history_->addWidget(element);
     }
 }
 
@@ -377,20 +389,21 @@ void CentralPanelWidget::saveFileSlot()
     // getGraphicManager()->saveFile(companion_);
 }
 
-RightPanelWidget::RightPanelWidget(QWidgetPtr parent)
+RightPanelWidget::RightPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::RIGHT_PANEL)
 {
     // if (parent)
     //     setParent(parent.get());
 
     layout_ = std::make_unique<QVBoxLayout>();
-    // layout_->setSpacing(0);
-    // layout_->setContentsMargins(0, 0, 0, 0);
+    layout_->setSpacing(0);
+    layout_->setContentsMargins(0, 0, 0, 0);
     setLayout(layout_.get());
 
-    log_ = std::make_unique<QPlainTextEdit>();
-    // appLogWidget_->setStyleSheet("border-left: 1px solid black");
-    log_->setReadOnly(true);
-    log_->setPlainText("");
+    // log_ = std::make_unique<QPlainTextEdit>();
+    log_ = std::make_unique<TextEditWidget>(WidgetType::APP_LOG);
+    // // appLogWidget_->setStyleSheet("border-left: 1px solid black");
+    // log_->setReadOnly(true);
+    // log_->setPlainText("");
 
     // palette_ = std::make_unique<QPalette>();
     // palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::APP_LOG)));
@@ -438,9 +451,11 @@ void RightPanelWidget::clearLog()
 
 void RightPanelWidget::addLogSlot(const QString &text)
 {
-    log_->appendPlainText(text);
+    // log_->appendPlainText(text);
+    log_->append(text);
 
-    // QApplication::processEvents();
+    QApplication::processEvents();
+    QApplication::processEvents();
 
     log_->ensureCursorVisible();
 }
@@ -484,7 +499,8 @@ void MainWidget::set()
     layout_->addWidget(right_.get());
 
     // splitter
-    splitter_ = std::make_unique<QSplitter>(this);
+    // splitter_ = std::make_unique<QSplitter>(this);
+    splitter_ = std::make_unique<SplitterWidget>(WidgetType::SPLITTER_CENTRAL_RIGHT, this);
     splitter_->addWidget(central_.get());
     splitter_->addWidget(right_.get());
     layout_->addWidget(splitter_.get());

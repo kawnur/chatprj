@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="aIU88XDhlDwrzjkHTBSQ">
-    <mxGraphModel dx="933" dy="1715" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="778" dy="1429" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -45,6 +45,9 @@
         </mxCell>
         <mxCell id="O4gkc52YgHuas_3BEzVP-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ShowHide 30" vertex="1">
           <mxGeometry height="80" width="250" x="40" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="-1I47xzMyAk0B_U2v_H7-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;labelPerimeter=1;" value="Splitter 50" vertex="1">
+          <mxGeometry height="740" width="20" x="570" y="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

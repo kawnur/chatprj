@@ -5,18 +5,21 @@
 #include "widgets.hpp"
 
 const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
-    { WidgetType::MAIN_WINDOW_MENU, 45 },
-    { WidgetType::LEFT_PANEL, 70 },
-    { WidgetType::SOCKET_INFO, 55 },
-    { WidgetType::SOCKET_INFO_SELECTED, 40 },
-    { WidgetType::COMPANION_NAME_LABEL, 60 },
-    { WidgetType::SHOW_HIDE, 30 },
-    { WidgetType::MESSAGE, 80 },
-    { WidgetType::HISTORY, 75 },
-    { WidgetType::BUTTON_PANEL, 65 },
-    { WidgetType::TEXT_EDIT, 80 },
-    { WidgetType::APP_LOG, 85 },
-    { WidgetType::INDICATOR_ME, 30 }
+    { WidgetType::MAIN_WINDOW_MENU, 50 },
+    { WidgetType::LEFT_PANEL, 75 },
+    { WidgetType::SOCKET_INFO, 60 },
+    { WidgetType::SOCKET_INFO_SELECTED, 45 },
+    { WidgetType::SHOW_HIDE, 35 },
+    { WidgetType::CENTRAL_PANEL, 80 },
+    { WidgetType::COMPANION_NAME_LABEL, 65 },
+    { WidgetType::MESSAGE, 85 },
+    { WidgetType::HISTORY, 80 },
+    { WidgetType::BUTTON_PANEL, 70 },
+    { WidgetType::TEXT_EDIT, 85 },
+    { WidgetType::SPLITTER_CENTRAL_RIGHT, 60 },
+    { WidgetType::RIGHT_PANEL, 90 },
+    { WidgetType::APP_LOG, 90 },
+    { WidgetType::INDICATOR_ME, 35 }
 };
 
 const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
