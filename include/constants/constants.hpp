@@ -39,10 +39,6 @@ const std::string POINTER_CASTING_ERROR { "Pointer casting error" };
 const QString ME_NAME { "me" };
 const QString NOT_FOUND { "NOT FOUND" };
 
-const uint8_t CONNECTION_STATE_INDICATOR_WIDGET_SIZE = 15;
-const uint8_t NEW_MESSAGES_INDICATOR_WIDGET_SIZE = 7;
-const uint8_t MESSAGE_WIDGET_INDICATOR_WIDGET_SIZE = 10;
-
 const std::size_t NETWORK_ID_SIZE = 5;
 
 // file transmission
@@ -308,6 +304,7 @@ enum class WidgetType
     UNKNOWN,
     MAIN_WINDOW_MENU,
     LEFT_PANEL,
+    COMPANION_PANEL,
     SOCKET_INFO,
     SOCKET_INFO_SELECTED,
     COMPANION_NAME_LABEL,
@@ -324,6 +321,9 @@ enum class WidgetType
     SPLITTER_CENTRAL_RIGHT,
     RIGHT_PANEL,
     APP_LOG,
+    CONNECTION_STATE_INDICATOR,
+    NEW_MESSAGES_INDICATOR,
+    MESSAGE_WIDGET_INDICATOR,
     INDICATOR_ME,
     INDICATOR_ON,
     INDICATOR_OFF,

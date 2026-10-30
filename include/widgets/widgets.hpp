@@ -11,19 +11,20 @@
 #include <QLabel>
 #include <QMenu>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QSplitter>
 #include <QTextEdit>
 
 #include "alias.hpp"
 #include "logging.hpp"
 
-class Widget : public QWidget
+class PalettedWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Widget(WidgetType type);
-    virtual ~Widget() = default;
+    PalettedWidget(WidgetType type);
+    virtual ~PalettedWidget() = default;
 
     void setType(WidgetType type);
     void setColor();
@@ -34,33 +35,47 @@ protected:
     std::shared_ptr<QPalette> palette_;
 };
 
-class VLayout
+class Layout
 {
 public:
-    VLayout();
+    Layout(WidgetType type);
+    virtual ~Layout() = default;
+
+    virtual void addWidget(QWidget *widget) {}
+    virtual void removeWidget(QWidget *widget) {}
+
+protected:
+    WidgetType type_;
+    uint32_t value_;
+};
+
+class VLayout : public Layout
+{
+public:
+    VLayout(WidgetType type);
     virtual ~VLayout() = default;
 
-    void addWidget(QWidget *widget);
-    void removeWidget(QWidget *widget);
+    void addWidget(QWidget *widget) override;
+    void removeWidget(QWidget *widget) override;
 
 protected:
     std::unique_ptr<QVBoxLayout> layout_;
 };
 
-class HLayout
+class HLayout : public Layout
 {
 public:
-    HLayout();
+    HLayout(WidgetType type);
     virtual ~HLayout() = default;
 
-    void addWidget(QWidget *widget);
-    void removeWidget(QWidget *widget);
+    void addWidget(QWidget *widget) override;
+    void removeWidget(QWidget *widget) override;
 
 protected:
     std::unique_ptr<QHBoxLayout> layout_;
 };
 
-class VLayoutWidget : public Widget, public VLayout
+class VLayoutWidget : public PalettedWidget, public VLayout
 {
     Q_OBJECT
 
@@ -71,7 +86,7 @@ public:
     void set();
 };
 
-class HLayoutWidget : public Widget, public HLayout
+class HLayoutWidget : public PalettedWidget, public HLayout
 {
     Q_OBJECT
 
@@ -173,7 +188,6 @@ private:
 
 };
 
-// class TextEditWidget : public QTextEdit
 class MessageEditWidget : public TextEditWidget
 {
     Q_OBJECT
@@ -183,8 +197,6 @@ public:
     ~MessageEditWidget() = default;
 
 private:
-    // std::unique_ptr<QPalette> palette_;
-
     void keyPressEvent(QKeyEvent *event);
 
 signals:
@@ -194,17 +206,14 @@ public slots:
     void sendSlot();
 };
 
-// class IndicatorWidget : public QWidget
-class IndicatorWidget : public Widget
+class IndicatorWidget : public PalettedWidget
 {
     Q_OBJECT
 
 public:
-    IndicatorWidget(uint8_t size, bool isOn);
-    // IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator);
+    IndicatorWidget(WidgetType type, bool isOn);
     ~IndicatorWidget() = default;
 
-    // void set(bool on, const QColor &color);
     void setOn();
     void setOff();
     void setMe();
@@ -218,16 +227,24 @@ private:
     QColor onColor_;
     QColor offColor_;
     QColor meColor_;
-    // std::shared_ptr<QPalette> palette_;
 };
 
-// class SocketInfoBaseWidget : public QWidget
-class SocketInfoBaseWidget : public Widget
+class ButtonPanelWidget : public HLayoutWidget
+{
+public:
+    ButtonPanelWidget(const std::initializer_list<ButtonInfo> &list);
+    ~ButtonPanelWidget() = default;
+
+private:
+    std::list<std::shared_ptr<QPushButton>> buttons_;
+};
+
+// class SocketInfoBaseWidget : public PalettedWidget
+class SocketInfoBaseWidget : public HLayoutWidget
 {
     Q_OBJECT
 
 public:
-    // SocketInfoBaseWidget() = default;
     SocketInfoBaseWidget();
     virtual ~SocketInfoBaseWidget() {}
 
@@ -286,7 +303,6 @@ private:
     void buildFields(WidgetGroupPtr group);
     void setFieldsFromCompanionData();
     void setFields();
-    // void changeColor(QColor &color);
     void mousePressEvent(QMouseEvent *event) override;
 
     bool isSelected_;
@@ -294,13 +310,13 @@ private:
     CompanionPtr companion_;
     QColor selected_;
     QColor unselected_;
-    // std::shared_ptr<QPalette> palette_;
-    std::shared_ptr<QHBoxLayout> layout_;
+    // std::shared_ptr<QHBoxLayout> layout_;
     std::shared_ptr<IndicatorWidget> state_;
     std::shared_ptr<QLabel> name_;
     std::shared_ptr<QLabel> ipAddress_;
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
+    std::shared_ptr<QSpacerItem> spacer_;
     std::shared_ptr<QPushButton> edit_;
     ButtonType connectButtonType_;
     std::shared_ptr<QPushButton> connect_;
@@ -323,14 +339,13 @@ public:
 
 private:
     QString mark_;
-    std::unique_ptr<QHBoxLayout> layout_;
+    // std::unique_ptr<QHBoxLayout> layout_;
     std::unique_ptr<QLabel> markLabel_;
 
     void initializeFields();
 };
 
-// class ShowHideWidget : public QWidget
-class ShowHideWidget : public Widget
+class ShowHideWidget : public PalettedWidget
 {
     Q_OBJECT
 
@@ -346,31 +361,16 @@ private:
     bool show_;
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QLabel> label_;
-    // std::unique_ptr<QPalette> palette_;
 };
 
-// class AppLogWidget : public Widget
-// {
-//     Q_OBJECT
+class ScrollAreaWidget : public QScrollArea
+{
+    Q_OBJECT
 
-// public:
-//     AppLogWidget();
-//     ~AppLogWidget() = default;
-
-// private:
-
-// };
-
-// class ScrollArea : public QScrollArea
-// {
-// public:
-//     ScrollArea() = default;
-//     ~ScrollArea() = default;
-
-// private:
-
-//     // void wheelEvent(std::shared_ptr<QWheelEvent>) override;
-// };
+public:
+    ScrollAreaWidget(QWidgetPtr widget);
+    ~ScrollAreaWidget() = default;
+};
 
 class WidgetGroup : public QObject, public std::enable_shared_from_this<WidgetGroup>
 {

@@ -26,5 +26,7 @@ QString getHTMLHeader(
     const std::string &time);
 
 QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
+uint32_t getLayoutValue(WidgetType type);
+uint32_t getIndicatorSize(WidgetType type);
 
 #endif // UTILS_WIDGETS_HPP

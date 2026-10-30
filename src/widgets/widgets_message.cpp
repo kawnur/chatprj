@@ -22,9 +22,12 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(MessagePtr message)
     setLayout(layout_.get());
 
     if (sentByMe_) {
-        auto size = MESSAGE_WIDGET_INDICATOR_WIDGET_SIZE;
-        sent_ = std::make_shared<IndicatorWidget>(size, message->isSent());
-        received_ = std::make_shared<IndicatorWidget>(size, message->isReceived());
+        // auto size = MESSAGE_WIDGET_INDICATOR_WIDGET_SIZE;
+        auto type = WidgetType::MESSAGE_WIDGET_INDICATOR;
+        // sent_ = std::make_shared<IndicatorWidget>(size, message->isSent());
+        // received_ = std::make_shared<IndicatorWidget>(size, message->isReceived());
+        sent_ = std::make_shared<IndicatorWidget>(type, message->isSent());
+        received_ = std::make_shared<IndicatorWidget>(type, message->isReceived());
 
         newMessageLabel_ = nullptr;
 
@@ -142,7 +145,7 @@ void FileMessageBodyWidget::buildText(MessagePtr message)
 }
 
 MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
-    : Widget(WidgetType::MESSAGE)
+    : PalettedWidget(WidgetType::MESSAGE)
 {
     // fields
     type_ = getMessageWidgetType(message->type());

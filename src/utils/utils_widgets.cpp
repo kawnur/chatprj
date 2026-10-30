@@ -22,6 +22,11 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::INDICATOR_ME, 35 }
 };
 
+const std::unordered_map<WidgetType, uint32_t> LAYOUT_VALUE_MAP {
+    { WidgetType::BUTTON_PANEL, 10 },
+    { WidgetType::SOCKET_INFO, 10 }
+};
+
 const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
     { WidgetType::MESSAGE_SENT, 0x115e00 },
     { WidgetType::MESSAGE_RECEIVED, 0x00115e },
@@ -55,6 +60,12 @@ const std::unordered_map<uint32_t, uint32_t> WIDGET_LIGHTNESS_TO_COLOR_MAP {
     { 90, 0xe8e7e3 },
     { 95, 0xf4f3f1 },
     { 100, 0xffffff }
+};
+
+const std::unordered_map<WidgetType, uint32_t> INDICATOR_WIDGET_SIZE_MAP {
+    { WidgetType::CONNECTION_STATE_INDICATOR, 15 },
+    { WidgetType::NEW_MESSAGES_INDICATOR, 7 },
+    { WidgetType::MESSAGE_WIDGET_INDICATOR, 10 }
 };
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)
@@ -123,4 +134,14 @@ QString getHTMLBody(const std::string &color, const std::string &text, bool _bre
     auto textSub = getStringByFormat("{0}{1}{2}{3}", breakSub, boldOpen, text, boldClose);
 
     return getQString(getStringByFormat("<font color=\"{0}\">{1}</font>", color, textSub));
+}
+
+uint32_t getLayoutValue(WidgetType type)
+{
+    return getMapValue(LAYOUT_VALUE_MAP, type, 0);
+}
+
+uint32_t getIndicatorSize(WidgetType type)
+{
+    return getMapValue(INDICATOR_WIDGET_SIZE_MAP, type, 10);
 }

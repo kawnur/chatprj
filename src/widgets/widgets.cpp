@@ -10,31 +10,35 @@
 #include "widgets_message.hpp"
 #include "widgets_panel.hpp"
 
-Widget::Widget(WidgetType type) : type_(type)
+PalettedWidget::PalettedWidget(WidgetType type) : type_(type)
 {
     // palette_ = std::make_unique<QPalette>();
     palette_ = std::make_shared<QPalette>();
     setColor();
     setAutoFillBackground(true);
-    // setPalette(*palette_);
 }
 
-void Widget::setType(WidgetType type)
+void PalettedWidget::setType(WidgetType type)
 {
     type_ = type;
     setColor();
 }
 
-void Widget::setColor()
+void PalettedWidget::setColor()
 {
     palette_->setColor(QPalette::Window, QColor(getWidgetColor(type_)));
     setPalette(*palette_);
 }
 
-VLayout::VLayout() : layout_(new QVBoxLayout)
+Layout::Layout(WidgetType type) : type_(type)
 {
-    layout_->setSpacing(0);
-    layout_->setContentsMargins(0, 0, 0, 0);
+    value_ = getLayoutValue(type_);
+}
+
+VLayout::VLayout(WidgetType type) : Layout(type), layout_(new QVBoxLayout)
+{
+    layout_->setSpacing(value_);
+    layout_->setContentsMargins(value_, value_, value_, value_);
     layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout_->setSizeConstraint(QLayout::SetMaximumSize);
@@ -50,10 +54,10 @@ void VLayout::removeWidget(QWidget *widget)
     layout_->removeWidget(widget);
 }
 
-HLayout::HLayout() : layout_(new QHBoxLayout)
+HLayout::HLayout(WidgetType type) : Layout(type), layout_(new QHBoxLayout)
 {
-    layout_->setSpacing(0);
-    layout_->setContentsMargins(0, 0, 0, 0);
+    layout_->setSpacing(value_);
+    layout_->setContentsMargins(value_, value_, value_, value_);
     layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout_->setSizeConstraint(QLayout::SetMaximumSize);
@@ -69,12 +73,12 @@ void HLayout::removeWidget(QWidget *widget)
     layout_->removeWidget(widget);
 }
 
-VLayoutWidget::VLayoutWidget(WidgetType type) : Widget(type), VLayout()
+VLayoutWidget::VLayoutWidget(WidgetType type) : PalettedWidget(type), VLayout(type)
 {
     setLayout(layout_.get());
 }
 
-HLayoutWidget::HLayoutWidget(WidgetType type) : Widget(type), HLayout()
+HLayoutWidget::HLayoutWidget(WidgetType type) : PalettedWidget(type), HLayout(type)
 {
     setLayout(layout_.get());
 }
@@ -85,14 +89,7 @@ LabelWidget::LabelWidget(WidgetType type, const QString &text) : type_(type), QL
     palette_ = std::make_shared<QPalette>();
     setColor();
     setAutoFillBackground(true);
-    // setPalette(*palette_);
 }
-
-// void LabelWidget::setType(WidgetType type)
-// {
-//     type_ = type;
-//     setColor();
-// }
 
 void LabelWidget::setColor()
 {
@@ -109,14 +106,7 @@ SplitterWidget::SplitterWidget(WidgetType type, QWidget *parent) : type_(type)
     palette_ = std::make_shared<QPalette>();
     setColor();
     setAutoFillBackground(true);
-    // setPalette(*palette_);
 }
-
-// void SplitterWidget::setType(WidgetType type)
-// {
-//     type_ = type;
-//     setColor();
-// }
 
 void SplitterWidget::setColor()
 {
@@ -130,14 +120,7 @@ TextEditWidget::TextEditWidget(WidgetType type) : type_(type)
     palette_ = std::make_shared<QPalette>();
     setColor();
     setAutoFillBackground(true);
-    // setPalette(*palette_);
 }
-
-// void TextEditWidget::setType(WidgetType type)
-// {
-//     type_ = type;
-//     setColor();
-// }
 
 void TextEditWidget::setColor()
 {
@@ -178,16 +161,8 @@ ButtonBox::ButtonBox(const std::initializer_list<ButtonInfo> &list) : QDialogBut
 
 ButtonBox::~ButtonBox() { logArgsInfo(Q_FUNC_INFO); }
 
-// TextEditWidget::TextEditWidget()
-MessageEditWidget::MessageEditWidget(WidgetType type) : TextEditWidget(type)
-{
-    // palette_ = std::make_unique<QPalette>();
-    // palette_->setColor(QPalette::Base, QColor(getWidgetColor(WidgetType::TEXT_EDIT)));
-    // setAutoFillBackground(true);
-    // setPalette(*palette_);
-}
+MessageEditWidget::MessageEditWidget(WidgetType type) : TextEditWidget(type) {}
 
-// void TextEditWidget::keyPressEvent(QKeyEvent *event)
 void MessageEditWidget::keyPressEvent(QKeyEvent *event)
 {
 //    coutWithEndl("keyPressEvent");
@@ -210,7 +185,6 @@ void MessageEditWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
-// void TextEditWidget::sendSlot()
 void MessageEditWidget::sendSlot()
 {
     auto text = toPlainText();
@@ -218,10 +192,9 @@ void MessageEditWidget::sendSlot()
     emit sendSignal(text);
 }
 
-// IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn)
-IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn) : Widget(WidgetType::INDICATOR_OFF)
+IndicatorWidget::IndicatorWidget(WidgetType type, bool isOn) : PalettedWidget(type)
 {
-    size_ = size;
+    size_ = getIndicatorSize(type_);
     setFixedWidth(size_);
     setFixedHeight(size_);
 
@@ -230,55 +203,48 @@ IndicatorWidget::IndicatorWidget(uint8_t size, bool isOn) : Widget(WidgetType::I
     offColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_OFF));
     meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
 
-    // palette_ = std::make_shared<QPalette>();
-    // palette_->setColor(QPalette::Window, (isOn_) ? onColor_ : offColor_);
-    // setAutoFillBackground(true);
-    // setPalette(*palette_);
+    (isOn_) ? setOn() : setOff();
 }
-
-// IndicatorWidget::IndicatorWidget(std::shared_ptr<IndicatorWidget> indicator)
-// {
-//     size_ = indicator->size_;
-//     isOn_ = indicator->isOn_;
-//     onColor_ = indicator->onColor_;
-//     offColor_ = indicator->offColor_;
-//     // palette_ = indicator->palette_;
-// }
-
-// void IndicatorWidget::set(bool on, const QColor &color)
-// {
-//     isOn_ = on;
-//     // palette_->setColor(QPalette::Window, color);
-//     // setPalette(*palette_);
-// }
 
 void IndicatorWidget::setOn()
 {
-    // set(true, onColor_);
     isOn_ = true;
     setType(WidgetType::INDICATOR_ON);
 }
 
 void IndicatorWidget::setOff()
 {
-    // set(false, offColor_);
     isOn_ = false;
     setType(WidgetType::INDICATOR_OFF);
 }
 
 void IndicatorWidget::setMe()
 {
-    // set(false, meColor_);
     isOn_ = false;
     setType(WidgetType::INDICATOR_ME);
 }
 
 void IndicatorWidget::toggle()
 {
-    (isOn_ == true) ? setOff() : setOn();
+    (isOn_) ? setOff() : setOn();
 }
 
-SocketInfoBaseWidget::SocketInfoBaseWidget() : Widget(WidgetType::SOCKET_INFO) {}
+ButtonPanelWidget::ButtonPanelWidget(const std::initializer_list<ButtonInfo> &list)
+    : HLayoutWidget(WidgetType::BUTTON_PANEL), buttons_()
+{
+    for (const auto &info : list) {
+        auto type = info.type();
+        auto button = std::make_shared<QPushButton>(getButtonText(type));
+        buttons_.push_back(button);
+        addWidget(button.get());
+
+        QObject::connect(
+            button.get(), &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
+    }
+}
+
+// SocketInfoBaseWidget::SocketInfoBaseWidget() : PalettedWidget(WidgetType::SOCKET_INFO) {}
+SocketInfoBaseWidget::SocketInfoBaseWidget() : HLayoutWidget(WidgetType::SOCKET_INFO) {}
 
 SocketInfoWidget::SocketInfoWidget(WidgetGroupPtr group, CompanionPtr companion)
 {
@@ -328,14 +294,12 @@ bool SocketInfoWidget::isConnected()
 void SocketInfoWidget::select()
 {
     isSelected_ = true;
-    // changeColor(selected_);
     setType(WidgetType::SOCKET_INFO_SELECTED);
 }
 
 void SocketInfoWidget::unselect()
 {
     isSelected_ = false;
-    // changeColor(unselected_);
     setType(WidgetType::SOCKET_INFO);
 }
 
@@ -390,26 +354,21 @@ void SocketInfoWidget::buildFields(WidgetGroupPtr group)
     // value fields
     isSelected_ = false;
     isConnected_ = false;
-    selected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO_SELECTED));
-    unselected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO));
-
-    // // palette
-    // palette_ = std::make_shared<QPalette>();
-    // palette_->setColor(QPalette::Window, unselected_);
-    // setAutoFillBackground(true);
-    // setPalette(*palette_);
+    // selected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO_SELECTED));
+    // unselected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO));
 
     // layout
-    layout_ = std::make_shared<QHBoxLayout>();
-    setLayout(layout_.get());
+    // layout_ = std::make_shared<QHBoxLayout>();
+    // setLayout(layout_.get());
 
     // widget fields
-    state_ = std::make_shared<IndicatorWidget>(CONNECTION_STATE_INDICATOR_WIDGET_SIZE, false);
+    state_ = std::make_shared<IndicatorWidget>(WidgetType::CONNECTION_STATE_INDICATOR, false);
 
     name_ = std::make_shared<QLabel>();
     ipAddress_ = std::make_shared<QLabel>();
     serverPort_ = std::make_shared<QLabel>();
     clientPort_ = std::make_shared<QLabel>();
+    spacer_ = std::make_shared<QSpacerItem>(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
     edit_ = std::make_shared<QPushButton>(getButtonText(ButtonType::EDIT));
     connectButtonType_ = getInitialConnectButtonType();
     connect_ = std::make_shared<QPushButton>(getButtonText(connectButtonType_));
@@ -422,14 +381,28 @@ void SocketInfoWidget::buildFields(WidgetGroupPtr group)
         connect_.get(), &QPushButton::clicked,
         group.get(), &WidgetGroup::clientAction, Qt::QueuedConnection);
 
-    received_ = std::make_shared<IndicatorWidget>(NEW_MESSAGES_INDICATOR_WIDGET_SIZE, false);
+    received_ = std::make_shared<IndicatorWidget>(WidgetType::NEW_MESSAGES_INDICATOR, false);
 
     // add widgets to layout
-    std::vector<QWidgetPtr> widgets {
-        state_, name_, ipAddress_, serverPort_, clientPort_, edit_, connect_, received_
+    // std::vector<QWidgetPtr> widgets {
+    //     state_, name_, ipAddress_, serverPort_, clientPort_, edit_, connect_, received_
+    // };
+    std::vector<QWidgetPtr> widgets1 {
+        state_, name_, ipAddress_, serverPort_, clientPort_
     };
 
-    for (auto &widget : widgets)
+    std::vector<QWidgetPtr> widgets2 {
+        edit_, connect_, received_
+    };
+
+    // for (auto &widget : widgets)
+    //     layout_->addWidget(widget.get());
+    for (auto &widget : widgets1)
+        layout_->addWidget(widget.get());
+
+    layout_->addSpacerItem(spacer_.get());
+
+    for (auto &widget : widgets2)
         layout_->addWidget(widget.get());
 
     // ???
@@ -468,14 +441,6 @@ void SocketInfoWidget::setFieldsFromCompanionData()
         clientPort_->setText(getQString(data->clientPort()));
     }
 }
-
-// void SocketInfoWidget::changeColor(QColor &color)
-// {
-//     palette_ = std::make_shared<QPalette>();
-//     palette_->setColor(QPalette::Window, color);
-//     setAutoFillBackground(true);
-//     setPalette(*palette_);
-// }
 
 void SocketInfoWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -516,8 +481,8 @@ SocketInfoStubWidget::SocketInfoStubWidget()
 {
     mark_ = getQString(socketInfoStubWidget);
 
-    layout_ = std::make_unique<QHBoxLayout>();
-    setLayout(layout_.get());
+    // layout_ = std::make_unique<QHBoxLayout>();
+    // setLayout(layout_.get());
 
     markLabel_ = std::make_unique<QLabel>(mark_);
     layout_->addWidget(markLabel_.get());
@@ -528,8 +493,7 @@ bool SocketInfoStubWidget::isStub()
     return true;
 }
 
-// ShowHideWidget::ShowHideWidget()
-ShowHideWidget::ShowHideWidget() : Widget(WidgetType::SHOW_HIDE)
+ShowHideWidget::ShowHideWidget() : PalettedWidget(WidgetType::SHOW_HIDE)
 {
     show_ = true;
     layout_ = std::make_unique<QVBoxLayout>();
@@ -538,11 +502,6 @@ ShowHideWidget::ShowHideWidget() : Widget(WidgetType::SHOW_HIDE)
 
     label_ = std::make_unique<QLabel>();
     label_->setText("Show / Hide");
-
-    // palette_ = std::make_unique<QPalette>();
-    // palette_->setColor(QPalette::Window, QColor(getWidgetColor(WidgetType::SHOW_HIDE)));
-    // setAutoFillBackground(true);
-    // setPalette(*palette_);
 
     layout_->addWidget(label_.get());
 }
@@ -563,19 +522,12 @@ void ShowHideWidget::mousePressEvent(QMouseEvent *event)
     show_ = !(show_);
 }
 
-// AppLogWidget::AppLogWidget() : Widget(WidgetType::APP_LOG)
-// {
-//     log_ = std::make_unique<QPlainTextEdit>();
-//     // appLogWidget_->setStyleSheet("border-left: 1px solid black");
-//     log_->setReadOnly(true);
-//     log_->setPlainText("");
-
-// }
-
-// void ScrollArea::wheelEvent(std::shared_ptr<QWheelEvent> event)
-// {
-//     logArgs(__FUNCTION__);
-// }
+ScrollAreaWidget::ScrollAreaWidget(QWidgetPtr widget)
+{
+    setWidgetResizable(true);
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setWidget(widget.get());
+}
 
 WidgetGroup::WidgetGroup(CompanionPtr companion)
     : companion_(companion), antecedentMessagesCounterMutex_(), antecedentMessagesCounter_(0) {}

@@ -88,7 +88,7 @@ private:
 };
 
 // class MessageWidget : public QWidget, public std::enable_shared_from_this<MessageWidget>
-class MessageWidget : public Widget, public std::enable_shared_from_this<MessageWidget>
+class MessageWidget : public PalettedWidget, public std::enable_shared_from_this<MessageWidget>
 {
     Q_OBJECT
 
