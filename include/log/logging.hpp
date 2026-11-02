@@ -101,6 +101,12 @@ void logTemplateError(T &&templateString, Ts &&...args)
     logArgsError(getStringByFormat(templateString, args...));
 }
 
+template<typename T, typename... Ts>
+void logTemplateException(T &&templateString, Ts &&...args)
+{
+    logArgsException(getStringByFormat(templateString, args...));
+}
+
 template<typename... Ts>
 void logArgsWithCustomMark(Ts &&...args)
 {

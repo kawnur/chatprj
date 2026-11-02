@@ -26,10 +26,7 @@ LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::LE
     companionPanel_ = std::make_unique<VLayoutWidget>(WidgetType::COMPANION_PANEL);
     layout_->addWidget(companionPanel_.get());
 
-    companionPanel_->resize(4000, 1000);  // TODO ???
-
-    spacer_ = std::make_unique<QSpacerItem>(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    layout_->addSpacerItem(spacer_.get());
+    layout_->addStretch(1);
 }
 
 void LeftPanelWidget::addCompanion(SocketInfoBaseWidgetPtr widget)
@@ -109,11 +106,11 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
 
     // button panel
     std::initializer_list<ButtonInfo> list = {
-        { ButtonType::SEND_FILE, [this]() { sendFileSlot(); } },
-        { ButtonType::SEND_TEXT, [this]() { textEdit_->sendSlot(); } }
+        { false, ButtonType::SEND_FILE, [this]() { sendFileSlot(); } },
+        { false, ButtonType::SEND_TEXT, [this]() { textEdit_->sendSlot(); } }
     };
 
-    buttons_ = std::make_unique<ButtonPanelWidget>(list);
+    buttons_ = std::make_unique<ButtonPanelWidget>(WidgetType::HISTORY_BUTTON_PANEL, list);
     layout_->addWidget(buttons_.get());
 
     // text edit panel

@@ -8,7 +8,6 @@
 #include <QLabel>
 #include <QPalette>
 #include <QPlainTextEdit>
-#include <QPushButton>
 #include <QScrollArea>
 #include <QSpacerItem>
 #include <QVBoxLayout>
@@ -46,7 +45,6 @@ public:
 
 private:
     std::unique_ptr<VLayoutWidget> companionPanel_;
-    std::unique_ptr<QSpacerItem> spacer_;
 };
 
 class CentralPanelWidget : public PanelWidget

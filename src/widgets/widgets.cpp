@@ -1,5 +1,7 @@
 #include "widgets.hpp"
 
+#include <QSizePolicy>
+
 #include "companion.hpp"
 #include "constants.hpp"
 #include "data.hpp"
@@ -32,13 +34,17 @@ void PalettedWidget::setColor()
 
 Layout::Layout(WidgetType type) : type_(type)
 {
-    value_ = getLayoutValue(type_);
+    spacing_ = getLayoutSpacingValue(type_);
+    contentsMargins_ = getLayoutContentsMarginsValue(type_);
 }
 
 VLayout::VLayout(WidgetType type) : Layout(type), layout_(new QVBoxLayout)
 {
-    layout_->setSpacing(value_);
-    layout_->setContentsMargins(value_, value_, value_, value_);
+    layout_->setSpacing(spacing_);
+
+    auto value = contentsMargins_;
+    layout_->setContentsMargins(value, value, value, value);
+
     layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout_->setSizeConstraint(QLayout::SetMaximumSize);
@@ -56,8 +62,11 @@ void VLayout::removeWidget(QWidget *widget)
 
 HLayout::HLayout(WidgetType type) : Layout(type), layout_(new QHBoxLayout)
 {
-    layout_->setSpacing(value_);
-    layout_->setContentsMargins(value_, value_, value_, value_);
+    layout_->setSpacing(spacing_);
+
+    auto value = contentsMargins_;
+    layout_->setContentsMargins(value, value, value, value);
+
     layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout_->setSizeConstraint(QLayout::SetMaximumSize);
@@ -128,16 +137,49 @@ void TextEditWidget::setColor()
     setPalette(*palette_);
 }
 
-// Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
+Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
 
-// Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
+Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
 
-ButtonInfo::ButtonInfo(): type_(ButtonType::UNKNOWN), function_() {}
+StateButton::StateButton(ButtonType type) : Button(type), state_(ButtonState::UNKNOWN)
+{
+    if (!BUTTON_TYPE_TO_STATE_LIST_MAP.contains(type_))
+        return;
 
-ButtonInfo::ButtonInfo(ButtonType type, std::function<void()> function)
-    : type_(type), function_(function) {}
+    auto list = BUTTON_TYPE_TO_STATE_LIST_MAP.at(type_);
+
+    if (list.empty())
+        return;
+
+    setState(list.front());
+}
+
+void StateButton::setState(ButtonState state)
+{
+    state_ = state;
+    setText(getButtonText(state_));
+}
+
+void StateButton::updateState()
+{
+    if (!BUTTON_TYPE_TO_STATE_LIST_MAP.contains(type_))
+        return;
+
+    state_ = getNextItem(BUTTON_TYPE_TO_STATE_LIST_MAP.at(type_), state_, ButtonState::UNKNOWN);
+    setText(getButtonText(state_));
+}
+
+ButtonInfo::ButtonInfo(): isStateButton_(false), type_(ButtonType::UNKNOWN), function_() {}
+
+ButtonInfo::ButtonInfo(bool isStateButton, ButtonType type, std::function<void()> function)
+    : isStateButton_(isStateButton), type_(type), function_(function) {}
 
 ButtonInfo::~ButtonInfo() { logArgsInfo(Q_FUNC_INFO); }
+
+bool ButtonInfo::isStateButton() const
+{
+    return isStateButton_;
+}
 
 ButtonType ButtonInfo::type() const
 {
@@ -229,31 +271,86 @@ void IndicatorWidget::toggle()
     (isOn_) ? setOff() : setOn();
 }
 
-ButtonPanelWidget::ButtonPanelWidget(const std::initializer_list<ButtonInfo> &list)
-    : HLayoutWidget(WidgetType::BUTTON_PANEL), buttons_()
+ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list)
+    : HLayoutWidget(type), buttons_()
 {
     for (const auto &info : list) {
         auto type = info.type();
-        auto button = std::make_shared<QPushButton>(getButtonText(type));
-        buttons_.push_back(button);
+
+        std::shared_ptr<Button> button = nullptr;
+
+        if (info.isStateButton())
+            button = std::make_shared<StateButton>(type);
+        else
+            button = std::make_shared<Button>(type);
+
+        buttons_[type] = button;
         addWidget(button.get());
 
-        QObject::connect(
-            button.get(), &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
+        connect(button.get(), &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
     }
 }
 
-// SocketInfoBaseWidget::SocketInfoBaseWidget() : PalettedWidget(WidgetType::SOCKET_INFO) {}
+void ButtonPanelWidget::updateButtonState(ButtonType type)
+{
+    runAndLogException([&]() { buttons_.at(type)->updateState(); });
+}
+
 SocketInfoBaseWidget::SocketInfoBaseWidget() : HLayoutWidget(WidgetType::SOCKET_INFO) {}
 
-SocketInfoWidget::SocketInfoWidget(WidgetGroupPtr group, CompanionPtr companion)
+SocketInfoWidget::SocketInfoWidget(CompanionPtr companion)
+    : isSelected_(false), isConnected_(false), companion_(companion) {}
+
+void SocketInfoWidget::set(WidgetGroupPtr group)
 {
-    buildFields(group);
+    // size
+    setFixedWidth(SOCKET_INFO_WIDGET_WIDTH);
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    companion_ = companion;
+    // widget fields
+    state_ = std::make_shared<IndicatorWidget>(WidgetType::CONNECTION_STATE_INDICATOR, false);
 
-    setFieldsFromCompanionData();
-    setFields();
+    name_ = std::make_shared<QLabel>();
+    ipAddress_ = std::make_shared<QLabel>();
+    serverPort_ = std::make_shared<QLabel>();
+    clientPort_ = std::make_shared<QLabel>();
+
+    // buttons
+    std::initializer_list<ButtonInfo> list = {
+        { false, ButtonType::EDIT, [this]() { updateCompanionAction(); } },
+        { true, ButtonType::CONNECT_DISCONNECT, [=, this]() { group->clientAction(); } }
+    };
+
+    buttons_ = std::make_shared<ButtonPanelWidget>(WidgetType::SOCKET_INFO_BUTTON_PANEL, list);
+    received_ = std::make_shared<IndicatorWidget>(WidgetType::NEW_MESSAGES_INDICATOR, false);
+
+    // add to layout
+    std::vector<QWidgetPtr> widgets1 { state_, name_, ipAddress_, serverPort_, clientPort_ };
+    std::vector<QWidgetPtr> widgets2 { buttons_, received_ };
+
+    for (auto &widget : widgets1)
+        layout_->addWidget(widget.get());
+
+    layout_->addStretch(1);
+
+    for (auto &widget : widgets2)
+        layout_->addWidget(widget.get());
+
+    // context menu
+    requestHistory_ = std::make_shared<QAction>("Request chat history from companion", this);
+    requestHistory_->setDisabled(true);
+
+    connect(
+        requestHistory_.get(), &QAction::triggered,
+        group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(
+        this, &QWidget::customContextMenuRequested,
+        this, &SocketInfoWidget::customMenuRequestedSlot, Qt::QueuedConnection);
+
+    setValues();
 }
 
 QString SocketInfoWidget::name() const
@@ -295,12 +392,14 @@ void SocketInfoWidget::select()
 {
     isSelected_ = true;
     setType(WidgetType::SOCKET_INFO_SELECTED);
+    buttons_->setType(WidgetType::SOCKET_INFO_BUTTON_PANEL_SELECTED);
 }
 
 void SocketInfoWidget::unselect()
 {
     isSelected_ = false;
     setType(WidgetType::SOCKET_INFO);
+    buttons_->setType(WidgetType::SOCKET_INFO_BUTTON_PANEL);
 }
 
 void SocketInfoWidget::updateFields()
@@ -333,100 +432,28 @@ void SocketInfoWidget::deleteCompanionAction()
     getGraphicManager()->deleteCompanion(companion_);
 }
 
-void SocketInfoWidget::updateState()
+void SocketInfoWidget::updateConnectionState()
 {
     // change value
     isConnected_ = !(isConnected_);
 
     // change connect button text
-    connectButtonType_ = getNextConnectButtonType(connectButtonType_);
-    connect_->setText(getButtonText(connectButtonType_));
+    buttons_->updateButtonState(ButtonType::CONNECT_DISCONNECT);
 
     // change indicator color
     state_->toggle();
 
-    // set context menu action enabled
+    // set context menu action disabled
     requestHistory_->setDisabled(requestHistory_->isEnabled());
 }
 
-void SocketInfoWidget::buildFields(WidgetGroupPtr group)
+void SocketInfoWidget::setValues()
 {
-    // value fields
-    isSelected_ = false;
-    isConnected_ = false;
-    // selected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO_SELECTED));
-    // unselected_ = QColor(getWidgetColor(WidgetType::SOCKET_INFO));
+    setFieldsFromCompanionData();
 
-    // layout
-    // layout_ = std::make_shared<QHBoxLayout>();
-    // setLayout(layout_.get());
-
-    // widget fields
-    state_ = std::make_shared<IndicatorWidget>(WidgetType::CONNECTION_STATE_INDICATOR, false);
-
-    name_ = std::make_shared<QLabel>();
-    ipAddress_ = std::make_shared<QLabel>();
-    serverPort_ = std::make_shared<QLabel>();
-    clientPort_ = std::make_shared<QLabel>();
-    spacer_ = std::make_shared<QSpacerItem>(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    edit_ = std::make_shared<QPushButton>(getButtonText(ButtonType::EDIT));
-    connectButtonType_ = getInitialConnectButtonType();
-    connect_ = std::make_shared<QPushButton>(getButtonText(connectButtonType_));
-
-    connect(
-        edit_.get(), &QPushButton::clicked,
-        this, &SocketInfoWidget::updateCompanionAction, Qt::QueuedConnection);
-
-    connect(
-        connect_.get(), &QPushButton::clicked,
-        group.get(), &WidgetGroup::clientAction, Qt::QueuedConnection);
-
-    received_ = std::make_shared<IndicatorWidget>(WidgetType::NEW_MESSAGES_INDICATOR, false);
-
-    // add widgets to layout
-    // std::vector<QWidgetPtr> widgets {
-    //     state_, name_, ipAddress_, serverPort_, clientPort_, edit_, connect_, received_
-    // };
-    std::vector<QWidgetPtr> widgets1 {
-        state_, name_, ipAddress_, serverPort_, clientPort_
-    };
-
-    std::vector<QWidgetPtr> widgets2 {
-        edit_, connect_, received_
-    };
-
-    // for (auto &widget : widgets)
-    //     layout_->addWidget(widget.get());
-    for (auto &widget : widgets1)
-        layout_->addWidget(widget.get());
-
-    layout_->addSpacerItem(spacer_.get());
-
-    for (auto &widget : widgets2)
-        layout_->addWidget(widget.get());
-
-    // ???
-    requestHistory_ = std::make_shared<QAction>("Request chat history from companion", this);
-    requestHistory_->setDisabled(true);
-
-    // connections
-    connect(
-        requestHistory_.get(), &QAction::triggered,
-        group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
-
-    setContextMenuPolicy(Qt::CustomContextMenu);
-
-    connect(
-        this, &QWidget::customContextMenuRequested,
-        this, &SocketInfoWidget::customMenuRequestedSlot, Qt::QueuedConnection);
-}
-
-void SocketInfoWidget::setFields()
-{
     if (name_->text() == ME_NAME) {  // TODO ???
         state_->setMe();
-        edit_->hide();
-        connect_->hide();
+        buttons_->hide();
     }
 }
 
@@ -542,7 +569,8 @@ void WidgetGroup::set()
 {
     auto graphicManager = getGraphicManager();
 
-    auto widget = std::make_shared<SocketInfoWidget>(shared_from_this(), companion_);
+    auto widget = std::make_shared<SocketInfoWidget>(companion_);
+    widget->set(shared_from_this());
 
     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
     graphicManager->addCompanionWidget(socketInfoBase_);
@@ -696,7 +724,7 @@ void WidgetGroup::clientAction()
     if (!getGraphicManager()->clientAction(companion_, socketInfoBase_->isConnected()))
         return;
 
-    socketInfoBase_->updateState();
+    socketInfoBase_->updateConnectionState();
 }
 
 // void WidgetGroup::askUserForHistorySendingConfirmationSlot()
@@ -772,33 +800,6 @@ std::shared_ptr<CentralPanelWidget> StubWidgetGroup::central() const
 std::shared_ptr<RightPanelWidget> StubWidgetGroup::right() const
 {
     return right_;
-}
-
-ButtonType getInitialConnectButtonType()
-{
-    return runAndReturnDefault([]() { return CONNECT_BUTTONS.at(0); }, ButtonType::UNKNOWN);
-}
-
-ButtonType getNextConnectButtonType(ButtonType currentValue)
-{
-    auto lambda = [&](const auto &container) {
-        auto current = std::ranges::find(container, currentValue);
-
-        if (current == container.end()) {
-            auto entry = getStringByFormat("current type '{}' not found in container", currentValue);
-
-            throw std::runtime_error(entry);
-        }
-
-        auto next = current + 1;
-
-        if (next == container.end())
-            next = container.begin();
-
-        return *next;
-    };
-
-    return runAndReturnDefault(lambda, ButtonType::UNKNOWN, CONNECT_BUTTONS);
 }
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)

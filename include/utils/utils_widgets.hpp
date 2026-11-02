@@ -13,6 +13,7 @@
 ButtonInfo getOKButtonInfo(const std::function<void()> &function);
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function);
 QString getButtonText(ButtonType value);
+QString getButtonText(ButtonState state);
 QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
 QString getFileWidgetText(WidgetType value);
 MessageWidgetType getMessageWidgetType(MessageType value);
@@ -26,7 +27,8 @@ QString getHTMLHeader(
     const std::string &time);
 
 QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
-uint32_t getLayoutValue(WidgetType type);
+uint32_t getLayoutSpacingValue(WidgetType type);
+uint32_t getLayoutContentsMarginsValue(WidgetType type);
 uint32_t getIndicatorSize(WidgetType type);
 
 #endif // UTILS_WIDGETS_HPP

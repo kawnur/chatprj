@@ -260,21 +260,30 @@ enum class ButtonType
     CLEAR_HISTORY,
     SEND_HISTORY,
     DELETE_COMPANION,
-    CONNECT,
-    DISCONNECT,
+    CONNECT_DISCONNECT,
     DOWNLOAD_FILE,
     SEND_FILE,
     SEND_TEXT,
     UNKNOWN
 };
 
-const std::vector<ButtonType> CONNECT_BUTTONS {
-    ButtonType::CONNECT,  // initial
-    ButtonType::DISCONNECT
+enum class ButtonState {
+    UNKNOWN,
+    CONNECT,
+    DISCONNECT
 };
 
-const QString DEFAULT_BUTTON_TEXT { "OK" };
+const std::unordered_map<ButtonType, std::list<ButtonState>> BUTTON_TYPE_TO_STATE_LIST_MAP {
+    { ButtonType::CONNECT_DISCONNECT, { ButtonState::CONNECT, ButtonState::DISCONNECT } }
+};
+
+const QString DEFAULT_BUTTON_TEXT { "____" };
 const QString DEFAULT_FILE_WIDGET_TEXT { "FILE_WIDGET" };
+
+const std::unordered_map<ButtonState, QString> BUTTON_STATE_TO_TEXT_MAP {
+    { ButtonState::CONNECT, "Connect" },
+    { ButtonState::DISCONNECT, "Disconnect" }
+};
 
 const std::unordered_map<ButtonType, QString> BUTTON_TYPE_TO_TEXT_MAP {
     { ButtonType::OK, "OK" },
@@ -283,8 +292,6 @@ const std::unordered_map<ButtonType, QString> BUTTON_TYPE_TO_TEXT_MAP {
     { ButtonType::CLEAR_HISTORY, "Clear history" },
     { ButtonType::SEND_HISTORY, "Send history" },
     { ButtonType::DELETE_COMPANION, "Delete companion" },
-    { ButtonType::CONNECT, "Connect" },
-    { ButtonType::DISCONNECT, "Disconnect" },
     { ButtonType::DOWNLOAD_FILE, "Download file" },
     { ButtonType::SEND_FILE, "Send file" },
     { ButtonType::SEND_TEXT, "Send text" },
@@ -316,7 +323,9 @@ enum class WidgetType
     MESSAGE_RECEIVED,
     FILE_SENT,
     FILE_RECEIVED,
-    BUTTON_PANEL,
+    SOCKET_INFO_BUTTON_PANEL,
+    SOCKET_INFO_BUTTON_PANEL_SELECTED,
+    HISTORY_BUTTON_PANEL,
     TEXT_EDIT,
     SPLITTER_CENTRAL_RIGHT,
     RIGHT_PANEL,
@@ -332,6 +341,8 @@ enum class WidgetType
 
 const uint32_t DEFAULT_WIDGET_LIGHTNESS = 0;  // black
 const uint32_t DEFAULT_WIDGET_COLOR = 0x000000;  // black
+
+const uint32_t SOCKET_INFO_WIDGET_WIDTH = 500;
 
 const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
     { WidgetType::FILE_SENT, "SEND FILE: {}" },

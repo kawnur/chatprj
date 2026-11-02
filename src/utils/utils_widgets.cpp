@@ -8,13 +8,15 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::MAIN_WINDOW_MENU, 50 },
     { WidgetType::LEFT_PANEL, 75 },
     { WidgetType::SOCKET_INFO, 60 },
+    { WidgetType::SOCKET_INFO_BUTTON_PANEL, 60 },
     { WidgetType::SOCKET_INFO_SELECTED, 45 },
+    { WidgetType::SOCKET_INFO_BUTTON_PANEL_SELECTED, 45 },
     { WidgetType::SHOW_HIDE, 35 },
     { WidgetType::CENTRAL_PANEL, 80 },
     { WidgetType::COMPANION_NAME_LABEL, 65 },
     { WidgetType::MESSAGE, 85 },
     { WidgetType::HISTORY, 80 },
-    { WidgetType::BUTTON_PANEL, 70 },
+    { WidgetType::HISTORY_BUTTON_PANEL, 70 },
     { WidgetType::TEXT_EDIT, 85 },
     { WidgetType::SPLITTER_CENTRAL_RIGHT, 60 },
     { WidgetType::RIGHT_PANEL, 90 },
@@ -22,8 +24,14 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::INDICATOR_ME, 35 }
 };
 
-const std::unordered_map<WidgetType, uint32_t> LAYOUT_VALUE_MAP {
-    { WidgetType::BUTTON_PANEL, 10 },
+const std::unordered_map<WidgetType, uint32_t> LAYOUT_SPACING_MAP {
+    { WidgetType::HISTORY_BUTTON_PANEL, 10 },
+    { WidgetType::SOCKET_INFO, 10 },
+    { WidgetType::SOCKET_INFO_BUTTON_PANEL, 10 }
+};
+
+const std::unordered_map<WidgetType, uint32_t> LAYOUT_CONTENTS_MARGINS_MAP {
+    { WidgetType::HISTORY_BUTTON_PANEL, 10 },
     { WidgetType::SOCKET_INFO, 10 }
 };
 
@@ -70,17 +78,22 @@ const std::unordered_map<WidgetType, uint32_t> INDICATOR_WIDGET_SIZE_MAP {
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)
 {
-    return ButtonInfo(ButtonType::OK, function);
+    return ButtonInfo(false, ButtonType::OK, function);
 }
 
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function)
 {
-    return ButtonInfo(ButtonType::CANCEL, function);
+    return ButtonInfo(false, ButtonType::CANCEL, function);
 }
 
-QString getButtonText(ButtonType value)
+QString getButtonText(ButtonType type)
 {
-    return getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, DEFAULT_BUTTON_TEXT);
+    return getMapValue(BUTTON_TYPE_TO_TEXT_MAP, type, DEFAULT_BUTTON_TEXT);
+}
+
+QString getButtonText(ButtonState state)
+{
+    return getMapValue(BUTTON_STATE_TO_TEXT_MAP, state, DEFAULT_BUTTON_TEXT);
 }
 
 QDialogButtonBox::ButtonRole getButtonRole(ButtonType type)
@@ -136,9 +149,14 @@ QString getHTMLBody(const std::string &color, const std::string &text, bool _bre
     return getQString(getStringByFormat("<font color=\"{0}\">{1}</font>", color, textSub));
 }
 
-uint32_t getLayoutValue(WidgetType type)
+uint32_t getLayoutSpacingValue(WidgetType type)
 {
-    return getMapValue(LAYOUT_VALUE_MAP, type, 0);
+    return getMapValue(LAYOUT_SPACING_MAP, type, 0);
+}
+
+uint32_t getLayoutContentsMarginsValue(WidgetType type)
+{
+    return getMapValue(LAYOUT_CONTENTS_MARGINS_MAP, type, 0);
 }
 
 uint32_t getIndicatorSize(WidgetType type)

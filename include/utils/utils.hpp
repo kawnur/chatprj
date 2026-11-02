@@ -142,6 +142,9 @@ void logArgsException(Ts &&...args);
 template<typename T, typename... Ts>
 void logTemplateError(T &&templateString, Ts &&...args);
 
+template<typename T, typename... Ts>
+void logTemplateException(T &&templateString, Ts &&...args);
+
 template<AssociativeContainer M, typename T, typename U>
 typename M::mapped_type getMapValue(
     const std::reference_wrapper<const M> &wrapper, const T &key, const U &defaultValue)
@@ -161,10 +164,37 @@ typename M::mapped_type getMapValue(const M &map, const T &key, const U &default
         return defaultValue;
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return (typename M::mapped_type)(std::remove_reference_t<U>());
     }
+}
+
+template<std::ranges::bidirectional_range C>
+typename C::value_type getNextItem(
+    const C &container, const typename C::value_type &current,
+    const typename C::value_type &defaultValue)
+{
+    if (container.empty()) {
+        logTemplateError("{}, container is empty", __FUNCTION__);
+
+        return defaultValue;
+    }
+
+    auto item = std::ranges::find(container, current);
+
+    if (item == std::ranges::next(container.begin(), container.end())) {
+        logTemplateError("{}, current item not found", __FUNCTION__);
+
+        return defaultValue;
+    }
+
+    item = std::next(item);
+
+    if (item == std::ranges::next(container.begin(), container.end()))
+        item = container.begin();
+
+    return *item;
 }
 
 template<typename F, typename... Ts>
@@ -191,7 +221,7 @@ void runAndLogException(F &&func, Ts&&... args)
         func(args...);
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
     }
 }
 
@@ -204,7 +234,7 @@ bool runAndReturnBool(F &&func, Ts&&... args)
         return true;
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return false;
     }
@@ -228,7 +258,7 @@ std::optional<T> runAndReturnOptional(F &&func, Ts&&... args)
         return func(args...);
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return std::nullopt;
     }
@@ -241,7 +271,7 @@ T runAndReturnDefault(F &&func, const T &defaultValue, Ts&&... args)
         return func(args...);
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return defaultValue;
     }
@@ -254,7 +284,7 @@ T runAndReturnResultOrDefaultValue(F &&func, const T &defaultValue, Ts &&...args
         return func(args...);
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return defaultValue;
     }
@@ -276,7 +306,7 @@ std::shared_ptr<T> runAndReturnSharedPtr(F &&func, Ts&&... args)
         return func(args...);
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return nullptr;
     }
@@ -289,7 +319,7 @@ void runAndHandleException(F &&func, FH &&handler, Ts&&... args)
         func(args...);
     }
     catch(const std::exception &e) {
-        logArgsException(e.what());
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
         handler(e);
     }
 }

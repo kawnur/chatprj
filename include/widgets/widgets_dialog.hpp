@@ -15,7 +15,6 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPlainTextEdit>
-#include <QPushButton>
 #include <QString>
 
 #include "alias.hpp"

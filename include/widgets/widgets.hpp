@@ -46,7 +46,8 @@ public:
 
 protected:
     WidgetType type_;
-    uint32_t value_;
+    uint32_t spacing_;
+    uint32_t contentsMargins_;
 };
 
 class VLayout : public Layout
@@ -148,29 +149,48 @@ protected:
     std::shared_ptr<QPalette> palette_;
 };
 
-// class Button : public QPushButton
-// {
-//     Q_OBJECT
+class Button : public QPushButton
+{
+    Q_OBJECT
 
-// public:
-//     Button(ButtonType type);
-//     ~Button();
+public:
+    Button(ButtonType type);
+    ~Button();
 
-// private:
-//     ButtonType type_;
-// };
+    virtual void updateState() {}
+
+protected:
+    ButtonType type_;
+};
+
+class StateButton : public Button
+{
+    Q_OBJECT
+
+public:
+    StateButton(ButtonType type);
+    ~StateButton() = default;
+
+    void setState(ButtonState state);
+    void updateState() override;
+
+private:
+    ButtonState state_;
+};
 
 class ButtonInfo
 {
 public:
     ButtonInfo();
-    ButtonInfo(ButtonType type, std::function<void()> function);
+    ButtonInfo(bool isStateButton, ButtonType type, std::function<void()> function);
     ~ButtonInfo();
 
+    bool isStateButton() const;
     ButtonType type() const;
     std::function<void()> function() const;
 
 private:
+    bool isStateButton_;
     ButtonType type_;
     std::function<void()> function_;
 };
@@ -232,11 +252,13 @@ private:
 class ButtonPanelWidget : public HLayoutWidget
 {
 public:
-    ButtonPanelWidget(const std::initializer_list<ButtonInfo> &list);
+    ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list);
     ~ButtonPanelWidget() = default;
 
+    void updateButtonState(ButtonType type);
+
 private:
-    std::list<std::shared_ptr<QPushButton>> buttons_;
+    std::unordered_map<ButtonType, std::shared_ptr<Button>> buttons_;
 };
 
 // class SocketInfoBaseWidget : public PalettedWidget
@@ -255,7 +277,7 @@ public:
     virtual void setNewMessagesIndicatorOff() {}
     virtual void updateFields() {}
     virtual bool isConnected() { return false; }
-    virtual void updateState() {}
+    virtual void updateConnectionState() {}
     virtual CompanionPtr companion() { return nullptr; }
 
     void initializeFields();  // non-virtual because is called from constructor
@@ -273,8 +295,10 @@ class SocketInfoWidget : public SocketInfoBaseWidget
     Q_OBJECT
 
 public:
-    SocketInfoWidget(WidgetGroupPtr group, CompanionPtr companion);
+    SocketInfoWidget(CompanionPtr companion);
     ~SocketInfoWidget() = default;
+
+    void set(WidgetGroupPtr group);
 
     QString name() const;
     QString ipAddress() const;
@@ -290,7 +314,7 @@ public:
     void setNewMessagesIndicatorOn() override;
     void setNewMessagesIndicatorOff() override;
 
-    void updateState() override;
+    void updateConnectionState() override;
 
     CompanionPtr companion() override;
 
@@ -300,26 +324,20 @@ public slots:
     void deleteCompanionAction();
 
 private:
-    void buildFields(WidgetGroupPtr group);
+    void setValues();
     void setFieldsFromCompanionData();
-    void setFields();
     void mousePressEvent(QMouseEvent *event) override;
 
     bool isSelected_;
     bool isConnected_;
     CompanionPtr companion_;
-    QColor selected_;
-    QColor unselected_;
-    // std::shared_ptr<QHBoxLayout> layout_;
     std::shared_ptr<IndicatorWidget> state_;
     std::shared_ptr<QLabel> name_;
     std::shared_ptr<QLabel> ipAddress_;
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
-    std::shared_ptr<QSpacerItem> spacer_;
-    std::shared_ptr<QPushButton> edit_;
     ButtonType connectButtonType_;
-    std::shared_ptr<QPushButton> connect_;
+    std::shared_ptr<ButtonPanelWidget> buttons_;
     std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QAction> requestHistory_;
 
@@ -441,8 +459,6 @@ private:
     std::shared_ptr<RightPanelWidget> right_;
 };
 
-ButtonType getInitialConnectButtonType();
-ButtonType getNextConnectButtonType(ButtonType current);
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);
 
 #endif // WIDGETS_HPP
