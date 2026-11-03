@@ -279,6 +279,7 @@ const std::unordered_map<ButtonType, std::list<ButtonState>> BUTTON_TYPE_TO_STAT
 
 const QString DEFAULT_BUTTON_TEXT { "____" };
 const QString DEFAULT_FILE_WIDGET_TEXT { "FILE_WIDGET" };
+const QString DEFAULT_DATA_TYPE_STRING_REPR { "UNKNOWN" };
 
 const std::unordered_map<ButtonState, QString> BUTTON_STATE_TO_TEXT_MAP {
     { ButtonState::CONNECT, "Connect" },
@@ -314,6 +315,7 @@ enum class WidgetType
     COMPANION_PANEL,
     SOCKET_INFO,
     SOCKET_INFO_SELECTED,
+    SOCKET_INFO_UNKNOWN,
     COMPANION_NAME_LABEL,
     SHOW_HIDE,
     CENTRAL_PANEL,
@@ -333,9 +335,6 @@ enum class WidgetType
     CONNECTION_STATE_INDICATOR,
     NEW_MESSAGES_INDICATOR,
     MESSAGE_WIDGET_INDICATOR,
-    // INDICATOR_ME,
-    // INDICATOR_ON,
-    // INDICATOR_OFF,
     NEW_MESSAGE_EDIT
 };
 
@@ -371,6 +370,14 @@ enum class IndicatorWidgetState {
     UNKNOWN,
     ON,
     OFF
+};
+
+enum class DataType
+{
+    NAME,
+    IP_ADDRESS,
+    SERVER_PORT,
+    CLIENT_PORT
 };
 
 #endif // CONSTANTS_HPP

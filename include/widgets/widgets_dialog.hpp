@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -57,7 +58,40 @@ protected:
     QString defaultTitle_;
 };
 
-class CompanionDataDialog : public Dialog
+class FormLine
+{
+public:
+    FormLine(const QString &name);
+    ~FormLine() = default;
+
+    std::shared_ptr<QLabel> label() const;
+    std::shared_ptr<QLineEdit> edit() const;
+
+    void setEditText(const QString &text);
+
+private:
+    std::shared_ptr<QLabel> label_;
+    std::shared_ptr<QLineEdit> edit_;
+};
+
+class FormLayout
+{
+public:
+    FormLayout();
+    ~FormLayout() = default;
+
+    std::shared_ptr<QFormLayout> getLayout() const;
+    QString getData(DataType type);
+
+    void fillForm(std::initializer_list<DataType> list);
+    void setFormData(CompanionDataPtr data);
+
+private:
+    std::shared_ptr<QFormLayout> layout_;
+    std::unordered_map<DataType, std::shared_ptr<FormLine>> map_;
+};
+
+class CompanionDataDialog : public Dialog, public FormLayout
 {
     Q_OBJECT
 
@@ -65,23 +99,12 @@ public:
     CompanionDataDialog(ActionType type, CompanionPtr companion);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    std::string name();
-    std::string ipAddress();
-    std::string port();
-
     void set(ActionPtr action) override;
 
     CompanionDataPtr getCompanionData() override;
 
 private:
     ActionType type_;
-    std::unique_ptr<QFormLayout> layout_;
-    std::unique_ptr<QLabel> nameLabel_;
-    std::unique_ptr<QLineEdit> nameEdit_;
-    std::unique_ptr<QLabel> ipAddressLabel_;
-    std::unique_ptr<QLineEdit> ipAddressEdit_;
-    std::unique_ptr<QLabel> portLabel_;
-    std::unique_ptr<QLineEdit> portEdit_;
     std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 

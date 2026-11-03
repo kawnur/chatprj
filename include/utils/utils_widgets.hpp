@@ -17,6 +17,7 @@ QString getButtonText(ButtonState state);
 QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
 QString getFileWidgetText(WidgetType value);
 MessageWidgetType getMessageWidgetType(MessageType value);
+QString getDataTypeStringRepr(DataType type);
 
 // color
 uint32_t getWidgetColor(WidgetType value);

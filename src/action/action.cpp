@@ -226,21 +226,16 @@ void CompanionAction::act()
         if (!cast)
             break;
 
-        auto name = cast->name();
-        auto address = cast->ipAddress();
-        auto port = cast->port();
+        // set data field
+        auto data = cast->getCompanionData();
 
-        // check dialog data
-        for (const auto &item : { name, address, port }) {
-            if (item.empty()) {
-                updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
+        if (!data->checkAsUpdateResult()) {
+            updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
 
-                return;
-            }
+            return;
         }
 
-        // set data field
-        data_ = std::make_shared<CompanionData>(name, address, ""s, port);
+        data_ = data;
     }
 
     break;

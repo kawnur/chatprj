@@ -18,20 +18,15 @@
 #include "alias.hpp"
 #include "logging.hpp"
 
-// class PalettedWidget : public QWidget
 class Palette
 {
-    // Q_OBJECT
-
 public:
-    // PalettedWidget(WidgetType type);
-    // virtual ~PalettedWidget() = default;
     Palette(WidgetType type, QPalette::ColorRole role);
-    // virtual ~Palette() = default;
     ~Palette() = default;
 
+    WidgetType type() const;
+
     void setType(WidgetType type);
-    // void setColor();
     void setColor(uint32_t color);
 
 protected:
@@ -50,6 +45,7 @@ public:
     virtual ~PalettedWidget() = default;
 
     void updateColor(uint32_t color);
+    void updateType(WidgetType type);
 };
 
 class Layout
@@ -115,55 +111,31 @@ public:
     void set();
 };
 
-class LabelWidget : public QLabel
+class LabelWidget : public QLabel, public Palette
 {
     Q_OBJECT
 
 public:
     LabelWidget(WidgetType type, const QString &text);
-    virtual ~LabelWidget() = default;
-
-    // void setType(WidgetType type);
-    void setColor();
-
-protected:
-    WidgetType type_;
-    // std::unique_ptr<QPalette> palette_;
-    std::shared_ptr<QPalette> palette_;
+    ~LabelWidget() = default;
 };
 
-class SplitterWidget : public QSplitter
+class SplitterWidget : public QSplitter, public Palette
 {
     Q_OBJECT
 
 public:
     SplitterWidget(WidgetType type, QWidget *parent = nullptr);
-    virtual ~SplitterWidget() = default;
-
-    // void setType(WidgetType type);
-    void setColor();
-
-protected:
-    WidgetType type_;
-    // std::unique_ptr<QPalette> palette_;
-    std::shared_ptr<QPalette> palette_;
+    ~SplitterWidget() = default;
 };
 
-class TextEditWidget : public QTextEdit
+class TextEditWidget : public QTextEdit, public Palette
 {
     Q_OBJECT
 
 public:
     TextEditWidget(WidgetType type);
-    virtual ~TextEditWidget() = default;
-
-    // void setType(WidgetType type);
-    void setColor();
-
-protected:
-    WidgetType type_;
-    // std::unique_ptr<QPalette> palette_;
-    std::shared_ptr<QPalette> palette_;
+    ~TextEditWidget() = default;
 };
 
 class Button : public QPushButton
@@ -247,7 +219,7 @@ class IndicatorWidget : public PalettedWidget
     Q_OBJECT
 
 public:
-    IndicatorWidget(WidgetType type, bool isOn);
+    IndicatorWidget(WidgetType type, IndicatorWidgetState state);
     ~IndicatorWidget() = default;
 
     // void setOn();
@@ -279,7 +251,6 @@ private:
     std::unordered_map<ButtonType, std::shared_ptr<Button>> buttons_;
 };
 
-// class SocketInfoBaseWidget : public PalettedWidget
 class SocketInfoBaseWidget : public HLayoutWidget
 {
     Q_OBJECT
@@ -377,7 +348,6 @@ public:
 
 private:
     QString mark_;
-    // std::unique_ptr<QHBoxLayout> layout_;
     std::unique_ptr<QLabel> markLabel_;
 
     void initializeFields();

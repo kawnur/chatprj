@@ -5,9 +5,10 @@
 #include "widgets.hpp"
 
 const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
-    { WidgetType::MAIN_WINDOW_MENU, 50 },
+    { WidgetType::MAIN_WINDOW_MENU, 40 },
     { WidgetType::LEFT_PANEL, 75 },
     { WidgetType::SOCKET_INFO, 60 },
+    { WidgetType::SOCKET_INFO_UNKNOWN, 60 },
     { WidgetType::SOCKET_INFO_BUTTON_PANEL, 60 },
     { WidgetType::SOCKET_INFO_SELECTED, 45 },
     { WidgetType::SOCKET_INFO_BUTTON_PANEL_SELECTED, 45 },
@@ -21,7 +22,6 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::SPLITTER_CENTRAL_RIGHT, 60 },
     { WidgetType::RIGHT_PANEL, 90 },
     { WidgetType::APP_LOG, 90 },
-    // { WidgetType::INDICATOR_ME, 35 }
 };
 
 const std::unordered_map<WidgetType, uint32_t> LAYOUT_SPACING_MAP {
@@ -40,8 +40,6 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
     { WidgetType::MESSAGE_RECEIVED, 0x00115e },
     { WidgetType::FILE_SENT, 0x093400 },
     { WidgetType::FILE_RECEIVED, 0x000934 },
-    // { WidgetType::INDICATOR_ON, 0x009600 },
-    // { WidgetType::INDICATOR_OFF, 0x690000 },
     { WidgetType::NEW_MESSAGE_EDIT, 0xdcdc07 }
 };
 
@@ -81,6 +79,13 @@ const std::unordered_map<WidgetType, uint32_t> INDICATOR_WIDGET_SIZE_MAP {
     { WidgetType::MESSAGE_WIDGET_INDICATOR, 10 }
 };
 
+const std::unordered_map<DataType, QString> DATA_TYPE_STRING_REPR_MAP {
+    { DataType::NAME, "Name" },
+    { DataType::IP_ADDRESS, "IpAddress" },
+    { DataType::SERVER_PORT, "Port" },
+    { DataType::CLIENT_PORT, "Port" }
+};
+
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)
 {
     return ButtonInfo(false, ButtonType::OK, function);
@@ -114,6 +119,11 @@ QString getFileWidgetText(WidgetType value)
 MessageWidgetType getMessageWidgetType(MessageType value)
 {
     return getMapValue(MESSAGE_WIDGET_TYPE_MAP, value, MessageWidgetType::UNKNOWN);
+}
+
+QString getDataTypeStringRepr(DataType type)
+{
+    return getMapValue(DATA_TYPE_STRING_REPR_MAP, type, DEFAULT_DATA_TYPE_STRING_REPR);
 }
 
 // color

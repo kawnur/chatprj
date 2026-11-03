@@ -2,11 +2,6 @@
 
 #include "logging.hpp"
 
-CompanionData::CompanionData(
-    const std::string &name, const std::string &ipAddress, const std::string &serverPort,
-    const std::string &clientPort)
-    : name_(name), ipAddress_(ipAddress), serverPort_(serverPort), clientPort_(clientPort) {}
-
 std::string CompanionData::name() const
 {
     return name_;
@@ -42,6 +37,32 @@ void CompanionData::log()
     auto entry = "name: {0}, ipAddress: {1}, serverPort: {2}, clientPort: {3}"s;
 
     logTemplateInfo(entry, name_, ipAddress_, serverPort_, clientPort_);
+}
+
+std::string CompanionData::getData(DataType type)
+{
+    switch(type) {
+    case DataType::NAME:
+        return name_;
+    case DataType::IP_ADDRESS:
+        return ipAddress_;
+    case DataType::SERVER_PORT:
+        return serverPort_;
+    case DataType::CLIENT_PORT:
+        return clientPort_;
+    default:
+        return ""s;
+    }
+}
+
+bool CompanionData::checkAsUpdateResult()
+{
+    for (const auto &item : { name_, ipAddress_, clientPort_ }) {
+        if (item.empty())
+            return false;
+    }
+
+    return true;
 }
 
 GroupChatData::GroupChatData() : members_() {}

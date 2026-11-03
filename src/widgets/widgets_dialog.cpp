@@ -9,6 +9,7 @@
 #include "logging.hpp"
 #include "mainwindow.hpp"
 #include "utils.hpp"
+#include "utils_widgets.hpp"
 #include "widgets.hpp"
 
 Dialog::Dialog()
@@ -34,7 +35,59 @@ void Dialog::setDialogType(DialogType type)
     setTitleAsInfo();
 }
 
-CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion) : Dialog()
+FormLine::FormLine(const QString &name)
+{
+    label_ = std::make_shared<QLabel>(name);
+    edit_ = std::make_shared<QLineEdit>();
+}
+
+std::shared_ptr<QLabel> FormLine::label() const
+{
+    return label_;
+}
+
+std::shared_ptr<QLineEdit> FormLine::edit() const
+{
+    return edit_;
+}
+
+void FormLine::setEditText(const QString &text)
+{
+    edit_->setText(text);
+}
+
+FormLayout::FormLayout() : layout_(new QFormLayout), map_() {}
+
+std::shared_ptr<QFormLayout> FormLayout::getLayout() const
+{
+    return layout_;
+}
+
+QString FormLayout::getData(DataType type)
+{
+    auto line = getMapValue(map_, type, nullptr);
+
+    return (line) ? line->edit()->text() : "";
+}
+
+void FormLayout::fillForm(std::initializer_list<DataType> list)
+{
+    for (const auto &item : list) {
+        auto line = std::make_shared<FormLine>(getDataTypeStringRepr(item));
+        layout_->addRow(line->label().get(), line->edit().get());
+
+        map_[item] = line;
+    }
+}
+
+void FormLayout::setFormData(CompanionDataPtr data)
+{
+    for (auto pair : map_)
+        pair.second->setEditText(getQString(data->getData(pair.first)));
+}
+
+CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion)
+    : Dialog(), FormLayout()
 {
     setTitleAsData();
 
@@ -44,53 +97,20 @@ CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion
 
     type_ = type;
 
-    layout_ = std::make_unique<QFormLayout>();
-    setLayout(layout_.get());
+    setLayout(getLayout().get());
 
-    nameLabel_ = std::make_unique<QLabel>("Name");
-    nameEdit_ = std::make_unique<QLineEdit>();
-
-    ipAddressLabel_ = std::make_unique<QLabel>("IpAddress");
-    ipAddressEdit_ = std::make_unique<QLineEdit>();
-
-    portLabel_ = std::make_unique<QLabel>("Port");
-    portEdit_ = std::make_unique<QLineEdit>();
+    auto list = { DataType::NAME, DataType::IP_ADDRESS, DataType::CLIENT_PORT };
+    fillForm(list);
 
     if (type_ == ActionType::UPDATE_COMPANION && companion) {
         auto data = getGraphicManager()->getCompanionData(companion);
 
-        if (data) {
-            nameEdit_->setText(getQString(companion->name()));
-            ipAddressEdit_->setText(getQString(data->ipAddress()));
-            portEdit_->setText(getQString(data->clientPort()));
-        }
+        if (data)
+            setFormData(data);
     }
 
-    layout_->addRow(nameLabel_.get(), nameEdit_.get());
-    layout_->addRow(ipAddressLabel_.get(), ipAddressEdit_.get());
-    layout_->addRow(portLabel_.get(), portEdit_.get());
-
     buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    layout_->addWidget(buttonBox_.get());
-}
-
-std::string CompanionDataDialog::name()
-{
-    return getString(nameEdit_->text());
-}
-
-std::string CompanionDataDialog::ipAddress()
-{
-    // result format is db-compliant
-    auto ipAddressFromWidget = ipAddressEdit_->text();
-    QHostAddress hostAddress { ipAddressFromWidget };
-
-    return getString(hostAddress);
-}
-
-std::string CompanionDataDialog::port()
-{
-    return getString(portEdit_->text());
+    getLayout()->addWidget(buttonBox_.get());
 }
 
 void CompanionDataDialog::set(ActionPtr action)
@@ -112,8 +132,16 @@ void CompanionDataDialog::set(ActionPtr action)
 
 CompanionDataPtr CompanionDataDialog::getCompanionData()
 {
-    return std::make_shared<CompanionData>(
-        name(), ipAddress(), ""s, port());
+    auto name = getData(DataType::NAME);
+
+    // result format is db-compliant
+    auto ipAddressFromWidget = getData(DataType::IP_ADDRESS);
+    QHostAddress hostAddress { ipAddressFromWidget };
+    auto ipAddress = getString(hostAddress);
+
+    auto port = getData(DataType::CLIENT_PORT);
+
+    return std::make_shared<CompanionData>(name, ipAddress, ""s, port);
 }
 
 GroupChatDataDialog::GroupChatDataDialog(ActionType type)

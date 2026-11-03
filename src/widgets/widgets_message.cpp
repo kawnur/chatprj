@@ -26,8 +26,14 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(MessagePtr message)
         auto type = WidgetType::MESSAGE_WIDGET_INDICATOR;
         // sent_ = std::make_shared<IndicatorWidget>(size, message->isSent());
         // received_ = std::make_shared<IndicatorWidget>(size, message->isReceived());
-        sent_ = std::make_shared<IndicatorWidget>(type, message->isSent());
-        received_ = std::make_shared<IndicatorWidget>(type, message->isReceived());
+
+        auto state = [](bool value)
+        {
+            return (value) ? IndicatorWidgetState::ON : IndicatorWidgetState::OFF;
+        };
+
+        sent_ = std::make_shared<IndicatorWidget>(type, state(message->isSent()));
+        received_ = std::make_shared<IndicatorWidget>(type, state(message->isReceived()));
 
         newMessageLabel_ = nullptr;
 

@@ -10,9 +10,13 @@
 class CompanionData
 {
 public:
+    template<typename T1, typename T2, typename T3, typename T4>
     CompanionData(
-        const std::string &name, const std::string &ipAddress, const std::string &serverPort,
-        const std::string &clientPort);
+        T1 &&name, T2 &&ipAddress, T3 &&serverPort, T4 &&clientPort)
+        : name_(getString(std::forward<T1>(name))),
+        ipAddress_(getString(std::forward<T2>(ipAddress))),
+        serverPort_(getString(std::forward<T3>(serverPort))),
+        clientPort_(getString(std::forward<T4>(clientPort))) {}
 
     ~CompanionData() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -25,6 +29,10 @@ public:
     void setServerPort(uint16_t port);
 
     void log();
+
+    std::string getData(DataType type);
+
+    bool checkAsUpdateResult();
 
 private:
     std::string name_;
@@ -42,6 +50,7 @@ private:
     std::vector<CompanionPtr> members_;
 };
 
+// TODO overload operator
 bool compareCompanionData(
     CompanionDataPtr data1, CompanionDataPtr data2);
 
