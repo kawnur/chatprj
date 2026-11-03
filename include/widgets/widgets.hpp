@@ -18,7 +18,30 @@
 #include "alias.hpp"
 #include "logging.hpp"
 
-class PalettedWidget : public QWidget
+// class PalettedWidget : public QWidget
+class Palette
+{
+    // Q_OBJECT
+
+public:
+    // PalettedWidget(WidgetType type);
+    // virtual ~PalettedWidget() = default;
+    Palette(WidgetType type, QPalette::ColorRole role);
+    // virtual ~Palette() = default;
+    ~Palette() = default;
+
+    void setType(WidgetType type);
+    // void setColor();
+    void setColor(uint32_t color);
+
+protected:
+    WidgetType type_;
+    QPalette::ColorRole role_;
+    // std::unique_ptr<QPalette> palette_;
+    std::shared_ptr<QPalette> palette_;
+};
+
+class PalettedWidget : public QWidget, public Palette
 {
     Q_OBJECT
 
@@ -26,13 +49,7 @@ public:
     PalettedWidget(WidgetType type);
     virtual ~PalettedWidget() = default;
 
-    void setType(WidgetType type);
-    void setColor();
-
-protected:
-    WidgetType type_;
-    // std::unique_ptr<QPalette> palette_;
-    std::shared_ptr<QPalette> palette_;
+    void updateColor(uint32_t color);
 };
 
 class Layout
@@ -171,7 +188,6 @@ public:
     StateButton(ButtonType type);
     ~StateButton() = default;
 
-    void setState(ButtonState state);
     void updateState() override;
 
 private:
@@ -234,19 +250,21 @@ public:
     IndicatorWidget(WidgetType type, bool isOn);
     ~IndicatorWidget() = default;
 
-    void setOn();
-    void setOff();
-    void setMe();
+    // void setOn();
+    // void setOff();
+    // void setMe();
 
+    void updateState();
 public slots:
-    void toggle();
+    // void toggle();
 
 private:
-    bool isOn_;
+    // bool isOn_;
+    IndicatorWidgetState state_;
     uint8_t size_;
-    QColor onColor_;
-    QColor offColor_;
-    QColor meColor_;
+    // QColor onColor_;
+    // QColor offColor_;
+    // QColor meColor_;
 };
 
 class ButtonPanelWidget : public HLayoutWidget
@@ -273,8 +291,9 @@ public:
     virtual bool isStub() { return false; }
     virtual void select() {}
     virtual void unselect() {}
-    virtual void setNewMessagesIndicatorOn() {}
-    virtual void setNewMessagesIndicatorOff() {}
+    // virtual void setNewMessagesIndicatorOn() {}
+    // virtual void setNewMessagesIndicatorOff() {}
+    virtual void updateNewMessagesIndicator() {}
     virtual void updateFields() {}
     virtual bool isConnected() { return false; }
     virtual void updateConnectionState() {}
@@ -311,8 +330,9 @@ public:
     void select() override;
     void unselect() override;
     void updateFields() override;
-    void setNewMessagesIndicatorOn() override;
-    void setNewMessagesIndicatorOff() override;
+    // void setNewMessagesIndicatorOn() override;
+    // void setNewMessagesIndicatorOff() override;
+    void updateNewMessagesIndicator() override;
 
     void updateConnectionState() override;
 
@@ -406,8 +426,8 @@ public:
     void updateSocketInfoWidget();
     void select();
     void unselect();
-    void setNewMessagesIndicatorOn();
-    void setNewMessagesIndicatorOff();
+    // void setNewMessagesIndicatorOn();
+    // void setNewMessagesIndicatorOff();
 
 signals:
     void addMessageWidgetSignal(MessagePtr message);

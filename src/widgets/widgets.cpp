@@ -12,23 +12,39 @@
 #include "widgets_message.hpp"
 #include "widgets_panel.hpp"
 
-PalettedWidget::PalettedWidget(WidgetType type) : type_(type)
+// PalettedWidget::PalettedWidget(WidgetType type) : type_(type)
+Palette::Palette(WidgetType type, QPalette::ColorRole role) : type_(type), role_(role)
 {
     // palette_ = std::make_unique<QPalette>();
     palette_ = std::make_shared<QPalette>();
-    setColor();
-    setAutoFillBackground(true);
+    setColor(getWidgetColor(type_));
+    // setAutoFillBackground(true);
 }
 
-void PalettedWidget::setType(WidgetType type)
+// void PalettedWidget::setType(WidgetType type)
+void Palette::setType(WidgetType type)
 {
     type_ = type;
-    setColor();
+    setColor(getWidgetColor(type_));
 }
 
-void PalettedWidget::setColor()
+// void PalettedWidget::setColor()
+// void Palette::setColor()
+void Palette::setColor(uint32_t color)
 {
-    palette_->setColor(QPalette::Window, QColor(getWidgetColor(type_)));
+    palette_->setColor(role_, QColor(color));
+    // setPalette(*palette_);
+}
+
+PalettedWidget::PalettedWidget(WidgetType type) : QWidget(), Palette(type, QPalette::Window)
+{
+    setAutoFillBackground(true);
+    setPalette(*palette_);
+}
+
+void PalettedWidget::updateColor(uint32_t color)
+{
+    setColor(color);
     setPalette(*palette_);
 }
 
@@ -151,12 +167,7 @@ StateButton::StateButton(ButtonType type) : Button(type), state_(ButtonState::UN
     if (list.empty())
         return;
 
-    setState(list.front());
-}
-
-void StateButton::setState(ButtonState state)
-{
-    state_ = state;
+    state_ = list.front();
     setText(getButtonText(state_));
 }
 
@@ -240,35 +251,47 @@ IndicatorWidget::IndicatorWidget(WidgetType type, bool isOn) : PalettedWidget(ty
     setFixedWidth(size_);
     setFixedHeight(size_);
 
-    isOn_ = isOn;
-    onColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ON));
-    offColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_OFF));
-    meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
+    // isOn_ = isOn;
+    state_ = (isOn) ? IndicatorWidgetState::ON : IndicatorWidgetState::OFF;
+    // onColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ON));
+    // offColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_OFF));
+    // meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
 
-    (isOn_) ? setOn() : setOff();
+    // (isOn_) ? setOn() : setOff();
+    updateColor(getIndicatorWidgetColor(state_));
 }
 
-void IndicatorWidget::setOn()
-{
-    isOn_ = true;
-    setType(WidgetType::INDICATOR_ON);
-}
+// void IndicatorWidget::setOn()
+// {
+//     isOn_ = true;
+//     setType(WidgetType::INDICATOR_ON);
+// }
 
-void IndicatorWidget::setOff()
-{
-    isOn_ = false;
-    setType(WidgetType::INDICATOR_OFF);
-}
+// void IndicatorWidget::setOff()
+// {
+//     isOn_ = false;
+//     setType(WidgetType::INDICATOR_OFF);
+// }
 
-void IndicatorWidget::setMe()
-{
-    isOn_ = false;
-    setType(WidgetType::INDICATOR_ME);
-}
+// void IndicatorWidget::setMe()
+// {
+//     isOn_ = false;
+//     setType(WidgetType::INDICATOR_ME);
+// }
 
-void IndicatorWidget::toggle()
+// void IndicatorWidget::toggle()
+// {
+//     (isOn_) ? setOff() : setOn();
+// }
+
+void IndicatorWidget::updateState()
 {
-    (isOn_) ? setOff() : setOn();
+    if (state_ == IndicatorWidgetState::OFF)
+        state_ = IndicatorWidgetState::ON;
+    else if (state_ == IndicatorWidgetState::ON)
+        state_ = IndicatorWidgetState::OFF;
+
+    updateColor(getIndicatorWidgetColor(state_));
 }
 
 ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list)
@@ -407,15 +430,20 @@ void SocketInfoWidget::updateFields()
     setFieldsFromCompanionData();
 }
 
-void SocketInfoWidget::setNewMessagesIndicatorOn()
+void SocketInfoWidget::updateNewMessagesIndicator()
 {
-    received_->setOn();
+    received_->updateState();
 }
 
-void SocketInfoWidget::setNewMessagesIndicatorOff()
-{
-    received_->setOff();
-}
+// void SocketInfoWidget::setNewMessagesIndicatorOn()
+// {
+//     received_->setOn();
+// }
+
+// void SocketInfoWidget::setNewMessagesIndicatorOff()
+// {
+//     received_->setOff();
+// }
 
 void SocketInfoWidget::updateCompanionAction()
 {
@@ -441,7 +469,8 @@ void SocketInfoWidget::updateConnectionState()
     buttons_->updateButtonState(ButtonType::CONNECT_DISCONNECT);
 
     // change indicator color
-    state_->toggle();
+    // state_->toggle();
+    state_->updateState();
 
     // set context menu action disabled
     requestHistory_->setDisabled(requestHistory_->isEnabled());
@@ -451,10 +480,10 @@ void SocketInfoWidget::setValues()
 {
     setFieldsFromCompanionData();
 
-    if (name_->text() == ME_NAME) {  // TODO ???
-        state_->setMe();
-        buttons_->hide();
-    }
+    // if (name_->text() == ME_NAME) {  // TODO ???
+    //     state_->setMe();
+    //     buttons_->hide();
+    // }
 }
 
 void SocketInfoWidget::setFieldsFromCompanionData()
@@ -594,7 +623,8 @@ void WidgetGroup::set()
 void WidgetGroup::clearHistory()
 {
     centralPanel_->clearHistory();
-    setNewMessagesIndicatorOff();
+    // setNewMessagesIndicatorOff();
+    socketInfoBase_->updateNewMessagesIndicator();
 
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
     antecedentMessagesCounter_ = 0;
@@ -619,7 +649,8 @@ void WidgetGroup::messageAdded()
     if (antecedentMessagesCounter_ <= 0)
         return;
 
-    setNewMessagesIndicatorOn();
+    // setNewMessagesIndicatorOn();
+    socketInfoBase_->updateNewMessagesIndicator();
 }
 
 void WidgetGroup::updateSocketInfoWidget()
@@ -637,15 +668,15 @@ void WidgetGroup::unselect()
     socketInfoBase_->unselect();
 }
 
-void WidgetGroup::setNewMessagesIndicatorOn()
-{
-    socketInfoBase_->setNewMessagesIndicatorOn();
-}
+// void WidgetGroup::setNewMessagesIndicatorOn()
+// {
+//     socketInfoBase_->setNewMessagesIndicatorOn();
+// }
 
-void WidgetGroup::setNewMessagesIndicatorOff()
-{
-    socketInfoBase_->setNewMessagesIndicatorOff();
-}
+// void WidgetGroup::setNewMessagesIndicatorOff()
+// {
+//     socketInfoBase_->setNewMessagesIndicatorOff();
+// }
 
 void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 {
@@ -669,7 +700,8 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
         messageState->setIsAntecedent(false);
 
         if (antecedentMessagesCounter_ == 0)
-            setNewMessagesIndicatorOff();
+            // setNewMessagesIndicatorOff();
+            socketInfoBase_->updateNewMessagesIndicator();
     }
 }
 

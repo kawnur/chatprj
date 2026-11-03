@@ -1,3 +1,4 @@
+#!/bin/python3
 import pathlib
 import shutil
 import sys

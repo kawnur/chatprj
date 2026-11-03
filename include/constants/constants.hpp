@@ -333,14 +333,15 @@ enum class WidgetType
     CONNECTION_STATE_INDICATOR,
     NEW_MESSAGES_INDICATOR,
     MESSAGE_WIDGET_INDICATOR,
-    INDICATOR_ME,
-    INDICATOR_ON,
-    INDICATOR_OFF,
+    // INDICATOR_ME,
+    // INDICATOR_ON,
+    // INDICATOR_OFF,
     NEW_MESSAGE_EDIT
 };
 
 const uint32_t DEFAULT_WIDGET_LIGHTNESS = 0;  // black
 const uint32_t DEFAULT_WIDGET_COLOR = 0x000000;  // black
+const uint32_t DEFAULT_INDICATOR_WIDGET_COLOR = 0x5d5c56;
 
 const uint32_t SOCKET_INFO_WIDGET_WIDTH = 500;
 
@@ -364,6 +365,12 @@ enum class MessageWidgetState {
     UNKNOWN,
     SENT,
     RECEIVED
+};
+
+enum class IndicatorWidgetState {
+    UNKNOWN,
+    ON,
+    OFF
 };
 
 #endif // CONSTANTS_HPP

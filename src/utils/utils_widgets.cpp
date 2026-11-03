@@ -21,7 +21,7 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::SPLITTER_CENTRAL_RIGHT, 60 },
     { WidgetType::RIGHT_PANEL, 90 },
     { WidgetType::APP_LOG, 90 },
-    { WidgetType::INDICATOR_ME, 35 }
+    // { WidgetType::INDICATOR_ME, 35 }
 };
 
 const std::unordered_map<WidgetType, uint32_t> LAYOUT_SPACING_MAP {
@@ -40,9 +40,14 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
     { WidgetType::MESSAGE_RECEIVED, 0x00115e },
     { WidgetType::FILE_SENT, 0x093400 },
     { WidgetType::FILE_RECEIVED, 0x000934 },
-    { WidgetType::INDICATOR_ON, 0x009600 },
-    { WidgetType::INDICATOR_OFF, 0x690000 },
+    // { WidgetType::INDICATOR_ON, 0x009600 },
+    // { WidgetType::INDICATOR_OFF, 0x690000 },
     { WidgetType::NEW_MESSAGE_EDIT, 0xdcdc07 }
+};
+
+const std::unordered_map<IndicatorWidgetState, uint32_t> INDICATOR_WIDGET_STATE_TO_COLOR_MAP {
+    { IndicatorWidgetState::ON, 0x009600 },
+    { IndicatorWidgetState::OFF, 0x690000 }
 };
 
 // TODO add color calculation instead of color map
@@ -122,6 +127,11 @@ uint32_t getWidgetColor(WidgetType type)
     auto lightness = getMapValue(WIDGET_LIGHTNESS_MAP, type, DEFAULT_WIDGET_LIGHTNESS);
 
     return getMapValue(WIDGET_LIGHTNESS_TO_COLOR_MAP, lightness, DEFAULT_WIDGET_COLOR);
+}
+
+uint32_t getIndicatorWidgetColor(IndicatorWidgetState state)
+{
+    return getMapValue(INDICATOR_WIDGET_STATE_TO_COLOR_MAP, state, DEFAULT_INDICATOR_WIDGET_COLOR);
 }
 
 std::string getHTMLColor(WidgetType type)

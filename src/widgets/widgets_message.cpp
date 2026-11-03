@@ -50,12 +50,14 @@ MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(MessagePtr message)
 
 void MessageIndicatorPanelWidget::setSentIndicatorOn()
 {
-    sent_->setOn();
+    // sent_->setOn();
+    sent_->updateState();
 }
 
 void MessageIndicatorPanelWidget::setReceivedIndicatorOn()
 {
-    received_->setOn();
+    // received_->setOn();
+    received_->updateState();
 }
 
 void MessageIndicatorPanelWidget::unsetNewMessageLabel()

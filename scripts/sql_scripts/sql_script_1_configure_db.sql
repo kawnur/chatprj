@@ -1,3 +1,5 @@
+create database app;
+
 create table public.passwords (
     id int not null primary key generated always as identity,
     password varchar(30) not null

@@ -20,6 +20,7 @@ MessageWidgetType getMessageWidgetType(MessageType value);
 
 // color
 uint32_t getWidgetColor(WidgetType value);
+uint32_t getIndicatorWidgetColor(IndicatorWidgetState state);
 std::string getHTMLColor(WidgetType value);
 
 QString getHTMLHeader(
