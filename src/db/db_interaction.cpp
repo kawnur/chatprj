@@ -258,7 +258,7 @@ void DBReplyData::sortDataById()
     sortDataViaLambda(lambda);
 }
 
-void DBReplyData::sortDataViaLambda(std::function<bool(DataMap &, DataMap &)> lambda)
+void DBReplyData::sortDataViaLambda(std::function<bool(DBDataMap &, DBDataMap &)> lambda)
 {
     std::ranges::sort(data_, lambda);
 }

@@ -291,20 +291,24 @@ PasswordAction::~PasswordAction() { logArgsInfo(Q_FUNC_INFO); }
 
 void PasswordAction::buildDataDialog()
 {
+    std::initializer_list<DataType> list;
+
     switch (type_) {
     case ActionType::CREATE_PASSWORD:
-        dataDialog_ = std::make_shared<CreatePasswordDialog>();
+        list = { DataType::PASSWORD, DataType::PASSWORD_REENTER };
 
         break;
 
     case ActionType::GET_PASSWORD:
-        dataDialog_ = std::make_shared<GetPasswordDialog>();
+        list = { DataType::PASSWORD };
 
         break;
 
     default:
-        break;
+        return;
     }
+
+    dataDialog_ = std::make_shared<DataDialog>(type_, list);
 }
 
 std::string PasswordAction::password()
@@ -369,8 +373,9 @@ void PasswordAction::act()
 {
     switch (type_) {
     case ActionType::CREATE_PASSWORD: {
-        auto text1 = dataDialog_->firstEditText();
-        auto text2 = dataDialog_->secondEditText();
+        auto data = dataDialog_->getDataWrapper();
+        auto text1 = data->get(DataType::PASSWORD);
+        auto text2 = data->get(DataType::PASSWORD_REENTER);
 
         auto errorText = ""s;
 
@@ -391,7 +396,8 @@ void PasswordAction::act()
     break;
 
     case ActionType::GET_PASSWORD: {
-        auto text = dataDialog_->editText();
+        auto data = dataDialog_->getDataWrapper();
+        auto text = data->get(DataType::PASSWORD);
 
         if (text.size() == 0) {
             updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);

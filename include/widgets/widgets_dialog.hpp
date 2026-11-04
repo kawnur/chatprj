@@ -19,6 +19,7 @@
 #include <QString>
 
 #include "alias.hpp"
+#include "data.hpp"
 #include "constants.hpp"
 #include "logging.hpp"
 
@@ -27,22 +28,19 @@ class Dialog : public QDialog
     Q_OBJECT
 
 public:
-    Dialog();
+    Dialog(ActionType actionType);
     virtual ~Dialog() { logArgsInfo(Q_FUNC_INFO); }
 
     virtual void set(ActionPtr action) {}
     virtual void showDialog() {}
+    virtual std::shared_ptr<DataWrapper> getDataWrapper() { return nullptr; }
     virtual CompanionDataPtr getCompanionData() { return nullptr; }
-    virtual std::string firstEditText() { return ""s; }
-    virtual std::string secondEditText() { return ""s; }
     virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() const { return QStringList(); }
     virtual QString getSaveFileName(const QString &param, const QString &path) { return ""; }
 
-    // bool containsDialog() const { return containsDialog_; }
     void setDialogType(DialogType type);
 
-// protected slots:
 public slots:
     // void actionSlot();
 
@@ -66,6 +64,8 @@ public:
 
     std::shared_ptr<QLabel> label() const;
     std::shared_ptr<QLineEdit> edit() const;
+    QString getLabelText();
+    QString getEditText();
 
     void setEditText(const QString &text);
 
@@ -82,6 +82,7 @@ public:
 
     std::shared_ptr<QFormLayout> getLayout() const;
     QString getData(DataType type);
+    std::shared_ptr<DataWrapper> getDataWrapper1();
 
     void fillForm(std::initializer_list<DataType> list);
     void setFormData(CompanionDataPtr data);
@@ -91,7 +92,22 @@ private:
     std::unordered_map<DataType, std::shared_ptr<FormLine>> map_;
 };
 
-class CompanionDataDialog : public Dialog, public FormLayout
+class DataDialog : public Dialog, public FormLayout
+{
+    Q_OBJECT
+
+public:
+    DataDialog(ActionType type, const std::initializer_list<DataType> &lines);
+    virtual ~DataDialog() { logArgsInfo(Q_FUNC_INFO); }
+
+    void set(ActionPtr action) override;
+    std::shared_ptr<DataWrapper> getDataWrapper() override;
+
+private:
+    std::unique_ptr<QDialogButtonBox> buttonBox_;
+};
+
+class CompanionDataDialog : public DataDialog
 {
     Q_OBJECT
 
@@ -99,13 +115,7 @@ public:
     CompanionDataDialog(ActionType type, CompanionPtr companion);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
-    void set(ActionPtr action) override;
-
     CompanionDataPtr getCompanionData() override;
-
-private:
-    ActionType type_;
-    std::unique_ptr<QDialogButtonBox> buttonBox_;
 };
 
 class GroupChatDataDialog : public Dialog
@@ -124,47 +134,6 @@ private:
     std::unique_ptr<QLabel> label_;
     std::unique_ptr<QListWidget> list_;
 };
-
-class CreatePasswordDialog : public Dialog
-{
-    Q_OBJECT
-
-public:
-    CreatePasswordDialog();
-    ~CreatePasswordDialog() { logArgsInfo(Q_FUNC_INFO); }
-
-    void set(ActionPtr action) override;
-    std::string firstEditText() override;
-    std::string secondEditText() override;
-
-private:
-    std::unique_ptr<QFormLayout> layout_;
-    std::unique_ptr<QLabel> firstLabel_;
-    std::unique_ptr<QLineEdit> firstEdit_;
-    std::unique_ptr<QLabel> secondLabel_;
-    std::unique_ptr<QLineEdit> secondEdit_;
-    std::unique_ptr<QDialogButtonBox> buttonBox_;
-};
-
-class GetPasswordDialog : public Dialog
-{
-    Q_OBJECT
-
-public:
-    GetPasswordDialog();
-    ~GetPasswordDialog() { logArgsInfo(Q_FUNC_INFO); }
-
-    void set(ActionPtr action) override;
-    std::string editText() override;
-
-private:
-    std::unique_ptr<QFormLayout> layout_;
-    std::unique_ptr<QLabel> label_;
-    std::unique_ptr<QLineEdit> edit_;
-    std::unique_ptr<QDialogButtonBox> buttonBox_;
-};
-
-class TextDialog;
 
 class TextDialog : public Dialog
 {

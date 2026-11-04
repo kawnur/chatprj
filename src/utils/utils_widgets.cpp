@@ -83,7 +83,9 @@ const std::unordered_map<DataType, QString> DATA_TYPE_STRING_REPR_MAP {
     { DataType::NAME, "Name" },
     { DataType::IP_ADDRESS, "IpAddress" },
     { DataType::SERVER_PORT, "Port" },
-    { DataType::CLIENT_PORT, "Port" }
+    { DataType::CLIENT_PORT, "Port" },
+    { DataType::PASSWORD, "Enter password" },
+    { DataType::PASSWORD_REENTER, "Reenter password" },
 };
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)

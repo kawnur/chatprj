@@ -2,6 +2,34 @@
 
 #include "logging.hpp"
 
+DataWrapper::DataWrapper() : map_() {}
+
+DataWrapper::DataWrapper(DataMap map) :map_(map) {}
+
+std::string DataWrapper::get(DataType type)
+{
+    return getMapValue(map_, type, ""s);
+}
+
+void DataWrapper::set(DataType type, const std::string &value)
+{
+    map_[type] = value;
+}
+
+void DataWrapper::log()
+{
+    auto entry = ""s;
+
+    for (const auto &pair : map_)
+        entry += getStringByFormat("{0}: {1}, ");
+
+    entry.erase(entry.end() - 2, entry.end() - 1);
+
+    logArgsInfo(DATA_LOG_DELIMITER);
+    logArgsInfo(entry);
+    logArgsInfo(DATA_LOG_DELIMITER);
+}
+
 std::string CompanionData::name() const
 {
     return name_;

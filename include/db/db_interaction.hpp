@@ -2,7 +2,6 @@
 #define DB_INTERACTION_HPP
 
 #include <libpq-events.h>
-#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -12,8 +11,8 @@
 #include "db_constants.hpp"
 #include "utils.hpp"
 
-using DataMap = std::unordered_map<std::string, std::string>;
-using Data = std::vector<DataMap>;
+using DBDataMap = std::unordered_map<std::string, std::string>;
+using DBData = std::vector<DBDataMap>;
 
 class DBConnectionPrameters
 {
@@ -78,11 +77,11 @@ public:
     void log();
 
     void sortDataById();
-    void sortDataViaLambda(std::function<bool(DataMap &, DataMap &)> lambda);
+    void sortDataViaLambda(std::function<bool(DBDataMap &, DBDataMap &)> lambda);
 
 private:
     bool log_;
-    Data data_;
+    DBData data_;
 };
 
 std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::string> &keys);

@@ -12,6 +12,7 @@
 const std::string LOG_DELIMITER(28, '#');
 const std::string LOG_CUSTOM_DELIMITER(25, '?');
 const std::string MESSAGE_LOG_DELIMITER(28, 'M');
+const std::string DATA_LOG_DELIMITER(28, 'D');
 const std::string EXIT_LOG_ENTRY { "Exit..." };
 
 const std::size_t MAX_BUFFER_SIZE = 1024;
@@ -241,16 +242,6 @@ const std::string socketInfoStubWidget { "No companion info from DB..." };
 // new group chat dialog
 const QString newGroupChatDialogLabel { "Choose companions to add to new group chat" };
 
-// new password dialog
-const QString newPasswordDialogFirstLabel { "Enter password:" };
-const QString newPasswordDialogSecondLabel { "Reenter password:" };
-
-// get password dialog
-const QString getPasswordDialogLabel { "Enter password:" };
-
-// info dialogs
-// const std::string newPasswordCreatedLabel { "New password created" };
-
 // button text
 enum class ButtonType
 {
@@ -377,7 +368,9 @@ enum class DataType
     NAME,
     IP_ADDRESS,
     SERVER_PORT,
-    CLIENT_PORT
+    CLIENT_PORT,
+    PASSWORD,
+    PASSWORD_REENTER
 };
 
 #endif // CONSTANTS_HPP

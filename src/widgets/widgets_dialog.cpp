@@ -12,8 +12,8 @@
 #include "utils_widgets.hpp"
 #include "widgets.hpp"
 
-Dialog::Dialog()
-    : dialogType_(DialogType::INFO), actionType_(ActionType::UNKNOWN), /*containsDialog_(false),*/
+Dialog::Dialog(ActionType actionType)
+    : dialogType_(DialogType::INFO), actionType_(actionType), /*containsDialog_(false),*/
     dataMap_(ACTION_TITLE_MAP), infoMap_(INFO_STUB),
     defaultTitle_(getQString(ACTION_INFO_DIALOG_DEFAULT_HEADER)) {}
 
@@ -51,6 +51,16 @@ std::shared_ptr<QLineEdit> FormLine::edit() const
     return edit_;
 }
 
+QString FormLine::getLabelText()
+{
+    return label_->text();
+}
+
+QString FormLine::getEditText()
+{
+    return edit_->text();
+}
+
 void FormLine::setEditText(const QString &text)
 {
     edit_->setText(text);
@@ -67,7 +77,17 @@ QString FormLayout::getData(DataType type)
 {
     auto line = getMapValue(map_, type, nullptr);
 
-    return (line) ? line->edit()->text() : "";
+    return (line) ? line->getEditText() : "";
+}
+
+std::shared_ptr<DataWrapper> FormLayout::getDataWrapper1()
+{
+    auto data = std::make_shared<DataWrapper>();
+
+    for (const auto &pair : map_)
+        data->set(pair.first, getString(pair.second->getEditText()));
+
+    return data;
 }
 
 void FormLayout::fillForm(std::initializer_list<DataType> list)
@@ -86,48 +106,55 @@ void FormLayout::setFormData(CompanionDataPtr data)
         pair.second->setEditText(getQString(data->getData(pair.first)));
 }
 
-CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion)
-    : Dialog(), FormLayout()
+DataDialog::DataDialog(ActionType type, const std::initializer_list<DataType> &lines)
+    : Dialog(type), FormLayout()
 {
+    // set properties
     setTitleAsData();
-
     setParent(getGraphicManager()->getMainWindow().get());
     setModal(true);
     setWindowFlag(Qt::Window);
 
-    type_ = type;
+    auto layout = getLayout();
+    setLayout(layout.get());
 
-    setLayout(getLayout().get());
+    // fill form
+    fillForm(lines);
 
-    auto list = { DataType::NAME, DataType::IP_ADDRESS, DataType::CLIENT_PORT };
-    fillForm(list);
+    // buttons
+    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout->addWidget(buttonBox_.get());
+}
 
-    if (type_ == ActionType::UPDATE_COMPANION && companion) {
+void DataDialog::set(ActionPtr action)
+{
+    connect(
+        buttonBox_.get(), &QDialogButtonBox::accepted, action.get(), &Action::act,
+        Qt::QueuedConnection);
+
+    connect(
+        buttonBox_.get(), &QDialogButtonBox::rejected, action.get(), &Action::endAct,
+        Qt::QueuedConnection);
+
+    // close button
+    connect(this, &QDialog::rejected, action.get(), &Action::endAct, Qt::QueuedConnection);
+}
+
+std::shared_ptr<DataWrapper> DataDialog::getDataWrapper()
+{
+    return getDataWrapper1();
+}
+
+CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion)
+    : DataDialog(type, {DataType::NAME, DataType::IP_ADDRESS, DataType::CLIENT_PORT})
+{
+    // set form values
+    if (actionType_ == ActionType::UPDATE_COMPANION && companion) {
         auto data = getGraphicManager()->getCompanionData(companion);
 
         if (data)
             setFormData(data);
     }
-
-    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    getLayout()->addWidget(buttonBox_.get());
-}
-
-void CompanionDataDialog::set(ActionPtr action)
-{
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::accepted,
-        action.get(), &Action::act, Qt::QueuedConnection);
-
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::rejected,
-        action.get(), &Action::endAct, Qt::QueuedConnection);
-
-    // close button
-    connect(
-        this, &QDialog::rejected,
-        action.get(), &Action::endAct, Qt::QueuedConnection);
-
 }
 
 CompanionDataPtr CompanionDataDialog::getCompanionData()
@@ -144,7 +171,7 @@ CompanionDataPtr CompanionDataDialog::getCompanionData()
     return std::make_shared<CompanionData>(name, ipAddress, ""s, port);
 }
 
-GroupChatDataDialog::GroupChatDataDialog(ActionType type)
+GroupChatDataDialog::GroupChatDataDialog(ActionType type) : Dialog(type)
 {
     setTitleAsData();
 
@@ -165,91 +192,9 @@ GroupChatDataDialog::GroupChatDataDialog(ActionType type)
 
 void GroupChatDataDialog::set(ActionPtr action) {}
 
-CreatePasswordDialog::CreatePasswordDialog()
-{
-    actionType_ = ActionType::CREATE_PASSWORD;
-    setTitleAsData();
-
-    setParent(getGraphicManager()->getMainWindow().get());
-
-    setModal(true);
-    setWindowFlag(Qt::Window);
-
-    layout_ = std::make_unique<QFormLayout>();
-    setLayout(layout_.get());
-
-    firstLabel_ = std::make_unique<QLabel>(newPasswordDialogFirstLabel);
-    firstEdit_ = std::make_unique<QLineEdit>();
-
-    secondLabel_ = std::make_unique<QLabel>(newPasswordDialogSecondLabel);
-    secondEdit_ = std::make_unique<QLineEdit>();
-
-    layout_->addRow(firstLabel_.get(), firstEdit_.get());
-    layout_->addRow(secondLabel_.get(), secondEdit_.get());
-
-    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok);
-    layout_->addWidget(buttonBox_.get());
-}
-
-void CreatePasswordDialog::set(ActionPtr action)
-{
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::accepted,
-        action.get(), &Action::act, Qt::QueuedConnection);
-}
-
-std::string CreatePasswordDialog::firstEditText()
-{
-    return getString(firstEdit_->text());
-}
-
-std::string CreatePasswordDialog::secondEditText()
-{
-    return getString(secondEdit_->text());
-}
-
-GetPasswordDialog::GetPasswordDialog()
-{
-    actionType_ = ActionType::GET_PASSWORD;
-    setTitleAsData();
-
-    setParent(getGraphicManager()->getMainWindow().get());
-
-    setModal(true);
-    setWindowFlag(Qt::Window);
-
-    layout_ = std::make_unique<QFormLayout>();
-    setLayout(layout_.get());
-
-    label_ = std::make_unique<QLabel>(getPasswordDialogLabel);
-    edit_ = std::make_unique<QLineEdit>();
-
-    layout_->addRow(label_.get(), edit_.get());
-
-    buttonBox_ = std::make_unique<QDialogButtonBox>(QDialogButtonBox::Ok);
-    layout_->addWidget(buttonBox_.get());
-}
-
-void GetPasswordDialog::set(ActionPtr action)
-{
-    connect(
-        buttonBox_.get(), &QDialogButtonBox::accepted,
-        action.get(), &Action::act, Qt::QueuedConnection);
-
-    // close button
-    connect(
-        this, &QDialog::rejected,
-        action.get(), &Action::endAct, Qt::QueuedConnection);
-}
-
-std::string GetPasswordDialog::editText()
-{
-    return getString(edit_->text());
-}
-
 TextDialog::TextDialog(
     std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
-    std::initializer_list<ButtonInfo> buttonsInfo)
+    std::initializer_list<ButtonInfo> buttonsInfo) : Dialog(ActionType::UNKNOWN)
 {
     // title
     dialogType_ = type;
@@ -355,10 +300,9 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog(ActionType type)
+FileDialog::FileDialog(ActionType type) : Dialog(type)
 {
     // title
-    actionType_ = type;
     setTitleAsData();
 
     // containsDialog_ = true;

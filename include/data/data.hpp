@@ -3,9 +3,28 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "alias.hpp"
 #include "logging.hpp"
+
+using DataMap = std::unordered_map<DataType, std::string>;
+
+class DataWrapper
+{
+public:
+    DataWrapper();
+    DataWrapper(DataMap map);
+    ~DataWrapper() { logArgsInfo(Q_FUNC_INFO); }
+
+    std::string get(DataType type);
+    void set(DataType type, const std::string &value);
+
+    void log();
+
+private:
+    DataMap map_;
+};
 
 class CompanionData
 {
