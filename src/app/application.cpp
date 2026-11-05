@@ -3,13 +3,9 @@
 #include "graphic_manager.hpp"
 #include "manager.hpp"
 
-ChatApp::ChatApp(int argc, char *argv[]) : QApplication(argc, argv) {}
-
-void ChatApp::set()
+ChatApp::ChatApp(int argc, char *argv[]) : QApplication(argc, argv)
 {
     graphicManager_ = std::make_shared<GraphicManager>();
-    graphicManager_->set();
-
     manager_ = std::make_shared<Manager>(graphicManager_);
 
     graphicManager_->setManager(manager_);

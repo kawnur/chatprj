@@ -123,8 +123,6 @@ public:
     MainWidget();
     ~MainWidget() = default;
 
-    void set();
-
     bool addWidgetToContainer(MWContainerPosition position, QWidgetPtr widget);
     void addCompanion(SocketInfoBaseWidgetPtr widget);
     void removeCompanion(SocketInfoBaseWidgetPtr widget);

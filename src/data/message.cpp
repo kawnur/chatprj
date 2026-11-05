@@ -421,9 +421,22 @@ void Message::updateMeta(MessageMetaDataPtr meta)
 void Message::log()
 {
     logArgsInfo(MESSAGE_LOG_DELIMITER);
-    meta_->log();
-    data_->log();
-    state_->log();
+
+    if (meta_)
+        meta_->log();
+    else
+        logArgsInfo("meta is nullptr");
+
+    if (data_)
+        data_->log();
+    else
+        logArgsInfo("data is nullptr");
+
+    if (state_)
+        state_->log();
+    else
+        logArgsInfo("state is nullptr");
+
     logArgsInfo(MESSAGE_LOG_DELIMITER);
 }
 

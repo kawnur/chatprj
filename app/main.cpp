@@ -6,7 +6,6 @@ int main(int argc, char *argv[])
     //     std::exit(0);
 
     ChatApp app(argc, argv);
-    app.set();
 
     return app.exec();
 }

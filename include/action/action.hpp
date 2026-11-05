@@ -22,9 +22,7 @@ public:
     void setDialog(ActionPtr action);
 
     virtual void buildDataDialog() {}
-    // virtual void buildInfoDialog() {}
 
-    virtual void set() {}
     virtual void preAct() {}
     virtual void act() {}
     virtual void postAct(ActionResultPtr result) {}
@@ -42,7 +40,6 @@ public:
     std::string getInfoDialogHeader(const auto &map);
     std::string getInfoDialogSuccessHeader();
     std::string getInfoDialogFailHeader();
-    // void initInfoDialog(std::initializer_list<ButtonInfo> list);
     void buildInfoDialog();
 
     void updateInfoDialogAndShow(
@@ -65,8 +62,6 @@ class RegularAction : public Action
 public:
     RegularAction(ActionType type);
     virtual ~RegularAction();
-
-    void set() override;
 };
 
 class CompanionAction : public RegularAction, public std::enable_shared_from_this<CompanionAction>
@@ -78,7 +73,6 @@ public:
     ~CompanionAction();
 
     void buildDataDialog() override;
-    // void buildInfoDialog() override;
 
     std::string name() override;
     std::string ipAddress() override;
@@ -88,9 +82,6 @@ public:
     CompanionDataPtr getCompanionData() const;
     CompanionPtr getCompanion() const;
 
-    void set() override;
-
-    // void updateCompanionObjectData();
     void updateInfoDialog(ActionResultPtr result);
 
 public slots:
@@ -127,7 +118,6 @@ public:
     void buildDataDialog() override;
     std::string password() override;
 
-    void set() override;
     void preAct() override;
     void updateInfoDialog(ActionResultPtr result);
     void act() override;
@@ -149,7 +139,6 @@ public:
     void buildDataDialog() override;
     CompanionPtr getCompanion() const;
     std::filesystem::path getPath() override;
-    void set() override;
     void preAct() override;
     void act() override;
     void defineFilePath();

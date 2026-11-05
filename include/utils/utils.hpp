@@ -159,8 +159,6 @@ typename M::mapped_type getMapValue(const M &map, const T &key, const U &default
         return map.at(key);
     }
     catch(std::out_of_range) {
-        logArgsError("mapping key error");
-
         return defaultValue;
     }
     catch(const std::exception &e) {

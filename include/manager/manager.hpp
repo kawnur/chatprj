@@ -145,7 +145,8 @@ private:
     {
         auto action = std::make_shared<T>(type, args...);
         setCurrentAction(std::dynamic_pointer_cast<Action>(action));  // TODO check cast
-        action->set();
+        action->setDialog(action);
+        action->preAct();
     }
 
     template<typename... Ts>

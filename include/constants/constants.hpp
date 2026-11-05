@@ -24,9 +24,6 @@ const bool LOG_DB_INTERACTION = true;
 
 static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-const uint32_t SLEEP_DURATION_INITIAL_MS = 1000;
-const float SLEEP_DURATION_INCREASE_RATE = 1.2f;
-
 const std::filesystem::path HOME_PATH("~");
 
 const int PORT_BAD_VALUE = 0;

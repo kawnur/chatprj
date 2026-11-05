@@ -13,17 +13,13 @@ GraphicManager::GraphicManager()
     : manager_(nullptr), mainWindow_(nullptr), map_(), selectedCompanion_(nullptr)
 {
     mainWindow_ = std::make_shared<MainWindow>();
+    mainWindow_->set();
+    mainWindow_->show();
 }
 
 MainWindowPtr GraphicManager::getMainWindow()
 {
     return mainWindow_;
-}
-
-void GraphicManager::set()
-{
-    mainWindow_->set();
-    mainWindow_->show();
 }
 
 void GraphicManager::setManager(ManagerPtr manager)
@@ -128,6 +124,11 @@ void GraphicManager::deleteWidgetGroup(CompanionPtr companion)
 
     if (result == map_.end())
         return;
+
+    auto group = result->second.second;
+
+    if (group)
+        group->hideFields();
 
     map_.erase(result);
 

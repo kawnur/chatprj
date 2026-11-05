@@ -20,7 +20,6 @@ MainWindow::MainWindow()
 
     // central widget
     mainWidget_ = std::make_unique<MainWidget>();
-    mainWidget_->set();
     setCentralWidget(mainWidget_.get());
 }
 

@@ -260,39 +260,21 @@ IndicatorWidget::IndicatorWidget(WidgetType type, IndicatorWidgetState state)
     size_ = getIndicatorSize(type_);
     setFixedWidth(size_);
     setFixedHeight(size_);
-
-    // isOn_ = isOn;
     state_ = state;
-    // onColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ON));
-    // offColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_OFF));
-    // meColor_ = QColor(getWidgetColor(WidgetType::INDICATOR_ME));
-
-    // (isOn_) ? setOn() : setOff();
     updateColor(getIndicatorWidgetColor(state_));
 }
 
-// void IndicatorWidget::setOn()
-// {
-//     isOn_ = true;
-//     setType(WidgetType::INDICATOR_ON);
-// }
+void IndicatorWidget::setOn()
+{
+    state_ = IndicatorWidgetState::ON;
+    updateColor(getIndicatorWidgetColor(state_));
+}
 
-// void IndicatorWidget::setOff()
-// {
-//     isOn_ = false;
-//     setType(WidgetType::INDICATOR_OFF);
-// }
-
-// void IndicatorWidget::setMe()
-// {
-//     isOn_ = false;
-//     setType(WidgetType::INDICATOR_ME);
-// }
-
-// void IndicatorWidget::toggle()
-// {
-//     (isOn_) ? setOff() : setOn();
-// }
+void IndicatorWidget::setOff()
+{
+    state_ = IndicatorWidgetState::OFF;
+    updateColor(getIndicatorWidgetColor(state_));
+}
 
 void IndicatorWidget::updateState()
 {
@@ -448,20 +430,20 @@ void SocketInfoWidget::updateFields()
     setFieldsFromCompanionData();
 }
 
-void SocketInfoWidget::updateNewMessagesIndicator()
+// void SocketInfoWidget::updateNewMessagesIndicator()
+// {
+//     received_->updateState();
+// }
+
+void SocketInfoWidget::setNewMessagesIndicatorOn()
 {
-    received_->updateState();
+    received_->setOn();
 }
 
-// void SocketInfoWidget::setNewMessagesIndicatorOn()
-// {
-//     received_->setOn();
-// }
-
-// void SocketInfoWidget::setNewMessagesIndicatorOff()
-// {
-//     received_->setOff();
-// }
+void SocketInfoWidget::setNewMessagesIndicatorOff()
+{
+    received_->setOff();
+}
 
 void SocketInfoWidget::updateCompanionAction()
 {
@@ -603,6 +585,7 @@ WidgetGroup::WidgetGroup(CompanionPtr companion)
 
 WidgetGroup::~WidgetGroup()
 {
+    logArgsInfo(Q_FUNC_INFO);
     getGraphicManager()->removeCompanionWidget(socketInfoBase_);
     hideCentralPanel();
 }
@@ -635,11 +618,17 @@ void WidgetGroup::set()
 void WidgetGroup::clearHistory()
 {
     centralPanel_->clearHistory();
-    // setNewMessagesIndicatorOff();
-    socketInfoBase_->updateNewMessagesIndicator();
+    setNewMessagesIndicatorOff();
+    // socketInfoBase_->updateNewMessagesIndicator();
 
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
     antecedentMessagesCounter_ = 0;
+}
+
+void WidgetGroup::hideFields()
+{
+    socketInfoBase_->hide();
+    centralPanel_->hide();
 }
 
 void WidgetGroup::hideCentralPanel()
@@ -661,8 +650,8 @@ void WidgetGroup::messageAdded()
     if (antecedentMessagesCounter_ <= 0)
         return;
 
-    // setNewMessagesIndicatorOn();
-    socketInfoBase_->updateNewMessagesIndicator();
+    setNewMessagesIndicatorOn();
+    // socketInfoBase_->updateNewMessagesIndicator();
 }
 
 void WidgetGroup::updateSocketInfoWidget()
@@ -680,15 +669,15 @@ void WidgetGroup::unselect()
     socketInfoBase_->unselect();
 }
 
-// void WidgetGroup::setNewMessagesIndicatorOn()
-// {
-//     socketInfoBase_->setNewMessagesIndicatorOn();
-// }
+void WidgetGroup::setNewMessagesIndicatorOn()
+{
+    socketInfoBase_->setNewMessagesIndicatorOn();
+}
 
-// void WidgetGroup::setNewMessagesIndicatorOff()
-// {
-//     socketInfoBase_->setNewMessagesIndicatorOff();
-// }
+void WidgetGroup::setNewMessagesIndicatorOff()
+{
+    socketInfoBase_->setNewMessagesIndicatorOff();
+}
 
 void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 {
@@ -712,8 +701,8 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
         messageState->setIsAntecedent(false);
 
         if (antecedentMessagesCounter_ == 0)
-            // setNewMessagesIndicatorOff();
-            socketInfoBase_->updateNewMessagesIndicator();
+            setNewMessagesIndicatorOff();
+            // socketInfoBase_->updateNewMessagesIndicator();
     }
 }
 

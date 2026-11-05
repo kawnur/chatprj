@@ -11,8 +11,6 @@ public:
     ChatApp(int argc, char *argv[]);
     ~ChatApp() = default;
 
-    void set();
-
     GraphicManagerPtr graphicManager_;
     ManagerPtr manager_;
 };

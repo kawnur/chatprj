@@ -4,6 +4,10 @@
 #include "manager.hpp"
 #include "message.hpp"
 
+const uint32_t SLEEP_DURATION_INITIAL_MS = 1000;
+// const float SLEEP_DURATION_INCREASE_RATE = 1.2f;
+const float SLEEP_DURATION_INCREASE_RATE = 1.0f;
+
 MessageHandler::MessageHandler() : manager_(nullptr), storage_(), builder_() {}
 
 void MessageHandler::setManager(ManagerPtr manager)
@@ -107,7 +111,7 @@ void MessageHandler::sendMessage(
         manager_->markMessageAsSent(companion, message);
 
     // wait for message reception confirmation
-    // waitForMessageReceptionConfirmation(companion, message);
+    waitForMessageReceptionConfirmation(companion, message);
 }
 
 bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr message)
@@ -120,7 +124,7 @@ bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr mes
     if (type == NetworkMessageType::NO_ACTION)
         return true;
 
-    // build json
+    // build json3
     auto json = buildMessageJSONString(companion, message);
 
     // send json over network
@@ -568,7 +572,8 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
 
         sleepForMS(sleep);
 
-        while (true) {
+        // while (true) {
+        while (getMessageInfo(companion, message)) {
             if (message->isReceived())
                 return;
 

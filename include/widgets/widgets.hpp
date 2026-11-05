@@ -100,8 +100,6 @@ class VLayoutWidget : public PalettedWidget, public VLayout
 public:
     VLayoutWidget(WidgetType type, Qt::AlignmentFlag alignment);
     virtual ~VLayoutWidget() = default;
-
-    void set();
 };
 
 class HLayoutWidget : public PalettedWidget, public HLayout
@@ -111,8 +109,6 @@ class HLayoutWidget : public PalettedWidget, public HLayout
 public:
     HLayoutWidget(WidgetType type, Qt::AlignmentFlag alignment);
     virtual ~HLayoutWidget() = default;
-
-    void set();
 };
 
 class LabelWidget : public QLabel, public Palette
@@ -226,21 +222,13 @@ public:
     IndicatorWidget(WidgetType type, IndicatorWidgetState state);
     ~IndicatorWidget() = default;
 
-    // void setOn();
-    // void setOff();
-    // void setMe();
-
+    void setOn();
+    void setOff();
     void updateState();
-public slots:
-    // void toggle();
 
 private:
-    // bool isOn_;
     IndicatorWidgetState state_;
     uint8_t size_;
-    // QColor onColor_;
-    // QColor offColor_;
-    // QColor meColor_;
 };
 
 class ButtonPanelWidget : public HLayoutWidget
@@ -266,9 +254,9 @@ public:
     virtual bool isStub() { return false; }
     virtual void select() {}
     virtual void unselect() {}
-    // virtual void setNewMessagesIndicatorOn() {}
-    // virtual void setNewMessagesIndicatorOff() {}
-    virtual void updateNewMessagesIndicator() {}
+    virtual void setNewMessagesIndicatorOn() {}
+    virtual void setNewMessagesIndicatorOff() {}
+    // virtual void updateNewMessagesIndicator() {}
     virtual void updateFields() {}
     virtual bool isConnected() { return false; }
     virtual void updateConnectionState() {}
@@ -305,9 +293,9 @@ public:
     void select() override;
     void unselect() override;
     void updateFields() override;
-    // void setNewMessagesIndicatorOn() override;
-    // void setNewMessagesIndicatorOff() override;
-    void updateNewMessagesIndicator() override;
+    void setNewMessagesIndicatorOn() override;
+    void setNewMessagesIndicatorOff() override;
+    // void updateNewMessagesIndicator() override;
 
     void updateConnectionState() override;
 
@@ -393,14 +381,15 @@ public:
 
     void set();
     void clearHistory();
+    void hideFields();
     void hideCentralPanel();
     void showCentralPanel();
     void messageAdded();
     void updateSocketInfoWidget();
     void select();
     void unselect();
-    // void setNewMessagesIndicatorOn();
-    // void setNewMessagesIndicatorOff();
+    void setNewMessagesIndicatorOn();
+    void setNewMessagesIndicatorOff();
 
 signals:
     void addMessageWidgetSignal(MessagePtr message);

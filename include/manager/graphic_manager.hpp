@@ -20,7 +20,6 @@ public:
     ~GraphicManager() = default;
 
     MainWindowPtr getMainWindow();
-    void set();
     void setManager(ManagerPtr manager);
 
     void buildWidgetGroups();

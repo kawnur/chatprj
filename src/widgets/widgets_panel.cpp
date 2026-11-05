@@ -343,9 +343,7 @@ CentralPanelContainerWidget::CentralPanelContainerWidget()
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
-MainWidget::MainWidget() : HLayoutWidget(WidgetType::UNKNOWN, Qt::AlignLeft) {}
-
-void MainWidget::set()
+MainWidget::MainWidget() : HLayoutWidget(WidgetType::UNKNOWN, Qt::AlignLeft)
 {
     // left panel
     left_ = std::make_shared<LeftPanelWidget>();

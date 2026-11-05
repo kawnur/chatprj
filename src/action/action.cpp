@@ -15,7 +15,10 @@
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
-Action::Action(ActionType type) : type_(type) {}
+Action::Action(ActionType type) : type_(type)
+{
+    buildInfoDialog();
+}
 
 Action::~Action() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -71,14 +74,11 @@ RegularAction::RegularAction(ActionType type) : Action(type) {}
 
 RegularAction::~RegularAction() { logArgsInfo(Q_FUNC_INFO); }
 
-void RegularAction::set()
-{
-    // setDialog();
-    dataDialog_->show();
-}
-
 CompanionAction::CompanionAction(ActionType type, CompanionPtr companion)
-    : companion_(companion), data_(nullptr), RegularAction(type) {}
+    : companion_(companion), data_(nullptr), RegularAction(type)
+{
+    buildDataDialog();
+}
 
 CompanionAction::~CompanionAction() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -130,27 +130,6 @@ CompanionPtr CompanionAction::getCompanion() const
 {
     return companion_;
 }
-
-// TODO change
-void CompanionAction::set()
-{
-    buildDataDialog();
-    buildInfoDialog();
-
-    auto cast = dynamic_pointer_cast<Action>(shared_from_this());
-
-    if (!cast)
-        logArgsError("action cast error");
-
-    setDialog(cast);
-    preAct();
-}
-
-// void CompanionAction::updateCompanionObjectData()
-// {
-//     // companion_->updateData(data_);
-//     getManager()->updateCompanion()
-// }
 
 void CompanionAction::updateInfoDialog(ActionResultPtr result)
 {
@@ -274,6 +253,8 @@ void CompanionAction::endAct()
 
 GroupChatAction::GroupChatAction(ActionType type) : data_(), RegularAction(type)
 {
+    buildDataDialog();
+
     switch (type) {
     case ActionType::CREATE_GROUP:
         dataDialog_ = std::make_shared<GroupChatDataDialog>(type_);
@@ -285,7 +266,10 @@ GroupChatAction::GroupChatAction(ActionType type) : data_(), RegularAction(type)
     }
 }
 
-PasswordAction::PasswordAction(ActionType type) : RegularAction(type) {}
+PasswordAction::PasswordAction(ActionType type) : RegularAction(type)
+{
+    buildDataDialog();
+}
 
 PasswordAction::~PasswordAction() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -314,20 +298,6 @@ void PasswordAction::buildDataDialog()
 std::string PasswordAction::password()
 {
     return password_;
-}
-
-void PasswordAction::set()
-{
-    buildDataDialog();
-    buildInfoDialog();
-
-    auto cast = dynamic_pointer_cast<Action>(shared_from_this());
-
-    if (!cast)
-        logArgsError("action cast error");
-
-    setDialog(cast);
-    preAct();
 }
 
 void PasswordAction::preAct()
@@ -430,7 +400,10 @@ void PasswordAction::endAct()
 
 FileAction::FileAction(
     ActionType type, const std::string &networkId, CompanionPtr companion)
-    : Action(type), companion_(companion), networkId_(networkId) {}
+    : Action(type), companion_(companion), networkId_(networkId)
+{
+    buildDataDialog();
+}
 
 FileAction::~FileAction() { logArgsInfo(Q_FUNC_INFO); }
 
@@ -447,20 +420,6 @@ CompanionPtr FileAction::getCompanion() const
 std::filesystem::path FileAction::getPath()
 {
     return filePath_;
-}
-
-void FileAction::set()
-{
-    buildDataDialog();
-    buildInfoDialog();
-
-    auto cast = dynamic_pointer_cast<Action>(shared_from_this());
-
-    if (!cast)
-        logArgsError("action cast error");
-
-    setDialog(cast);
-    preAct();
 }
 
 void FileAction::preAct()
