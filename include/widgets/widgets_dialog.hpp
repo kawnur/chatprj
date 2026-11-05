@@ -33,7 +33,7 @@ public:
 
     virtual void set(ActionPtr action) {}
     virtual void showDialog() {}
-    virtual std::shared_ptr<DataWrapper> getDataWrapper() { return nullptr; }
+    virtual std::shared_ptr<DataWrapper> getData() { return nullptr; }
     virtual CompanionDataPtr getCompanionData() { return nullptr; }
     virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() const { return QStringList(); }
@@ -81,8 +81,8 @@ public:
     ~FormLayout() = default;
 
     std::shared_ptr<QFormLayout> getLayout() const;
-    QString getData(DataType type);
-    std::shared_ptr<DataWrapper> getDataWrapper1();
+    QString getDataByType(DataType type);
+    std::shared_ptr<DataWrapper> getDataWrapper();
 
     void fillForm(std::initializer_list<DataType> list);
     void setFormData(CompanionDataPtr data);
@@ -101,7 +101,7 @@ public:
     virtual ~DataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     void set(ActionPtr action) override;
-    std::shared_ptr<DataWrapper> getDataWrapper() override;
+    std::shared_ptr<DataWrapper> getData() override;
 
 private:
     std::unique_ptr<QDialogButtonBox> buttonBox_;
@@ -118,6 +118,7 @@ public:
     CompanionDataPtr getCompanionData() override;
 };
 
+// TODO inherit from DataDialog
 class GroupChatDataDialog : public Dialog
 {
     Q_OBJECT

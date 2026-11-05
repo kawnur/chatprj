@@ -73,14 +73,14 @@ std::shared_ptr<QFormLayout> FormLayout::getLayout() const
     return layout_;
 }
 
-QString FormLayout::getData(DataType type)
+QString FormLayout::getDataByType(DataType type)
 {
     auto line = getMapValue(map_, type, nullptr);
 
     return (line) ? line->getEditText() : "";
 }
 
-std::shared_ptr<DataWrapper> FormLayout::getDataWrapper1()
+std::shared_ptr<DataWrapper> FormLayout::getDataWrapper()
 {
     auto data = std::make_shared<DataWrapper>();
 
@@ -140,9 +140,9 @@ void DataDialog::set(ActionPtr action)
     connect(this, &QDialog::rejected, action.get(), &Action::endAct, Qt::QueuedConnection);
 }
 
-std::shared_ptr<DataWrapper> DataDialog::getDataWrapper()
+std::shared_ptr<DataWrapper> DataDialog::getData()
 {
-    return getDataWrapper1();
+    return getDataWrapper();
 }
 
 CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion)
@@ -159,14 +159,14 @@ CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion
 
 CompanionDataPtr CompanionDataDialog::getCompanionData()
 {
-    auto name = getData(DataType::NAME);
+    auto name = getDataByType(DataType::NAME);
 
     // result format is db-compliant
-    auto ipAddressFromWidget = getData(DataType::IP_ADDRESS);
+    auto ipAddressFromWidget = getDataByType(DataType::IP_ADDRESS);
     QHostAddress hostAddress { ipAddressFromWidget };
     auto ipAddress = getString(hostAddress);
 
-    auto port = getData(DataType::CLIENT_PORT);
+    auto port = getDataByType(DataType::CLIENT_PORT);
 
     return std::make_shared<CompanionData>(name, ipAddress, ""s, port);
 }

@@ -36,7 +36,7 @@ void MainWindow::addLog(const QString &text)
 
 bool MainWindow::addWidget(MWContainerPosition position, QWidgetPtr widget)
 {
-    return mainWidget_->addWidget(position, widget);
+    return mainWidget_->addWidgetToContainer(position, widget);
 }
 
 void MainWindow::addCompanion(SocketInfoBaseWidgetPtr widget)

@@ -16,16 +16,15 @@
 #include "utils_widgets.hpp"
 #include "widgets_message.hpp"
 
-PanelWidget::PanelWidget(WidgetType type) : VLayoutWidget(type) {}
+PanelWidget::PanelWidget(WidgetType type) : VLayoutWidget(type, Qt::AlignLeft) {}
 
 LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::LEFT_PANEL)
 {
     if (parent)
         setParent(parent.get());
 
-    companionPanel_ = std::make_unique<VLayoutWidget>(WidgetType::COMPANION_PANEL);
-    layout_->addWidget(companionPanel_.get());
-
+    companionPanel_ = std::make_unique<VLayoutWidget>(WidgetType::COMPANION_PANEL, Qt::AlignLeft);
+    addWidget(companionPanel_.get());
     layout_->addStretch(1);
 }
 
@@ -81,7 +80,7 @@ void LeftPanelWidget::disable()
     companionPanel_->setDisabled(true);
 }
 
-CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &name)
+CentralPanelWidget::CentralPanelWidget(const std::string &name, bool isStub, QWidgetPtr parent)
     : PanelWidget(WidgetType::CENTRAL_PANEL), mutex_()
 {
     // fields
@@ -94,15 +93,19 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
     companionLabel_ =
         std::make_unique<LabelWidget>(WidgetType::COMPANION_NAME_LABEL, getQString(name));
 
-    layout_->addWidget(companionLabel_.get());
+    addWidget(companionLabel_.get());
 
     // history
-    history_ = std::make_shared<VLayoutWidget>(WidgetType::HISTORY);
+    history_ = std::make_shared<VLayoutWidget>(WidgetType::HISTORY, Qt::AlignLeft);
+    history_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     if (name.size() != 0) {
         historyScrollArea_ = std::make_unique<ScrollAreaWidget>(history_);
-        layout_->addWidget(historyScrollArea_.get());
+        addWidget(historyScrollArea_.get());
     }
+
+    if (isStub)
+        return;
 
     // button panel
     std::initializer_list<ButtonInfo> list = {
@@ -111,11 +114,11 @@ CentralPanelWidget::CentralPanelWidget(QWidgetPtr parent, const std::string &nam
     };
 
     buttons_ = std::make_unique<ButtonPanelWidget>(WidgetType::HISTORY_BUTTON_PANEL, list);
-    layout_->addWidget(buttons_.get());
+    addWidget(buttons_.get());
 
     // text edit panel
     textEdit_ = std::make_unique<MessageEditWidget>(WidgetType::TEXT_EDIT);
-    layout_->addWidget(textEdit_.get());
+    addWidget(textEdit_.get());
 }
 
 void CentralPanelWidget::set(CompanionPtr companion)
@@ -273,12 +276,12 @@ void CentralPanelWidget::saveFileSlot()
 
 RightPanelWidget::RightPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::RIGHT_PANEL)
 {
-    // if (parent)
-    //     setParent(parent.get());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setFixedWidth(400);
 
     log_ = std::make_unique<TextEditWidget>(WidgetType::APP_LOG);
 
-    layout_->addWidget(log_.get());
+    addWidget(log_.get());
 
     //    testPlainTextEditButton_ = new QPushButton("testPlainTextEditButton");
     //    connect(
@@ -291,9 +294,6 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::
 
 void RightPanelWidget::set()
 {
-    // setParent(qobject_cast<Widget *>(this));
-    // log_->setParent(this);
-
     connect(
         this, SIGNAL(addLogSignal(QString)), this, SLOT(addLogSlot(QString)), Qt::QueuedConnection);
 
@@ -337,77 +337,70 @@ void RightPanelWidget::customMenuRequestedSlot(const QPoint &position)
     menu->popup(mapToGlobal(position));
 }
 
-MainWidget::MainWidget() : layout_(nullptr) {}
+CentralPanelContainerWidget::CentralPanelContainerWidget()
+    : VLayoutWidget(WidgetType::CONTAINER_WIDGET, Qt::AlignLeft)
+{
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+}
+
+MainWidget::MainWidget() : HLayoutWidget(WidgetType::UNKNOWN, Qt::AlignLeft) {}
 
 void MainWidget::set()
 {
-    // layout
-    layout_ = std::make_unique<QHBoxLayout>(this);
-    layout_->setSpacing(0);
-    layout_->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout_.get());
-
-    // left container
-    left_ = std::make_shared<MainWindowContainerWidget<LeftPanelWidget>>(this);
+    // left panel
+    left_ = std::make_shared<LeftPanelWidget>();
     left_->set();
-    layout_->addWidget(left_.get());
+    addWidget(left_.get());
 
     // central container
-    central_ = std::make_shared<MainWindowContainerWidget<CentralPanelWidget>>(this);
-    central_->set(false, ""s);
-    layout_->addWidget(central_.get());
+    central_ = std::make_shared<CentralPanelContainerWidget>();
+    addWidget(central_.get());
 
-    // right container
-    right_ = std::make_shared<MainWindowContainerWidget<RightPanelWidget>>(this);
+    // right panel
+    right_ = std::make_shared<RightPanelWidget>();
     right_->set();
-    layout_->addWidget(right_.get());
+    addWidget(right_.get());
 
     // splitter
-    splitter_ = std::make_unique<SplitterWidget>(WidgetType::SPLITTER_CENTRAL_RIGHT, this);
+    splitter_ = std::make_unique<SplitterWidget>(WidgetType::SPLITTER_CENTRAL_RIGHT);
     splitter_->addWidget(central_.get());
     splitter_->addWidget(right_.get());
-    layout_->addWidget(splitter_.get());
+    addWidget(splitter_.get());
 
     // stub widgets
     stubs_ = std::make_shared<StubWidgetGroup>();
-    stubs_->setParents(left_, central_);
     addCompanion(stubs_->socketInfoBase());
-    addWidget(MWContainerPosition::LEFT, stubs_->left());
-    addWidget(MWContainerPosition::CENTRAL, stubs_->central());
-    addWidget(MWContainerPosition::RIGHT, stubs_->right());
+    addWidgetToContainer(MWContainerPosition::LEFT, stubs_->left());
+    addWidgetToContainer(MWContainerPosition::CENTRAL, stubs_->central());
+    addWidgetToContainer(MWContainerPosition::RIGHT, stubs_->right());
     stubs_->hide();
     stubs_->showCentral();
 
     // show - hide widget
     showHide_ = std::make_shared<ShowHideWidget>();
 
-    if (!addWidget(MWContainerPosition::LEFT, showHide_))
+    if (!addWidgetToContainer(MWContainerPosition::LEFT, showHide_))
         logArgsError("addWidget error");
 
     // blur effect
     initBlurEffect();
 }
 
-std::shared_ptr<QHBoxLayout> MainWidget::layout() const
-{
-    return layout_;
-}
-
-bool MainWidget::addWidget(MWContainerPosition position, QWidgetPtr widget)
+bool MainWidget::addWidgetToContainer(MWContainerPosition position, QWidgetPtr widget)
 {
     switch (position) {
     case MWContainerPosition::LEFT:
-        left_->addWidget(widget);
+        left_->addWidget(widget.get());
 
     break;
 
     case MWContainerPosition::CENTRAL:
-        central_->addWidget(widget);
+        central_->addWidget(widget.get());
 
     break;
 
     case MWContainerPosition::RIGHT:
-        right_->addWidget(widget);
+        right_->addWidget(widget.get());
 
     break;
 

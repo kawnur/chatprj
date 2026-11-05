@@ -14,8 +14,7 @@
 
 Palette::Palette(WidgetType type, QPalette::ColorRole role) : type_(type), role_(role)
 {
-    // palette_ = std::make_unique<QPalette>();
-    palette_ = std::make_shared<QPalette>();
+    palette_ = std::make_unique<QPalette>();
     setColor(getWidgetColor(type_));
 }
 
@@ -56,18 +55,23 @@ void PalettedWidget::updateColor(uint32_t color)
 Layout::Layout(WidgetType type) : type_(type)
 {
     spacing_ = getLayoutSpacingValue(type_);
-    contentsMargins_ = getLayoutContentsMarginsValue(type_);
+    leftMargin_ = getLayoutContentsLeftMargin(type);
+    topMargin_ = getLayoutContentsTopMargin(type);
+    rightMargin_ = getLayoutContentsRightMargin(type);
+    bottomMargin_ = getLayoutContentsBottomMargin(type);
 }
 
-VLayout::VLayout(WidgetType type) : Layout(type), layout_(new QVBoxLayout)
+VLayout::VLayout(WidgetType type, Qt::AlignmentFlag alignment)
+    : Layout(type), layout_(new QVBoxLayout)
 {
     layout_->setSpacing(spacing_);
+    layout_->setContentsMargins(leftMargin_, topMargin_, rightMargin_, bottomMargin_);
 
-    auto value = contentsMargins_;
-    layout_->setContentsMargins(value, value, value, value);
+    if (alignment == Qt::AlignCenter)
+        layout_->setAlignment(alignment);
+    else
+        layout_->setAlignment(alignment | Qt::AlignTop);
 
-    layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout_->setSizeConstraint(QLayout::SetMaximumSize);
 }
 
@@ -81,15 +85,22 @@ void VLayout::removeWidget(QWidget *widget)
     layout_->removeWidget(widget);
 }
 
-HLayout::HLayout(WidgetType type) : Layout(type), layout_(new QHBoxLayout)
+void VLayout::logLayout()
+{
+    logArgsInfo(LAYOUT_LOG_DELIMITER);
+
+    for (std::size_t i = 0; i < layout_->count(); ++i)
+        logArgsInfo(layout_->itemAt(i)->widget());
+
+    logArgsInfo(LAYOUT_LOG_DELIMITER);
+}
+
+HLayout::HLayout(WidgetType type, Qt::AlignmentFlag alignment)
+    : Layout(type), layout_(new QHBoxLayout)
 {
     layout_->setSpacing(spacing_);
-
-    auto value = contentsMargins_;
-    layout_->setContentsMargins(value, value, value, value);
-
-    layout_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    // chatHistoryLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    layout_->setContentsMargins(leftMargin_, topMargin_, rightMargin_, bottomMargin_);
+    layout_->setAlignment(alignment | Qt::AlignTop);
     layout_->setSizeConstraint(QLayout::SetMaximumSize);
 }
 
@@ -103,12 +114,24 @@ void HLayout::removeWidget(QWidget *widget)
     layout_->removeWidget(widget);
 }
 
-VLayoutWidget::VLayoutWidget(WidgetType type) : PalettedWidget(type), VLayout(type)
+void HLayout::logLayout()
+{
+    logArgsInfo(LAYOUT_LOG_DELIMITER);
+
+    for (std::size_t i = 0; i < layout_->count(); ++i)
+        logArgsInfo(layout_->itemAt(i)->widget());
+
+    logArgsInfo(LAYOUT_LOG_DELIMITER);
+}
+
+VLayoutWidget::VLayoutWidget(WidgetType type, Qt::AlignmentFlag alignment)
+    : PalettedWidget(type), VLayout(type, alignment)
 {
     setLayout(layout_.get());
 }
 
-HLayoutWidget::HLayoutWidget(WidgetType type) : PalettedWidget(type), HLayout(type)
+HLayoutWidget::HLayoutWidget(WidgetType type, Qt::AlignmentFlag alignment)
+    : PalettedWidget(type), HLayout(type, alignment)
 {
     setLayout(layout_.get());
 }
@@ -119,6 +142,7 @@ LabelWidget::LabelWidget(WidgetType type, const QString &text)
     setColor(getWidgetColor(type));
     setPalette(*palette_);
     setAutoFillBackground(true);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
 SplitterWidget::SplitterWidget(WidgetType type, QWidget *parent) : Palette(type, QPalette::Window)
@@ -281,7 +305,7 @@ void IndicatorWidget::updateState()
 }
 
 ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list)
-    : HLayoutWidget(type), buttons_()
+    : HLayoutWidget(type, Qt::AlignLeft), buttons_()
 {
     for (const auto &info : list) {
         auto type = info.type();
@@ -305,7 +329,8 @@ void ButtonPanelWidget::updateButtonState(ButtonType type)
     runAndLogException([&]() { buttons_.at(type)->updateState(); });
 }
 
-SocketInfoBaseWidget::SocketInfoBaseWidget() : HLayoutWidget(WidgetType::SOCKET_INFO) {}
+SocketInfoBaseWidget::SocketInfoBaseWidget()
+    : HLayoutWidget(WidgetType::SOCKET_INFO, Qt::AlignLeft) {}
 
 SocketInfoWidget::SocketInfoWidget(CompanionPtr companion)
     : isSelected_(false), isConnected_(false), companion_(companion) {}
@@ -345,12 +370,12 @@ void SocketInfoWidget::set(WidgetGroupPtr group)
     std::vector<QWidgetPtr> widgets2 { buttons_, received_ };
 
     for (auto &widget : widgets1)
-        layout_->addWidget(widget.get());
+        addWidget(widget.get());
 
     layout_->addStretch(1);
 
     for (auto &widget : widgets2)
-        layout_->addWidget(widget.get());
+        addWidget(widget.get());
 
     // context menu
     requestHistory_ = std::make_shared<QAction>("Request chat history from companion", this);
@@ -532,7 +557,7 @@ SocketInfoStubWidget::SocketInfoStubWidget()
 {
     mark_ = getQString(socketInfoStubWidget);
     markLabel_ = std::make_unique<QLabel>(mark_);
-    layout_->addWidget(markLabel_.get());
+    addWidget(markLabel_.get());
 }
 
 bool SocketInfoStubWidget::isStub()
@@ -540,17 +565,14 @@ bool SocketInfoStubWidget::isStub()
     return true;
 }
 
-ShowHideWidget::ShowHideWidget() : PalettedWidget(WidgetType::SHOW_HIDE)
+ShowHideWidget::ShowHideWidget() : VLayoutWidget(WidgetType::SHOW_HIDE, Qt::AlignCenter)
 {
     show_ = true;
-    layout_ = std::make_unique<QVBoxLayout>();
-    layout_->setAlignment(Qt::AlignCenter);
-    setLayout(layout_.get());
 
     label_ = std::make_unique<QLabel>();
     label_->setText("Show / Hide");
 
-    layout_->addWidget(label_.get());
+    addWidget(label_.get());
 }
 
 void ShowHideWidget::hideInfo()
@@ -595,8 +617,7 @@ void WidgetGroup::set()
     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
     graphicManager->addCompanionWidget(socketInfoBase_);
 
-    centralPanel_ = std::make_shared<CentralPanelWidget>(
-        getGraphicManager()->getMainWindow(), companion_->name());
+    centralPanel_ = std::make_shared<CentralPanelWidget>(companion_->name(), false);
 
     centralPanel_->set(companion_);
     graphicManager->addWidget(MWContainerPosition::CENTRAL, centralPanel_);
@@ -759,9 +780,12 @@ void WidgetGroup::clientAction()
 StubWidgetGroup::StubWidgetGroup()
 {
     socketInfo_ = std::make_shared<SocketInfoStubWidget>();
-    left_ = std::make_shared<LeftPanelWidget>(nullptr);
-    central_ = std::make_shared<CentralPanelWidget>(nullptr, "");
-    right_ = std::make_shared<RightPanelWidget>(nullptr);
+    left_ = std::make_shared<LeftPanelWidget>();
+    central_ = std::make_shared<CentralPanelWidget>("", true);
+    right_ = std::make_shared<RightPanelWidget>();
+
+    central_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    central_->setFixedWidth(400);
 }
 
 void StubWidgetGroup::hide()
@@ -776,13 +800,6 @@ void StubWidgetGroup::show()
     left_->show();
     central_->show();
     right_->show();
-}
-
-void StubWidgetGroup::setParents(QWidgetPtr leftContainer, QWidgetPtr centralContainer)
-{
-    left_->setParent(centralContainer.get());
-    central_->setParent(centralContainer.get());
-    right_->setParent(centralContainer.get());
 }
 
 void StubWidgetGroup::hideSocketInfo()

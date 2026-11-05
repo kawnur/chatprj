@@ -13,31 +13,57 @@ const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::SOCKET_INFO_SELECTED, 45 },
     { WidgetType::SOCKET_INFO_BUTTON_PANEL_SELECTED, 45 },
     { WidgetType::SHOW_HIDE, 35 },
+    { WidgetType::CONTAINER_WIDGET, 80 },
     { WidgetType::CENTRAL_PANEL, 80 },
     { WidgetType::COMPANION_NAME_LABEL, 65 },
     { WidgetType::MESSAGE, 85 },
+    { WidgetType::TEXT_SENT, 35 },
+    { WidgetType::TEXT_RECEIVED, 35 },
+    { WidgetType::FILE_SENT, 35 },
+    { WidgetType::FILE_RECEIVED, 35 },
+    { WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, 85 },
     { WidgetType::HISTORY, 80 },
     { WidgetType::HISTORY_BUTTON_PANEL, 70 },
     { WidgetType::TEXT_EDIT, 85 },
     { WidgetType::SPLITTER_CENTRAL_RIGHT, 60 },
     { WidgetType::RIGHT_PANEL, 90 },
-    { WidgetType::APP_LOG, 90 },
+    { WidgetType::APP_LOG, 90 }
 };
 
 const std::unordered_map<WidgetType, uint32_t> LAYOUT_SPACING_MAP {
     { WidgetType::HISTORY_BUTTON_PANEL, 10 },
     { WidgetType::SOCKET_INFO, 10 },
-    { WidgetType::SOCKET_INFO_BUTTON_PANEL, 10 }
+    { WidgetType::SOCKET_INFO_BUTTON_PANEL, 10 },
+    { WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, 5 }
 };
 
-const std::unordered_map<WidgetType, uint32_t> LAYOUT_CONTENTS_MARGINS_MAP {
+const LayoutContentsMarginMap LAYOUT_CONTENTS_LEFT_MARGIN_MAP {
     { WidgetType::HISTORY_BUTTON_PANEL, 10 },
     { WidgetType::SOCKET_INFO, 10 }
 };
 
+const LayoutContentsMarginMap LAYOUT_CONTENTS_TOP_MARGIN_MAP {
+    { WidgetType::HISTORY_BUTTON_PANEL, 10 },
+    { WidgetType::SOCKET_INFO, 10 },
+    { WidgetType::SHOW_HIDE, 10 }
+};
+
+const LayoutContentsMarginMap LAYOUT_CONTENTS_RIGHT_MARGIN_MAP {
+    { WidgetType::HISTORY_BUTTON_PANEL, 10 },
+    { WidgetType::SOCKET_INFO, 10 },
+    { WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, 10 }
+};
+
+const LayoutContentsMarginMap LAYOUT_CONTENTS_BOTTOM_MARGIN_MAP {
+    { WidgetType::HISTORY_BUTTON_PANEL, 10 },
+    { WidgetType::SOCKET_INFO, 10 },
+    { WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, 10 },
+    { WidgetType::SHOW_HIDE, 10 }
+};
+
 const std::unordered_map<WidgetType, uint32_t> WIDGET_COLOR_MAP {
-    { WidgetType::MESSAGE_SENT, 0x115e00 },
-    { WidgetType::MESSAGE_RECEIVED, 0x00115e },
+    { WidgetType::TEXT_SENT, 0x115e00 },
+    { WidgetType::TEXT_RECEIVED, 0x00115e },
     { WidgetType::FILE_SENT, 0x093400 },
     { WidgetType::FILE_RECEIVED, 0x000934 },
     { WidgetType::NEW_MESSAGE_EDIT, 0xdcdc07 }
@@ -176,9 +202,24 @@ uint32_t getLayoutSpacingValue(WidgetType type)
     return getMapValue(LAYOUT_SPACING_MAP, type, 0);
 }
 
-uint32_t getLayoutContentsMarginsValue(WidgetType type)
+uint32_t getLayoutContentsLeftMargin(WidgetType type)
 {
-    return getMapValue(LAYOUT_CONTENTS_MARGINS_MAP, type, 0);
+    return getMapValue(LAYOUT_CONTENTS_LEFT_MARGIN_MAP, type, 0);
+}
+
+uint32_t getLayoutContentsTopMargin(WidgetType type)
+{
+    return getMapValue(LAYOUT_CONTENTS_TOP_MARGIN_MAP, type, 0);
+}
+
+uint32_t getLayoutContentsRightMargin(WidgetType type)
+{
+    return getMapValue(LAYOUT_CONTENTS_RIGHT_MARGIN_MAP, type, 0);
+}
+
+uint32_t getLayoutContentsBottomMargin(WidgetType type)
+{
+    return getMapValue(LAYOUT_CONTENTS_BOTTOM_MARGIN_MAP, type, 0);
 }
 
 uint32_t getIndicatorSize(WidgetType type)

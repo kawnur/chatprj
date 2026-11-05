@@ -13,7 +13,7 @@
 #include "constants.hpp"
 #include "widgets.hpp"
 
-class MessageIndicatorPanelWidget : public QWidget
+class MessageIndicatorPanelWidget : public HLayoutWidget
 {
     Q_OBJECT
 
@@ -26,27 +26,22 @@ public:
     void unsetNewMessageLabel();
 
 private:
-    bool sentByMe_;
-    std::shared_ptr<QHBoxLayout> layout_;
     std::shared_ptr<IndicatorWidget> sent_;
     std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QLabel> newMessageLabel_;
 };
 
-class MessageBodyWidget : public QWidget
+class MessageBodyWidget : public HLayoutWidget
 {
     Q_OBJECT
 
 public:
-    MessageBodyWidget() = default;
+    MessageBodyWidget();
     ~MessageBodyWidget() = default;
 
     virtual void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) {}
     virtual void setParentTo(MessageWidget *widget) {}
     virtual void set() {}
-
-protected:
-    WidgetType type_;  // TODO change enum
 };
 
 class TextMessageBodyWidget : public MessageBodyWidget
@@ -56,9 +51,6 @@ class TextMessageBodyWidget : public MessageBodyWidget
 public:
     TextMessageBodyWidget(MessagePtr message);
     ~TextMessageBodyWidget() = default;
-
-    void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) override;
-    void setParentTo(MessageWidget *widget) override;
 
 private:
     std::shared_ptr<QLabel> label_;
@@ -72,8 +64,6 @@ public:
     FileMessageBodyWidget(MessagePtr message);
     ~FileMessageBodyWidget() = default;
 
-    void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) override;
-    void setParentTo(MessageWidget *widget) override;
     void set() override;
 
 private slots:
@@ -82,13 +72,11 @@ private slots:
 private:
     void buildText(MessagePtr message);
 
-    std::shared_ptr<QHBoxLayout> layout_;
     std::shared_ptr<QLabel> label_;
     std::shared_ptr<QPushButton> button_;  // download button
 };
 
-// class MessageWidget : public QWidget, public std::enable_shared_from_this<MessageWidget>
-class MessageWidget : public PalettedWidget, public std::enable_shared_from_this<MessageWidget>
+class MessageWidget : public VLayoutWidget, public std::enable_shared_from_this<MessageWidget>
 {
     Q_OBJECT
 
@@ -112,8 +100,6 @@ protected:
     MessageWidgetType type_;
     CompanionPtr companion_;
     MessagePtr message_;
-    // std::shared_ptr<QPalette> palette_;
-    std::shared_ptr<QVBoxLayout> layout_;
     std::shared_ptr<QLabel> header_;
     MessageBodyWidgetPtr body_;
     std::shared_ptr<MessageIndicatorPanelWidget> indicatorPanel_;

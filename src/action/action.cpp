@@ -373,7 +373,7 @@ void PasswordAction::act()
 {
     switch (type_) {
     case ActionType::CREATE_PASSWORD: {
-        auto data = dataDialog_->getDataWrapper();
+        auto data = dataDialog_->getData();
         auto text1 = data->get(DataType::PASSWORD);
         auto text2 = data->get(DataType::PASSWORD_REENTER);
 
@@ -396,7 +396,7 @@ void PasswordAction::act()
     break;
 
     case ActionType::GET_PASSWORD: {
-        auto data = dataDialog_->getDataWrapper();
+        auto data = dataDialog_->getData();
         auto text = data->get(DataType::PASSWORD);
 
         if (text.size() == 0) {

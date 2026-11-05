@@ -32,8 +32,7 @@ public:
 protected:
     WidgetType type_;
     QPalette::ColorRole role_;
-    // std::unique_ptr<QPalette> palette_;
-    std::shared_ptr<QPalette> palette_;
+    std::unique_ptr<QPalette> palette_;
 };
 
 class PalettedWidget : public QWidget, public Palette
@@ -60,17 +59,21 @@ public:
 protected:
     WidgetType type_;
     uint32_t spacing_;
-    uint32_t contentsMargins_;
+    uint32_t leftMargin_;
+    uint32_t topMargin_;
+    uint32_t rightMargin_;
+    uint32_t bottomMargin_;
 };
 
 class VLayout : public Layout
 {
 public:
-    VLayout(WidgetType type);
+    VLayout(WidgetType type, Qt::AlignmentFlag alignment);
     virtual ~VLayout() = default;
 
     void addWidget(QWidget *widget) override;
     void removeWidget(QWidget *widget) override;
+    void logLayout();
 
 protected:
     std::unique_ptr<QVBoxLayout> layout_;
@@ -79,11 +82,12 @@ protected:
 class HLayout : public Layout
 {
 public:
-    HLayout(WidgetType type);
+    HLayout(WidgetType type, Qt::AlignmentFlag alignment);
     virtual ~HLayout() = default;
 
     void addWidget(QWidget *widget) override;
     void removeWidget(QWidget *widget) override;
+    void logLayout();
 
 protected:
     std::unique_ptr<QHBoxLayout> layout_;
@@ -94,7 +98,7 @@ class VLayoutWidget : public PalettedWidget, public VLayout
     Q_OBJECT
 
 public:
-    VLayoutWidget(WidgetType type);
+    VLayoutWidget(WidgetType type, Qt::AlignmentFlag alignment);
     virtual ~VLayoutWidget() = default;
 
     void set();
@@ -105,7 +109,7 @@ class HLayoutWidget : public PalettedWidget, public HLayout
     Q_OBJECT
 
 public:
-    HLayoutWidget(WidgetType type);
+    HLayoutWidget(WidgetType type, Qt::AlignmentFlag alignment);
     virtual ~HLayoutWidget() = default;
 
     void set();
@@ -353,7 +357,7 @@ private:
     void initializeFields();
 };
 
-class ShowHideWidget : public PalettedWidget
+class ShowHideWidget : public VLayoutWidget
 {
     Q_OBJECT
 
@@ -367,7 +371,6 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
 
     bool show_;
-    std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QLabel> label_;
 };
 
@@ -432,7 +435,6 @@ public:
 
     void hide();
     void show();
-    void setParents(QWidgetPtr leftContainer, QWidgetPtr centralContainer);
     void hideSocketInfo();
     void hideCentral();
     void showCentral();

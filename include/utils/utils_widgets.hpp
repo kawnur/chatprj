@@ -10,6 +10,8 @@
 #include "alias.hpp"
 #include "constants.hpp"
 
+using LayoutContentsMarginMap = std::unordered_map<WidgetType, uint32_t>;
+
 ButtonInfo getOKButtonInfo(const std::function<void()> &function);
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function);
 QString getButtonText(ButtonType value);
@@ -30,7 +32,13 @@ QString getHTMLHeader(
 
 QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
 uint32_t getLayoutSpacingValue(WidgetType type);
-uint32_t getLayoutContentsMarginsValue(WidgetType type);
+
+// layout contents margins
+uint32_t getLayoutContentsLeftMargin(WidgetType type);
+uint32_t getLayoutContentsTopMargin(WidgetType type);
+uint32_t getLayoutContentsRightMargin(WidgetType type);
+uint32_t getLayoutContentsBottomMargin(WidgetType type);
+
 uint32_t getIndicatorSize(WidgetType type);
 
 #endif // UTILS_WIDGETS_HPP

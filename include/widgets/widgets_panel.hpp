@@ -33,7 +33,7 @@ class LeftPanelWidget : public PanelWidget
     Q_OBJECT
 
 public:
-    LeftPanelWidget(QWidgetPtr parent);
+    LeftPanelWidget(QWidgetPtr parent = nullptr);
     ~LeftPanelWidget() = default;
 
     void addCompanion(SocketInfoBaseWidgetPtr widget);
@@ -52,7 +52,7 @@ class CentralPanelWidget : public PanelWidget
     Q_OBJECT
 
 public:
-    CentralPanelWidget(QWidgetPtr parent, const std::string &name);
+    CentralPanelWidget(const std::string &name, bool isStub, QWidgetPtr parent = nullptr);
     ~CentralPanelWidget() = default;
 
     void set(CompanionPtr companion);
@@ -85,7 +85,7 @@ class RightPanelWidget : public PanelWidget
     Q_OBJECT
 
 public:
-    RightPanelWidget(QWidgetPtr parent);
+    RightPanelWidget(QWidgetPtr parent = nullptr);
     ~RightPanelWidget() = default;
 
     void set() override;
@@ -105,91 +105,17 @@ private slots:
     void customMenuRequestedSlot(const QPoint &position);
 };
 
-template<typename T>
-class MainWindowContainerWidget
-    : public std::enable_shared_from_this<MainWindowContainerWidget<T>>, public QWidget
+/*!
+ * \brief The CentralPanelContainerWidget class - needed to add center-right splitter
+ */
+class CentralPanelContainerWidget : public VLayoutWidget
 {
 public:
-    MainWindowContainerWidget(QWidget *widget) : panel_(nullptr), layout_(nullptr)
-    {
-        if (widget)
-            setParent(widget);
-    }
-
-    template<typename...Ts>
-    void set(bool init = true, Ts &&...args)
-    {
-        layout_ = std::make_unique<QVBoxLayout>();
-        layout_->setSpacing(0);
-        layout_->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout_.get());
-
-        if (init) {
-            panel_ = std::make_unique<T>(this->shared_from_this(), args...);
-            panel_->set();
-            layout_->addWidget(panel_.get());
-        }
-    }
-
-    void addWidget(QWidgetPtr widget)
-    {
-        if (widget) {
-            layout_->addWidget(widget.get());
-            widget->setParent(this);
-        }
-    }
-
-    void addLog(const QString &text)
-    {
-        panel_->addLog(text);
-    }
-
-    void addCompanion(SocketInfoBaseWidgetPtr widget)
-    {
-        panel_->addCompanion(widget);
-    }
-
-    void removeCompanion(SocketInfoBaseWidgetPtr widget)
-    {
-        panel_->removeCompanion(widget);
-    }
-
-    std::size_t getCompanionPanelChildrenSize()
-    {
-        return panel_->getCompanionPanelChildrenSize();
-    }
-
-    void hide()
-    {
-        panel_->hide();
-    }
-
-    void show()
-    {
-        panel_->show();
-    }
-
-    int getLastCompanionPanelChildWidth()
-    {
-        return panel_->getLastCompanionPanelChildWidth();
-    }
-
-    void enable()
-    {
-        panel_->enable();
-    }
-
-    void disable()
-    {
-        panel_->disable();
-    }
-
-private:
-    std::unique_ptr<T> panel_;
-    std::unique_ptr<QVBoxLayout> layout_;
+    CentralPanelContainerWidget();
+    ~CentralPanelContainerWidget() = default;
 };
 
-class MainWidget : public QWidget
+class MainWidget : public HLayoutWidget
 {
     Q_OBJECT
 
@@ -197,10 +123,9 @@ public:
     MainWidget();
     ~MainWidget() = default;
 
-    std::shared_ptr<QHBoxLayout> layout() const;
     void set();
 
-    bool addWidget(MWContainerPosition position, QWidgetPtr widget);
+    bool addWidgetToContainer(MWContainerPosition position, QWidgetPtr widget);
     void addCompanion(SocketInfoBaseWidgetPtr widget);
     void removeCompanion(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();
@@ -218,10 +143,9 @@ public:
     void setBlur();
 
 private:
-    std::shared_ptr<QHBoxLayout> layout_;
-    std::shared_ptr<MainWindowContainerWidget<LeftPanelWidget>> left_;
-    std::shared_ptr<MainWindowContainerWidget<CentralPanelWidget>> central_;
-    std::shared_ptr<MainWindowContainerWidget<RightPanelWidget>> right_;
+    std::shared_ptr<LeftPanelWidget> left_;
+    std::shared_ptr<CentralPanelContainerWidget> central_;
+    std::shared_ptr<RightPanelWidget> right_;
     std::shared_ptr<ShowHideWidget> showHide_;
     std::shared_ptr<QGraphicsBlurEffect> blur_;
     std::unique_ptr<SplitterWidget> splitter_;

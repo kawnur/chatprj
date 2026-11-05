@@ -13,6 +13,7 @@ const std::string LOG_DELIMITER(28, '#');
 const std::string LOG_CUSTOM_DELIMITER(25, '?');
 const std::string MESSAGE_LOG_DELIMITER(28, 'M');
 const std::string DATA_LOG_DELIMITER(28, 'D');
+const std::string LAYOUT_LOG_DELIMITER(28, 'L');
 const std::string EXIT_LOG_ENTRY { "Exit..." };
 
 const std::size_t MAX_BUFFER_SIZE = 1024;
@@ -302,6 +303,7 @@ enum class WidgetType
 {
     UNKNOWN,
     MAIN_WINDOW_MENU,
+    CONTAINER_WIDGET,
     LEFT_PANEL,
     COMPANION_PANEL,
     SOCKET_INFO,
@@ -312,8 +314,9 @@ enum class WidgetType
     CENTRAL_PANEL,
     HISTORY,
     MESSAGE,
-    MESSAGE_SENT,
-    MESSAGE_RECEIVED,
+    MESSAGE_BODY,
+    TEXT_SENT,
+    TEXT_RECEIVED,
     FILE_SENT,
     FILE_RECEIVED,
     SOCKET_INFO_BUTTON_PANEL,
@@ -325,6 +328,7 @@ enum class WidgetType
     APP_LOG,
     CONNECTION_STATE_INDICATOR,
     NEW_MESSAGES_INDICATOR,
+    MESSAGE_WIDGET_INDICATOR_PANEL,
     MESSAGE_WIDGET_INDICATOR,
     NEW_MESSAGE_EDIT
 };
