@@ -24,6 +24,8 @@ QString getDataTypeStringRepr(DataType type);
 // color
 uint32_t getWidgetColor(WidgetType value);
 uint32_t getIndicatorWidgetColor(IndicatorWidgetState state);
+
+// html
 std::string getHTMLColor(WidgetType value);
 
 QString getHTMLHeader(
@@ -31,6 +33,10 @@ QString getHTMLHeader(
     const std::string &time);
 
 QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold);
+std::string getHTMLBold(const std::string &value);
+std::string getHTMLItalic(const std::string &value);
+std::string getHTMLBreak(const std::string &value);
+
 uint32_t getLayoutSpacingValue(WidgetType type);
 
 // layout contents margins

@@ -165,8 +165,6 @@ enum class MWContainerPosition
     RIGHT
 };
 
-const uint8_t BLUR_RADIUS = 30;
-
 // dialog type to dialog window title mapping
 using InfoDialogTitleMap = std::unordered_map<DialogType, QString>;
 using DataDialogTitleMap = std::unordered_map<ActionType, QString>;

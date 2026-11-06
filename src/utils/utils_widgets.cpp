@@ -114,6 +114,8 @@ const std::unordered_map<DataType, QString> DATA_TYPE_STRING_REPR_MAP {
     { DataType::PASSWORD_REENTER, "Reenter password" },
 };
 
+const uint8_t MESSAGE_HEADER_HTML_FONT_SIZE = 2;
+
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)
 {
     return ButtonInfo(false, ButtonType::OK, function);
@@ -181,20 +183,37 @@ QString getHTMLHeader(
     const std::string &color, const std::string &sender, const std::string &receiver,
     const std::string &time)
 {
-    auto headerTemplate = "<font color=\"{0}\"><b><br><i>From {1} to {2} at {3}:</i></b></font>"s;
+    auto textTemplate = "From {0} to {1} at {2}:"s;
+    auto text = getStringByFormat(textTemplate, sender, receiver, time);
 
-    return getQString(getStringByFormat(headerTemplate, color, sender, receiver, time));
+    auto headerTemplate = "<font size=\"{0}\" color=\"{1}\">{2}</font>"s;
+    auto size = MESSAGE_HEADER_HTML_FONT_SIZE;
+    auto value = getHTMLBold(getHTMLBreak(getHTMLItalic(text)));
+
+    return getQString(getStringByFormat(headerTemplate, size, color, value));
 }
 
 QString getHTMLBody(const std::string &color, const std::string &text, bool _break, bool bold)
 {
-    auto breakSub = (_break) ? "<br>"s : ""s;
-    auto boldOpen = (bold) ? "<b>"s : ""s;
-    auto boldClose = (bold) ? "</b>"s : ""s;
+    auto value = (bold) ? getHTMLBold(text) : text;
+    value = (_break) ? getHTMLBreak(value) : value;
 
-    auto textSub = getStringByFormat("{0}{1}{2}{3}", breakSub, boldOpen, text, boldClose);
+    return getQString(getStringByFormat("<font color=\"{0}\">{1}</font>", color, value));
+}
 
-    return getQString(getStringByFormat("<font color=\"{0}\">{1}</font>", color, textSub));
+std::string getHTMLBold(const std::string &value)
+{
+    return getStringByFormat("<b>{}</b>", value);
+}
+
+std::string getHTMLItalic(const std::string &value)
+{
+    return getStringByFormat("<i>{}</i>", value);
+}
+
+std::string getHTMLBreak(const std::string &value)
+{
+    return getStringByFormat("<br>{}", value);
 }
 
 uint32_t getLayoutSpacingValue(WidgetType type)

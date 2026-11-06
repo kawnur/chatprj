@@ -18,10 +18,7 @@ public:
     Action(ActionType type);
     virtual ~Action();
 
-    virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
     void setDialog(ActionPtr action);
-
-    virtual void buildDataDialog() {}
 
     virtual void preAct() {}
     virtual void act() {}
@@ -37,19 +34,23 @@ public:
     virtual std::filesystem::path getPath() { return std::filesystem::path(); }
 
     ActionType type();
-    std::string getInfoDialogHeader(const auto &map);
-    std::string getInfoDialogSuccessHeader();
-    std::string getInfoDialogFailHeader();
+
+protected:
+    virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
+    virtual void buildDataDialog() {}
+
     void buildInfoDialog();
+    std::string getInfoDialogHeader(DialogType type);
+
+    void updateInfoDialogBase(
+        bool status, const std::vector<std::string> &messages,
+        std::initializer_list<ButtonInfo> list);
 
     void updateInfoDialogAndShow(
         DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
 
     void updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text);
 
-    std::initializer_list<ButtonInfo> getOkButtonInfoCloseSelfAndParent();
-
-protected:
     ActionType type_;
     std::shared_ptr<Dialog> dataDialog_;
     std::shared_ptr<TextDialog> infoDialog_;
@@ -72,8 +73,6 @@ public:
     CompanionAction(ActionType type, CompanionPtr companion);
     ~CompanionAction();
 
-    void buildDataDialog() override;
-
     std::string name() override;
     std::string ipAddress() override;
     std::string serverPort() override;
@@ -82,8 +81,6 @@ public:
     CompanionDataPtr getCompanionData() const;
     CompanionPtr getCompanion() const;
 
-    void updateInfoDialog(ActionResultPtr result);
-
 public slots:
     void preAct() override;
     void act() override;
@@ -91,6 +88,9 @@ public slots:
     void endAct() override;
 
 private:
+    void buildDataDialog() override;
+    void updateInfoDialog(ActionResultPtr result);
+
     CompanionDataPtr data_;
     CompanionPtr companion_;
 };
@@ -115,16 +115,17 @@ public:
     PasswordAction(ActionType type);
     ~PasswordAction();
 
-    void buildDataDialog() override;
     std::string password() override;
 
     void preAct() override;
-    void updateInfoDialog(ActionResultPtr result);
     void act() override;
     void postAct(ActionResultPtr result) override;
     void endAct() override;
 
 private:
+    void buildDataDialog() override;
+    void updateInfoDialog(ActionResultPtr result);
+
     std::string password_;
 };
 
@@ -136,14 +137,14 @@ public:
     FileAction(ActionType type, const std::string &networkId, CompanionPtr companion);
     ~FileAction();
 
-    void buildDataDialog() override;
-    CompanionPtr getCompanion() const;
     std::filesystem::path getPath() override;
     void preAct() override;
     void act() override;
-    void defineFilePath();
 
 private:
+    void buildDataDialog() override;
+    void defineFilePath();
+
     std::filesystem::path filePath_;
     CompanionPtr companion_;
     std::string networkId_;

@@ -12,6 +12,8 @@
 #include "widgets_message.hpp"
 #include "widgets_panel.hpp"
 
+const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
+
 Palette::Palette(WidgetType type, QPalette::ColorRole role) : type_(type), role_(role)
 {
     palette_ = std::make_unique<QPalette>();
@@ -774,7 +776,7 @@ StubWidgetGroup::StubWidgetGroup()
     right_ = std::make_shared<RightPanelWidget>();
 
     central_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    central_->setFixedWidth(400);
+    central_->setFixedWidth(CENTRAL_STUB_FIXED_WIDTH);
 }
 
 void StubWidgetGroup::hide()

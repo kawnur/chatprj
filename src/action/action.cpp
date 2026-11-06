@@ -36,19 +36,33 @@ ActionType Action::type()
     return type_;
 }
 
-std::string Action::getInfoDialogHeader(const auto &map)
+std::string Action::getInfoDialogHeader(DialogType type)
 {
+    InfoDialogHeaderMap map;
+
+    switch (type) {
+    case DialogType::INFO:
+        map = ACTION_SUCCESS_HEADER_MAP;
+
+    break;
+    case DialogType::ERROR:
+        map = ACTION_FAIL_HEADER_MAP;
+
+    break;
+    default:
+        break;
+    }
+
     return getMapValue(map, type_, ACTION_INFO_DIALOG_DEFAULT_HEADER);
 }
 
-std::string Action::getInfoDialogSuccessHeader()
+void Action::updateInfoDialogBase(
+    bool status, const std::vector<std::string> &messages, std::initializer_list<ButtonInfo> list)
 {
-    return getInfoDialogHeader(ACTION_SUCCESS_HEADER_MAP);
-}
-
-std::string Action::getInfoDialogFailHeader()
-{
-    return getInfoDialogHeader(ACTION_FAIL_HEADER_MAP);
+    auto type = (status) ? DialogType::INFO : DialogType::ERROR;
+    auto header = getInfoDialogHeader(type);
+    auto text = buildTextAsUnorderedListWithHeader(header, messages);
+    infoDialog_->update(type, text, list);
 }
 
 void Action::buildInfoDialog()
@@ -133,33 +147,23 @@ CompanionPtr CompanionAction::getCompanion() const
 
 void CompanionAction::updateInfoDialog(ActionResultPtr result)
 {
-    // TODO move to parent
-    DialogType type = DialogType::UNKNOWN;
-    std::string text {};
-    std::string header {};
+    auto status = result->status();
     auto messages = std::vector<std::string> {};
 
-    if (result->status()) {
-        type = DialogType::INFO;
-
+    if (status) {
         std::vector<std::pair<std::string, std::string>> lines {
             { "name: {}", data_->name() },
             { "ipAddress: {}", data_->ipAddress() },
             { "port: {}", data_->clientPort() }
         };
 
-        header = getInfoDialogSuccessHeader();
         fillMessages(messages, lines);
-
     } else {
-        type = DialogType::ERROR;
-        header = getInfoDialogFailHeader();
         messages.push_back(result->definition());
     }
 
-    text = buildTextAsUnorderedListWithHeader(header, messages);
     auto list = { getOKButtonInfo([this]() { infoDialog_->closeSelfAndParent(); }) };
-    infoDialog_->update(type, text, list);
+    updateInfoDialogBase(status, messages, list);
 }
 
 void CompanionAction::preAct()
@@ -307,27 +311,18 @@ void PasswordAction::preAct()
 
 void PasswordAction::updateInfoDialog(ActionResultPtr result)
 {
-    // TODO move to parent
-    DialogType type = DialogType::UNKNOWN;
-    std::string text {};
-    std::string header {};
+    auto status = result->status();
     auto messages = std::vector<std::string> {};
     std::function<void()> function;
 
-    if (result->status()) {
-        type = DialogType::INFO;
-        text = getInfoDialogSuccessHeader();
-
+    if (status) {
         function = [this]()
         {
             getManager()->disableBlur();
             infoDialog_->closeSelfAndParent();
         };
     } else {
-        type = DialogType::ERROR;
-        header = getInfoDialogFailHeader();
         messages.push_back(result->definition());
-        text = buildTextAsUnorderedListWithHeader(header, messages);
 
         function = [this]()
         {
@@ -336,7 +331,7 @@ void PasswordAction::updateInfoDialog(ActionResultPtr result)
     }
 
     auto list = { getOKButtonInfo(function) };
-    infoDialog_->update(type, text, list);
+    updateInfoDialogBase(status, messages, list);
 }
 
 void PasswordAction::act()
@@ -410,11 +405,6 @@ FileAction::~FileAction() { logArgsInfo(Q_FUNC_INFO); }
 void FileAction::buildDataDialog()
 {
     dataDialog_ = std::make_shared<FileDialog>(type_);
-}
-
-CompanionPtr FileAction::getCompanion() const
-{
-    return companion_;
 }
 
 std::filesystem::path FileAction::getPath()

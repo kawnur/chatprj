@@ -16,6 +16,9 @@
 #include "utils_widgets.hpp"
 #include "widgets_message.hpp"
 
+const uint8_t BLUR_RADIUS = 30;
+const uint16_t RIGHT_PANEL_FIXED_WIDTH = 100;
+
 PanelWidget::PanelWidget(WidgetType type) : VLayoutWidget(type, Qt::AlignLeft) {}
 
 LeftPanelWidget::LeftPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::LEFT_PANEL)
@@ -277,7 +280,7 @@ void CentralPanelWidget::saveFileSlot()
 RightPanelWidget::RightPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::RIGHT_PANEL)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setFixedWidth(400);
+    setFixedWidth(RIGHT_PANEL_FIXED_WIDTH);
 
     log_ = std::make_unique<TextEditWidget>(WidgetType::APP_LOG);
 
