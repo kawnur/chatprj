@@ -1,6 +1,7 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 
+#include <array>
 #include <memory>
 #include <filesystem>
 
@@ -10,21 +11,22 @@
 #include "constants.hpp"
 #include "widgets_dialog.hpp"
 
-class Action : public QObject
+using Headers = std::array<std::string, 2>;
+
+class Action : public QObject, public std::enable_shared_from_this<Action>
 {
     Q_OBJECT
 
 public:
-    Action(ActionType type);
+    Action(ManagerPtr manager, const std::string &title);
     virtual ~Action();
 
     void setDialog(ActionPtr action);
 
+    virtual void setDataDialog() {}
     virtual void preAct() {}
-    virtual void act() {}
+    virtual ActionResultPtr act() { return nullptr; }
     virtual void postAct(ActionResultPtr result) {}
-    virtual void endAct() {}
-
     virtual std::string name() { return ""s; }
     virtual std::string ipAddress() { return ""s; }
     virtual std::string serverPort() { return ""s; }
@@ -33,14 +35,18 @@ public:
     virtual std::string password() { return ""s; }
     virtual std::filesystem::path getPath() { return std::filesystem::path(); }
 
-    ActionType type();
+public slots:
+    void perform();
+    void endAct();
 
 protected:
     virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
-    virtual void buildDataDialog() {}
 
-    void buildInfoDialog();
-    std::string getInfoDialogHeader(DialogType type);
+    template<typename T>
+    std::shared_ptr<T> getShared()
+    {
+        return std::dynamic_pointer_cast<T>(shared_from_this());
+    }
 
     void updateInfoDialogBase(
         bool status, const std::vector<std::string> &messages,
@@ -51,27 +57,19 @@ protected:
 
     void updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text);
 
-    ActionType type_;
-    std::shared_ptr<Dialog> dataDialog_;
+    ManagerPtr manager_;
     std::shared_ptr<TextDialog> infoDialog_;
+    std::string dialogTitle_;
+    std::array<std::string, 2> infoDialogHeaders_;
 };
 
-class RegularAction : public Action
+class CompanionAction : public Action
 {
     Q_OBJECT
 
 public:
-    RegularAction(ActionType type);
-    virtual ~RegularAction();
-};
-
-class CompanionAction : public RegularAction, public std::enable_shared_from_this<CompanionAction>
-{
-    Q_OBJECT
-
-public:
-    CompanionAction(ActionType type, CompanionPtr companion);
-    ~CompanionAction();
+    CompanionAction(ManagerPtr manager, CompanionPtr companion, const std::string &title);
+    virtual ~CompanionAction();
 
     std::string name() override;
     std::string ipAddress() override;
@@ -81,73 +79,159 @@ public:
     CompanionDataPtr getCompanionData() const;
     CompanionPtr getCompanion() const;
 
-public slots:
-    void preAct() override;
-    void act() override;
     void postAct(ActionResultPtr result) override;
-    void endAct() override;
 
-private:
-    void buildDataDialog() override;
+protected:
+    void setDataDialog() override;
+    void updateData();
     void updateInfoDialog(ActionResultPtr result);
 
     CompanionDataPtr data_;
     CompanionPtr companion_;
+    std::shared_ptr<CompanionDataDialog> dataDialog_;
 };
 
-class GroupChatAction : public RegularAction
+class CreateCompanionAction : public CompanionAction
+{
+public:
+    CreateCompanionAction(ManagerPtr manager);
+    ~CreateCompanionAction() = default;
+
+    void preAct() override;
+    ActionResultPtr act() override;
+};
+
+class UpdateCompanionAction : public CompanionAction
+{
+public:
+    UpdateCompanionAction(ManagerPtr manager, CompanionPtr companion);
+    ~UpdateCompanionAction() = default;
+
+    void preAct() override;
+    ActionResultPtr act() override;
+};
+
+class DeleteCompanionAction : public CompanionAction
+{
+public:
+    DeleteCompanionAction(ManagerPtr manager, CompanionPtr companion);
+    ~DeleteCompanionAction() = default;
+
+    void preAct() override;
+    ActionResultPtr act() override;
+};
+
+class ClearHistoryCompanionAction : public CompanionAction
+{
+public:
+    ClearHistoryCompanionAction(ManagerPtr manager, CompanionPtr companion);
+    ~ClearHistoryCompanionAction() = default;
+
+    void preAct() override;
+    ActionResultPtr act() override;
+};
+
+class SendHistoryCompanionAction : public CompanionAction
+{
+public:
+    SendHistoryCompanionAction(ManagerPtr manager, CompanionPtr companion);
+    ~SendHistoryCompanionAction() = default;
+
+    ActionResultPtr act() override;
+};
+
+// class GroupChatAction : public RegularAction
+// {
+//     Q_OBJECT
+
+// public:
+//     GroupChatAction();
+//     ~GroupChatAction() = default;
+
+// private:
+//     std::shared_ptr<GroupChatData> data_;
+// };
+
+class PasswordAction : public Action
 {
     Q_OBJECT
 
 public:
-    GroupChatAction(ActionType type);
-    ~GroupChatAction() = default;
-
-private:
-    std::shared_ptr<GroupChatData> data_;
-};
-
-class PasswordAction : public RegularAction, public std::enable_shared_from_this<PasswordAction>
-{
-    Q_OBJECT
-
-public:
-    PasswordAction(ActionType type);
+    PasswordAction(ManagerPtr manager, const std::string &title);
     ~PasswordAction();
 
     std::string password() override;
 
     void preAct() override;
-    void act() override;
     void postAct(ActionResultPtr result) override;
-    void endAct() override;
 
-private:
-    void buildDataDialog() override;
+protected:
+    void setDataDialog() override;
     void updateInfoDialog(ActionResultPtr result);
 
     std::string password_;
+    std::shared_ptr<DataDialog> dataDialog_;
 };
 
-class FileAction : public Action, public std::enable_shared_from_this<FileAction>
+class CreatePasswordAction : public PasswordAction
+{
+public:
+    CreatePasswordAction(ManagerPtr manager);
+    ~CreatePasswordAction() = default;
+
+    ActionResultPtr act() override;
+};
+
+class GetPasswordAction : public PasswordAction
+{
+public:
+    GetPasswordAction(ManagerPtr manager);
+    ~GetPasswordAction() = default;
+
+    ActionResultPtr act() override;
+};
+
+class FileAction : public Action
 {
     Q_OBJECT
 
 public:
-    FileAction(ActionType type, const std::string &networkId, CompanionPtr companion);
+    FileAction(
+        ManagerPtr manager, const std::string &networkId, CompanionPtr companion,
+        const std::string &title);
+
     ~FileAction();
 
     std::filesystem::path getPath() override;
-    void preAct() override;
-    void act() override;
 
-private:
-    void buildDataDialog() override;
+protected:
+    void setDataDialog() override;
     void defineFilePath();
 
+    std::shared_ptr<FileDialog> dataDialog_;
     std::filesystem::path filePath_;
     CompanionPtr companion_;
     std::string networkId_;
+};
+
+class SendFileAction : public FileAction
+{
+public:
+    SendFileAction(ManagerPtr manager, const std::string &networkId, CompanionPtr companion);
+    ~SendFileAction() = default;
+
+    void preAct() override;
+    ActionResultPtr act() override;
+};
+
+class SaveFileAction : public FileAction
+{
+public:
+    SaveFileAction(ManagerPtr manager, const std::string &networkId, CompanionPtr companion);
+    ~SaveFileAction() = default;
+
+    void preAct() override;
+    ActionResultPtr act() override;
 };
 
 void fillMessages(

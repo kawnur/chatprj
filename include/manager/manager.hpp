@@ -14,6 +14,7 @@
 
 #include "alias.hpp"
 #include "constants.hpp"
+#include "data_checker.hpp"
 #include "db_constants.hpp"
 #include "db_operator.hpp"
 #include "file_manager.hpp"
@@ -43,26 +44,6 @@ public:
     DBReplyDataPtr getEarlyMessagesDBData(int companionId, int messageId);
 
     // action
-    template<typename F, typename T>
-    ActionResultPtr performActionAndCallPostAct(F &&func, std::shared_ptr<T> action)
-    {
-        auto result = func(action);
-        action->postAct(result);
-
-        return result;
-    }
-
-    template<typename T>
-    std::function<ActionResultPtr(std::shared_ptr<T>)> getActionLambda(std::shared_ptr<T> action);
-
-    template<typename T>
-    ActionResultPtr performAction(std::shared_ptr<T> action)
-    {
-        auto lambda = getActionLambda<T>(action);
-
-        return performActionAndCallPostAct(lambda, action);
-    }
-
     void initCompanionCreation();
     void initCompanionUpdate(CompanionPtr companion);
     void initCompanionDeletion(CompanionPtr companion);
@@ -73,6 +54,13 @@ public:
     void initFileReception(const std::string &networkId, CompanionPtr companion);
     void startUserAuthentication();
     void endAction(ActionPtr action);
+
+    ActionResultPtr createCompanion(CreateCompanionActionPtr action);
+    ActionResultPtr updateCompanion(UpdateCompanionActionPtr action);
+    ActionResultPtr deleteCompanion(DeleteCompanionActionPtr action);
+    ActionResultPtr clearCompanionHistory(ClearHistoryCompanionActionPtr action);
+    ActionResultPtr createUserPassword(CreatePasswordActionPtr action);
+    ActionResultPtr authenticateUser(GetPasswordActionPtr action);
 
     // message
     void receiveMessage(int companionId, const std::string &json);
@@ -135,15 +123,15 @@ private:
 
     // db
     ActionResultPtr pushSocketToDb(CompanionActionPtr action, int serverPort);
-    ActionResultPtr updateCompanionInDbAndReturnId(CompanionActionPtr action);
-    ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(CompanionActionPtr action);
-    ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(CompanionActionPtr action);
+    ActionResultPtr updateCompanionInDbAndReturnId(UpdateCompanionActionPtr action);
+    ActionResultPtr deleteCompanionMessagesFromDbAndReturnId(uint32_t companionId);
+    ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(DeleteCompanionActionPtr action);
 
     // action
     template<typename T, typename... Ts>
-    void initAction(ActionType type, Ts &&...args)
+    void startAction(Ts &&...args)
     {
-        auto action = std::make_shared<T>(type, args...);
+        auto action = std::make_shared<T>(shared_from_this(), args...);
         setCurrentAction(std::dynamic_pointer_cast<Action>(action));  // TODO check cast
         action->setDialog(action);
         action->preAct();
@@ -166,13 +154,7 @@ private:
     ActionResultPtr getActionResultByKeyDBData(
         DBReplyDataPtr data, const std::string &key, bool allowEmptyResult = false);
 
-    ActionResultPtr createCompanion(CompanionActionPtr action);
-    ActionResultPtr updateCompanion(CompanionActionPtr action);
-    ActionResultPtr deleteCompanion(CompanionActionPtr action);
-    ActionResultPtr clearCompanionHistory(CompanionActionPtr action);
     ActionResultPtr pushPasswordToDbAndReturnId(PasswordActionPtr action);
-    ActionResultPtr createUserPassword(PasswordActionPtr action);
-    ActionResultPtr authenticateUser(PasswordActionPtr action);
     ActionResultPtr pushCompanionToDbAndReturnId(CompanionActionPtr action);
 
     std::shared_ptr<CompanionResult> addCompanionAndRetutnResult(int id, const std::string &name);
@@ -193,6 +175,7 @@ private:
 
     GraphicManagerPtr graphicManager_;
     DBOperator dbOperator_;
+    DataChecker dataChecker_;
     MessageHandler messageHandler_;
     FileManagerPtr fileManager_;
     NetworkManagerPtr networkManager_;
@@ -200,18 +183,6 @@ private:
     // bool userIsAuthenticated_;
     ActionPtr currentAction_;
 };
-
-template<>
-std::function<ActionResultPtr(CompanionActionPtr)>
-Manager::getActionLambda(CompanionActionPtr action);
-
-template<>
-std::function<ActionResultPtr(PasswordActionPtr)>
-Manager::getActionLambda(PasswordActionPtr action);
-
-template<>
-std::function<ActionResultPtr(FileActionPtr)>
-Manager::getActionLambda(FileActionPtr action);
 
 ManagerPtr getManager();
 

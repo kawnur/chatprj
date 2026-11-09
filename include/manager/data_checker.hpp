@@ -6,26 +6,18 @@
 
 #include "alias.hpp"
 #include "db_constants.hpp"
-#include "manager.hpp"
+#include "utils.hpp"
 
 class DataChecker
 {
 public:
-    DataChecker(ManagerPtr manager, ActionPtr action);
+    DataChecker();
     ~DataChecker() = default;
 
+    void setManager(ManagerPtr manager);
+
     template<typename... Ts>
-    auto getDBData(Ts &&...args)
-    {
-        auto data = manager_->getDBData(args...);
-
-        if (!data) {
-            errors_.push_back(DB_REPLY_NULL);
-            status_ = false;
-        }
-
-        return data;
-    }
+    auto getDBData(Ts &&...args);
 
     template<typename... Ts>
     bool checkDataForExistance(DBRequestType type, const std::string &entryTemplate, Ts &&...args)
@@ -106,24 +98,42 @@ public:
     std::vector<std::string> &&moveErrors();
     void coutErrorsState();
 
-    bool checkCompanionNameForExistanceAtCreation();
-    bool checkCompanionSocketForExistanceAtCreation();
-    bool checkCompanionDataForExistanceAtCreation();
+    bool checkCompanionNameForExistanceAtCreation(CreateCompanionActionPtr action);
+    bool checkCompanionSocketForExistanceAtCreation(CreateCompanionActionPtr action);
+    bool checkCompanionDataForExistanceAtCreation(CreateCompanionActionPtr action);
 
-    bool checkCompanionNameForExistanceAtUpdate();
-    bool checkCompanionSocketForExistanceAtUpdate();
-    bool checkCompanionDataForExistanceAtUpdate();
+    bool checkCompanionNameForExistanceAtUpdate(UpdateCompanionActionPtr action);
+    bool checkCompanionSocketForExistanceAtUpdate(UpdateCompanionActionPtr action);
+    bool checkCompanionDataForExistanceAtUpdate(UpdateCompanionActionPtr action);
 
-    bool checkPasswordForExistanceAtAuthentication();
-    bool check();
+    bool checkPasswordForExistanceAtAuthentication(GetPasswordActionPtr action);
+    // bool checkCreateCompanion();
+
+    ActionResultPtr checkCreateCompanion(CreateCompanionActionPtr action);
+    ActionResultPtr checkUpdateCompanion(UpdateCompanionActionPtr action);
+    ActionResultPtr checkGetPassword(GetPasswordActionPtr action);
 
 private:
+    ActionResultPtr getActionResult(bool result);
+
     ManagerPtr manager_;
     bool status_;
-    ActionPtr action_;
     std::vector<std::string> errors_;
 };
 
-ActionResultPtr checkDataForExistance(ManagerPtr manager, ActionPtr action);
+#include "manager.hpp"
+
+template<typename... Ts>
+auto DataChecker::getDBData(Ts &&...args)
+{
+    auto data = manager_->getDBData(args...);
+
+    if (!data) {
+        errors_.push_back(DB_REPLY_NULL);
+        status_ = false;
+    }
+
+    return data;
+}
 
 #endif // DATA_CHECKER_HPP

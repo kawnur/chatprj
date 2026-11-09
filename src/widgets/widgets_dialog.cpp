@@ -12,27 +12,15 @@
 #include "utils_widgets.hpp"
 #include "widgets.hpp"
 
-Dialog::Dialog(ActionType actionType)
-    : dialogType_(DialogType::INFO), actionType_(actionType), /*containsDialog_(false),*/
-    dataMap_(ACTION_TITLE_MAP), infoMap_(INFO_STUB),
-    defaultTitle_(getQString(ACTION_INFO_DIALOG_DEFAULT_HEADER)) {}
-
-void Dialog::setTitleAsData()
+Dialog::Dialog(const std::string &title)
+    : dialogType_(DialogType::INFO), defaultTitle_(getQString(ACTION_INFO_DIALOG_DEFAULT_HEADER))
 {
-    auto title = getMapValue(dataMap_, actionType_, defaultTitle_);
-    setWindowTitle(title);
-}
-
-void Dialog::setTitleAsInfo()
-{
-    auto title = getMapValue(infoMap_, dialogType_, defaultTitle_);
-    setWindowTitle(title);
+    setWindowTitle(getQString(title));
 }
 
 void Dialog::setDialogType(DialogType type)
 {
     dialogType_ = type;
-    setTitleAsInfo();
 }
 
 FormLine::FormLine(const QString &name)
@@ -106,11 +94,10 @@ void FormLayout::setFormData(CompanionDataPtr data)
         pair.second->setEditText(getQString(data->getData(pair.first)));
 }
 
-DataDialog::DataDialog(ActionType type, const std::initializer_list<DataType> &lines)
-    : Dialog(type), FormLayout()
+DataDialog::DataDialog(const std::string &title, const std::initializer_list<DataType> &lines)
+    : Dialog(title), FormLayout()
 {
     // set properties
-    setTitleAsData();
     setParent(getGraphicManager()->getMainWindow().get());
     setModal(true);
     setWindowFlag(Qt::Window);
@@ -129,7 +116,7 @@ DataDialog::DataDialog(ActionType type, const std::initializer_list<DataType> &l
 void DataDialog::set(ActionPtr action)
 {
     connect(
-        buttonBox_.get(), &QDialogButtonBox::accepted, action.get(), &Action::act,
+        buttonBox_.get(), &QDialogButtonBox::accepted, action.get(), &Action::perform,
         Qt::QueuedConnection);
 
     connect(
@@ -145,16 +132,21 @@ std::shared_ptr<DataWrapper> DataDialog::getData()
     return getDataWrapper();
 }
 
-CompanionDataDialog::CompanionDataDialog(ActionType type, CompanionPtr companion)
-    : DataDialog(type, {DataType::NAME, DataType::IP_ADDRESS, DataType::CLIENT_PORT})
+CompanionDataDialog::CompanionDataDialog(CompanionPtr companion, const std::string &title)
+    : DataDialog(title, { DataType::NAME, DataType::IP_ADDRESS, DataType::CLIENT_PORT }) {}
+
+UpdateCompanionDataDialog::UpdateCompanionDataDialog(
+    CompanionPtr companion, const std::string &title)
+    : CompanionDataDialog(companion, title)
 {
     // set form values
-    if (actionType_ == ActionType::UPDATE_COMPANION && companion) {
-        auto data = getGraphicManager()->getCompanionData(companion);
+    if (!companion)
+        return;
 
-        if (data)
-            setFormData(data);
-    }
+    auto data = getGraphicManager()->getCompanionData(companion);
+
+    if (data)
+        setFormData(data);
 }
 
 CompanionDataPtr CompanionDataDialog::getCompanionData()
@@ -171,15 +163,11 @@ CompanionDataPtr CompanionDataDialog::getCompanionData()
     return std::make_shared<CompanionData>(name, ipAddress, ""s, port);
 }
 
-GroupChatDataDialog::GroupChatDataDialog(ActionType type) : Dialog(type)
+GroupChatDataDialog::GroupChatDataDialog(const std::string &title) : Dialog(title)
 {
-    setTitleAsData();
-
     setParent(getGraphicManager()->getMainWindow().get());
     setModal(true);
     setWindowFlag(Qt::Window);
-
-    type_ = type;
 
     layout_ = std::make_unique<QVBoxLayout>();
     setLayout(layout_.get());
@@ -193,14 +181,14 @@ GroupChatDataDialog::GroupChatDataDialog(ActionType type) : Dialog(type)
 void GroupChatDataDialog::set(ActionPtr action) {}
 
 TextDialog::TextDialog(
-    std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
-    std::initializer_list<ButtonInfo> buttonsInfo) : Dialog(ActionType::UNKNOWN)
+    std::shared_ptr<Dialog> parent, DialogType type, const std::string &title,
+    const std::string &text, std::initializer_list<ButtonInfo> buttonsInfo)
+    : Dialog(title)
 {
     // title
     dialogType_ = type;
-    infoMap_ = DIALOG_TYPE_STRING_REPR_MAP;
     defaultTitle_ = getQString(INFO_DIALOG_DEFAULT_HEADER);
-    setTitleAsInfo();
+    setWindowTitle(getQString(title));
 
     // parent
     if (parent)
@@ -279,7 +267,6 @@ void TextDialog::updateType(DialogType type)
 {
     if (dialogType_ != type) {
         dialogType_ = type;
-        setTitleAsInfo();
     }
 }
 
@@ -300,17 +287,13 @@ void TextDialog::reject()
     QDialog::reject();
 }
 
-FileDialog::FileDialog(ActionType type) : Dialog(type)
+FileDialog::FileDialog(const std::string &title) : Dialog(title)
 {
-    // title
-    setTitleAsData();
-
     // containsDialog_ = true;
     dialog_ = std::make_shared<QFileDialog>();
     dialog_->setFileMode(QFileDialog::AnyFile);
     dialog_->setViewMode(QFileDialog::Detail);
     dialog_->setDirectory(getQString(getGraphicManager()->getLastOpenedPath()));
-    // dialog_->setWindowTitle(getQString(title));
 }
 
 FileDialog::~FileDialog() { logArgsInfo(Q_FUNC_INFO); }
@@ -319,7 +302,7 @@ void FileDialog::set(ActionPtr action)
 {
     connect(
         dialog_.get(), &QFileDialog::accepted,
-        action.get(), &Action::act, Qt::QueuedConnection);
+        action.get(), &Action::perform, Qt::QueuedConnection);
 }
 
 void FileDialog::showDialog()

@@ -41,7 +41,8 @@ std::string buildTextAsUnorderedListWithHeader(
     const std::string &header, const std::vector<std::string> &messages)
 {
     if (messages.empty())
-        return "";
+        // return "";
+        return header;
 
     auto text = getStringByFormat("{}:\n\n", header);
     text += buildTextAsUnorderedList(messages);

@@ -15,60 +15,42 @@
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
-Action::Action(ActionType type) : type_(type)
+Action::Action(ManagerPtr manager, const std::string &title)
+    : manager_(manager), dialogTitle_(title)
 {
-    buildInfoDialog();
+    std::initializer_list<ButtonInfo> list {};
+    infoDialog_ = std::make_shared<TextDialog>(nullptr, DialogType::INFO, dialogTitle_, ""s, list);
 }
 
 Action::~Action() { logArgsInfo(Q_FUNC_INFO); }
 
 void Action::setDialog(ActionPtr action)
 {
-    if (dataDialog_)
-        dataDialog_->set(action);
+    setDataDialog();
 
     if (infoDialog_)
         infoDialog_->set(action);
 }
 
-ActionType Action::type()
+void Action::perform()
 {
-    return type_;
+    auto result = act();
+    postAct(result);
 }
 
-std::string Action::getInfoDialogHeader(DialogType type)
+void Action::endAct()
 {
-    InfoDialogHeaderMap map;
-
-    switch (type) {
-    case DialogType::INFO:
-        map = ACTION_SUCCESS_HEADER_MAP;
-
-    break;
-    case DialogType::ERROR:
-        map = ACTION_FAIL_HEADER_MAP;
-
-    break;
-    default:
-        break;
-    }
-
-    return getMapValue(map, type_, ACTION_INFO_DIALOG_DEFAULT_HEADER);
+    manager_->endAction(shared_from_this());
 }
 
 void Action::updateInfoDialogBase(
     bool status, const std::vector<std::string> &messages, std::initializer_list<ButtonInfo> list)
 {
     auto type = (status) ? DialogType::INFO : DialogType::ERROR;
-    auto header = getInfoDialogHeader(type);
+    auto lambda = [this](bool status) { return infoDialogHeaders_.at(uint(status)); };
+    auto header = runAndReturnDefault(lambda, ""s, status);
     auto text = buildTextAsUnorderedListWithHeader(header, messages);
     infoDialog_->update(type, text, list);
-}
-
-void Action::buildInfoDialog()
-{
-    auto list = { ButtonInfo() };
-    infoDialog_ = std::make_shared<TextDialog>(dataDialog_, DialogType::INFO, ""s, list);
 }
 
 void Action::updateInfoDialogAndShow(
@@ -84,31 +66,14 @@ void Action::updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text
     updateInfoDialogAndShow(DialogType::ERROR, text, list);
 }
 
-RegularAction::RegularAction(ActionType type) : Action(type) {}
-
-RegularAction::~RegularAction() { logArgsInfo(Q_FUNC_INFO); }
-
-CompanionAction::CompanionAction(ActionType type, CompanionPtr companion)
-    : companion_(companion), data_(nullptr), RegularAction(type)
+CompanionAction::CompanionAction(
+    ManagerPtr manager, CompanionPtr companion, const std::string &title)
+    : Action(manager, title), companion_(companion), data_(nullptr)
 {
-    buildDataDialog();
+    infoDialog_->setParent(dataDialog_.get());
 }
 
 CompanionAction::~CompanionAction() { logArgsInfo(Q_FUNC_INFO); }
-
-void CompanionAction::buildDataDialog()
-{
-    switch (type_) {
-    case ActionType::CREATE_COMPANION:
-    case ActionType::UPDATE_COMPANION:
-        dataDialog_ = std::make_shared<CompanionDataDialog>(type_, companion_);
-
-    break;
-
-    default:
-        break;
-    }
-}
 
 std::string CompanionAction::name()
 {
@@ -166,138 +131,155 @@ void CompanionAction::updateInfoDialog(ActionResultPtr result)
     updateInfoDialogBase(status, messages, list);
 }
 
-void CompanionAction::preAct()
-{
-    switch (type_) {
-    case ActionType::CREATE_COMPANION:
-    case ActionType::UPDATE_COMPANION:
-        dataDialog_->show();
-
-    break;
-
-    case ActionType::DELETE_COMPANION: {
-        auto list = { getOKButtonInfo([this]() { act(); }), getCancelButtonInfo([this]() { endAct(); }) };
-        updateInfoDialogAndShow(DialogType::WARNING, deleteCompanionDialogText, list);
-    }
-
-    break;
-    case ActionType::CLEAR_HISTORY: {
-        auto list = { getOKButtonInfo([this]() { act(); }), getCancelButtonInfo([this]() { endAct(); }) };
-        updateInfoDialogAndShow(DialogType::WARNING, clearCompanionHistoryDialogText, list);
-    }
-
-    break;
-
-    case ActionType::SEND_HISTORY:
-        // // TODO if client is disconnected show error dialog
-        // getManager()->sendChatHistoryToCompanion(companion_);
-
-        break;
-
-    default:
-        break;
-    }
-}
-
-void CompanionAction::act()
-{
-    switch (type_) {
-    case ActionType::CREATE_COMPANION:
-    case ActionType::UPDATE_COMPANION: {
-        auto cast = dynamic_pointer_cast<CompanionDataDialog>(dataDialog_);
-
-        if (!cast)
-            break;
-
-        // set data field
-        auto data = cast->getCompanionData();
-
-        if (!data->checkAsUpdateResult()) {
-            updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
-
-            return;
-        }
-
-        data_ = data;
-    }
-
-    break;
-
-    case ActionType::DELETE_COMPANION:
-    case ActionType::CLEAR_HISTORY:
-        data_ = getManager()->getCompanionData(companion_);
-
-    break;
-
-    case ActionType::SEND_HISTORY:
-        // TODO if client is disconnected show error dialog
-        getManager()->sendHistoryToCompanion(companion_);
-
-    break;
-
-    default:
-        break;
-    }
-
-    data_->log();
-
-    getManager()->performAction(shared_from_this());
-}
-
 void CompanionAction::postAct(ActionResultPtr result)
 {
     updateInfoDialog(result);
     infoDialog_->show();
 }
 
-void CompanionAction::endAct()
+void CompanionAction::setDataDialog()
 {
-    getManager()->endAction(shared_from_this());
+    if (dataDialog_)
+        dataDialog_->set(shared_from_this());
 }
 
-GroupChatAction::GroupChatAction(ActionType type) : data_(), RegularAction(type)
+void CompanionAction::updateData()
 {
-    buildDataDialog();
+    // set data field
+    auto data = dataDialog_->getCompanionData();
 
-    switch (type) {
-    case ActionType::CREATE_GROUP:
-        dataDialog_ = std::make_shared<GroupChatDataDialog>(type_);
+    if (!data->checkAsUpdateResult()) {
+        updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
 
-        break;
-
-    default:
-        break;
-    }
-}
-
-PasswordAction::PasswordAction(ActionType type) : RegularAction(type)
-{
-    buildDataDialog();
-}
-
-PasswordAction::~PasswordAction() { logArgsInfo(Q_FUNC_INFO); }
-
-void PasswordAction::buildDataDialog()
-{
-    std::initializer_list<DataType> list;
-
-    switch (type_) {
-    case ActionType::CREATE_PASSWORD:
-        list = { DataType::PASSWORD, DataType::PASSWORD_REENTER };
-
-        break;
-
-    case ActionType::GET_PASSWORD:
-        list = { DataType::PASSWORD };
-
-        break;
-
-    default:
         return;
     }
 
-    dataDialog_ = std::make_shared<DataDialog>(type_, list);
+    data_ = data;
 }
+
+CreateCompanionAction::CreateCompanionAction(ManagerPtr manager)
+    : CompanionAction(manager, nullptr, "Add new companion")
+{
+    dataDialog_ = std::make_shared<CompanionDataDialog>(companion_, dialogTitle_);
+    infoDialogHeaders_ = { "Companion addition error", "New companion added" };
+}
+
+void CreateCompanionAction::preAct()
+{
+    dataDialog_->show();
+}
+
+ActionResultPtr CreateCompanionAction::act()
+{
+    updateData();
+    data_->log();
+
+    return manager_->createCompanion(getShared<CreateCompanionAction>());
+}
+
+UpdateCompanionAction::UpdateCompanionAction(ManagerPtr manager, CompanionPtr companion)
+    : CompanionAction(manager, companion, "Edit companion")
+{
+    dataDialog_ = std::make_shared<UpdateCompanionDataDialog>(companion_, dialogTitle_);
+    infoDialogHeaders_ = { "Companion edition error", "Companion edited" };
+}
+
+void UpdateCompanionAction::preAct()
+{
+    dataDialog_->show();
+}
+
+ActionResultPtr UpdateCompanionAction::act()
+{
+    updateData();
+    data_->log();
+
+    return manager_->updateCompanion(getShared<UpdateCompanionAction>());
+}
+
+DeleteCompanionAction::DeleteCompanionAction(ManagerPtr manager, CompanionPtr companion)
+    : CompanionAction(manager, companion, "Delete companion")
+{
+    infoDialogHeaders_ = { "Companion deletion error", "Companion deleted" };
+}
+
+void DeleteCompanionAction::preAct()
+{
+    auto list = {
+        getOKButtonInfo([this]() { perform(); }),
+        getCancelButtonInfo([this]() { endAct(); })
+    };
+
+    updateInfoDialogAndShow(DialogType::WARNING, deleteCompanionDialogText, list);
+}
+
+ActionResultPtr DeleteCompanionAction::act()
+{
+    data_ = getManager()->getCompanionData(companion_);
+    data_->log();
+
+    return manager_->deleteCompanion(getShared<DeleteCompanionAction>());
+}
+
+ClearHistoryCompanionAction::ClearHistoryCompanionAction(ManagerPtr manager, CompanionPtr companion)
+    : CompanionAction(manager, companion, "Clear companion history")
+{
+    infoDialogHeaders_ = { "Chat history clearing error", "Chat history cleared" };
+}
+
+void ClearHistoryCompanionAction::preAct()
+{
+    // TODO move to base
+    auto list = {
+        getOKButtonInfo([this]() { perform(); }),
+        getCancelButtonInfo([this]() { endAct(); })
+    };
+
+    updateInfoDialogAndShow(DialogType::WARNING, clearCompanionHistoryDialogText, list);
+}
+
+ActionResultPtr ClearHistoryCompanionAction::act()
+{
+    data_ = getManager()->getCompanionData(companion_);
+    data_->log();
+
+    return manager_->clearCompanionHistory(getShared<ClearHistoryCompanionAction>());
+}
+
+SendHistoryCompanionAction::SendHistoryCompanionAction(ManagerPtr manager, CompanionPtr companion)
+    : CompanionAction(manager, companion, "Send companion history") {}
+
+ActionResultPtr SendHistoryCompanionAction::act()
+{
+    // TODO if client is disconnected show error dialog
+    getManager()->sendHistoryToCompanion(companion_);
+    data_->log();
+
+    // add manager action
+}
+
+// GroupChatAction::GroupChatAction(ActionType type) : data_(), RegularAction(type)
+// {
+//     buildDataDialog();
+
+//     switch (type) {
+//     case ActionType::CREATE_GROUP:
+//         dataDialog_ = std::make_shared<GroupChatDataDialog>(type_);
+
+//         break;
+
+//     default:
+//         break;
+//     }
+// }
+
+PasswordAction::PasswordAction(ManagerPtr manager, const std::string &title)
+    : Action(manager, title)
+{
+    infoDialog_->setParent(dataDialog_.get());
+}
+
+PasswordAction::~PasswordAction() { logArgsInfo(Q_FUNC_INFO); }
 
 std::string PasswordAction::password()
 {
@@ -307,6 +289,11 @@ std::string PasswordAction::password()
 void PasswordAction::preAct()
 {
     dataDialog_->show();
+}
+
+void PasswordAction::setDataDialog()
+{
+    dataDialog_->set(shared_from_this());
 }
 
 void PasswordAction::updateInfoDialog(ActionResultPtr result)
@@ -334,178 +321,86 @@ void PasswordAction::updateInfoDialog(ActionResultPtr result)
     updateInfoDialogBase(status, messages, list);
 }
 
-void PasswordAction::act()
-{
-    switch (type_) {
-    case ActionType::CREATE_PASSWORD: {
-        auto data = dataDialog_->getData();
-        auto text1 = data->get(DataType::PASSWORD);
-        auto text2 = data->get(DataType::PASSWORD_REENTER);
-
-        auto errorText = ""s;
-
-        if (text1 != text2)
-            errorText = PASSWORDS_ARE_NOT_EQUAL_DIALOG_TEXT;
-        else if (text1.size() == 0)
-            errorText = EMPTY_FIELD_DIALOG_TEXT;
-
-        if (!errorText.empty()) {
-            updateInfoDialogToErrorWithCloseSelfAndShow(errorText);
-
-            return;
-        }
-
-        password_ = text1;
-    }
-
-    break;
-
-    case ActionType::GET_PASSWORD: {
-        auto data = dataDialog_->getData();
-        auto text = data->get(DataType::PASSWORD);
-
-        if (text.size() == 0) {
-            updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
-
-            return;
-        }
-
-        password_ = text;
-    }
-
-    break;
-
-    default:
-        break;
-    }
-
-    getManager()->performAction(shared_from_this());
-}
-
 void PasswordAction::postAct(ActionResultPtr result)
 {
     updateInfoDialog(result);
     infoDialog_->show();
 }
 
-void PasswordAction::endAct()
+CreatePasswordAction::CreatePasswordAction(ManagerPtr manager)
+    : PasswordAction(manager, "Create new password")
 {
-    getManager()->endAction(shared_from_this());
+    auto list = { DataType::PASSWORD, DataType::PASSWORD_REENTER };
+    dataDialog_ = std::make_shared<DataDialog>(dialogTitle_, list);
+    infoDialogHeaders_ = { "Password creation error", "New password created" };
+}
+
+ActionResultPtr CreatePasswordAction::act()
+{
+    auto data = dataDialog_->getData();
+    auto text1 = data->get(DataType::PASSWORD);
+    auto text2 = data->get(DataType::PASSWORD_REENTER);
+
+    auto errorText = ""s;
+
+    if (text1 != text2)
+        errorText = PASSWORDS_ARE_NOT_EQUAL_DIALOG_TEXT;
+    else if (text1.size() == 0)
+        errorText = EMPTY_FIELD_DIALOG_TEXT;
+
+    if (!errorText.empty()) {
+        updateInfoDialogToErrorWithCloseSelfAndShow(errorText);
+
+        return std::make_shared<ActionResult>(false, ""s);
+    }
+
+    password_ = text1;
+
+    return manager_->createUserPassword(getShared<CreatePasswordAction>());
+}
+
+GetPasswordAction::GetPasswordAction(ManagerPtr manager)
+    : PasswordAction(manager, "Authentication")
+{
+    auto list = { DataType::PASSWORD };
+    dataDialog_ = std::make_shared<DataDialog>(dialogTitle_, list);
+    infoDialogHeaders_ = { "User authentication error", "User successfully authenticated" };
+}
+
+ActionResultPtr GetPasswordAction::act()
+{
+    auto data = dataDialog_->getData();
+    auto text = data->get(DataType::PASSWORD);
+
+    if (text.size() == 0) {
+        updateInfoDialogToErrorWithCloseSelfAndShow(EMPTY_FIELD_DIALOG_TEXT);
+
+        return std::make_shared<ActionResult>(false, ""s);
+    }
+
+    password_ = text;
+
+    return manager_->authenticateUser(getShared<GetPasswordAction>());
 }
 
 FileAction::FileAction(
-    ActionType type, const std::string &networkId, CompanionPtr companion)
-    : Action(type), companion_(companion), networkId_(networkId)
+    ManagerPtr manager, const std::string &networkId, CompanionPtr companion,
+    const std::string &title)
+    : Action(manager, title), companion_(companion), networkId_(networkId)
 {
-    buildDataDialog();
+    dataDialog_ = std::make_shared<FileDialog>(title);
 }
 
 FileAction::~FileAction() { logArgsInfo(Q_FUNC_INFO); }
-
-void FileAction::buildDataDialog()
-{
-    dataDialog_ = std::make_shared<FileDialog>(type_);
-}
 
 std::filesystem::path FileAction::getPath()
 {
     return filePath_;
 }
 
-void FileAction::preAct()
+void FileAction::setDataDialog()
 {
-    switch (type_) {
-    case ActionType::SEND_FILE:
-        dataDialog_->showDialog();
-
-    break;
-
-    case ActionType::SAVE_FILE:
-        defineFilePath();
-
-    break;
-
-    default:
-        logArgsError("unknown action type");
-
-    break;
-    }
-}
-
-void FileAction::act()
-{
-    // auto cast = dynamic_pointer_cast<FileDialog>(dataDialog_);
-
-    // if (!cast)
-    //     return;
-
-    // auto dialog = cast->getFileDialog();
-
-    // if (!dialog)
-    //     return;
-
-    auto manager = getManager();
-
-    switch (type_) {
-    case ActionType::SEND_FILE:
-    {
-        for (const auto &path : dataDialog_->selectedFiles()) {
-            filePath_ = std::filesystem::path(getString(path));
-            auto text = filePath_.filename().string();
-            manager->sendMessage(MessageType::FILE, companion_, shared_from_this(), text);
-            manager->setLastOpenedPath(filePath_.parent_path());
-        }
-    }
-
-    break;
-
-    case ActionType::SAVE_FILE:
-    {
-        // for (auto &pathQString : dialog->selectedFiles())  // one file
-        // {
-        //     logArgs(pathQString);
-
-        //     auto path = std::filesystem::path(pathQString.toStdString());
-
-        //     filePath_ = path;
-
-        //     // set file path for file operator
-        //     companion_->getFileOperatorStorage()->
-        //         getOperator(networkId_)->setFilePath(path);
-
-        //     // send without saving to db
-        //     bool result = companion_->sendMessage(
-        //         false, NetworkMessageType::FILE_REQUEST,
-        //         networkId_, nullptr);
-
-        //     getManager()->setLastOpenedPath(path.parent_path());
-
-        // }
-
-        // set file path for file operator
-        // bool setResult = companion_->setFileOperatorFilePath(networkId_, filePath_);
-        bool setResult = manager->setFileOperatorFilePath(networkId_, filePath_);
-
-        if (setResult) {
-            // send without saving to db
-            // auto meta = std::make_shared<MessageMetaData>();
-            // meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
-            // meta->networkId_ = networkId_;
-
-            // bool result = manager->sendMessage(companion_, nullptr, meta);
-            bool result = manager->sendFileRequestMessage(companion_, networkId_);
-            manager->setLastOpenedPath(filePath_.parent_path());
-        }
-        else {
-            logTemplateError("error saving file, path: {}", filePath_);
-        }
-    }
-
-    break;
-
-    default:
-        break;
-    }
+    dataDialog_->set(shared_from_this());
 }
 
 void FileAction::defineFilePath()
@@ -515,6 +410,76 @@ void FileAction::defineFilePath()
     auto result = dataDialog_->getSaveFileName(param, pathQStr);
     filePath_ = std::filesystem::path(result.toStdString());
     act();
+}
+
+SendFileAction::SendFileAction(
+    ManagerPtr manager, const std::string &networkId, CompanionPtr companion)
+    : FileAction(manager, networkId, companion, "Send file") {}
+
+void SendFileAction::preAct()
+{
+    dataDialog_->showDialog();
+}
+
+ActionResultPtr SendFileAction::act()
+{
+    for (const auto &path : dataDialog_->selectedFiles()) {
+        filePath_ = std::filesystem::path(getString(path));
+        auto text = filePath_.filename().string();
+        manager_->sendMessage(MessageType::FILE, companion_, shared_from_this(), text);
+        manager_->setLastOpenedPath(filePath_.parent_path());
+    }
+}
+
+SaveFileAction::SaveFileAction(
+    ManagerPtr manager, const std::string &networkId, CompanionPtr companion)
+    : FileAction(manager, networkId, companion, "Save file") {}
+
+void SaveFileAction::preAct()
+{
+    defineFilePath();
+}
+
+ActionResultPtr SaveFileAction::act()
+{
+    // for (auto &pathQString : dialog->selectedFiles())  // one file
+    // {
+    //     logArgs(pathQString);
+
+    //     auto path = std::filesystem::path(pathQString.toStdString());
+
+    //     filePath_ = path;
+
+    //     // set file path for file operator
+    //     companion_->getFileOperatorStorage()->
+    //         getOperator(networkId_)->setFilePath(path);
+
+    //     // send without saving to db
+    //     bool result = companion_->sendMessage(
+    //         false, NetworkMessageType::FILE_REQUEST,
+    //         networkId_, nullptr);
+
+    //     getManager()->setLastOpenedPath(path.parent_path());
+
+    // }
+
+    // set file path for file operator
+    // bool setResult = companion_->setFileOperatorFilePath(networkId_, filePath_);
+    bool setResult = manager_->setFileOperatorFilePath(networkId_, filePath_);
+
+    if (setResult) {
+        // send without saving to db
+        // auto meta = std::make_shared<MessageMetaData>();
+        // meta->networkMessageType_ = NetworkMessageType::FILE_REQUEST;
+        // meta->networkId_ = networkId_;
+
+        // bool result = manager->sendMessage(companion_, nullptr, meta);
+        bool result = manager_->sendFileRequestMessage(companion_, networkId_);
+        manager_->setLastOpenedPath(filePath_.parent_path());
+    }
+    else {
+        logTemplateError("error saving file, path: {}", filePath_);
+    }
 }
 
 void fillMessages(

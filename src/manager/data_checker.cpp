@@ -2,18 +2,18 @@
 
 #include "action.hpp"
 #include "action_result.hpp"
+#include "companion.hpp"
 
-DataChecker::DataChecker(ManagerPtr manager, ActionPtr action)
-    : manager_(manager), status_(true), action_(action), errors_() {}
+DataChecker::DataChecker() : status_(true), errors_() {}
+
+void DataChecker::setManager(ManagerPtr manager)
+{
+    manager_ = manager;
+}
 
 std::vector<std::string> DataChecker::errors() const
 {
     return errors_;
-}
-
-std::vector<std::string> &&DataChecker::moveErrors()
-{
-    return std::move(errors_);
 }
 
 void DataChecker::coutErrorsState()
@@ -21,88 +21,89 @@ void DataChecker::coutErrorsState()
     coutVectorState(errors_);
 }
 
-bool DataChecker::checkCompanionNameForExistanceAtCreation()
+bool DataChecker::checkCompanionNameForExistanceAtCreation(CreateCompanionActionPtr action)
 {
     // check if companion with such name already exists
 
     return checkDataForExistance(
         DBRequestType::GET_COMPANION_BY_NAME, "companion with name '{}' already exists"s,
-        action_->name());
+        action->name());
 }
 
-bool DataChecker::checkCompanionSocketForExistanceAtCreation()
+bool DataChecker::checkCompanionSocketForExistanceAtCreation(CreateCompanionActionPtr action)
 {
     // check if such socket already exists
 
     return checkDataForExistance(
         DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT,
-        "companion with address '{0}' and port '{1}' already exists"s, action_->ipAddress(),
-        action_->clientPort());
+        "companion with address '{0}' and port '{1}' already exists"s, action->ipAddress(),
+        action->clientPort());
 }
 
-bool DataChecker::checkCompanionDataForExistanceAtCreation()
+bool DataChecker::checkCompanionDataForExistanceAtCreation(CreateCompanionActionPtr action)
 {
-    return checkCompanionNameForExistanceAtCreation()
-        && checkCompanionSocketForExistanceAtCreation();
+    return checkCompanionNameForExistanceAtCreation(action)
+        && checkCompanionSocketForExistanceAtCreation(action);
 }
 
-bool DataChecker::checkCompanionNameForExistanceAtUpdate()
+bool DataChecker::checkCompanionNameForExistanceAtUpdate(UpdateCompanionActionPtr action)
 {
     // check if companion with such name already exists
 
     return checkIdDataForExistance(
         DBRequestType::GET_COMPANION_BY_NAME, "companion with name '{}' already exists"s,
-        action_->companionId(), action_->name());
+        action->companionId(), action->name());
 }
 
-bool DataChecker::checkCompanionSocketForExistanceAtUpdate()
+bool DataChecker::checkCompanionSocketForExistanceAtUpdate(UpdateCompanionActionPtr action)
 {
     // check if such socket already exists
 
     return checkIdDataForExistance(
         DBRequestType::GET_SOCKET_BY_IP_ADDRESS_AND_PORT,
-        "companion with address '{0}' and port '{1}' already exists"s, action_->companionId(),
-        action_->ipAddress(), action_->clientPort());
+        "companion with address '{0}' and port '{1}' already exists"s, action->companionId(),
+        action->ipAddress(), action->clientPort());
 }
 
-bool DataChecker::checkCompanionDataForExistanceAtUpdate()
+bool DataChecker::checkCompanionDataForExistanceAtUpdate(UpdateCompanionActionPtr action)
 {
-    return checkCompanionNameForExistanceAtUpdate()
-    && checkCompanionSocketForExistanceAtUpdate();
+    return checkCompanionNameForExistanceAtUpdate(action)
+    && checkCompanionSocketForExistanceAtUpdate(action);
 }
 
 
-bool DataChecker::checkPasswordForExistanceAtAuthentication()
+bool DataChecker::checkPasswordForExistanceAtAuthentication(GetPasswordActionPtr action)
 {
     return checkPasswordDataForExistance(
         DBRequestType::GET_PASSWORD, "password was not set"s, "password is incorrect"s,
-        action_->password());
+        action->password());
 }
 
-bool DataChecker::check()
+ActionResultPtr DataChecker::checkCreateCompanion(CreateCompanionActionPtr action)
 {
-    switch (action_->type()) {
-    case ActionType::CREATE_COMPANION:
-        return checkCompanionDataForExistanceAtCreation();
+    bool result = checkCompanionDataForExistanceAtCreation(action);
 
-    case ActionType::UPDATE_COMPANION:
-        return checkCompanionDataForExistanceAtUpdate();
-
-    case ActionType::GET_PASSWORD:
-        return checkPasswordForExistanceAtAuthentication();
-
-    default:
-        return false;
-    }
+    return getActionResult(result);
 }
 
-ActionResultPtr checkDataForExistance(ManagerPtr manager, ActionPtr action)
+ActionResultPtr DataChecker::checkUpdateCompanion(UpdateCompanionActionPtr action)
 {
-    DataChecker checker(manager, action);
-    auto result = checker.check();
+    bool result = checkCompanionDataForExistanceAtUpdate(action);
 
+    return getActionResult(result);
+}
+
+ActionResultPtr DataChecker::checkGetPassword(GetPasswordActionPtr action)
+{
+    bool result = checkPasswordForExistanceAtAuthentication(action);
+
+    return getActionResult(result);
+}
+
+ActionResultPtr DataChecker::getActionResult(bool result)
+{
     if (result)
         return std::make_shared<ActionResult>(true, ""s);
     else
-        return std::make_shared<ActionResult>(false, checker.moveErrors());
+        return std::make_shared<ActionResult>(false, std::move(errors_));
 }

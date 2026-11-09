@@ -28,7 +28,7 @@ class Dialog : public QDialog
     Q_OBJECT
 
 public:
-    Dialog(ActionType actionType);
+    Dialog(const std::string &title);
     virtual ~Dialog() { logArgsInfo(Q_FUNC_INFO); }
 
     virtual void set(ActionPtr action) {}
@@ -41,18 +41,8 @@ public:
 
     void setDialogType(DialogType type);
 
-public slots:
-    // void actionSlot();
-
 protected:
-    void setTitleAsData();
-    void setTitleAsInfo();
-
     DialogType dialogType_;
-    ActionType actionType_;
-    // bool containsDialog_;
-    std::reference_wrapper<const DataDialogTitleMap> dataMap_;
-    std::reference_wrapper<const InfoDialogTitleMap> infoMap_;
     QString defaultTitle_;
 };
 
@@ -97,7 +87,7 @@ class DataDialog : public Dialog, public FormLayout
     Q_OBJECT
 
 public:
-    DataDialog(ActionType type, const std::initializer_list<DataType> &lines);
+    DataDialog(const std::string &title, const std::initializer_list<DataType> &lines);
     virtual ~DataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     void set(ActionPtr action) override;
@@ -112,10 +102,19 @@ class CompanionDataDialog : public DataDialog
     Q_OBJECT
 
 public:
-    CompanionDataDialog(ActionType type, CompanionPtr companion);
+    CompanionDataDialog(CompanionPtr companion, const std::string &title);
     ~CompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     CompanionDataPtr getCompanionData() override;
+};
+
+class UpdateCompanionDataDialog : public CompanionDataDialog
+{
+    Q_OBJECT
+
+public:
+    UpdateCompanionDataDialog(CompanionPtr companion, const std::string &title);
+    ~UpdateCompanionDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 };
 
 // TODO inherit from DataDialog
@@ -124,13 +123,12 @@ class GroupChatDataDialog : public Dialog
     Q_OBJECT
 
 public:
-    GroupChatDataDialog(ActionType type);
+    GroupChatDataDialog(const std::string &title);
     ~GroupChatDataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     void set(ActionPtr action) override;
 
 private:
-    ActionType type_;
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QLabel> label_;
     std::unique_ptr<QListWidget> list_;
@@ -142,8 +140,8 @@ class TextDialog : public Dialog
 
 public:
     TextDialog(
-        std::shared_ptr<Dialog> parent, DialogType type, const std::string &text,
-        std::initializer_list<ButtonInfo> buttonsInfo);
+        std::shared_ptr<Dialog> parent, DialogType type, const std::string &title,
+        const std::string &text, std::initializer_list<ButtonInfo> buttonsInfo);
 
     ~TextDialog();
 
@@ -152,7 +150,6 @@ public:
     void closeSelfAndParent();
     void acceptAction();
     void setText(const std::string &text);
-
     void update(DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
     void updateType(DialogType type);
     void updateButtonBox(std::initializer_list<ButtonInfo> list);
@@ -172,15 +169,12 @@ class FileDialog : public Dialog
     Q_OBJECT
 
 public:
-    FileDialog(ActionType type);
+    FileDialog(const std::string &title);
     ~FileDialog();
 
     void set(ActionPtr action) override;
     void showDialog() override;
-
-    // std::shared_ptr<QFileDialog> getFileDialog();
     QStringList selectedFiles() const override;
-
     QString getSaveFileName(const QString &param, const QString &path) override;
 
 private:

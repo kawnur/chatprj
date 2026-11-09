@@ -140,21 +140,6 @@ enum class DialogType
     UNKNOWN
 };
 
-enum class ActionType
-{
-    UNKNOWN,
-    CREATE_COMPANION,
-    UPDATE_COMPANION,
-    DELETE_COMPANION,
-    CREATE_GROUP,
-    CLEAR_HISTORY,
-    SEND_HISTORY,
-    CREATE_PASSWORD,
-    GET_PASSWORD,
-    SEND_FILE,
-    SAVE_FILE
-};
-
 /*!
  * \brief The MWContainerPosition enum, main window container position
  */
@@ -167,24 +152,6 @@ enum class MWContainerPosition
 
 // dialog type to dialog window title mapping
 using InfoDialogTitleMap = std::unordered_map<DialogType, QString>;
-using DataDialogTitleMap = std::unordered_map<ActionType, QString>;
-
-// action type to first line of info dialog text mapping
-using InfoDialogHeaderMap = std::unordered_map<ActionType, std::string>;
-using RequestDialogHeaderMap = std::unordered_map<ActionType, std::string>;
-
-const InfoDialogTitleMap INFO_STUB {};
-const DataDialogTitleMap DATA_STUB {};
-
-const DataDialogTitleMap ACTION_TITLE_MAP {
-    { ActionType::CREATE_COMPANION, "Add new companion" },
-    { ActionType::UPDATE_COMPANION, "Edit companion" },
-    { ActionType::CREATE_GROUP, "Add new group chat" },
-    { ActionType::CREATE_PASSWORD, "Create new password" },
-    { ActionType::GET_PASSWORD, "Authentication" },
-    { ActionType::SEND_FILE, "Send file" },
-    { ActionType::SAVE_FILE, "Save file" }
-};
 
 const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
     { DialogType::INFO, "INFO" },
@@ -195,24 +162,6 @@ const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
 
 const std::string ACTION_INFO_DIALOG_DEFAULT_HEADER { "Action" };
 const std::string INFO_DIALOG_DEFAULT_HEADER { "Info dialog" };
-
-const InfoDialogHeaderMap ACTION_SUCCESS_HEADER_MAP {
-    { ActionType::CREATE_COMPANION, "New companion added" },
-    { ActionType::UPDATE_COMPANION, "Companion edited" },
-    { ActionType::DELETE_COMPANION, "Companion deleted" },
-    { ActionType::CLEAR_HISTORY, "Chat history cleared" },
-    { ActionType::CREATE_PASSWORD, "New password created" },
-    { ActionType::GET_PASSWORD, "User successfully authenticated" }
-};
-
-const InfoDialogHeaderMap ACTION_FAIL_HEADER_MAP {
-    { ActionType::CREATE_COMPANION, "Companion addition error" },
-    { ActionType::UPDATE_COMPANION, "Companion edition error" },
-    { ActionType::DELETE_COMPANION, "Companion deletion error" },
-    { ActionType::CLEAR_HISTORY, "Chat history clearing error" },
-    { ActionType::CREATE_PASSWORD, "Password creation error" },
-    { ActionType::GET_PASSWORD, "User authentication error" }
-};
 
 const std::unordered_map<DialogType, LogType> MAP_DIALOG_TYPE_TO_LOG_TYPE {
     { DialogType::INFO, LogType::INFO },

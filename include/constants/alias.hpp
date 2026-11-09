@@ -21,10 +21,15 @@ class CentralPanelWidget;
 class Companion;
 class CompanionAction;
 class CompanionData;
+class ClearHistoryCompanionAction;
+class CreateCompanionAction;
+class CreatePasswordAction;
 class DBReplyData;
+class DeleteCompanionAction;
 class FileAction;
 class FileManager;
 class FileOperator;
+class GetPasswordAction;
 class GraphicManager;
 class GroupChatData;
 class IndicatorWidget;
@@ -52,25 +57,36 @@ class PriorityTask;
 class ReceiverOperator;
 class RightPanelWidget;
 class SenderOperator;
+class SaveFileAction;
+class SendFileAction;
+class SendHistoryCompanionAction;
 class ShowHideWidget;
 class SocketInfo;
 class SocketInfoBaseWidget;
 class StubWidgetGroup;
 class TextDialog;
 class TextEditWidget;
+class UpdateCompanionAction;
 class WidgetGroup;
 
 using namespace std::string_literals;
 
+using CompanionResult = ActionSharedValueResult<Companion>;
+
 using ActionPtr = std::shared_ptr<Action>;
 using ActionResultPtr = std::shared_ptr<ActionResult>;
+using ClearHistoryCompanionActionPtr = std::shared_ptr<ClearHistoryCompanionAction>;
 using CompanionActionPtr = std::shared_ptr<CompanionAction>;
 using CompanionDataPtr = std::shared_ptr<CompanionData>;
 using CompanionPtr = std::shared_ptr<Companion>;
-using CompanionResult = ActionSharedValueResult<Companion>;
+using CompanionResultPtr = std::shared_ptr<CompanionResult>;
+using CreateCompanionActionPtr = std::shared_ptr<CreateCompanionAction>;
+using CreatePasswordActionPtr = std::shared_ptr<CreatePasswordAction>;
 using DBReplyDataPtr = std::shared_ptr<DBReplyData>;
+using DeleteCompanionActionPtr = std::shared_ptr<DeleteCompanionAction>;
 using FileActionPtr = std::shared_ptr<FileAction>;
 using FileManagerPtr = std::shared_ptr<FileManager>;
+using GetPasswordActionPtr = std::shared_ptr<GetPasswordAction>;
 using GraphicManagerPtr = std::shared_ptr<GraphicManager>;
 using MainWindowPtr = std::shared_ptr<MainWindow>;
 using ManagerPtr = std::shared_ptr<Manager>;
@@ -93,9 +109,13 @@ using PriorityTaskQueue =
     std::priority_queue<PriorityTask, std::vector<PriorityTask>, PriorityTaskComparator>;
 
 using ReceiverOperatorPtr = std::shared_ptr<ReceiverOperator>;
+using SaveFileActionPtr = std::shared_ptr<SaveFileAction>;
+using SendFileActionPtr = std::shared_ptr<SendFileAction>;
+using SendHistoryCompanionActionPtr = std::shared_ptr<SendHistoryCompanionAction>;
 using SocketInfoBaseWidgetPtr = std::shared_ptr<SocketInfoBaseWidget>;
 using SocketInfoPtr = std::shared_ptr<SocketInfo>;
 using QWidgetPtr = std::shared_ptr<QWidget>;
+using UpdateCompanionActionPtr = std::shared_ptr<UpdateCompanionAction>;
 using WidgetGroupPtr = std::shared_ptr<WidgetGroup>;
 
 #endif // ALIAS_HPP
