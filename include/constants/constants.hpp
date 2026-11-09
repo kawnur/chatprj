@@ -132,14 +132,6 @@ enum class LogType
     ERROR
 };
 
-enum class DialogType
-{
-    INFO,
-    WARNING,
-    ERROR,
-    UNKNOWN
-};
-
 /*!
  * \brief The MWContainerPosition enum, main window container position
  */
@@ -148,25 +140,6 @@ enum class MWContainerPosition
     LEFT,
     CENTRAL,
     RIGHT
-};
-
-// dialog type to dialog window title mapping
-using InfoDialogTitleMap = std::unordered_map<DialogType, QString>;
-
-const InfoDialogTitleMap DIALOG_TYPE_STRING_REPR_MAP {
-    { DialogType::INFO, "INFO" },
-    { DialogType::WARNING, "WARNING" },
-    { DialogType::ERROR, "ERROR" },
-    { DialogType::UNKNOWN, "UNKNOWN" }
-};
-
-const std::string ACTION_INFO_DIALOG_DEFAULT_HEADER { "Action" };
-const std::string INFO_DIALOG_DEFAULT_HEADER { "Info dialog" };
-
-const std::unordered_map<DialogType, LogType> MAP_DIALOG_TYPE_TO_LOG_TYPE {
-    { DialogType::INFO, LogType::INFO },
-    { DialogType::WARNING, LogType::WARNING },
-    { DialogType::ERROR, LogType::ERROR }
 };
 
 const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPR {
@@ -288,16 +261,16 @@ const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
     { WidgetType::FILE_RECEIVED, "RECEIVE FILE: {}" }
 };
 
-enum class MessageWidgetType {
-    UNKNOWN,
-    TEXT,
-    FILE
-};
+// enum class MessageWidgetType {
+//     UNKNOWN,
+//     TEXT,
+//     FILE
+// };
 
-const std::unordered_map<MessageType, MessageWidgetType> MESSAGE_WIDGET_TYPE_MAP {
-    { MessageType::TEXT, MessageWidgetType::TEXT },
-    { MessageType::FILE, MessageWidgetType::FILE }
-};
+// const std::unordered_map<MessageType, MessageWidgetType> MESSAGE_WIDGET_TYPE_MAP {
+//     { MessageType::TEXT, MessageWidgetType::TEXT },
+//     { MessageType::FILE, MessageWidgetType::FILE }
+// };
 
 enum class MessageWidgetState {
     UNKNOWN,

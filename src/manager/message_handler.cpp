@@ -76,13 +76,13 @@ bool MessageHandler::buildAndSendConfirmation(CompanionPtr companion, MessagePtr
     return result;
 }
 
-void MessageHandler::sendMessage(
-    MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text)
+void MessageHandler::sendTextMessage(
+    CompanionPtr companion, ActionPtr action, const std::string &text)
 {
     // encrypt message
 
     // build message
-    auto message = builder_.buildMyTextMessage(type, companion, text);
+    auto message = builder_.buildMyTextMessage(companion, text);
 
     // add to DB and get timestamp
     auto pushResult = manager_->pushMessageToDB(message);
@@ -96,12 +96,13 @@ void MessageHandler::sendMessage(
     if (!storeResult)
         return;
 
+    // TODO move
     // add file sender
-    if (type == MessageType::FILE)
-        manager_->addSenderOperator(message->networkId(), action);
+    // if (type == MessageType::FILE)
+    //     manager_->addSenderOperator(message->networkId(), action);
 
     // add message widget
-    manager_->addMessageWidget(companion, message);
+    manager_->addMessageWidget<TextMessageWidget>(companion, message);
 
     // send over network
     bool result = sendMessageByNetwork(companion, message);
@@ -572,7 +573,6 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
 
         sleepForMS(sleep);
 
-        // while (true) {
         while (getMessageInfo(companion, message)) {
             if (message->isReceived())
                 return;

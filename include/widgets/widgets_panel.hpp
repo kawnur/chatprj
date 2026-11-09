@@ -75,7 +75,7 @@ private:
     bool eventFilter(QObject *object, QEvent *event) override;
 
 private slots:
-    void sendMessageSlot(const QString &text);
+    void sendTextMessageSlot(const QString &text);
     void sendFileSlot();
     void saveFileSlot();
 };

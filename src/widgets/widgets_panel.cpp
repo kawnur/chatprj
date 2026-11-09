@@ -130,7 +130,7 @@ void CentralPanelWidget::set(CompanionPtr companion)
 
     connect(
         textEdit_.get(), &MessageEditWidget::sendSignal,
-        this, &CentralPanelWidget::sendMessageSlot, Qt::QueuedConnection);
+        this, &CentralPanelWidget::sendTextMessageSlot, Qt::QueuedConnection);
 
     historyScrollArea_->installEventFilter(this);
 }
@@ -261,10 +261,10 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
     return result;
 }
 
-void CentralPanelWidget::sendMessageSlot(const QString &text)
+void CentralPanelWidget::sendTextMessageSlot(const QString &text)
 {
     if (!text.isEmpty())
-        getGraphicManager()->sendMessage(MessageType::TEXT, companion_, text.toStdString());
+        getGraphicManager()->sendTextMessage(companion_, text.toStdString());
 }
 
 void CentralPanelWidget::sendFileSlot()

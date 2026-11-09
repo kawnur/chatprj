@@ -28,7 +28,8 @@ std::pair<NetworkManagerMap::iterator, bool> NetworkManager::addToMap(
 
 NetworkEntityPtr NetworkManager::getNetworkEntity(int id)
 {
-    return runAndReturnSharedPtr<NetworkEntity>([&]() { return map_.at(id); });
+    // return runAndReturnSharedPtr<NetworkEntity>([&]() { return map_.at(id); });
+    return runAndReturnSharedPtr([&]() { return map_.at(id); });
 }
 
 void NetworkManager::updateSocketInfo(int id, CompanionDataPtr data)

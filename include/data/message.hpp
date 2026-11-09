@@ -146,11 +146,6 @@ private:
 class Message
 {
 public:
-    // Message(
-    //     // MessageType type, uint32_t id, uint8_t companion_id, uint8_t author_id,
-    //     // const std::string &time, const std::string &text);
-    //     MessageType type, const MessageMetaData &meta, const std::string &text);
-
     Message(MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state);
     Message(MessagePtr message);
 

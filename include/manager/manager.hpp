@@ -66,10 +66,7 @@ public:
     void receiveMessage(int companionId, const std::string &json);
     void requestHistoryFromCompanion(CompanionPtr companion);
     void sendHistoryToCompanion(CompanionPtr companion);
-
-    void sendMessage(
-        MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
-
+    void sendTextMessage(CompanionPtr companion, ActionPtr action, const std::string &text);
     bool sendFileRequestMessage(CompanionPtr companion, const std::string &networkId);
 
     bool sendFileDataTransmissionResultMessage(
@@ -86,7 +83,14 @@ public:
     void clearChatHistory(CompanionPtr companion);
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
-    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+
+    // void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    template<typename T>
+    void addMessageWidget(CompanionPtr companion, MessagePtr message)
+    {
+        graphicManager_->addMessageWidget<T>(companion, message);
+    }
+
     void addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages);
     void disableBlur();
 

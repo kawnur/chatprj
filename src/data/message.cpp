@@ -440,11 +440,6 @@ void Message::log()
     logArgsInfo(MESSAGE_LOG_DELIMITER);
 }
 
-// MessageState::MessageState(
-//     uint8_t companionId, bool isAntecedent, bool isSent, bool isReceived, std::string networkId)
-//     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived), networkId_(networkId)
-// {}
-
 MessageState::MessageState(bool isAntecedent, bool isSent, bool isReceived)
     : isAntecedent_(isAntecedent), isSent_(isSent), isReceived_(isReceived) {}
 

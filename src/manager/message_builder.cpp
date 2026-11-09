@@ -38,10 +38,11 @@ MessageMetaDataPtr MessageBuilder::buildUnsentMessageMetaData(
         "");
 }
 
-MessageMetaDataPtr MessageBuilder::buildMyTextMessageMetaData(
-    MessageType type, CompanionPtr companion)
+MessageMetaDataPtr MessageBuilder::buildMyTextMessageMetaData(CompanionPtr companion)
 {
     // network id is created by storage
+    auto type = MessageType::TEXT;
+
     return std::make_shared<MessageMetaData>(
         type,
         defineNetworkMessageType(type),
@@ -80,10 +81,9 @@ MessagePtr MessageBuilder::buildMessageFromDbData(
     return message;
 }
 
-MessagePtr MessageBuilder::buildMyTextMessage(
-    MessageType type, CompanionPtr companion, const std::string &text)
+MessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const std::string &text)
 {
-    auto meta = buildMyTextMessageMetaData(type, companion);
+    auto meta = buildMyTextMessageMetaData(companion);
     auto data = std::make_shared<MessageData>(text, "");
     auto state = std::make_shared<MessageState>(false, false, false);
 

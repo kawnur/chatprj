@@ -107,7 +107,6 @@ public:
     bool checkCompanionDataForExistanceAtUpdate(UpdateCompanionActionPtr action);
 
     bool checkPasswordForExistanceAtAuthentication(GetPasswordActionPtr action);
-    // bool checkCreateCompanion();
 
     ActionResultPtr checkCreateCompanion(CreateCompanionActionPtr action);
     ActionResultPtr checkUpdateCompanion(UpdateCompanionActionPtr action);

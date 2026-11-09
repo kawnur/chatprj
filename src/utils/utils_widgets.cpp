@@ -146,10 +146,10 @@ QString getFileWidgetText(WidgetType value)
     return getMapValue(FILE_WIDGET_TEXT_MAP, value, DEFAULT_FILE_WIDGET_TEXT);
 }
 
-MessageWidgetType getMessageWidgetType(MessageType value)
-{
-    return getMapValue(MESSAGE_WIDGET_TYPE_MAP, value, MessageWidgetType::UNKNOWN);
-}
+// MessageWidgetType getMessageWidgetType(MessageType value)
+// {
+//     return getMapValue(MESSAGE_WIDGET_TYPE_MAP, value, MessageWidgetType::UNKNOWN);
+// }
 
 QString getDataTypeStringRepr(DataType type)
 {

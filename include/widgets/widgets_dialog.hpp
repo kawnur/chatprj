@@ -38,12 +38,6 @@ public:
     virtual std::string editText() { return ""s; }
     virtual QStringList selectedFiles() const { return QStringList(); }
     virtual QString getSaveFileName(const QString &param, const QString &path) { return ""; }
-
-    void setDialogType(DialogType type);
-
-protected:
-    DialogType dialogType_;
-    QString defaultTitle_;
 };
 
 class FormLine
@@ -140,8 +134,8 @@ class TextDialog : public Dialog
 
 public:
     TextDialog(
-        std::shared_ptr<Dialog> parent, DialogType type, const std::string &title,
-        const std::string &text, std::initializer_list<ButtonInfo> buttonsInfo);
+        std::shared_ptr<Dialog> parent, const std::string &title, const std::string &text,
+        std::initializer_list<ButtonInfo> buttonsInfo);
 
     ~TextDialog();
 
@@ -150,8 +144,7 @@ public:
     void closeSelfAndParent();
     void acceptAction();
     void setText(const std::string &text);
-    void update(DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
-    void updateType(DialogType type);
+    void update(const std::string &text, std::initializer_list<ButtonInfo> list);
     void updateButtonBox(std::initializer_list<ButtonInfo> list);
 
 public slots:

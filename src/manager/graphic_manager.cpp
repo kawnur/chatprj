@@ -5,6 +5,7 @@
 #include "mainwindow.hpp"
 #include "manager.hpp"
 #include "message.hpp"
+#include "widget_group.hpp"
 #include "widgets.hpp"
 #include "widgets_message.hpp"
 #include "utils.hpp"
@@ -76,7 +77,7 @@ bool GraphicManager::addCompanion(CompanionPtr companion)
 std::optional<GraphicManagerMapValue> GraphicManager::getMappedValue(int id) const
 {
     auto lambda = [&]() { return map_.at(id); };
-    auto result = runAndReturnOptional<GraphicManagerMapValue>(lambda);
+    auto result = runAndReturnOptional(lambda);
 
     if (!result)
         logTemplateError("companion with id '{}' not found", id);
@@ -196,9 +197,9 @@ void GraphicManager::postSelectCompanion()
     group->showCentralPanel();
 }
 
-void GraphicManager::sendMessage(MessageType type, CompanionPtr companion, const std::string &text)
+void GraphicManager::sendTextMessage(CompanionPtr companion, const std::string &text)
 {
-    manager_->sendMessage(type, companion, nullptr, text);
+    manager_->sendTextMessage(companion, nullptr, text);
 }
 
 void GraphicManager::addLog(const QString &text)
@@ -314,33 +315,20 @@ void GraphicManager::createEntrancePassword()
 //     manager_->initEntrancePasswordReception();
 // }
 
-MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, MessagePtr message)
-{
-    // switch (message->type()) {
-    // case MessageType::TEXT:
-    //     return std::make_shared<TextMessageWidget>(companion, message);
+// MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, MessagePtr message)
+// {
+//     return std::make_shared<MessageWidget>(companion, message);
+// }
 
-    // case MessageType::FILE:
-    //     return std::make_shared<FileMessageWidget>(companion, message);
+// void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message)
+// {
+//     auto group = getWidgetGroup(companion);
 
-    // default:
-    //     logArgsError("message widget building error");
+//     if (!group)
+//         return;
 
-    //     return nullptr;
-    // }
-
-    return std::make_shared<MessageWidget>(companion, message);
-}
-
-void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message)
-{
-    auto group = getWidgetGroup(companion);
-
-    if (!group)
-        return;
-
-    emit group->addMessageWidgetSignal(message);
-}
+//     emit group->addMessageWidgetSignal(message);
+// }
 
 void GraphicManager::addMessageWidgets(
     CompanionPtr companion, const std::vector<MessagePtr> &messages)
@@ -446,6 +434,18 @@ void GraphicManager::addEarlyMessages(CompanionPtr companion)
 std::filesystem::path GraphicManager::getLastOpenedPath()
 {
     return manager_->getLastOpenedPath();
+}
+
+template<>
+void GraphicManager::emitGroupSignal<TextMessageWidget>(WidgetGroupPtr group, MessagePtr message)
+{
+    emit group->addTextMessageWidgetSignal(message);
+}
+
+template<>
+void GraphicManager::emitGroupSignal<FileMessageWidget>(WidgetGroupPtr group, MessagePtr message)
+{
+    emit group->addFileMessageWidgetSignal(message);
 }
 
 GraphicManagerPtr getGraphicManager()

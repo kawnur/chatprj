@@ -52,9 +52,7 @@ protected:
         bool status, const std::vector<std::string> &messages,
         std::initializer_list<ButtonInfo> list);
 
-    void updateInfoDialogAndShow(
-        DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list);
-
+    void updateInfoDialogAndShow(const std::string &text, std::initializer_list<ButtonInfo> list);
     void updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text);
 
     ManagerPtr manager_;

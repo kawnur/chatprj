@@ -145,15 +145,9 @@ void logTemplateError(T &&templateString, Ts &&...args);
 template<typename T, typename... Ts>
 void logTemplateException(T &&templateString, Ts &&...args);
 
-template<AssociativeContainer M, typename T, typename U>
+template<AssociativeContainer M>
 typename M::mapped_type getMapValue(
-    const std::reference_wrapper<const M> &wrapper, const T &key, const U &defaultValue)
-{
-    return getMapValue(wrapper.get(), key, defaultValue);
-}
-
-template<AssociativeContainer M, typename T, typename U>
-typename M::mapped_type getMapValue(const M &map, const T &key, const U &defaultValue)
+    const M &map, const typename M::key_type &key, const typename M::mapped_type &defaultValue)
 {
     try {
         return map.at(key);
@@ -164,7 +158,7 @@ typename M::mapped_type getMapValue(const M &map, const T &key, const U &default
     catch(const std::exception &e) {
         logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
-        return (typename M::mapped_type)(std::remove_reference_t<U>());
+        return typename M::mapped_type();
     }
 }
 
@@ -249,11 +243,11 @@ bool runAndReturnTrue(F &&func, Ts&&... args)
     return true;
 }
 
-template<typename T, typename F, typename... Ts>
-std::optional<T> runAndReturnOptional(F &&func, Ts&&... args)
+template<typename F, typename... Ts>
+std::optional<std::invoke_result_t<F, Ts...>> runAndReturnOptional(F &&func, Ts&&... args)
 {
     try {
-        return func(args...);
+        return std::optional<std::invoke_result_t<F, Ts...>>(func(args...));
     }
     catch(const std::exception &e) {
         logTemplateException("{0} {1}", __FUNCTION__, e.what());
@@ -262,8 +256,9 @@ std::optional<T> runAndReturnOptional(F &&func, Ts&&... args)
     }
 }
 
-template<typename T, typename F, typename... Ts>
-T runAndReturnDefault(F &&func, const T &defaultValue, Ts&&... args)
+template<typename F, typename... Ts>
+std::invoke_result_t<F, Ts...> runAndReturnDefault(
+    F &&func, const std::invoke_result_t<F, Ts...> &defaultValue, Ts&&... args)
 {
     try {
         return func(args...);
@@ -275,8 +270,9 @@ T runAndReturnDefault(F &&func, const T &defaultValue, Ts&&... args)
     }
 }
 
-template<typename T, typename F, typename... Ts>
-T runAndReturnResultOrDefaultValue(F &&func, const T &defaultValue, Ts &&...args)
+template<typename F, typename... Ts>
+std::invoke_result_t<F, Ts...> runAndReturnResultOrDefaultValue(
+    F &&func, const std::invoke_result_t<F, Ts...> &defaultValue, Ts &&...args)
 {
     try {
         return func(args...);
@@ -293,12 +289,11 @@ int getIntFromString(const int &defaultValue, Ts &&...args)
 {
     auto lambda = [&](auto &&...args) { return std::stoi(args...); };
 
-    return runAndReturnResultOrDefaultValue<int>(lambda, defaultValue, args...);
+    return runAndReturnResultOrDefaultValue(lambda, defaultValue, args...);
 }
 
-// TODO get rid of T template parameter
-template<typename T, typename F, typename... Ts>
-std::shared_ptr<T> runAndReturnSharedPtr(F &&func, Ts&&... args)
+template<typename F, typename... Ts>
+std::invoke_result_t<F, Ts...> runAndReturnSharedPtr(F &&func, Ts&&... args)
 {
     try {
         return func(args...);
@@ -337,7 +332,6 @@ std::string buildTextAsUnorderedList(const std::vector<std::string> &messages);
 std::string buildTextAsUnorderedListWithHeader(
     const std::string &header, const std::vector<std::string> &messages);
 
-LogType getLogTypeByDialogType(DialogType type);
 nlohmann::json buildJsonObject(const std::string &jsonString);
 std::string getNetworkId();
 std::string getRandomString(std::size_t length);

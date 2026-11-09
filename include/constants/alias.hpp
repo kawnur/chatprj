@@ -28,6 +28,7 @@ class DBReplyData;
 class DeleteCompanionAction;
 class FileAction;
 class FileManager;
+class FileMessageWidget;
 class FileOperator;
 class GetPasswordAction;
 class GraphicManager;
@@ -66,6 +67,7 @@ class SocketInfoBaseWidget;
 class StubWidgetGroup;
 class TextDialog;
 class TextEditWidget;
+class TextMessageWidget;
 class UpdateCompanionAction;
 class WidgetGroup;
 

@@ -50,7 +50,6 @@ public:
     void log();
 
     std::string getData(DataType type);
-
     bool checkAsUpdateResult();
 
 private:
@@ -69,8 +68,6 @@ private:
     std::vector<CompanionPtr> members_;
 };
 
-// TODO overload operator
-bool compareCompanionData(
-    CompanionDataPtr data1, CompanionDataPtr data2);
+bool compareCompanionData(CompanionDataPtr data1, CompanionDataPtr data2);
 
 #endif // DATA_HPP

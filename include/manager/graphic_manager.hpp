@@ -29,7 +29,7 @@ public:
     void deleteWidgetGroup(CompanionPtr companion);
     void preSelectCompanion();
     void postSelectCompanion();
-    void sendMessage(MessageType type, CompanionPtr companion, const std::string &text);
+    void sendTextMessage(CompanionPtr companion, const std::string &text);
     void addLog(const QString &text);
     void addWidget(MWContainerPosition position, QWidgetPtr widget);
     void addCompanionWidget(SocketInfoBaseWidgetPtr widget);
@@ -45,8 +45,23 @@ public:
     void enableMainWindowBlurEffect();
     void disableBlur();
     // void getEntrancePassword();
-    MessageWidgetPtr buildMessageWidget(CompanionPtr companion, MessagePtr message);
-    void addMessageWidget(CompanionPtr companion, MessagePtr message);
+    // MessageWidgetPtr buildMessageWidget(CompanionPtr companion, MessagePtr message);
+    // void addMessageWidget(CompanionPtr companion, MessagePtr message);
+
+    template<typename T>
+    void addMessageWidget(CompanionPtr companion, MessagePtr message)
+    {
+        auto group = getWidgetGroup(companion);
+
+        if (!group)
+            return;
+
+        emitGroupSignal<T>(group, message);
+    }
+
+    template<typename T>
+    void emitGroupSignal(WidgetGroupPtr group, MessagePtr message);
+
     void addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages);
     void setMessageWidgetState(MessageWidgetState state, MessageInfoPtr info);
     void sendFile(CompanionPtr companion);
@@ -83,6 +98,12 @@ private:
     GraphicManagerMap map_;
     CompanionPtr selectedCompanion_;
 };
+
+template<>
+void GraphicManager::emitGroupSignal<TextMessageWidget>(WidgetGroupPtr group, MessagePtr message);
+
+template<>
+void GraphicManager::emitGroupSignal<FileMessageWidget>(WidgetGroupPtr group, MessagePtr message);
 
 GraphicManagerPtr getGraphicManager();
 

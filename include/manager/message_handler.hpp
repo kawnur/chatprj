@@ -33,9 +33,7 @@ public:
     void setManager(ManagerPtr manager);
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
-
-    void sendMessage(
-        MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text);
+    void sendTextMessage(CompanionPtr companion, ActionPtr action, const std::string &text);
 
     bool sendChatHistory(
         CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys);

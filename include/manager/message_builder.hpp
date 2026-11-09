@@ -16,15 +16,14 @@ public:
     MessageMetaDataPtr buildUnsentMessageMetaData(
         CompanionPtr companion, DBReplyDataPtr data, std::size_t index);
 
-    MessageMetaDataPtr buildMyTextMessageMetaData(MessageType type, CompanionPtr companion);
+    MessageMetaDataPtr buildMyTextMessageMetaData(CompanionPtr companion);
     MessageDataPtr buildMessageData(DBReplyDataPtr data, std::size_t index);
     MessageStatePtr buildMessageState(bool isAntecedent, DBReplyDataPtr data, std::size_t index);
 
     MessagePtr buildMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);
 
-    MessagePtr buildMyTextMessage(
-        MessageType type, CompanionPtr companion, const std::string &text);
+    MessagePtr buildMyTextMessage(CompanionPtr companion, const std::string &text);
 
     MessagePtr buildUnsentTextMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);

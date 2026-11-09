@@ -434,10 +434,9 @@ void Manager::endAction(ActionPtr action)
     checkAndResetCurrentAction(action);
 }
 
-void Manager::sendMessage(
-    MessageType type, CompanionPtr companion, ActionPtr action, const std::string &text)
+void Manager::sendTextMessage(CompanionPtr companion, ActionPtr action, const std::string &text)
 {
-    messageHandler_.sendMessage(type, companion, action, text);
+    messageHandler_.sendTextMessage(companion, action, text);
 }
 
 bool Manager::sendFileRequestMessage(CompanionPtr companion, const std::string &networkId)
@@ -646,10 +645,10 @@ void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool container
     messageHandler_.fillMessageStorageForCompanion(companion, containersAreEmpty);
 }
 
-void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
-{
-    graphicManager_->addMessageWidget(companion, message);
-}
+// void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
+// {
+//     graphicManager_->addMessageWidget(companion, message);
+// }
 
 void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages)
 {

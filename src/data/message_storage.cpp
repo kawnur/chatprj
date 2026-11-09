@@ -14,7 +14,7 @@ MessageInfoPtr CompanionMessageStorage::getMessageInfo(int id)
 
     auto lambda = [&]() { return map_.at(id); };
 
-    return runAndReturnSharedPtr<MessageInfo>(lambda);
+    return runAndReturnSharedPtr(lambda);
 }
 
 MessageInfoPtr CompanionMessageStorage::getMessageInfoByNetworkId(const std::string &networkId)
@@ -148,7 +148,7 @@ MessagePtr MessageStorage::getEarliestMessage(int companionId)
 {
     auto lambda = [&]() { return storage_.at(companionId).getEarliestMessage(); };
 
-    return runAndReturnSharedPtr<Message>(lambda);
+    return runAndReturnSharedPtr(lambda);
 }
 
 bool MessageStorage::updateAndInsert(int companionId, MessageInfoPtr info)

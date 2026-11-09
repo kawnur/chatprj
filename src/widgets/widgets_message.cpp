@@ -124,7 +124,7 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
     : VLayoutWidget(WidgetType::MESSAGE, Qt::AlignLeft)
 {
     // fields
-    type_ = getMessageWidgetType(message->type());
+    // type_ = getMessageWidgetType(message->type());
     companion_ = companion;
     message_ = message;
 
@@ -142,30 +142,30 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
 
     // body
     initBody();
-    addWidget(body_.get());
+    // addWidget(body_.get());
 
     // indicator panel
     indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(message);
     addWidget(indicatorPanel_.get());
 }
 
-void MessageWidget::initBody()
-{
-    switch (type_) {
-    case MessageWidgetType::TEXT:
-        body_ = std::make_shared<TextMessageBodyWidget>(message_);
+// void MessageWidget::initBody()
+// {
+//     switch (type_) {
+//     case MessageWidgetType::TEXT:
+//         body_ = std::make_shared<TextMessageBodyWidget>(message_);
 
-    break;
-    case MessageWidgetType::FILE:
-        body_ = std::make_shared<FileMessageBodyWidget>(message_);
+//     break;
+//     case MessageWidgetType::FILE:
+//         body_ = std::make_shared<FileMessageBodyWidget>(message_);
 
-    break;
-    default:
-        logArgsError("message widget building error");
+//     break;
+//     default:
+//         logArgsError("message widget building error");
 
-    break;
-    }
-}
+//     break;
+//     }
+// }
 
 MessagePtr MessageWidget::message()
 {
@@ -174,7 +174,7 @@ MessagePtr MessageWidget::message()
 
 void MessageWidget::set(WidgetGroupPtr group)
 {
-    body_->set();
+    // body_->set();
 
     connect(
         this, &MessageWidget::widgetSelectedSignal,
@@ -202,6 +202,26 @@ void MessageWidget::mousePressEvent(QMouseEvent *event)
 {
     indicatorPanel_->unsetNewMessageLabel();
     emit widgetSelectedSignal(shared_from_this());
+}
+
+TextMessageWidget::TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : MessageWidget(companion, message, parent) {}
+
+void TextMessageWidget::initBody()
+{
+    body_ = std::make_unique<TextMessageBodyWidget>(message_);
+    body_->set();
+    addWidget(body_.get());
+}
+
+FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : MessageWidget(companion, message, parent) {}
+
+void FileMessageWidget::initBody()
+{
+    body_ = std::make_unique<FileMessageBodyWidget>(message_);
+    body_->set();
+    addWidget(body_.get());
 }
 
 QString formatHeader(CompanionPtr companion, MessagePtr message)

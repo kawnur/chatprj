@@ -50,11 +50,6 @@ std::string buildTextAsUnorderedListWithHeader(
     return text;
 }
 
-LogType getLogTypeByDialogType(DialogType type)
-{
-    return getMapValue(MAP_DIALOG_TYPE_TO_LOG_TYPE, type, LogType::INFO);
-}
-
 nlohmann::json buildJsonObject(const std::string &jsonString)
 {
     nlohmann::json jsonData = nlohmann::json::parse(jsonString);

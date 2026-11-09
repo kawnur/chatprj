@@ -19,7 +19,7 @@ Action::Action(ManagerPtr manager, const std::string &title)
     : manager_(manager), dialogTitle_(title)
 {
     std::initializer_list<ButtonInfo> list {};
-    infoDialog_ = std::make_shared<TextDialog>(nullptr, DialogType::INFO, dialogTitle_, ""s, list);
+    infoDialog_ = std::make_shared<TextDialog>(nullptr, dialogTitle_, ""s, list);
 }
 
 Action::~Action() { logArgsInfo(Q_FUNC_INFO); }
@@ -46,24 +46,23 @@ void Action::endAct()
 void Action::updateInfoDialogBase(
     bool status, const std::vector<std::string> &messages, std::initializer_list<ButtonInfo> list)
 {
-    auto type = (status) ? DialogType::INFO : DialogType::ERROR;
     auto lambda = [this](bool status) { return infoDialogHeaders_.at(uint(status)); };
     auto header = runAndReturnDefault(lambda, ""s, status);
     auto text = buildTextAsUnorderedListWithHeader(header, messages);
-    infoDialog_->update(type, text, list);
+    infoDialog_->update(text, list);
 }
 
 void Action::updateInfoDialogAndShow(
-    DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list)
+    const std::string &text, std::initializer_list<ButtonInfo> list)
 {
-    infoDialog_->update(type, text, list);
+    infoDialog_->update(text, list);
     infoDialog_->show();
 }
 
 void Action::updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text)
 {
     auto list = { getOKButtonInfo([this]() { infoDialog_->closeSelf(); }) };
-    updateInfoDialogAndShow(DialogType::ERROR, text, list);
+    updateInfoDialogAndShow(text, list);
 }
 
 CompanionAction::CompanionAction(
@@ -210,7 +209,7 @@ void DeleteCompanionAction::preAct()
         getCancelButtonInfo([this]() { endAct(); })
     };
 
-    updateInfoDialogAndShow(DialogType::WARNING, deleteCompanionDialogText, list);
+    updateInfoDialogAndShow(deleteCompanionDialogText, list);
 }
 
 ActionResultPtr DeleteCompanionAction::act()
@@ -235,7 +234,7 @@ void ClearHistoryCompanionAction::preAct()
         getCancelButtonInfo([this]() { endAct(); })
     };
 
-    updateInfoDialogAndShow(DialogType::WARNING, clearCompanionHistoryDialogText, list);
+    updateInfoDialogAndShow(clearCompanionHistoryDialogText, list);
 }
 
 ActionResultPtr ClearHistoryCompanionAction::act()
@@ -426,7 +425,7 @@ ActionResultPtr SendFileAction::act()
     for (const auto &path : dataDialog_->selectedFiles()) {
         filePath_ = std::filesystem::path(getString(path));
         auto text = filePath_.filename().string();
-        manager_->sendMessage(MessageType::FILE, companion_, shared_from_this(), text);
+        manager_->sendTextMessage(MessageType::FILE, companion_, shared_from_this(), text);
         manager_->setLastOpenedPath(filePath_.parent_path());
     }
 }

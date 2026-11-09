@@ -13,14 +13,8 @@
 #include "widgets.hpp"
 
 Dialog::Dialog(const std::string &title)
-    : dialogType_(DialogType::INFO), defaultTitle_(getQString(ACTION_INFO_DIALOG_DEFAULT_HEADER))
 {
     setWindowTitle(getQString(title));
-}
-
-void Dialog::setDialogType(DialogType type)
-{
-    dialogType_ = type;
 }
 
 FormLine::FormLine(const QString &name)
@@ -181,13 +175,11 @@ GroupChatDataDialog::GroupChatDataDialog(const std::string &title) : Dialog(titl
 void GroupChatDataDialog::set(ActionPtr action) {}
 
 TextDialog::TextDialog(
-    std::shared_ptr<Dialog> parent, DialogType type, const std::string &title,
-    const std::string &text, std::initializer_list<ButtonInfo> buttonsInfo)
+    std::shared_ptr<Dialog> parent, const std::string &title, const std::string &text,
+    std::initializer_list<ButtonInfo> buttonsInfo)
     : Dialog(title)
 {
     // title
-    dialogType_ = type;
-    defaultTitle_ = getQString(INFO_DIALOG_DEFAULT_HEADER);
     setWindowTitle(getQString(title));
 
     // parent
@@ -255,19 +247,10 @@ void TextDialog::setText(const std::string &text)
     edit_->setPlainText(getQString(text));
 }
 
-void TextDialog::update(
-    DialogType type, const std::string &text, std::initializer_list<ButtonInfo> list)
+void TextDialog::update(const std::string &text, std::initializer_list<ButtonInfo> list)
 {
-    updateType(type);
     setText(text);
     updateButtonBox(list);
-}
-
-void TextDialog::updateType(DialogType type)
-{
-    if (dialogType_ != type) {
-        dialogType_ = type;
-    }
 }
 
 void TextDialog::updateButtonBox(std::initializer_list<ButtonInfo> list)

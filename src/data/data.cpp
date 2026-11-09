@@ -95,8 +95,7 @@ bool CompanionData::checkAsUpdateResult()
 
 GroupChatData::GroupChatData() : members_() {}
 
-bool compareCompanionData(
-    CompanionDataPtr data1, CompanionDataPtr data2)
+bool compareCompanionData(CompanionDataPtr data1, CompanionDataPtr data2)
 {
     // do not check serverPort
 
