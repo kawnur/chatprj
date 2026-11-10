@@ -84,8 +84,6 @@ std::string getString(T &&value)
         return value;
     else if constexpr (Same<T, NetworkMessageType>)
         return getMapValue(NETWORK_MESSAGE_TYPE_STRING_REPR_MAP, value, getString(NOT_FOUND));
-    else if constexpr (Same<T, MessageType>)
-        return getMapValue(MESSAGE_TYPE_STRING_REPR_MAP, value, getString(NOT_FOUND));
     else if constexpr (Same<T, std::filesystem::path>)
         return value.string();
     else if constexpr (Same<T, QHostAddress>)
@@ -355,7 +353,6 @@ bool getBoolFromDBValue(const std::string &value);
 std::string hashFileMD5(const std::string &filename);
 void exitUtil(int result);
 
-NetworkMessageType defineNetworkMessageType(MessageType type);
 std::optional<std::string> getValueFromEnvironmentVariable(std::string &&variableName);
 
 #endif // UTILS_HPP

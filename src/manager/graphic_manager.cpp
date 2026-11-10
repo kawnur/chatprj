@@ -4,7 +4,7 @@
 #include "companion.hpp"
 #include "mainwindow.hpp"
 #include "manager.hpp"
-#include "message.hpp"
+#include "message_info.hpp"
 #include "widget_group.hpp"
 #include "widgets.hpp"
 #include "widgets_message.hpp"
@@ -207,6 +207,11 @@ void GraphicManager::addLog(const QString &text)
     mainWindow_->addLog(text);
 }
 
+void GraphicManager::addWidgetToCentralContainer(QWidgetPtr widget)
+{
+    mainWindow_->addWidgetToCentralContainer(widget);
+}
+
 void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroupPtr group)
 {
     group->hideCentralPanel();
@@ -215,12 +220,6 @@ void GraphicManager::hideWidgetGroupCentralPanel(WidgetGroupPtr group)
 void GraphicManager::showWidgetGroupCentralPanel(WidgetGroupPtr group)
 {
     group->showCentralPanel();
-}
-
-void GraphicManager::addWidget(MWContainerPosition position, QWidgetPtr widget)
-{
-    if (!mainWindow_->addWidget(position, widget))
-        logArgsError(Q_FUNC_INFO, "error");
 }
 
 void GraphicManager::addCompanionWidget(SocketInfoBaseWidgetPtr widget)

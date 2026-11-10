@@ -39,7 +39,9 @@ public:
         return dbOperator_.getDBData(type, args...);
     }
 
-    MessagePtr pushMessageToDB(MessagePtr message);
+    MessagePtr pushMessageToDB(
+        MessagePtr message, const std::string &companionName, const std::string &authorName);
+
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
     DBReplyDataPtr getEarlyMessagesDBData(int companionId, int messageId);
 

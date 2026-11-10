@@ -4,6 +4,8 @@
 #include <utility>
 
 #include "message.hpp"
+#include "message_info.hpp"
+#include "message_meta_data.hpp"
 #include "utils.hpp"
 
 CompanionMessageStorage::CompanionMessageStorage() : mutex_(), map_() {}

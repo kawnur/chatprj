@@ -12,6 +12,7 @@ target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/act
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/app)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/constants)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/data)
+target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/data/message)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/db)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/log)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/manager)

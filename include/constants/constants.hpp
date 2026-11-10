@@ -59,19 +59,6 @@ const uint32_t FILE_MANAGER_HANDLER_SLEEP_MS = 500;
 const std::size_t COMPANION_NAME_SIZE_LIMIT = 30;
 const std::size_t PASSWORD_SIZE_LIMIT = 30;
 
-enum class MessageType
-{
-    UNKNOWN,
-    TEXT,
-    FILE
-};
-
-const std::unordered_map<MessageType, std::string> MESSAGE_TYPE_STRING_REPR_MAP {
-    { MessageType::UNKNOWN, "UNKNOWN" },
-    { MessageType::TEXT, "TEXT" },
-    { MessageType::FILE, "FILE" }
-};
-
 enum class NetworkMessageType
 {
     UNKNOWN,
@@ -107,50 +94,6 @@ const std::unordered_map<NetworkMessageType, std::string> NETWORK_MESSAGE_TYPE_S
     { NetworkMessageType::CHAT_HISTORY_DATA, "CHAT_HISTORY_DATA" }
 };
 
-const std::unordered_map<NetworkMessageType, MessageType> NETWORK_MESSAGE_TYPE_TO_MESSAGE_TYPE_MAP {
-    { NetworkMessageType::UNKNOWN, MessageType::UNKNOWN },
-    { NetworkMessageType::NO_ACTION, MessageType::TEXT },
-    { NetworkMessageType::TEXT, MessageType::TEXT },
-    { NetworkMessageType::FILE_PROPOSAL, MessageType::FILE },
-    { NetworkMessageType::FILE_REQUEST, MessageType::FILE },
-    { NetworkMessageType::FILE_DATA, MessageType::FILE },
-    { NetworkMessageType::FILE_DATA_CHECK_SUCCESS, MessageType::FILE },
-    { NetworkMessageType::FILE_DATA_CHECK_FAILURE, MessageType::FILE },
-    { NetworkMessageType::FILE_DATA_TRANSMISSON_END, MessageType::FILE },
-    { NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE, MessageType::FILE },
-    { NetworkMessageType::RECEIVE_CONFIRMATION, MessageType::TEXT },
-    { NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST, MessageType::TEXT },
-    { NetworkMessageType::CHAT_HISTORY_REQUEST, MessageType::TEXT },
-    { NetworkMessageType::CHAT_HISTORY_DATA, MessageType::TEXT }
-};
-
-enum class LogType
-{
-    INFO,
-    DEBUG,
-    EXCEPTION,
-    WARNING,
-    ERROR
-};
-
-/*!
- * \brief The MWContainerPosition enum, main window container position
- */
-enum class MWContainerPosition
-{
-    LEFT,
-    CENTRAL,
-    RIGHT
-};
-
-const std::unordered_map<LogType, std::string> LOG_TYPE_STRING_REPR {
-    { LogType::INFO,      "INF" },
-    { LogType::DEBUG,     "DEB" },
-    { LogType::EXCEPTION, "EXC" },
-    { LogType::WARNING,   "WRN" },
-    { LogType::ERROR,     "ERR" }
-};
-
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };
@@ -160,12 +103,6 @@ const std::string socketInfoStubWidget { "No companion info from DB..." };
 
 // new group chat dialog
 const QString newGroupChatDialogLabel { "Choose companions to add to new group chat" };
-
-enum class ButtonState {
-    UNKNOWN,
-    CONNECT,
-    DISCONNECT
-};
 
 const QString DEFAULT_BUTTON_TEXT { "____" };
 const QString DEFAULT_FILE_WIDGET_TEXT { "FILE_WIDGET" };

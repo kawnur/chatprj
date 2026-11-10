@@ -7,6 +7,8 @@
 #include "data.hpp"
 #include "data_checker.hpp"
 #include "message.hpp"
+#include "message_info.hpp"
+#include "message_state.hpp"
 #include "utils.hpp"
 #include "validator.hpp"
 #include "widgets.hpp"
@@ -772,13 +774,16 @@ DBReplyDataPtr Manager::getEarlyMessagesDBData(int companionId, int messageId)
     return data;
 }
 
-MessagePtr Manager::pushMessageToDB(MessagePtr message)
+MessagePtr Manager::pushMessageToDB(
+    MessagePtr message, const std::string &companionName, const std::string &authorName)
 {
     // push data to db
     auto messageData = getDBData(
         DBRequestType::PUSH_MESSAGE_AND_RETURN,
-        message->companionName(),
-        message->authorName(),
+        // message->companionName(),
+        // message->authorName(),
+        companionName,
+        authorName,
         message->time(),
         message->text(),
         message->isSent(),

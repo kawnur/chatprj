@@ -31,7 +31,7 @@ public:
     void postSelectCompanion();
     void sendTextMessage(CompanionPtr companion, const std::string &text);
     void addLog(const QString &text);
-    void addWidget(MWContainerPosition position, QWidgetPtr widget);
+    void addWidgetToCentralContainer(QWidgetPtr widget);
     void addCompanionWidget(SocketInfoBaseWidgetPtr widget);
     void removeCompanionWidget(SocketInfoBaseWidgetPtr widget);
     void createCompanion();

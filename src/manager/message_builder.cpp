@@ -3,22 +3,97 @@
 #include "companion.hpp"
 #include "db_interaction.hpp"
 #include "message.hpp"
+#include "message_data.hpp"
+#include "message_meta_data.hpp"
+#include "message_state.hpp"
+
+MessagePtr MessageBuilder::buildMessage(CompanionPtr companion, const std::string &json)
+{
+    nlohmann::json jsonData = buildJsonObject(json);
+
+    if (!jsonData.contains("type"))
+        return nullptr;
+
+    auto type = NetworkMessageType(jsonData.at("type"));
+
+    switch (type) {
+    case NetworkMessageType::TEXT:
+
+        break;
+
+    case NetworkMessageType::FILE_PROPOSAL:
+
+        break;
+
+    case NetworkMessageType::RECEIVE_CONFIRMATION:
+
+        break;
+
+    case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
+
+        break;
+
+    case NetworkMessageType::CHAT_HISTORY_REQUEST:
+
+        break;
+
+    case NetworkMessageType::CHAT_HISTORY_DATA:
+
+        break;
+
+    case NetworkMessageType::FILE_REQUEST:
+
+        break;
+
+    case NetworkMessageType::FILE_DATA:
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_CHECK_SUCCESS:
+    case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
+
+        break;
+
+    case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
+
+        break;
+
+    default:
+        break;
+    }
+
+    // build meta
+    auto meta = buildObjectFromJson<MessageMetaData>(companion, jsonData);
+
+    // build data
+    auto data = buildObjectFromJson<MessageData>(companion, jsonData);
+
+    // build state
+    auto state = buildObjectFromJson<MessageState>(companion, jsonData);
+
+    auto message = std::make_shared<Message>(meta, data, state);
+
+    return message;
+}
 
 MessageMetaDataPtr MessageBuilder::buildMessageMetaData(
     CompanionPtr companion, DBReplyDataPtr data, std::size_t index)
 {
     // network id is created by storage
     return std::make_shared<MessageMetaData>(
-        MessageType::TEXT,
         NetworkMessageType::UNKNOWN,
         getIdFromDbData(data, index, "id"),
         companion->id(),
-        companion->name(),
+        // companion->name(),
         getIdFromDbData(data, index, "author_id"),
-        "",
+        // "",
         data->getValue(index, "timestamp_tz"),
-        "",
-        "");
+        ""/*,
+        ""*/);
 }
 
 MessageMetaDataPtr MessageBuilder::buildUnsentMessageMetaData(
@@ -26,34 +101,31 @@ MessageMetaDataPtr MessageBuilder::buildUnsentMessageMetaData(
 {
     // network id is created by storage
     return std::make_shared<MessageMetaData>(
-        MessageType::TEXT,
-        defineNetworkMessageType(MessageType::TEXT),
+        NetworkMessageType::TEXT,
         getIdFromDbData(data, index, "id"),
         companion->id(),
-        companion->name(),
+        // companion->name(),
         1,
-        "",
+        // "",
         data->getValue(index, "timestamp_tz"),
-        "",
-        "");
+        ""/*,
+        ""*/);
 }
 
 MessageMetaDataPtr MessageBuilder::buildMyTextMessageMetaData(CompanionPtr companion)
 {
     // network id is created by storage
-    auto type = MessageType::TEXT;
 
     return std::make_shared<MessageMetaData>(
-        type,
-        defineNetworkMessageType(type),
+        NetworkMessageType::TEXT,
         0,
         companion->id(),
-        companion->name(),
+        // companion->name(),
         1,
-        getString(ME_NAME),
+        // getString(ME_NAME),
         "now()"s,
-        "",
-        "");
+        ""/*,
+        ""*/);
 }
 
 MessageDataPtr MessageBuilder::buildMessageData(DBReplyDataPtr data, std::size_t index)
@@ -165,7 +237,6 @@ MessagePtr MessageBuilder::buildFileDataTransmissionResultMessage(
 MessagePtr MessageBuilder::buildFileProposalReplyMessage(MessagePtr message)
 {
     auto meta = std::make_shared<MessageMetaData>(message->meta());
-    meta->setMessageType(MessageType::FILE);
     meta->setNetworkMessageType(NetworkMessageType::NO_ACTION);
 
     auto data = std::make_shared<MessageData>(message->data());

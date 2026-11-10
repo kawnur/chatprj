@@ -10,12 +10,9 @@ void logDBResultUnknownField(PGresultPtr result, int row, int column)
     logTemplateError("unknown field name: {}", logMark);
 }
 
-std::string buildLogEntryPrefix(LogType type)
+std::string buildLogEntryPrefix(const std::string &logType)
 {
     auto time = getString(QTime().currentTime().toString());
 
-    std::string defaultValue = "UNKNOWN"s;
-    auto mark = getMapValue(LOG_TYPE_STRING_REPR, type, defaultValue);
-
-    return getStringByFormat("[{0} {1}]", time, mark);
+    return getStringByFormat("[{0} {1}]", time, logType);
 }

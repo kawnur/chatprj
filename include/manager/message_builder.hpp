@@ -1,14 +1,31 @@
 #ifndef MESSAGE_BUILDER_HPP
 #define MESSAGE_BUILDER_HPP
 
+#include <nlohmann/json.hpp>
+
 #include "alias.hpp"
 #include "constants.hpp"
+#include "logging.hpp"
+
+template <typename T>
+std::shared_ptr<T> buildObjectFromJson(CompanionPtr companion, const nlohmann::json &data)
+{
+    auto object = std::make_shared<T>();
+    auto result = object->setFields(companion, data);
+
+    if (!result)
+        logTemplateError("{}, error parsing jsonData", __FUNCTION__);
+
+    return (result) ? object : nullptr;
+}
 
 class MessageBuilder
 {
 public:
     MessageBuilder() = default;
     ~MessageBuilder() = default;
+
+    MessagePtr buildMessage(CompanionPtr companion, const std::string &json);
 
     MessageMetaDataPtr buildMessageMetaData(
         CompanionPtr companion, DBReplyDataPtr data, std::size_t index);

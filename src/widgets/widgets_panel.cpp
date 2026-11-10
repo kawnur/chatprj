@@ -372,45 +372,23 @@ MainWidget::MainWidget() : HLayoutWidget(WidgetType::UNKNOWN, Qt::AlignLeft)
     // stub widgets
     stubs_ = std::make_shared<StubWidgetGroup>();
     addCompanion(stubs_->socketInfoBase());
-    addWidgetToContainer(MWContainerPosition::LEFT, stubs_->left());
-    addWidgetToContainer(MWContainerPosition::CENTRAL, stubs_->central());
-    addWidgetToContainer(MWContainerPosition::RIGHT, stubs_->right());
+    left_->addWidget(stubs_->left().get());
+    addWidgetToCentralContainer(stubs_->central());
+    right_->addWidget(stubs_->right().get());
     stubs_->hide();
     stubs_->showCentral();
 
     // show - hide widget
     showHide_ = std::make_shared<ShowHideWidget>();
-
-    if (!addWidgetToContainer(MWContainerPosition::LEFT, showHide_))
-        logArgsError("addWidget error");
+    left_->addWidget(showHide_.get());
 
     // blur effect
     initBlurEffect();
 }
 
-bool MainWidget::addWidgetToContainer(MWContainerPosition position, QWidgetPtr widget)
+void MainWidget::addWidgetToCentralContainer(QWidgetPtr widget)
 {
-    switch (position) {
-    case MWContainerPosition::LEFT:
-        left_->addWidget(widget.get());
-
-    break;
-
-    case MWContainerPosition::CENTRAL:
-        central_->addWidget(widget.get());
-
-    break;
-
-    case MWContainerPosition::RIGHT:
-        right_->addWidget(widget.get());
-
-    break;
-
-    default:
-        return false;
-    }
-
-    return true;
+    central_->addWidget(widget.get());
 }
 
 void MainWidget::addCompanion(SocketInfoBaseWidgetPtr widget)

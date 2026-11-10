@@ -3,6 +3,7 @@
 #include "logging.hpp"
 #include "manager.hpp"
 #include "message.hpp"
+#include "message_data.hpp"
 
 FileManager::FileManager() : manager_(nullptr), mutex_(), lastOpenedPath_(HOME_PATH), map_() {}
 
@@ -47,8 +48,8 @@ void FileManager::addReceiverOperator(MessagePtr message, const std::filesystem:
         return;
     }
 
-    map_[networkId] =
-        std::make_shared<ReceiverOperator>(shared_from_this(), path, message->hashMD5());
+    // map_[networkId] =
+    //     std::make_shared<ReceiverOperator>(shared_from_this(), path, message->hashMD5());
 }
 
 std::shared_ptr<FileOperator> FileManager::getOperator(const std::string &key)

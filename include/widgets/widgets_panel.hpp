@@ -123,7 +123,7 @@ public:
     MainWidget();
     ~MainWidget() = default;
 
-    bool addWidgetToContainer(MWContainerPosition position, QWidgetPtr widget);
+    void addWidgetToCentralContainer(QWidgetPtr widget);
     void addCompanion(SocketInfoBaseWidgetPtr widget);
     void removeCompanion(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();

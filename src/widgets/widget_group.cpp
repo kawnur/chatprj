@@ -1,6 +1,7 @@
 #include "widget_group.hpp"
 
 #include "companion.hpp"
+#include "message_state.hpp"
 #include "widgets_message.hpp"
 
 const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
@@ -28,7 +29,7 @@ void WidgetGroup::set()
     centralPanel_ = std::make_shared<CentralPanelWidget>(companion_->name(), false);
 
     centralPanel_->set(companion_);
-    graphicManager->addWidget(MWContainerPosition::CENTRAL, centralPanel_);
+    graphicManager->addWidgetToCentralContainer(centralPanel_);
     centralPanel_->hide();
 
     connect(

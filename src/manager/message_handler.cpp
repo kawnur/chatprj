@@ -3,6 +3,9 @@
 #include "companion.hpp"
 #include "manager.hpp"
 #include "message.hpp"
+#include "message_info.hpp"
+#include "message_meta_data.hpp"
+#include "message_state.hpp"
 
 const uint32_t SLEEP_DURATION_INITIAL_MS = 1000;
 // const float SLEEP_DURATION_INCREASE_RATE = 1.2f;
@@ -85,7 +88,7 @@ void MessageHandler::sendTextMessage(
     auto message = builder_.buildMyTextMessage(companion, text);
 
     // add to DB and get timestamp
-    auto pushResult = manager_->pushMessageToDB(message);
+    auto pushResult = manager_->pushMessageToDB(message, companion->name(), getString(ME_NAME));
 
     if (!pushResult || !pushResult->meta()->isValid())
         return;
@@ -178,35 +181,16 @@ bool MessageHandler::sendFileDataTransmissionResultMessage(
 
 void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &json)
 {
-    nlohmann::json jsonData = buildJsonObject(json);
+    auto message = builder_.buildMessage(companion, json);
 
-    // build meta
-    auto meta = buildObjectFromJson<MessageMetaData>(companion, jsonData);
-    auto name = companion->name();
-    meta->setCompanionName(name);
-    meta->setAuthorName(name);
-
-    if (!meta)
+    if (!message)
         return;
 
-    // build data
-    auto data = buildObjectFromJson<MessageData>(companion, jsonData);
-
-    if (!data)
-        return;
-
-    // build state
-    auto state = buildObjectFromJson<MessageState>(companion, jsonData);
-    state->setIsReceived(true);
-
-    if (!state)
-        return;
-
-    auto message = std::make_shared<Message>(meta, data, state);
+    handleMessage(companion, message);
 
     switch (message->networkMessageType()) {
     case NetworkMessageType::TEXT:
-        receiveTextMessage(companion, message);
+        // receiveTextMessage(companion, message);
 
     break;
 
@@ -231,7 +215,7 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     break;
 
     case NetworkMessageType::CHAT_HISTORY_DATA:
-        receiveChatHistoryData(companion, jsonData);
+        // receiveChatHistoryData(companion, jsonData);
 
     break;
 
@@ -266,27 +250,28 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     }
 }
 
-void MessageHandler::receiveTextMessage(CompanionPtr companion, MessagePtr message)
-{
-    // add to DB and get timestamp
-    auto pushResult = manager_->pushMessageToDB(message);
+// void MessageHandler::receiveTextMessage(CompanionPtr companion, MessagePtr message)
+// {
+//     // add to DB and get timestamp
+//     auto name = companion->name();
+//     auto pushResult = manager_->pushMessageToDB(message, name, name);
 
-    if (!pushResult || !pushResult->meta()->isValid())
-        return;
+//     if (!pushResult || !pushResult->meta()->isValid())
+//         return;
 
-    auto storeResult = addToStorage(companion, message);
+//     auto storeResult = addToStorage(companion, message);
 
-    if (!storeResult)
-        return;
+//     if (!storeResult)
+//         return;
 
-    // decrypt message
+//     // decrypt message
 
-    // add widget
-    manager_->addMessageWidget<TextMessageWidget>(companion, message);
+//     // add widget
+//     manager_->addMessageWidget<TextMessageWidget>(companion, message);
 
-    // send reply message to sender
-    bool result = buildAndSendConfirmation(companion, message);
-}
+//     // send reply message to sender
+//     bool result = buildAndSendConfirmation(companion, message);
+// }
 
 void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr message)
 {
@@ -604,6 +589,30 @@ bool MessageHandler::clearMessageMapping(CompanionPtr companion)
 bool MessageHandler::addCompanionToMessageStorage(CompanionPtr companion)
 {
     return storage_.addCompanion(companion->id());
+}
+
+template<>
+void MessageHandler::handleMessage<TextMessage>(CompanionPtr companion, TextMessagePtr message)
+{
+    // add to DB and get timestamp
+    auto name = companion->name();
+    auto pushResult = manager_->pushMessageToDB(message, name, name);
+
+    if (!pushResult || !pushResult->meta()->isValid())
+        return;
+
+    auto storeResult = addToStorage(companion, message);
+
+    if (!storeResult)
+        return;
+
+    // decrypt message
+
+    // add widget
+    manager_->addMessageWidget<TextMessageWidget>(companion, message);
+
+    // send reply message to sender
+    bool result = buildAndSendConfirmation(companion, message);
 }
 
 std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message)

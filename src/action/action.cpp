@@ -9,7 +9,6 @@
 #include "data.hpp"
 #include "logging.hpp"
 #include "manager.hpp"
-#include "message.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
 #include "widgets.hpp"

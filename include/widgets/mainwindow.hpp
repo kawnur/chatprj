@@ -25,7 +25,7 @@ public:
     void set();
 
     void addLog(const QString &text);
-    bool addWidget(MWContainerPosition position, QWidgetPtr widget);
+    void addWidgetToCentralContainer(QWidgetPtr widget);
     void addCompanion(SocketInfoBaseWidgetPtr widget);
     void removeCompanion(SocketInfoBaseWidgetPtr widget);
     std::size_t getCompanionPanelChildrenSize();

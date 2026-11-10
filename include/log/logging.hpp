@@ -39,42 +39,42 @@ void logArgsWithTemplate(T &&templateString, Ts &&...args)
     logArgs(getStringByFormat(templateString, args...));
 }
 
-std::string buildLogEntryPrefix(LogType type);
+std::string buildLogEntryPrefix(const std::string &logType);
 
 template<typename... Ts>
-void logTypeArgs(LogType type, Ts &&...args)
+void logTypeArgs(const std::string &prefix, Ts &&...args)
 {
-    logArgs(buildLogEntryPrefix(type), args...);
+    logArgs(prefix, args...);
 }
 
 template<typename... Ts>
 void logArgsInfo(Ts &&...args)
 {
-    logArgs(buildLogEntryPrefix(LogType::INFO), args...);
+    logArgs(buildLogEntryPrefix("INFO"), args...);
 }
 
 template<typename... Ts>
 void logArgsDebug(Ts &&...args)
 {
-    logArgs(buildLogEntryPrefix(LogType::DEBUG), args...);
+    logArgs(buildLogEntryPrefix("DEBUG"), args...);
 }
 
 template<typename... Ts>
 void logArgsException(Ts &&...args)
 {
-    logArgs(buildLogEntryPrefix(LogType::EXCEPTION), args...);
+    logArgs(buildLogEntryPrefix("EXCEPTION"), args...);
 }
 
 template<typename... Ts>
 void logArgsWarning(Ts &&...args)
 {
-    logArgs(buildLogEntryPrefix(LogType::WARNING), args...);
+    logArgs(buildLogEntryPrefix("WARNING"), args...);
 }
 
 template<typename... Ts>
 void logArgsError(Ts &&...args)
 {
-    logArgs(buildLogEntryPrefix(LogType::ERROR), args...);
+    logArgs(buildLogEntryPrefix("ERROR"), args...);
 }
 
 template<typename T, typename... Ts>

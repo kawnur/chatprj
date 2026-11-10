@@ -10,19 +10,8 @@
 #include "constants.hpp"
 #include "logging.hpp"
 #include "message_builder.hpp"
+#include "message_data.hpp"
 #include "message_storage.hpp"
-
-template <typename T>
-std::shared_ptr<T> buildObjectFromJson(CompanionPtr companion, const nlohmann::json &data)
-{
-    auto object = std::make_shared<T>();
-    auto result = object->setFields(companion, data);
-
-    if (!result)
-        logTemplateError("{}, error parsing jsonData", __FUNCTION__);
-
-    return (result) ? object : nullptr;
-}
 
 class MessageHandler
 {
@@ -31,6 +20,9 @@ public:
     ~MessageHandler() = default;
 
     void setManager(ManagerPtr manager);
+
+    template<typename T>
+    void handleMessage(CompanionPtr companion, std::shared_ptr<T> message);
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
     void sendTextMessage(CompanionPtr companion, ActionPtr action, const std::string &text);
@@ -71,7 +63,7 @@ private:
     bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
     bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
 
-    void receiveTextMessage(CompanionPtr companion, MessagePtr message);
+    // void receiveTextMessage(CompanionPtr companion, MessagePtr message);
     void receiveConfirmation(CompanionPtr companion, MessagePtr message);
     void receiveConfirmationRequest(CompanionPtr companion, MessagePtr message);
     void reciveChatHistoryRequest(CompanionPtr companion);
@@ -89,6 +81,9 @@ private:
     MessageStorage storage_;
     MessageBuilder builder_;
 };
+
+template<>
+void MessageHandler::handleMessage<TextMessage>(CompanionPtr companion, TextMessagePtr message);
 
 std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message);
 
