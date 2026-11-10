@@ -14,6 +14,7 @@
 #include "message.hpp"  // used in lambda
 #include "utils_cout.hpp"
 #include "utils_widgets.hpp"
+#include "widget_group.hpp"
 #include "widgets_message.hpp"
 
 const uint8_t BLUR_RADIUS = 30;
@@ -112,8 +113,8 @@ CentralPanelWidget::CentralPanelWidget(const std::string &name, bool isStub, QWi
 
     // button panel
     std::initializer_list<ButtonInfo> list = {
-        { false, ButtonType::SEND_FILE, [this]() { sendFileSlot(); } },
-        { false, ButtonType::SEND_TEXT, [this]() { textEdit_->sendSlot(); } }
+        { { SEND_FILE_BUTTON_TEXT }, [this]() { sendFileSlot(); } },
+        { { SEND_TEXT_BUTTON_TEXT }, [this]() { textEdit_->sendSlot(); } }
     };
 
     buttons_ = std::make_unique<ButtonPanelWidget>(WidgetType::HISTORY_BUTTON_PANEL, list);

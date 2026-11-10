@@ -36,6 +36,7 @@ const std::string VALUE_BUILDING_ERROR { "Value building error" };
 const std::string POINTER_CASTING_ERROR { "Pointer casting error" };
 
 const QString ME_NAME { "me" };
+const std::string MESSAGE_WIDGET_ME_NAME { "Me" };
 const QString NOT_FOUND { "NOT FOUND" };
 
 const std::size_t NETWORK_ID_SIZE = 5;
@@ -160,60 +161,30 @@ const std::string socketInfoStubWidget { "No companion info from DB..." };
 // new group chat dialog
 const QString newGroupChatDialogLabel { "Choose companions to add to new group chat" };
 
-// button text
-enum class ButtonType
-{
-    OK,
-    CANCEL,
-    EDIT,
-    CLEAR_HISTORY,
-    SEND_HISTORY,
-    DELETE_COMPANION,
-    CONNECT_DISCONNECT,
-    DOWNLOAD_FILE,
-    SEND_FILE,
-    SEND_TEXT,
-    UNKNOWN
-};
-
 enum class ButtonState {
     UNKNOWN,
     CONNECT,
     DISCONNECT
 };
 
-const std::unordered_map<ButtonType, std::list<ButtonState>> BUTTON_TYPE_TO_STATE_LIST_MAP {
-    { ButtonType::CONNECT_DISCONNECT, { ButtonState::CONNECT, ButtonState::DISCONNECT } }
-};
-
 const QString DEFAULT_BUTTON_TEXT { "____" };
 const QString DEFAULT_FILE_WIDGET_TEXT { "FILE_WIDGET" };
 const QString DEFAULT_DATA_TYPE_STRING_REPR { "UNKNOWN" };
 
-const std::unordered_map<ButtonState, QString> BUTTON_STATE_TO_TEXT_MAP {
-    { ButtonState::CONNECT, "Connect" },
-    { ButtonState::DISCONNECT, "Disconnect" }
-};
-
-const std::unordered_map<ButtonType, QString> BUTTON_TYPE_TO_TEXT_MAP {
-    { ButtonType::OK, "OK" },
-    { ButtonType::CANCEL, "Cancel" },
-    { ButtonType::EDIT, "Edit" },
-    { ButtonType::CLEAR_HISTORY, "Clear history" },
-    { ButtonType::SEND_HISTORY, "Send history" },
-    { ButtonType::DELETE_COMPANION, "Delete companion" },
-    { ButtonType::DOWNLOAD_FILE, "Download file" },
-    { ButtonType::SEND_FILE, "Send file" },
-    { ButtonType::SEND_TEXT, "Send text" },
-    { ButtonType::UNKNOWN, "_" }
-};
+const QString OK_BUTTON_TEXT = "OK";
+const QString CANCEL_BUTTON_TEXT = "Cancel";
+const QString EDIT_BUTTON_TEXT = "Edit";
+const QString CONNECT_BUTTON_TEXT = "Connect";
+const QString DISCONNECT_BUTTON_TEXT = "Disconnect";
+const QString CLEAR_HISTORY_BUTTON_TEXT = "Clear history";
+const QString SEND_HISTORY_BUTTON_TEXT = "Send history";
+const QString DELETE_COMPANION_BUTTON_TEXT = "Delete companion";
+const QString DOWNLOAD_FILE_BUTTON_TEXT = "Download file";
+const QString SEND_FILE_BUTTON_TEXT = "Send file";
+const QString SEND_TEXT_BUTTON_TEXT = "Send text";
+const QString UNKNOWN_BUTTON_TEXT = "_";
 
 const QDialogButtonBox::ButtonRole DEFAULT_BUTTON_ROLE = QDialogButtonBox::NoRole;
-
-const std::unordered_map<ButtonType, QDialogButtonBox::ButtonRole> BUTTON_TYPE_TO_ROLE_MAP {
-    { ButtonType::OK, QDialogButtonBox::AcceptRole },
-    { ButtonType::CANCEL, QDialogButtonBox::RejectRole }
-};
 
 // colors
 enum class WidgetType
@@ -260,17 +231,6 @@ const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
     { WidgetType::FILE_SENT, "SEND FILE: {}" },
     { WidgetType::FILE_RECEIVED, "RECEIVE FILE: {}" }
 };
-
-// enum class MessageWidgetType {
-//     UNKNOWN,
-//     TEXT,
-//     FILE
-// };
-
-// const std::unordered_map<MessageType, MessageWidgetType> MESSAGE_WIDGET_TYPE_MAP {
-//     { MessageType::TEXT, MessageWidgetType::TEXT },
-//     { MessageType::FILE, MessageWidgetType::FILE }
-// };
 
 enum class MessageWidgetState {
     UNKNOWN,

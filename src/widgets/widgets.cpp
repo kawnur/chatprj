@@ -1,17 +1,14 @@
 #include "widgets.hpp"
 
+#include <cstdint>
+
 #include <QSizePolicy>
 
 #include "companion.hpp"
-#include "constants.hpp"
 #include "data.hpp"
-#include "graphic_manager.hpp"
-#include "mainwindow.hpp"
+#include "utils.hpp"
 #include "utils_widgets.hpp"
-#include "widgets_message.hpp"
-#include "widgets_panel.hpp"
-
-const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
+#include "widget_group.hpp"
 
 Palette::Palette(WidgetType type, QPalette::ColorRole role) : type_(type), role_(role)
 {
@@ -163,48 +160,48 @@ TextEditWidget::TextEditWidget(WidgetType type) : Palette(type, QPalette::Base)
     setAutoFillBackground(true);
 }
 
-Button::Button(ButtonType type) : type_(type), QPushButton(getButtonText(type)) {}
+Button::Button(const QString &text) : QPushButton(text) {}
 
 Button::~Button() { logArgsInfo(Q_FUNC_INFO); }
 
-StateButton::StateButton(ButtonType type) : Button(type), state_(ButtonState::UNKNOWN)
+StateButton::StateButton(const std::vector<QString> &texts)
+    : Button(""), texts_(std::move(texts))
 {
-    if (!BUTTON_TYPE_TO_STATE_LIST_MAP.contains(type_))
+    if (texts_.empty())
         return;
 
-    auto list = BUTTON_TYPE_TO_STATE_LIST_MAP.at(type_);
-
-    if (list.empty())
-        return;
-
-    state_ = list.front();
-    setText(getButtonText(state_));
+    setText(texts.at(0));
 }
 
 void StateButton::updateState()
 {
-    if (!BUTTON_TYPE_TO_STATE_LIST_MAP.contains(type_))
-        return;
+    auto current = text();
+    auto begin = texts_.begin();
+    auto end = texts_.end();
 
-    state_ = getNextItem(BUTTON_TYPE_TO_STATE_LIST_MAP.at(type_), state_, ButtonState::UNKNOWN);
-    setText(getButtonText(state_));
+    for (auto iter = begin; iter != end; ++iter) {
+        if (*iter != current)
+            continue;
+
+        auto next = iter + 1;
+
+        if (next == end)
+            next = begin;
+
+        setText(*next);
+    }
 }
 
-ButtonInfo::ButtonInfo(): isStateButton_(false), type_(ButtonType::UNKNOWN), function_() {}
+ButtonInfo::ButtonInfo(): function_() {}
 
-ButtonInfo::ButtonInfo(bool isStateButton, ButtonType type, std::function<void()> function)
-    : isStateButton_(isStateButton), type_(type), function_(function) {}
+ButtonInfo::ButtonInfo(const std::vector<QString> &texts, std::function<void ()> function)
+    : texts_(std::move(texts)), function_(function) {}
 
 ButtonInfo::~ButtonInfo() { logArgsInfo(Q_FUNC_INFO); }
 
-bool ButtonInfo::isStateButton() const
+std::vector<QString> ButtonInfo::texts() const
 {
-    return isStateButton_;
-}
-
-ButtonType ButtonInfo::type() const
-{
-    return type_;
+    return texts_;
 }
 
 std::function<void()> ButtonInfo::function() const
@@ -215,8 +212,9 @@ std::function<void()> ButtonInfo::function() const
 ButtonBox::ButtonBox(const std::initializer_list<ButtonInfo> &list) : QDialogButtonBox()
 {
     for (const auto &info : list) {
-        auto type = info.type();
-        auto button = addButton(getButtonText(type), getButtonRole(type));
+        std::size_t index = 0;
+        auto text = getIndexedContainerValue(info.texts(), index, DEFAULT_BUTTON_TEXT);
+        auto button = addButton(text, DEFAULT_BUTTON_ROLE);
 
         connect(button, &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
     }
@@ -291,25 +289,30 @@ ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::initializer_lis
     : HLayoutWidget(type, Qt::AlignLeft), buttons_()
 {
     for (const auto &info : list) {
-        auto type = info.type();
-
         std::shared_ptr<Button> button = nullptr;
 
-        if (info.isStateButton())
-            button = std::make_shared<StateButton>(type);
-        else
-            button = std::make_shared<Button>(type);
+        auto texts = info.texts();
+        auto size = texts.size();
 
-        buttons_[type] = button;
+        if (size > 1) {
+            stateButton_ = std::make_shared<StateButton>(texts);
+            button = stateButton_;
+        } else if (size == 1) {
+            button = std::make_shared<Button>(texts.at(0));
+            buttons_.push_back(button);
+        } else {
+            continue;
+        }
+
         addWidget(button.get());
 
         connect(button.get(), &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
     }
 }
 
-void ButtonPanelWidget::updateButtonState(ButtonType type)
+void ButtonPanelWidget::updateButtonState()
 {
-    runAndLogException([&]() { buttons_.at(type)->updateState(); });
+    stateButton_->updateState();
 }
 
 SocketInfoBaseWidget::SocketInfoBaseWidget()
@@ -341,8 +344,8 @@ void SocketInfoWidget::set(WidgetGroupPtr group)
 
     // buttons
     std::initializer_list<ButtonInfo> list = {
-        { false, ButtonType::EDIT, [this]() { updateCompanionAction(); } },
-        { true, ButtonType::CONNECT_DISCONNECT, [=, this]() { group->clientAction(); } }
+        { { EDIT_BUTTON_TEXT }, [this]() { updateCompanionAction(); } },
+        { { CONNECT_BUTTON_TEXT, DISCONNECT_BUTTON_TEXT }, [=, this]() { group->clientAction(); } }
     };
 
     buttons_ = std::make_shared<ButtonPanelWidget>(WidgetType::SOCKET_INFO_BUTTON_PANEL, list);
@@ -467,7 +470,7 @@ void SocketInfoWidget::updateConnectionState()
     isConnected_ = !(isConnected_);
 
     // change connect button text
-    buttons_->updateButtonState(ButtonType::CONNECT_DISCONNECT);
+    buttons_->updateButtonState();
 
     // change indicator color
     state_->updateState();
@@ -579,268 +582,6 @@ ScrollAreaWidget::ScrollAreaWidget(QWidgetPtr widget)
     setWidgetResizable(true);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setWidget(widget.get());
-}
-
-// WidgetGroup::WidgetGroup(CompanionPtr companion)
-//     : companion_(companion), antecedentMessagesCounterMutex_(), antecedentMessagesCounter_(0) {}
-
-// WidgetGroup::~WidgetGroup()
-// {
-//     logArgsInfo(Q_FUNC_INFO);
-//     getGraphicManager()->removeCompanionWidget(socketInfoBase_);
-//     hideCentralPanel();
-// }
-
-// void WidgetGroup::set()
-// {
-//     auto graphicManager = getGraphicManager();
-
-//     auto widget = std::make_shared<SocketInfoWidget>(companion_);
-//     widget->set(shared_from_this());
-
-//     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
-//     graphicManager->addCompanionWidget(socketInfoBase_);
-
-//     centralPanel_ = std::make_shared<CentralPanelWidget>(companion_->name(), false);
-
-//     centralPanel_->set(companion_);
-//     graphicManager->addWidget(MWContainerPosition::CENTRAL, centralPanel_);
-//     centralPanel_->hide();
-
-//     connect(
-//         this, &WidgetGroup::addMessageWidgetSignal, this, &WidgetGroup::addMessageWidgetSlot,
-//         Qt::QueuedConnection);
-
-//     connect(
-//         this, &WidgetGroup::addMessageWidgetsSignal, this, &WidgetGroup::addMessageWidgetsSlot,
-//         Qt::QueuedConnection);
-// }
-
-// void WidgetGroup::clearHistory()
-// {
-//     centralPanel_->clearHistory();
-//     setNewMessagesIndicatorOff();
-//     // socketInfoBase_->updateNewMessagesIndicator();
-
-//     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-//     antecedentMessagesCounter_ = 0;
-// }
-
-// void WidgetGroup::hideFields()
-// {
-//     socketInfoBase_->hide();
-//     centralPanel_->hide();
-// }
-
-// void WidgetGroup::hideCentralPanel()
-// {
-//     centralPanel_->hide();
-// }
-
-// void WidgetGroup::showCentralPanel()
-// {
-//     centralPanel_->show();
-//     centralPanel_->scrollDownHistory();
-// }
-
-// void WidgetGroup::messageAdded()
-// {
-//     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-//     // set new message indicator on if socket info widget is not selected
-//     if (antecedentMessagesCounter_ <= 0)
-//         return;
-
-//     setNewMessagesIndicatorOn();
-//     // socketInfoBase_->updateNewMessagesIndicator();
-// }
-
-// void WidgetGroup::updateSocketInfoWidget()
-// {
-//     socketInfoBase_->updateFields();
-// }
-
-// void WidgetGroup::select()
-// {
-//     socketInfoBase_->select();
-// }
-
-// void WidgetGroup::unselect()
-// {
-//     socketInfoBase_->unselect();
-// }
-
-// void WidgetGroup::setNewMessagesIndicatorOn()
-// {
-//     socketInfoBase_->setNewMessagesIndicatorOn();
-// }
-
-// void WidgetGroup::setNewMessagesIndicatorOff()
-// {
-//     socketInfoBase_->setNewMessagesIndicatorOff();
-// }
-
-// void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
-// {
-//     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-//     auto messageState = widget->message()->state();
-
-//     if (!messageState)
-//         return;
-
-//     bool isAntecedent = messageState->isAntecedent();
-
-//     logTemplateInfo("isAntecedent: {}", isAntecedent);
-
-//     if (isAntecedent) {
-//         if (antecedentMessagesCounter_ != 0)
-//             --antecedentMessagesCounter_;
-
-//         logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-
-//         messageState->setIsAntecedent(false);
-
-//         if (antecedentMessagesCounter_ == 0)
-//             setNewMessagesIndicatorOff();
-//             // socketInfoBase_->updateNewMessagesIndicator();
-//     }
-// }
-
-// // void WidgetGroup::buildChatHistorySlot()
-// // {
-// //     companion_->addMessageWidgetsToChatHistory();
-// // }
-
-// // void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
-// // {
-// //     bool isAntecedent = message->isAntecedent();
-
-// //     if (isAntecedent) {
-// //         std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-// //         ++antecedentMessagesCounter_;
-
-// //         logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-// //     }
-
-// //     // auto widget = getGraphicManager()->buildMessageWidget(companion_, message);
-// //     auto widget = std::make_shared<MessageWidget>(companion_, message);
-
-// //     // auto lambda = [=]()
-// //     // {
-// //     //     // companion->setMappedMessageWidget(message, widget);
-// //     //     getManager()->setMappedMessageWidget(companion_, message, widget);
-// //     // };
-
-// //     // runInDetachedThread(lambda);
-// //     auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-// //     // widget->setBase(shared_from_this());
-// //     widget->set(shared_from_this());
-// //     centralPanel_->addMessage(widget, isAntecedent);
-// //     messageAdded();
-// // }
-
-// void WidgetGroup::addMessageWidgetsSlot(const std::vector<MessagePtr> &messages)
-// {
-//     for (auto message : messages)
-//         addMessageWidgetSlot(message);
-
-//     centralPanel_->sortHistory(true);
-// }
-
-// void WidgetGroup::requestHistorySlot()
-// {
-//     getGraphicManager()->requestHistory(companion_);
-// }
-
-// void WidgetGroup::clientAction()
-// {
-//     if (!getGraphicManager()->clientAction(companion_, socketInfoBase_->isConnected()))
-//         return;
-
-//     socketInfoBase_->updateConnectionState();
-// }
-
-// void WidgetGroup::addTextMessageWidgetSlot(MessagePtr message)
-// {
-//     addMessageWidget<TextMessageWidget>(message);
-// }
-
-// void WidgetGroup::addFileMessageWidgetSlot(MessagePtr message)
-// {
-//     addMessageWidget<FileMessageWidget>(message);
-// }
-
-// // void WidgetGroup::askUserForHistorySendingConfirmationSlot()
-// // {
-// //     auto action = std::make_unique<CompanionAction>(ActionType::SEND_HISTORY, companion_);
-// //     action->set();
-// // }
-
-StubWidgetGroup::StubWidgetGroup()
-{
-    socketInfo_ = std::make_shared<SocketInfoStubWidget>();
-    left_ = std::make_shared<LeftPanelWidget>();
-    central_ = std::make_shared<CentralPanelWidget>("", true);
-    right_ = std::make_shared<RightPanelWidget>();
-
-    central_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    central_->setFixedWidth(CENTRAL_STUB_FIXED_WIDTH);
-}
-
-void StubWidgetGroup::hide()
-{
-    left_->hide();
-    central_->hide();
-    right_->hide();
-}
-
-void StubWidgetGroup::show()
-{
-    left_->show();
-    central_->show();
-    right_->show();
-}
-
-void StubWidgetGroup::hideSocketInfo()
-{
-    socketInfo_->hide();
-}
-
-void StubWidgetGroup::hideCentral()
-{
-    central_->hide();
-}
-
-void StubWidgetGroup::showCentral()
-{
-    central_->show();
-}
-
-void StubWidgetGroup::setLeftPanelWidth(int width)
-{
-    left_->resize(width, left_->height());
-}
-
-std::shared_ptr<SocketInfoBaseWidget> StubWidgetGroup::socketInfoBase() const
-{
-    return dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
-}
-
-std::shared_ptr<LeftPanelWidget> StubWidgetGroup::left() const
-{
-    return left_;
-}
-
-std::shared_ptr<CentralPanelWidget> StubWidgetGroup::central() const
-{
-    return central_;
-}
-
-std::shared_ptr<RightPanelWidget> StubWidgetGroup::right() const
-{
-    return right_;
 }
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object)

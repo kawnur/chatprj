@@ -95,17 +95,14 @@ signals:
     void widgetSelectedSignal(MessageWidgetPtr widget);
 
 protected:
-    virtual void addMembersToLayout() {}
+    void addMembersToLayout(MessageBodyWidgetPtr body);
 
-    // MessageWidgetType type_;
     CompanionPtr companion_;
     MessagePtr message_;
     std::shared_ptr<QLabel> header_;
-    // MessageBodyWidgetPtr body_;
     std::shared_ptr<MessageIndicatorPanelWidget> indicatorPanel_;
 
 private:
-    virtual void initBody() {}
     void mousePressEvent(QMouseEvent *) override;
 };
 
@@ -117,10 +114,8 @@ public:
     TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     ~TextMessageWidget() = default;
 
-    void initBody() override;
-
 private:
-    std::unique_ptr<TextMessageBodyWidget> body_;
+    std::shared_ptr<TextMessageBodyWidget> body_;
 };
 
 class FileMessageWidget : public MessageWidget
@@ -131,10 +126,8 @@ public:
     FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     ~FileMessageWidget() = default;
 
-    void initBody() override;
-
 private:
-    std::unique_ptr<FileMessageBodyWidget> body_;
+    std::shared_ptr<FileMessageBodyWidget> body_;
 };
 
 QString formatHeader(CompanionPtr companion, MessagePtr message);

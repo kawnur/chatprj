@@ -118,38 +118,18 @@ const uint8_t MESSAGE_HEADER_HTML_FONT_SIZE = 2;
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)
 {
-    return ButtonInfo(false, ButtonType::OK, function);
+    return ButtonInfo({ OK_BUTTON_TEXT }, function);
 }
 
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function)
 {
-    return ButtonInfo(false, ButtonType::CANCEL, function);
-}
-
-QString getButtonText(ButtonType type)
-{
-    return getMapValue(BUTTON_TYPE_TO_TEXT_MAP, type, DEFAULT_BUTTON_TEXT);
-}
-
-QString getButtonText(ButtonState state)
-{
-    return getMapValue(BUTTON_STATE_TO_TEXT_MAP, state, DEFAULT_BUTTON_TEXT);
-}
-
-QDialogButtonBox::ButtonRole getButtonRole(ButtonType type)
-{
-    return getMapValue(BUTTON_TYPE_TO_ROLE_MAP, type, DEFAULT_BUTTON_ROLE);
+    return ButtonInfo({ CANCEL_BUTTON_TEXT }, function);
 }
 
 QString getFileWidgetText(WidgetType value)
 {
     return getMapValue(FILE_WIDGET_TEXT_MAP, value, DEFAULT_FILE_WIDGET_TEXT);
 }
-
-// MessageWidgetType getMessageWidgetType(MessageType value)
-// {
-//     return getMapValue(MESSAGE_WIDGET_TYPE_MAP, value, MessageWidgetType::UNKNOWN);
-// }
 
 QString getDataTypeStringRepr(DataType type)
 {

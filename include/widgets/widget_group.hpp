@@ -86,4 +86,28 @@ private:
     std::mutex antecedentMessagesCounterMutex_;
 };
 
+class StubWidgetGroup
+{
+public:
+    StubWidgetGroup();
+    ~StubWidgetGroup() = default;
+
+    void hide();
+    void show();
+    void hideSocketInfo();
+    void hideCentral();
+    void showCentral();
+    void setLeftPanelWidth(int width);
+    std::shared_ptr<SocketInfoBaseWidget> socketInfoBase() const;
+    std::shared_ptr<LeftPanelWidget> left() const;
+    std::shared_ptr<CentralPanelWidget> central() const;
+    std::shared_ptr<RightPanelWidget> right() const;
+
+private:
+    std::shared_ptr<SocketInfoStubWidget> socketInfo_;
+    std::shared_ptr<LeftPanelWidget> left_;
+    std::shared_ptr<CentralPanelWidget> central_;
+    std::shared_ptr<RightPanelWidget> right_;
+};
+
 #endif // WIDGET_GROUP_HPP

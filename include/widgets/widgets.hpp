@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <memory>
-// #include <mutex>
+#include <vector>
 
 #include <QColor>
 #include <QHBoxLayout>
@@ -13,11 +13,11 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSplitter>
+#include <QString>
 #include <QTextEdit>
 
 #include "alias.hpp"
 #include "logging.hpp"
-// #include "message.hpp"
 
 class Palette
 {
@@ -144,13 +144,8 @@ class Button : public QPushButton
     Q_OBJECT
 
 public:
-    Button(ButtonType type);
+    Button(const QString &text);
     ~Button();
-
-    virtual void updateState() {}
-
-protected:
-    ButtonType type_;
 };
 
 class StateButton : public Button
@@ -158,29 +153,27 @@ class StateButton : public Button
     Q_OBJECT
 
 public:
-    StateButton(ButtonType type);
+    StateButton(const std::vector<QString> &texts);
     ~StateButton() = default;
 
-    void updateState() override;
+    void updateState();
 
 private:
-    ButtonState state_;
+    std::vector<QString> texts_;
 };
 
 class ButtonInfo
 {
 public:
     ButtonInfo();
-    ButtonInfo(bool isStateButton, ButtonType type, std::function<void()> function);
+    ButtonInfo(const std::vector<QString> &texts, std::function<void()> function);
     ~ButtonInfo();
 
-    bool isStateButton() const;
-    ButtonType type() const;
+    std::vector<QString> texts() const;
     std::function<void()> function() const;
 
 private:
-    bool isStateButton_;
-    ButtonType type_;
+    std::vector<QString> texts_;
     std::function<void()> function_;
 };
 
@@ -238,10 +231,11 @@ public:
     ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list);
     ~ButtonPanelWidget() = default;
 
-    void updateButtonState(ButtonType type);
+    void updateButtonState();
 
 private:
-    std::unordered_map<ButtonType, std::shared_ptr<Button>> buttons_;
+    std::shared_ptr<StateButton> stateButton_;  // only one
+    std::vector<std::shared_ptr<Button>> buttons_;
 };
 
 class SocketInfoBaseWidget : public HLayoutWidget
@@ -320,7 +314,6 @@ private:
     std::shared_ptr<QLabel> ipAddress_;
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
-    ButtonType connectButtonType_;
     std::shared_ptr<ButtonPanelWidget> buttons_;
     std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QAction> requestHistory_;
@@ -370,107 +363,6 @@ class ScrollAreaWidget : public QScrollArea
 public:
     ScrollAreaWidget(QWidgetPtr widget);
     ~ScrollAreaWidget() = default;
-};
-
-// class WidgetGroup : public QObject, public std::enable_shared_from_this<WidgetGroup>
-// {
-//     Q_OBJECT
-
-// public:
-//     WidgetGroup(CompanionPtr companion);
-//     ~WidgetGroup();
-
-//     void set();
-//     void clearHistory();
-//     void hideFields();
-//     void hideCentralPanel();
-//     void showCentralPanel();
-//     void messageAdded();
-//     void updateSocketInfoWidget();
-//     void select();
-//     void unselect();
-//     void setNewMessagesIndicatorOn();
-//     void setNewMessagesIndicatorOff();
-
-// signals:
-//     void addTextMessageWidgetSignal(MessagePtr message);
-//     void addFileMessageWidgetSignal(MessagePtr message);
-//     void addMessageWidgetsSignal(const std::vector<MessagePtr> &messages);  // TODO rename
-//     // void askUserForHistorySendingConfirmationSignal();
-//     // void buildChatHistorySignal();
-
-// public slots:
-//     void messageWidgetSelected(MessageWidgetPtr widget);
-//     // void buildChatHistorySlot();
-//     void requestHistorySlot();
-//     void clientAction();
-
-// private slots:
-//     void addTextMessageWidgetSlot(MessagePtr message);
-//     void addFileMessageWidgetSlot(MessagePtr message);
-//     void addMessageWidgetsSlot(const std::vector<MessagePtr> &messages);
-//     // void askUserForHistorySendingConfirmationSlot();
-
-// private:
-//     template<typename T>
-//     void addMessageWidget(MessagePtr message)
-//     {
-//         bool isAntecedent = message->isAntecedent();
-
-//         if (isAntecedent) {
-//             std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-//             ++antecedentMessagesCounter_;
-
-//             logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-//         }
-
-//         // auto widget = getGraphicManager()->buildMessageWidget(companion_, message);
-//         auto widget = std::make_shared<T>(companion_, message);
-
-//         // auto lambda = [=]()
-//         // {
-//         //     // companion->setMappedMessageWidget(message, widget);
-//         //     getManager()->setMappedMessageWidget(companion_, message, widget);
-//         // };
-
-//         // runInDetachedThread(lambda);
-//         auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-//         // widget->setBase(shared_from_this());
-//         widget->set(shared_from_this());
-//         centralPanel_->addMessage(widget, isAntecedent);
-//         messageAdded();
-//     }
-
-//     CompanionPtr companion_;
-//     SocketInfoBaseWidgetPtr socketInfoBase_;
-//     std::shared_ptr<CentralPanelWidget> centralPanel_;
-//     uint32_t antecedentMessagesCounter_;
-//     std::mutex antecedentMessagesCounterMutex_;
-// };
-
-class StubWidgetGroup
-{
-public:
-    StubWidgetGroup();
-    ~StubWidgetGroup() = default;
-
-    void hide();
-    void show();
-    void hideSocketInfo();
-    void hideCentral();
-    void showCentral();
-    void setLeftPanelWidth(int width);
-    std::shared_ptr<SocketInfoBaseWidget> socketInfoBase() const;
-    std::shared_ptr<LeftPanelWidget> left() const;
-    std::shared_ptr<CentralPanelWidget> central() const;
-    std::shared_ptr<RightPanelWidget> right() const;
-
-private:
-    std::shared_ptr<SocketInfoStubWidget> socketInfo_;
-    std::shared_ptr<LeftPanelWidget> left_;
-    std::shared_ptr<CentralPanelWidget> central_;
-    std::shared_ptr<RightPanelWidget> right_;
 };
 
 void logSocketInfoWidget(std::shared_ptr<SocketInfoWidget> object);

@@ -425,7 +425,6 @@ ActionResultPtr SendFileAction::act()
     for (const auto &path : dataDialog_->selectedFiles()) {
         filePath_ = std::filesystem::path(getString(path));
         auto text = filePath_.filename().string();
-        manager_->sendTextMessage(MessageType::FILE, companion_, shared_from_this(), text);
         manager_->setLastOpenedPath(filePath_.parent_path());
     }
 }

@@ -14,11 +14,7 @@ using LayoutContentsMarginMap = std::unordered_map<WidgetType, uint32_t>;
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function);
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function);
-QString getButtonText(ButtonType value);
-QString getButtonText(ButtonState state);
-QDialogButtonBox::ButtonRole getButtonRole(ButtonType type);
 QString getFileWidgetText(WidgetType value);
-// MessageWidgetType getMessageWidgetType(MessageType value);
 QString getDataTypeStringRepr(DataType type);
 
 // color

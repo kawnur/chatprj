@@ -6,6 +6,7 @@
 #include "message.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
+#include "widget_group.hpp"
 
 MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(MessagePtr message)
     : HLayoutWidget(WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, Qt::AlignRight),
@@ -79,7 +80,7 @@ FileMessageBodyWidget::FileMessageBodyWidget(MessagePtr message) : MessageBodyWi
 
     // button
     if (type() == WidgetType::FILE_RECEIVED) {
-        button_ = std::make_shared<QPushButton>(getButtonText(ButtonType::DOWNLOAD_FILE));
+        button_ = std::make_shared<QPushButton>(DOWNLOAD_FILE_BUTTON_TEXT);
         layout_->addWidget(button_.get());
     }
 }
@@ -124,7 +125,6 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
     : VLayoutWidget(WidgetType::MESSAGE, Qt::AlignLeft)
 {
     // fields
-    // type_ = getMessageWidgetType(message->type());
     companion_ = companion;
     message_ = message;
 
@@ -138,34 +138,10 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
 
     // header
     header_ = std::make_shared<QLabel>(formatHeader(companion, message));
-    addWidget(header_.get());
-
-    // body
-    initBody();
-    // addWidget(body_.get());
 
     // indicator panel
     indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(message);
-    addWidget(indicatorPanel_.get());
 }
-
-// void MessageWidget::initBody()
-// {
-//     switch (type_) {
-//     case MessageWidgetType::TEXT:
-//         body_ = std::make_shared<TextMessageBodyWidget>(message_);
-
-//     break;
-//     case MessageWidgetType::FILE:
-//         body_ = std::make_shared<FileMessageBodyWidget>(message_);
-
-//     break;
-//     default:
-//         logArgsError("message widget building error");
-
-//     break;
-//     }
-// }
 
 MessagePtr MessageWidget::message()
 {
@@ -174,8 +150,6 @@ MessagePtr MessageWidget::message()
 
 void MessageWidget::set(WidgetGroupPtr group)
 {
-    // body_->set();
-
     connect(
         this, &MessageWidget::widgetSelectedSignal,
         group.get(), &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
@@ -198,6 +172,14 @@ void MessageWidget::setReceived()
     indicatorPanel_->setReceivedIndicatorOn();
 }
 
+void MessageWidget::addMembersToLayout(MessageBodyWidgetPtr body)
+{
+    body->set();
+    addWidget(header_.get());
+    addWidget(body.get());
+    addWidget(indicatorPanel_.get());
+}
+
 void MessageWidget::mousePressEvent(QMouseEvent *event)
 {
     indicatorPanel_->unsetNewMessageLabel();
@@ -205,23 +187,17 @@ void MessageWidget::mousePressEvent(QMouseEvent *event)
 }
 
 TextMessageWidget::TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
-    : MessageWidget(companion, message, parent) {}
-
-void TextMessageWidget::initBody()
+    : MessageWidget(companion, message, parent)
 {
-    body_ = std::make_unique<TextMessageBodyWidget>(message_);
-    body_->set();
-    addWidget(body_.get());
+    body_ = std::make_shared<TextMessageBodyWidget>(message_);
+    addMembersToLayout(body_);
 }
 
 FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
-    : MessageWidget(companion, message, parent) {}
-
-void FileMessageWidget::initBody()
+    : MessageWidget(companion, message, parent)
 {
-    body_ = std::make_unique<FileMessageBodyWidget>(message_);
-    body_->set();
-    addWidget(body_.get());
+    body_ = std::make_shared<FileMessageBodyWidget>(message_);
+    addMembersToLayout(body_);
 }
 
 QString formatHeader(CompanionPtr companion, MessagePtr message)
@@ -233,12 +209,12 @@ QString formatHeader(CompanionPtr companion, MessagePtr message)
 
     if (message->isMessageFromMe()) {
         color = getHTMLColor(WidgetType::TEXT_SENT);
-        sender = "Me";
+        sender = MESSAGE_WIDGET_ME_NAME;
         receiver = companionName;
     } else {
         color = getHTMLColor(WidgetType::TEXT_RECEIVED);
         sender = companionName;
-        receiver = "Me";
+        receiver = MESSAGE_WIDGET_ME_NAME;
     }
 
     auto header = getHTMLHeader(color, sender, receiver, time);

@@ -282,7 +282,7 @@ void MessageHandler::receiveTextMessage(CompanionPtr companion, MessagePtr messa
     // decrypt message
 
     // add widget
-    manager_->addMessageWidget(companion, message);
+    manager_->addMessageWidget<TextMessageWidget>(companion, message);
 
     // send reply message to sender
     bool result = buildAndSendConfirmation(companion, message);
@@ -350,7 +350,7 @@ void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr mess
         return;
 
     // add widget
-    manager_->addMessageWidget(companion, message);
+    manager_->addMessageWidget<FileMessageWidget>(companion, message);
 
     // create receiver operator
     manager_->addReceiverOperator(message);

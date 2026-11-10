@@ -82,8 +82,6 @@ std::string getString(T &&value)
         return value.toStdString();
     else if constexpr (Same<T, std::string>)
         return value;
-    else if constexpr (Same<T, ButtonType>)
-        return getString(getMapValue(BUTTON_TYPE_TO_TEXT_MAP, value, NOT_FOUND));
     else if constexpr (Same<T, NetworkMessageType>)
         return getMapValue(NETWORK_MESSAGE_TYPE_STRING_REPR_MAP, value, getString(NOT_FOUND));
     else if constexpr (Same<T, MessageType>)
@@ -159,6 +157,23 @@ typename M::mapped_type getMapValue(
         logTemplateException("{0} {1}", __FUNCTION__, e.what());
 
         return typename M::mapped_type();
+    }
+}
+
+template<std::ranges::random_access_range R>
+typename R::value_type getIndexedContainerValue(
+    const R &container, std::size_t &index, const typename R::value_type &defaultValue)
+{
+    try {
+        return container.at(index);
+    }
+    catch(std::out_of_range) {
+        return defaultValue;
+    }
+    catch(const std::exception &e) {
+        logTemplateException("{0} {1}", __FUNCTION__, e.what());
+
+        return typename R::value_type();
     }
 }
 

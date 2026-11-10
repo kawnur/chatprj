@@ -3,6 +3,8 @@
 #include "companion.hpp"
 #include "widgets_message.hpp"
 
+const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
+
 WidgetGroup::WidgetGroup(CompanionPtr companion)
     : companion_(companion), antecedentMessagesCounterMutex_(), antecedentMessagesCounter_(0) {}
 
@@ -30,8 +32,12 @@ void WidgetGroup::set()
     centralPanel_->hide();
 
     connect(
-        this, &WidgetGroup::addMessageWidgetSignal, this, &WidgetGroup::addMessageWidgetSlot,
-        Qt::QueuedConnection);
+        this, &WidgetGroup::addTextMessageWidgetSignal,
+        this, &WidgetGroup::addTextMessageWidgetSlot, Qt::QueuedConnection);
+
+    connect(
+        this, &WidgetGroup::addFileMessageWidgetSignal,
+        this, &WidgetGroup::addFileMessageWidgetSlot, Qt::QueuedConnection);
 
     connect(
         this, &WidgetGroup::addMessageWidgetsSignal, this, &WidgetGroup::addMessageWidgetsSlot,
@@ -166,7 +172,7 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 void WidgetGroup::addMessageWidgetsSlot(const std::vector<MessagePtr> &messages)
 {
     for (auto message : messages)
-        addMessageWidgetSlot(message);
+        addTextMessageWidgetSlot(message);
 
     centralPanel_->sortHistory(true);
 }
@@ -199,3 +205,68 @@ void WidgetGroup::addFileMessageWidgetSlot(MessagePtr message)
 //     auto action = std::make_unique<CompanionAction>(ActionType::SEND_HISTORY, companion_);
 //     action->set();
 // }
+
+StubWidgetGroup::StubWidgetGroup()
+{
+    socketInfo_ = std::make_shared<SocketInfoStubWidget>();
+    left_ = std::make_shared<LeftPanelWidget>();
+    central_ = std::make_shared<CentralPanelWidget>("", true);
+    right_ = std::make_shared<RightPanelWidget>();
+
+    central_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    central_->setFixedWidth(CENTRAL_STUB_FIXED_WIDTH);
+}
+
+void StubWidgetGroup::hide()
+{
+    left_->hide();
+    central_->hide();
+    right_->hide();
+}
+
+void StubWidgetGroup::show()
+{
+    left_->show();
+    central_->show();
+    right_->show();
+}
+
+void StubWidgetGroup::hideSocketInfo()
+{
+    socketInfo_->hide();
+}
+
+void StubWidgetGroup::hideCentral()
+{
+    central_->hide();
+}
+
+void StubWidgetGroup::showCentral()
+{
+    central_->show();
+}
+
+void StubWidgetGroup::setLeftPanelWidth(int width)
+{
+    left_->resize(width, left_->height());
+}
+
+std::shared_ptr<SocketInfoBaseWidget> StubWidgetGroup::socketInfoBase() const
+{
+    return dynamic_pointer_cast<SocketInfoBaseWidget>(socketInfo_);
+}
+
+std::shared_ptr<LeftPanelWidget> StubWidgetGroup::left() const
+{
+    return left_;
+}
+
+std::shared_ptr<CentralPanelWidget> StubWidgetGroup::central() const
+{
+    return central_;
+}
+
+std::shared_ptr<RightPanelWidget> StubWidgetGroup::right() const
+{
+    return right_;
+}
