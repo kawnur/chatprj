@@ -3,37 +3,24 @@
 #include "logging.hpp"
 #include "priority_task_queue.hpp"
 
-MessageData::MessageData(const std::string &text, const std::string &data)
-    : text_(text), data_(data) {}
+MessageData::MessageData(const std::string &data) : data_(data) {}
 
 MessageData::MessageData(MessageDataPtr data)
 {
     data_ = data->data_;
-    text_ = data->text_;
 }
 
 bool MessageData::setFields(CompanionPtr companion, const nlohmann::json &data)
 {
     std::vector<PriorityTask> taskVector
         {
-            { 0, "text", [&]() { text_ = data.at("text"); } },
-            { 0, "data", [&]() { data_ = data.at("data"); }, false }
+            { 0, "text", [&]() { data_ = data.at("text"); }, false }
         };
 
     PriorityTaskQueueWrapper wrapper(taskVector);
     bool result = wrapper.runTasksAndReturnResult();
 
     return result;
-}
-
-std::string MessageData::text() const
-{
-    return text_;
-}
-
-void MessageData::setText(const std::string &newText)
-{
-    text_ = newText;
 }
 
 std::string MessageData::data() const
@@ -48,7 +35,20 @@ void MessageData::setData(const std::string &newData)
 
 void MessageData::log()
 {
-    auto entryTemplate = "data: {0}, text: {1}"s;
+    auto entryTemplate = "data: {0}"s;
 
-    logTemplateInfo(entryTemplate, data_, text_);
+    logTemplateInfo(entryTemplate, data_);
+}
+
+TextMessageData::TextMessageData() : MessageData() {}
+
+TextMessageData::TextMessageData(const std::string &data) : MessageData(data) {}
+
+nlohmann::json TextMessageData::getJsonData()
+{
+    nlohmann::json data;
+
+    data["text"] = data_;
+
+    return data;
 }

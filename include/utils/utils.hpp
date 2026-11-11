@@ -82,8 +82,6 @@ std::string getString(T &&value)
         return value.toStdString();
     else if constexpr (Same<T, std::string>)
         return value;
-    else if constexpr (Same<T, NetworkMessageType>)
-        return getMapValue(NETWORK_MESSAGE_TYPE_STRING_REPR_MAP, value, getString(NOT_FOUND));
     else if constexpr (Same<T, std::filesystem::path>)
         return value.string();
     else if constexpr (Same<T, QHostAddress>)

@@ -11,23 +11,32 @@ class MessageData
 {
 public:
     MessageData() = default;
-    MessageData(const std::string &text, const std::string &data);
+    MessageData(const std::string &data);
     MessageData(MessageDataPtr data);
 
     ~MessageData() = default;
 
-    std::string text() const;
     std::string data() const;
 
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
-    void setText(const std::string &newText);
     void setData(const std::string &newData);
 
     void log();
 
-private:
-    std::string text_;
-    std::string data_;  // for file transfer
+    virtual nlohmann::json getJsonData() { return nlohmann::json::object(); }
+
+protected:
+    std::string data_;
+};
+
+class TextMessageData : public MessageData
+{
+public:
+    TextMessageData();
+    TextMessageData(const std::string &data);
+    ~TextMessageData() = default;
+
+    nlohmann::json getJsonData() override;
 };
 
 #endif // MESSAGE_DATA_HPP

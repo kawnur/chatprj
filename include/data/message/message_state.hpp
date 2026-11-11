@@ -25,10 +25,22 @@ public:
 
     void log();
 
-private:
+    virtual nlohmann::json getJsonData() { return nlohmann::json::object(); }
+
+protected:
     bool isAntecedent_;
     bool isSent_;
     bool isReceived_;
+};
+
+class ReceiveConfirmationMessageState : public MessageState
+{
+public:
+    ReceiveConfirmationMessageState() = default;
+    ReceiveConfirmationMessageState(bool isAntecedent, bool isSent, bool isReceived);
+    ~ReceiveConfirmationMessageState() = default;
+
+    nlohmann::json getJsonData() override;
 };
 
 #endif // MESSAGE_STATE_HPP

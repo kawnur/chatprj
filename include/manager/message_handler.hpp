@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <variant>
 
 #include <nlohmann/json.hpp>
 
@@ -13,6 +14,9 @@
 #include "message_data.hpp"
 #include "message_storage.hpp"
 
+template<class... Ts>
+struct Visitor : Ts... { using Ts::operator()...; };
+
 class MessageHandler
 {
 public:
@@ -20,9 +24,6 @@ public:
     ~MessageHandler() = default;
 
     void setManager(ManagerPtr manager);
-
-    template<typename T>
-    void handleMessage(CompanionPtr companion, std::shared_ptr<T> message);
 
     MessageInfoPtr getMessageInfo(CompanionPtr companion, MessagePtr message);
     void sendTextMessage(CompanionPtr companion, ActionPtr action, const std::string &text);
@@ -63,7 +64,7 @@ private:
     bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
     bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
 
-    // void receiveTextMessage(CompanionPtr companion, MessagePtr message);
+    void receiveTextMessage(CompanionPtr companion, TextMessagePtr message);
     void receiveConfirmation(CompanionPtr companion, MessagePtr message);
     void receiveConfirmationRequest(CompanionPtr companion, MessagePtr message);
     void reciveChatHistoryRequest(CompanionPtr companion);
@@ -82,10 +83,7 @@ private:
     MessageBuilder builder_;
 };
 
-template<>
-void MessageHandler::handleMessage<TextMessage>(CompanionPtr companion, TextMessagePtr message);
-
-std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message);
+// std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message);
 
 std::string buildFileBlockJSONString(
     CompanionPtr companion, const std::string &networkId, const std::string &data);

@@ -3,11 +3,9 @@
 #include "logging.hpp"
 #include "message_data.hpp"
 #include "message_meta_data.hpp"
-#include "message_state.hpp"
 
-Message::Message(
-    MessageMetaDataPtr meta, MessageDataPtr data,
-    MessageStatePtr state) : meta_(meta), data_(data), state_(state)
+Message::Message(MetaPtr meta, DataPtr data, StatePtr state)
+    : meta_(meta), data_(data), state_(state)
 {
     log();
 }
@@ -33,34 +31,19 @@ uint8_t Message::companionId() const
     return meta_->companionId();
 }
 
-// std::string Message::companionName() const
-// {
-//     return meta_->companionName();
-// }
-
 uint8_t Message::authorId() const
 {
     return meta_->authorId();
 }
-
-// std::string Message::authorName() const
-// {
-//     return meta_->authorName();
-// }
 
 std::string Message::time() const
 {
     return meta_->timestampTz();
 }
 
-// std::string Message::hashMD5() const
-// {
-//     return meta_->hashMD5();
-// }
-
-std::string Message::text() const
+std::string Message::_data() const
 {
-    return data_->text();
+    return data_->data();
 }
 
 bool Message::isMessageFromMe() const
@@ -86,11 +69,6 @@ bool Message::isAntecedent() const
 std::string Message::networkId() const
 {
     return meta_->networkId();
-}
-
-NetworkMessageType Message::networkMessageType() const
-{
-    return meta_->networkMessageType();
 }
 
 void Message::setId(int id)
@@ -128,6 +106,29 @@ void Message::updateMeta(MessageMetaDataPtr meta)
     meta_->update(meta);
 }
 
+std::string Message::getNetworkReadyData()
+{
+    return getJsonData().dump();
+}
+
+nlohmann::json Message::buildJsonData(NetworkMessageType type)
+{
+    nlohmann::json data;
+
+    data["type"] = type;
+
+    auto metaJsonData = meta_->getJsonData();
+    data.update(metaJsonData);
+
+    auto dataJsonData = data_->getJsonData();
+    data.update(dataJsonData);
+
+    auto stateJsonData = state_->getJsonData();
+    data.update(stateJsonData);
+
+    return data;
+}
+
 void Message::log()
 {
     logArgsInfo(MESSAGE_LOG_DELIMITER);
@@ -155,5 +156,17 @@ bool operator<(const Message &message1, const Message &message2)
     return message1.id() < message2.id();
 }
 
-TextMessage::TextMessage(MessageMetaDataPtr meta, MessageDataPtr data, MessageStatePtr state)
+TextMessage::TextMessage(MetaPtr meta, DataPtr data, StatePtr state) : Message(meta, data, state) {}
+
+nlohmann::json TextMessage::getJsonData()
+{
+    return buildJsonData(NetworkMessageType::TEXT);
+}
+
+ReceiveConfirmationMessage::ReceiveConfirmationMessage(MetaPtr meta, DataPtr data, StatePtr state)
     : Message(meta, data, state) {}
+
+nlohmann::json ReceiveConfirmationMessage::getJsonData()
+{
+    return buildJsonData(NetworkMessageType::RECEIVE_CONFIRMATION);
+}

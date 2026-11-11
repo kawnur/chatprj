@@ -135,7 +135,7 @@ class TextEditWidget : public QTextEdit, public Palette
     Q_OBJECT
 
 public:
-    TextEditWidget(WidgetType type);
+    TextEditWidget(WidgetType type, bool readOnly = false);
     ~TextEditWidget() = default;
 };
 

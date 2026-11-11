@@ -780,12 +780,10 @@ MessagePtr Manager::pushMessageToDB(
     // push data to db
     auto messageData = getDBData(
         DBRequestType::PUSH_MESSAGE_AND_RETURN,
-        // message->companionName(),
-        // message->authorName(),
         companionName,
         authorName,
         message->time(),
-        message->text(),
+        message->_data(),
         message->isSent(),
         message->isReceived());
 

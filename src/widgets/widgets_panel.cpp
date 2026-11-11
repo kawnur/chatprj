@@ -209,7 +209,7 @@ void CentralPanelWidget::sortHistory(bool lock)
     auto print = [&]()
     {
         for (const auto l : list)
-            coutArgsWithSpaceSeparator(l->message()->text());
+            coutArgsWithSpaceSeparator(l->message()->_data());
     };
 
     coutArgsWithSpaceSeparator("BEFORE SORTING");
@@ -227,7 +227,7 @@ void CentralPanelWidget::sortHistory(bool lock)
         coutArgsWithSpaceSeparator("message:", message.get());
 
         if (message)
-            coutArgsWithSpaceSeparator("element message:", message->text());
+            coutArgsWithSpaceSeparator("element message:", message->_data());
 
         history_->removeWidget(element);
         history_->addWidget(element);
@@ -283,7 +283,7 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFixedWidth(RIGHT_PANEL_FIXED_WIDTH);
 
-    log_ = std::make_unique<TextEditWidget>(WidgetType::APP_LOG);
+    log_ = std::make_unique<TextEditWidget>(WidgetType::APP_LOG, true);
 
     addWidget(log_.get());
 

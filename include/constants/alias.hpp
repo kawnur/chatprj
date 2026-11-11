@@ -55,6 +55,8 @@ class NetworkManager;
 class PalettedWidget;
 class PasswordAction;
 class PriorityTask;
+class ReceiveConfirmationMessage;
+class ReceiveConfirmationMessageState;
 class ReceiverOperator;
 class RightPanelWidget;
 class SenderOperator;
@@ -68,6 +70,7 @@ class StubWidgetGroup;
 class TextDialog;
 class TextEditWidget;
 class TextMessage;
+class TextMessageData;
 class TextMessageWidget;
 class UpdateCompanionAction;
 class WidgetGroup;
@@ -111,6 +114,8 @@ using PriorityTaskComparator = std::function<bool(const PriorityTask&, const Pri
 using PriorityTaskQueue =
     std::priority_queue<PriorityTask, std::vector<PriorityTask>, PriorityTaskComparator>;
 
+using ReceiveConfirmationMessagePtr = std::shared_ptr<ReceiveConfirmationMessage>;
+using ReceiveConfirmationMessageStatePtr = std::shared_ptr<ReceiveConfirmationMessageState>;
 using ReceiverOperatorPtr = std::shared_ptr<ReceiverOperator>;
 using SaveFileActionPtr = std::shared_ptr<SaveFileAction>;
 using SendFileActionPtr = std::shared_ptr<SendFileAction>;
@@ -118,6 +123,7 @@ using SendHistoryCompanionActionPtr = std::shared_ptr<SendHistoryCompanionAction
 using SocketInfoBaseWidgetPtr = std::shared_ptr<SocketInfoBaseWidget>;
 using SocketInfoPtr = std::shared_ptr<SocketInfo>;
 using TextMessagePtr = std::shared_ptr<TextMessage>;
+using TextMessageDataPtr = std::shared_ptr<TextMessageData>;
 using QWidgetPtr = std::shared_ptr<QWidget>;
 using UpdateCompanionActionPtr = std::shared_ptr<UpdateCompanionAction>;
 using WidgetGroupPtr = std::shared_ptr<WidgetGroup>;

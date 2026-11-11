@@ -120,16 +120,17 @@ void MessageHandler::sendTextMessage(
 
 bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr message)
 {
-    auto type = message->networkMessageType();
+    // auto type = message->networkMessageType();
 
-    if (type == NetworkMessageType::UNKNOWN)
-        return false;
+    // if (type == NetworkMessageType::UNKNOWN)
+    //     return false;
 
-    if (type == NetworkMessageType::NO_ACTION)
-        return true;
+    // if (type == NetworkMessageType::NO_ACTION)
+    //     return true;
 
-    // build json3
-    auto json = buildMessageJSONString(companion, message);
+    // build json
+    // auto json = buildMessageJSONString(companion, message);
+    auto json = message->getNetworkReadyData();
 
     // send json over network
     return manager_->sendJsonByNetwork(companion, json);
@@ -181,97 +182,42 @@ bool MessageHandler::sendFileDataTransmissionResultMessage(
 
 void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &json)
 {
-    auto message = builder_.buildMessage(companion, json);
+    auto messageVariant = builder_.buildMessage(companion, json);
 
-    if (!message)
+    if (std::holds_alternative<std::nullptr_t>(messageVariant))
         return;
 
-    handleMessage(companion, message);
+    const Visitor visitor {
+        [&](std::nullptr_t value) { return; },
+        [&](TextMessagePtr value) { receiveTextMessage(companion, value); },
+        [&](ReceiveConfirmationMessagePtr value) { receiveConfirmation(companion, value); }
+    };
 
-    switch (message->networkMessageType()) {
-    case NetworkMessageType::TEXT:
-        // receiveTextMessage(companion, message);
-
-    break;
-
-    case NetworkMessageType::FILE_PROPOSAL:
-        receiveFileProposal(companion, message);
-
-    break;
-
-    case NetworkMessageType::RECEIVE_CONFIRMATION:
-        receiveConfirmation(companion, message);
-
-    break;
-
-    case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
-        receiveConfirmationRequest(companion, message);
-
-    break;
-
-    case NetworkMessageType::CHAT_HISTORY_REQUEST:
-        reciveChatHistoryRequest(companion);
-
-    break;
-
-    case NetworkMessageType::CHAT_HISTORY_DATA:
-        // receiveChatHistoryData(companion, jsonData);
-
-    break;
-
-    case NetworkMessageType::FILE_REQUEST:
-        receiveFileRequest(companion, message);
-
-    break;
-
-    case NetworkMessageType::FILE_DATA:
-        receiveFileData(companion, message);
-
-    break;
-
-    case NetworkMessageType::FILE_DATA_CHECK_SUCCESS:
-    case NetworkMessageType::FILE_DATA_CHECK_FAILURE:
-        receiveFileDataCheck(companion, message);
-
-    break;
-
-    case NetworkMessageType::FILE_DATA_TRANSMISSON_END:
-        receiveFileDataTransmissionEnd(companion, message);
-
-    break;
-
-    case NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE:
-        receiveFileDataTransmissionFailure(companion, message);
-
-    break;
-
-    default:
-        break;
-    }
+    std::visit(visitor, messageVariant);
 }
 
-// void MessageHandler::receiveTextMessage(CompanionPtr companion, MessagePtr message)
-// {
-//     // add to DB and get timestamp
-//     auto name = companion->name();
-//     auto pushResult = manager_->pushMessageToDB(message, name, name);
+void MessageHandler::receiveTextMessage(CompanionPtr companion, TextMessagePtr message)
+{
+    // add to DB and get timestamp
+    auto name = companion->name();
+    auto pushResult = manager_->pushMessageToDB(message, name, name);
 
-//     if (!pushResult || !pushResult->meta()->isValid())
-//         return;
+    if (!pushResult || !pushResult->meta()->isValid())
+        return;
 
-//     auto storeResult = addToStorage(companion, message);
+    auto storeResult = addToStorage(companion, message);
 
-//     if (!storeResult)
-//         return;
+    if (!storeResult)
+        return;
 
-//     // decrypt message
+    // decrypt message
 
-//     // add widget
-//     manager_->addMessageWidget<TextMessageWidget>(companion, message);
+    // add widget
+    manager_->addMessageWidget<TextMessageWidget>(companion, message);
 
-//     // send reply message to sender
-//     bool result = buildAndSendConfirmation(companion, message);
-// }
+    // send reply message to sender
+    bool result = buildAndSendConfirmation(companion, message);
+}
 
 void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr message)
 {
@@ -421,13 +367,15 @@ void MessageHandler::receiveFileData(CompanionPtr companion, MessagePtr message)
 
 void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr message)
 {
-    bool success = (message->networkMessageType() == NetworkMessageType::FILE_DATA_CHECK_SUCCESS);
+    // bool success = (message->networkMessageType() == NetworkMessageType::FILE_DATA_CHECK_SUCCESS);
 
-    logArgsInfo(__FUNCTION__, success);
+    // logArgsInfo(__FUNCTION__, success);
 
-    auto entryTemplate = (success)
-        ? "file '{}' received by companion successfully"
-        : "file '{}' WAS NOT received by companion";
+    // auto entryTemplate = (success)
+    //     ? "file '{}' received by companion successfully"
+    //     : "file '{}' WAS NOT received by companion";
+
+    auto entryTemplate = ""s;
 
     auto networkId = message->networkId();
 
@@ -591,74 +539,51 @@ bool MessageHandler::addCompanionToMessageStorage(CompanionPtr companion)
     return storage_.addCompanion(companion->id());
 }
 
-template<>
-void MessageHandler::handleMessage<TextMessage>(CompanionPtr companion, TextMessagePtr message)
-{
-    // add to DB and get timestamp
-    auto name = companion->name();
-    auto pushResult = manager_->pushMessageToDB(message, name, name);
+// std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message)
+// {
+//     using json = nlohmann::json;
 
-    if (!pushResult || !pushResult->meta()->isValid())
-        return;
+//     json jsonData;
 
-    auto storeResult = addToStorage(companion, message);
+//     auto networkId = message->networkId();
+//     auto type = message->networkMessageType();
 
-    if (!storeResult)
-        return;
+//     jsonData["type"] = type;
+//     jsonData["id"] = networkId;
+//     // jsonData["companion_id"] = companion->getId();
+//     jsonData["antecedent"] = message->isAntecedent();
+//     jsonData["time"] = message->time();
+//     // jsonData["text"] = message->text();
+//     jsonData["text"] = message->_data();
 
-    // decrypt message
+//     switch (type) {
+//     case NetworkMessageType::TEXT: {
+//         // jsonData["time"] = message->getTime();
+//         // jsonData["text"] = message->getText();
+//     }
 
-    // add widget
-    manager_->addMessageWidget<TextMessageWidget>(companion, message);
+//     break;
 
-    // send reply message to sender
-    bool result = buildAndSendConfirmation(companion, message);
-}
+//     case NetworkMessageType::FILE_PROPOSAL: {
+//         // jsonData["time"] = message->getTime();
+//         // jsonData["text"] = message->getText();
+//         jsonData["hashMD5"] = getManager()->getFileOperatorMD5Hash(networkId);
+//     }
 
-std::string buildMessageJSONString(CompanionPtr companion, MessagePtr message)
-{
-    using json = nlohmann::json;
+//     break;
 
-    json jsonData;
+//     case NetworkMessageType::RECEIVE_CONFIRMATION:
+//         // jsonData["received"] = 1;
+//         jsonData["received"] = message->isSent();
 
-    auto networkId = message->networkId();
-    auto type = message->networkMessageType();
+//         break;
 
-    jsonData["type"] = type;
-    jsonData["id"] = networkId;
-    // jsonData["companion_id"] = companion->getId();
-    jsonData["antecedent"] = message->isAntecedent();
-    jsonData["time"] = message->time();
-    jsonData["text"] = message->text();
+//     default:
+//         break;
+//     }
 
-    switch (type) {
-    case NetworkMessageType::TEXT: {
-        // jsonData["time"] = message->getTime();
-        // jsonData["text"] = message->getText();
-    }
-
-    break;
-
-    case NetworkMessageType::FILE_PROPOSAL: {
-        // jsonData["time"] = message->getTime();
-        // jsonData["text"] = message->getText();
-        jsonData["hashMD5"] = getManager()->getFileOperatorMD5Hash(networkId);
-    }
-
-    break;
-
-    case NetworkMessageType::RECEIVE_CONFIRMATION:
-        // jsonData["received"] = 1;
-        jsonData["received"] = message->isSent();
-
-        break;
-
-    default:
-        break;
-    }
-
-    return jsonData.dump();
-}
+//     return jsonData.dump();
+// }
 
 std::string buildFileBlockJSONString(
     CompanionPtr companion, const std::string &networkId, const std::string &data)

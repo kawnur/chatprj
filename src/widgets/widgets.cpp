@@ -153,11 +153,12 @@ SplitterWidget::SplitterWidget(WidgetType type, QWidget *parent) : Palette(type,
     setAutoFillBackground(true);
 }
 
-TextEditWidget::TextEditWidget(WidgetType type) : Palette(type, QPalette::Base)
+TextEditWidget::TextEditWidget(WidgetType type, bool readOnly) : Palette(type, QPalette::Base)
 {
     setColor(getWidgetColor(type));
     setPalette(*palette_);
     setAutoFillBackground(true);
+    setReadOnly(readOnly);
 }
 
 Button::Button(const QString &text) : QPushButton(text) {}

@@ -77,23 +77,6 @@ enum class NetworkMessageType
     CHAT_HISTORY_DATA
 };
 
-const std::unordered_map<NetworkMessageType, std::string> NETWORK_MESSAGE_TYPE_STRING_REPR_MAP {
-    { NetworkMessageType::UNKNOWN, "UNKNOWN" },
-    { NetworkMessageType::NO_ACTION, "NO_ACTION" },
-    { NetworkMessageType::TEXT, "TEXT" },
-    { NetworkMessageType::FILE_PROPOSAL, "FILE_PROPOSAL" },
-    { NetworkMessageType::FILE_REQUEST, "FILE_REQUEST" },
-    { NetworkMessageType::FILE_DATA, "FILE_DATA" },
-    { NetworkMessageType::FILE_DATA_CHECK_SUCCESS, "FILE_DATA_CHECK_SUCCESS" },
-    { NetworkMessageType::FILE_DATA_CHECK_FAILURE, "FILE_DATA_CHECK_FAILURE" },
-    { NetworkMessageType::FILE_DATA_TRANSMISSON_END, "FILE_DATA_TRANSMISSON_END" },
-    { NetworkMessageType::FILE_DATA_TRANSMISSON_FAILURE, "FILE_DATA_TRANSMISSON_FAILURE" },
-    { NetworkMessageType::RECEIVE_CONFIRMATION, "RECEIVE_CONFIRMATION" },
-    { NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST, "RECEIVE_CONFIRMATION_REQUEST" },
-    { NetworkMessageType::CHAT_HISTORY_REQUEST, "CHAT_HISTORY_REQUEST" },
-    { NetworkMessageType::CHAT_HISTORY_DATA, "CHAT_HISTORY_DATA" }
-};
-
 const std::string deleteCompanionDialogText { "Companion will be deleted with chat history." };
 const std::string clearCompanionHistoryDialogText { "Companion chat history will be deleted." };
 const std::string sendChatHistoryToCompanionDialogText { "Companion {} requested chat history sending." };

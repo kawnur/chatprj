@@ -17,7 +17,7 @@ bool MessageState::setFields(CompanionPtr companion, const nlohmann::json &data)
 {
     std::vector<PriorityTask> taskVector
         {
-            { 0, "antecedent", [&]() { isAntecedent_ = data.at("antecedent"); } },
+            { 0, "antecedent", [&]() { isAntecedent_ = data.at("antecedent"); }, false },
             { 0, "received", [&]() { isReceived_ = data.at("received"); }, false }
         };
 
@@ -62,4 +62,17 @@ void MessageState::log()
     auto entryTemplate = "isAntecedent: {0}, isSent: {1}, isReceived: {2}"s;
 
     logTemplateInfo(entryTemplate, isAntecedent_, isSent_, isReceived_);
+}
+
+ReceiveConfirmationMessageState::ReceiveConfirmationMessageState(
+    bool isAntecedent, bool isSent, bool isReceived)
+    : MessageState(isAntecedent, isSent, isReceived) {}
+
+nlohmann::json ReceiveConfirmationMessageState::getJsonData()
+{
+    nlohmann::json data;
+
+    data["received"] = isReceived_;
+
+    return data;
 }
