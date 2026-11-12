@@ -53,7 +53,7 @@ int getSizeAsInt<std::string>(const std::string &string);
 
 // TODO does not work with multiple function pointers as params
 template<typename T, typename... Ts>
-void coutContainerArgsResultWithManupulators(std::vector<T> &container, Ts &&...args)
+void coutContainerArgsResultWithManupulators(const std::vector<T> &container, Ts &&...args)
 {
     auto lambda = [&](const T &u1, const T &u2) { return getSizeAsInt(u1) < getSizeAsInt(u2); };
     auto maxLengthElement = std::ranges::max_element(container, lambda);

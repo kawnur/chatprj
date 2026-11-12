@@ -68,7 +68,7 @@ public:
     QString getDataByType(DataType type);
     std::shared_ptr<DataWrapper> getDataWrapper();
 
-    void fillForm(std::initializer_list<DataType> list);
+    void fillForm(std::vector<DataType> list);
     void setFormData(CompanionDataPtr data);
 
 private:
@@ -81,7 +81,7 @@ class DataDialog : public Dialog, public FormLayout
     Q_OBJECT
 
 public:
-    DataDialog(const std::string &title, const std::initializer_list<DataType> &lines);
+    DataDialog(const std::string &title, const std::vector<DataType> &lines);
     virtual ~DataDialog() { logArgsInfo(Q_FUNC_INFO); }
 
     void set(ActionPtr action) override;
@@ -135,7 +135,7 @@ class TextDialog : public Dialog
 public:
     TextDialog(
         std::shared_ptr<Dialog> parent, const std::string &title, const std::string &text,
-        std::initializer_list<ButtonInfo> buttonsInfo);
+        const std::vector<ButtonInfo> &buttonsInfo);
 
     ~TextDialog();
 
@@ -144,8 +144,8 @@ public:
     void closeSelfAndParent();
     void acceptAction();
     void setText(const std::string &text);
-    void update(const std::string &text, std::initializer_list<ButtonInfo> list);
-    void updateButtonBox(std::initializer_list<ButtonInfo> list);
+    void update(const std::string &text, const std::vector<ButtonInfo> &list);
+    void updateButtonBox(const std::vector<ButtonInfo> &list);
 
 public slots:
     void unsetMainWindowBlurAndCloseDialogs();

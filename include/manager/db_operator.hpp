@@ -35,7 +35,7 @@ public:
             auto entry = getStringByFormat("{0}, {1}", requestData.logMark(), DB_REPLY_EMPTY);
             // showWarningDialogAndLogWarning(entry);
 
-            // return nullptr;
+            return nullptr;
         }
 
         return data;

@@ -2,7 +2,10 @@
 
 #include <unordered_map>
 
+#include <QDialogButtonBox>
+
 #include "widgets.hpp"
+#include "widget_info.hpp"
 
 const std::unordered_map<WidgetType, uint32_t> WIDGET_LIGHTNESS_MAP {
     { WidgetType::MAIN_WINDOW_MENU, 40 },
@@ -118,12 +121,12 @@ const uint8_t MESSAGE_HEADER_HTML_FONT_SIZE = 2;
 
 ButtonInfo getOKButtonInfo(const std::function<void()> &function)
 {
-    return ButtonInfo({ OK_BUTTON_TEXT }, function);
+    return ButtonInfo({ OK_BUTTON_TEXT }, function, QDialogButtonBox::ButtonRole::AcceptRole);
 }
 
 ButtonInfo getCancelButtonInfo(const std::function<void()> &function)
 {
-    return ButtonInfo({ CANCEL_BUTTON_TEXT }, function);
+    return ButtonInfo({ CANCEL_BUTTON_TEXT }, function, QDialogButtonBox::ButtonRole::RejectRole);
 }
 
 QString getFileWidgetText(WidgetType value)

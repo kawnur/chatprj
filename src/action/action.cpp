@@ -11,13 +11,14 @@
 #include "manager.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
+#include "widget_info.hpp"
 #include "widgets.hpp"
 #include "widgets_dialog.hpp"
 
 Action::Action(ManagerPtr manager, const std::string &title)
     : manager_(manager), dialogTitle_(title)
 {
-    std::initializer_list<ButtonInfo> list {};
+    std::vector<ButtonInfo> list {};
     infoDialog_ = std::make_shared<TextDialog>(nullptr, dialogTitle_, ""s, list);
 }
 
@@ -43,7 +44,7 @@ void Action::endAct()
 }
 
 void Action::updateInfoDialogBase(
-    bool status, const std::vector<std::string> &messages, std::initializer_list<ButtonInfo> list)
+    bool status, const std::vector<std::string> &messages, const std::vector<ButtonInfo> &list)
 {
     auto lambda = [this](bool status) { return infoDialogHeaders_.at(uint(status)); };
     auto header = runAndReturnDefault(lambda, ""s, status);
@@ -51,8 +52,7 @@ void Action::updateInfoDialogBase(
     infoDialog_->update(text, list);
 }
 
-void Action::updateInfoDialogAndShow(
-    const std::string &text, std::initializer_list<ButtonInfo> list)
+void Action::updateInfoDialogAndShow(const std::string &text, const std::vector<ButtonInfo> &list)
 {
     infoDialog_->update(text, list);
     infoDialog_->show();
@@ -62,6 +62,16 @@ void Action::updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text
 {
     auto list = { getOKButtonInfo([this]() { infoDialog_->closeSelf(); }) };
     updateInfoDialogAndShow(text, list);
+}
+
+std::vector<ButtonInfo> Action::getCancelOKButtonInfoList()
+{
+    auto list = {
+        getCancelButtonInfo([this]() { endAct(); }),
+        getOKButtonInfo([this]() { perform(); })
+    };
+
+    return list;
 }
 
 CompanionAction::CompanionAction(
@@ -203,12 +213,7 @@ DeleteCompanionAction::DeleteCompanionAction(ManagerPtr manager, CompanionPtr co
 
 void DeleteCompanionAction::preAct()
 {
-    auto list = {
-        getOKButtonInfo([this]() { perform(); }),
-        getCancelButtonInfo([this]() { endAct(); })
-    };
-
-    updateInfoDialogAndShow(deleteCompanionDialogText, list);
+    updateInfoDialogAndShow(deleteCompanionDialogText, getCancelOKButtonInfoList());
 }
 
 ActionResultPtr DeleteCompanionAction::act()
@@ -227,13 +232,7 @@ ClearHistoryCompanionAction::ClearHistoryCompanionAction(ManagerPtr manager, Com
 
 void ClearHistoryCompanionAction::preAct()
 {
-    // TODO move to base
-    auto list = {
-        getOKButtonInfo([this]() { perform(); }),
-        getCancelButtonInfo([this]() { endAct(); })
-    };
-
-    updateInfoDialogAndShow(clearCompanionHistoryDialogText, list);
+    updateInfoDialogAndShow(clearCompanionHistoryDialogText, getCancelOKButtonInfoList());
 }
 
 ActionResultPtr ClearHistoryCompanionAction::act()
@@ -480,7 +479,8 @@ ActionResultPtr SaveFileAction::act()
 }
 
 void fillMessages(
-    std::vector<std::string> &messages, std::vector<std::pair<std::string, std::string>> lines)
+    std::vector<std::string> &messages,
+    const std::vector<std::pair<std::string, std::string>> &lines)
 {
     for (const auto &line : lines)
         messages.emplace_back(getStringByFormat(line.first, line.second));

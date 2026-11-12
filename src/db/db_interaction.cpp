@@ -263,7 +263,7 @@ void DBReplyData::sortDataViaLambda(std::function<bool(DBDataMap &, DBDataMap &)
     std::ranges::sort(data_, lambda);
 }
 
-std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::string> &keys)
+std::string buildChatHistoryJSONString(DBReplyDataPtr data, const std::vector<std::string> &keys)
 {
     using json = nlohmann::json;
 

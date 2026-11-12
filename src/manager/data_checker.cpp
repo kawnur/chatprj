@@ -11,10 +11,10 @@ void DataChecker::setManager(ManagerPtr manager)
     manager_ = manager;
 }
 
-std::vector<std::string> DataChecker::errors() const
-{
-    return errors_;
-}
+// std::vector<std::string> DataChecker::errors() const
+// {
+//     return errors_;
+// }
 
 void DataChecker::coutErrorsState()
 {

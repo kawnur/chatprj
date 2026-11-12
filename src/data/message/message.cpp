@@ -16,7 +16,7 @@ Message::Message(MessagePtr message)
     data_ = message->data();
     state_ = message->state();
 
-    log();
+    // log();
 }
 
 Message::~Message() = default;
@@ -86,6 +86,11 @@ void Message::setTime(const std::string &time)
     meta_->setTimestampTz(time);
 }
 
+void Message::setReceived(bool value)
+{
+    state_->setIsReceived(value);
+}
+
 MessageMetaDataPtr Message::meta() const
 {
     return meta_;
@@ -117,21 +122,33 @@ nlohmann::json Message::buildJsonData(NetworkMessageType type)
 
     data["type"] = type;
 
-    auto metaJsonData = meta_->getJsonData();
-    data.update(metaJsonData);
+    if (meta_) {
+        auto metaJsonData = meta_->getJsonData();
+        data.update(metaJsonData);
+    }
 
-    auto dataJsonData = data_->getJsonData();
-    data.update(dataJsonData);
+    if (data_) {
+        auto dataJsonData = data_->getJsonData();
+        data.update(dataJsonData);
+    }
 
-    auto stateJsonData = state_->getJsonData();
-    data.update(stateJsonData);
+    if (state_) {
+        auto stateJsonData = state_->getJsonData();
+        data.update(stateJsonData);
+    }
 
     return data;
+}
+
+std::string Message::typeMark()
+{
+    return "Message";
 }
 
 void Message::log()
 {
     logArgsInfo(MESSAGE_LOG_DELIMITER);
+    logArgsInfo(typeMark());
 
     if (meta_)
         meta_->log();
@@ -156,17 +173,50 @@ bool operator<(const Message &message1, const Message &message2)
     return message1.id() < message2.id();
 }
 
-TextMessage::TextMessage(MetaPtr meta, DataPtr data, StatePtr state) : Message(meta, data, state) {}
+TextMessage::TextMessage(MetaPtr meta, DataPtr data, StatePtr state) : Message(meta, data, state)
+{
+    log();
+}
 
 nlohmann::json TextMessage::getJsonData()
 {
     return buildJsonData(NetworkMessageType::TEXT);
 }
 
+std::string TextMessage::typeMark()
+{
+    return "TextMessage";
+}
+
 ReceiveConfirmationMessage::ReceiveConfirmationMessage(MetaPtr meta, DataPtr data, StatePtr state)
-    : Message(meta, data, state) {}
+    : Message(meta, data, state)
+{
+    log();
+}
 
 nlohmann::json ReceiveConfirmationMessage::getJsonData()
 {
     return buildJsonData(NetworkMessageType::RECEIVE_CONFIRMATION);
+}
+
+std::string ReceiveConfirmationMessage::typeMark()
+{
+    return "ReceiveConfirmationMessage";
+}
+
+ReceiveConfirmationRequestMessage::ReceiveConfirmationRequestMessage(
+    MetaPtr meta, DataPtr data, StatePtr state)
+    : Message(meta, data, state)
+{
+    log();
+}
+
+nlohmann::json ReceiveConfirmationRequestMessage::getJsonData()
+{
+    return buildJsonData(NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST);
+}
+
+std::string ReceiveConfirmationRequestMessage::typeMark()
+{
+    return "ReceiveConfirmationRequestMessage";
 }

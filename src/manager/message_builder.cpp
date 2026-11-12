@@ -27,7 +27,7 @@ MessagePtrVariant MessageBuilder::buildMessage(CompanionPtr companion, const std
         return buildMessageObject<ReceiveConfirmationMessage>(companion, data);
 
     case NetworkMessageType::RECEIVE_CONFIRMATION_REQUEST:
-        return nullptr;
+        return buildMessageObject<ReceiveConfirmationRequestMessage>(companion, data);
 
     case NetworkMessageType::CHAT_HISTORY_REQUEST:
         return nullptr;
@@ -145,24 +145,27 @@ MessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
 
 ReceiveConfirmationMessagePtr MessageBuilder::buildReceiveConfirmationMessage(MessagePtr message)
 {
-    auto meta = std::make_shared<MessageMetaData>(message->meta());
+    // auto meta = std::make_shared<MessageMetaData>(message->meta());
+    auto meta = std::make_shared<MessageMetaData>();
+    meta->setNetworkId(message->networkId());
 
-    auto data = std::make_shared<MessageData>("");
+    // auto data = std::make_shared<MessageData>("");
     auto state = std::make_shared<ReceiveConfirmationMessageState>(false, false, true);
 
-    auto newMessage = std::make_shared<ReceiveConfirmationMessage>(meta, data, state);
+    // auto newMessage = std::make_shared<ReceiveConfirmationMessage>(meta, data, state);
+    auto newMessage = std::make_shared<ReceiveConfirmationMessage>(meta, nullptr, state);
 
     return newMessage;
 }
 
-MessagePtr MessageBuilder::buildReceiveConfirmationRequestMessage(MessagePtr message)
+ReceiveConfirmationRequestMessagePtr MessageBuilder::buildReceiveConfirmationRequestMessage(MessagePtr message)
 {
     auto meta = std::make_shared<MessageMetaData>();
     meta->setNetworkId(message->networkId());
 
     auto state = std::make_shared<MessageState>(false, false, false);
 
-    auto newMessage = std::make_shared<Message>(meta, nullptr, state);
+    auto newMessage = std::make_shared<ReceiveConfirmationRequestMessage>(meta, nullptr, state);
 
     return newMessage;
 }

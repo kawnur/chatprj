@@ -3,6 +3,7 @@
 #include <QMenuBar>
 
 #include "graphic_manager.hpp"
+#include "utils.hpp"
 #include "utils_widgets.hpp"
 #include "widgets_panel.hpp"
 
@@ -77,6 +78,11 @@ void MainWindow::disableBlur()
     mainWidget_->initBlurEffect();
 }
 
+// void MainWindow::clearLog()
+// {
+//     mainWidget_->clearLog();
+// }
+
 void MainWindow::createCompanion()
 {
     getGraphicManager()->createCompanion();
@@ -103,33 +109,101 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
     // showFullScreen();
 }
 
+void MainWindow::addMenu1(QMenuBar *bar, const QString &name, const std::vector<MenuItemInfo> &info)
+{
+    QMenu* menu = bar->addMenu(name);
+    // QMenu* menu = menuBar()->addMenu(name);
+
+    if (!menu)
+        logArgsError("");
+
+    for (const auto &item : info) {
+        auto text = getIndexedContainerValue(item.texts(), 0, "");
+
+        QAction* action = new QAction(text, this);
+
+        if (!action)
+            logArgsError("");
+
+        menu->addAction(action);
+
+        connect(action, &QAction::triggered, this, item.function(), Qt::QueuedConnection);
+    }
+}
+
 void MainWindow::createMenu()
 {
     auto *bar = menuBar();
 
-    QMenu* fileMenu = bar->addMenu("File");
-    QAction* exitAction = new QAction("Exit", this);
-    fileMenu->addAction(exitAction);
+    // auto lambda = [&](const QString &name, const std::vector<MenuItemInfo> &info)
+    // {
+    //     // QMenu* menu = bar->addMenu(name);
+    //     QMenu* menu = menuBar()->addMenu(name);
 
-    connect(
-        exitAction, &QAction::triggered,
-        this, &QCoreApplication::quit, Qt::QueuedConnection);
+    //     for (const auto &item : info) {
+    //         auto text = getIndexedContainerValue(item.texts(), 0, "");
 
-    QMenu* companionMenu = bar->addMenu("Companion");
-    QAction* addCompanionAction = new QAction("Add new companion", this);
-    companionMenu->addAction(addCompanionAction);
+    //         QAction* action = new QAction(text, this);
+    //         menu->addAction(action);
 
-    connect(
-        addCompanionAction, &QAction::triggered,
-        this, &MainWindow::createCompanion, Qt::QueuedConnection);
+    //         connect(action, &QAction::triggered, this, item.function(), Qt::QueuedConnection);
+    //     }
+    // };
 
-    QMenu* groupChatMenu = bar->addMenu("Group chat");
-    QAction* addGroupChatAction = new QAction("Add new group chat", this);
-    groupChatMenu->addAction(addGroupChatAction);
+    std::vector<std::pair<const QString &, std::vector<MenuItemInfo>>> data {
+        {
+            QString("File"),
+            {
+                { { "Exit" }, [this]() { QCoreApplication::quit(); } },
+            }
+        },
+        {
+            "Companion",
+            {
+                { { "Add new companion" }, [this]() { createCompanion(); } },
+            }
+        },
+        {
+            "Group chat",
+            {
+                { { "Add new group chat" }, [this]() { createGroupChat(); } },
+            }
+        }
+    };
 
-    connect(
-        addGroupChatAction, &QAction::triggered,
-        this, &MainWindow::createGroupChat, Qt::QueuedConnection);
+    for (const auto &pair : data)
+        // lambda(pair.first, pair.second);
+        // addMenu1(pair.first, pair.second);
+        addMenu1(bar, pair.first, pair.second);
+
+    // std::vector<MenuItemInfo> info {
+    //     { { "Exit" }, [this]() { QCoreApplication::quit(); } },
+    // };
+
+
+    // // file
+    // QAction* exitAction = new QAction("Exit", this);
+    // fileMenu->addAction(exitAction);
+
+    // connect(
+    //     exitAction, &QAction::triggered,
+    //     this, &QCoreApplication::quit, Qt::QueuedConnection);
+
+    // companion
+    // QAction* addCompanionAction = new QAction("Add new companion", this);
+    // companionMenu->addAction(addCompanionAction);
+
+    // connect(
+    //     addCompanionAction, &QAction::triggered,
+    //     this, &MainWindow::createCompanion, Qt::QueuedConnection);
+
+    // groupchat
+    // QAction* addGroupChatAction = new QAction("Add new group chat", this);
+    // groupChatMenu->addAction(addGroupChatAction);
+
+    // connect(
+    //     addGroupChatAction, &QAction::triggered,
+    //     this, &MainWindow::createGroupChat, Qt::QueuedConnection);
 }
 
 void MainWindow::hideCentralStub()

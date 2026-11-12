@@ -94,7 +94,7 @@ public:
         return true;
     }
 
-    std::vector<std::string> errors() const;
+    // std::vector<std::string> errors() const;
     std::vector<std::string> &&moveErrors();
     void coutErrorsState();
 

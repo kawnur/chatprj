@@ -193,29 +193,11 @@ void StateButton::updateState()
     }
 }
 
-ButtonInfo::ButtonInfo(): function_() {}
-
-ButtonInfo::ButtonInfo(const std::vector<QString> &texts, std::function<void ()> function)
-    : texts_(std::move(texts)), function_(function) {}
-
-ButtonInfo::~ButtonInfo() { logArgsInfo(Q_FUNC_INFO); }
-
-std::vector<QString> ButtonInfo::texts() const
-{
-    return texts_;
-}
-
-std::function<void()> ButtonInfo::function() const
-{
-    return function_;
-}
-
-ButtonBox::ButtonBox(const std::initializer_list<ButtonInfo> &list) : QDialogButtonBox()
+ButtonBox::ButtonBox(const std::vector<ButtonInfo> &list) : QDialogButtonBox()
 {
     for (const auto &info : list) {
-        std::size_t index = 0;
-        auto text = getIndexedContainerValue(info.texts(), index, DEFAULT_BUTTON_TEXT);
-        auto button = addButton(text, DEFAULT_BUTTON_ROLE);
+        auto text = getIndexedContainerValue(info.texts(), 0, DEFAULT_BUTTON_TEXT);
+        auto button = addButton(text, info.role());
 
         connect(button, &QPushButton::clicked, this, info.function(), Qt::QueuedConnection);
     }
@@ -286,7 +268,7 @@ void IndicatorWidget::updateState()
     updateColor(getIndicatorWidgetColor(state_));
 }
 
-ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list)
+ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::vector<ButtonInfo> &list)
     : HLayoutWidget(type, Qt::AlignLeft), buttons_()
 {
     for (const auto &info : list) {
@@ -314,6 +296,41 @@ ButtonPanelWidget::ButtonPanelWidget(WidgetType type, const std::initializer_lis
 void ButtonPanelWidget::updateButtonState()
 {
     stateButton_->updateState();
+}
+
+MenuItem::MenuItem(const QString &text, bool isSwitchable, bool isDisabled)
+    : QAction(text), isSwitchable_(isSwitchable)
+{
+    setDisabled(isDisabled);
+}
+
+MenuItem::~MenuItem() { logArgsInfo(Q_FUNC_INFO); }
+
+bool MenuItem::isSwitchable() const
+{
+    return isSwitchable_;
+}
+
+Menu::Menu(const std::vector<MenuItemInfo> &info) : QMenu(), items_()
+{
+    for (const auto &item : info) {
+        auto text = getIndexedContainerValue(item.texts(), 0, "");
+        auto menuItem = std::make_shared<MenuItem>(text, item.isSwitchable(), item.isDisabled());
+        addAction(menuItem.get());
+        items_.push_back(menuItem);
+
+        connect(menuItem.get(), &QAction::triggered, this, item.function(), Qt::QueuedConnection);
+    }
+}
+
+Menu::~Menu() { logArgsInfo(Q_FUNC_INFO); }
+
+void Menu::updateSwitchableItems()
+{
+    for (auto &item : items_) {
+        if (item->isSwitchable())
+            item->resetEnabled();
+    }
 }
 
 SocketInfoBaseWidget::SocketInfoBaseWidget()
@@ -344,7 +361,7 @@ void SocketInfoWidget::set(WidgetGroupPtr group)
     clientPort_ = std::make_shared<QLabel>();
 
     // buttons
-    std::initializer_list<ButtonInfo> list = {
+    std::vector<ButtonInfo> list = {
         { { EDIT_BUTTON_TEXT }, [this]() { updateCompanionAction(); } },
         { { CONNECT_BUTTON_TEXT, DISCONNECT_BUTTON_TEXT }, [=, this]() { group->clientAction(); } }
     };
@@ -365,12 +382,41 @@ void SocketInfoWidget::set(WidgetGroupPtr group)
         addWidget(widget.get());
 
     // context menu
-    requestHistory_ = std::make_shared<QAction>("Request chat history from companion", this);
-    requestHistory_->setDisabled(true);
+    std::vector<MenuItemInfo> info {
+        { { "Clear chat history" }, [this]() { clearHistoryAction(); } },
+        { { "Delete companion" }, [this]() { deleteCompanionAction(); } },
+        {
+            { "Request chat history from companion" },
+            [&]() { group->requestHistorySlot(); },
+            true,
+            true
+        }
+    };
 
-    connect(
-        requestHistory_.get(), &QAction::triggered,
-        group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
+    // auto clearHistoryAction = new QAction("Clear chat history", this);
+    // menu->addAction(clearHistoryAction);
+
+    // connect(
+    //     clearHistoryAction, &QAction::triggered,
+    //     this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
+
+    // auto deleteCompanionAction = new QAction("Delete companion", this);
+    // menu->addAction(deleteCompanionAction);
+
+    // connect(
+    //     deleteCompanionAction, &QAction::triggered,
+    //     this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
+
+
+    // requestHistory_ = std::make_shared<QAction>("Request chat history from companion", this);
+    // menu->addAction(requestHistory_.get());
+    // requestHistory_->setDisabled(true);
+
+    // connect(
+    //     requestHistory_.get(), &QAction::triggered,
+    //     group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
+
+    menu_ = std::make_unique<Menu>(info);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -477,7 +523,8 @@ void SocketInfoWidget::updateConnectionState()
     state_->updateState();
 
     // set context menu action disabled
-    requestHistory_->setDisabled(requestHistory_->isEnabled());
+    // requestHistory_->setDisabled(requestHistory_->isEnabled());
+    menu_->updateSwitchableItems();
 }
 
 void SocketInfoWidget::setValues()
@@ -519,25 +566,7 @@ CompanionPtr SocketInfoWidget::companion()
 
 void SocketInfoWidget::customMenuRequestedSlot(QPoint position)
 {
-    auto menu = new Menu();
-
-    menu->addAction(requestHistory_.get());
-
-    auto clearHistoryAction = new QAction("Clear chat history", this);
-    menu->addAction(clearHistoryAction);
-
-    connect(
-        clearHistoryAction, &QAction::triggered,
-        this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
-
-    auto deleteCompanionAction = new QAction("Delete companion", this);
-    menu->addAction(deleteCompanionAction);
-
-    connect(
-        deleteCompanionAction, &QAction::triggered,
-        this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
-
-    menu->popup(mapToGlobal(position));
+    menu_->popup(mapToGlobal(position));
 }
 
 SocketInfoStubWidget::SocketInfoStubWidget()

@@ -57,6 +57,7 @@ class PasswordAction;
 class PriorityTask;
 class ReceiveConfirmationMessage;
 class ReceiveConfirmationMessageState;
+class ReceiveConfirmationRequestMessage;
 class ReceiverOperator;
 class RightPanelWidget;
 class SenderOperator;
@@ -116,6 +117,7 @@ using PriorityTaskQueue =
 
 using ReceiveConfirmationMessagePtr = std::shared_ptr<ReceiveConfirmationMessage>;
 using ReceiveConfirmationMessageStatePtr = std::shared_ptr<ReceiveConfirmationMessageState>;
+using ReceiveConfirmationRequestMessagePtr = std::shared_ptr<ReceiveConfirmationRequestMessage>;
 using ReceiverOperatorPtr = std::shared_ptr<ReceiverOperator>;
 using SaveFileActionPtr = std::shared_ptr<SaveFileAction>;
 using SendFileActionPtr = std::shared_ptr<SendFileAction>;

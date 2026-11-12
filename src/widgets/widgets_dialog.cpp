@@ -72,7 +72,7 @@ std::shared_ptr<DataWrapper> FormLayout::getDataWrapper()
     return data;
 }
 
-void FormLayout::fillForm(std::initializer_list<DataType> list)
+void FormLayout::fillForm(std::vector<DataType> list)
 {
     for (const auto &item : list) {
         auto line = std::make_shared<FormLine>(getDataTypeStringRepr(item));
@@ -88,7 +88,7 @@ void FormLayout::setFormData(CompanionDataPtr data)
         pair.second->setEditText(getQString(data->getData(pair.first)));
 }
 
-DataDialog::DataDialog(const std::string &title, const std::initializer_list<DataType> &lines)
+DataDialog::DataDialog(const std::string &title, const std::vector<DataType> &lines)
     : Dialog(title), FormLayout()
 {
     // set properties
@@ -176,7 +176,7 @@ void GroupChatDataDialog::set(ActionPtr action) {}
 
 TextDialog::TextDialog(
     std::shared_ptr<Dialog> parent, const std::string &title, const std::string &text,
-    std::initializer_list<ButtonInfo> buttonsInfo)
+    const std::vector<ButtonInfo> &buttonsInfo)
     : Dialog(title)
 {
     // title
@@ -247,13 +247,13 @@ void TextDialog::setText(const std::string &text)
     edit_->setPlainText(getQString(text));
 }
 
-void TextDialog::update(const std::string &text, std::initializer_list<ButtonInfo> list)
+void TextDialog::update(const std::string &text, const std::vector<ButtonInfo> &list)
 {
     setText(text);
     updateButtonBox(list);
 }
 
-void TextDialog::updateButtonBox(std::initializer_list<ButtonInfo> list)
+void TextDialog::updateButtonBox(const std::vector<ButtonInfo> &list)
 {
     buttonBox_ = std::make_unique<ButtonBox>(list);
     layout_->addWidget(buttonBox_.get());

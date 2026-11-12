@@ -84,7 +84,7 @@ private:
     DBData data_;
 };
 
-std::string buildChatHistoryJSONString(DBReplyDataPtr data, std::vector<std::string> &keys);
+std::string buildChatHistoryJSONString(DBReplyDataPtr data, const std::vector<std::string> &keys);
 
 int getBoolFromDbData(DBReplyDataPtr data, std::size_t index, const std::string &key);
 

@@ -18,6 +18,7 @@
 
 #include "alias.hpp"
 #include "logging.hpp"
+#include "widget_info.hpp"
 
 class Palette
 {
@@ -162,27 +163,12 @@ private:
     std::vector<QString> texts_;
 };
 
-class ButtonInfo
-{
-public:
-    ButtonInfo();
-    ButtonInfo(const std::vector<QString> &texts, std::function<void()> function);
-    ~ButtonInfo();
-
-    std::vector<QString> texts() const;
-    std::function<void()> function() const;
-
-private:
-    std::vector<QString> texts_;
-    std::function<void()> function_;
-};
-
 class ButtonBox :public QDialogButtonBox
 {
     Q_OBJECT
 
 public:
-    ButtonBox(const std::initializer_list<ButtonInfo> &list);
+    ButtonBox(const std::vector<ButtonInfo> &list);
     ~ButtonBox();
 
 private:
@@ -228,7 +214,7 @@ private:
 class ButtonPanelWidget : public HLayoutWidget
 {
 public:
-    ButtonPanelWidget(WidgetType type, const std::initializer_list<ButtonInfo> &list);
+    ButtonPanelWidget(WidgetType type, const std::vector<ButtonInfo> &list);
     ~ButtonPanelWidget() = default;
 
     void updateButtonState();
@@ -236,6 +222,32 @@ public:
 private:
     std::shared_ptr<StateButton> stateButton_;  // only one
     std::vector<std::shared_ptr<Button>> buttons_;
+};
+
+class MenuItem : public QAction
+{
+    Q_OBJECT
+
+public:
+    MenuItem(const QString &text, bool isSwitchable, bool isDisabled);
+    ~MenuItem();
+
+    bool isSwitchable() const;
+
+private:
+    bool isSwitchable_;
+};
+
+class Menu : public QMenu
+{
+public:
+    Menu(const std::vector<MenuItemInfo> &info);
+    ~Menu();
+
+    void updateSwitchableItems();
+
+private:
+    std::vector<std::shared_ptr<MenuItem>> items_;
 };
 
 class SocketInfoBaseWidget : public HLayoutWidget
@@ -258,13 +270,6 @@ public:
     virtual CompanionPtr companion() { return nullptr; }
 
     void initializeFields();  // non-virtual because is called from constructor
-};
-
-class Menu : public QMenu
-{
-public:
-    Menu() = default;
-    ~Menu() { logArgsInfo(Q_FUNC_INFO); }
 };
 
 class SocketInfoWidget : public SocketInfoBaseWidget
@@ -316,7 +321,8 @@ private:
     std::shared_ptr<QLabel> clientPort_;
     std::shared_ptr<ButtonPanelWidget> buttons_;
     std::shared_ptr<IndicatorWidget> received_;
-    std::shared_ptr<QAction> requestHistory_;
+    std::unique_ptr<Menu> menu_;
+    // std::shared_ptr<QAction> requestHistory_;
 
 private slots:
     void customMenuRequestedSlot(QPoint position);

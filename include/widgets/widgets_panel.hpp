@@ -99,6 +99,7 @@ signals:
 
 private:
     std::unique_ptr<TextEditWidget> log_;
+    std::unique_ptr<Menu> menu_;
 
 private slots:
     void addLogSlot(const QString &text);
@@ -139,6 +140,7 @@ public:
     void enable();
     void disable();
     void setBlur();
+    // void clearLog();
 
 private:
     std::shared_ptr<LeftPanelWidget> left_;

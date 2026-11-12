@@ -11,7 +11,8 @@
 
 using MessagePtrVariant = std::variant<std::nullptr_t,
                                        TextMessagePtr,
-                                       ReceiveConfirmationMessagePtr>;
+                                       ReceiveConfirmationMessagePtr,
+                                       ReceiveConfirmationRequestMessagePtr>;
 
 template <typename T>
 std::shared_ptr<T> buildObjectFromJson(CompanionPtr companion, const nlohmann::json &data)
@@ -81,7 +82,7 @@ public:
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);
 
     ReceiveConfirmationMessagePtr buildReceiveConfirmationMessage(MessagePtr message);
-    MessagePtr buildReceiveConfirmationRequestMessage(MessagePtr message);
+    ReceiveConfirmationRequestMessagePtr buildReceiveConfirmationRequestMessage(MessagePtr message);
     MessagePtr buildFileDataCheckResultMessage(NetworkMessageType type, MessagePtr message);
 
     MessagePtr buildFileDataTransmissionResultMessage(

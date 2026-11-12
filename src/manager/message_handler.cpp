@@ -137,7 +137,7 @@ bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr mes
 }
 
 bool MessageHandler::sendChatHistory(
-    CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys)
+    CompanionPtr companion, DBReplyDataPtr data, const std::vector<std::string> &keys)
 {
     // build json
     std::string json = buildChatHistoryJSONString(data, keys);
@@ -190,7 +190,8 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     const Visitor visitor {
         [&](std::nullptr_t value) { return; },
         [&](TextMessagePtr value) { receiveTextMessage(companion, value); },
-        [&](ReceiveConfirmationMessagePtr value) { receiveConfirmation(companion, value); }
+        [&](ReceiveConfirmationMessagePtr value) { receiveConfirmation(companion, value); },
+        [&](ReceiveConfirmationRequestMessagePtr value) { receiveConfirmationRequest(companion, value); }
     };
 
     std::visit(visitor, messageVariant);
@@ -198,6 +199,9 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
 
 void MessageHandler::receiveTextMessage(CompanionPtr companion, TextMessagePtr message)
 {
+    // set message received
+    message->setReceived(true);
+
     // add to DB and get timestamp
     auto name = companion->name();
     auto pushResult = manager_->pushMessageToDB(message, name, name);
@@ -512,7 +516,7 @@ void MessageHandler::waitForMessageReceptionConfirmation(CompanionPtr companion,
 
             // send message reception confirmation request
             auto request = builder_.buildReceiveConfirmationRequestMessage(message);  // TODO chek state
-            bool result = sendMessageByNetwork(companion, message);
+            bool result = sendMessageByNetwork(companion, request);
 
             // sleep
             sleepForMS(sleep);

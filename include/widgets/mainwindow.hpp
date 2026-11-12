@@ -5,7 +5,7 @@
 
 #include <QHBoxLayout>
 #include <QMainWindow>
-#include <QMenu>
+// #include <QMenu>
 #include <QObject>
 #include <QString>
 #include <QWidget>
@@ -39,7 +39,9 @@ public:
     void showStubs();
     void hideStubs();
 
+    void addMenu1(QMenuBar *bar, const QString &name, const std::vector<MenuItemInfo> &info);
 private slots:
+    // void clearLog();
     void createCompanion();
     void createGroupChat();
 

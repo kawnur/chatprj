@@ -14,6 +14,7 @@
 #include "message.hpp"  // used in lambda
 #include "utils_cout.hpp"
 #include "utils_widgets.hpp"
+#include "widget_info.hpp"
 #include "widget_group.hpp"
 #include "widgets_message.hpp"
 
@@ -112,7 +113,7 @@ CentralPanelWidget::CentralPanelWidget(const std::string &name, bool isStub, QWi
         return;
 
     // button panel
-    std::initializer_list<ButtonInfo> list = {
+    std::vector<ButtonInfo> list = {
         { { SEND_FILE_BUTTON_TEXT }, [this]() { sendFileSlot(); } },
         { { SEND_TEXT_BUTTON_TEXT }, [this]() { textEdit_->sendSlot(); } }
     };
@@ -294,6 +295,12 @@ RightPanelWidget::RightPanelWidget(QWidgetPtr parent) : PanelWidget(WidgetType::
     //                this,
     //                &MainWindow::testMainWindowRightPanel);
     //    rightPanelLayout_->addWidget(testPlainTextEditButton_);
+
+    std::vector<MenuItemInfo> info {
+        { { "Clear log" }, [this]() { clearLog(); } }
+    };
+
+    menu_ = std::make_unique<Menu>(info);
 }
 
 void RightPanelWidget::set()
@@ -330,15 +337,7 @@ void RightPanelWidget::addLogSlot(const QString &text)
 
 void RightPanelWidget::customMenuRequestedSlot(const QPoint &position)
 {
-    auto menu = std::make_shared<QMenu>(this);
-    auto clearLogAction = std::make_shared<QAction>("Clear log", this);
-    menu->addAction(clearLogAction.get());
-
-    connect(
-        clearLogAction.get(), &QAction::triggered,
-        this, &RightPanelWidget::clearLog, Qt::QueuedConnection);
-
-    menu->popup(mapToGlobal(position));
+    menu_->popup(mapToGlobal(position));
 }
 
 CentralPanelContainerWidget::CentralPanelContainerWidget()
@@ -475,3 +474,8 @@ void MainWidget::setBlur()
 {
     setGraphicsEffect(blur_.get());
 }
+
+// void MainWidget::clearLog()
+// {
+
+// }

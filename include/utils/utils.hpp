@@ -158,7 +158,7 @@ typename M::mapped_type getMapValue(
 
 template<std::ranges::random_access_range R>
 typename R::value_type getIndexedContainerValue(
-    const R &container, std::size_t &index, const typename R::value_type &defaultValue)
+    const R &container, std::size_t index, const typename R::value_type &defaultValue)
 {
     try {
         return container.at(index);

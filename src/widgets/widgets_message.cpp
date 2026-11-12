@@ -115,7 +115,6 @@ void FileMessageBodyWidget::buildText(MessagePtr message)
     if (_type == WidgetType::FILE_SENT)
         text = getStringByFormat(textTemplate, path);
     else if (_type == WidgetType::FILE_RECEIVED)
-        // text = getStringByFormat(textTemplate, message->text());
         text = getStringByFormat(textTemplate, message->_data());
 
     auto textHtml = getHTMLBody(color, text, true, false);
@@ -225,7 +224,6 @@ QString formatHeader(CompanionPtr companion, MessagePtr message)
 
 QString formatBody(MessagePtr message)
 {
-    // auto text = message->text();
     auto text = message->_data();
     std::string color;
 

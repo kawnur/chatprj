@@ -40,6 +40,7 @@ public:
     void setId(int id);
     void setCompanionId(int id);
     void setTime(const std::string &time);
+    void setReceived(bool value);
 
     friend bool operator<(const Message &message1, const Message &message2);
 
@@ -48,12 +49,14 @@ public:
     StatePtr state() const;
 
     void updateMeta(MessageMetaDataPtr meta);
+    // virtual std::string getNetworkReadyData();
     std::string getNetworkReadyData();
 
 protected:
     virtual nlohmann::json getJsonData() { return nlohmann::json::object(); }
     nlohmann::json buildJsonData(NetworkMessageType type);
-    void log();
+    virtual std::string typeMark();
+    virtual void log();
 
     MetaPtr meta_;
     DataPtr data_;
@@ -71,6 +74,7 @@ public:
     ~TextMessage() = default;
 
     nlohmann::json getJsonData() override;
+    std::string typeMark() override;
 };
 
 class ReceiveConfirmationMessage : public Message
@@ -84,6 +88,21 @@ public:
     ~ReceiveConfirmationMessage() = default;
 
     nlohmann::json getJsonData() override;
+    std::string typeMark() override;
+};
+
+class ReceiveConfirmationRequestMessage : public Message
+{
+public:
+    using meta_type = MessageMetaData;
+    using data_type = MessageData;
+    using state_type = MessageState;
+
+    ReceiveConfirmationRequestMessage(MetaPtr meta, DataPtr data, StatePtr state);
+    ~ReceiveConfirmationRequestMessage() = default;
+
+    nlohmann::json getJsonData() override;
+    std::string typeMark() override;
 };
 
 #endif // MESSAGE_HPP

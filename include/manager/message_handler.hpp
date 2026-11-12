@@ -29,7 +29,7 @@ public:
     void sendTextMessage(CompanionPtr companion, ActionPtr action, const std::string &text);
 
     bool sendChatHistory(
-        CompanionPtr companion, DBReplyDataPtr data, std::vector<std::string> &keys);
+        CompanionPtr companion, DBReplyDataPtr data, const std::vector<std::string> &keys);
 
     bool sendFileBlock(
         CompanionPtr companion, const std::string &networkId, const std::string &data);

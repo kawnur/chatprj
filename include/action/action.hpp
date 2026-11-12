@@ -50,10 +50,11 @@ protected:
 
     void updateInfoDialogBase(
         bool status, const std::vector<std::string> &messages,
-        std::initializer_list<ButtonInfo> list);
+        const std::vector<ButtonInfo> &list);
 
-    void updateInfoDialogAndShow(const std::string &text, std::initializer_list<ButtonInfo> list);
+    void updateInfoDialogAndShow(const std::string &text, const std::vector<ButtonInfo> &list);
     void updateInfoDialogToErrorWithCloseSelfAndShow(const std::string &text);
+    std::vector<ButtonInfo> getCancelOKButtonInfoList();
 
     ManagerPtr manager_;
     std::shared_ptr<TextDialog> infoDialog_;
@@ -233,6 +234,6 @@ public:
 };
 
 void fillMessages(
-    std::vector<std::string> &messages, std::vector<std::pair<std::string, std::string>> lines);
+    std::vector<std::string> &messages, const std::vector<std::pair<std::string, std::string>> &lines);
 
 #endif // ACTION_HPP
