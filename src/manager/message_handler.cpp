@@ -79,6 +79,20 @@ bool MessageHandler::buildAndSendConfirmation(CompanionPtr companion, MessagePtr
     return result;
 }
 
+void MessageHandler::sendTextMessageAndWaitForReceptionConfirmation(
+    CompanionPtr companion, MessagePtr message)
+{
+    // send over network
+    bool result = sendMessageByNetwork(companion, message);
+
+    // mark message as sent
+    if (result)
+        manager_->markMessageAsSent(companion, message);
+
+    // wait for message reception confirmation
+    waitForMessageReceptionConfirmation(companion, message);
+}
+
 void MessageHandler::sendTextMessage(
     CompanionPtr companion, ActionPtr action, const std::string &text)
 {
@@ -107,15 +121,18 @@ void MessageHandler::sendTextMessage(
     // add message widget
     manager_->addMessageWidget<TextMessageWidget>(companion, message);
 
-    // send over network
-    bool result = sendMessageByNetwork(companion, message);
+    // // send over network
+    // bool result = sendMessageByNetwork(companion, message);
 
-    // mark message as sent
-    if (result)
-        manager_->markMessageAsSent(companion, message);
+    // // mark message as sent
+    // if (result)
+    //     manager_->markMessageAsSent(companion, message);
 
-    // wait for message reception confirmation
-    waitForMessageReceptionConfirmation(companion, message);
+    // // wait for message reception confirmation
+    // waitForMessageReceptionConfirmation(companion, message);
+
+    // send and wait for confirmation
+    sendTextMessageAndWaitForReceptionConfirmation(companion, message);
 }
 
 bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr message)
@@ -455,12 +472,15 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
             // add to companion's messages if needed
             message = builder_.buildUnsentTextMessageFromDbData(companion, data, i);
 
-        // send over network
-        bool result = sendMessageByNetwork(companion, message);
+        // // send over network
+        // bool result = sendMessageByNetwork(companion, message);
 
-        // mark message as sent
-        if (result)
-            manager_->markMessageAsSent(companion, message);
+        // // mark message as sent
+        // if (result)
+        //     manager_->markMessageAsSent(companion, message);
+
+        // send and wait for confirmation
+        sendTextMessageAndWaitForReceptionConfirmation(companion, message);
     }
 }
 

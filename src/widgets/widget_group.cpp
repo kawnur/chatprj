@@ -1,7 +1,6 @@
 #include "widget_group.hpp"
 
 #include "companion.hpp"
-#include "message_state.hpp"
 #include "widgets_message.hpp"
 
 const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
@@ -20,18 +19,21 @@ void WidgetGroup::set()
 {
     auto graphicManager = getGraphicManager();
 
+    // socket
     auto widget = std::make_shared<SocketInfoWidget>(companion_);
     widget->set(shared_from_this());
 
     socketInfoBase_ = dynamic_pointer_cast<SocketInfoBaseWidget>(widget);
     graphicManager->addCompanionWidget(socketInfoBase_);
 
+    // central panel
     centralPanel_ = std::make_shared<CentralPanelWidget>(companion_->name(), false);
 
     centralPanel_->set(companion_);
     graphicManager->addWidgetToCentralContainer(centralPanel_);
     centralPanel_->hide();
 
+    // connections
     connect(
         this, &WidgetGroup::addTextMessageWidgetSignal,
         this, &WidgetGroup::addTextMessageWidgetSlot, Qt::QueuedConnection);
@@ -139,35 +141,6 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 // void WidgetGroup::buildChatHistorySlot()
 // {
 //     companion_->addMessageWidgetsToChatHistory();
-// }
-
-// void WidgetGroup::addMessageWidgetSlot(MessagePtr message)
-// {
-//     bool isAntecedent = message->isAntecedent();
-
-//     if (isAntecedent) {
-//         std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-//         ++antecedentMessagesCounter_;
-
-//         logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-//     }
-
-//     // auto widget = getGraphicManager()->buildMessageWidget(companion_, message);
-//     auto widget = std::make_shared<MessageWidget>(companion_, message);
-
-//     // auto lambda = [=]()
-//     // {
-//     //     // companion->setMappedMessageWidget(message, widget);
-//     //     getManager()->setMappedMessageWidget(companion_, message, widget);
-//     // };
-
-//     // runInDetachedThread(lambda);
-//     auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-//     // widget->setBase(shared_from_this());
-//     widget->set(shared_from_this());
-//     centralPanel_->addMessage(widget, isAntecedent);
-//     messageAdded();
 // }
 
 void WidgetGroup::addMessageWidgetsSlot(const std::vector<MessagePtr> &messages)

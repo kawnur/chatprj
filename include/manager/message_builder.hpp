@@ -70,7 +70,8 @@ public:
         CompanionPtr companion, DBReplyDataPtr data, std::size_t index);
 
     MessageMetaDataPtr buildMyTextMessageMetaData(CompanionPtr companion);
-    MessageDataPtr buildMessageData(DBReplyDataPtr data, std::size_t index);
+    // MessageDataPtr buildMessageData(DBReplyDataPtr data, std::size_t index);
+    TextMessageDataPtr buildTextMessageData(DBReplyDataPtr data, std::size_t index);
     MessageStatePtr buildMessageState(bool isAntecedent, DBReplyDataPtr data, std::size_t index);
 
     MessagePtr buildMessageFromDbData(
@@ -78,7 +79,8 @@ public:
 
     TextMessagePtr buildMyTextMessage(CompanionPtr companion, const std::string &text);
 
-    MessagePtr buildUnsentTextMessageFromDbData(
+    // MessagePtr buildUnsentTextMessageFromDbData(
+    TextMessagePtr buildUnsentTextMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);
 
     ReceiveConfirmationMessagePtr buildReceiveConfirmationMessage(MessagePtr message);

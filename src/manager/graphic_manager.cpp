@@ -314,21 +314,6 @@ void GraphicManager::createEntrancePassword()
 //     manager_->initEntrancePasswordReception();
 // }
 
-// MessageWidgetPtr GraphicManager::buildMessageWidget(CompanionPtr companion, MessagePtr message)
-// {
-//     return std::make_shared<MessageWidget>(companion, message);
-// }
-
-// void GraphicManager::addMessageWidget(CompanionPtr companion, MessagePtr message)
-// {
-//     auto group = getWidgetGroup(companion);
-
-//     if (!group)
-//         return;
-
-//     emit group->addMessageWidgetSignal(message);
-// }
-
 void GraphicManager::addMessageWidgets(
     CompanionPtr companion, const std::vector<MessagePtr> &messages)
 {

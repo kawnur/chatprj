@@ -140,7 +140,6 @@ public:
     void enable();
     void disable();
     void setBlur();
-    // void clearLog();
 
 private:
     std::shared_ptr<LeftPanelWidget> left_;

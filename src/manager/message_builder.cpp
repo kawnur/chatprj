@@ -93,9 +93,11 @@ MessageMetaDataPtr MessageBuilder::buildMyTextMessageMetaData(CompanionPtr compa
         "");
 }
 
-MessageDataPtr MessageBuilder::buildMessageData(DBReplyDataPtr data, std::size_t index)
+// MessageDataPtr MessageBuilder::buildMessageData(DBReplyDataPtr data, std::size_t index)
+TextMessageDataPtr MessageBuilder::buildTextMessageData(DBReplyDataPtr data, std::size_t index)
 {
-    return std::make_shared<MessageData>(data->getValue(index, "message"));
+    // return std::make_shared<MessageData>(data->getValue(index, "message"));
+    return std::make_shared<TextMessageData>(data->getValue(index, "message"));
 }
 
 MessageStatePtr MessageBuilder::buildMessageState(
@@ -110,7 +112,7 @@ MessagePtr MessageBuilder::buildMessageFromDbData(
     CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index)
 {
     auto meta = buildMessageMetaData(companion, dbData, index);
-    auto data = buildMessageData(dbData, index);
+    auto data = buildTextMessageData(dbData, index);
     auto state = buildMessageState(false, dbData, index);
 
     auto message = std::make_shared<Message>(meta, data, state);
@@ -129,16 +131,18 @@ TextMessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const 
     return message;
 }
 
-MessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
+// MessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
+TextMessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
     CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index)
 {
     auto meta = buildUnsentMessageMetaData(companion, dbData, index);
-    auto data = buildMessageData(dbData, index);
+    auto data = buildTextMessageData(dbData, index);
 
     auto state = buildMessageState(true, dbData, index);
     state->setIsSent(false);  // check db data
 
-    auto message = std::make_shared<Message>(meta, data, state);
+    // auto message = std::make_shared<Message>(meta, data, state);
+    auto message = std::make_shared<TextMessage>(meta, data, state);
 
     return message;
 }

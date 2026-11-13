@@ -78,11 +78,6 @@ void MainWindow::disableBlur()
     mainWidget_->initBlurEffect();
 }
 
-// void MainWindow::clearLog()
-// {
-//     mainWidget_->clearLog();
-// }
-
 void MainWindow::createCompanion()
 {
     getGraphicManager()->createCompanion();
@@ -109,50 +104,11 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
     // showFullScreen();
 }
 
-void MainWindow::addMenu1(QMenuBar *bar, const QString &name, const std::vector<MenuItemInfo> &info)
-{
-    QMenu* menu = bar->addMenu(name);
-    // QMenu* menu = menuBar()->addMenu(name);
-
-    if (!menu)
-        logArgsError("");
-
-    for (const auto &item : info) {
-        auto text = getIndexedContainerValue(item.texts(), 0, "");
-
-        QAction* action = new QAction(text, this);
-
-        if (!action)
-            logArgsError("");
-
-        menu->addAction(action);
-
-        connect(action, &QAction::triggered, this, item.function(), Qt::QueuedConnection);
-    }
-}
-
 void MainWindow::createMenu()
 {
-    auto *bar = menuBar();
-
-    // auto lambda = [&](const QString &name, const std::vector<MenuItemInfo> &info)
-    // {
-    //     // QMenu* menu = bar->addMenu(name);
-    //     QMenu* menu = menuBar()->addMenu(name);
-
-    //     for (const auto &item : info) {
-    //         auto text = getIndexedContainerValue(item.texts(), 0, "");
-
-    //         QAction* action = new QAction(text, this);
-    //         menu->addAction(action);
-
-    //         connect(action, &QAction::triggered, this, item.function(), Qt::QueuedConnection);
-    //     }
-    // };
-
     std::vector<std::pair<const QString &, std::vector<MenuItemInfo>>> data {
         {
-            QString("File"),
+            "File",
             {
                 { { "Exit" }, [this]() { QCoreApplication::quit(); } },
             }
@@ -171,39 +127,34 @@ void MainWindow::createMenu()
         }
     };
 
-    for (const auto &pair : data)
-        // lambda(pair.first, pair.second);
-        // addMenu1(pair.first, pair.second);
-        addMenu1(bar, pair.first, pair.second);
+    auto *bar = menuBar();
 
-    // std::vector<MenuItemInfo> info {
-    //     { { "Exit" }, [this]() { QCoreApplication::quit(); } },
-    // };
+    // auto lambda = [&](const QString &name, const std::vector<MenuItemInfo> &info)
+    auto lambda = [&](QMenu* menu, const std::vector<MenuItemInfo> &info)
+    {
+        // QMenu* menu = bar->addMenu(name);
 
+        for (const auto &item : info) {
+            auto text = getIndexedContainerValue(item.texts(), 0, "");
 
-    // // file
-    // QAction* exitAction = new QAction("Exit", this);
-    // fileMenu->addAction(exitAction);
+            QAction* action = new QAction(text, this);
+            menu->addAction(action);
 
-    // connect(
-    //     exitAction, &QAction::triggered,
-    //     this, &QCoreApplication::quit, Qt::QueuedConnection);
+            connect(action, &QAction::triggered, this, item.function(), Qt::QueuedConnection);
+        }
+    };
 
-    // companion
-    // QAction* addCompanionAction = new QAction("Add new companion", this);
-    // companionMenu->addAction(addCompanionAction);
+    // TODO get rid of notifier crash
+    // for (const auto &pair : data)
+    //     lambda(pair.first, pair.second);
 
-    // connect(
-    //     addCompanionAction, &QAction::triggered,
-    //     this, &MainWindow::createCompanion, Qt::QueuedConnection);
+    QMenu* fileMenu = bar->addMenu("File");
+    QMenu* companionMenu = bar->addMenu("Companion");
+    QMenu* groupChatMenu = bar->addMenu("Group chat");
 
-    // groupchat
-    // QAction* addGroupChatAction = new QAction("Add new group chat", this);
-    // groupChatMenu->addAction(addGroupChatAction);
-
-    // connect(
-    //     addGroupChatAction, &QAction::triggered,
-    //     this, &MainWindow::createGroupChat, Qt::QueuedConnection);
+    lambda(fileMenu, data[0].second);
+    lambda(companionMenu, data[1].second);
+    lambda(groupChatMenu, data[2].second);
 }
 
 void MainWindow::hideCentralStub()

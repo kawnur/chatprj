@@ -322,7 +322,6 @@ private:
     std::shared_ptr<ButtonPanelWidget> buttons_;
     std::shared_ptr<IndicatorWidget> received_;
     std::unique_ptr<Menu> menu_;
-    // std::shared_ptr<QAction> requestHistory_;
 
 private slots:
     void customMenuRequestedSlot(QPoint position);

@@ -207,20 +207,19 @@ void CentralPanelWidget::sortHistory(bool lock)
         return res;
     };
 
-    auto print = [&]()
+    auto print = [&](const QString &mark)
     {
+        coutArgsWithSpaceSeparator(mark);
+
         for (const auto l : list)
             coutArgsWithSpaceSeparator(l->message()->_data());
     };
 
-    coutArgsWithSpaceSeparator("BEFORE SORTING");
-    print();
+    print("BEFORE SORTING");
 
     std::ranges::sort(list, sortingLambda);
 
-    coutArgsWithSpaceSeparator("AFTER SORTING");
-    print();
-
+    print("AFTER SORTING");
 
     for (auto &element : list) {
         auto message = element->message();
@@ -239,25 +238,27 @@ bool CentralPanelWidget::eventFilter(QObject *object, QEvent *event)
 {
     auto result = QWidget::eventFilter(object, event);
 
-    if (object == historyScrollArea_.get()) {
-        auto bar = historyScrollArea_->verticalScrollBar();
+    if (object != historyScrollArea_.get())
+        return result;
 
-        if (bar && bar->value() == bar->minimum()) {
-            auto cast = dynamic_cast<QKeyEvent *>(event);
-            auto type = event->type();
+    auto bar = historyScrollArea_->verticalScrollBar();
 
-            bool condition1 = (type == QEvent::Wheel);
+    if (!bar || bar->value() != bar->minimum())
+        return result;
 
-            auto keys = (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home);
-            bool condition21 = (cast && (cast->key() & keys));
-            bool condition2 = (type == QEvent::KeyPress && condition21);
+    auto cast = dynamic_cast<QKeyEvent *>(event);
+    auto type = event->type();
 
-            if (condition1 || condition2) {
-                logTemplateInfo("scroll bar minimum event type '{}'", getString(event->type()));
+    bool condition1 = (type == QEvent::Wheel);
 
-                getGraphicManager()->addEarlyMessages(companion_);
-            }
-        }
+    auto keys = (Qt::Key_Up | Qt::Key_PageUp | Qt::Key_Home);
+    bool condition21 = (cast && (cast->key() & keys));
+    bool condition2 = (type == QEvent::KeyPress && condition21);
+
+    if (condition1 || condition2) {
+        logTemplateInfo("scroll bar minimum event type '{}'", getString(event->type()));
+
+        getGraphicManager()->addEarlyMessages(companion_);
     }
 
     return result;
@@ -474,8 +475,3 @@ void MainWidget::setBlur()
 {
     setGraphicsEffect(blur_.get());
 }
-
-// void MainWidget::clearLog()
-// {
-
-// }

@@ -52,6 +52,7 @@ public:
     bool addCompanionToMessageStorage(CompanionPtr companion);
 
 private:
+    void sendTextMessageAndWaitForReceptionConfirmation(CompanionPtr companion, MessagePtr message);
     void buildMessageAndStore(
         CompanionPtr companion, DBReplyDataPtr data, int index, std::vector<MessagePtr> &messages);
 

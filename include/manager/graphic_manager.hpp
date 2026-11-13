@@ -45,8 +45,6 @@ public:
     void enableMainWindowBlurEffect();
     void disableBlur();
     // void getEntrancePassword();
-    // MessageWidgetPtr buildMessageWidget(CompanionPtr companion, MessagePtr message);
-    // void addMessageWidget(CompanionPtr companion, MessagePtr message);
 
     template<typename T>
     void addMessageWidget(CompanionPtr companion, MessagePtr message)

@@ -62,18 +62,8 @@ private:
             logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
         }
 
-        // auto widget = getGraphicManager()->buildMessageWidget(companion_, message);
         auto widget = std::make_shared<T>(companion_, message);
-
-        // auto lambda = [=]()
-        // {
-        //     // companion->setMappedMessageWidget(message, widget);
-        //     getManager()->setMappedMessageWidget(companion_, message, widget);
-        // };
-
-        // runInDetachedThread(lambda);
         auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-        // widget->setBase(shared_from_this());
         widget->set(shared_from_this());
         centralPanel_->addMessage(widget, isAntecedent);
         messageAdded();

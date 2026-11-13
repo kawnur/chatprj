@@ -53,6 +53,8 @@ void PalettedWidget::updateColor(uint32_t color)
 Layout::Layout(WidgetType type) : type_(type)
 {
     spacing_ = getLayoutSpacingValue(type_);
+
+    // margins
     leftMargin_ = getLayoutContentsLeftMargin(type);
     topMargin_ = getLayoutContentsTopMargin(type);
     rightMargin_ = getLayoutContentsRightMargin(type);
@@ -393,29 +395,6 @@ void SocketInfoWidget::set(WidgetGroupPtr group)
         }
     };
 
-    // auto clearHistoryAction = new QAction("Clear chat history", this);
-    // menu->addAction(clearHistoryAction);
-
-    // connect(
-    //     clearHistoryAction, &QAction::triggered,
-    //     this, &SocketInfoWidget::clearHistoryAction, Qt::QueuedConnection);
-
-    // auto deleteCompanionAction = new QAction("Delete companion", this);
-    // menu->addAction(deleteCompanionAction);
-
-    // connect(
-    //     deleteCompanionAction, &QAction::triggered,
-    //     this, &SocketInfoWidget::deleteCompanionAction, Qt::QueuedConnection);
-
-
-    // requestHistory_ = std::make_shared<QAction>("Request chat history from companion", this);
-    // menu->addAction(requestHistory_.get());
-    // requestHistory_->setDisabled(true);
-
-    // connect(
-    //     requestHistory_.get(), &QAction::triggered,
-    //     group.get(), &WidgetGroup::requestHistorySlot, Qt::QueuedConnection);
-
     menu_ = std::make_unique<Menu>(info);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -523,7 +502,6 @@ void SocketInfoWidget::updateConnectionState()
     state_->updateState();
 
     // set context menu action disabled
-    // requestHistory_->setDisabled(requestHistory_->isEnabled());
     menu_->updateSwitchableItems();
 }
 
