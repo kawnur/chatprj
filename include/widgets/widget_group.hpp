@@ -30,9 +30,10 @@ public:
     void setNewMessagesIndicatorOff();
 
 signals:
-    void addTextMessageWidgetSignal(MessagePtr message);
+    void addIncomingTextMessageWidgetSignal(MessagePtr message);
+    void addOutgoingTextMessageWidgetSignal(MessagePtr message);
     void addFileMessageWidgetSignal(MessagePtr message);
-    void addMessageWidgetsSignal(const std::vector<MessagePtr> &messages);  // TODO rename
+    void addTextMessageWidgetsSignal(const std::vector<TextMessagePtr> &messages);  // TODO rename
     // void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
@@ -43,9 +44,10 @@ public slots:
     void clientAction();
 
 private slots:
-    void addTextMessageWidgetSlot(MessagePtr message);
+    void addIncomingTextMessageWidgetSlot(MessagePtr message);
+    void addOutgoingTextMessageWidgetSlot(MessagePtr message);
     void addFileMessageWidgetSlot(MessagePtr message);
-    void addMessageWidgetsSlot(const std::vector<MessagePtr> &messages);
+    void addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages);
     // void askUserForHistorySendingConfirmationSlot();
 
 private:

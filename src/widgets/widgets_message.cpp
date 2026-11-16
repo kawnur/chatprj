@@ -8,52 +8,50 @@
 #include "utils_widgets.hpp"
 #include "widget_group.hpp"
 
-MessageIndicatorPanelWidget::MessageIndicatorPanelWidget(MessagePtr message)
-    : HLayoutWidget(WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, Qt::AlignRight),
-    newMessageLabel_(nullptr)
+MessageIndicatorPanelWidget::MessageIndicatorPanelWidget()
+    : HLayoutWidget(WidgetType::MESSAGE_WIDGET_INDICATOR_PANEL, Qt::AlignRight)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    if (message->isMessageFromMe()) {
-        auto type = WidgetType::MESSAGE_WIDGET_INDICATOR;
-
-        auto state = [](bool value)
-        {
-            return (value) ? IndicatorWidgetState::ON : IndicatorWidgetState::OFF;
-        };
-
-        sent_ = std::make_shared<IndicatorWidget>(type, state(message->isSent()));
-        addWidget(sent_.get());
-        received_ = std::make_shared<IndicatorWidget>(type, state(message->isReceived()));
-        addWidget(received_.get());
-    }
-    else {
-        sent_ = nullptr;
-        received_ = nullptr;
-
-        auto color = getHTMLColor(WidgetType::TEXT_RECEIVED);
-        auto text = (message->isAntecedent()) ? "NEW"s : ""s;
-        auto textHtml = getHTMLBody(color, text, false, true);
-        newMessageLabel_ = std::make_shared<QLabel>(textHtml);
-        newMessageLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
-        addWidget(newMessageLabel_.get());
-    }
 }
 
-void MessageIndicatorPanelWidget::setSentIndicatorOn()
+IncomingTextMessageIndicatorPanelWidget::IncomingTextMessageIndicatorPanelWidget(MessagePtr message)
+    : MessageIndicatorPanelWidget()
+{
+    auto color = getHTMLColor(WidgetType::TEXT_RECEIVED);
+    auto text = (message->isAntecedent()) ? "NEW"s : ""s;
+    auto textHtml = getHTMLBody(color, text, false, true);
+    newMessageLabel_ = std::make_shared<QLabel>(textHtml);
+    newMessageLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
+    addWidget(newMessageLabel_.get());
+}
+
+void IncomingTextMessageIndicatorPanelWidget::unsetNewMessageLabel()
+{
+    newMessageLabel_->setText("");
+}
+
+OutgoingTextMessageIndicatorPanelWidget::OutgoingTextMessageIndicatorPanelWidget(MessagePtr message)
+    : MessageIndicatorPanelWidget()
+{
+    auto type = WidgetType::MESSAGE_WIDGET_INDICATOR;
+    auto sentState = getIndicatorWidgetState(message->isSent());
+    auto receivedState = getIndicatorWidgetState(message->isReceived());
+
+    sent_ = std::make_shared<IndicatorWidget>(type, sentState);
+    received_ = std::make_shared<IndicatorWidget>(type, receivedState);
+
+    addWidget(sent_.get());
+    addWidget(received_.get());
+}
+
+void OutgoingTextMessageIndicatorPanelWidget::setSentIndicatorOn()
 {
     sent_->setOn();
 }
 
-void MessageIndicatorPanelWidget::setReceivedIndicatorOn()
+void OutgoingTextMessageIndicatorPanelWidget::setReceivedIndicatorOn()
 {
     received_->setOn();
-}
-
-void MessageIndicatorPanelWidget::unsetNewMessageLabel()
-{
-    if (newMessageLabel_)
-        newMessageLabel_->setText("");
 }
 
 MessageBodyWidget::MessageBodyWidget() : HLayoutWidget(WidgetType::MESSAGE, Qt::AlignLeft) {}
@@ -84,7 +82,6 @@ FileMessageBodyWidget::FileMessageBodyWidget(MessagePtr message) : MessageBodyWi
         layout_->addWidget(button_.get());
     }
 }
-
 
 void FileMessageBodyWidget::set()
 {
@@ -122,14 +119,8 @@ void FileMessageBodyWidget::buildText(MessagePtr message)
 }
 
 MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
-    : VLayoutWidget(WidgetType::MESSAGE, Qt::AlignLeft)
+    : VLayoutWidget(WidgetType::MESSAGE, Qt::AlignLeft), companion_(companion), message_(message)
 {
-    // fields
-    companion_ = companion;
-    message_ = message;
-
-    // createdAsAntecedent_ = messageState->getIsAntecedent();
-
     // parent
     if (parent)
         setParent(parent.get());
@@ -138,9 +129,6 @@ MessageWidget::MessageWidget(CompanionPtr companion, MessagePtr message, QWidget
 
     // header
     header_ = std::make_shared<QLabel>(formatHeader(companion, message));
-
-    // indicator panel
-    indicatorPanel_ = std::make_shared<MessageIndicatorPanelWidget>(message);
 }
 
 MessagePtr MessageWidget::message()
@@ -162,28 +150,11 @@ void MessageWidget::saveFile()
     getGraphicManager()->saveFile(networkId, companion_);
 }
 
-void MessageWidget::setSent()
-{
-    indicatorPanel_->setSentIndicatorOn();
-}
-
-void MessageWidget::setReceived()
-{
-    indicatorPanel_->setReceivedIndicatorOn();
-}
-
 void MessageWidget::addMembersToLayout(MessageBodyWidgetPtr body)
 {
     body->set();
     addWidget(header_.get());
     addWidget(body.get());
-    addWidget(indicatorPanel_.get());
-}
-
-void MessageWidget::mousePressEvent(QMouseEvent *event)
-{
-    indicatorPanel_->unsetNewMessageLabel();
-    emit widgetSelectedSignal(shared_from_this());
 }
 
 TextMessageWidget::TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
@@ -191,6 +162,43 @@ TextMessageWidget::TextMessageWidget(CompanionPtr companion, MessagePtr message,
 {
     body_ = std::make_shared<TextMessageBodyWidget>(message_);
     addMembersToLayout(body_);
+}
+
+IncomingTextMessageWidget::IncomingTextMessageWidget(
+    CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : TextMessageWidget(companion, message, parent)
+{
+    indicatorPanel_ = std::make_shared<IncomingTextMessageIndicatorPanelWidget>(message);
+    addWidget(indicatorPanel_.get());
+}
+
+void IncomingTextMessageWidget::mousePressEvent(QMouseEvent *event)
+{
+    indicatorPanel_->unsetNewMessageLabel();
+    emit widgetSelectedSignal(shared_from_this());
+}
+
+OutgoingTextMessageWidget::OutgoingTextMessageWidget(
+    CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
+    : TextMessageWidget(companion, message, parent)
+{
+    indicatorPanel_ = std::make_shared<OutgoingTextMessageIndicatorPanelWidget>(message);
+    addWidget(indicatorPanel_.get());
+}
+
+void OutgoingTextMessageWidget::mousePressEvent(QMouseEvent *event)
+{
+    emit widgetSelectedSignal(shared_from_this());
+}
+
+void OutgoingTextMessageWidget::setSent()
+{
+    indicatorPanel_->setSentIndicatorOn();
+}
+
+void OutgoingTextMessageWidget::setReceived()
+{
+    indicatorPanel_->setReceivedIndicatorOn();
 }
 
 FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)

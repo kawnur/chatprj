@@ -35,15 +35,19 @@ void WidgetGroup::set()
 
     // connections
     connect(
-        this, &WidgetGroup::addTextMessageWidgetSignal,
-        this, &WidgetGroup::addTextMessageWidgetSlot, Qt::QueuedConnection);
+        this, &WidgetGroup::addIncomingTextMessageWidgetSignal,
+        this, &WidgetGroup::addIncomingTextMessageWidgetSlot, Qt::QueuedConnection);
+
+    connect(
+        this, &WidgetGroup::addOutgoingTextMessageWidgetSignal,
+        this, &WidgetGroup::addOutgoingTextMessageWidgetSlot, Qt::QueuedConnection);
 
     connect(
         this, &WidgetGroup::addFileMessageWidgetSignal,
         this, &WidgetGroup::addFileMessageWidgetSlot, Qt::QueuedConnection);
 
     connect(
-        this, &WidgetGroup::addMessageWidgetsSignal, this, &WidgetGroup::addMessageWidgetsSlot,
+        this, &WidgetGroup::addTextMessageWidgetsSignal, this, &WidgetGroup::addTextMessageWidgetsSlot,
         Qt::QueuedConnection);
 }
 
@@ -143,10 +147,14 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 //     companion_->addMessageWidgetsToChatHistory();
 // }
 
-void WidgetGroup::addMessageWidgetsSlot(const std::vector<MessagePtr> &messages)
+void WidgetGroup::addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages)
 {
-    for (auto message : messages)
-        addTextMessageWidgetSlot(message);
+    for (auto message : messages) {
+        if (message->isMessageFromMe())
+            addOutgoingTextMessageWidgetSlot(message);
+        else
+            addIncomingTextMessageWidgetSlot(message);
+    }
 
     centralPanel_->sortHistory(true);
 }
@@ -164,9 +172,14 @@ void WidgetGroup::clientAction()
     socketInfoBase_->updateConnectionState();
 }
 
-void WidgetGroup::addTextMessageWidgetSlot(MessagePtr message)
+void WidgetGroup::addIncomingTextMessageWidgetSlot(MessagePtr message)
 {
-    addMessageWidget<TextMessageWidget>(message);
+    addMessageWidget<IncomingTextMessageWidget>(message);
+}
+
+void WidgetGroup::addOutgoingTextMessageWidgetSlot(MessagePtr message)
+{
+    addMessageWidget<OutgoingTextMessageWidget>(message);
 }
 
 void WidgetGroup::addFileMessageWidgetSlot(MessagePtr message)

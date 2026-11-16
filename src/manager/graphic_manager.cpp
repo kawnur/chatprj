@@ -57,6 +57,8 @@ void GraphicManager::buildWidgetGroups()
 
     for (const auto &companion : getSortedCompanions()) {
         updateMapping(companion);
+
+        // TODO move to companion creation
         manager_->fillCompanionMessageMapping(companion, true);
     }
 }
@@ -315,40 +317,30 @@ void GraphicManager::createEntrancePassword()
 // }
 
 void GraphicManager::addMessageWidgets(
-    CompanionPtr companion, const std::vector<MessagePtr> &messages)
+    CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
 {
     auto group = getWidgetGroup(companion);
 
     if (!group)
         return;
 
-    emit group->addMessageWidgetsSignal(messages);
+    emit group->addTextMessageWidgetsSignal(messages);
 }
 
-void GraphicManager::setMessageWidgetState(MessageWidgetState state, MessageInfoPtr info)
+void GraphicManager::setMessageWidgetSent(MessageInfoPtr info)
 {
-    auto widget = info->widget();
+    auto widget = getWidgetFromMessageInfo(info);
 
-    if (!widget) {
-        logArgsError("message widget state setting error");
-
-        return;
-    }
-
-    switch (state) {
-    case MessageWidgetState::SENT:
+    if (widget)
         widget->setSent();
+}
 
-    break;
+void GraphicManager::setMessageWidgetReceived(MessageInfoPtr info)
+{
+    auto widget = getWidgetFromMessageInfo(info);
 
-    case MessageWidgetState::RECEIVED:
+    if (widget)
         widget->setReceived();
-
-    break;
-
-    default:
-        break;
-    }
 }
 
 void GraphicManager::sendFile(CompanionPtr companion)
@@ -420,10 +412,28 @@ std::filesystem::path GraphicManager::getLastOpenedPath()
     return manager_->getLastOpenedPath();
 }
 
-template<>
-void GraphicManager::emitGroupSignal<TextMessageWidget>(WidgetGroupPtr group, MessagePtr message)
+MessageWidgetPtr GraphicManager::getWidgetFromMessageInfo(MessageInfoPtr info)
 {
-    emit group->addTextMessageWidgetSignal(message);
+    auto widget = info->widget();
+
+    if (!widget)
+        logArgsError("info contains no widget");
+
+    return widget;
+}
+
+template<>
+void GraphicManager::emitGroupSignal<IncomingTextMessageWidget>(
+    WidgetGroupPtr group, MessagePtr message)
+{
+    emit group->addIncomingTextMessageWidgetSignal(message);
+}
+
+template<>
+void GraphicManager::emitGroupSignal<OutgoingTextMessageWidget>(
+    WidgetGroupPtr group, MessagePtr message)
+{
+    emit group->addOutgoingTextMessageWidgetSignal(message);
 }
 
 template<>

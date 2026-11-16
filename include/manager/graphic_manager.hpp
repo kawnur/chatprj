@@ -60,8 +60,9 @@ public:
     template<typename T>
     void emitGroupSignal(WidgetGroupPtr group, MessagePtr message);
 
-    void addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages);
-    void setMessageWidgetState(MessageWidgetState state, MessageInfoPtr info);
+    void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
+    void setMessageWidgetSent(MessageInfoPtr info);
+    void setMessageWidgetReceived(MessageInfoPtr info);
     void sendFile(CompanionPtr companion);
     void saveFile(const std::string& networkId, CompanionPtr companion);
     std::string getFilePathString(const std::string &networkId);
@@ -79,6 +80,7 @@ public:
     std::filesystem::path getLastOpenedPath();
 
 private:
+    MessageWidgetPtr getWidgetFromMessageInfo(MessageInfoPtr info);
     std::optional<GraphicManagerMapValue> getMappedValue(int id) const;
     WidgetGroupPtr getWidgetGroup(CompanionPtr companion) const;
     std::vector<CompanionPtr> getSortedCompanions();
@@ -98,7 +100,12 @@ private:
 };
 
 template<>
-void GraphicManager::emitGroupSignal<TextMessageWidget>(WidgetGroupPtr group, MessagePtr message);
+void GraphicManager::emitGroupSignal<IncomingTextMessageWidget>(
+    WidgetGroupPtr group, MessagePtr message);
+
+template<>
+void GraphicManager::emitGroupSignal<OutgoingTextMessageWidget>(
+    WidgetGroupPtr group, MessagePtr message);
 
 template<>
 void GraphicManager::emitGroupSignal<FileMessageWidget>(WidgetGroupPtr group, MessagePtr message);

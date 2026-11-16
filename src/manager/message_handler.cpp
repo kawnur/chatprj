@@ -24,12 +24,12 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
 }
 
 void MessageHandler::buildMessageAndStore(
-    CompanionPtr companion, DBReplyDataPtr data, int index, std::vector<MessagePtr> &messages)
+    CompanionPtr companion, DBReplyDataPtr data, int index, std::vector<TextMessagePtr> &messages)
 {
     logTemplateInfo("adding message with id '{}'", data->getValue(index, "id"));
 
     // create message
-    auto message = builder_.buildMessageFromDbData(companion, data, index);
+    auto message = builder_.buildTextMessageFromDbData(companion, data, index);
 
     // add to storage
     bool storageResult = addToStorage(companion, message);
@@ -42,7 +42,7 @@ void MessageHandler::buildMessageAndStore(
 
 void MessageHandler::addMessages(CompanionPtr companion, DBReplyDataPtr data)
 {
-    std::vector<MessagePtr> messages {};
+    std::vector<TextMessagePtr> messages {};
 
     for (std::size_t i = 0; i < data->size(); ++i)
         buildMessageAndStore(companion, data, i, messages);
@@ -54,7 +54,7 @@ void MessageHandler::addMessages(CompanionPtr companion, DBReplyDataPtr data)
 void MessageHandler::addMessagesByIndexes(
     CompanionPtr companion, DBReplyDataPtr data, const std::vector<int> &indexes)
 {
-    std::vector<MessagePtr> messages {};
+    std::vector<TextMessagePtr> messages {};
 
     for (const auto &i : indexes)
         buildMessageAndStore(companion, data, i, messages);
@@ -119,17 +119,7 @@ void MessageHandler::sendTextMessage(
     //     manager_->addSenderOperator(message->networkId(), action);
 
     // add message widget
-    manager_->addMessageWidget<TextMessageWidget>(companion, message);
-
-    // // send over network
-    // bool result = sendMessageByNetwork(companion, message);
-
-    // // mark message as sent
-    // if (result)
-    //     manager_->markMessageAsSent(companion, message);
-
-    // // wait for message reception confirmation
-    // waitForMessageReceptionConfirmation(companion, message);
+    manager_->addMessageWidget<OutgoingTextMessageWidget>(companion, message);
 
     // send and wait for confirmation
     sendTextMessageAndWaitForReceptionConfirmation(companion, message);
@@ -234,7 +224,7 @@ void MessageHandler::receiveTextMessage(CompanionPtr companion, TextMessagePtr m
     // decrypt message
 
     // add widget
-    manager_->addMessageWidget<TextMessageWidget>(companion, message);
+    manager_->addMessageWidget<IncomingTextMessageWidget>(companion, message);
 
     // send reply message to sender
     bool result = buildAndSendConfirmation(companion, message);
@@ -471,13 +461,6 @@ void MessageHandler::sendUnsentMessages(CompanionPtr companion)
         else
             // add to companion's messages if needed
             message = builder_.buildUnsentTextMessageFromDbData(companion, data, i);
-
-        // // send over network
-        // bool result = sendMessageByNetwork(companion, message);
-
-        // // mark message as sent
-        // if (result)
-        //     manager_->markMessageAsSent(companion, message);
 
         // send and wait for confirmation
         sendTextMessageAndWaitForReceptionConfirmation(companion, message);

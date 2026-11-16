@@ -18,17 +18,38 @@ class MessageIndicatorPanelWidget : public HLayoutWidget
     Q_OBJECT
 
 public:
-    MessageIndicatorPanelWidget(MessagePtr message);
-    ~MessageIndicatorPanelWidget() = default;
+    MessageIndicatorPanelWidget();
+    virtual ~MessageIndicatorPanelWidget() = default;
+};
 
-    void setSentIndicatorOn();
-    void setReceivedIndicatorOn();
+class IncomingTextMessageIndicatorPanelWidget : public MessageIndicatorPanelWidget
+{
+    Q_OBJECT
+
+public:
+    IncomingTextMessageIndicatorPanelWidget(MessagePtr message);
+    ~IncomingTextMessageIndicatorPanelWidget() = default;
+
     void unsetNewMessageLabel();
 
 private:
-    std::shared_ptr<IndicatorWidget> sent_;
-    std::shared_ptr<IndicatorWidget> received_;
     std::shared_ptr<QLabel> newMessageLabel_;
+};
+
+class OutgoingTextMessageIndicatorPanelWidget : public MessageIndicatorPanelWidget
+{
+    Q_OBJECT
+
+public:
+    OutgoingTextMessageIndicatorPanelWidget(MessagePtr message);
+    ~OutgoingTextMessageIndicatorPanelWidget() = default;
+
+    void setSentIndicatorOn();
+    void setReceivedIndicatorOn();
+
+private:
+    IndicatorWidgetPtr sent_;
+    IndicatorWidgetPtr received_;
 };
 
 class MessageBodyWidget : public HLayoutWidget
@@ -88,8 +109,8 @@ public:
     void set(WidgetGroupPtr group);
 
     void saveFile();
-    void setSent();
-    void setReceived();
+    virtual void setSent() {}
+    virtual void setReceived() {}
 
 signals:
     void widgetSelectedSignal(MessageWidgetPtr widget);
@@ -100,10 +121,6 @@ protected:
     CompanionPtr companion_;
     MessagePtr message_;
     std::shared_ptr<QLabel> header_;
-    std::shared_ptr<MessageIndicatorPanelWidget> indicatorPanel_;
-
-private:
-    void mousePressEvent(QMouseEvent *) override;
 };
 
 class TextMessageWidget : public MessageWidget
@@ -112,10 +129,41 @@ class TextMessageWidget : public MessageWidget
 
 public:
     TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
-    ~TextMessageWidget() = default;
+    virtual ~TextMessageWidget() = default;
 
 private:
     std::shared_ptr<TextMessageBodyWidget> body_;
+};
+
+class IncomingTextMessageWidget : public TextMessageWidget
+{
+public:
+    IncomingTextMessageWidget(
+        CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
+
+    ~IncomingTextMessageWidget() = default;
+
+private:
+    void mousePressEvent(QMouseEvent *) override;
+
+    std::shared_ptr<IncomingTextMessageIndicatorPanelWidget> indicatorPanel_;
+};
+
+class OutgoingTextMessageWidget : public TextMessageWidget
+{
+public:
+    OutgoingTextMessageWidget(
+        CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
+
+    ~OutgoingTextMessageWidget() = default;
+
+    void setSent() override;
+    void setReceived() override;
+
+private:
+    void mousePressEvent(QMouseEvent *) override;
+
+    std::shared_ptr<OutgoingTextMessageIndicatorPanelWidget> indicatorPanel_;
 };
 
 class FileMessageWidget : public MessageWidget

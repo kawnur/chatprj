@@ -228,3 +228,8 @@ uint32_t getIndicatorSize(WidgetType type)
 {
     return getMapValue(INDICATOR_WIDGET_SIZE_MAP, type, 10);
 }
+
+IndicatorWidgetState getIndicatorWidgetState(bool state)
+{
+    return (state) ? IndicatorWidgetState::ON : IndicatorWidgetState::OFF;
+}

@@ -86,14 +86,13 @@ public:
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
 
-    // void addMessageWidget(CompanionPtr companion, MessagePtr message);
     template<typename T>
     void addMessageWidget(CompanionPtr companion, MessagePtr message)
     {
         graphicManager_->addMessageWidget<T>(companion, message);
     }
 
-    void addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages);
+    void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
     void disableBlur();
 
     // files
@@ -178,6 +177,7 @@ private:
 
     // network
     uint16_t getServerPortByCompanionId(int id);
+    std::pair<NetworkManagerMap::iterator, bool> addNetworkEntity(int id, DBReplyDataPtr data);
 
     GraphicManagerPtr graphicManager_;
     DBOperator dbOperator_;

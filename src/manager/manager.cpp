@@ -42,7 +42,7 @@ void Manager::set()
     if (!companionsBuilt) {
         logArgsError("companion building error");
 
-    return;
+        return;
     }
 
     graphicManager_->buildWidgetGroups();
@@ -178,6 +178,21 @@ uint16_t Manager::getServerPortByCompanionId(int id)
     uint16_t serverPort = 5000 + id + 1;  // TODO change
 
     return serverPort;
+}
+
+std::pair<NetworkManagerMap::iterator, bool> Manager::addNetworkEntity(int id, DBReplyDataPtr data)
+{
+    // TODO use port number pool
+    auto ipAddress = data->getValue(0, "ipaddress");
+    auto clientPort = getPortFromDbData(data, 0, "client_port");
+    auto clientSocket = std::make_shared<SocketInfo>(ipAddress, clientPort);
+
+    auto serverSocket = std::make_shared<SocketInfo>(
+        ""s, getPortFromDbData(data, 0, "server_port"));
+
+    auto entityResult = networkManager_->addToMap(id, clientSocket, serverSocket);
+
+    return entityResult;
 }
 
 ActionResultPtr Manager::pushSocketToDb(CompanionActionPtr action, int serverPort)
@@ -479,20 +494,13 @@ bool Manager::buildCompanions()
         if (!socketsData || socketsData->isEmpty())
             return false;
 
-        // add to network manager
-        // TODO use port number pool
-        auto ipAddress = socketsData->getValue(0, "ipaddress");
-        auto clientPort = getPortFromDbData(socketsData, 0, "client_port");
-        auto clientSocket = std::make_shared<SocketInfo>(ipAddress, clientPort);
-
-        auto serverSocket = std::make_shared<SocketInfo>(
-            ""s, getPortFromDbData(socketsData, 0, "server_port"));
-
-        auto entityResult = networkManager_->addToMap(id, clientSocket, serverSocket);
+        // add network entity
+        auto entityResult = addNetworkEntity(id, socketsData);
 
         if (!entityResult.second)
             continue;
 
+        // DEBUG
         if (companion->id() <= 1)  // TODO change condition
             continue;
 
@@ -500,6 +508,7 @@ bool Manager::buildCompanions()
         if (!messageHandler_.addCompanionToMessageStorage(companion))
             continue;
 
+        // start network entity
         bool started = (*entityResult.first).second->start();
     }
 
@@ -647,12 +656,7 @@ void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool container
     messageHandler_.fillMessageStorageForCompanion(companion, containersAreEmpty);
 }
 
-// void Manager::addMessageWidget(CompanionPtr companion, MessagePtr message)
-// {
-//     graphicManager_->addMessageWidget(companion, message);
-// }
-
-void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<MessagePtr> &messages)
+void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
 {
     graphicManager_->addMessageWidgets(companion, messages);
 }
@@ -672,7 +676,9 @@ bool Manager::clientAction(CompanionPtr companion, bool isConnected)
     }
     else {
         result = connectClient(companion);
-        sendUnsentMessages(companion);
+
+        if (result)
+            sendUnsentMessages(companion);
     }
 
     return result;
@@ -736,13 +742,13 @@ void Manager::markMessageAsSent(CompanionPtr companion, MessagePtr message)
         return;
 
     // set widget state
-    graphicManager_->setMessageWidgetState(MessageWidgetState::SENT, info);
+    graphicManager_->setMessageWidgetSent(info);
 }
 
 void Manager::markMessageAsReceived(MessageInfoPtr info)
 {
     // set widget state
-    graphicManager_->setMessageWidgetState(MessageWidgetState::RECEIVED, info);
+    graphicManager_->setMessageWidgetReceived(info);
 
     // if (!result)
     //     logArgsError("marking wiget as received error");

@@ -93,10 +93,8 @@ MessageMetaDataPtr MessageBuilder::buildMyTextMessageMetaData(CompanionPtr compa
         "");
 }
 
-// MessageDataPtr MessageBuilder::buildMessageData(DBReplyDataPtr data, std::size_t index)
 TextMessageDataPtr MessageBuilder::buildTextMessageData(DBReplyDataPtr data, std::size_t index)
 {
-    // return std::make_shared<MessageData>(data->getValue(index, "message"));
     return std::make_shared<TextMessageData>(data->getValue(index, "message"));
 }
 
@@ -108,14 +106,14 @@ MessageStatePtr MessageBuilder::buildMessageState(
         getBoolFromDbData(data, index, "is_received"));
 }
 
-MessagePtr MessageBuilder::buildMessageFromDbData(
+TextMessagePtr MessageBuilder::buildTextMessageFromDbData(
     CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index)
 {
     auto meta = buildMessageMetaData(companion, dbData, index);
     auto data = buildTextMessageData(dbData, index);
     auto state = buildMessageState(false, dbData, index);
 
-    auto message = std::make_shared<Message>(meta, data, state);
+    auto message = std::make_shared<TextMessage>(meta, data, state);
 
     return message;
 }
@@ -131,7 +129,6 @@ TextMessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const 
     return message;
 }
 
-// MessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
 TextMessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
     CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index)
 {
@@ -141,7 +138,6 @@ TextMessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
     auto state = buildMessageState(true, dbData, index);
     state->setIsSent(false);  // check db data
 
-    // auto message = std::make_shared<Message>(meta, data, state);
     auto message = std::make_shared<TextMessage>(meta, data, state);
 
     return message;
@@ -149,14 +145,11 @@ TextMessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
 
 ReceiveConfirmationMessagePtr MessageBuilder::buildReceiveConfirmationMessage(MessagePtr message)
 {
-    // auto meta = std::make_shared<MessageMetaData>(message->meta());
     auto meta = std::make_shared<MessageMetaData>();
     meta->setNetworkId(message->networkId());
 
-    // auto data = std::make_shared<MessageData>("");
     auto state = std::make_shared<ReceiveConfirmationMessageState>(false, false, true);
 
-    // auto newMessage = std::make_shared<ReceiveConfirmationMessage>(meta, data, state);
     auto newMessage = std::make_shared<ReceiveConfirmationMessage>(meta, nullptr, state);
 
     return newMessage;

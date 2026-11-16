@@ -152,12 +152,6 @@ const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
     { WidgetType::FILE_RECEIVED, "RECEIVE FILE: {}" }
 };
 
-enum class MessageWidgetState {
-    UNKNOWN,
-    SENT,
-    RECEIVED
-};
-
 enum class IndicatorWidgetState {
     UNKNOWN,
     ON,

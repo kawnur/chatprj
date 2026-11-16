@@ -314,13 +314,13 @@ private:
     bool isSelected_;
     bool isConnected_;
     CompanionPtr companion_;
-    std::shared_ptr<IndicatorWidget> state_;
+    IndicatorWidgetPtr state_;
     std::shared_ptr<QLabel> name_;
     std::shared_ptr<QLabel> ipAddress_;
     std::shared_ptr<QLabel> serverPort_;
     std::shared_ptr<QLabel> clientPort_;
     std::shared_ptr<ButtonPanelWidget> buttons_;
-    std::shared_ptr<IndicatorWidget> received_;
+    IndicatorWidgetPtr received_;
     std::unique_ptr<Menu> menu_;
 
 private slots:

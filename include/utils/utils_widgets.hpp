@@ -42,5 +42,6 @@ uint32_t getLayoutContentsRightMargin(WidgetType type);
 uint32_t getLayoutContentsBottomMargin(WidgetType type);
 
 uint32_t getIndicatorSize(WidgetType type);
+IndicatorWidgetState getIndicatorWidgetState(bool state);
 
 #endif // UTILS_WIDGETS_HPP
