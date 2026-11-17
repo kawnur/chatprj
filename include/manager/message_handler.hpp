@@ -67,7 +67,7 @@ private:
     bool buildAndSendConfirmation(CompanionPtr companion, MessagePtr message);
     bool sendMessageByNetwork(CompanionPtr companion, MessagePtr message);
 
-    void receiveTextMessage(CompanionPtr companion, TextMessagePtr message);
+    void receiveTextMessage(CompanionPtr companion, IncomingTextMessagePtr message);
     void receiveConfirmation(CompanionPtr companion, MessagePtr message);
     void receiveConfirmationRequest(CompanionPtr companion, MessagePtr message);
     void reciveChatHistoryRequest(CompanionPtr companion);

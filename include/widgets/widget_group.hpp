@@ -51,23 +51,39 @@ private slots:
     // void askUserForHistorySendingConfirmationSlot();
 
 private:
+    void incrementCounter();
+
     template<typename T>
     void addMessageWidget(MessagePtr message)
     {
-        bool isAntecedent = message->isAntecedent();
+        // bool isAntecedent = message->isAntecedent();
 
-        if (isAntecedent) {
-            std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+        // if (isAntecedent) {
+        //     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
-            ++antecedentMessagesCounter_;
+        //     ++antecedentMessagesCounter_;
 
-            logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-        }
+        //     logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
+        // }
+
+        // auto widget = std::make_shared<T>(companion_, message);
+        // auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
+        // widget->set(shared_from_this());
+        // centralPanel_->addMessage(widget, isAntecedent);
+        // messageAdded();
+
+        // {
+        //     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+
+        //     ++antecedentMessagesCounter_;
+
+        //     logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
+        // }
 
         auto widget = std::make_shared<T>(companion_, message);
         auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
         widget->set(shared_from_this());
-        centralPanel_->addMessage(widget, isAntecedent);
+        centralPanel_->addMessage(widget);
         messageAdded();
     }
 

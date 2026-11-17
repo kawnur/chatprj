@@ -29,7 +29,8 @@ create table public.companion_messages (
     timestamp_tz timestamp with time zone not null,
     message text,
     is_sent boolean not null,
-    is_received boolean not null
+    is_received boolean not null,
+    is_read boolean not null
 );
 
 create table public.group_chat_messages (

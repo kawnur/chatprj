@@ -61,10 +61,10 @@ bool Message::isReceived() const
     return state_->isReceived();
 }
 
-bool Message::isAntecedent() const
-{
-    return state_->isAntecedent();
-}
+// bool Message::isAntecedent() const
+// {
+//     return state_->isAntecedent();
+// }
 
 std::string Message::networkId() const
 {
@@ -187,6 +187,17 @@ std::string TextMessage::typeMark()
 {
     return "TextMessage";
 }
+
+IncomingTextMessage::IncomingTextMessage(MetaPtr meta, DataPtr data, StatePtr state)
+    : TextMessage(meta, data, state) {}
+
+bool IncomingTextMessage::isRead()
+{
+    return state_->isRead();
+}
+
+OutgoingTextMessage::OutgoingTextMessage(MetaPtr meta, DataPtr data, StatePtr state)
+    : TextMessage(meta, data, state) {}
 
 ReceiveConfirmationMessage::ReceiveConfirmationMessage(MetaPtr meta, DataPtr data, StatePtr state)
     : Message(meta, data, state)

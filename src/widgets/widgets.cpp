@@ -9,6 +9,7 @@
 #include "utils.hpp"
 #include "utils_widgets.hpp"
 #include "widget_group.hpp"
+#include "widgets_message.hpp"
 
 Palette::Palette(WidgetType type, QPalette::ColorRole role) : type_(type), role_(role)
 {
@@ -93,6 +94,35 @@ void VLayout::logLayout()
         logArgsInfo(layout_->itemAt(i)->widget());
 
     logArgsInfo(LAYOUT_LOG_DELIMITER);
+}
+
+void VLayout::insertInSortedLayout(MessageWidgetPtr widget)
+{
+    auto time = widget->message()->time();
+    auto count = layout_->count();
+
+    if (count == 0) {
+        layout_->addWidget(widget.get());
+
+        return;
+    }
+
+    std::size_t index = count - 1;
+
+    for (; index >= 0; --index) {
+        auto item = layout_->itemAt(index)->widget();
+        auto cast = dynamic_cast<MessageWidget *>(item);
+
+        if (!cast)
+            continue;
+
+        auto itemTime = cast->message()->time();
+
+        if (time > itemTime)
+            break;
+    }
+
+    layout_->insertWidget(index + 1, widget.get());
 }
 
 HLayout::HLayout(WidgetType type, Qt::AlignmentFlag alignment)

@@ -196,7 +196,7 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
 
     const Visitor visitor {
         [&](std::nullptr_t value) { return; },
-        [&](TextMessagePtr value) { receiveTextMessage(companion, value); },
+        [&](IncomingTextMessagePtr value) { receiveTextMessage(companion, value); },
         [&](ReceiveConfirmationMessagePtr value) { receiveConfirmation(companion, value); },
         [&](ReceiveConfirmationRequestMessagePtr value) { receiveConfirmationRequest(companion, value); }
     };
@@ -204,7 +204,7 @@ void MessageHandler::receiveMessage(CompanionPtr companion, const std::string &j
     std::visit(visitor, messageVariant);
 }
 
-void MessageHandler::receiveTextMessage(CompanionPtr companion, TextMessagePtr message)
+void MessageHandler::receiveTextMessage(CompanionPtr companion, IncomingTextMessagePtr message)
 {
     // set message received
     message->setReceived(true);

@@ -129,10 +129,10 @@ ButtonInfo getCancelButtonInfo(const std::function<void()> &function)
     return ButtonInfo({ CANCEL_BUTTON_TEXT }, function, QDialogButtonBox::ButtonRole::RejectRole);
 }
 
-QString getFileWidgetText(WidgetType value)
-{
-    return getMapValue(FILE_WIDGET_TEXT_MAP, value, DEFAULT_FILE_WIDGET_TEXT);
-}
+// QString getFileWidgetText(WidgetType value)
+// {
+//     return getMapValue(FILE_WIDGET_TEXT_MAP, value, DEFAULT_FILE_WIDGET_TEXT);
+// }
 
 QString getDataTypeStringRepr(DataType type)
 {

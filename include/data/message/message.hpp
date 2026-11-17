@@ -34,7 +34,7 @@ public:
     bool isMessageFromMe() const;
     bool isSent() const;
     bool isReceived() const;
-    bool isAntecedent() const;
+    // bool isAntecedent() const;
     std::string networkId() const;
 
     void setId(int id);
@@ -73,8 +73,34 @@ public:
     TextMessage(MetaPtr meta, DataPtr data, StatePtr state);
     ~TextMessage() = default;
 
+    virtual bool isRead() { return false; }
+
     nlohmann::json getJsonData() override;
     std::string typeMark() override;
+};
+
+class IncomingTextMessage : public TextMessage
+{
+public:
+    using meta_type = MessageMetaData;
+    using data_type = TextMessageData;
+    using state_type = IncomingTextMessageState;
+
+    IncomingTextMessage(MetaPtr meta, DataPtr data, StatePtr state);
+    ~IncomingTextMessage() = default;
+
+    bool isRead() override;
+};
+
+class OutgoingTextMessage : public TextMessage
+{
+public:
+    using meta_type = MessageMetaData;
+    using data_type = TextMessageData;
+    using state_type = MessageState;
+
+    OutgoingTextMessage(MetaPtr meta, DataPtr data, StatePtr state);
+    ~OutgoingTextMessage() = default;
 };
 
 class ReceiveConfirmationMessage : public Message

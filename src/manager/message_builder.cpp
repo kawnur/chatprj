@@ -18,7 +18,7 @@ MessagePtrVariant MessageBuilder::buildMessage(CompanionPtr companion, const std
 
     switch (type) {
     case NetworkMessageType::TEXT:
-        return buildMessageObject<TextMessage>(companion, data);
+        return buildMessageObject<IncomingTextMessage>(companion, data);
 
     case NetworkMessageType::FILE_PROPOSAL:
         return nullptr;
@@ -102,7 +102,8 @@ MessageStatePtr MessageBuilder::buildMessageState(
     bool isAntecedent, DBReplyDataPtr data, std::size_t index)
 {
     return std::make_shared<MessageState>(
-        isAntecedent, getBoolFromDbData(data, index, "is_sent"),
+        // isAntecedent, getBoolFromDbData(data, index, "is_sent"),
+        getBoolFromDbData(data, index, "is_sent"),
         getBoolFromDbData(data, index, "is_received"));
 }
 
@@ -118,13 +119,16 @@ TextMessagePtr MessageBuilder::buildTextMessageFromDbData(
     return message;
 }
 
-TextMessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const std::string &text)
+OutgoingTextMessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const std::string &text)
 {
-    auto meta = buildMyTextMessageMetaData(companion);
-    auto data = std::make_shared<TextMessageData>(text);
-    auto state = std::make_shared<MessageState>(false, false, false);
+    using Type = OutgoingTextMessage;
 
-    auto message = std::make_shared<TextMessage>(meta, data, state);
+    auto meta = buildMyTextMessageMetaData(companion);
+    auto data = std::make_shared<Type::data_type>(text);
+    // auto state = std::make_shared<MessageState>(false, false, false);
+    auto state = std::make_shared<Type::state_type>(false, false);
+
+    auto message = std::make_shared<Type>(meta, data, state);
 
     return message;
 }
@@ -132,13 +136,15 @@ TextMessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const 
 TextMessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
     CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index)
 {
+    using Type = OutgoingTextMessage;
+
     auto meta = buildUnsentMessageMetaData(companion, dbData, index);
     auto data = buildTextMessageData(dbData, index);
 
     auto state = buildMessageState(true, dbData, index);
     state->setIsSent(false);  // check db data
 
-    auto message = std::make_shared<TextMessage>(meta, data, state);
+    auto message = std::make_shared<Type>(meta, data, state);
 
     return message;
 }
@@ -148,7 +154,8 @@ ReceiveConfirmationMessagePtr MessageBuilder::buildReceiveConfirmationMessage(Me
     auto meta = std::make_shared<MessageMetaData>();
     meta->setNetworkId(message->networkId());
 
-    auto state = std::make_shared<ReceiveConfirmationMessageState>(false, false, true);
+    // auto state = std::make_shared<ReceiveConfirmationMessageState>(false, false, true);
+    auto state = std::make_shared<ReceiveConfirmationMessageState>(false, true);
 
     auto newMessage = std::make_shared<ReceiveConfirmationMessage>(meta, nullptr, state);
 
@@ -160,7 +167,8 @@ ReceiveConfirmationRequestMessagePtr MessageBuilder::buildReceiveConfirmationReq
     auto meta = std::make_shared<MessageMetaData>();
     meta->setNetworkId(message->networkId());
 
-    auto state = std::make_shared<MessageState>(false, false, false);
+    // auto state = std::make_shared<MessageState>(false, false, false);
+    auto state = std::make_shared<MessageState>(false, false);
 
     auto newMessage = std::make_shared<ReceiveConfirmationRequestMessage>(meta, nullptr, state);
 
@@ -174,7 +182,7 @@ MessagePtr MessageBuilder::buildFileDataCheckResultMessage(
     meta->setNetworkId(message->networkId());
 
     auto state = std::make_shared<MessageState>();
-    state->setIsAntecedent(false);
+    // state->setIsAntecedent(false);
 
     auto newMessage = std::make_shared<Message>(meta, nullptr, state);
 
@@ -188,7 +196,7 @@ MessagePtr MessageBuilder::buildFileDataTransmissionResultMessage(
     meta->setNetworkId(networkId);
 
     auto state = std::make_shared<MessageState>();
-    state->setIsAntecedent(false);
+    // state->setIsAntecedent(false);
 
     auto message = std::make_shared<Message>(meta, nullptr, state);
 
@@ -211,7 +219,7 @@ MessagePtr MessageBuilder::buildChatHistoryRequestMessage(CompanionPtr companion
 {
     auto meta = std::make_shared<MessageMetaData>();
     auto state = std::make_shared<MessageState>();
-    state->setIsAntecedent(true);
+    // state->setIsAntecedent(true);
 
     auto message = std::make_shared<Message>(meta, nullptr, state);
 
@@ -223,7 +231,8 @@ MessagePtr MessageBuilder::buildFileRequestMessage(const std::string &networkId)
     auto meta = std::make_shared<MessageMetaData>();
     meta->setNetworkId(networkId);
 
-    auto state = std::make_shared<MessageState>(false, false, false);
+    // auto state = std::make_shared<MessageState>(false, false, false);
+    auto state = std::make_shared<MessageState>(false, false);
 
     auto message = std::make_shared<Message>(meta, nullptr, state);
 

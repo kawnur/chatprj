@@ -85,7 +85,7 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
         // push message to db
         auto messageAddData = getDBData(
             DBRequestType::PUSH_MESSAGE_AND_RETURN, companion->name(),
-            getString(authorId), timestamp, idString, text, true, true);
+            getString(authorId), timestamp, idString, text, true, true, true);
 
         if (!messageAddData || messageAddData->isEmpty())
             return false;
@@ -590,6 +590,20 @@ void Manager::sendUnsentMessages(CompanionPtr companion)
     messageHandler_.sendUnsentMessages(companion);
 }
 
+void Manager::updateMessage(DBReplyDataPtr data, MessagePtr message)
+{
+    uint32_t id = getIdFromDbData(data, 0, "id");
+    uint8_t companionId = getIdFromDbData(data, 0, "companion_id");
+    std::string timestampTz { data->getValue(0, "timestamp_tz") };
+
+    if (LOG_DB_INTERACTION)
+        logTemplateInfo("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
+
+    message->setId(id);
+    message->setCompanionId(companionId);
+    message->setTime(timestampTz);
+}
+
 bool Manager::sendFileBlock(
     CompanionPtr companion, const std::string &networkId, const std::string &data)
 {
@@ -780,8 +794,8 @@ DBReplyDataPtr Manager::getEarlyMessagesDBData(int companionId, int messageId)
     return data;
 }
 
-MessagePtr Manager::pushMessageToDB(
-    MessagePtr message, const std::string &companionName, const std::string &authorName)
+TextMessagePtr Manager::pushMessageToDB(
+    TextMessagePtr message, const std::string &companionName, const std::string &authorName)
 {
     // push data to db
     auto messageData = getDBData(
@@ -791,22 +805,13 @@ MessagePtr Manager::pushMessageToDB(
         message->time(),
         message->_data(),
         message->isSent(),
-        message->isReceived());
+        message->isReceived(),
+        message->isRead());
 
     if (!messageData || messageData->isEmpty())
         return nullptr;
 
-    // update message
-    uint32_t id = getIdFromDbData(messageData, 0, "id");
-    uint8_t companionId = getIdFromDbData(messageData, 0, "companion_id");
-    std::string timestampTz { messageData->getValue(0, "timestamp_tz") };
-
-    if (LOG_DB_INTERACTION)
-        logTemplateInfo("companionId: {0}, timestampTz: {1}", companionId, timestampTz);
-
-    message->setId(id);
-    message->setCompanionId(companionId);
-    message->setTime(timestampTz);
+    updateMessage(messageData, message);
 
     return message;
 }

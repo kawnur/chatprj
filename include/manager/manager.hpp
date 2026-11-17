@@ -39,8 +39,9 @@ public:
         return dbOperator_.getDBData(type, args...);
     }
 
-    MessagePtr pushMessageToDB(
-        MessagePtr message, const std::string &companionName, const std::string &authorName);
+    TextMessagePtr pushMessageToDB(
+        TextMessagePtr message, const std::string &companionName,
+        const std::string &authorName);
 
     bool pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::json &data);
     DBReplyDataPtr getEarlyMessagesDBData(int companionId, int messageId);
@@ -169,6 +170,7 @@ private:
 
     // message
     void sendUnsentMessages(CompanionPtr companion);
+    void updateMessage(DBReplyDataPtr data, MessagePtr message);
 
     // widgets
     void deleteWidgetGroupAndDeleteFromMapping(CompanionPtr companion);

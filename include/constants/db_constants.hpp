@@ -22,6 +22,7 @@ enum class DBRequestType
     GET_PASSWORD,
     SET_MESSAGE_IS_SENT_AND_RETURN,
     SET_MESSAGE_IS_RECEIVED_AND_RETURN,
+    SET_MESSAGE_IS_READ_AND_RETURN,
     PUSH_COMPANION_AND_RETURN,
     UPDATE_COMPANION_AND_RETURN,
     UPDATE_COMPANION_AND_SOCKET_AND_RETURN,
@@ -84,7 +85,8 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
             "ORDER BY timestamp_tz DESC LIMIT {2}) "
             "SELECT {0} FROM companion_messages WHERE id IN (SELECT id FROM select_id) "
             "ORDER BY timestamp_tz ASC",
-            "id", "companion_id", "author_id", "timestamp_tz", "message", "is_sent", "is_received"
+            "id", "companion_id", "author_id", "timestamp_tz", "message", "is_sent", "is_received",
+            "is_read"
         }
     },
     {
@@ -106,7 +108,8 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
             "ORDER BY timestamp_tz DESC LIMIT {3}) "
             "SELECT {0} FROM companion_messages WHERE id IN (SELECT id FROM select_id) "
             "ORDER BY timestamp_tz ASC",
-            "id", "companion_id", "author_id", "timestamp_tz", "message", "is_sent", "is_received"
+            "id", "companion_id", "author_id", "timestamp_tz", "message", "is_sent", "is_received",
+            "is_read"
         }
     },
     {
@@ -153,6 +156,14 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         }
     },
     {
+        DBRequestType::SET_MESSAGE_IS_READ_AND_RETURN,
+        {
+            "setMessageIsReadAndReturn",
+            "UPDATE companion_messages SET is_read = 'true' WHERE id = {1} RETURNING id",
+            "id"
+        }
+    },
+    {
         DBRequestType::PUSH_COMPANION_AND_RETURN,
         {
             "pushCompanionAndReturn",
@@ -192,9 +203,9 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         {
             "pushMessageAndReturn",
             "INSERT INTO companion_messages "
-            "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
+            "(companion_id, author_id, timestamp_tz, message, is_sent, is_received, is_read) "
             "VALUES ((SELECT id FROM companions WHERE name = '{1}'), "
-            "(SELECT id FROM companions WHERE name = '{2}'), '{3}', '{4}', {5}, {6}) "
+            "(SELECT id FROM companions WHERE name = '{2}'), '{3}', '{4}', {5}, {6}, {7}) "
             "RETURNING id, companion_id, timestamp_tz",  // ???
             "id", "companion_id", "timestamp_tz"
         }
@@ -204,8 +215,9 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
         {
             "pushMessageWithAuthorIdAndReturn",
             "INSERT INTO companion_messages "
-            "(companion_id, author_id, timestamp_tz, message, is_sent, is_received) "
-            "VALUES ((SELECT id FROM companions WHERE name = '{1}'), {2}, '{3}', '{4}', {5}, {6}) "
+            "(companion_id, author_id, timestamp_tz, message, is_sent, is_received, is_read) "
+            "VALUES ((SELECT id FROM companions WHERE name = '{1}'), "
+            "{2}, '{3}', '{4}', {5}, {6}, {7}) "
             "RETURNING id, %7, timestamp_tz",
             "id", "companion_id", "timestamp_tz"
         }

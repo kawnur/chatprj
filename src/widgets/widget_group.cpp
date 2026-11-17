@@ -47,8 +47,8 @@ void WidgetGroup::set()
         this, &WidgetGroup::addFileMessageWidgetSlot, Qt::QueuedConnection);
 
     connect(
-        this, &WidgetGroup::addTextMessageWidgetsSignal, this, &WidgetGroup::addTextMessageWidgetsSlot,
-        Qt::QueuedConnection);
+        this, &WidgetGroup::addTextMessageWidgetsSignal,
+        this, &WidgetGroup::addTextMessageWidgetsSlot, Qt::QueuedConnection);
 }
 
 void WidgetGroup::clearHistory()
@@ -119,27 +119,28 @@ void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 {
     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
 
-    auto messageState = widget->message()->state();
+    // auto messageState = widget->message()->state();
 
-    if (!messageState)
-        return;
+    // if (!messageState)
+    //     return;
 
-    bool isAntecedent = messageState->isAntecedent();
+    // bool isAntecedent = messageState->isAntecedent();
 
-    logTemplateInfo("isAntecedent: {}", isAntecedent);
+    // logTemplateInfo("isAntecedent: {}", isAntecedent);
 
-    if (isAntecedent) {
-        if (antecedentMessagesCounter_ != 0)
-            --antecedentMessagesCounter_;
+    // if (!isAntecedent)
+    //     return;
 
-        logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
+    if (antecedentMessagesCounter_ != 0)
+        --antecedentMessagesCounter_;
 
-        messageState->setIsAntecedent(false);
+    logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
 
-        if (antecedentMessagesCounter_ == 0)
-            setNewMessagesIndicatorOff();
-        // socketInfoBase_->updateNewMessagesIndicator();
-    }
+    // messageState->setIsAntecedent(false);
+
+    if (antecedentMessagesCounter_ == 0)
+        setNewMessagesIndicatorOff();
+    // socketInfoBase_->updateNewMessagesIndicator();
 }
 
 // void WidgetGroup::buildChatHistorySlot()
@@ -156,7 +157,16 @@ void WidgetGroup::addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &m
             addIncomingTextMessageWidgetSlot(message);
     }
 
-    centralPanel_->sortHistory(true);
+    centralPanel_->sortHistory(/*true*/);
+}
+
+void WidgetGroup::incrementCounter()
+{
+    std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+
+    ++antecedentMessagesCounter_;
+
+    logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
 }
 
 void WidgetGroup::requestHistorySlot()
@@ -174,6 +184,7 @@ void WidgetGroup::clientAction()
 
 void WidgetGroup::addIncomingTextMessageWidgetSlot(MessagePtr message)
 {
+    incrementCounter();
     addMessageWidget<IncomingTextMessageWidget>(message);
 }
 

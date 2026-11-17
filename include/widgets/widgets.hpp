@@ -76,6 +76,7 @@ public:
     void addWidget(QWidget *widget) override;
     void removeWidget(QWidget *widget) override;
     void logLayout();
+    void insertInSortedLayout(MessageWidgetPtr widget);
 
 protected:
     std::unique_ptr<QVBoxLayout> layout_;

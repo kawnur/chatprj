@@ -10,7 +10,7 @@
 #include "logging.hpp"
 
 using MessagePtrVariant = std::variant<std::nullptr_t,
-                                       TextMessagePtr,
+                                       IncomingTextMessagePtr,
                                        ReceiveConfirmationMessagePtr,
                                        ReceiveConfirmationRequestMessagePtr>;
 
@@ -53,11 +53,15 @@ public:
             return nullptr;
 
         // build state
-        auto state = buildObjectFromJson<typename M::state_type>(companion, json);
+        // auto state = buildObjectFromJson<typename M::state_type>(companion, json);
+        auto state = std::make_shared<typename M::state_type>();
 
         if (!state)
             return nullptr;
 
+        state->setIsReceived(true);
+
+        // build message
         auto message = std::make_shared<M>(meta, data, state);
 
         return MessagePtrVariant(message);
@@ -76,7 +80,7 @@ public:
     TextMessagePtr buildTextMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);
 
-    TextMessagePtr buildMyTextMessage(CompanionPtr companion, const std::string &text);
+    OutgoingTextMessagePtr buildMyTextMessage(CompanionPtr companion, const std::string &text);
 
     TextMessagePtr buildUnsentTextMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);
