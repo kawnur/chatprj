@@ -199,6 +199,17 @@ bool IncomingTextMessage::isRead()
 OutgoingTextMessage::OutgoingTextMessage(MetaPtr meta, DataPtr data, StatePtr state)
     : TextMessage(meta, data, state) {}
 
+FileMessage::FileMessage(MetaPtr meta, DataPtr data, StatePtr state) : Message(meta, data, state)
+{
+    // log();
+}
+
+IncomingFileMessage::IncomingFileMessage(MetaPtr meta, DataPtr data, StatePtr state)
+    : FileMessage(meta, data, state) {}
+
+OutgoingFileMessage::OutgoingFileMessage(MetaPtr meta, DataPtr data, StatePtr state)
+    : FileMessage(meta, data, state) {}
+
 ReceiveConfirmationMessage::ReceiveConfirmationMessage(MetaPtr meta, DataPtr data, StatePtr state)
     : Message(meta, data, state)
 {

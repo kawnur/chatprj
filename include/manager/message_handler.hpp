@@ -54,10 +54,13 @@ public:
 private:
     void sendTextMessageAndWaitForReceptionConfirmation(CompanionPtr companion, MessagePtr message);
 
-    void buildMessageAndStore(
-        CompanionPtr companion, DBReplyDataPtr data, int index,
-        std::vector<TextMessagePtr> &messages);
+    // void buildMessageAndStore(
+    //     CompanionPtr companion, DBReplyDataPtr data, int index,
+    //     std::vector<TextMessagePtr> &messages);
+    TextMessagePtr buildMessageAndStore(
+        CompanionPtr companion, DBReplyDataPtr data, int index);
 
+    void addTextMessageWidget(CompanionPtr companion, TextMessagePtr message);
     void addMessages(CompanionPtr companion, DBReplyDataPtr messagesData);
 
     void addMessagesByIndexes(
@@ -72,7 +75,7 @@ private:
     void receiveConfirmationRequest(CompanionPtr companion, MessagePtr message);
     void reciveChatHistoryRequest(CompanionPtr companion);
     void receiveChatHistoryData(CompanionPtr companion, const nlohmann::json &data);
-    void receiveFileProposal(CompanionPtr companion, MessagePtr message);
+    void receiveFileProposal(CompanionPtr companion, IncomingFileMessagePtr message);
     void receiveFileRequest(CompanionPtr companion, MessagePtr message);
     void receiveFileData(CompanionPtr companion, MessagePtr message);
     void receiveFileDataCheck(CompanionPtr companion, MessagePtr message);

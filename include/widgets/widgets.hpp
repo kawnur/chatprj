@@ -77,6 +77,35 @@ public:
     void removeWidget(QWidget *widget) override;
     void logLayout();
     void insertInSortedLayout(MessageWidgetPtr widget);
+    // template<class T>
+    // void insertInSortedLayout(TPtr<T> widget)
+    // {
+    //     auto time = widget->message()->time();
+    //     auto count = layout_->count();
+
+    //     if (count == 0) {
+    //         layout_->addWidget(widget.get());
+
+    //         return;
+    //     }
+
+    //     std::size_t index = count - 1;
+
+    //     for (; index >= 0; --index) {
+    //         auto item = layout_->itemAt(index)->widget();
+    //         auto cast = dynamic_cast<T *>(item);
+
+    //         if (!cast)
+    //             continue;
+
+    //         auto itemTime = cast->message()->time();
+
+    //         if (time > itemTime)
+    //             break;
+    //     }
+
+    //     layout_->insertWidget(index + 1, widget.get());
+    // }
 
 protected:
     std::unique_ptr<QVBoxLayout> layout_;

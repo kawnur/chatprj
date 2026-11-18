@@ -135,30 +135,30 @@ FileMessageBodyWidget::FileMessageBodyWidget(WidgetType type, MessagePtr message
     // }
 }
 
-void FileMessageBodyWidget::set()
-{
-    connect(
-        button_.get(), &QPushButton::clicked,
-        this, &FileMessageBodyWidget::saveFileSlot, Qt::QueuedConnection);
-}
+// void FileMessageBodyWidget::set()
+// {
+//     connect(
+//         button_.get(), &QPushButton::clicked,
+//         this, &FileMessageBodyWidget::saveFileSlot, Qt::QueuedConnection);
+// }
 
-void FileMessageBodyWidget::saveFileSlot()
-{
-    auto cast = qobject_cast<MessageWidget *>(parent());
+// void FileMessageBodyWidget::saveFileSlot()
+// {
+//     auto cast = qobject_cast<MessageWidget *>(parent());
 
-    if (!cast)
-        logTemplateError("{}, parent casting error", Q_FUNC_INFO);
+//     if (!cast)
+//         logTemplateError("{}, parent casting error", Q_FUNC_INFO);
 
-    cast->saveFile();
-}
+//     cast->saveFile();
+// }
 
 void FileMessageBodyWidget::buildText(MessagePtr message)
 {
     auto _type = type();
     auto color = getHTMLColor(_type);
     // auto path = getGraphicManager()->getFilePathString(message->networkId());
-    // auto textTemplate = getFileWidgetText(_type);
-    // auto textTemplate = getFileWidgetText(_type);
+    // auto texttemplate= getFileWidgetText(_type);
+    // auto texttemplate= getFileWidgetText(_type);
     // auto text = ""s;
 
     // if (_type == WidgetType::FILE_SENT)
@@ -177,6 +177,11 @@ IncomingFileMessageBodyWidget::IncomingFileMessageBodyWidget(MessagePtr message)
     button_ = std::make_shared<QPushButton>(DOWNLOAD_FILE_BUTTON_TEXT);
     layout_->addWidget(button_.get());
     buildText(message);
+}
+
+std::shared_ptr<QPushButton> IncomingFileMessageBodyWidget::button() const
+{
+    return button_;
 }
 
 std::string IncomingFileMessageBodyWidget::getText(MessagePtr message)
@@ -215,19 +220,19 @@ MessagePtr MessageWidget::message()
     return message_;
 }
 
-void MessageWidget::set(WidgetGroupPtr group)
-{
-    connect(
-        this, &MessageWidget::widgetSelectedSignal,
-        group.get(), &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
-}
+// void MessageWidget::set(WidgetGroupPtr group)
+// {
+//     connect(
+//         this, &MessageWidget::widgetSelectedSignal,
+//         group.get(), &WidgetGroup::messageWidgetSelected, Qt::QueuedConnection);
+// }
 
-void MessageWidget::saveFile()
-{
-    // create file operator for this networkId
-    auto networkId = message_->networkId();
-    getGraphicManager()->saveFile(networkId, companion_);
-}
+// void MessageWidget::saveFile()
+// {
+//     // create file operator for this networkId
+//     auto networkId = message_->networkId();
+//     getGraphicManager()->saveFile(networkId, companion_);
+// }
 
 // void MessageWidget::addMembersToLayout(MessageBodyWidgetPtr body)
 // {
@@ -256,11 +261,23 @@ IncomingTextMessageWidget::IncomingTextMessageWidget(
     addWidget(indicatorPanel_.get());
 }
 
+void IncomingTextMessageWidget::set(WidgetGroupPtr group)
+{
+    connect(
+        this, &IncomingTextMessageWidget::widgetSelectedSignal,
+        group.get(), &WidgetGroup::incomingTextMessageWidgetSelected, Qt::QueuedConnection);
+}
+
 void IncomingTextMessageWidget::mousePressEvent(QMouseEvent *event)
 {
     indicatorPanel_->unsetNewMessageLabel();
     emit widgetSelectedSignal(shared_from_this());
 }
+
+// IncomingTextMessagePtr IncomingTextMessageWidget::message() const
+// {
+//     return message_;
+// }
 
 OutgoingTextMessageWidget::OutgoingTextMessageWidget(
     CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
@@ -275,10 +292,22 @@ OutgoingTextMessageWidget::OutgoingTextMessageWidget(
     addWidget(indicatorPanel_.get());
 }
 
+void OutgoingTextMessageWidget::set(WidgetGroupPtr group)
+{
+    connect(
+        this, &OutgoingTextMessageWidget::widgetSelectedSignal,
+        group.get(), &WidgetGroup::outgoingTextMessageWidgetSelected, Qt::QueuedConnection);
+}
+
 void OutgoingTextMessageWidget::mousePressEvent(QMouseEvent *event)
 {
     emit widgetSelectedSignal(shared_from_this());
 }
+
+// OutgoingTextMessagePtr OutgoingTextMessageWidget::message() const
+// {
+//     return message_;
+// }
 
 void OutgoingTextMessageWidget::setSent()
 {
@@ -291,11 +320,16 @@ void OutgoingTextMessageWidget::setReceived()
 }
 
 FileMessageWidget::FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
-    : MessageWidget(companion, message, parent)
+    : MessageWidget(companion, message, parent)/*, message_(message)*/
 {
     // body_ = std::make_shared<FileMessageBodyWidget>(message_);
     // addMembersToLayout(body_);
 }
+
+// MessagePtr FileMessageWidget::message() const
+// {
+//     return message_;
+// }
 
 IncomingFileMessageWidget::IncomingFileMessageWidget(
     CompanionPtr companion, MessagePtr message, QWidgetPtr parent)
@@ -307,7 +341,21 @@ IncomingFileMessageWidget::IncomingFileMessageWidget(
     addWidget(header_.get());
     addWidget(body_.get());
 
-    body_->set();
+    // body_->set();
+}
+
+void IncomingFileMessageWidget::set(WidgetGroupPtr group)
+{
+    connect(
+        body_->button().get(), &QPushButton::clicked,
+        this, &IncomingFileMessageWidget::saveFileSlot, Qt::QueuedConnection);
+}
+
+void IncomingFileMessageWidget::saveFileSlot()
+{
+    // create file operator for this networkId
+    auto networkId = message_->networkId();
+    getGraphicManager()->saveFile(networkId, companion_);
 }
 
 OutgoingFileMessageWidget::OutgoingFileMessageWidget(
@@ -320,7 +368,7 @@ OutgoingFileMessageWidget::OutgoingFileMessageWidget(
     addWidget(header_.get());
     addWidget(body_.get());
 
-    body_->set();
+    // body_->set();
 }
 
 // QString formatHeader(CompanionPtr companion, MessagePtr message)

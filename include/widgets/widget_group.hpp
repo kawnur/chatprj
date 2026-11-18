@@ -30,31 +30,36 @@ public:
     void setNewMessagesIndicatorOff();
 
 signals:
-    void addIncomingTextMessageWidgetSignal(MessagePtr message);
-    void addOutgoingTextMessageWidgetSignal(MessagePtr message);
-    void addFileMessageWidgetSignal(MessagePtr message);
-    void addTextMessageWidgetsSignal(const std::vector<TextMessagePtr> &messages);  // TODO rename
+    void addIncomingTextMessageWidgetSignal(IncomingTextMessagePtr message);
+    void addOutgoingTextMessageWidgetSignal(OutgoingTextMessagePtr message);
+    void addIncomingFileMessageWidgetSignal(IncomingFileMessagePtr message);
+    void addOutgoingFileMessageWidgetSignal(OutgoingFileMessagePtr message);
+    // void addTextMessageWidgetsSignal(const std::vector<TextMessagePtr> &messages);  // TODO rename
     // void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
 public slots:
-    void messageWidgetSelected(MessageWidgetPtr widget);
+    // void messageWidgetSelected(MessageWidgetPtr widget);
+    void incomingTextMessageWidgetSelected(IncomingTextMessageWidgetPtr widget);
+    void outgoingTextMessageWidgetSelected(OutgoingTextMessageWidgetPtr widget);
     // void buildChatHistorySlot();
     void requestHistorySlot();
     void clientAction();
 
 private slots:
-    void addIncomingTextMessageWidgetSlot(MessagePtr message);
-    void addOutgoingTextMessageWidgetSlot(MessagePtr message);
-    void addFileMessageWidgetSlot(MessagePtr message);
-    void addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages);
+    void addIncomingTextMessageWidgetSlot(IncomingTextMessagePtr message);
+    void addOutgoingTextMessageWidgetSlot(OutgoingTextMessagePtr message);
+    void addIncomingFileMessageWidgetSlot(IncomingFileMessagePtr message);
+    void addOutgoingFileMessageWidgetSlot(OutgoingFileMessagePtr message);
+    // void addFileMessageWidgetSlot(MessagePtr message);
+    // void addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages);
     // void askUserForHistorySendingConfirmationSlot();
 
 private:
     void incrementCounter();
 
-    template<typename T>
-    void addMessageWidget(MessagePtr message)
+    template<class T>
+    void addMessageWidget(TPtr<T> message)
     {
         // bool isAntecedent = message->isAntecedent();
 
@@ -80,9 +85,10 @@ private:
         //     logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
         // }
 
-        auto widget = std::make_shared<T>(companion_, message);
+        auto widget = std::make_shared<typename T::widget_type>(companion_, message);
         auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
         widget->set(shared_from_this());
+        // widget->set();
         centralPanel_->addMessage(widget);
         messageAdded();
     }
@@ -90,8 +96,8 @@ private:
     CompanionPtr companion_;
     SocketInfoBaseWidgetPtr socketInfoBase_;
     std::shared_ptr<CentralPanelWidget> centralPanel_;
-    uint32_t antecedentMessagesCounter_;
-    std::mutex antecedentMessagesCounterMutex_;
+    uint32_t counter_;  // counts new messages
+    std::mutex counterMutex_;
 };
 
 class StubWidgetGroup

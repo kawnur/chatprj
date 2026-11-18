@@ -32,13 +32,13 @@ public:
     std::string getFilePathString(const std::string &networkId);
     bool setFilePath(const std::string &networkId, const std::filesystem::path &path);
 
-    template<typename T>
-    std::shared_ptr<T> getOperatorByType(const std::string &networkId)
+    template<class T>
+    TPtr<T> getOperatorByType(const std::string &networkId)
     {
         return dynamic_pointer_cast<T>(getOperator(networkId));
     }
 
-    template<typename T>
+    template<class T>
     void removeFileOperator(const std::string &networkId)
     {
         auto _operator = getOperatorByType<T>(networkId);

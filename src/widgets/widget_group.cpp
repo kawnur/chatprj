@@ -6,7 +6,7 @@
 const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
 
 WidgetGroup::WidgetGroup(CompanionPtr companion)
-    : companion_(companion), antecedentMessagesCounterMutex_(), antecedentMessagesCounter_(0) {}
+    : companion_(companion), counterMutex_(), counter_(0) {}
 
 WidgetGroup::~WidgetGroup()
 {
@@ -43,12 +43,16 @@ void WidgetGroup::set()
         this, &WidgetGroup::addOutgoingTextMessageWidgetSlot, Qt::QueuedConnection);
 
     connect(
-        this, &WidgetGroup::addFileMessageWidgetSignal,
-        this, &WidgetGroup::addFileMessageWidgetSlot, Qt::QueuedConnection);
+        this, &WidgetGroup::addIncomingFileMessageWidgetSignal,
+        this, &WidgetGroup::addIncomingFileMessageWidgetSlot, Qt::QueuedConnection);
 
     connect(
-        this, &WidgetGroup::addTextMessageWidgetsSignal,
-        this, &WidgetGroup::addTextMessageWidgetsSlot, Qt::QueuedConnection);
+        this, &WidgetGroup::addOutgoingFileMessageWidgetSignal,
+        this, &WidgetGroup::addOutgoingFileMessageWidgetSlot, Qt::QueuedConnection);
+
+    // connect(
+    //     this, &WidgetGroup::addTextMessageWidgetsSignal,
+    //     this, &WidgetGroup::addTextMessageWidgetsSlot, Qt::QueuedConnection);
 }
 
 void WidgetGroup::clearHistory()
@@ -57,8 +61,8 @@ void WidgetGroup::clearHistory()
     setNewMessagesIndicatorOff();
     // socketInfoBase_->updateNewMessagesIndicator();
 
-    std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-    antecedentMessagesCounter_ = 0;
+    std::lock_guard<std::mutex> lock(counterMutex_);
+    counter_ = 0;
 }
 
 void WidgetGroup::hideFields()
@@ -80,10 +84,10 @@ void WidgetGroup::showCentralPanel()
 
 void WidgetGroup::messageAdded()
 {
-    std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+    std::lock_guard<std::mutex> lock(counterMutex_);
 
     // set new message indicator on if socket info widget is not selected
-    if (antecedentMessagesCounter_ <= 0)
+    if (counter_ <= 0)
         return;
 
     setNewMessagesIndicatorOn();
@@ -115,58 +119,67 @@ void WidgetGroup::setNewMessagesIndicatorOff()
     socketInfoBase_->setNewMessagesIndicatorOff();
 }
 
-void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
+void WidgetGroup::incomingTextMessageWidgetSelected(IncomingTextMessageWidgetPtr widget)
+// void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 {
-    std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+    std::lock_guard<std::mutex> lock(counterMutex_);
 
-    // auto messageState = widget->message()->state();
+    auto message = widget->message();
+    auto messageState = message->state();
 
-    // if (!messageState)
-    //     return;
+    if (!messageState)
+        return;
 
     // bool isAntecedent = messageState->isAntecedent();
+    bool isRead = messageState->isRead();
 
     // logTemplateInfo("isAntecedent: {}", isAntecedent);
 
-    // if (!isAntecedent)
-    //     return;
+    if (isRead)
+        return;
 
-    if (antecedentMessagesCounter_ != 0)
-        --antecedentMessagesCounter_;
+    if (counter_ != 0)  // ???
+        --counter_;
 
-    logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
+    logTemplateInfo("counter_: {}", counter_);
+
+    auto cast = std::dynamic_pointer_cast<IncomingTextMessage>(message);
 
     // messageState->setIsAntecedent(false);
+    if (cast)
+        getGraphicManager()->markMessageAsRead(cast);
 
-    if (antecedentMessagesCounter_ == 0)
+    if (counter_ == 0)
         setNewMessagesIndicatorOff();
     // socketInfoBase_->updateNewMessagesIndicator();
 }
+
+void WidgetGroup::outgoingTextMessageWidgetSelected(OutgoingTextMessageWidgetPtr widget) {}
 
 // void WidgetGroup::buildChatHistorySlot()
 // {
 //     companion_->addMessageWidgetsToChatHistory();
 // }
 
-void WidgetGroup::addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages)
-{
-    for (auto message : messages) {
-        if (message->isMessageFromMe())
-            addOutgoingTextMessageWidgetSlot(message);
-        else
-            addIncomingTextMessageWidgetSlot(message);
-    }
+// void WidgetGroup::addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages)
+// {
+//     for (auto message : messages) {
+//         if (message->isMessageFromMe())
+//             addOutgoingTextMessageWidgetSlot(std::dynamic_pointer_cast<OutgoingTextMessage>(message));
+//         else
+//             addIncomingTextMessageWidgetSlot(std::dynamic_pointer_cast<IncomingTextMessage>(message));
+//     }
 
-    centralPanel_->sortHistory(/*true*/);
-}
+//     centralPanel_->sortHistory(/*true*/);
+// }
 
 void WidgetGroup::incrementCounter()
 {
-    std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
+    std::lock_guard<std::mutex> lock(counterMutex_);
 
-    ++antecedentMessagesCounter_;
+    ++counter_;
 
-    logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
+    logTemplateInfo("antecedentMessagesCounter_: {}", counter_);
 }
 
 void WidgetGroup::requestHistorySlot()
@@ -182,20 +195,25 @@ void WidgetGroup::clientAction()
     socketInfoBase_->updateConnectionState();
 }
 
-void WidgetGroup::addIncomingTextMessageWidgetSlot(MessagePtr message)
+void WidgetGroup::addIncomingTextMessageWidgetSlot(IncomingTextMessagePtr message)
 {
     incrementCounter();
-    addMessageWidget<IncomingTextMessageWidget>(message);
+    addMessageWidget<IncomingTextMessage>(message);
 }
 
-void WidgetGroup::addOutgoingTextMessageWidgetSlot(MessagePtr message)
+void WidgetGroup::addOutgoingTextMessageWidgetSlot(OutgoingTextMessagePtr message)
 {
-    addMessageWidget<OutgoingTextMessageWidget>(message);
+    addMessageWidget<OutgoingTextMessage>(message);
 }
 
-void WidgetGroup::addFileMessageWidgetSlot(MessagePtr message)
+void WidgetGroup::addIncomingFileMessageWidgetSlot(IncomingFileMessagePtr message)
 {
-    addMessageWidget<FileMessageWidget>(message);
+    addMessageWidget<IncomingFileMessage>(message);
+}
+
+void WidgetGroup::addOutgoingFileMessageWidgetSlot(OutgoingFileMessagePtr message)
+{
+    addMessageWidget<OutgoingFileMessage>(message);
 }
 
 // void WidgetGroup::askUserForHistorySendingConfirmationSlot()

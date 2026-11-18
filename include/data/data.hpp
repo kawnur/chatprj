@@ -29,7 +29,7 @@ private:
 class CompanionData
 {
 public:
-    template<typename T1, typename T2, typename T3, typename T4>
+    template<class T1, class T2, class T3, class T4>
     CompanionData(
         T1 &&name, T2 &&ipAddress, T3 &&serverPort, T4 &&clientPort)
         : name_(getString(std::forward<T1>(name))),

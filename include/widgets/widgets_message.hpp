@@ -98,7 +98,7 @@ public:
 
     virtual void addToParentLayout(std::shared_ptr<QVBoxLayout> layout) {}
     virtual void setParentTo(MessageWidget *widget) {}
-    virtual void set() {}
+    // virtual void set() {}
 };
 
 class TextMessageBodyWidget : public MessageBodyWidget
@@ -139,17 +139,19 @@ public:
     FileMessageBodyWidget(WidgetType type, MessagePtr message);
     virtual ~FileMessageBodyWidget() = default;
 
-    void set() override;
+    // void set() override;
 
-private slots:
-    void saveFileSlot();
+// std::shared_ptr<QPushButton> button() const;
+
+// private slots:
+    // void saveFileSlot();
 
 protected:
     void buildText(MessagePtr message);
     virtual std::string getText(MessagePtr message) { return ""s; }
 
     std::shared_ptr<QLabel> label_;
-    std::shared_ptr<QPushButton> button_;  // download button
+    // std::shared_ptr<QPushButton> button_;  // download button
 };
 
 class IncomingFileMessageBodyWidget : public FileMessageBodyWidget
@@ -159,6 +161,8 @@ class IncomingFileMessageBodyWidget : public FileMessageBodyWidget
 public:
     IncomingFileMessageBodyWidget(MessagePtr message);
     ~IncomingFileMessageBodyWidget() = default;
+
+    std::shared_ptr<QPushButton> button() const;
 
 private:
     std::string getText(MessagePtr message) override;
@@ -178,7 +182,7 @@ private:
     std::string getText(MessagePtr message) override;
 };
 
-class MessageWidget : public VLayoutWidget, public std::enable_shared_from_this<MessageWidget>
+class MessageWidget : public VLayoutWidget/*, public std::enable_shared_from_this<MessageWidget>*/
 {
     Q_OBJECT
 
@@ -187,14 +191,16 @@ public:
     virtual ~MessageWidget() {}
 
     MessagePtr message();
-    void set(WidgetGroupPtr group);
+    // virtual MessagePtr getMessage() { return nullptr; }
+    // void set(WidgetGroupPtr group);
+    virtual void set(WidgetGroupPtr group) {}
 
-    void saveFile();
+    // void saveFile();
     virtual void setSent() {}
     virtual void setReceived() {}
 
-signals:
-    void widgetSelectedSignal(MessageWidgetPtr widget);
+// signals:
+//     void widgetSelectedSignal(MessageWidgetPtr widget);
 
 protected:
     // void addMembersToLayout(MessageBodyWidgetPtr body);
@@ -212,39 +218,66 @@ public:
     TextMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     virtual ~TextMessageWidget() = default;
 
-private:
+// private:
     // std::shared_ptr<TextMessageBodyWidget> body_;
 };
 
-class IncomingTextMessageWidget : public TextMessageWidget
+class IncomingTextMessageWidget
+    : public TextMessageWidget, public std::enable_shared_from_this<IncomingTextMessageWidget>
 {
+    Q_OBJECT
+
 public:
     IncomingTextMessageWidget(
         CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
 
     ~IncomingTextMessageWidget() = default;
 
+    void set(WidgetGroupPtr group) override;
+
+    // MessagePtr getMessage() override { return std::dynamic_pointer_cast<Message>(message_); }
+
+    // IncomingTextMessagePtr message() const;
+
+signals:
+    void widgetSelectedSignal(IncomingTextMessageWidgetPtr widget);
+
 private:
     void mousePressEvent(QMouseEvent *) override;
+
+    // IncomingTextMessagePtr message_;
 
     std::shared_ptr<IncomingMessageHeaderWidget> header_;
     std::shared_ptr<IncomingTextMessageBodyWidget> body_;
     std::shared_ptr<IncomingTextMessageIndicatorPanelWidget> indicatorPanel_;
 };
 
-class OutgoingTextMessageWidget : public TextMessageWidget
+class OutgoingTextMessageWidget
+    : public TextMessageWidget, public std::enable_shared_from_this<OutgoingTextMessageWidget>
 {
+    Q_OBJECT
+
 public:
     OutgoingTextMessageWidget(
         CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
 
     ~OutgoingTextMessageWidget() = default;
 
+    void set(WidgetGroupPtr group) override;
     void setSent() override;
     void setReceived() override;
 
+    // MessagePtr getMessage() override { return std::dynamic_pointer_cast<Message>(message_); }
+
+    // OutgoingTextMessagePtr message() const;
+
+signals:
+    void widgetSelectedSignal(OutgoingTextMessageWidgetPtr widget);
+
 private:
     void mousePressEvent(QMouseEvent *) override;
+
+    // OutgoingTextMessagePtr message_;
 
     std::shared_ptr<OutgoingMessageHeaderWidget> header_;
     std::shared_ptr<OutgoingTextMessageBodyWidget> body_;
@@ -259,8 +292,14 @@ public:
     FileMessageWidget(CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
     virtual ~FileMessageWidget() = default;
 
-// private:
+    // MessagePtr getMessage() override { return message_; }
+
+    // MessagePtr message() const;
+
+private:
 //     std::shared_ptr<FileMessageBodyWidget> body_;
+protected:
+    // MessagePtr message_;
 };
 
 class IncomingFileMessageWidget : public FileMessageWidget
@@ -272,6 +311,11 @@ public:
         CompanionPtr companion, MessagePtr message, QWidgetPtr parent = nullptr);
 
     ~IncomingFileMessageWidget() = default;
+
+    void set(WidgetGroupPtr group) override;
+
+private slots:
+    void saveFileSlot();
 
 private:
     std::shared_ptr<IncomingMessageHeaderWidget> header_;

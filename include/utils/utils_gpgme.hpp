@@ -39,7 +39,7 @@ namespace TestGpgme
     std::string getStringFromChar(const char *value);
 
     template<typename T>
-    auto getOrString(std::shared_ptr<T> parameter)
+    auto getOrString(TPtr<T> parameter)
     {
         return (parameter) ? parameter : "nullptr"s;  // TODO ???
 	}

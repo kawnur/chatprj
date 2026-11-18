@@ -35,7 +35,7 @@ void MessageData::setData(const std::string &newData)
 
 void MessageData::log()
 {
-    auto entryTemplate = "data: {0}"s;
+    auto entryTemplate= "data: {0}"s;
 
     logTemplateInfo(entryTemplate, data_);
 }

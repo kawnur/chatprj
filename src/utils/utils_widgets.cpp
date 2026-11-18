@@ -166,10 +166,10 @@ QString getHTMLHeader(
     const std::string &color, const std::string &sender, const std::string &receiver,
     const std::string &time)
 {
-    auto textTemplate = "From {0} to {1} at {2}:"s;
+    auto textTemplate= "From {0} to {1} at {2}:"s;
     auto text = getStringByFormat(textTemplate, sender, receiver, time);
 
-    auto headerTemplate = "<font size=\"{0}\" color=\"{1}\">{2}</font>"s;
+    auto headerTemplate= "<font size=\"{0}\" color=\"{1}\">{2}</font>"s;
     auto size = MESSAGE_HEADER_HTML_FONT_SIZE;
     auto value = getHTMLBold(getHTMLBreak(getHTMLItalic(text)));
 

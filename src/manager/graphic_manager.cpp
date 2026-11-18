@@ -316,16 +316,16 @@ void GraphicManager::createEntrancePassword()
 //     manager_->initEntrancePasswordReception();
 // }
 
-void GraphicManager::addMessageWidgets(
-    CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
-{
-    auto group = getWidgetGroup(companion);
+// void GraphicManager::addMessageWidgets(
+//     CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
+// {
+//     auto group = getWidgetGroup(companion);
 
-    if (!group)
-        return;
+//     if (!group)
+//         return;
 
-    emit group->addTextMessageWidgetsSignal(messages);
-}
+//     emit group->addTextMessageWidgetsSignal(messages);
+// }
 
 void GraphicManager::setMessageWidgetSent(MessageInfoPtr info)
 {
@@ -402,6 +402,11 @@ bool GraphicManager::setMappedMessageWidget(
     return manager_->setMappedMessageWidget(companion, message, widget);
 }
 
+bool GraphicManager::markMessageAsRead(IncomingTextMessagePtr message)
+{
+    manager_->markMessageAsRead(message);
+}
+
 void GraphicManager::addEarlyMessages(CompanionPtr companion)
 {
     manager_->addEarlyMessages(companion);
@@ -423,23 +428,31 @@ MessageWidgetPtr GraphicManager::getWidgetFromMessageInfo(MessageInfoPtr info)
 }
 
 template<>
-void GraphicManager::emitGroupSignal<IncomingTextMessageWidget>(
-    WidgetGroupPtr group, MessagePtr message)
+void GraphicManager::emitGroupSignal<IncomingTextMessage>(
+    WidgetGroupPtr group, IncomingTextMessagePtr message)
 {
     emit group->addIncomingTextMessageWidgetSignal(message);
 }
 
 template<>
-void GraphicManager::emitGroupSignal<OutgoingTextMessageWidget>(
-    WidgetGroupPtr group, MessagePtr message)
+void GraphicManager::emitGroupSignal<OutgoingTextMessage>(
+    WidgetGroupPtr group, OutgoingTextMessagePtr message)
 {
     emit group->addOutgoingTextMessageWidgetSignal(message);
 }
 
 template<>
-void GraphicManager::emitGroupSignal<FileMessageWidget>(WidgetGroupPtr group, MessagePtr message)
+void GraphicManager::emitGroupSignal<IncomingFileMessage>(
+    WidgetGroupPtr group, IncomingFileMessagePtr message)
 {
-    emit group->addFileMessageWidgetSignal(message);
+    emit group->addIncomingFileMessageWidgetSignal(message);
+}
+
+template<>
+void GraphicManager::emitGroupSignal<OutgoingFileMessage>(
+    WidgetGroupPtr group, OutgoingFileMessagePtr message)
+{
+    emit group->addOutgoingFileMessageWidgetSignal(message);
 }
 
 GraphicManagerPtr getGraphicManager()

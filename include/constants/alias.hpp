@@ -9,10 +9,13 @@
 
 #include <libpq-fe.h>
 
+template<class T>
+using TPtr = std::shared_ptr<T>;
+
 class Action;
 class ActionResult;
 
-template<typename T>
+template<class T>
 class ActionSharedValueResult;
 
 class ButtonBox;
@@ -34,13 +37,16 @@ class GetPasswordAction;
 class GraphicManager;
 class GroupChatData;
 class IncomingTextMessage;
+class IncomingTextMessageState;
 class IncomingTextMessageWidget;
+class IncomingFileMessage;
+class IncomingFileMessageWidget;
 class IndicatorWidget;
 class LeftPanelWidget;
 class MainWidget;
 class MainWindow;
 
-template<typename T>
+template<class T>
 class MainWindowContainerWidget;
 
 class Manager;
@@ -54,6 +60,8 @@ class MessageState;
 class MessageWidget;
 class NetworkEntity;
 class NetworkManager;
+class OutgoingFileMessage;
+class OutgoingFileMessageWidget;
 class OutgoingTextMessage;
 class OutgoingTextMessageWidget;
 class PalettedWidget;
@@ -100,7 +108,11 @@ using FileManagerPtr = std::shared_ptr<FileManager>;
 using GetPasswordActionPtr = std::shared_ptr<GetPasswordAction>;
 using GraphicManagerPtr = std::shared_ptr<GraphicManager>;
 using IndicatorWidgetPtr = std::shared_ptr<IndicatorWidget>;
+using IncomingFileMessagePtr = std::shared_ptr<IncomingFileMessage>;
+using IncomingFileMessageWidgetPtr = std::shared_ptr<IncomingFileMessageWidget>;
 using IncomingTextMessagePtr = std::shared_ptr<IncomingTextMessage>;
+using IncomingTextMessageStatePtr = std::shared_ptr<IncomingTextMessageState>;
+using IncomingTextMessageWidgetPtr = std::shared_ptr<IncomingTextMessageWidget>;
 using MainWindowPtr = std::shared_ptr<MainWindow>;
 using ManagerPtr = std::shared_ptr<Manager>;
 using MessageBodyWidgetPtr = std::shared_ptr<MessageBodyWidget>;
@@ -112,7 +124,10 @@ using MessageStatePtr = std::shared_ptr<MessageState>;
 using MessageWidgetPtr = std::shared_ptr<MessageWidget>;
 using NetworkEntityPtr = std::shared_ptr<NetworkEntity>;
 using NetworkManagerPtr = std::shared_ptr<NetworkManager>;
+using OutgoingFileMessagePtr = std::shared_ptr<OutgoingFileMessage>;
+using OutgoingFileMessageWidgetPtr = std::shared_ptr<OutgoingFileMessageWidget>;
 using OutgoingTextMessagePtr = std::shared_ptr<OutgoingTextMessage>;
+using OutgoingTextMessageWidgetPtr = std::shared_ptr<OutgoingTextMessageWidget>;
 using PalettedWidgetPtr = std::shared_ptr<PalettedWidget>;
 using PasswordActionPtr = std::shared_ptr<PasswordAction>;
 using PGconnPtr = std::shared_ptr<PGconn>;

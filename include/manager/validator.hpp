@@ -39,8 +39,8 @@ template<>
 ActionResultPtr Validator::validate<PasswordAction>(
     PasswordActionPtr action);
 
-template<typename T>
-ActionResultPtr validateActionData(std::shared_ptr<T> action)
+template<class T>
+ActionResultPtr validateActionData(TPtr<T> action)
 {
     Validator validator {};
 

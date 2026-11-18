@@ -3,13 +3,14 @@
 
 #include <string>
 
+#include "alias.hpp"
 #include "logging.hpp"
 
 class ActionResult
 {
 public:
     // TODO add container concept
-    template<typename T>
+    template<class T>
     ActionResult(bool status, T &&value) : status_(status)
     {
         if constexpr (Same<T, std::string>)
@@ -30,7 +31,7 @@ protected:
     std::vector<std::string> definitions_;
 };
 
-template<typename T>
+template<class T>
 class ActionValueResult : public ActionResult
 {
 public:
@@ -48,22 +49,22 @@ private:
     T value_;
 };
 
-template<typename T>
+template<class T>
 class ActionSharedValueResult : public ActionResult
 {
 public:
-    ActionSharedValueResult(std::shared_ptr<T> value, bool status, const std::string &definition)
+    ActionSharedValueResult(TPtr<T> value, bool status, const std::string &definition)
         : value_(value), ActionResult(status, definition) {}
 
     ~ActionSharedValueResult() { logArgsInfo(Q_FUNC_INFO); }
 
-    std::shared_ptr<T> value() const
+    TPtr<T> value() const
     {
         return value_;
     }
 
 private:
-    std::shared_ptr<T> value_;
+    TPtr<T> value_;
 };
 
 #endif // ACTION_RESULT_HPP

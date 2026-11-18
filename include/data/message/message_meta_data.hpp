@@ -9,7 +9,7 @@
 #include "alias.hpp"
 #include "constants.hpp"
 
-class MessageMetaData
+class MessageMetaData  // TODO rename to MessageMeta
 {
 public:
     MessageMetaData() = default;

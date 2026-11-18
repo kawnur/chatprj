@@ -117,7 +117,7 @@ void MessageMetaData::setNetworkId(const std::string &newNetworkId)
 
 std::string MessageMetaData::getLogString()
 {
-    auto entryTemplate =
+    auto entryTemplate=
         "messageId: {0}, companionId: {1}, authorId: {2}, timestampTz: {3}, networkId: {4}"s;
 
     return getStringByFormat(

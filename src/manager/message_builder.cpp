@@ -99,7 +99,7 @@ TextMessageDataPtr MessageBuilder::buildTextMessageData(DBReplyDataPtr data, std
 }
 
 MessageStatePtr MessageBuilder::buildMessageState(
-    bool isAntecedent, DBReplyDataPtr data, std::size_t index)
+    /*bool isAntecedent, */DBReplyDataPtr data, std::size_t index)
 {
     return std::make_shared<MessageState>(
         // isAntecedent, getBoolFromDbData(data, index, "is_sent"),
@@ -107,16 +107,31 @@ MessageStatePtr MessageBuilder::buildMessageState(
         getBoolFromDbData(data, index, "is_received"));
 }
 
+IncomingTextMessageStatePtr MessageBuilder::buildIncomingTextMessageState(
+    /*bool isAntecedent, */DBReplyDataPtr data, std::size_t index)
+{
+    return std::make_shared<IncomingTextMessageState>(
+        // isAntecedent, getBoolFromDbData(data, index, "is_sent"),
+        getBoolFromDbData(data, index, "is_sent"),
+        getBoolFromDbData(data, index, "is_received"),
+        getBoolFromDbData(data, index, "is_read"));
+}
+
 TextMessagePtr MessageBuilder::buildTextMessageFromDbData(
     CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index)
 {
     auto meta = buildMessageMetaData(companion, dbData, index);
     auto data = buildTextMessageData(dbData, index);
-    auto state = buildMessageState(false, dbData, index);
 
-    auto message = std::make_shared<TextMessage>(meta, data, state);
+    if (meta->isMessageFromMe()) {
+        auto state = buildMessageState(dbData, index);
 
-    return message;
+        return std::make_shared<OutgoingTextMessage>(meta, data, state);
+    } else {
+        auto state = buildIncomingTextMessageState(dbData, index);
+
+        return std::make_shared<IncomingTextMessage>(meta, data, state);
+    }
 }
 
 OutgoingTextMessagePtr MessageBuilder::buildMyTextMessage(CompanionPtr companion, const std::string &text)
@@ -141,7 +156,7 @@ TextMessagePtr MessageBuilder::buildUnsentTextMessageFromDbData(
     auto meta = buildUnsentMessageMetaData(companion, dbData, index);
     auto data = buildTextMessageData(dbData, index);
 
-    auto state = buildMessageState(true, dbData, index);
+    auto state = buildMessageState(/*true, */dbData, index);
     state->setIsSent(false);  // check db data
 
     auto message = std::make_shared<Type>(meta, data, state);

@@ -16,10 +16,12 @@ public:
     using meta_type = MessageMetaData;
     using data_type = MessageData;
     using state_type = MessageState;
+    using widget_type = MessageWidget;
 
     using MetaPtr = std::shared_ptr<meta_type>;
     using DataPtr = std::shared_ptr<data_type>;
     using StatePtr = std::shared_ptr<state_type>;
+    using WidgetPtr = std::shared_ptr<widget_type>;
 
     Message(MetaPtr meta, DataPtr data, StatePtr state);
     Message(MessagePtr message);
@@ -69,6 +71,7 @@ public:
     using meta_type = MessageMetaData;
     using data_type = TextMessageData;
     using state_type = MessageState;
+    using widget_type = TextMessageWidget;
 
     TextMessage(MetaPtr meta, DataPtr data, StatePtr state);
     ~TextMessage() = default;
@@ -85,6 +88,7 @@ public:
     using meta_type = MessageMetaData;
     using data_type = TextMessageData;
     using state_type = IncomingTextMessageState;
+    using widget_type = IncomingTextMessageWidget;
 
     IncomingTextMessage(MetaPtr meta, DataPtr data, StatePtr state);
     ~IncomingTextMessage() = default;
@@ -98,9 +102,53 @@ public:
     using meta_type = MessageMetaData;
     using data_type = TextMessageData;
     using state_type = MessageState;
+    using widget_type = OutgoingTextMessageWidget;
 
     OutgoingTextMessage(MetaPtr meta, DataPtr data, StatePtr state);
     ~OutgoingTextMessage() = default;
+};
+
+class FileMessage : public Message
+{
+public:
+    using meta_type = MessageMetaData;
+    using data_type = MessageData;
+    using state_type = MessageState;
+    using widget_type = FileMessageWidget;
+
+    FileMessage(MetaPtr meta, DataPtr data, StatePtr state);
+    virtual ~FileMessage() = default;
+
+    // virtual bool isRead() { return false; }
+
+    // nlohmann::json getJsonData() override;
+    // std::string typeMark() override;
+};
+
+class IncomingFileMessage : public FileMessage
+{
+public:
+    using meta_type = MessageMetaData;
+    using data_type = MessageData;
+    using state_type = MessageState;
+    using widget_type = IncomingFileMessageWidget;
+
+    IncomingFileMessage(MetaPtr meta, DataPtr data, StatePtr state);
+    ~IncomingFileMessage() = default;
+
+    // bool isRead() override;
+};
+
+class OutgoingFileMessage : public FileMessage
+{
+public:
+    using meta_type = MessageMetaData;
+    using data_type = MessageData;
+    using state_type = MessageState;
+    using widget_type = OutgoingFileMessageWidget;
+
+    OutgoingFileMessage(MetaPtr meta, DataPtr data, StatePtr state);
+    ~OutgoingFileMessage() = default;
 };
 
 class ReceiveConfirmationMessage : public Message

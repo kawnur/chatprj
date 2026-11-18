@@ -42,8 +42,8 @@ public slots:
 protected:
     virtual std::shared_ptr<Dialog> buildDialog() { return nullptr; }
 
-    template<typename T>
-    std::shared_ptr<T> getShared()
+    template<class T>
+    TPtr<T> getShared()
     {
         return std::dynamic_pointer_cast<T>(shared_from_this());
     }

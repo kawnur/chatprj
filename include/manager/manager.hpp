@@ -86,14 +86,20 @@ public:
     void clearChatHistory(CompanionPtr companion);
     void markMessageAsSent(CompanionPtr companion, MessagePtr message);
     void markMessageAsReceived(MessageInfoPtr info);
+    void markMessageAsRead(IncomingTextMessagePtr message);
 
-    template<typename T>
-    void addMessageWidget(CompanionPtr companion, MessagePtr message)
+    // template<typename T>
+    // void addMessageWidget(CompanionPtr companion, MessagePtr message)
+    // {
+    //     graphicManager_->addMessageWidget<T>(companion, message);
+    // }
+    template<class T>
+    void addMessageWidget(CompanionPtr companion, TPtr<T> message)
     {
         graphicManager_->addMessageWidget<T>(companion, message);
     }
 
-    void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
+    // void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
     void disableBlur();
 
     // files
@@ -134,7 +140,7 @@ private:
     ActionResultPtr deleteCompanionAndSocketFromDbAndReturnId(DeleteCompanionActionPtr action);
 
     // action
-    template<typename T, typename... Ts>
+    template<class T, typename... Ts>
     void startAction(Ts &&...args)
     {
         auto action = std::make_shared<T>(shared_from_this(), args...);

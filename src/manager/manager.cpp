@@ -72,7 +72,7 @@ bool Manager::pushMessageHistoryToDb(CompanionPtr companion, const nlohmann::jso
             return false;
 
         if (!messageGetData->isEmpty()) {
-            // auto entryTemplate =
+            // auto entrytemplate=
             //     "Message with timestamp {0} from companion with id {1} already exists";
 
             // showInfoDialogAndLogInfo(getStringByFormat(entryTemplate, timestamp, companionId));
@@ -670,10 +670,10 @@ void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool container
     messageHandler_.fillMessageStorageForCompanion(companion, containersAreEmpty);
 }
 
-void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
-{
-    graphicManager_->addMessageWidgets(companion, messages);
-}
+// void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
+// {
+//     graphicManager_->addMessageWidgets(companion, messages);
+// }
 
 void Manager::disableBlur()
 {
@@ -770,6 +770,12 @@ void Manager::markMessageAsReceived(MessageInfoPtr info)
     // mark in db
     auto result = getDBData(
         DBRequestType::SET_MESSAGE_IS_RECEIVED_AND_RETURN, info->message()->id());
+}
+
+void Manager::markMessageAsRead(IncomingTextMessagePtr message)
+{
+    // mark in db
+    auto result = getDBData(DBRequestType::SET_MESSAGE_IS_READ_AND_RETURN, message->id());
 }
 
 bool Manager::sendJsonByNetwork(CompanionPtr companion, const std::string &json)

@@ -23,8 +23,8 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
     return storage_.getMessageInfo(companion->id(), message->id());
 }
 
-void MessageHandler::buildMessageAndStore(
-    CompanionPtr companion, DBReplyDataPtr data, int index, std::vector<TextMessagePtr> &messages)
+TextMessagePtr MessageHandler::buildMessageAndStore(
+    CompanionPtr companion, DBReplyDataPtr data, int index/*, std::vector<TextMessagePtr> &messages*/)
 {
     logTemplateInfo("adding message with id '{}'", data->getValue(index, "id"));
 
@@ -34,33 +34,56 @@ void MessageHandler::buildMessageAndStore(
     // add to storage
     bool storageResult = addToStorage(companion, message);
 
-    if (!storageResult)
+    if (!storageResult) {
         logArgsError("adding message to storage error");
 
-    messages.push_back(message);
+        return nullptr;
+    }
+
+    return message;
+
+    // messages.push_back(message);
+}
+
+void MessageHandler::addTextMessageWidget(CompanionPtr companion, TextMessagePtr message)
+{
+    if (message->isMessageFromMe()) {
+        auto cast = std::dynamic_pointer_cast<OutgoingTextMessage>(message);
+
+        if (cast)
+            manager_->addMessageWidget<OutgoingTextMessage>(companion, cast);
+    } else {
+        auto cast = std::dynamic_pointer_cast<IncomingTextMessage>(message);
+
+        if (cast)
+            manager_->addMessageWidget<IncomingTextMessage>(companion, cast);
+    }
 }
 
 void MessageHandler::addMessages(CompanionPtr companion, DBReplyDataPtr data)
 {
-    std::vector<TextMessagePtr> messages {};
+    // std::vector<TextMessagePtr> messages {};
 
-    for (std::size_t i = 0; i < data->size(); ++i)
-        buildMessageAndStore(companion, data, i, messages);
+    for (std::size_t i = 0; i < data->size(); ++i) {
+        auto message = buildMessageAndStore(companion, data, i/*, messages*/);
+        addTextMessageWidget(companion, message);
+    }
 
     // add widgets
-    manager_->addMessageWidgets(companion, messages);
+    // manager_->addMessageWidgets(companion, messages);
 }
 
 void MessageHandler::addMessagesByIndexes(
     CompanionPtr companion, DBReplyDataPtr data, const std::vector<int> &indexes)
 {
-    std::vector<TextMessagePtr> messages {};
+    // std::vector<TextMessagePtr> messages {};
 
-    for (const auto &i : indexes)
-        buildMessageAndStore(companion, data, i, messages);
-
+    for (const auto &i : indexes) {
+        auto message = buildMessageAndStore(companion, data, i/*, messages*/);
+        addTextMessageWidget(companion, message);
+    }
     // add widgets
-    manager_->addMessageWidgets(companion, messages);
+    // manager_->addMessageWidgets(companion, messages);
 }
 
 bool MessageHandler::addToStorage(CompanionPtr companion, MessagePtr message)
@@ -119,7 +142,8 @@ void MessageHandler::sendTextMessage(
     //     manager_->addSenderOperator(message->networkId(), action);
 
     // add message widget
-    manager_->addMessageWidget<OutgoingTextMessageWidget>(companion, message);
+    // manager_->addMessageWidget<OutgoingTextMessageWidget>(companion, message);
+    manager_->addMessageWidget<OutgoingTextMessage>(companion, message);
 
     // send and wait for confirmation
     sendTextMessageAndWaitForReceptionConfirmation(companion, message);
@@ -224,13 +248,13 @@ void MessageHandler::receiveTextMessage(CompanionPtr companion, IncomingTextMess
     // decrypt message
 
     // add widget
-    manager_->addMessageWidget<IncomingTextMessageWidget>(companion, message);
+    manager_->addMessageWidget<IncomingTextMessage>(companion, message);
 
     // send reply message to sender
     bool result = buildAndSendConfirmation(companion, message);
 }
 
-void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr message)
+void MessageHandler::receiveFileProposal(CompanionPtr companion, IncomingFileMessagePtr message)
 {
     // // create receiver operator
     // manager_->addReceiverOperator(meta, HOME_PATH);
@@ -292,7 +316,8 @@ void MessageHandler::receiveFileProposal(CompanionPtr companion, MessagePtr mess
         return;
 
     // add widget
-    manager_->addMessageWidget<FileMessageWidget>(companion, message);
+    // manager_->addMessageWidget<FileMessageWidget>(companion, message);
+    manager_->addMessageWidget<IncomingFileMessage>(companion, message);
 
     // create receiver operator
     manager_->addReceiverOperator(message);
@@ -382,11 +407,11 @@ void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr mes
 
     // logArgsInfo(__FUNCTION__, success);
 
-    // auto entryTemplate = (success)
+    // auto entrytemplate= (success)
     //     ? "file '{}' received by companion successfully"
     //     : "file '{}' WAS NOT received by companion";
 
-    auto entryTemplate = ""s;
+    auto entryTemplate= ""s;
 
     auto networkId = message->networkId();
 

@@ -59,8 +59,8 @@ void MessageState::setIsReceived(bool newIsReceived)
 
 void MessageState::log()
 {
-    // auto entryTemplate = "isAntecedent: {0}, isSent: {1}, isReceived: {2}"s;
-    auto entryTemplate = "isSent: {0}, isReceived: {1}"s;
+    // auto entrytemplate= "isAntecedent: {0}, isSent: {1}, isReceived: {2}"s;
+    auto entryTemplate= "isSent: {0}, isReceived: {1}"s;
 
     // logTemplateInfo(entryTemplate, isAntecedent_, isSent_, isReceived_);
     logTemplateInfo(entryTemplate, isSent_, isReceived_);

@@ -46,8 +46,8 @@ public:
     void disableBlur();
     // void getEntrancePassword();
 
-    template<typename T>
-    void addMessageWidget(CompanionPtr companion, MessagePtr message)
+    template<class T>
+    void addMessageWidget(CompanionPtr companion, TPtr<T> message)
     {
         auto group = getWidgetGroup(companion);
 
@@ -57,10 +57,10 @@ public:
         emitGroupSignal<T>(group, message);
     }
 
-    template<typename T>
-    void emitGroupSignal(WidgetGroupPtr group, MessagePtr message);
+    template<class T>
+    void emitGroupSignal(WidgetGroupPtr group, TPtr<T> message);
 
-    void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
+    // void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
     void setMessageWidgetSent(MessageInfoPtr info);
     void setMessageWidgetReceived(MessageInfoPtr info);
     void sendFile(CompanionPtr companion);
@@ -76,6 +76,7 @@ public:
     bool setMappedMessageWidget(
         CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
 
+    bool markMessageAsRead(IncomingTextMessagePtr message);
     void addEarlyMessages(CompanionPtr companion);
     std::filesystem::path getLastOpenedPath();
 
@@ -100,15 +101,20 @@ private:
 };
 
 template<>
-void GraphicManager::emitGroupSignal<IncomingTextMessageWidget>(
-    WidgetGroupPtr group, MessagePtr message);
+void GraphicManager::emitGroupSignal<IncomingTextMessage>(
+    WidgetGroupPtr group, IncomingTextMessagePtr message);
 
 template<>
-void GraphicManager::emitGroupSignal<OutgoingTextMessageWidget>(
-    WidgetGroupPtr group, MessagePtr message);
+void GraphicManager::emitGroupSignal<OutgoingTextMessage>(
+    WidgetGroupPtr group, OutgoingTextMessagePtr message);
 
 template<>
-void GraphicManager::emitGroupSignal<FileMessageWidget>(WidgetGroupPtr group, MessagePtr message);
+void GraphicManager::emitGroupSignal<IncomingFileMessage>(
+    WidgetGroupPtr group, IncomingFileMessagePtr message);
+
+template<>
+void GraphicManager::emitGroupSignal<OutgoingFileMessage>(
+    WidgetGroupPtr group, OutgoingFileMessagePtr message);
 
 GraphicManagerPtr getGraphicManager();
 

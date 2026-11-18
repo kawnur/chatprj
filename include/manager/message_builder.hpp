@@ -14,8 +14,8 @@ using MessagePtrVariant = std::variant<std::nullptr_t,
                                        ReceiveConfirmationMessagePtr,
                                        ReceiveConfirmationRequestMessagePtr>;
 
-template <typename T>
-std::shared_ptr<T> buildObjectFromJson(CompanionPtr companion, const nlohmann::json &data)
+template<class T>
+TPtr<T> buildObjectFromJson(CompanionPtr companion, const nlohmann::json &data)
 {
     auto object = std::make_shared<T>();
     auto result = object->setFields(companion, data);
@@ -75,7 +75,10 @@ public:
 
     MessageMetaDataPtr buildMyTextMessageMetaData(CompanionPtr companion);
     TextMessageDataPtr buildTextMessageData(DBReplyDataPtr data, std::size_t index);
-    MessageStatePtr buildMessageState(bool isAntecedent, DBReplyDataPtr data, std::size_t index);
+    MessageStatePtr buildMessageState(/*bool isAntecedent, */DBReplyDataPtr data, std::size_t index);
+
+    IncomingTextMessageStatePtr buildIncomingTextMessageState(
+        /*bool isAntecedent, */DBReplyDataPtr data, std::size_t index);
 
     TextMessagePtr buildTextMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);

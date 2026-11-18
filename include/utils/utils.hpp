@@ -42,13 +42,13 @@ concept IsArithmetic = std::is_arithmetic_v<std::remove_cvref_t<T>>;
 template<typename T>
 concept IsNotArithmetic = !std::is_arithmetic_v<std::remove_cvref_t<T>>;
 
-template <typename T>
+template<typename T>
 struct isOptionalHelper : std::false_type {};
 
-template <typename T>
+template<typename T>
 struct isOptionalHelper<std::optional<T>> : std::true_type {};
 
-template <typename T>
+template<typename T>
 concept IsOptional = isOptionalHelper<std::remove_cvref_t<T>>::value;
 
 std::string getString(const char *value);
