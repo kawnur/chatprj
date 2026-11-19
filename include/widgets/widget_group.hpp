@@ -7,7 +7,8 @@
 #include "alias.hpp"
 #include "logging.hpp"
 #include "message.hpp"
-#include "widgets_panel.hpp"
+#include "widget_panel.hpp"
+#include "widget_socket_info.hpp"
 
 class WidgetGroup : public QObject, public std::enable_shared_from_this<WidgetGroup>
 {

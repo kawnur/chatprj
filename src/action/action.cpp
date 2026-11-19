@@ -12,8 +12,7 @@
 #include "utils.hpp"
 #include "utils_widgets.hpp"
 #include "widget_info.hpp"
-#include "widgets.hpp"
-#include "widgets_dialog.hpp"
+#include "widget_dialog.hpp"
 
 Action::Action(ManagerPtr manager, const std::string &title)
     : manager_(manager), dialogTitle_(title)

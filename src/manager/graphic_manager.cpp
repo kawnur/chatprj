@@ -6,8 +6,7 @@
 #include "manager.hpp"
 #include "message_info.hpp"
 #include "widget_group.hpp"
-#include "widgets.hpp"
-#include "widgets_message.hpp"
+#include "message_widget.hpp"
 #include "utils.hpp"
 
 GraphicManager::GraphicManager()

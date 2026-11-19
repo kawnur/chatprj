@@ -1,7 +1,7 @@
 #include "widget_group.hpp"
 
 #include "companion.hpp"
-#include "widgets_message.hpp"
+#include "message_widget.hpp"
 
 const uint16_t CENTRAL_STUB_FIXED_WIDTH = 400;
 

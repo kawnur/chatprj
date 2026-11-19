@@ -9,7 +9,7 @@
 
 #include "alias.hpp"
 #include "constants.hpp"
-#include "widgets_dialog.hpp"
+#include "widget_dialog.hpp"
 
 using Headers = std::array<std::string, 2>;
 

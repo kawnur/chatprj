@@ -11,7 +11,7 @@
 
 #include "alias.hpp"
 #include "constants.hpp"
-#include "widgets_panel.hpp"
+#include "widget_panel.hpp"
 
 class MainWindow : public QMainWindow
 {

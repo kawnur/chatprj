@@ -16,6 +16,10 @@
 #include "alias.hpp"
 #include "constants.hpp"
 #include "widgets.hpp"
+#include "widget_button.hpp"
+#include "widget_layout.hpp"
+#include "widget_menu.hpp"
+#include "widget_text_edit.hpp"
 
 class PanelWidget : public VLayoutWidget
 {

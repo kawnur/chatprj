@@ -11,7 +11,6 @@
 #include "message_state.hpp"
 #include "utils.hpp"
 #include "validator.hpp"
-#include "widgets.hpp"
 
 Manager::Manager(GraphicManagerPtr graphicManager)
     : graphicManager_(graphicManager), dbOperator_(), dataChecker_(), messageHandler_(),

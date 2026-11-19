@@ -1,4 +1,4 @@
-#include "widgets_dialog.hpp"
+#include "widget_dialog.hpp"
 
 #include <QHostAddress>
 
@@ -10,7 +10,7 @@
 #include "mainwindow.hpp"
 #include "utils.hpp"
 #include "utils_widgets.hpp"
-#include "widgets.hpp"
+#include "widget_button.hpp"
 
 Dialog::Dialog(const std::string &title)
 {

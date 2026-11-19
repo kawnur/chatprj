@@ -20,5 +20,7 @@ target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/net
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/task)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/utils)
 target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/widgets)
+target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/widgets/message)
+target_include_directories(chatapp_lib PRIVATE ${PROJECT_SOURCE_DIR}/include/widgets/widgets)
 
 target_link_libraries(chatapp_lib crypto ssl)

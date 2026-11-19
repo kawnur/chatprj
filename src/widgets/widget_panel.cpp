@@ -1,4 +1,4 @@
-#include "widgets_panel.hpp"
+#include "widget_panel.hpp"
 
 #include <memory>
 #include <string>
@@ -16,7 +16,7 @@
 #include "utils_widgets.hpp"
 #include "widget_info.hpp"
 #include "widget_group.hpp"
-#include "widgets_message.hpp"
+#include "message_widget.hpp"
 
 const uint8_t BLUR_RADIUS = 30;
 const uint16_t RIGHT_PANEL_FIXED_WIDTH = 100;
