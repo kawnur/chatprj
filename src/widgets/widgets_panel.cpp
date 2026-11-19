@@ -86,7 +86,7 @@ void LeftPanelWidget::disable()
 }
 
 CentralPanelWidget::CentralPanelWidget(const std::string &name, bool isStub, QWidgetPtr parent)
-    : PanelWidget(WidgetType::CENTRAL_PANEL)/*, mutex_()*/
+    : PanelWidget(WidgetType::CENTRAL_PANEL)
 {
     // fields
     historyScrollArea_ = nullptr;
@@ -137,22 +137,8 @@ void CentralPanelWidget::set(CompanionPtr companion)
     historyScrollArea_->installEventFilter(this);
 }
 
-// void CentralPanelWidget::addMessage(MessageWidgetPtr widget, bool isAntecedent)
 void CentralPanelWidget::addMessage(MessageWidgetPtr widget)
 {
-    // {
-    //     std::lock_guard<std::mutex> lock(mutex_);
-
-    //     widget->setParent(history_.get());
-    //     history_->addWidget(widget.get());
-
-    //     // check if received message is the oldest
-
-
-    //     if (isAntecedent)
-    //         sortHistory(false);
-    // }
-
     widget->setParent(history_.get());
 
     history_->insertInSortedLayout(widget);
@@ -183,11 +169,8 @@ void CentralPanelWidget::clearHistory()
     }
 }
 
-void CentralPanelWidget::sortHistory(/*bool lock*/)
+void CentralPanelWidget::sortHistory()
 {
-    // if (lock)
-    //     std::lock_guard<std::mutex> lockObject(mutex_);
-
     QList<MessageWidget *> list;
 
     for (const auto &item : history_->children()) {

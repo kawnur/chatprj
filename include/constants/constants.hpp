@@ -147,11 +147,6 @@ const uint32_t DEFAULT_INDICATOR_WIDGET_COLOR = 0x5d5c56;
 
 const uint32_t SOCKET_INFO_WIDGET_WIDTH = 500;
 
-// const std::unordered_map<WidgetType, QString> FILE_WIDGET_TEXT_MAP {
-//     { WidgetType::FILE_SENT, "SEND FILE: {}" },
-//     { WidgetType::FILE_RECEIVED, "RECEIVE FILE: {}" }
-// };
-
 enum class IndicatorWidgetState {
     UNKNOWN,
     ON,

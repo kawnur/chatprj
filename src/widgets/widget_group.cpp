@@ -49,10 +49,6 @@ void WidgetGroup::set()
     connect(
         this, &WidgetGroup::addOutgoingFileMessageWidgetSignal,
         this, &WidgetGroup::addOutgoingFileMessageWidgetSlot, Qt::QueuedConnection);
-
-    // connect(
-    //     this, &WidgetGroup::addTextMessageWidgetsSignal,
-    //     this, &WidgetGroup::addTextMessageWidgetsSlot, Qt::QueuedConnection);
 }
 
 void WidgetGroup::clearHistory()
@@ -120,7 +116,6 @@ void WidgetGroup::setNewMessagesIndicatorOff()
 }
 
 void WidgetGroup::incomingTextMessageWidgetSelected(IncomingTextMessageWidgetPtr widget)
-// void WidgetGroup::messageWidgetSelected(MessageWidgetPtr widget)
 {
     std::lock_guard<std::mutex> lock(counterMutex_);
 
@@ -130,10 +125,7 @@ void WidgetGroup::incomingTextMessageWidgetSelected(IncomingTextMessageWidgetPtr
     if (!messageState)
         return;
 
-    // bool isAntecedent = messageState->isAntecedent();
     bool isRead = messageState->isRead();
-
-    // logTemplateInfo("isAntecedent: {}", isAntecedent);
 
     if (isRead)
         return;
@@ -145,7 +137,6 @@ void WidgetGroup::incomingTextMessageWidgetSelected(IncomingTextMessageWidgetPtr
 
     auto cast = std::dynamic_pointer_cast<IncomingTextMessage>(message);
 
-    // messageState->setIsAntecedent(false);
     if (cast)
         getGraphicManager()->markMessageAsRead(cast);
 
@@ -159,18 +150,6 @@ void WidgetGroup::outgoingTextMessageWidgetSelected(OutgoingTextMessageWidgetPtr
 // void WidgetGroup::buildChatHistorySlot()
 // {
 //     companion_->addMessageWidgetsToChatHistory();
-// }
-
-// void WidgetGroup::addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages)
-// {
-//     for (auto message : messages) {
-//         if (message->isMessageFromMe())
-//             addOutgoingTextMessageWidgetSlot(std::dynamic_pointer_cast<OutgoingTextMessage>(message));
-//         else
-//             addIncomingTextMessageWidgetSlot(std::dynamic_pointer_cast<IncomingTextMessage>(message));
-//     }
-
-//     centralPanel_->sortHistory(/*true*/);
 // }
 
 void WidgetGroup::incrementCounter()
@@ -197,7 +176,9 @@ void WidgetGroup::clientAction()
 
 void WidgetGroup::addIncomingTextMessageWidgetSlot(IncomingTextMessagePtr message)
 {
-    incrementCounter();
+    if (!message->isRead())
+        incrementCounter();
+
     addMessageWidget<IncomingTextMessage>(message);
 }
 

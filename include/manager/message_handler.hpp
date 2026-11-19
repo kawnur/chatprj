@@ -54,9 +54,6 @@ public:
 private:
     void sendTextMessageAndWaitForReceptionConfirmation(CompanionPtr companion, MessagePtr message);
 
-    // void buildMessageAndStore(
-    //     CompanionPtr companion, DBReplyDataPtr data, int index,
-    //     std::vector<TextMessagePtr> &messages);
     TextMessagePtr buildMessageAndStore(
         CompanionPtr companion, DBReplyDataPtr data, int index);
 

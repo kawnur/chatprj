@@ -54,7 +54,6 @@ class Message;
 class MessageBodyWidget;
 class MessageData;
 class MessageInfo;
-// class MessageHandler;
 class MessageMetaData;
 class MessageState;
 class MessageWidget;

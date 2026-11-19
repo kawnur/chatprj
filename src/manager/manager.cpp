@@ -670,11 +670,6 @@ void Manager::fillCompanionMessageMapping(CompanionPtr companion, bool container
     messageHandler_.fillMessageStorageForCompanion(companion, containersAreEmpty);
 }
 
-// void Manager::addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
-// {
-//     graphicManager_->addMessageWidgets(companion, messages);
-// }
-
 void Manager::disableBlur()
 {
     graphicManager_->disableBlur();

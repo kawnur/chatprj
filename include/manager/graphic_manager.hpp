@@ -60,7 +60,6 @@ public:
     template<class T>
     void emitGroupSignal(WidgetGroupPtr group, TPtr<T> message);
 
-    // void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
     void setMessageWidgetSent(MessageInfoPtr info);
     void setMessageWidgetReceived(MessageInfoPtr info);
     void sendFile(CompanionPtr companion);
@@ -76,7 +75,7 @@ public:
     bool setMappedMessageWidget(
         CompanionPtr companion, MessagePtr message, MessageWidgetPtr widget);
 
-    bool markMessageAsRead(IncomingTextMessagePtr message);
+    void markMessageAsRead(IncomingTextMessagePtr message);
     void addEarlyMessages(CompanionPtr companion);
     std::filesystem::path getLastOpenedPath();
 

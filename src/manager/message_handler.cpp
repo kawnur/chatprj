@@ -24,7 +24,7 @@ MessageInfoPtr MessageHandler::getMessageInfo(CompanionPtr companion, MessagePtr
 }
 
 TextMessagePtr MessageHandler::buildMessageAndStore(
-    CompanionPtr companion, DBReplyDataPtr data, int index/*, std::vector<TextMessagePtr> &messages*/)
+    CompanionPtr companion, DBReplyDataPtr data, int index)
 {
     logTemplateInfo("adding message with id '{}'", data->getValue(index, "id"));
 
@@ -41,8 +41,6 @@ TextMessagePtr MessageHandler::buildMessageAndStore(
     }
 
     return message;
-
-    // messages.push_back(message);
 }
 
 void MessageHandler::addTextMessageWidget(CompanionPtr companion, TextMessagePtr message)
@@ -62,28 +60,19 @@ void MessageHandler::addTextMessageWidget(CompanionPtr companion, TextMessagePtr
 
 void MessageHandler::addMessages(CompanionPtr companion, DBReplyDataPtr data)
 {
-    // std::vector<TextMessagePtr> messages {};
-
     for (std::size_t i = 0; i < data->size(); ++i) {
-        auto message = buildMessageAndStore(companion, data, i/*, messages*/);
+        auto message = buildMessageAndStore(companion, data, i);
         addTextMessageWidget(companion, message);
     }
-
-    // add widgets
-    // manager_->addMessageWidgets(companion, messages);
 }
 
 void MessageHandler::addMessagesByIndexes(
     CompanionPtr companion, DBReplyDataPtr data, const std::vector<int> &indexes)
 {
-    // std::vector<TextMessagePtr> messages {};
-
     for (const auto &i : indexes) {
-        auto message = buildMessageAndStore(companion, data, i/*, messages*/);
+        auto message = buildMessageAndStore(companion, data, i);
         addTextMessageWidget(companion, message);
     }
-    // add widgets
-    // manager_->addMessageWidgets(companion, messages);
 }
 
 bool MessageHandler::addToStorage(CompanionPtr companion, MessagePtr message)
@@ -142,7 +131,6 @@ void MessageHandler::sendTextMessage(
     //     manager_->addSenderOperator(message->networkId(), action);
 
     // add message widget
-    // manager_->addMessageWidget<OutgoingTextMessageWidget>(companion, message);
     manager_->addMessageWidget<OutgoingTextMessage>(companion, message);
 
     // send and wait for confirmation
@@ -151,16 +139,7 @@ void MessageHandler::sendTextMessage(
 
 bool MessageHandler::sendMessageByNetwork(CompanionPtr companion, MessagePtr message)
 {
-    // auto type = message->networkMessageType();
-
-    // if (type == NetworkMessageType::UNKNOWN)
-    //     return false;
-
-    // if (type == NetworkMessageType::NO_ACTION)
-    //     return true;
-
     // build json
-    // auto json = buildMessageJSONString(companion, message);
     auto json = message->getNetworkReadyData();
 
     // send json over network
@@ -316,7 +295,6 @@ void MessageHandler::receiveFileProposal(CompanionPtr companion, IncomingFileMes
         return;
 
     // add widget
-    // manager_->addMessageWidget<FileMessageWidget>(companion, message);
     manager_->addMessageWidget<IncomingFileMessage>(companion, message);
 
     // create receiver operator
@@ -403,16 +381,7 @@ void MessageHandler::receiveFileData(CompanionPtr companion, MessagePtr message)
 
 void MessageHandler::receiveFileDataCheck(CompanionPtr companion, MessagePtr message)
 {
-    // bool success = (message->networkMessageType() == NetworkMessageType::FILE_DATA_CHECK_SUCCESS);
-
-    // logArgsInfo(__FUNCTION__, success);
-
-    // auto entrytemplate= (success)
-    //     ? "file '{}' received by companion successfully"
-    //     : "file '{}' WAS NOT received by companion";
-
     auto entryTemplate= ""s;
-
     auto networkId = message->networkId();
 
     logTemplateInfo(entryTemplate, manager_->getFilePathString(networkId));

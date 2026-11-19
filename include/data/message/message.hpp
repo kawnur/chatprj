@@ -36,7 +36,6 @@ public:
     bool isMessageFromMe() const;
     bool isSent() const;
     bool isReceived() const;
-    // bool isAntecedent() const;
     std::string networkId() const;
 
     void setId(int id);
@@ -51,7 +50,6 @@ public:
     StatePtr state() const;
 
     void updateMeta(MessageMetaDataPtr meta);
-    // virtual std::string getNetworkReadyData();
     std::string getNetworkReadyData();
 
 protected:
@@ -118,11 +116,6 @@ public:
 
     FileMessage(MetaPtr meta, DataPtr data, StatePtr state);
     virtual ~FileMessage() = default;
-
-    // virtual bool isRead() { return false; }
-
-    // nlohmann::json getJsonData() override;
-    // std::string typeMark() override;
 };
 
 class IncomingFileMessage : public FileMessage
@@ -135,8 +128,6 @@ public:
 
     IncomingFileMessage(MetaPtr meta, DataPtr data, StatePtr state);
     ~IncomingFileMessage() = default;
-
-    // bool isRead() override;
 };
 
 class OutgoingFileMessage : public FileMessage

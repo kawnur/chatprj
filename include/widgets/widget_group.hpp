@@ -34,12 +34,10 @@ signals:
     void addOutgoingTextMessageWidgetSignal(OutgoingTextMessagePtr message);
     void addIncomingFileMessageWidgetSignal(IncomingFileMessagePtr message);
     void addOutgoingFileMessageWidgetSignal(OutgoingFileMessagePtr message);
-    // void addTextMessageWidgetsSignal(const std::vector<TextMessagePtr> &messages);  // TODO rename
     // void askUserForHistorySendingConfirmationSignal();
     // void buildChatHistorySignal();
 
 public slots:
-    // void messageWidgetSelected(MessageWidgetPtr widget);
     void incomingTextMessageWidgetSelected(IncomingTextMessageWidgetPtr widget);
     void outgoingTextMessageWidgetSelected(OutgoingTextMessageWidgetPtr widget);
     // void buildChatHistorySlot();
@@ -51,8 +49,6 @@ private slots:
     void addOutgoingTextMessageWidgetSlot(OutgoingTextMessagePtr message);
     void addIncomingFileMessageWidgetSlot(IncomingFileMessagePtr message);
     void addOutgoingFileMessageWidgetSlot(OutgoingFileMessagePtr message);
-    // void addFileMessageWidgetSlot(MessagePtr message);
-    // void addTextMessageWidgetsSlot(const std::vector<TextMessagePtr> &messages);
     // void askUserForHistorySendingConfirmationSlot();
 
 private:
@@ -61,34 +57,9 @@ private:
     template<class T>
     void addMessageWidget(TPtr<T> message)
     {
-        // bool isAntecedent = message->isAntecedent();
-
-        // if (isAntecedent) {
-        //     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-        //     ++antecedentMessagesCounter_;
-
-        //     logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-        // }
-
-        // auto widget = std::make_shared<T>(companion_, message);
-        // auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
-        // widget->set(shared_from_this());
-        // centralPanel_->addMessage(widget, isAntecedent);
-        // messageAdded();
-
-        // {
-        //     std::lock_guard<std::mutex> lock(antecedentMessagesCounterMutex_);
-
-        //     ++antecedentMessagesCounter_;
-
-        //     logTemplateInfo("antecedentMessagesCounter_: {}", antecedentMessagesCounter_);
-        // }
-
         auto widget = std::make_shared<typename T::widget_type>(companion_, message);
         auto result = getGraphicManager()->setMappedMessageWidget(companion_, message, widget);
         widget->set(shared_from_this());
-        // widget->set();
         centralPanel_->addMessage(widget);
         messageAdded();
     }

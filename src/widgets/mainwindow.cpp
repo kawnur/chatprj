@@ -106,6 +106,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 
 void MainWindow::createMenu()
 {
+    // TODO get rid of notifier crash
     std::vector<std::pair<const QString &, std::vector<MenuItemInfo>>> data {
         {
             "File",
@@ -144,7 +145,6 @@ void MainWindow::createMenu()
         }
     };
 
-    // TODO get rid of notifier crash
     // for (const auto &pair : data)
     //     lambda(pair.first, pair.second);
 

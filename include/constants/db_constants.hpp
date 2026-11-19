@@ -171,14 +171,6 @@ static const std::map<DBRequestType, std::vector<std::string>> DB_REQUEST_DATA_M
             "id"
         }
     },
-    // {
-    //     DBRequestType::UPDATE_COMPANION_AND_RETURN,
-    //     {
-    //         "updateCompanionAndReturn",
-    //         "INSERT INTO companions (name) VALUES ('{}') RETURNING id",  // ???
-    //         "id"
-    //     }
-    // },
     {
         DBRequestType::UPDATE_COMPANION_AND_SOCKET_AND_RETURN,
         {

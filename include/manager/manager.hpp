@@ -88,18 +88,12 @@ public:
     void markMessageAsReceived(MessageInfoPtr info);
     void markMessageAsRead(IncomingTextMessagePtr message);
 
-    // template<typename T>
-    // void addMessageWidget(CompanionPtr companion, MessagePtr message)
-    // {
-    //     graphicManager_->addMessageWidget<T>(companion, message);
-    // }
     template<class T>
     void addMessageWidget(CompanionPtr companion, TPtr<T> message)
     {
         graphicManager_->addMessageWidget<T>(companion, message);
     }
 
-    // void addMessageWidgets(CompanionPtr companion, const std::vector<TextMessagePtr> &messages);
     void disableBlur();
 
     // files

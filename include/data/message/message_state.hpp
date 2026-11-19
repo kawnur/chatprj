@@ -9,19 +9,17 @@ class MessageState
 {
 public:
     MessageState() = default;
-    MessageState(/*bool isAntecedent, */bool isSent, bool isReceived);
+    MessageState(bool isSent, bool isReceived);
     MessageState(MessageStatePtr state);
 
     virtual ~MessageState() = default;
 
-    // bool isAntecedent() const;
     bool isSent() const;
     bool isReceived() const;
 
     virtual bool isRead() { return false;}
 
     bool setFields(CompanionPtr companion, const nlohmann::json &data);
-    // void setIsAntecedent(bool newIsAntecedent);
     void setIsSent(bool newIsSent);
     void setIsReceived(bool newIsReceived);
 
@@ -30,7 +28,6 @@ public:
     virtual nlohmann::json getJsonData() { return nlohmann::json::object(); }
 
 protected:
-    // bool isAntecedent_;
     bool isSent_;
     bool isReceived_;
 };
@@ -57,7 +54,7 @@ class ReceiveConfirmationMessageState : public MessageState
 {
 public:
     ReceiveConfirmationMessageState() = default;
-    ReceiveConfirmationMessageState(/*bool isAntecedent, */bool isSent, bool isReceived);
+    ReceiveConfirmationMessageState(bool isSent, bool isReceived);
     ~ReceiveConfirmationMessageState() = default;
 
     nlohmann::json getJsonData() override;

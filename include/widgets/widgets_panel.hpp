@@ -57,24 +57,12 @@ public:
 
     void set(CompanionPtr companion);
     void set() override {}
-    // void addMessage(MessageWidgetPtr widget, bool isAntecedent);
     void addMessage(MessageWidgetPtr widget);
-    // template<class T>
-    // void addMessage(TPtr<T> widget)
-    // {
-    //     widget->setParent(history_.get());
-
-    //     history_->insertInSortedLayout<T>(widget);
-
-    //     scrollDownHistory();
-    // }
-
     void scrollDownHistory();
     void clearHistory();
-    void sortHistory(/*bool lock*/);
+    void sortHistory();
 
 private:
-    // std::mutex mutex_;
     CompanionPtr companion_;
 
     std::unique_ptr<LabelWidget> companionLabel_;

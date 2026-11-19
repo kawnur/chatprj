@@ -316,17 +316,6 @@ void GraphicManager::createEntrancePassword()
 //     manager_->initEntrancePasswordReception();
 // }
 
-// void GraphicManager::addMessageWidgets(
-//     CompanionPtr companion, const std::vector<TextMessagePtr> &messages)
-// {
-//     auto group = getWidgetGroup(companion);
-
-//     if (!group)
-//         return;
-
-//     emit group->addTextMessageWidgetsSignal(messages);
-// }
-
 void GraphicManager::setMessageWidgetSent(MessageInfoPtr info)
 {
     auto widget = getWidgetFromMessageInfo(info);
@@ -402,7 +391,7 @@ bool GraphicManager::setMappedMessageWidget(
     return manager_->setMappedMessageWidget(companion, message, widget);
 }
 
-bool GraphicManager::markMessageAsRead(IncomingTextMessagePtr message)
+void GraphicManager::markMessageAsRead(IncomingTextMessagePtr message)
 {
     manager_->markMessageAsRead(message);
 }

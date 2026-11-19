@@ -109,7 +109,7 @@ void VLayout::insertInSortedLayout(MessageWidgetPtr widget)
 
     std::size_t index = count - 1;
 
-    for (; index >= 0; --index) {
+    for (; index >= 0 && index != SIZE_MAX; --index) {
         auto item = layout_->itemAt(index)->widget();
         auto cast = dynamic_cast<MessageWidget *>(item);
 

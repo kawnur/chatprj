@@ -53,7 +53,6 @@ public:
             return nullptr;
 
         // build state
-        // auto state = buildObjectFromJson<typename M::state_type>(companion, json);
         auto state = std::make_shared<typename M::state_type>();
 
         if (!state)
@@ -75,10 +74,10 @@ public:
 
     MessageMetaDataPtr buildMyTextMessageMetaData(CompanionPtr companion);
     TextMessageDataPtr buildTextMessageData(DBReplyDataPtr data, std::size_t index);
-    MessageStatePtr buildMessageState(/*bool isAntecedent, */DBReplyDataPtr data, std::size_t index);
+    MessageStatePtr buildMessageState(DBReplyDataPtr data, std::size_t index);
 
     IncomingTextMessageStatePtr buildIncomingTextMessageState(
-        /*bool isAntecedent, */DBReplyDataPtr data, std::size_t index);
+        DBReplyDataPtr data, std::size_t index);
 
     TextMessagePtr buildTextMessageFromDbData(
         CompanionPtr companion, DBReplyDataPtr dbData, std::size_t index);

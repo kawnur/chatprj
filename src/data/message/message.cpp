@@ -61,11 +61,6 @@ bool Message::isReceived() const
     return state_->isReceived();
 }
 
-// bool Message::isAntecedent() const
-// {
-//     return state_->isAntecedent();
-// }
-
 std::string Message::networkId() const
 {
     return meta_->networkId();
